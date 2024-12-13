@@ -1,0 +1,4676 @@
+[
+    {
+        "keyword": "ai video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P0",
+        "reason": "Highly relevant to KreadoAI's business with sufficient search volume (74000). Difficulty (76) and competitive density (0.5400000214576721) are secondary for immediate targeting. Competitor insights: KreadoAI's rank (97) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 74000,
+            "difficulty": 76,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 97,
+                "heygen.com": 20,
+                "d-id.com": 29,
+                "synthesia.io": 8,
+                "creatify.ai": 25
+            }
+        }
+    },
+    {
+        "keyword": "free ai video generator",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (12100) with acceptable difficulty (73) and density (0.6100000143051147). Competitor insights: KreadoAI's rank (81) is weaker compared to competitors. D-ID's performance (68) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 12100,
+            "difficulty": 73,
+            "density": 0.6100000143051147,
+            "competitors": {
+                "kreadoai.com": 81,
+                "heygen.com": 17,
+                "d-id.com": 68,
+                "synthesia.io": 4,
+                "creatify.ai": 39
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (8100) with acceptable difficulty (70) and density (0.5899999737739563). Competitor insights: KreadoAI's rank (72) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 8100,
+            "difficulty": 70,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 72,
+                "heygen.com": 17,
+                "d-id.com": 46,
+                "synthesia.io": 5,
+                "creatify.ai": 34
+            }
+        }
+    },
+    {
+        "keyword": "ai generated video",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (6600) with acceptable difficulty (82) and density (0.44999998807907104). Competitor insights: KreadoAI's rank (87) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 6600,
+            "difficulty": 82,
+            "density": 0.44999998807907104,
+            "competitors": {
+                "kreadoai.com": 87,
+                "heygen.com": 15,
+                "d-id.com": 16,
+                "synthesia.io": 7,
+                "creatify.ai": 24
+            }
+        }
+    },
+    {
+        "keyword": "ai video creator",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (4400) with acceptable difficulty (74) and density (0.5899999737739563). Competitor insights: KreadoAI's rank (88) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 4400,
+            "difficulty": 74,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 88,
+                "heygen.com": 14,
+                "d-id.com": 16,
+                "synthesia.io": 5,
+                "creatify.ai": 30
+            }
+        }
+    },
+    {
+        "keyword": "video ai generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P0",
+        "reason": "Highly relevant to KreadoAI's business with sufficient search volume (2900). Difficulty (75) and competitive density (0.5799999833106995) are secondary for immediate targeting. Competitor insights: KreadoAI's rank (77) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 2900,
+            "difficulty": 75,
+            "density": 0.5799999833106995,
+            "competitors": {
+                "kreadoai.com": 77,
+                "heygen.com": 13,
+                "d-id.com": 42,
+                "synthesia.io": 6,
+                "creatify.ai": 31
+            }
+        }
+    },
+    {
+        "keyword": "crete ai videos",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (1900) with acceptable difficulty (79) and density (0.0). Competitor insights: KreadoAI's rank (51) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 1900,
+            "difficulty": 79,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 51,
+                "heygen.com": 10,
+                "d-id.com": 38,
+                "synthesia.io": 5,
+                "creatify.ai": 16
+            }
+        }
+    },
+    {
+        "keyword": "video generator ai",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P0",
+        "reason": "Highly relevant to KreadoAI's business with sufficient search volume (1900). Difficulty (73) and competitive density (0.6100000143051147) are secondary for immediate targeting. Competitor insights: KreadoAI's rank (70) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 1900,
+            "difficulty": 73,
+            "density": 0.6100000143051147,
+            "competitors": {
+                "kreadoai.com": 70,
+                "heygen.com": 12,
+                "d-id.com": 27,
+                "synthesia.io": 6,
+                "creatify.ai": 24
+            }
+        }
+    },
+    {
+        "keyword": "ai in video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (1600) with acceptable difficulty (84) and density (0.3799999952316284). Competitor insights: KreadoAI's rank (99) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 1600,
+            "difficulty": 84,
+            "density": 0.3799999952316284,
+            "competitors": {
+                "kreadoai.com": 99,
+                "heygen.com": 13,
+                "d-id.com": 37,
+                "synthesia.io": 4,
+                "creatify.ai": 41
+            }
+        }
+    },
+    {
+        "keyword": "ai generate video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (1300) with acceptable difficulty (72) and density (0.44999998807907104). Competitor insights: KreadoAI's rank (74) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 1300,
+            "difficulty": 72,
+            "density": 0.44999998807907104,
+            "competitors": {
+                "kreadoai.com": 74,
+                "heygen.com": 16,
+                "d-id.com": 17,
+                "synthesia.io": 6,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "ai text to video generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (1300) with acceptable difficulty (67) and density (0.6499999761581421). Competitor insights: KreadoAI's rank (92) is weaker compared to competitors. D-ID's performance (85) is weaker, indicating potential opportunities. Heygen (67) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 1300,
+            "difficulty": 67,
+            "density": 0.6499999761581421,
+            "competitors": {
+                "kreadoai.com": 92,
+                "heygen.com": 67,
+                "d-id.com": 85,
+                "synthesia.io": 6,
+                "creatify.ai": 82
+            }
+        }
+    },
+    {
+        "keyword": "artificial intelligence text to video",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P2",
+        "reason": "Moderate search volume (1300) with acceptable difficulty (69) and density (0.5699999928474426). Competitor insights: KreadoAI's rank (65) is weaker compared to competitors. D-ID's performance (61) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 1300,
+            "difficulty": 69,
+            "density": 0.5699999928474426,
+            "competitors": {
+                "kreadoai.com": 65,
+                "heygen.com": 44,
+                "d-id.com": 61,
+                "synthesia.io": 6,
+                "creatify.ai": 50
+            }
+        }
+    },
+    {
+        "keyword": "create ai videos",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (1300) with acceptable difficulty (79) and density (0.5899999737739563). Competitor insights: KreadoAI's rank (42) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 1300,
+            "difficulty": 79,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 42,
+                "heygen.com": 10,
+                "d-id.com": 44,
+                "synthesia.io": 5,
+                "creatify.ai": 15
+            }
+        }
+    },
+    {
+        "keyword": "text to video ai free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (1300) with acceptable difficulty (67) and density (0.6600000262260437). Competitor insights: KreadoAI's rank (85) is weaker compared to competitors. D-ID's performance (77) is weaker, indicating potential opportunities. Heygen (70) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 1300,
+            "difficulty": 67,
+            "density": 0.6600000262260437,
+            "competitors": {
+                "kreadoai.com": 85,
+                "heygen.com": 70,
+                "d-id.com": 77,
+                "synthesia.io": 8,
+                "creatify.ai": 82
+            }
+        }
+    },
+    {
+        "keyword": "video creation",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (1300) with acceptable difficulty (100) and density (0.4699999988079071). Competitor insights: KreadoAI's rank (81) is weaker compared to competitors. D-ID's performance (51) is weaker, indicating potential opportunities. Heygen (65) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 1300,
+            "difficulty": 100,
+            "density": 0.4699999988079071,
+            "competitors": {
+                "kreadoai.com": 81,
+                "heygen.com": 65,
+                "d-id.com": 51,
+                "synthesia.io": 18,
+                "creatify.ai": 74
+            }
+        }
+    },
+    {
+        "keyword": "ai movie generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P0",
+        "reason": "Highly relevant to KreadoAI's business with sufficient search volume (1000). Difficulty (75) and competitive density (0.5799999833106995) are secondary for immediate targeting. Competitor insights: KreadoAI's rank (79) is weaker compared to competitors. D-ID's performance (59) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 1000,
+            "difficulty": 75,
+            "density": 0.5799999833106995,
+            "competitors": {
+                "kreadoai.com": 79,
+                "heygen.com": 11,
+                "d-id.com": 59,
+                "synthesia.io": 5,
+                "creatify.ai": 50
+            }
+        }
+    },
+    {
+        "keyword": "ai video generation",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (1000) with acceptable difficulty (77) and density (0.5199999809265137). Competitor insights: KreadoAI's rank (86) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 1000,
+            "difficulty": 77,
+            "density": 0.5199999809265137,
+            "competitors": {
+                "kreadoai.com": 86,
+                "heygen.com": 11,
+                "d-id.com": 35,
+                "synthesia.io": 6,
+                "creatify.ai": 34
+            }
+        }
+    },
+    {
+        "keyword": "video generatorai",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P0",
+        "reason": "Highly relevant to KreadoAI's business with sufficient search volume (1000). Difficulty (73) and competitive density (0.0) are secondary for immediate targeting. Competitor insights: KreadoAI's rank (58) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 1000,
+            "difficulty": 73,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 58,
+                "heygen.com": 14,
+                "d-id.com": 36,
+                "synthesia.io": 8,
+                "creatify.ai": 31
+            }
+        }
+    },
+    {
+        "keyword": "ai video creation",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (880) with acceptable difficulty (76) and density (0.6200000047683716). Competitor insights: KreadoAI's rank (33) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 880,
+            "difficulty": 76,
+            "density": 0.6200000047683716,
+            "competitors": {
+                "kreadoai.com": 33,
+                "heygen.com": 9,
+                "d-id.com": 19,
+                "synthesia.io": 4,
+                "creatify.ai": 27
+            }
+        }
+    },
+    {
+        "keyword": "create video with ai",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P2",
+        "reason": "Moderate search volume (720) with acceptable difficulty (75) and density (0.6700000166893005). Competitor insights: KreadoAI's rank (95) is weaker compared to competitors. D-ID's performance (61) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 720,
+            "difficulty": 75,
+            "density": 0.6700000166893005,
+            "competitors": {
+                "kreadoai.com": 95,
+                "heygen.com": 12,
+                "d-id.com": 61,
+                "synthesia.io": 6,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "free video generator",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (720) with acceptable difficulty (84) and density (0.5600000023841858). Competitor insights: KreadoAI's rank (91) is weaker compared to competitors. D-ID's performance (90) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 720,
+            "difficulty": 84,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 91,
+                "heygen.com": 23,
+                "d-id.com": 90,
+                "synthesia.io": 4,
+                "creatify.ai": 45
+            }
+        }
+    },
+    {
+        "keyword": "make ai videos",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (720) with acceptable difficulty (74) and density (0.5400000214576721). Competitor insights: KreadoAI's rank (87) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 720,
+            "difficulty": 74,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 87,
+                "heygen.com": 11,
+                "d-id.com": 20,
+                "synthesia.io": 5,
+                "creatify.ai": 25
+            }
+        }
+    },
+    {
+        "keyword": "video ai generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (720) with acceptable difficulty (72) and density (0.5799999833106995). Competitor insights: KreadoAI's rank (68) is weaker compared to competitors. D-ID's performance (79) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 720,
+            "difficulty": 72,
+            "density": 0.5799999833106995,
+            "competitors": {
+                "kreadoai.com": 68,
+                "heygen.com": 19,
+                "d-id.com": 79,
+                "synthesia.io": 5,
+                "creatify.ai": 22
+            }
+        }
+    },
+    {
+        "keyword": "ai vedio creat",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (590) with acceptable difficulty (75) and density (0.0). Competitor insights: KreadoAI's rank (68) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 590,
+            "difficulty": 75,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 68,
+                "heygen.com": 14,
+                "d-id.com": 43,
+                "synthesia.io": 5,
+                "creatify.ai": 18
+            }
+        }
+    },
+    {
+        "keyword": "best text to video ai",
+        "semantics": "Other",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (590) with acceptable difficulty (70) and density (0.6100000143051147). Competitor insights: KreadoAI's rank (84) is weaker compared to competitors. D-ID's performance (92) is weaker, indicating potential opportunities. Heygen (97) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 590,
+            "difficulty": 70,
+            "density": 0.6100000143051147,
+            "competitors": {
+                "kreadoai.com": 84,
+                "heygen.com": 97,
+                "d-id.com": 92,
+                "synthesia.io": 2,
+                "creatify.ai": 75
+            }
+        }
+    },
+    {
+        "keyword": "free text to video ai",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (590) with acceptable difficulty (62) and density (0.6600000262260437). Competitor insights: KreadoAI's rank (57) is weaker compared to competitors. D-ID's performance (59) is weaker, indicating potential opportunities. Heygen (53) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 590,
+            "difficulty": 62,
+            "density": 0.6600000262260437,
+            "competitors": {
+                "kreadoai.com": 57,
+                "heygen.com": 53,
+                "d-id.com": 59,
+                "synthesia.io": 7,
+                "creatify.ai": 55
+            }
+        }
+    },
+    {
+        "keyword": "generate ai video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (590) with acceptable difficulty (70) and density (0.5699999928474426). Competitor insights: KreadoAI's rank (63) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 590,
+            "difficulty": 70,
+            "density": 0.5699999928474426,
+            "competitors": {
+                "kreadoai.com": 63,
+                "heygen.com": 12,
+                "d-id.com": 15,
+                "synthesia.io": 5,
+                "creatify.ai": 19
+            }
+        }
+    },
+    {
+        "keyword": "a.i video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (480) with acceptable difficulty (70) and density (0.5600000023841858). Competitor insights: KreadoAI's rank (61) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 480,
+            "difficulty": 70,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 61,
+                "heygen.com": 18,
+                "d-id.com": 25,
+                "synthesia.io": 6,
+                "creatify.ai": 24
+            }
+        }
+    },
+    {
+        "keyword": "ai text to video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P2",
+        "reason": "Moderate search volume (480) with acceptable difficulty (62) and density (0.6399999856948853). Competitor insights: KreadoAI's rank (68) is weaker compared to competitors. D-ID's performance (92) is weaker, indicating potential opportunities. Heygen (65) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 480,
+            "difficulty": 62,
+            "density": 0.6399999856948853,
+            "competitors": {
+                "kreadoai.com": 68,
+                "heygen.com": 65,
+                "d-id.com": 92,
+                "synthesia.io": 10,
+                "creatify.ai": 88
+            }
+        }
+    },
+    {
+        "keyword": "avatar ai",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (480) with acceptable difficulty (66) and density (0.2199999988079071). Competitor insights: KreadoAI's rank (59) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 480,
+            "difficulty": 66,
+            "density": 0.2199999988079071,
+            "competitors": {
+                "kreadoai.com": 59,
+                "heygen.com": 3,
+                "d-id.com": 19,
+                "synthesia.io": 1,
+                "creatify.ai": 4
+            }
+        }
+    },
+    {
+        "keyword": "digital avatar .com",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (480) with acceptable difficulty (0) and density (0.0). Competitor insights: KreadoAI's rank (34) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 480,
+            "difficulty": 0,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 34,
+                "heygen.com": 15,
+                "d-id.com": 27,
+                "synthesia.io": 55,
+                "creatify.ai": 61
+            }
+        }
+    },
+    {
+        "keyword": "a.i. video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (70) and density (0.5600000023841858). Competitor insights: KreadoAI's rank (77) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 70,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 77,
+                "heygen.com": 16,
+                "d-id.com": 18,
+                "synthesia.io": 5,
+                "creatify.ai": 41
+            }
+        }
+    },
+    {
+        "keyword": "ai avatar video generator",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (67) and density (0.6200000047683716). Competitor insights: KreadoAI's rank (30) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 67,
+            "density": 0.6200000047683716,
+            "competitors": {
+                "kreadoai.com": 30,
+                "heygen.com": 1,
+                "d-id.com": 15,
+                "synthesia.io": 3,
+                "creatify.ai": 12
+            }
+        }
+    },
+    {
+        "keyword": "ai clip generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (72) and density (0.6299999952316284). Competitor insights: KreadoAI's rank (92) is weaker compared to competitors. D-ID's performance (93) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 72,
+            "density": 0.6299999952316284,
+            "competitors": {
+                "kreadoai.com": 92,
+                "heygen.com": 38,
+                "d-id.com": 93,
+                "synthesia.io": 9,
+                "creatify.ai": 63
+            }
+        }
+    },
+    {
+        "keyword": "ai created video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (79) and density (0.5299999713897705). Competitor insights: KreadoAI's rank (61) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 79,
+            "density": 0.5299999713897705,
+            "competitors": {
+                "kreadoai.com": 61,
+                "heygen.com": 13,
+                "d-id.com": 42,
+                "synthesia.io": 5,
+                "creatify.ai": 22
+            }
+        }
+    },
+    {
+        "keyword": "ai nude genrator",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (71) and density (0.0). Competitor insights: KreadoAI's rank (71) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 71,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 71,
+                "heygen.com": 17,
+                "d-id.com": 25,
+                "synthesia.io": 6,
+                "creatify.ai": 29
+            }
+        }
+    },
+    {
+        "keyword": "ai video creator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (71) and density (0.6299999952316284). Competitor insights: KreadoAI's rank (87) is weaker compared to competitors. D-ID's performance (75) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 71,
+            "density": 0.6299999952316284,
+            "competitors": {
+                "kreadoai.com": 87,
+                "heygen.com": 17,
+                "d-id.com": 75,
+                "synthesia.io": 4,
+                "creatify.ai": 30
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator free no sign up",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (38) and density (0.2800000011920929). Competitor insights: KreadoAI's rank (70) is weaker compared to competitors. D-ID's performance (82) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 38,
+            "density": 0.2800000011920929,
+            "competitors": {
+                "kreadoai.com": 70,
+                "heygen.com": 23,
+                "d-id.com": 82,
+                "synthesia.io": 19,
+                "creatify.ai": 63
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator no sign up",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (37) and density (0.2800000011920929). Competitor insights: KreadoAI's rank (64) is weaker compared to competitors. D-ID's performance (56) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 37,
+            "density": 0.2800000011920929,
+            "competitors": {
+                "kreadoai.com": 64,
+                "heygen.com": 32,
+                "d-id.com": 56,
+                "synthesia.io": 25,
+                "creatify.ai": 48
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator.",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (72) and density (0.5600000023841858). Competitor insights: KreadoAI's rank (59) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 72,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 59,
+                "heygen.com": 17,
+                "d-id.com": 25,
+                "synthesia.io": 6,
+                "creatify.ai": 26
+            }
+        }
+    },
+    {
+        "keyword": "best ai video generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (67) and density (0.6000000238418579). Competitor insights: KreadoAI's rank (80) is weaker compared to competitors. D-ID's performance (96) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 67,
+            "density": 0.6000000238418579,
+            "competitors": {
+                "kreadoai.com": 80,
+                "heygen.com": 50,
+                "d-id.com": 96,
+                "synthesia.io": 3,
+                "creatify.ai": 55
+            }
+        }
+    },
+    {
+        "keyword": "create videos with ai",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (75) and density (0.6700000166893005). Competitor insights: KreadoAI's rank (89) is weaker compared to competitors. D-ID's performance (55) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 75,
+            "density": 0.6700000166893005,
+            "competitors": {
+                "kreadoai.com": 89,
+                "heygen.com": 11,
+                "d-id.com": 55,
+                "synthesia.io": 6,
+                "creatify.ai": 19
+            }
+        }
+    },
+    {
+        "keyword": "free video ai generator",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (72) and density (0.6100000143051147). Competitor insights: KreadoAI's rank (76) is weaker compared to competitors. D-ID's performance (82) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 72,
+            "density": 0.6100000143051147,
+            "competitors": {
+                "kreadoai.com": 76,
+                "heygen.com": 20,
+                "d-id.com": 82,
+                "synthesia.io": 5,
+                "creatify.ai": 30
+            }
+        }
+    },
+    {
+        "keyword": "video creator ai",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (390) with acceptable difficulty (72) and density (0.6100000143051147). Competitor insights: KreadoAI's rank (79) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 390,
+            "difficulty": 72,
+            "density": 0.6100000143051147,
+            "competitors": {
+                "kreadoai.com": 79,
+                "heygen.com": 15,
+                "d-id.com": 42,
+                "synthesia.io": 4,
+                "creatify.ai": 28
+            }
+        }
+    },
+    {
+        "keyword": "a i video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P2",
+        "reason": "Moderate search volume (320) with acceptable difficulty (71) and density (0.5600000023841858). Competitor insights: KreadoAI's rank (63) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 320,
+            "difficulty": 71,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 63,
+                "heygen.com": 17,
+                "d-id.com": 35,
+                "synthesia.io": 8,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "ai create video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (320) with acceptable difficulty (73) and density (0.5299999713897705). Competitor insights: KreadoAI's rank (58) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 320,
+            "difficulty": 73,
+            "density": 0.5299999713897705,
+            "competitors": {
+                "kreadoai.com": 58,
+                "heygen.com": 13,
+                "d-id.com": 38,
+                "synthesia.io": 5,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "ai created videos",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (320) with acceptable difficulty (79) and density (0.5299999713897705). Competitor insights: KreadoAI's rank (53) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 320,
+            "difficulty": 79,
+            "density": 0.5299999713897705,
+            "competitors": {
+                "kreadoai.com": 53,
+                "heygen.com": 14,
+                "d-id.com": 50,
+                "synthesia.io": 4,
+                "creatify.ai": 24
+            }
+        }
+    },
+    {
+        "keyword": "ai image to video generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (320) with acceptable difficulty (46) and density (0.47999998927116394). Competitor insights: KreadoAI's rank (89) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 320,
+            "difficulty": 46,
+            "density": 0.47999998927116394,
+            "competitors": {
+                "kreadoai.com": 89,
+                "heygen.com": 50,
+                "d-id.com": 44,
+                "synthesia.io": 24,
+                "creatify.ai": 80
+            }
+        }
+    },
+    {
+        "keyword": "ai nude generatir",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (320) with acceptable difficulty (70) and density (0.0). Competitor insights: KreadoAI's rank (83) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 320,
+            "difficulty": 70,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 83,
+                "heygen.com": 17,
+                "d-id.com": 34,
+                "synthesia.io": 8,
+                "creatify.ai": 63
+            }
+        }
+    },
+    {
+        "keyword": "ai nude genorator",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (320) with acceptable difficulty (70) and density (0.5400000214576721). Competitor insights: KreadoAI's rank (98) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 320,
+            "difficulty": 70,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 98,
+                "heygen.com": 20,
+                "d-id.com": 30,
+                "synthesia.io": 8,
+                "creatify.ai": 25
+            }
+        }
+    },
+    {
+        "keyword": "free ai text to video generator",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (320) with acceptable difficulty (65) and density (0.6800000071525574). Competitor insights: KreadoAI's rank (87) is weaker compared to competitors. D-ID's performance (79) is weaker, indicating potential opportunities. Heygen (61) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 320,
+            "difficulty": 65,
+            "density": 0.6800000071525574,
+            "competitors": {
+                "kreadoai.com": 87,
+                "heygen.com": 61,
+                "d-id.com": 79,
+                "synthesia.io": 7,
+                "creatify.ai": 76
+            }
+        }
+    },
+    {
+        "keyword": "generate ai videos",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P2",
+        "reason": "Moderate search volume (320) with acceptable difficulty (70) and density (0.5699999928474426). Competitor insights: KreadoAI's rank (68) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 320,
+            "difficulty": 70,
+            "density": 0.5699999928474426,
+            "competitors": {
+                "kreadoai.com": 68,
+                "heygen.com": 9,
+                "d-id.com": 20,
+                "synthesia.io": 5,
+                "creatify.ai": 26
+            }
+        }
+    },
+    {
+        "keyword": "text to video ai generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (320) with acceptable difficulty (63) and density (0.75). Competitor insights: KreadoAI's rank (80) is weaker compared to competitors. D-ID's performance (70) is weaker, indicating potential opportunities. Heygen (57) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 320,
+            "difficulty": 63,
+            "density": 0.75,
+            "competitors": {
+                "kreadoai.com": 80,
+                "heygen.com": 57,
+                "d-id.com": 70,
+                "synthesia.io": 8,
+                "creatify.ai": 67
+            }
+        }
+    },
+    {
+        "keyword": "text to video generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P2",
+        "reason": "Moderate search volume (320) with acceptable difficulty (62) and density (0.6000000238418579). Competitor insights: KreadoAI's rank (76) is weaker compared to competitors. D-ID's performance (61) is weaker, indicating potential opportunities. Heygen (58) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 320,
+            "difficulty": 62,
+            "density": 0.6000000238418579,
+            "competitors": {
+                "kreadoai.com": 76,
+                "heygen.com": 58,
+                "d-id.com": 61,
+                "synthesia.io": 7,
+                "creatify.ai": 80
+            }
+        }
+    },
+    {
+        "keyword": "ai free video generator",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (260) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (47) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 260,
+            "difficulty": 70,
+            "density": 0.6200000047683716,
+            "competitors": {
+                "kreadoai.com": 47,
+                "heygen.com": 16,
+                "d-id.com": 39,
+                "synthesia.io": 5,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "ai viedo generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (260) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (69) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 260,
+            "difficulty": 70,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 69,
+                "heygen.com": 11,
+                "d-id.com": 28,
+                "synthesia.io": 6,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "avatar videos",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (260) and/or high difficulty (88) make it a future opportunity. Competitor insights: KreadoAI's rank (56) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 260,
+            "difficulty": 88,
+            "density": 0.019999999552965164,
+            "competitors": {
+                "kreadoai.com": 56,
+                "heygen.com": 11,
+                "d-id.com": 25,
+                "synthesia.io": 8,
+                "creatify.ai": 39
+            }
+        }
+    },
+    {
+        "keyword": "best ai video creator",
+        "semantics": "Other",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (260) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (87) is weaker compared to competitors. D-ID's performance (76) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 260,
+            "difficulty": 72,
+            "density": 0.6499999761581421,
+            "competitors": {
+                "kreadoai.com": 87,
+                "heygen.com": 45,
+                "d-id.com": 76,
+                "synthesia.io": 2,
+                "creatify.ai": 40
+            }
+        }
+    },
+    {
+        "keyword": "free ai video generator no sign up",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (260) and/or high difficulty (36) make it a future opportunity. Competitor insights: KreadoAI's rank (99) is weaker compared to competitors. D-ID's performance (85) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 260,
+            "difficulty": 36,
+            "density": 0.30000001192092896,
+            "competitors": {
+                "kreadoai.com": 99,
+                "heygen.com": 37,
+                "d-id.com": 85,
+                "synthesia.io": 22,
+                "creatify.ai": 46
+            }
+        }
+    },
+    {
+        "keyword": "ai for video creation",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (74) make it a future opportunity. Competitor insights: KreadoAI's rank (33) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 74,
+            "density": 0.550000011920929,
+            "competitors": {
+                "kreadoai.com": 33,
+                "heygen.com": 16,
+                "d-id.com": 20,
+                "synthesia.io": 4,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "ai to create videos",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (78) make it a future opportunity. Competitor insights: KreadoAI's rank (68) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 78,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 68,
+                "heygen.com": 12,
+                "d-id.com": 48,
+                "synthesia.io": 5,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "ai to video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (77) make it a future opportunity. Competitor insights: KreadoAI's rank (94) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 77,
+            "density": 0.5099999904632568,
+            "competitors": {
+                "kreadoai.com": 94,
+                "heygen.com": 12,
+                "d-id.com": 42,
+                "synthesia.io": 7,
+                "creatify.ai": 26
+            }
+        }
+    },
+    {
+        "keyword": "ai video creater",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (69) make it a future opportunity. Competitor insights: KreadoAI's rank (73) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 69,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 73,
+                "heygen.com": 12,
+                "d-id.com": 43,
+                "synthesia.io": 5,
+                "creatify.ai": 24
+            }
+        }
+    },
+    {
+        "keyword": "avatar video",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (88) make it a future opportunity. Competitor insights: KreadoAI's rank (33) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 88,
+            "density": 0.019999999552965164,
+            "competitors": {
+                "kreadoai.com": 33,
+                "heygen.com": 11,
+                "d-id.com": 29,
+                "synthesia.io": 9,
+                "creatify.ai": 25
+            }
+        }
+    },
+    {
+        "keyword": "create video with artificial intelligence",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (87) is weaker compared to competitors. D-ID's performance (56) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 72,
+            "density": 0.6700000166893005,
+            "competitors": {
+                "kreadoai.com": 87,
+                "heygen.com": 26,
+                "d-id.com": 56,
+                "synthesia.io": 6,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "free video generator ai",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (72) is weaker compared to competitors. D-ID's performance (69) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 72,
+            "density": 0.6399999856948853,
+            "competitors": {
+                "kreadoai.com": 72,
+                "heygen.com": 17,
+                "d-id.com": 69,
+                "synthesia.io": 5,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "generate video with ai",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (76) make it a future opportunity. Competitor insights: KreadoAI's rank (84) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 76,
+            "density": 0.6000000238418579,
+            "competitors": {
+                "kreadoai.com": 84,
+                "heygen.com": 13,
+                "d-id.com": 42,
+                "synthesia.io": 6,
+                "creatify.ai": 25
+            }
+        }
+    },
+    {
+        "keyword": "ia video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (65) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 71,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 65,
+                "heygen.com": 17,
+                "d-id.com": 28,
+                "synthesia.io": 6,
+                "creatify.ai": 39
+            }
+        }
+    },
+    {
+        "keyword": "video ai creator",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (73) make it a future opportunity. Competitor insights: KreadoAI's rank (67) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 73,
+            "density": 0.5099999904632568,
+            "competitors": {
+                "kreadoai.com": 67,
+                "heygen.com": 10,
+                "d-id.com": 22,
+                "synthesia.io": 4,
+                "creatify.ai": 28
+            }
+        }
+    },
+    {
+        "keyword": "video creating ai",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (44) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 72,
+            "density": 0.6000000238418579,
+            "competitors": {
+                "kreadoai.com": 44,
+                "heygen.com": 11,
+                "d-id.com": 21,
+                "synthesia.io": 5,
+                "creatify.ai": 19
+            }
+        }
+    },
+    {
+        "keyword": "video generator ai free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (210) and/or high difficulty (68) make it a future opportunity. Competitor insights: KreadoAI's rank (32) is weaker compared to competitors. D-ID's performance (55) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 210,
+            "difficulty": 68,
+            "density": 0.6299999952316284,
+            "competitors": {
+                "kreadoai.com": 32,
+                "heygen.com": 14,
+                "d-id.com": 55,
+                "synthesia.io": 5,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "a.i generated video",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (170) and/or high difficulty (73) make it a future opportunity. Competitor insights: KreadoAI's rank (91) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 170,
+            "difficulty": 73,
+            "density": 0.4699999988079071,
+            "competitors": {
+                "kreadoai.com": 91,
+                "heygen.com": 13,
+                "d-id.com": 18,
+                "synthesia.io": 7,
+                "creatify.ai": 22
+            }
+        }
+    },
+    {
+        "keyword": "ai vedio generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (170) and/or high difficulty (69) make it a future opportunity. Competitor insights: KreadoAI's rank (87) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 170,
+            "difficulty": 69,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 87,
+                "heygen.com": 18,
+                "d-id.com": 26,
+                "synthesia.io": 7,
+                "creatify.ai": 52
+            }
+        }
+    },
+    {
+        "keyword": "ai video app",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (170) and/or high difficulty (76) make it a future opportunity. Competitor insights: KreadoAI's rank (65) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 170,
+            "difficulty": 76,
+            "density": 0.5099999904632568,
+            "competitors": {
+                "kreadoai.com": 65,
+                "heygen.com": 6,
+                "d-id.com": 48,
+                "synthesia.io": 5,
+                "creatify.ai": 54
+            }
+        }
+    },
+    {
+        "keyword": "ai video generating",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (170) and/or high difficulty (84) make it a future opportunity. Competitor insights: KreadoAI's rank (42) is weaker compared to competitors. D-ID's performance (85) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 170,
+            "difficulty": 84,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 42,
+                "heygen.com": 7,
+                "d-id.com": 85,
+                "synthesia.io": 5,
+                "creatify.ai": 26
+            }
+        }
+    },
+    {
+        "keyword": "ai video generatoe",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (170) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (66) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 170,
+            "difficulty": 72,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 66,
+                "heygen.com": 18,
+                "d-id.com": 39,
+                "synthesia.io": 5,
+                "creatify.ai": 26
+            }
+        }
+    },
+    {
+        "keyword": "free ai generated video",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (170) and/or high difficulty (67) make it a future opportunity. Competitor insights: KreadoAI's rank (97) is weaker compared to competitors. D-ID's performance (70) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 170,
+            "difficulty": 67,
+            "density": 0.6700000166893005,
+            "competitors": {
+                "kreadoai.com": 97,
+                "heygen.com": 24,
+                "d-id.com": 70,
+                "synthesia.io": 5,
+                "creatify.ai": 31
+            }
+        }
+    },
+    {
+        "keyword": "make an ai video",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (170) and/or high difficulty (78) make it a future opportunity. Competitor insights: KreadoAI's rank (80) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 170,
+            "difficulty": 78,
+            "density": 0.5699999928474426,
+            "competitors": {
+                "kreadoai.com": 80,
+                "heygen.com": 13,
+                "d-id.com": 28,
+                "synthesia.io": 5,
+                "creatify.ai": 25
+            }
+        }
+    },
+    {
+        "keyword": "video creation ai",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (170) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (22) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 170,
+            "difficulty": 72,
+            "density": 0.6399999856948853,
+            "competitors": {
+                "kreadoai.com": 22,
+                "heygen.com": 13,
+                "d-id.com": 21,
+                "synthesia.io": 4,
+                "creatify.ai": 24
+            }
+        }
+    },
+    {
+        "keyword": "ai for creating videos",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (140) and/or high difficulty (79) make it a future opportunity. Competitor insights: KreadoAI's rank (79) is weaker compared to competitors. D-ID's performance (58) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 140,
+            "difficulty": 79,
+            "density": 0.6100000143051147,
+            "competitors": {
+                "kreadoai.com": 79,
+                "heygen.com": 16,
+                "d-id.com": 58,
+                "synthesia.io": 6,
+                "creatify.ai": 19
+            }
+        }
+    },
+    {
+        "keyword": "ai generator videos",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (140) and/or high difficulty (80) make it a future opportunity. Competitor insights: KreadoAI's rank (52) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 140,
+            "difficulty": 80,
+            "density": 0.5799999833106995,
+            "competitors": {
+                "kreadoai.com": 52,
+                "heygen.com": 9,
+                "d-id.com": 40,
+                "synthesia.io": 6,
+                "creatify.ai": 29
+            }
+        }
+    },
+    {
+        "keyword": "ai person creator",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (140) and/or high difficulty (51) make it a future opportunity. Competitor insights: KreadoAI's rank (99) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 140,
+            "difficulty": 51,
+            "density": 0.20000000298023224,
+            "competitors": {
+                "kreadoai.com": 99,
+                "heygen.com": 23,
+                "d-id.com": 48,
+                "synthesia.io": 19,
+                "creatify.ai": 50
+            }
+        }
+    },
+    {
+        "keyword": "ai photo to video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (140) and/or high difficulty (44) make it a future opportunity. Competitor insights: KreadoAI's rank (94) is weaker compared to competitors. Heygen (61) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 140,
+            "difficulty": 44,
+            "density": 0.5099999904632568,
+            "competitors": {
+                "kreadoai.com": 94,
+                "heygen.com": 61,
+                "d-id.com": 20,
+                "synthesia.io": 49,
+                "creatify.ai": 95
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator app",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (140) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (89) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 140,
+            "difficulty": 72,
+            "density": 0.5199999809265137,
+            "competitors": {
+                "kreadoai.com": 89,
+                "heygen.com": 7,
+                "d-id.com": 42,
+                "synthesia.io": 5,
+                "creatify.ai": 52
+            }
+        }
+    },
+    {
+        "keyword": "aı video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (140) and/or high difficulty (73) make it a future opportunity. Competitor insights: KreadoAI's rank (49) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 140,
+            "difficulty": 73,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 49,
+                "heygen.com": 8,
+                "d-id.com": 17,
+                "synthesia.io": 6,
+                "creatify.ai": 31
+            }
+        }
+    },
+    {
+        "keyword": "create an ai video",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (140) and/or high difficulty (73) make it a future opportunity. Competitor insights: KreadoAI's rank (69) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 140,
+            "difficulty": 73,
+            "density": 0.6299999952316284,
+            "competitors": {
+                "kreadoai.com": 69,
+                "heygen.com": 15,
+                "d-id.com": 35,
+                "synthesia.io": 5,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "free ai text to video",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (140) and/or high difficulty (63) make it a future opportunity. Competitor insights: KreadoAI's rank (89) is weaker compared to competitors. D-ID's performance (95) is weaker, indicating potential opportunities. Heygen (77) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 140,
+            "difficulty": 63,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 89,
+                "heygen.com": 77,
+                "d-id.com": 95,
+                "synthesia.io": 7,
+                "creatify.ai": 78
+            }
+        }
+    },
+    {
+        "keyword": "url to video ai",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (140) and/or high difficulty (26) make it a future opportunity. Competitor insights: KreadoAI's rank (18) is weaker compared to competitors. D-ID's performance (74) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 140,
+            "difficulty": 26,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 18,
+                "heygen.com": 36,
+                "d-id.com": 74,
+                "synthesia.io": 26,
+                "creatify.ai": 3
+            }
+        }
+    },
+    {
+        "keyword": "a.i. video generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (66) make it a future opportunity. Competitor insights: KreadoAI's rank (33) is weaker compared to competitors. D-ID's performance (65) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 66,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 33,
+                "heygen.com": 15,
+                "d-id.com": 65,
+                "synthesia.io": 5,
+                "creatify.ai": 30
+            }
+        }
+    },
+    {
+        "keyword": "ai generated videos from text",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (67) make it a future opportunity. Competitor insights: KreadoAI's rank (98) is weaker compared to competitors. D-ID's performance (54) is weaker, indicating potential opportunities. Heygen (53) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 67,
+            "density": 0.6200000047683716,
+            "competitors": {
+                "kreadoai.com": 98,
+                "heygen.com": 53,
+                "d-id.com": 54,
+                "synthesia.io": 4,
+                "creatify.ai": 49
+            }
+        }
+    },
+    {
+        "keyword": "ai genereated video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (79) make it a future opportunity. Competitor insights: KreadoAI's rank (64) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 79,
+            "density": 0.4699999988079071,
+            "competitors": {
+                "kreadoai.com": 64,
+                "heygen.com": 12,
+                "d-id.com": 17,
+                "synthesia.io": 7,
+                "creatify.ai": 33
+            }
+        }
+    },
+    {
+        "keyword": "ai nude generater",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (85) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 71,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 85,
+                "heygen.com": 18,
+                "d-id.com": 25,
+                "synthesia.io": 6,
+                "creatify.ai": 44
+            }
+        }
+    },
+    {
+        "keyword": "ai video avatar",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (66) make it a future opportunity. Competitor insights: KreadoAI's rank (26) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 66,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 26,
+                "heygen.com": 1,
+                "d-id.com": 25,
+                "synthesia.io": 2,
+                "creatify.ai": 3
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator for free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (69) make it a future opportunity. Competitor insights: KreadoAI's rank (81) is weaker compared to competitors. D-ID's performance (69) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 69,
+            "density": 0.5,
+            "competitors": {
+                "kreadoai.com": 81,
+                "heygen.com": 14,
+                "d-id.com": 69,
+                "synthesia.io": 3,
+                "creatify.ai": 37
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator free from text",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (64) make it a future opportunity. Competitor insights: KreadoAI's rank (91) is weaker compared to competitors. D-ID's performance (89) is weaker, indicating potential opportunities. Heygen (61) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 64,
+            "density": 0.7099999785423279,
+            "competitors": {
+                "kreadoai.com": 91,
+                "heygen.com": 61,
+                "d-id.com": 89,
+                "synthesia.io": 7,
+                "creatify.ai": 71
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator from audio",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (27) make it a future opportunity. Competitor insights: KreadoAI's rank (74) is weaker compared to competitors. D-ID's performance (67) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 27,
+            "density": 0.6800000071525574,
+            "competitors": {
+                "kreadoai.com": 74,
+                "heygen.com": 11,
+                "d-id.com": 67,
+                "synthesia.io": 28,
+                "creatify.ai": 90
+            }
+        }
+    },
+    {
+        "keyword": "ai video genrator",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (87) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 70,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 87,
+                "heygen.com": 19,
+                "d-id.com": 36,
+                "synthesia.io": 6,
+                "creatify.ai": 26
+            }
+        }
+    },
+    {
+        "keyword": "ai video making",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (79) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 72,
+            "density": 0.5799999833106995,
+            "competitors": {
+                "kreadoai.com": 79,
+                "heygen.com": 49,
+                "d-id.com": 43,
+                "synthesia.io": 4,
+                "creatify.ai": 24
+            }
+        }
+    },
+    {
+        "keyword": "avatar online youtube",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (56) make it a future opportunity. Competitor insights: KreadoAI's rank (63) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 56,
+            "density": 0.009999999776482582,
+            "competitors": {
+                "kreadoai.com": 63,
+                "heygen.com": 34,
+                "d-id.com": 49,
+                "synthesia.io": 26,
+                "creatify.ai": 50
+            }
+        }
+    },
+    {
+        "keyword": "creating ai video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (79) make it a future opportunity. Competitor insights: KreadoAI's rank (46) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 79,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 46,
+                "heygen.com": 12,
+                "d-id.com": 47,
+                "synthesia.io": 5,
+                "creatify.ai": 17
+            }
+        }
+    },
+    {
+        "keyword": "free video generators",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (68) make it a future opportunity. Competitor insights: KreadoAI's rank (93) is weaker compared to competitors. D-ID's performance (99) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 68,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 93,
+                "heygen.com": 31,
+                "d-id.com": 99,
+                "synthesia.io": 5,
+                "creatify.ai": 77
+            }
+        }
+    },
+    {
+        "keyword": "ia generate video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (87) make it a future opportunity. Competitor insights: KreadoAI's rank (60) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 87,
+            "density": 0.4699999988079071,
+            "competitors": {
+                "kreadoai.com": 60,
+                "heygen.com": 8,
+                "d-id.com": 25,
+                "synthesia.io": 4,
+                "creatify.ai": 28
+            }
+        }
+    },
+    {
+        "keyword": "video avatar",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (43) make it a future opportunity. Competitor insights: KreadoAI's rank (63) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 43,
+            "density": 0.3400000035762787,
+            "competitors": {
+                "kreadoai.com": 63,
+                "heygen.com": 2,
+                "d-id.com": 27,
+                "synthesia.io": 1,
+                "creatify.ai": 3
+            }
+        }
+    },
+    {
+        "keyword": "video making ai",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (110) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (66) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 110,
+            "difficulty": 72,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 66,
+                "heygen.com": 26,
+                "d-id.com": 37,
+                "synthesia.io": 6,
+                "creatify.ai": 24
+            }
+        }
+    },
+    {
+        "keyword": "ai avatar video",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (45) make it a future opportunity. Competitor insights: KreadoAI's rank (36) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 45,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 36,
+                "heygen.com": 3,
+                "d-id.com": 28,
+                "synthesia.io": 2,
+                "creatify.ai": 6
+            }
+        }
+    },
+    {
+        "keyword": "ai avatar video generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (74) make it a future opportunity. Competitor insights: KreadoAI's rank (54) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 74,
+            "density": 0.3799999952316284,
+            "competitors": {
+                "kreadoai.com": 54,
+                "heygen.com": 4,
+                "d-id.com": 43,
+                "synthesia.io": 1,
+                "creatify.ai": 41
+            }
+        }
+    },
+    {
+        "keyword": "ai gen video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (82) is weaker compared to competitors. D-ID's performance (54) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 71,
+            "density": 0.4699999988079071,
+            "competitors": {
+                "kreadoai.com": 82,
+                "heygen.com": 4,
+                "d-id.com": 54,
+                "synthesia.io": 7,
+                "creatify.ai": 62
+            }
+        }
+    },
+    {
+        "keyword": "ai in video io",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (45) make it a future opportunity. Competitor insights: KreadoAI's rank (80) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 45,
+            "density": 0.3700000047683716,
+            "competitors": {
+                "kreadoai.com": 80,
+                "heygen.com": 34,
+                "d-id.com": 42,
+                "synthesia.io": 6,
+                "creatify.ai": 65
+            }
+        }
+    },
+    {
+        "keyword": "ai text to video generator free no sign up",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (34) make it a future opportunity. Competitor insights: KreadoAI's rank (90) is weaker compared to competitors. D-ID's performance (71) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 34,
+            "density": 0.25999999046325684,
+            "competitors": {
+                "kreadoai.com": 90,
+                "heygen.com": 42,
+                "d-id.com": 71,
+                "synthesia.io": 21,
+                "creatify.ai": 93
+            }
+        }
+    },
+    {
+        "keyword": "ai video generato",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (58) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 70,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 58,
+                "heygen.com": 19,
+                "d-id.com": 35,
+                "synthesia.io": 7,
+                "creatify.ai": 28
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator apps",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (76) make it a future opportunity. Competitor insights: KreadoAI's rank (96) is weaker compared to competitors. D-ID's performance (58) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 76,
+            "density": 0.5199999809265137,
+            "competitors": {
+                "kreadoai.com": 96,
+                "heygen.com": 7,
+                "d-id.com": 58,
+                "synthesia.io": 2,
+                "creatify.ai": 77
+            }
+        }
+    },
+    {
+        "keyword": "ai.video creator",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (81) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 70,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 81,
+                "heygen.com": 12,
+                "d-id.com": 14,
+                "synthesia.io": 4,
+                "creatify.ai": 29
+            }
+        }
+    },
+    {
+        "keyword": "ai视频网站",
+        "semantics": "Other",
+        "seo_type": "Target",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (13) make it a future opportunity. Competitor insights: KreadoAI's rank (99) is weaker compared to competitors. D-ID's performance (77) is weaker, indicating potential opportunities. Heygen (57) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 13,
+            "density": 0.27000001072883606,
+            "competitors": {
+                "kreadoai.com": 99,
+                "heygen.com": 57,
+                "d-id.com": 77,
+                "synthesia.io": 54,
+                "creatify.ai": 96
+            }
+        }
+    },
+    {
+        "keyword": "avatar.ai",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Target",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (63) make it a future opportunity. Competitor insights: KreadoAI's rank (65) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 63,
+            "density": 0.2199999988079071,
+            "competitors": {
+                "kreadoai.com": 65,
+                "heygen.com": 5,
+                "d-id.com": 20,
+                "synthesia.io": 3,
+                "creatify.ai": 4
+            }
+        }
+    },
+    {
+        "keyword": "creat ai video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (49) is weaker compared to competitors. D-ID's performance (56) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 72,
+            "density": 0.6200000047683716,
+            "competitors": {
+                "kreadoai.com": 49,
+                "heygen.com": 13,
+                "d-id.com": 56,
+                "synthesia.io": 6,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "create ai generated videos",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (80) make it a future opportunity. Competitor insights: KreadoAI's rank (87) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 80,
+            "density": 0.6200000047683716,
+            "competitors": {
+                "kreadoai.com": 87,
+                "heygen.com": 22,
+                "d-id.com": 20,
+                "synthesia.io": 5,
+                "creatify.ai": 18
+            }
+        }
+    },
+    {
+        "keyword": "make avatar for youtube",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (45) make it a future opportunity. Competitor insights: KreadoAI's rank (76) is weaker compared to competitors. D-ID's performance (61) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 45,
+            "density": 0.1899999976158142,
+            "competitors": {
+                "kreadoai.com": 76,
+                "heygen.com": 26,
+                "d-id.com": 61,
+                "synthesia.io": 8,
+                "creatify.ai": 79
+            }
+        }
+    },
+    {
+        "keyword": "text to video generator ai",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (64) make it a future opportunity. Competitor insights: KreadoAI's rank (94) is weaker compared to competitors. D-ID's performance (78) is weaker, indicating potential opportunities. Heygen (68) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 64,
+            "density": 0.6600000262260437,
+            "competitors": {
+                "kreadoai.com": 94,
+                "heygen.com": 68,
+                "d-id.com": 78,
+                "synthesia.io": 7,
+                "creatify.ai": 90
+            }
+        }
+    },
+    {
+        "keyword": "video ai app",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (75) make it a future opportunity. Competitor insights: KreadoAI's rank (71) is weaker compared to competitors. D-ID's performance (58) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 75,
+            "density": 0.46000000834465027,
+            "competitors": {
+                "kreadoai.com": 71,
+                "heygen.com": 7,
+                "d-id.com": 58,
+                "synthesia.io": 5,
+                "creatify.ai": 47
+            }
+        }
+    },
+    {
+        "keyword": "video ia generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (90) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (71) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 90,
+            "difficulty": 72,
+            "density": 0.5699999928474426,
+            "competitors": {
+                "kreadoai.com": 71,
+                "heygen.com": 13,
+                "d-id.com": 33,
+                "synthesia.io": 7,
+                "creatify.ai": 41
+            }
+        }
+    },
+    {
+        "keyword": "a.i generated videos",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (78) make it a future opportunity. Competitor insights: KreadoAI's rank (100) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 78,
+            "density": 0.4699999988079071,
+            "competitors": {
+                "kreadoai.com": 100,
+                "heygen.com": 15,
+                "d-id.com": 17,
+                "synthesia.io": 6,
+                "creatify.ai": 30
+            }
+        }
+    },
+    {
+        "keyword": "ai making video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (94) is weaker compared to competitors. D-ID's performance (72) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 71,
+            "density": 0.5,
+            "competitors": {
+                "kreadoai.com": 94,
+                "heygen.com": 12,
+                "d-id.com": 72,
+                "synthesia.io": 6,
+                "creatify.ai": 22
+            }
+        }
+    },
+    {
+        "keyword": "ai that generates videos",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (74) make it a future opportunity. Competitor insights: KreadoAI's rank (100) is weaker compared to competitors. D-ID's performance (99) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 74,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 100,
+                "heygen.com": 12,
+                "d-id.com": 99,
+                "synthesia.io": 5,
+                "creatify.ai": 27
+            }
+        }
+    },
+    {
+        "keyword": "ai to create video",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (69) is weaker compared to competitors. D-ID's performance (61) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 71,
+            "density": 0.5199999809265137,
+            "competitors": {
+                "kreadoai.com": 69,
+                "heygen.com": 11,
+                "d-id.com": 61,
+                "synthesia.io": 6,
+                "creatify.ai": 22
+            }
+        }
+    },
+    {
+        "keyword": "ai video genarator",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (68) make it a future opportunity. Competitor insights: KreadoAI's rank (64) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 68,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 64,
+                "heygen.com": 17,
+                "d-id.com": 25,
+                "synthesia.io": 6,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator from video",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (81) make it a future opportunity. Competitor insights: KreadoAI's rank (99) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 81,
+            "density": 0.550000011920929,
+            "competitors": {
+                "kreadoai.com": 99,
+                "heygen.com": 10,
+                "d-id.com": 36,
+                "synthesia.io": 9,
+                "creatify.ai": 34
+            }
+        }
+    },
+    {
+        "keyword": "ai videos generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (75) make it a future opportunity. Competitor insights: KreadoAI's rank (58) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 75,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 58,
+                "heygen.com": 10,
+                "d-id.com": 14,
+                "synthesia.io": 6,
+                "creatify.ai": 18
+            }
+        }
+    },
+    {
+        "keyword": "avatar. ai",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (61) make it a future opportunity. Competitor insights: KreadoAI's rank (74) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 61,
+            "density": 0.25,
+            "competitors": {
+                "kreadoai.com": 74,
+                "heygen.com": 4,
+                "d-id.com": 21,
+                "synthesia.io": 1,
+                "creatify.ai": 2
+            }
+        }
+    },
+    {
+        "keyword": "avtar video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (81) make it a future opportunity. Competitor insights: KreadoAI's rank (48) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 81,
+            "density": 0.019999999552965164,
+            "competitors": {
+                "kreadoai.com": 48,
+                "heygen.com": 25,
+                "d-id.com": 35,
+                "synthesia.io": 15,
+                "creatify.ai": 28
+            }
+        }
+    },
+    {
+        "keyword": "best ai for video creation",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (60) make it a future opportunity. Competitor insights: KreadoAI's rank (36) is weaker compared to competitors. Heygen (52) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 60,
+            "density": 0.6200000047683716,
+            "competitors": {
+                "kreadoai.com": 36,
+                "heygen.com": 52,
+                "d-id.com": 25,
+                "synthesia.io": 2,
+                "creatify.ai": 41
+            }
+        }
+    },
+    {
+        "keyword": "create video with ai free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (74) make it a future opportunity. Competitor insights: KreadoAI's rank (83) is weaker compared to competitors. D-ID's performance (88) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 74,
+            "density": 0.7200000286102295,
+            "competitors": {
+                "kreadoai.com": 83,
+                "heygen.com": 23,
+                "d-id.com": 88,
+                "synthesia.io": 4,
+                "creatify.ai": 25
+            }
+        }
+    },
+    {
+        "keyword": "free online ai video generator",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (62) make it a future opportunity. Competitor insights: KreadoAI's rank (99) is weaker compared to competitors. D-ID's performance (78) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 62,
+            "density": 0.6600000262260437,
+            "competitors": {
+                "kreadoai.com": 99,
+                "heygen.com": 29,
+                "d-id.com": 78,
+                "synthesia.io": 16,
+                "creatify.ai": 66
+            }
+        }
+    },
+    {
+        "keyword": "free video creator ai",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (67) make it a future opportunity. Competitor insights: KreadoAI's rank (79) is weaker compared to competitors. D-ID's performance (93) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 67,
+            "density": 0.6800000071525574,
+            "competitors": {
+                "kreadoai.com": 79,
+                "heygen.com": 25,
+                "d-id.com": 93,
+                "synthesia.io": 3,
+                "creatify.ai": 35
+            }
+        }
+    },
+    {
+        "keyword": "video genrator ai",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (70) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (73) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 70,
+            "difficulty": 70,
+            "density": 0.6299999952316284,
+            "competitors": {
+                "kreadoai.com": 73,
+                "heygen.com": 12,
+                "d-id.com": 30,
+                "synthesia.io": 6,
+                "creatify.ai": 44
+            }
+        }
+    },
+    {
+        "keyword": "ai avatar generator free video",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (63) make it a future opportunity. Competitor insights: KreadoAI's rank (48) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 63,
+            "density": 0.27000001072883606,
+            "competitors": {
+                "kreadoai.com": 48,
+                "heygen.com": 7,
+                "d-id.com": 37,
+                "synthesia.io": 2,
+                "creatify.ai": 42
+            }
+        }
+    },
+    {
+        "keyword": "ai generater video",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (78) make it a future opportunity. Competitor insights: KreadoAI's rank (75) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 78,
+            "density": 0.4699999988079071,
+            "competitors": {
+                "kreadoai.com": 75,
+                "heygen.com": 15,
+                "d-id.com": 34,
+                "synthesia.io": 8,
+                "creatify.ai": 35
+            }
+        }
+    },
+    {
+        "keyword": "ai video avatar creator",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (39) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 71,
+            "density": 0.699999988079071,
+            "competitors": {
+                "kreadoai.com": 39,
+                "heygen.com": 1,
+                "d-id.com": 32,
+                "synthesia.io": 2,
+                "creatify.ai": 22
+            }
+        }
+    },
+    {
+        "keyword": "ai video content generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (86) is weaker compared to competitors. D-ID's performance (81) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 70,
+            "density": 0.7099999785423279,
+            "competitors": {
+                "kreadoai.com": 86,
+                "heygen.com": 21,
+                "d-id.com": 81,
+                "synthesia.io": 6,
+                "creatify.ai": 33
+            }
+        }
+    },
+    {
+        "keyword": "ai video creation free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (69) make it a future opportunity. Competitor insights: KreadoAI's rank (47) is weaker compared to competitors. D-ID's performance (88) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 69,
+            "density": 0.699999988079071,
+            "competitors": {
+                "kreadoai.com": 47,
+                "heygen.com": 28,
+                "d-id.com": 88,
+                "synthesia.io": 3,
+                "creatify.ai": 33
+            }
+        }
+    },
+    {
+        "keyword": "ai video generater",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (67) make it a future opportunity. Competitor insights: KreadoAI's rank (84) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 67,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 84,
+                "heygen.com": 16,
+                "d-id.com": 24,
+                "synthesia.io": 6,
+                "creatify.ai": 46
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator from image free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (54) make it a future opportunity. Competitor insights: KreadoAI's rank (99) is weaker compared to competitors. D-ID's performance (63) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 54,
+            "density": 0.5099999904632568,
+            "competitors": {
+                "kreadoai.com": 99,
+                "heygen.com": 50,
+                "d-id.com": 63,
+                "synthesia.io": 25,
+                "creatify.ai": 84
+            }
+        }
+    },
+    {
+        "keyword": "ai video generetor",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (69) make it a future opportunity. Competitor insights: KreadoAI's rank (54) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 69,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 54,
+                "heygen.com": 17,
+                "d-id.com": 30,
+                "synthesia.io": 5,
+                "creatify.ai": 25
+            }
+        }
+    },
+    {
+        "keyword": "ai video generstor",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (69) make it a future opportunity. Competitor insights: KreadoAI's rank (72) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 69,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 72,
+                "heygen.com": 16,
+                "d-id.com": 30,
+                "synthesia.io": 5,
+                "creatify.ai": 47
+            }
+        }
+    },
+    {
+        "keyword": "ai-video-generation",
+        "semantics": "Other",
+        "seo_type": "Target",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (75) make it a future opportunity. Competitor insights: KreadoAI's rank (77) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 75,
+            "density": 0.5299999713897705,
+            "competitors": {
+                "kreadoai.com": 77,
+                "heygen.com": 11,
+                "d-id.com": 42,
+                "synthesia.io": 6,
+                "creatify.ai": 50
+            }
+        }
+    },
+    {
+        "keyword": "avatar ai creator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (41) make it a future opportunity. Competitor insights: KreadoAI's rank (86) is weaker compared to competitors. D-ID's performance (78) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 41,
+            "density": 0.3199999928474426,
+            "competitors": {
+                "kreadoai.com": 86,
+                "heygen.com": 35,
+                "d-id.com": 78,
+                "synthesia.io": 23,
+                "creatify.ai": 89
+            }
+        }
+    },
+    {
+        "keyword": "best ai video avatar generator",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (73) make it a future opportunity. Competitor insights: KreadoAI's rank (84) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 73,
+            "density": 0.8799999952316284,
+            "competitors": {
+                "kreadoai.com": 84,
+                "heygen.com": 38,
+                "d-id.com": 40,
+                "synthesia.io": 2,
+                "creatify.ai": 77
+            }
+        }
+    },
+    {
+        "keyword": "best ai video generator app",
+        "semantics": "AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (48) make it a future opportunity. Competitor insights: KreadoAI's rank (91) is weaker compared to competitors. D-ID's performance (60) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 48,
+            "density": 0.25,
+            "competitors": {
+                "kreadoai.com": 91,
+                "heygen.com": 41,
+                "d-id.com": 60,
+                "synthesia.io": 2,
+                "creatify.ai": 59
+            }
+        }
+    },
+    {
+        "keyword": "best video ai creator",
+        "semantics": "Other",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (82) make it a future opportunity. Competitor insights: KreadoAI's rank (67) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 82,
+            "density": 0.49000000953674316,
+            "competitors": {
+                "kreadoai.com": 67,
+                "heygen.com": 44,
+                "d-id.com": 31,
+                "synthesia.io": 1,
+                "creatify.ai": 45
+            }
+        }
+    },
+    {
+        "keyword": "crea avatar",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (62) make it a future opportunity. Competitor insights: KreadoAI's rank (74) is weaker compared to competitors. D-ID's performance (82) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 62,
+            "density": 0.2199999988079071,
+            "competitors": {
+                "kreadoai.com": 74,
+                "heygen.com": 5,
+                "d-id.com": 82,
+                "synthesia.io": 8,
+                "creatify.ai": 17
+            }
+        }
+    },
+    {
+        "keyword": "free a i video generator",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (68) make it a future opportunity. Competitor insights: KreadoAI's rank (73) is weaker compared to competitors. D-ID's performance (77) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 68,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 73,
+                "heygen.com": 19,
+                "d-id.com": 77,
+                "synthesia.io": 5,
+                "creatify.ai": 29
+            }
+        }
+    },
+    {
+        "keyword": "free ai avatar generator video",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (57) make it a future opportunity. Competitor insights: KreadoAI's rank (70) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 57,
+            "density": 0.44999998807907104,
+            "competitors": {
+                "kreadoai.com": 70,
+                "heygen.com": 8,
+                "d-id.com": 38,
+                "synthesia.io": 3,
+                "creatify.ai": 63
+            }
+        }
+    },
+    {
+        "keyword": "free ai avatar video generator",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (64) make it a future opportunity. Competitor insights: KreadoAI's rank (54) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 64,
+            "density": 0.6100000143051147,
+            "competitors": {
+                "kreadoai.com": 54,
+                "heygen.com": 6,
+                "d-id.com": 50,
+                "synthesia.io": 1,
+                "creatify.ai": 45
+            }
+        }
+    },
+    {
+        "keyword": "free ai video generator with avatar",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (44) is weaker compared to competitors. D-ID's performance (53) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 71,
+            "density": 0.7099999785423279,
+            "competitors": {
+                "kreadoai.com": 44,
+                "heygen.com": 4,
+                "d-id.com": 53,
+                "synthesia.io": 2,
+                "creatify.ai": 46
+            }
+        }
+    },
+    {
+        "keyword": "generate videos with ai",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (87) make it a future opportunity. Competitor insights: KreadoAI's rank (82) is weaker compared to competitors. D-ID's performance (57) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 87,
+            "density": 0.6000000238418579,
+            "competitors": {
+                "kreadoai.com": 82,
+                "heygen.com": 12,
+                "d-id.com": 57,
+                "synthesia.io": 5,
+                "creatify.ai": 29
+            }
+        }
+    },
+    {
+        "keyword": "video creater ai.",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (88) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 70,
+            "density": 0.6100000143051147,
+            "competitors": {
+                "kreadoai.com": 88,
+                "heygen.com": 12,
+                "d-id.com": 21,
+                "synthesia.io": 7,
+                "creatify.ai": 39
+            }
+        }
+    },
+    {
+        "keyword": "video.ai.com",
+        "semantics": "Other",
+        "seo_type": "Target",
+        "priority": "P3",
+        "reason": "Low search volume (50) and/or high difficulty (91) make it a future opportunity. Competitor insights: KreadoAI's rank (15) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 50,
+            "difficulty": 91,
+            "density": 0.09000000357627869,
+            "competitors": {
+                "kreadoai.com": 15,
+                "heygen.com": 13,
+                "d-id.com": 47,
+                "synthesia.io": 18,
+                "creatify.ai": 24
+            }
+        }
+    },
+    {
+        "keyword": "a i video generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (66) make it a future opportunity. Competitor insights: KreadoAI's rank (47) is weaker compared to competitors. D-ID's performance (62) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 66,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 47,
+                "heygen.com": 18,
+                "d-id.com": 62,
+                "synthesia.io": 5,
+                "creatify.ai": 27
+            }
+        }
+    },
+    {
+        "keyword": "ai ad video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (59) make it a future opportunity. Competitor insights: KreadoAI's rank (78) is weaker compared to competitors. D-ID's performance (75) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 59,
+            "density": 0.7200000286102295,
+            "competitors": {
+                "kreadoai.com": 78,
+                "heygen.com": 49,
+                "d-id.com": 75,
+                "synthesia.io": 47,
+                "creatify.ai": 1
+            }
+        }
+    },
+    {
+        "keyword": "ai app for video",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (68) make it a future opportunity. Competitor insights: KreadoAI's rank (85) is weaker compared to competitors. D-ID's performance (99) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 68,
+            "density": 0.5299999713897705,
+            "competitors": {
+                "kreadoai.com": 85,
+                "heygen.com": 10,
+                "d-id.com": 99,
+                "synthesia.io": 2,
+                "creatify.ai": 64
+            }
+        }
+    },
+    {
+        "keyword": "ai app video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (78) is weaker compared to competitors. D-ID's performance (51) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 72,
+            "density": 0.4699999988079071,
+            "competitors": {
+                "kreadoai.com": 78,
+                "heygen.com": 7,
+                "d-id.com": 51,
+                "synthesia.io": 3,
+                "creatify.ai": 63
+            }
+        }
+    },
+    {
+        "keyword": "ai avatar video creator",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (87) make it a future opportunity. Competitor insights: KreadoAI's rank (28) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 87,
+            "density": 0.6499999761581421,
+            "competitors": {
+                "kreadoai.com": 28,
+                "heygen.com": 1,
+                "d-id.com": 35,
+                "synthesia.io": 2,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "ai character speaking video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (35) make it a future opportunity. Competitor insights: KreadoAI's rank (67) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 35,
+            "density": 0.6600000262260437,
+            "competitors": {
+                "kreadoai.com": 67,
+                "heygen.com": 3,
+                "d-id.com": 8,
+                "synthesia.io": 1,
+                "creatify.ai": 71
+            }
+        }
+    },
+    {
+        "keyword": "ai nude genarator",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (66) make it a future opportunity. Competitor insights: KreadoAI's rank (79) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 66,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 79,
+                "heygen.com": 18,
+                "d-id.com": 24,
+                "synthesia.io": 5,
+                "creatify.ai": 22
+            }
+        }
+    },
+    {
+        "keyword": "ai nudegenerator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (68) make it a future opportunity. Competitor insights: KreadoAI's rank (62) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 68,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 62,
+                "heygen.com": 18,
+                "d-id.com": 29,
+                "synthesia.io": 6,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "ai person video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (76) make it a future opportunity. Competitor insights: KreadoAI's rank (54) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 76,
+            "density": 0.5699999928474426,
+            "competitors": {
+                "kreadoai.com": 54,
+                "heygen.com": 6,
+                "d-id.com": 44,
+                "synthesia.io": 1,
+                "creatify.ai": 42
+            }
+        }
+    },
+    {
+        "keyword": "ai to generate videos",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (76) make it a future opportunity. Competitor insights: KreadoAI's rank (71) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 76,
+            "density": 0.5199999809265137,
+            "competitors": {
+                "kreadoai.com": 71,
+                "heygen.com": 13,
+                "d-id.com": 45,
+                "synthesia.io": 4,
+                "creatify.ai": 30
+            }
+        }
+    },
+    {
+        "keyword": "ai video avatars",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (65) make it a future opportunity. Competitor insights: KreadoAI's rank (30) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 65,
+            "density": 0.6299999952316284,
+            "competitors": {
+                "kreadoai.com": 30,
+                "heygen.com": 1,
+                "d-id.com": 20,
+                "synthesia.io": 2,
+                "creatify.ai": 5
+            }
+        }
+    },
+    {
+        "keyword": "ai video content creator",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (79) is weaker compared to competitors. D-ID's performance (69) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 71,
+            "density": 0.6899999976158142,
+            "competitors": {
+                "kreadoai.com": 79,
+                "heygen.com": 15,
+                "d-id.com": 69,
+                "synthesia.io": 2,
+                "creatify.ai": 29
+            }
+        }
+    },
+    {
+        "keyword": "ai video generate",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (58) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 72,
+            "density": 0.5,
+            "competitors": {
+                "kreadoai.com": 58,
+                "heygen.com": 12,
+                "d-id.com": 16,
+                "synthesia.io": 7,
+                "creatify.ai": 20
+            }
+        }
+    },
+    {
+        "keyword": "ai video generated",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (86) make it a future opportunity. Competitor insights: KreadoAI's rank (95) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 86,
+            "density": 0.5,
+            "competitors": {
+                "kreadoai.com": 95,
+                "heygen.com": 7,
+                "d-id.com": 14,
+                "synthesia.io": 9,
+                "creatify.ai": 29
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator mod apk",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (3) make it a future opportunity. Competitor insights: KreadoAI's rank (45) is weaker compared to competitors. D-ID's performance (70) is weaker, indicating potential opportunities. Heygen (60) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 3,
+            "density": 0.25999999046325684,
+            "competitors": {
+                "kreadoai.com": 45,
+                "heygen.com": 60,
+                "d-id.com": 70,
+                "synthesia.io": 47,
+                "creatify.ai": 50
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator person",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (87) make it a future opportunity. Competitor insights: KreadoAI's rank (41) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 87,
+            "density": 0.4399999976158142,
+            "competitors": {
+                "kreadoai.com": 41,
+                "heygen.com": 4,
+                "d-id.com": 14,
+                "synthesia.io": 1,
+                "creatify.ai": 48
+            }
+        }
+    },
+    {
+        "keyword": "ai video maker with avatar",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (86) make it a future opportunity. Competitor insights: KreadoAI's rank (48) is weaker compared to competitors. D-ID's performance (64) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 86,
+            "density": 0.4300000071525574,
+            "competitors": {
+                "kreadoai.com": 48,
+                "heygen.com": 4,
+                "d-id.com": 64,
+                "synthesia.io": 1,
+                "creatify.ai": 30
+            }
+        }
+    },
+    {
+        "keyword": "aigc video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (57) make it a future opportunity. Competitor insights: KreadoAI's rank (1) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 57,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 1,
+                "heygen.com": 4,
+                "d-id.com": 19,
+                "synthesia.io": 3,
+                "creatify.ai": 5
+            }
+        }
+    },
+    {
+        "keyword": "aivideo.com",
+        "semantics": "Other",
+        "seo_type": "Target",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (47) make it a future opportunity. Competitor insights: KreadoAI's rank (41) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 47,
+            "density": 0.41999998688697815,
+            "competitors": {
+                "kreadoai.com": 41,
+                "heygen.com": 42,
+                "d-id.com": 30,
+                "synthesia.io": 19,
+                "creatify.ai": 67
+            }
+        }
+    },
+    {
+        "keyword": "avatar ai video",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (51) make it a future opportunity. Competitor insights: KreadoAI's rank (37) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 51,
+            "density": 0.41999998688697815,
+            "competitors": {
+                "kreadoai.com": 37,
+                "heygen.com": 1,
+                "d-id.com": 30,
+                "synthesia.io": 3,
+                "creatify.ai": 4
+            }
+        }
+    },
+    {
+        "keyword": "best ai video creator app",
+        "semantics": "Other",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (61) make it a future opportunity. Competitor insights: KreadoAI's rank (59) is weaker compared to competitors. Heygen (69) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 61,
+            "density": 0.6000000238418579,
+            "competitors": {
+                "kreadoai.com": 59,
+                "heygen.com": 69,
+                "d-id.com": 32,
+                "synthesia.io": 2,
+                "creatify.ai": 52
+            }
+        }
+    },
+    {
+        "keyword": "creaitor .ai",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (30) make it a future opportunity. Competitor insights: KreadoAI's rank (48) is weaker compared to competitors. D-ID's performance (77) is weaker, indicating potential opportunities. Heygen (91) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 30,
+            "density": 0.09000000357627869,
+            "competitors": {
+                "kreadoai.com": 48,
+                "heygen.com": 91,
+                "d-id.com": 77,
+                "synthesia.io": 59,
+                "creatify.ai": 51
+            }
+        }
+    },
+    {
+        "keyword": "create ai avatar videos",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (59) make it a future opportunity. Competitor insights: KreadoAI's rank (44) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 59,
+            "density": 0.6499999761581421,
+            "competitors": {
+                "kreadoai.com": 44,
+                "heygen.com": 1,
+                "d-id.com": 40,
+                "synthesia.io": 2,
+                "creatify.ai": 8
+            }
+        }
+    },
+    {
+        "keyword": "create avatar video ai",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (73) make it a future opportunity. Competitor insights: KreadoAI's rank (40) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 73,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 40,
+                "heygen.com": 4,
+                "d-id.com": 38,
+                "synthesia.io": 1,
+                "creatify.ai": 11
+            }
+        }
+    },
+    {
+        "keyword": "free ai generator video",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (98) is weaker compared to competitors. D-ID's performance (89) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 70,
+            "density": 0.6499999761581421,
+            "competitors": {
+                "kreadoai.com": 98,
+                "heygen.com": 29,
+                "d-id.com": 89,
+                "synthesia.io": 5,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "free ai talking video generator",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (82) make it a future opportunity. Competitor insights: KreadoAI's rank (54) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 82,
+            "density": 0.6100000143051147,
+            "competitors": {
+                "kreadoai.com": 54,
+                "heygen.com": 10,
+                "d-id.com": 34,
+                "synthesia.io": 3,
+                "creatify.ai": 69
+            }
+        }
+    },
+    {
+        "keyword": "free no sign up ai video generator",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (38) make it a future opportunity. Competitor insights: KreadoAI's rank (63) is weaker compared to competitors. D-ID's performance (80) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 38,
+            "density": 0.30000001192092896,
+            "competitors": {
+                "kreadoai.com": 63,
+                "heygen.com": 25,
+                "d-id.com": 80,
+                "synthesia.io": 23,
+                "creatify.ai": 73
+            }
+        }
+    },
+    {
+        "keyword": "link to video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (18) make it a future opportunity. Competitor insights: KreadoAI's rank (32) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 18,
+            "density": 0.25999999046325684,
+            "competitors": {
+                "kreadoai.com": 32,
+                "heygen.com": 20,
+                "d-id.com": 36,
+                "synthesia.io": 21,
+                "creatify.ai": 5
+            }
+        }
+    },
+    {
+        "keyword": "speech to video ai",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (80) make it a future opportunity. Competitor insights: KreadoAI's rank (96) is weaker compared to competitors. D-ID's performance (86) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 80,
+            "density": 0.7099999785423279,
+            "competitors": {
+                "kreadoai.com": 96,
+                "heygen.com": 9,
+                "d-id.com": 86,
+                "synthesia.io": 3,
+                "creatify.ai": 72
+            }
+        }
+    },
+    {
+        "keyword": "text to ai avatar",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (35) make it a future opportunity. Competitor insights: KreadoAI's rank (99) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 35,
+            "density": 0.33000001311302185,
+            "competitors": {
+                "kreadoai.com": 99,
+                "heygen.com": 1,
+                "d-id.com": 14,
+                "synthesia.io": 7,
+                "creatify.ai": 71
+            }
+        }
+    },
+    {
+        "keyword": "text to avatar ai",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (33) make it a future opportunity. Competitor insights: KreadoAI's rank (84) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 33,
+            "density": 0.28999999165534973,
+            "competitors": {
+                "kreadoai.com": 84,
+                "heygen.com": 1,
+                "d-id.com": 15,
+                "synthesia.io": 8,
+                "creatify.ai": 44
+            }
+        }
+    },
+    {
+        "keyword": "text to video ai apk mod",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (4) make it a future opportunity. Competitor insights: KreadoAI's rank (37) is weaker compared to competitors. D-ID's performance (77) is weaker, indicating potential opportunities. Heygen (91) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 4,
+            "density": 0.14000000059604645,
+            "competitors": {
+                "kreadoai.com": 37,
+                "heygen.com": 91,
+                "d-id.com": 77,
+                "synthesia.io": 36,
+                "creatify.ai": 43
+            }
+        }
+    },
+    {
+        "keyword": "vedio generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (69) make it a future opportunity. Competitor insights: KreadoAI's rank (87) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 69,
+            "density": 0.5299999713897705,
+            "competitors": {
+                "kreadoai.com": 87,
+                "heygen.com": 13,
+                "d-id.com": 24,
+                "synthesia.io": 4,
+                "creatify.ai": 34
+            }
+        }
+    },
+    {
+        "keyword": "video create ai",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (41) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 71,
+            "density": 0.6000000238418579,
+            "competitors": {
+                "kreadoai.com": 41,
+                "heygen.com": 13,
+                "d-id.com": 21,
+                "synthesia.io": 5,
+                "creatify.ai": 20
+            }
+        }
+    },
+    {
+        "keyword": "video generator ai free from text",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (40) and/or high difficulty (61) make it a future opportunity. Competitor insights: KreadoAI's rank (85) is weaker compared to competitors. D-ID's performance (81) is weaker, indicating potential opportunities. Heygen (57) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 40,
+            "difficulty": 61,
+            "density": 0.7599999904632568,
+            "competitors": {
+                "kreadoai.com": 85,
+                "heygen.com": 57,
+                "d-id.com": 81,
+                "synthesia.io": 9,
+                "creatify.ai": 88
+            }
+        }
+    },
+    {
+        "keyword": "ai app for video creation",
+        "semantics": "AI Video Generation and Content",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (65) is weaker compared to competitors. D-ID's performance (61) is weaker, indicating potential opportunities. Heygen (71) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 72,
+            "density": 0.6299999952316284,
+            "competitors": {
+                "kreadoai.com": 65,
+                "heygen.com": 71,
+                "d-id.com": 61,
+                "synthesia.io": 2,
+                "creatify.ai": 50
+            }
+        }
+    },
+    {
+        "keyword": "ai avatar generator video",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (48) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 72,
+            "density": 0.6100000143051147,
+            "competitors": {
+                "kreadoai.com": 48,
+                "heygen.com": 1,
+                "d-id.com": 29,
+                "synthesia.io": 2,
+                "creatify.ai": 20
+            }
+        }
+    },
+    {
+        "keyword": "ai avatar video generator free online",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (63) make it a future opportunity. Competitor insights: KreadoAI's rank (72) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 63,
+            "density": 0.14000000059604645,
+            "competitors": {
+                "kreadoai.com": 72,
+                "heygen.com": 8,
+                "d-id.com": 47,
+                "synthesia.io": 6,
+                "creatify.ai": 52
+            }
+        }
+    },
+    {
+        "keyword": "ai avatar videos",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (67) make it a future opportunity. Competitor insights: KreadoAI's rank (50) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 67,
+            "density": 0.4699999988079071,
+            "competitors": {
+                "kreadoai.com": 50,
+                "heygen.com": 1,
+                "d-id.com": 25,
+                "synthesia.io": 2,
+                "creatify.ai": 4
+            }
+        }
+    },
+    {
+        "keyword": "ai for video generation",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (88) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 70,
+            "density": 0.6299999952316284,
+            "competitors": {
+                "kreadoai.com": 88,
+                "heygen.com": 9,
+                "d-id.com": 22,
+                "synthesia.io": 6,
+                "creatify.ai": 60
+            }
+        }
+    },
+    {
+        "keyword": "ai generator clips",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (63) make it a future opportunity. Competitor insights: KreadoAI's rank (95) is weaker compared to competitors. D-ID's performance (90) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 63,
+            "density": 0.5799999833106995,
+            "competitors": {
+                "kreadoai.com": 95,
+                "heygen.com": 12,
+                "d-id.com": 90,
+                "synthesia.io": 6,
+                "creatify.ai": 52
+            }
+        }
+    },
+    {
+        "keyword": "ai generator for videos",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (82) make it a future opportunity. Competitor insights: KreadoAI's rank (57) is weaker compared to competitors. D-ID's performance (54) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 82,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 57,
+                "heygen.com": 8,
+                "d-id.com": 54,
+                "synthesia.io": 5,
+                "creatify.ai": 32
+            }
+        }
+    },
+    {
+        "keyword": "ai video avatar generator",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (67) make it a future opportunity. Competitor insights: KreadoAI's rank (11) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 67,
+            "density": 0.47999998927116394,
+            "competitors": {
+                "kreadoai.com": 11,
+                "heygen.com": 1,
+                "d-id.com": 13,
+                "synthesia.io": 2,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "ai video avatar generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (74) make it a future opportunity. Competitor insights: KreadoAI's rank (54) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 74,
+            "density": 0.41999998688697815,
+            "competitors": {
+                "kreadoai.com": 54,
+                "heygen.com": 6,
+                "d-id.com": 29,
+                "synthesia.io": 1,
+                "creatify.ai": 51
+            }
+        }
+    },
+    {
+        "keyword": "ai video creating",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (48) is weaker compared to competitors. D-ID's performance (51) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 71,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 48,
+                "heygen.com": 14,
+                "d-id.com": 51,
+                "synthesia.io": 4,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "ai video generatir",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (67) make it a future opportunity. Competitor insights: KreadoAI's rank (73) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 67,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 73,
+                "heygen.com": 17,
+                "d-id.com": 29,
+                "synthesia.io": 6,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator avatar",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (87) make it a future opportunity. Competitor insights: KreadoAI's rank (11) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 87,
+            "density": 0.6000000238418579,
+            "competitors": {
+                "kreadoai.com": 11,
+                "heygen.com": 1,
+                "d-id.com": 30,
+                "synthesia.io": 3,
+                "creatify.ai": 23
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator sites",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (69) make it a future opportunity. Competitor insights: KreadoAI's rank (44) is weaker compared to competitors. D-ID's performance (59) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 69,
+            "density": 0.4300000071525574,
+            "competitors": {
+                "kreadoai.com": 44,
+                "heygen.com": 12,
+                "d-id.com": 59,
+                "synthesia.io": 2,
+                "creatify.ai": 29
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator text to video",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (59) make it a future opportunity. Competitor insights: KreadoAI's rank (80) is weaker compared to competitors. D-ID's performance (97) is weaker, indicating potential opportunities. Heygen (67) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 59,
+            "density": 0.6000000238418579,
+            "competitors": {
+                "kreadoai.com": 80,
+                "heygen.com": 67,
+                "d-id.com": 97,
+                "synthesia.io": 11,
+                "creatify.ai": 89
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator website",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (79) make it a future opportunity. Competitor insights: KreadoAI's rank (17) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 79,
+            "density": 0.6000000238418579,
+            "competitors": {
+                "kreadoai.com": 17,
+                "heygen.com": 6,
+                "d-id.com": 25,
+                "synthesia.io": 3,
+                "creatify.ai": 32
+            }
+        }
+    },
+    {
+        "keyword": "ai video generator with voice",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (77) make it a future opportunity. Competitor insights: KreadoAI's rank (11) is weaker compared to competitors. D-ID's performance (91) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 77,
+            "density": 0.6700000166893005,
+            "competitors": {
+                "kreadoai.com": 11,
+                "heygen.com": 4,
+                "d-id.com": 91,
+                "synthesia.io": 1,
+                "creatify.ai": 86
+            }
+        }
+    },
+    {
+        "keyword": "ai video genorator",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (67) make it a future opportunity. Competitor insights: KreadoAI's rank (73) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 67,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 73,
+                "heygen.com": 17,
+                "d-id.com": 30,
+                "synthesia.io": 6,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "ai video genrator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (68) make it a future opportunity. Competitor insights: KreadoAI's rank (62) is weaker compared to competitors. D-ID's performance (75) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 68,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 62,
+                "heygen.com": 16,
+                "d-id.com": 75,
+                "synthesia.io": 5,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "ai video talking generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (69) make it a future opportunity. Competitor insights: KreadoAI's rank (78) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 69,
+            "density": 0.49000000953674316,
+            "competitors": {
+                "kreadoai.com": 78,
+                "heygen.com": 6,
+                "d-id.com": 18,
+                "synthesia.io": 1,
+                "creatify.ai": 95
+            }
+        }
+    },
+    {
+        "keyword": "ai video websites",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (16) is weaker compared to competitors. D-ID's performance (62) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 70,
+            "density": 0.44999998807907104,
+            "competitors": {
+                "kreadoai.com": 16,
+                "heygen.com": 14,
+                "d-id.com": 62,
+                "synthesia.io": 2,
+                "creatify.ai": 21
+            }
+        }
+    },
+    {
+        "keyword": "ai videogenerator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (68) make it a future opportunity. Competitor insights: KreadoAI's rank (85) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 68,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 85,
+                "heygen.com": 15,
+                "d-id.com": 21,
+                "synthesia.io": 7,
+                "creatify.ai": 55
+            }
+        }
+    },
+    {
+        "keyword": "aivideo generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (68) make it a future opportunity. Competitor insights: KreadoAI's rank (67) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 68,
+            "density": 0.5400000214576721,
+            "competitors": {
+                "kreadoai.com": 67,
+                "heygen.com": 17,
+                "d-id.com": 37,
+                "synthesia.io": 5,
+                "creatify.ai": 26
+            }
+        }
+    },
+    {
+        "keyword": "aivideo.io",
+        "semantics": "Other",
+        "seo_type": "Target",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (94) is weaker compared to competitors. D-ID's performance (63) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 71,
+            "density": 0.25,
+            "competitors": {
+                "kreadoai.com": 94,
+                "heygen.com": 23,
+                "d-id.com": 63,
+                "synthesia.io": 5,
+                "creatify.ai": 74
+            }
+        }
+    },
+    {
+        "keyword": "al avatar",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (67) make it a future opportunity. Competitor insights: KreadoAI's rank (61) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 67,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 61,
+                "heygen.com": 26,
+                "d-id.com": 40,
+                "synthesia.io": 28,
+                "creatify.ai": 78
+            }
+        }
+    },
+    {
+        "keyword": "avatar ai video generator free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (73) make it a future opportunity. Competitor insights: KreadoAI's rank (31) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 73,
+            "density": 0.8999999761581421,
+            "competitors": {
+                "kreadoai.com": 31,
+                "heygen.com": 4,
+                "d-id.com": 33,
+                "synthesia.io": 1,
+                "creatify.ai": 32
+            }
+        }
+    },
+    {
+        "keyword": "avatar credit card",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (54) make it a future opportunity. Competitor insights: KreadoAI's rank (36) is weaker compared to competitors. D-ID's performance (54) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 54,
+            "density": 0.14000000059604645,
+            "competitors": {
+                "kreadoai.com": 36,
+                "heygen.com": 43,
+                "d-id.com": 54,
+                "synthesia.io": 60,
+                "creatify.ai": 32
+            }
+        }
+    },
+    {
+        "keyword": "avatar video creator",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (56) make it a future opportunity. Competitor insights: KreadoAI's rank (52) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 56,
+            "density": 0.46000000834465027,
+            "competitors": {
+                "kreadoai.com": 52,
+                "heygen.com": 5,
+                "d-id.com": 46,
+                "synthesia.io": 4,
+                "creatify.ai": 71
+            }
+        }
+    },
+    {
+        "keyword": "avator videos",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (91) make it a future opportunity. Competitor insights: KreadoAI's rank (46) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 91,
+            "density": 0.019999999552965164,
+            "competitors": {
+                "kreadoai.com": 46,
+                "heygen.com": 12,
+                "d-id.com": 26,
+                "synthesia.io": 7,
+                "creatify.ai": 35
+            }
+        }
+    },
+    {
+        "keyword": "best ai photo to video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (52) make it a future opportunity. Competitor insights: KreadoAI's rank (74) is weaker compared to competitors. D-ID's performance (58) is weaker, indicating potential opportunities. Heygen (69) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 52,
+            "density": 0.6899999976158142,
+            "competitors": {
+                "kreadoai.com": 74,
+                "heygen.com": 69,
+                "d-id.com": 58,
+                "synthesia.io": 1,
+                "creatify.ai": 62
+            }
+        }
+    },
+    {
+        "keyword": "best ai video gen",
+        "semantics": "Other",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (50) make it a future opportunity. Competitor insights: KreadoAI's rank (79) is weaker compared to competitors. D-ID's performance (86) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 50,
+            "density": 0.5299999713897705,
+            "competitors": {
+                "kreadoai.com": 79,
+                "heygen.com": 34,
+                "d-id.com": 86,
+                "synthesia.io": 3,
+                "creatify.ai": 60
+            }
+        }
+    },
+    {
+        "keyword": "best video ai generators",
+        "semantics": "AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (57) make it a future opportunity. Competitor insights: KreadoAI's rank (26) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 57,
+            "density": 0.6399999856948853,
+            "competitors": {
+                "kreadoai.com": 26,
+                "heygen.com": 43,
+                "d-id.com": 21,
+                "synthesia.io": 2,
+                "creatify.ai": 65
+            }
+        }
+    },
+    {
+        "keyword": "best video creating ai",
+        "semantics": "Other",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (59) make it a future opportunity. Competitor insights: KreadoAI's rank (91) is weaker compared to competitors. D-ID's performance (63) is weaker, indicating potential opportunities. Heygen (74) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 59,
+            "density": 0.5099999904632568,
+            "competitors": {
+                "kreadoai.com": 91,
+                "heygen.com": 74,
+                "d-id.com": 63,
+                "synthesia.io": 2,
+                "creatify.ai": 44
+            }
+        }
+    },
+    {
+        "keyword": "best video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (64) make it a future opportunity. Competitor insights: KreadoAI's rank (99) is weaker compared to competitors. D-ID's performance (93) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 64,
+            "density": 0.5899999737739563,
+            "competitors": {
+                "kreadoai.com": 99,
+                "heygen.com": 48,
+                "d-id.com": 93,
+                "synthesia.io": 2,
+                "creatify.ai": 61
+            }
+        }
+    },
+    {
+        "keyword": "c.ai voice generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (43) make it a future opportunity. Competitor insights: KreadoAI's rank (89) is weaker compared to competitors. D-ID's performance (74) is weaker, indicating potential opportunities. Heygen (63) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 43,
+            "density": 0.14000000059604645,
+            "competitors": {
+                "kreadoai.com": 89,
+                "heygen.com": 63,
+                "d-id.com": 74,
+                "synthesia.io": 25,
+                "creatify.ai": 93
+            }
+        }
+    },
+    {
+        "keyword": "create ai character video",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (77) is weaker compared to competitors. D-ID's performance (71) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 70,
+            "density": 0.7099999785423279,
+            "competitors": {
+                "kreadoai.com": 77,
+                "heygen.com": 12,
+                "d-id.com": 71,
+                "synthesia.io": 2,
+                "creatify.ai": 76
+            }
+        }
+    },
+    {
+        "keyword": "create ai video avatar",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (66) make it a future opportunity. Competitor insights: KreadoAI's rank (39) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 66,
+            "density": 0.7900000214576721,
+            "competitors": {
+                "kreadoai.com": 39,
+                "heygen.com": 2,
+                "d-id.com": 28,
+                "synthesia.io": 1,
+                "creatify.ai": 24
+            }
+        }
+    },
+    {
+        "keyword": "create ai video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (71) make it a future opportunity. Competitor insights: KreadoAI's rank (48) is weaker compared to competitors. D-ID's performance (57) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 71,
+            "density": 0.25999999046325684,
+            "competitors": {
+                "kreadoai.com": 48,
+                "heygen.com": 14,
+                "d-id.com": 57,
+                "synthesia.io": 5,
+                "creatify.ai": 25
+            }
+        }
+    },
+    {
+        "keyword": "create free ai video",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (72) make it a future opportunity. Competitor insights: KreadoAI's rank (83) is weaker compared to competitors. D-ID's performance (86) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 72,
+            "density": 0.6800000071525574,
+            "competitors": {
+                "kreadoai.com": 83,
+                "heygen.com": 47,
+                "d-id.com": 86,
+                "synthesia.io": 4,
+                "creatify.ai": 34
+            }
+        }
+    },
+    {
+        "keyword": "create videos with ai avatars",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (74) make it a future opportunity. Competitor insights: KreadoAI's rank (81) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 74,
+            "density": 0.7200000286102295,
+            "competitors": {
+                "kreadoai.com": 81,
+                "heygen.com": 2,
+                "d-id.com": 40,
+                "synthesia.io": 1,
+                "creatify.ai": 18
+            }
+        }
+    },
+    {
+        "keyword": "creator ia",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (91) make it a future opportunity. Competitor insights: KreadoAI's rank (33) is weaker compared to competitors. D-ID's performance (65) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 91,
+            "density": 0.33000001311302185,
+            "competitors": {
+                "kreadoai.com": 33,
+                "heygen.com": 18,
+                "d-id.com": 65,
+                "synthesia.io": 19,
+                "creatify.ai": 55
+            }
+        }
+    },
+    {
+        "keyword": "download ai videos",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (30) make it a future opportunity. Competitor insights: KreadoAI's rank (62) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 30,
+            "density": 0.4000000059604645,
+            "competitors": {
+                "kreadoai.com": 62,
+                "heygen.com": 18,
+                "d-id.com": 46,
+                "synthesia.io": 19,
+                "creatify.ai": 61
+            }
+        }
+    },
+    {
+        "keyword": "free ai talking avatar",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (30) make it a future opportunity. Competitor insights: KreadoAI's rank (51) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 30,
+            "density": 0.49000000953674316,
+            "competitors": {
+                "kreadoai.com": 51,
+                "heygen.com": 5,
+                "d-id.com": 18,
+                "synthesia.io": 1,
+                "creatify.ai": 43
+            }
+        }
+    },
+    {
+        "keyword": "free ai vedio",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (42) is weaker compared to competitors. D-ID's performance (71) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 70,
+            "density": 0.5600000023841858,
+            "competitors": {
+                "kreadoai.com": 42,
+                "heygen.com": 16,
+                "d-id.com": 71,
+                "synthesia.io": 2,
+                "creatify.ai": 25
+            }
+        }
+    },
+    {
+        "keyword": "free ai video apps",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (95) is weaker compared to competitors. D-ID's performance (94) is weaker, indicating potential opportunities. Heygen (65) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 70,
+            "density": 0.5099999904632568,
+            "competitors": {
+                "kreadoai.com": 95,
+                "heygen.com": 65,
+                "d-id.com": 94,
+                "synthesia.io": 6,
+                "creatify.ai": 75
+            }
+        }
+    },
+    {
+        "keyword": "gen ai for videos",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (70) make it a future opportunity. Competitor insights: KreadoAI's rank (97) is weaker compared to competitors. D-ID's performance (63) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 70,
+            "density": 0.3499999940395355,
+            "competitors": {
+                "kreadoai.com": 97,
+                "heygen.com": 3,
+                "d-id.com": 63,
+                "synthesia.io": 2,
+                "creatify.ai": 45
+            }
+        }
+    },
+    {
+        "keyword": "generating videos with ai",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (74) make it a future opportunity. Competitor insights: KreadoAI's rank (92) is weaker compared to competitors. D-ID's performance (52) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 74,
+            "density": 0.6299999952316284,
+            "competitors": {
+                "kreadoai.com": 92,
+                "heygen.com": 13,
+                "d-id.com": 52,
+                "synthesia.io": 6,
+                "creatify.ai": 26
+            }
+        }
+    },
+    {
+        "keyword": "how to create ai human video",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (56) make it a future opportunity. Competitor insights: KreadoAI's rank (70) is weaker compared to competitors. D-ID's performance (60) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 56,
+            "density": 0.6399999856948853,
+            "competitors": {
+                "kreadoai.com": 70,
+                "heygen.com": 20,
+                "d-id.com": 60,
+                "synthesia.io": 2,
+                "creatify.ai": 88
+            }
+        }
+    },
+    {
+        "keyword": "i video generator",
+        "semantics": "AI Video Tools",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (68) make it a future opportunity. Competitor insights: KreadoAI's rank (89) is weaker compared to competitors. D-ID's performance (96) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 68,
+            "density": 0.49000000953674316,
+            "competitors": {
+                "kreadoai.com": 89,
+                "heygen.com": 26,
+                "d-id.com": 96,
+                "synthesia.io": 12,
+                "creatify.ai": 65
+            }
+        }
+    },
+    {
+        "keyword": "ia avatar",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (57) make it a future opportunity. Competitor insights: KreadoAI's rank (51) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 57,
+            "density": 0.0,
+            "competitors": {
+                "kreadoai.com": 51,
+                "heygen.com": 2,
+                "d-id.com": 49,
+                "synthesia.io": 5,
+                "creatify.ai": 6
+            }
+        }
+    },
+    {
+        "keyword": "ia.com gratis",
+        "semantics": "Other",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (100) make it a future opportunity. Competitor insights: KreadoAI's rank (15) is weaker compared to competitors. D-ID's performance (74) is weaker, indicating potential opportunities. Heygen (71) has room for improvement in this domain.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 100,
+            "density": 0.4300000071525574,
+            "competitors": {
+                "kreadoai.com": 15,
+                "heygen.com": 71,
+                "d-id.com": 74,
+                "synthesia.io": 83,
+                "creatify.ai": 47
+            }
+        }
+    },
+    {
+        "keyword": "image to speaking video ai",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (42) make it a future opportunity. Competitor insights: KreadoAI's rank (69) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 42,
+            "density": 0.6000000238418579,
+            "competitors": {
+                "kreadoai.com": 69,
+                "heygen.com": 8,
+                "d-id.com": 3,
+                "synthesia.io": 9,
+                "creatify.ai": 75
+            }
+        }
+    },
+    {
+        "keyword": "in video ai download",
+        "semantics": "Other",
+        "seo_type": "Long-tail",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (43) make it a future opportunity. Competitor insights: KreadoAI's rank (98) is weaker compared to competitors. D-ID's performance (62) is weaker, indicating potential opportunities.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 43,
+            "density": 0.27000001072883606,
+            "competitors": {
+                "kreadoai.com": 98,
+                "heygen.com": 40,
+                "d-id.com": 62,
+                "synthesia.io": 74,
+                "creatify.ai": 72
+            }
+        }
+    },
+    {
+        "keyword": "make video with ai avatar free",
+        "semantics": "Free AI Video Tools",
+        "seo_type": "Modified",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (38) make it a future opportunity. Competitor insights: KreadoAI's rank (94) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 38,
+            "density": 0.4300000071525574,
+            "competitors": {
+                "kreadoai.com": 94,
+                "heygen.com": 11,
+                "d-id.com": 44,
+                "synthesia.io": 3,
+                "creatify.ai": 78
+            }
+        }
+    },
+    {
+        "keyword": "video avatar ai",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (74) make it a future opportunity. Competitor insights: KreadoAI's rank (10) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 74,
+            "density": 0.3400000035762787,
+            "competitors": {
+                "kreadoai.com": 10,
+                "heygen.com": 1,
+                "d-id.com": 15,
+                "synthesia.io": 2,
+                "creatify.ai": 6
+            }
+        }
+    },
+    {
+        "keyword": "video avatars",
+        "semantics": "AI Avatars and Comparisons",
+        "seo_type": "Core",
+        "priority": "P3",
+        "reason": "Low search volume (30) and/or high difficulty (63) make it a future opportunity. Competitor insights: KreadoAI's rank (58) is weaker compared to competitors.",
+        "attributes": {
+            "volume": 30,
+            "difficulty": 63,
+            "density": 0.25,
+            "competitors": {
+                "kreadoai.com": 58,
+                "heygen.com": 3,
+                "d-id.com": 20,
+                "synthesia.io": 1,
+                "creatify.ai": 7
+            }
+        }
+    }
+]
