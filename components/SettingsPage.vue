@@ -40,7 +40,17 @@
                     </div>
                     
                     <div class="configured-domains" v-if="currentDomainConfigs?.length > 0">
-                      <h3>Added Subdomains</h3>
+                      <div class="domains-header">
+                        <h3>Added Subdomains</h3>
+                        <a-button 
+                          type="link"
+                          class="refresh-btn"
+                          :loading="refreshing"
+                          @click="handleRefresh"
+                        >
+                          <reload-outlined />
+                        </a-button>
+                      </div>
                       <div class="domain-list">
                         <div v-for="domain in currentDomainConfigs" :key="domain.name" class="domain-item">
                           <div class="domain-info">
@@ -237,7 +247,7 @@
 import { ref, onMounted, watch } from 'vue';
 import { message, Modal } from 'ant-design-vue';
 import PageLayout from './layout/PageLayout.vue'
-import { SettingOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { SettingOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons-vue'
 import apiClient from '../api/api';
 
 export default {
@@ -245,7 +255,8 @@ export default {
   components: {
     PageLayout,
     SettingOutlined,
-    DeleteOutlined  
+    DeleteOutlined,
+    ReloadOutlined
   },
   setup() {
     const activeTab = ref('domains');
@@ -282,13 +293,27 @@ export default {
         key: 'value',
       }
     ];
+    const refreshing = ref(false);
+    const handleRefresh = async () => {
+      refreshing.value = true;
+      try {
+        await loadVercelDomainInfo();
+        message.success('Refresh successfully');
+      } catch (error) {
+        message.error('Refresh failed');
+      } finally {
+        refreshing.value = false;
+      }
+    };
+
 
     // 添加获取 projectId 的工具方法
     const getProjectId = (customerId) => {
       switch (customerId) {
         case '673f4f19caf5b79765874fe8':
           return 'prj_7SXIhcIx5SOYKKVzhhRvnmUdoN7g';
-        // 可以在这里添加其他客户的映射关系
+        case '67525da4ba5fcadf228e56c1':
+          return 'prj_7SXIhcIx5SOYKKVzhhRvnmUdoN7g';
         default:
           return 'prj_ySV5jK2SgENiBpE5D2aTaeI3KfAo'; // 默认值待定
       }
@@ -548,6 +573,8 @@ export default {
       dnsColumns,
       getDomainStatusColor,
       getDomainStatusText,
+      refreshing,
+      handleRefresh
     };
   }
 }
@@ -944,5 +971,34 @@ export default {
 .dns-table {
   background: white;
   border-radius: 8px;
+}
+
+.domains-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 16px 0;
+}
+
+.domains-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.refresh-btn {
+  padding: 4px;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.refresh-btn:hover {
+  color: #60A5FA;
+  background: #F0F7FF;
+  border-radius: 4px;
 }
 </style> 

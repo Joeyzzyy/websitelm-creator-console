@@ -9,6 +9,15 @@
             <template #icon><ReloadOutlined /></template>
             Refresh
           </a-button>
+          <span v-show="verifiedDomains.length === 0" class="domain-label">
+            No verified domain available - <router-link to="/settings">click here to add domain</router-link>
+          </span>
+          <span v-show="verifiedDomains.length > 0" class="domain-label">Pages will be published to:</span>
+          <div class="domain-tags">
+            <a-tag v-for="domain in verifiedDomains" :key="domain" color="success">
+              {{ domain }}
+            </a-tag>
+          </div>
         </div>
         <div class="header-right">
           <a-input
@@ -147,6 +156,7 @@ export default {
   setup() {
     const tasks = ref([])
     const loading = ref(false)
+    const verifiedDomains = ref([])
     
     const modalConfig = reactive({
       visible: false,
@@ -171,6 +181,33 @@ export default {
       )
     })
 
+    const getProjectId = (customerId) => {
+      switch (customerId) {
+        case '673f4f19caf5b79765874fe8':
+          return 'prj_7SXIhcIx5SOYKKVzhhRvnmUdoN7g';
+        case '67525da4ba5fcadf228e56c1':
+          return 'prj_7SXIhcIx5SOYKKVzhhRvnmUdoN7g';
+        default:
+          return 'prj_ySV5jK2SgENiBpE5D2aTaeI3KfAo'; // 默认值待定
+      }
+    };
+
+    const loadVerifiedDomains = async () => {
+      try {
+        const customerId = localStorage.getItem('currentUserId')
+        const projectId = getProjectId(customerId)
+        
+        const response = await apiClient.getVercelDomainInfo(projectId)
+        
+        // 查找所有已验证的域名
+        verifiedDomains.value = response?.domains
+          ?.filter(domain => domain.verified || !domain.configDetails?.misconfigured)
+          ?.map(domain => domain.name) || []
+      } catch (error) {
+        console.error('Failed to load domain info:', error)
+      }
+    }
+
     // Fetch task list
     const fetchTasks = async () => {
       loading.value = true
@@ -183,6 +220,8 @@ export default {
           let completedBatches = 0
           
           tasks.value = await Promise.all(res.data.map(async batch => {
+            loadVerifiedDomains();
+
             // Get English articles
             const enRes = await apiClient.getBatchPagesData(batch.batchId)
             const enArticles = (enRes?.data || []).map(article => {
@@ -260,7 +299,7 @@ export default {
             }
           })
 
-          // 安全地检查标题字段
+          // ��全地检查标题字段
           const titleFields = ['title', 'subtitle', 'subTitle']
           titleFields.forEach(field => {
             const value = section[field]
@@ -330,6 +369,13 @@ export default {
     // Publish/Unpublish article
     const confirmPublishAction = (article) => {
       const isPublished = article.publishStatus === 'publish'
+      
+      // 只在要发布时检查 verified domains
+      if (!isPublished && verifiedDomains.value.length === 0) {
+        message.error('No verified domain available. Please verify a domain in Settings first.')
+        return
+      }
+
       modalConfig.visible = true
       modalConfig.title = isPublished ? 'Confirm Unpublish' : 'Confirm Publish'
       modalConfig.content = isPublished 
@@ -345,13 +391,24 @@ export default {
       window.open(url, '_blank')
     }
 
-    // Get URLs
     const getPreviewUrl = (article) => {
-      return `${config.domains.preview}${article.lang === 'zh' ? 'zh/' : 'en/'}${article.pageLangId}`
+      const customerId = localStorage.getItem('currentUserId')
+      const previewDomain = customerId === '673f4f19caf5b79765874fe8' || customerId === '67525da4ba5fcadf228e56c1'
+        ? config.domains.kreado_preview 
+        : config.domains.preview
+        
+      return `${previewDomain}${article.lang === 'zh' ? 'zh/' : 'en/'}${article.pageLangId}`
     }
     
     const getPublishUrl = (article) => {
-      return `${config.domains.production}${article.lang === 'zh' ? 'zh/' : 'en/'}${article.pageLangId}`
+      // 如果没有验证域名,返回空
+      if (verifiedDomains.value.length === 0) {
+        return ''
+      }
+      
+      // 使用第一个验证域名作为发布域名
+      const publishDomain = verifiedDomains.value[0]
+      return `https://${publishDomain}/${article.lang === 'zh' ? 'zh/' : 'en/'}${article.pageLangId}`
     }
 
     // Style methods
@@ -409,6 +466,7 @@ export default {
       searchQuery,
       filteredTasks,
       loadingProgress,
+      verifiedDomains,
     }
   }
 }
@@ -575,6 +633,9 @@ export default {
 
 .text-button:nth-child(4) {
   color: #722ed1;
+  cursor: pointer;
+  opacity: v-bind('verifiedDomains.length === 0 ? 0.5 : 1');
+  pointer-events: v-bind('verifiedDomains.length === 0 ? "none" : "auto"');
 }
 
 .text-button:hover {
@@ -710,5 +771,40 @@ export default {
 
 .published-tag {
   position: static;
+}
+
+/* 添加新的样式 */
+.domain-tags {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+:deep(.ant-tag) {
+  font-size: 12px;
+  line-height: 20px;
+  padding: 0 8px;
+  border-radius: 4px;
+}
+
+.domain-label {
+  color: #666;
+  font-size: 13px;
+  margin-left: 8px;
+}
+
+.domain-label :deep(a) {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+.domain-label :deep(a:hover) {
+  text-decoration: underline;
+}
+
+.domain-tags {
+  display: inline-flex;
+  gap: 8px;
+  margin-left: 4px;
 }
 </style>

@@ -2,7 +2,8 @@ export default {
   // 基础配置
   domains: {
     development: 'http://localhost:3000/',
-    preview: 'https://pages.websitelm.site/',
+    kreado_preview: 'https://kreadoai-preview.websitelm.site/',
+    preview: 'https://preview.websitelm.site/',
     production: 'https://pages.tachacc.com/'
   },
   
