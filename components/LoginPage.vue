@@ -688,19 +688,18 @@ export default {
       }
 
       try {
-        // // 检查邮箱是否已注册
-        // const isRegistered = await apiClient.checkEmailExists(this.registerForm.email);
-        // if (isRegistered) {
-        //   this.$notification.error({
-        //     message: 'Error',
-        //     description: 'This email is already registered'
-        //   });
-        //   return;
-        // }
-
         // 发送验证码
-        await apiClient.sendEmailCode(this.registerForm.email, 'register');
+        const response = await apiClient.sendEmailCode(this.registerForm.email, 'register');
         
+        // 检查返回的状态码
+        if (response.code === 1001) {
+          this.$notification.error({
+            message: 'Error',
+            description: 'This email is already registered'
+          });
+          return;
+        }
+
         // 开始倒计时
         this.cooldown = 60;
         this.cooldownTimer = setInterval(() => {
