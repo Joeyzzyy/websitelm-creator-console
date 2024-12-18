@@ -5,7 +5,7 @@ import { message } from 'ant-design-vue';
 const apiClient = axios.create({
   // baseURL: 'http://106.15.94.148:7070/v1', // 替换为实际的 API 基础地址
   baseURL: 'https://strapi.sheet2email.com/v1', // 替换为实际的 API 基础地址
-  timeout: 10000,
+  timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -16,7 +16,6 @@ const vercelApiClient = axios.create({
   timeout: 10000,
   headers: {
     'Authorization': 'Bearer 3LSBxZQ35VdhqRW7tzGs1oYo',
-    // 'Authorization': 'Bearer XVo1RbnPFBJboQa5aDRc0Cay',
     'Content-Type': 'application/json',
   },
 });
@@ -47,10 +46,7 @@ apiClient.interceptors.response.use(
     error => {
         if (error.response && error.response.status === 401) {
           // 只保留核心验证相关的存储项
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('intelickIsLoggedIn');
-          localStorage.removeItem('customers');
-          localStorage.removeItem('currentUserId');
+          localStorage.clear();
 
           if (error.response.data.message === 'User not find') {
             message.error('User not found');
@@ -58,6 +54,11 @@ apiClient.interceptors.response.use(
             message.error('Wrong username or password');
           } else {
             message.error('Session expired. Please login again.');
+            // window.location.href = '/login';
+          }
+          // 强制跳转到登录页面
+          // 使用 window.location.href 确保完全重新加载页面
+          if (window.location.pathname !== '/login') {
             window.location.href = '/login';
           }
         }
@@ -65,9 +66,9 @@ apiClient.interceptors.response.use(
     }
 );
 
-const login = async (username, password) => {
+const login = async (email, password) => {
     try {
-        const response = await apiClient.post('/login', {username, password});
+        const response = await apiClient.post('/login', {email, password});
         return response.data;
     } catch (error) {
         console.error('登录失败:', error);
@@ -326,7 +327,7 @@ const updatePageStatus = async (pageId, status) => {
   }
 };
 
-// 更新页面基本信息
+// 更��基本信息
 const updatePage = async (pageId, pageData) => {
   try {
     const response = await apiClient.put(`/pages/${pageId}`, pageData);
@@ -371,9 +372,9 @@ const updateProduct = async (productId, productData) => {
 };
 
 // 新增：根据客户ID获取产品列表的方法
-const getProductsByCustomerId = async (customerId) => {
+const getProductsByCustomerId = async () => {
   try {
-    const response = await apiClient.get(`/products/customer/${customerId}`);
+    const response = await apiClient.get(`/products/customer`);
     return response.data;
   } catch (error) {
     console.error('获取客户产品列表失败:', error);
@@ -393,9 +394,9 @@ const deleteProduct = async (productId) => {
 };
 
 // 新增：获取sitemap的方法
-const getSitemap = async (customerId) => {
+const getSitemap = async () => {
   try {
-    const response = await apiClient.get(`/products/sitemap/${customerId}`);
+    const response = await apiClient.get(`/products/sitemap`);
     return response.data;
   } catch (error) {
     console.error('获取sitemap失败:', error);
@@ -438,8 +439,8 @@ const getMedia = async (customerId, mediaType, categoryId, page, limit) => {
       customerId,
       page,
       limit,
-      ...(mediaType && { mediaType }), // 可选参数，仅在提供时添加
-      ...(categoryId && { categoryId }) // 可选参数，仅在提供时添加
+      ...(mediaType && { mediaType }), 
+      ...(categoryId && { categoryId }) 
     };
     
     const response = await apiClient.get('/media', { params });
@@ -555,7 +556,7 @@ const checkGscAuth = async (customerId) => {
   }
 };
 
-// 新增：获取内部链接列表的��法
+// 新增：获取内部链接列表的方法
 const getInternalLinks = async (customerId, params = {}) => {
   try {
     const queryParams = {
@@ -672,8 +673,182 @@ const verifyVercelDomain = async (projectId, domainName, params = {}) => {
   }
 };
 
-// 在导出时,将新方法添加到导出对象中
+const sendEmailCode = async (email, codeType) => {
+  try {
+    const response = await apiClient.post('/customer/send-email', {
+      email,
+      codeType // 可选值: forgot_password, change_email, register
+    });
+    return response.data;
+  } catch (error) {
+    console.error('发送邮件验证码失败:', error);
+    return null;
+  }
+};
+
+const register = async (registerData) => {
+  try {
+    const response = await apiClient.post('/customer/register', registerData);
+    return response.data;
+  } catch (error) {
+    console.error('用户注册失败:', error);
+    return null;
+  }
+};
+
+// Google登录
+const googleLogin = async () => {
+  try {
+    const response = await apiClient.get('/customer/google');
+    return response.data;
+  } catch (error) {
+    console.error('Google登录失败:', error);
+    return null;
+  }
+};
+
+// Google登录回调
+const googleCallback = async (code, state) => {
+  try {
+    const response = await apiClient.get('/customer/google/callback', {
+      params: { 
+        code,
+        state 
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Google callback failed:', error);
+    throw error;
+  }
+};
+
+const resetPassword = async (resetData) => {
+  try {
+    const response = await apiClient.post('/customer/reset-password', resetData);
+    return response.data;
+  } catch (error) {
+    console.error('重置密码失败:', error);
+    return null;
+  }
+};
+
+const createDomainWithTXT = async (domainData) => {
+  try {
+    const response = await apiClient.post('/domain', domainData);
+    return response.data;
+  } catch (error) {
+    console.error('创建域名和添加 TXT 记录失败:', error);
+    return null;
+  }
+};
+
+const getDomain = async (customerId) => {
+  try {
+    const response = await apiClient.get('/domain', {
+      params: { customerId }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('获取域名列表失败:', error);
+    return null;
+  }
+};
+
+// 修改邮箱地址
+const changeEmail = async (changeEmailData) => {
+  try {
+    const response = await apiClient.post('/customer/change-email', changeEmailData);
+    return response.data;
+  } catch (error) {
+    console.error('修改邮箱地址失败:', error);
+    return null;
+  }
+};
+
+const validateDomain = async (customerId) => {
+  try {
+    const response = await apiClient.get('/domain/validate', {
+      params: { customerId }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('验证域名失败:', error);
+    return null;
+  }
+};
+
+// 新增：获取knowledge center内容列表的方法
+const getKnowledgeCenter = async () => {
+  try {
+    const response = await apiClient.get('/knowledge/center');
+    return response.data;
+  } catch (error) {
+    console.error('获取knowledge center内容列表失败:', error);
+    return null;
+  }
+};
+
+// 新增：根据ID获取knowledge内容的方法
+const getKnowledgeById = async (contentId) => {
+  try {
+    const response = await apiClient.get(`/knowledge/${contentId}`);
+    return response.data;
+  } catch (error) {
+    console.error('获取knowledge内容详情失败:', error);
+    return null;
+  }
+};
+
+// 新增：更新knowledge内容的方法
+const updateKnowledge = async (contentId, updateData) => {
+  try {
+    const response = await apiClient.put(`/knowledge/center/${contentId}`, {
+      content: updateData.content,
+      description: updateData.description,
+      source: updateData.source,
+      tags: updateData.tags,
+      title: updateData.title
+    });
+    return response.data;
+  } catch (error) {
+    console.error('更新knowledge内容失败:', error);
+    return null;
+  }
+};
+
+// 新增：获取knowledge生成状态的方法
+const getKnowledgeProcessStatus = async () => {
+  try {
+    const response = await apiClient.get('/knowledge/process');
+    return response.data;
+  } catch (error) {
+    console.error('获取knowledge生成状态失败:', error);
+    return null;
+  }
+};
+
+// 新增: 修改密码接口
+const changePassword = async (passwordData) => {
+  try {
+    const response = await apiClient.post('/customer/change-password', passwordData);
+    return response.data;
+  } catch (error) {
+    console.error('修改密码失败:', error);
+    return null;
+  }
+};
+
 export default {
+  validateDomain,
+  changeEmail,
+  getDomain,
+  createDomainWithTXT,
+  resetPassword,
+  googleLogin,
+  googleCallback,
+  register,
+  sendEmailCode,
   login,
   getKeywords,
   getBatchHistoryData,
@@ -724,5 +899,10 @@ export default {
   getVercelDomainInfo,
   deleteVercelDomain,
   getVercelDomainConfig,
-  verifyVercelDomain
+  verifyVercelDomain,
+  getKnowledgeCenter,
+  getKnowledgeById,
+  updateKnowledge,
+  getKnowledgeProcessStatus,
+  changePassword
 };

@@ -10,7 +10,7 @@
             Refresh
           </a-button>
           <span v-show="verifiedDomains.length === 0" class="domain-label">
-            No verified domain available - <router-link to="/settings">click here to add domain</router-link>
+            No verified sub-domain available - <router-link to="/settings">click here to add sub-domain</router-link>
           </span>
           <span v-show="verifiedDomains.length > 0" class="domain-label">Pages will be published to:</span>
           <div class="domain-tags">
@@ -124,7 +124,7 @@
 </template>
 
 <script>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { 
   ReloadOutlined,
@@ -192,16 +192,33 @@ export default {
       }
     };
 
+    const loadProductInfo = async () => {
+      try {
+        const response = await apiClient.getProductsByCustomerId()
+        if (response?.code === 200) {
+          productInfo.value = response.data
+        } else {
+          console.error('Failed to load product information')
+        }
+      } catch (error) {
+        console.error('Failed to load product information:', error)
+      }
+    }
+
     const loadVerifiedDomains = async () => {
       try {
-        const customerId = localStorage.getItem('currentUserId')
+        const customerId = localStorage.getItem('currentCustomerId')
         const projectId = getProjectId(customerId)
         
         const response = await apiClient.getVercelDomainInfo(projectId)
         
         // 查找所有已验证的域名
         verifiedDomains.value = response?.domains
-          ?.filter(domain => domain.verified || !domain.configDetails?.misconfigured)
+          ?.filter(domain => {
+            const isVerified = domain.verified || !domain.configDetails?.misconfigured
+            const hasProductInfo = productInfo.value?.projectWebsite === domain.name && productInfo.value?.domainStatus
+            return isVerified && hasProductInfo
+          })
           ?.map(domain => domain.name) || []
       } catch (error) {
         console.error('Failed to load domain info:', error)
@@ -213,7 +230,7 @@ export default {
       loading.value = true
       loadingProgress.value = 0
       try {
-        const userId = localStorage.getItem('currentUserId')
+        const userId = localStorage.getItem('currentCustomerId')
         const res = await apiClient.getBatchHistoryData(userId)
         if(res.code === 200) {
           const totalBatches = res.data.length
@@ -372,7 +389,7 @@ export default {
       
       // 只在要发布时检查 verified domains
       if (!isPublished && verifiedDomains.value.length === 0) {
-        message.error('No verified domain available. Please verify a domain in Settings first.')
+        message.error('No verified sub-domain available. Please verify a domain in Settings first.')
         return
       }
 
@@ -392,7 +409,7 @@ export default {
     }
 
     const getPreviewUrl = (article) => {
-      const customerId = localStorage.getItem('currentUserId')
+      const customerId = localStorage.getItem('currentCustomerId')
       const previewDomain = customerId === '673f4f19caf5b79765874fe8' || customerId === '67525da4ba5fcadf228e56c1'
         ? config.domains.kreado_preview 
         : config.domains.preview
@@ -442,8 +459,11 @@ export default {
       return articles.filter(a => a.publishStatus === 'publish').length
     }
 
-    // Initialize
-    fetchTasks()
+    onMounted(async () => {
+      fetchTasks()
+      await loadProductInfo()
+      await loadVerifiedDomains()
+    })
 
     return {
       tasks,

@@ -19,14 +19,8 @@
       </div>
       <!-- 头像部分 -->
       <div class="user-profile-section">
-        <a-avatar
-          :style="avatarStyle"
-          class="user-avatar"
-          @click="showUserModal"
-        >
-          {{ getCurrentUserInitials(selectedUser) }}
-        </a-avatar>
-        <div class="user-name">{{ getCurrentUserName(selectedUser) }}</div>
+        <div class="welcome-text">Welcome back!</div>
+        <div class="user-name-display">{{ currentCustomerEmail }}</div>
       </div>
       <!-- 菜单部分 -->
       <div class="menu-section">
@@ -69,35 +63,6 @@
       <router-view />
     </a-layout-content>
   </a-layout>
-  
-  <!-- 添加用户切换模态框 -->
-  <a-modal
-    v-model:open="isUserModalVisible"
-    title="Switch User"
-    @ok="switchUser"
-    @cancel="hideUserModal"
-    :okButtonProps="{ 
-      style: { 
-        background: '#1890ff',
-        borderColor: '#1890ff'
-      } 
-    }"
-    okText="Switch"
-    cancelText="Cancel"
-  >
-    <a-radio-group v-model:value="tempSelectedUser" class="user-radio-group">
-      <div v-for="user in users" :key="user.userID" class="user-option">
-        <a-radio :value="user.userID">
-          <div class="user-radio-content">
-            <a-avatar :style="getAvatarStyle(user)" class="user-option-avatar">
-              {{ getInitials(user.name) }}
-            </a-avatar>
-            <span class="user-option-name">{{ user.name }}</span>
-          </div>
-        </a-radio>
-      </div>
-    </a-radio-group>
-  </a-modal>
 </template>
 
 <style scoped>
@@ -118,36 +83,6 @@ html, body, #app {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.user-avatar {
-  cursor: pointer;
-  background: linear-gradient(135deg, #4096ff, #1677ff) !important;
-  font-size: 28px;
-  transition: all 0.3s ease;
-  border: 4px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-.user-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-.user-name {
-  margin-top: 16px;
-  font-weight: 600;
-  font-size: 12px;
-  color: #2D2B4A;
-}
-
-.user-role {
-  margin-top: 4px;
-  font-size: 13px;
-  color: #4A4875;
 }
 
 /* 菜单部分 */
@@ -195,72 +130,6 @@ html, body, #app {
   box-shadow: 0 2px 8px rgba(22, 119, 255, 0.25);
 }
 
-/* 用户切换模态框样式 */
-:deep(.ant-modal-content) {
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-:deep(.ant-select-selector) {
-  border-radius: 8px !important;
-  height: 40px !important;
-  padding: 4px 12px !important;
-}
-
-:deep(.ant-select-selection-item) {
-  line-height: 32px !important;
-}
-
-.user-radio-group {
-  width: 100%;
-}
-
-.user-option {
-  padding: 8px 0;
-  transition: all 0.3s ease;
-}
-
-.user-option:hover {
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
-.user-radio-content {
-  display: flex;
-  align-items: center;
-  padding: 4px 0;
-}
-
-.user-option-avatar {
-  width: 32px;
-  height: 32px;
-  line-height: 32px;
-  font-size: 14px;
-  margin-right: 12px;
-  background: linear-gradient(135deg, #1890ff, #1890ff);
-  color: white;
-}
-
-.user-option-name {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-:deep(.ant-radio-wrapper) {
-  width: 100%;
-  display: flex;
-  align-items: center;
-}
-
-:deep(.ant-radio) {
-  align-self: center;
-  margin-top: 0;
-}
-
-:deep(.ant-radio-wrapper > span:last-child) {
-  flex: 1;
-  padding-right: 8px;
-}
-
 :deep(.ant-btn-primary:hover) {
   background: #6366F1 !important;
   border-color: #6366F1 !important;
@@ -274,20 +143,6 @@ html, body, #app {
 /* 添加过渡效果 */
 :deep(.ant-layout-sider) {
   transition: all 0.3s ease !important;
-}
-
-/* 调整折叠时的样式 */
-:deep(.ant-layout-sider.ant-layout-sider-collapsed) {
-  .user-name,
-  .user-role {
-    display: none;
-  }
-  
-  .user-avatar {
-    width: 50px !important;
-    height: 50px !important;
-    font-size: 20px !important;
-  }
 }
 
 /* 更新折叠触发器样式 */
@@ -616,6 +471,95 @@ html, body, #app {
 .bottom-action-btn .anticon {
   font-size: 18px;
 }
+
+.user-profile-section {
+  text-align: center;
+  padding: 32px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(240, 247, 255, 0.5));
+  position: relative;
+}
+
+.welcome-text {
+  font-size: 14px;
+  color: #8B92A5;
+  margin-bottom: 8px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  animation: fadeIn 0.5s ease;
+}
+
+.user-name-display {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1677ff;
+  margin-top: 4px;
+  padding: 8px 16px;
+  background: rgba(22, 119, 255, 0.1);
+  border-radius: 20px;
+  display: inline-block;
+  transition: all 0.3s ease;
+  animation: slideUp 0.5s ease;
+}
+
+.user-name-display:hover {
+  transform: translateY(-2px);
+  background: rgba(22, 119, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.1);
+}
+
+/* 添加动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 适配折叠状态 */
+:deep(.ant-layout-sider.ant-layout-sider-collapsed) {
+  .welcome-text {
+    display: none;
+  }
+  
+  .user-name-display {
+    font-size: 14px;
+    padding: 4px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60px;
+  }
+}
+
+/* 添加响应式阴影效果 */
+.user-profile-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, 
+    rgba(22, 119, 255, 0.1), 
+    rgba(22, 119, 255, 0.3), 
+    rgba(22, 119, 255, 0.1)
+  );
+}
 </style>
 
 <script>
@@ -643,13 +587,6 @@ export default {
   },
   setup() {
     const router = useRouter();
-    
-    const handleLogout = () => {
-      localStorage.clear();
-      router.push('/login');
-      message.success('Logout successful');
-    };
-
     // 检查登录状态
     const checkAuth = () => {
       const isLoggedIn = localStorage.getItem('intelickIsLoggedIn');
@@ -663,29 +600,22 @@ export default {
     onMounted(() => {
       checkAuth();
     });
-
-    return { handleLogout };
   },
   data() {
-    const storedCustomers = JSON.parse(localStorage.getItem('customers') || '[]');
-    const currentUserId = localStorage.getItem('currentUserId');
+    const currentCustomerId = localStorage.getItem('currentCustomerId');
+    const currentCustomerEmail = localStorage.getItem('currentCustomerEmail');
     return {
       mainNavItems: [
         { title: 'Home', view: 'DashboardPage' },
         { title: 'Assets', view: 'AssetsPage' },
-        { title: 'Keywords Planning', view: 'KeywordsPlanningPage' },
-        { title: 'Task Management', view: 'TaskManagementPage' },
+        { title: 'Planner', view: 'KeywordsPlanningPage' },
+        { title: 'Tasks', view: 'TaskManagementPage' },
         { title: 'Settings', view: 'SettingsPage' },
       ],
       currentView: this.getViewFromRoute(),
-      isUserModalVisible: false,
-      selectedUser: currentUserId || (storedCustomers.length > 0 ? storedCustomers[0].customerId : ''),
-      tempSelectedUser: currentUserId || (storedCustomers.length > 0 ? storedCustomers[0].customerId : ''),
-      users: storedCustomers.map(customer => ({
-        userID: customer.customerId,
-        name: customer.userName
-      })),
+      selectedUser: currentCustomerId,
       collapsed: localStorage.getItem('sidebarCollapsed') === 'true',
+      currentCustomerEmail: currentCustomerEmail,
     };
   },
   computed: {
@@ -721,42 +651,6 @@ export default {
         this.$router.push(routeMap[key]);
       }
     },
-    showUserModal() {
-      if (this.users.length > 1) {
-        this.tempSelectedUser = this.selectedUser;
-        this.isUserModalVisible = true;
-      }
-    },
-    hideUserModal() {
-      this.tempSelectedUser = this.selectedUser;
-      this.isUserModalVisible = false;
-    },
-    switchUser() {
-      const customers = JSON.parse(localStorage.getItem('customers') || '[]');
-      const newCurrentCustomer = customers.find(customer => customer.customerId === this.tempSelectedUser);
-      
-      if (newCurrentCustomer) {
-        this.selectedUser = this.tempSelectedUser;
-        
-        localStorage.setItem('currentCustomer', JSON.stringify(newCurrentCustomer));
-        localStorage.setItem('currentUserId', this.selectedUser);
-        
-        this.isUserModalVisible = false;
-        
-        location.reload();
-        
-        this.$notification.success({
-          message: 'Success',
-          description: `Switched to ${newCurrentCustomer.userName}`,
-          duration: 1
-        });
-      } else {
-        this.$notification.error({
-          message: 'Error',
-          description: 'Selected user not found'
-        });
-      }
-    },
 
     handleLogout() {
       Modal.confirm({
@@ -766,22 +660,16 @@ export default {
         okText: 'OK',
         cancelText: 'Cancel',
         onOk: () => {
-          localStorage.clear();
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('intelickIsLoggedIn');
+          localStorage.removeItem('currentCustomer');
+          localStorage.removeItem('currentCustomerId');
           this.$router.push('/login');
           message.success('Logout successful');
         }
       });
     },
 
-    getCurrentUserName(userId) {
-      const user = this.users.find(u => u.userID === userId);
-      return user ? user.name : '';
-    },
-
-    getCurrentUserInitials(userId) {
-      const name = this.getCurrentUserName(userId);
-      return name ? name.charAt(0).toUpperCase() : '';
-    },
     getAvatarStyle(user) {
       return {
         backgroundColor: 'transparent',

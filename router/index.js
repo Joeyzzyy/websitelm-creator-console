@@ -22,6 +22,11 @@ const routes = [
     meta: { hideNavigation: true }
   },
   {
+    path: '/auth/google/callback',
+    name: 'GoogleCallback',
+    component: () => import('../components/GoogleCallback.vue')
+  },
+  {
     path: '/',
     component: Home,
     children: [

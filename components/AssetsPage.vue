@@ -4,7 +4,9 @@
     description="Manage your assets, including images, videos, internal links and other"
     icon="🎨"
   >
-    <a-tabs 
+    <!-- Domain not configured notice -->
+    <template v-if="domainConfigured">
+      <a-tabs 
       class="main-tabs"
       v-model:activeKey="activeTab"
     >
@@ -50,179 +52,172 @@
         <!-- 媒体资产内容 -->
         <template v-if="activeTab === 'images' || activeTab === 'videos'">
           <a-spin :spinning="loading" tip="Loading assets...">
-            <div class="assets-grid">
-              <template v-if="!showEmptyState">
-                <a-row :gutter="[16, 16]">
-                  <a-col 
-                    v-for="asset in filteredAssets" 
-                    :key="asset.id" 
-                    :xs="24" 
-                    :sm="12" 
-                    :md="8" 
-                    :lg="6"
-                  >
-                    <div class="asset-card">
-                      <div class="asset-preview" @click="previewAsset(asset)">
-                        <img 
-                          v-if="asset.type === 'image'" 
-                          :src="asset.url" 
-                          :alt="asset.name"
-                        >
-                        <video 
-                          v-else-if="asset.type === 'video'" 
-                          :src="asset.url" 
-                          controls
-                        ></video>
-                        <div class="asset-overlay">
-                          <eye-outlined class="preview-icon" />
-                        </div>
-                        <div class="asset-actions">
-                          <a-popconfirm
-                            title="Are you sure you want to delete this file?"
-                            ok-text="Delete"
-                            cancel-text="Cancel"
-                            @confirm="deleteAsset(asset)"
-                            ok-type="primary"
-                            :ok-button-props="{
-                              style: {
-                                background: 'linear-gradient(135deg, #1890ff, #3B82F6)',
-                                border: 'none'
-                              }
-                            }"
-                          >
-                            <a-button 
-                              type="link" 
-                              danger 
-                              class="delete-btn"
-                              @click.stop
-                            >
-                              <delete-outlined />
-                            </a-button>
-                          </a-popconfirm>
-                        </div>
+          </a-spin>
+          <div class="assets-grid" v-if="!loading">
+            <template v-if="!showEmptyState">
+              <a-row :gutter="[16, 16]">
+                <a-col 
+                  v-for="asset in filteredAssets" 
+                  :key="asset.id" 
+                  :xs="24" 
+                  :sm="12" 
+                  :md="8" 
+                  :lg="6"
+                >
+                  <div class="asset-card">
+                    <div class="asset-preview" @click="previewAsset(asset)">
+                      <img 
+                        v-if="asset.type === 'image'" 
+                        :src="asset.url" 
+                        :alt="asset.name"
+                      >
+                      <video 
+                        v-else-if="asset.type === 'video'" 
+                        :src="asset.url" 
+                        controls
+                      ></video>
+                      <div class="asset-overlay">
+                        <eye-outlined class="preview-icon" />
                       </div>
-                      <div class="asset-info">
-                        <div class="asset-name-container">
-                          <h4 class="asset-name" :title="asset.name">{{ asset.name }}</h4>
-                          <a-button type="link" class="edit-btn" @click="startEditing(asset)">
-                            <edit-outlined />
+                      <div class="asset-actions">
+                        <a-popconfirm
+                          title="Are you sure you want to delete this file?"
+                          ok-text="Delete"
+                          cancel-text="Cancel"
+                          @confirm="deleteAsset(asset)"
+                          ok-type="primary"
+                          :ok-button-props="{
+                            style: {
+                              background: 'linear-gradient(135deg, #1890ff, #3B82F6)',
+                              border: 'none'
+                            }
+                          }"
+                        >
+                          <a-button 
+                            type="link" 
+                            danger 
+                            class="delete-btn"
+                            @click.stop
+                          >
+                            <delete-outlined />
                           </a-button>
-                        </div>
-                        <p class="asset-description" :title="asset.description">
-                          {{ asset.description || 'No description' }}
-                        </p>
+                        </a-popconfirm>
                       </div>
                     </div>
-                  </a-col>
-                </a-row>
-              </template>
-              
-              <div v-else-if="showEmptyState && activeTab !== 'links'" class="empty-state">
-                <h3 class="empty-state-title">Your creative canvas awaits! 🎨</h3>
-                <p class="empty-state-description">
-                  Ready to bring your brand to life? Upload your first {{ activeTab === 'images' ? 'image' : 'video' }} and let's make something amazing together.
-                </p>
-                <a-button 
-                  type="primary" 
-                  class="upload-btn-empty" 
-                  @click="showUploadModal"
-                >
-                  <upload-outlined /> Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}
-                </a-button>
-              </div>
+                    <div class="asset-info">
+                      <div class="asset-name-container">
+                        <h4 class="asset-name" :title="asset.name">{{ asset.name }}</h4>
+                        <a-button type="link" class="edit-btn" @click="startEditing(asset)">
+                          <edit-outlined />
+                        </a-button>
+                      </div>
+                      <p class="asset-description" :title="asset.description">
+                        {{ asset.description || 'No description' }}
+                      </p>
+                    </div>
+                  </div>
+                </a-col>
+              </a-row>
+            </template>
+            
+            <div v-else-if="showEmptyState && activeTab !== 'links'" class="empty-state">
+              <h3 class="empty-state-title">Your creative canvas awaits! 🎨</h3>
+              <p class="empty-state-description">
+                Ready to bring your brand to life? Upload your first {{ activeTab === 'images' ? 'image' : 'video' }} and let's make something amazing together.
+              </p>
+              <a-button 
+                type="primary" 
+                class="upload-btn-empty" 
+                @click="showUploadModal"
+              >
+                <upload-outlined /> Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}
+              </a-button>
             </div>
-          </a-spin>
+          </div>
+          
         </template>
 
         <!-- 链接内容 -->
         <template v-else-if="activeTab === 'links'">
           <a-spin :spinning="linksLoading" tip="Loading links...">
-            <a-table 
-              :columns="linkColumns" 
-              :dataSource="internalLinks" 
-              :pagination="{ 
-                pageSize: 10,
-                showSizeChanger: true,
-                showTotal: (total) => `Total ${total} items`
-              }"
-              :rowKey="record => record.id"
-            >
-              <template #bodyCell="{ column, record }">
-                <template v-if="column.key === 'operation'">
-                  <a-space>
-                    <a-button type="link" @click="editLink(record)">
-                      <edit-outlined />
-                    </a-button>
-                    <a-popconfirm
-                      title="Are you sure you want to delete this link?"
-                      @confirm="deleteLink(record)"
-                      ok-text="Delete"
-                      cancel-text="Cancel"
-                    >
-                      <a-button type="link" danger>
-                        <delete-outlined />
-                      </a-button>
-                    </a-popconfirm>
-                  </a-space>
-                </template>
-                <template v-if="column.key === 'link'">
-                  <a :href="record.link" target="_blank">{{ record.link }}</a>
-                </template>
-              </template>
-            </a-table>
           </a-spin>
+          <a-table
+            v-if="!linksLoading" 
+            :columns="linkColumns" 
+            :dataSource="internalLinks" 
+            :pagination="{ 
+              pageSize: 10,
+              showSizeChanger: true,
+              showTotal: (total) => `Total ${total} items`
+            }"
+            :rowKey="record => record.id"
+          >
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'operation'">
+                <a-space>
+                  <a-button type="link" @click="editLink(record)">
+                    <edit-outlined />
+                  </a-button>
+                  <a-popconfirm
+                    title="Are you sure you want to delete this link?"
+                    @confirm="deleteLink(record)"
+                    ok-text="Delete"
+                    cancel-text="Cancel"
+                  >
+                    <a-button type="link" danger>
+                      <delete-outlined />
+                    </a-button>
+                  </a-popconfirm>
+                </a-space>
+              </template>
+              <template v-if="column.key === 'link'">
+                <a :href="record.link" target="_blank">{{ record.link }}</a>
+              </template>
+            </template>
+          </a-table>
         </template>
 
         <!-- Knowledge Tab Content -->
         <template v-else-if="activeTab === 'knowledge'">
+          <a-spin :spinning="loading" tip="Loading knowledge base...">
+          </a-spin>
+          <div class="traffic-light-descriptions" v-if="!loading">
+            <p><span class="status-dot status-green"></span> Green: No human intervention needed.</p>
+            <p><span class="status-dot status-yellow"></span> Yellow: Requires review.</p>
+            <p><span class="status-dot status-red"></span> Red: Needs human supplementation.</p>
+          </div>
           <div class="assets-content">
-            <div class="controls-header">
-              <div class="controls-right">
-                <slot name="controls"></slot>
-              </div>
-            </div>
-            
-            <a-spin :spinning="loading" tip="Loading knowledge base...">
-              <div class="assets-grid">
-                <div class="main-content">
-                  <!-- Status Explanation Tip -->
-                  <div>
-                    <a-alert
-                      type="info"
-                      class="knowledge-alert"
-                    >
-                      <template #description>
-                        <div class="alert-content">
-                          <div class="kb-status-header">
-                            <div class="status-message">
-                              <span class="ai-icon">🤖</span>
-                              <p>We've analyzed your product information and website content to create an SEO-optimized knowledge base.</p>
-                            </div>
-                            <div class="status-indicators">
-                              <div class="indicator">
-                                <span class="status-dot status-green"></span>
-                                <span>Ready To Use</span>
-                              </div>
-                              <div class="indicator">
-                                <span class="status-dot status-yellow"></span>
-                                <span>Needs Your Review</span>
-                              </div>
-                              <div class="indicator">
-                                <span class="status-dot status-red"></span>
-                                <span>Needs Your Input</span>
-                              </div>
-                              <div class="attention-hint">
-                                <span class="attention-icon">⚠️</span>
-                                <span>Review yellow/red items</span>
-                              </div>
-                            </div>
-                          </div>
+            <div class="assets-grid" v-if="!loading">
+              <div class="main-content">
+                <!-- Knowledge Base Status Alert -->
+                <a-alert
+                  type="info"
+                  class="knowledge-alert"
+                >
+                  <template #description>
+                    <div class="alert-content" v-if="processingKnowledge">
+                      <div class="kb-status-header">
+                        <div class="status-message">
+                          <p>
+                            Knowledge base processing: 
+                            <span class="highlight yellow">
+                              {{ knowledgeStatus === 'fetch' ? 'Fetching data' : 
+                                 knowledgeStatus === 'process' ? 'Processing content' : 
+                                 knowledgeStatus === 'analyze' ? 'Analyzing content' : 
+                                 knowledgeStatus === 'vector2' ? 'Vectorizing content' : 
+                                 'Initializing...' }}
+                            </span>
+                            (Estimated time: {{ knowledgeTime }}s)
+                          </p>
                         </div>
-                      </template>
-                    </a-alert>
-                  </div>
+                      </div>
+                    </div>
+                  </template>
+                </a-alert>
 
-                  <!-- Breadcrumb -->
+                <!-- Knowledge Base Content -->
+                <template v-if="!processingKnowledge">
+                  <!-- Breadcrumb Navigation -->
                   <div class="breadcrumb" v-if="currentArticle">
                     <span @click="clearCurrentArticle">Knowledge Base</span>
                     <span class="separator">/</span>
@@ -231,7 +226,7 @@
                     <span class="current">{{ currentArticle.title }}</span>
                   </div>
 
-                  <!-- Grid View -->
+                  <!-- Category Grid -->
                   <div class="grid-container" v-if="!currentArticle">
                     <div 
                       v-for="(articles, label) in groupedArticles" 
@@ -297,15 +292,13 @@
                       placeholder="Enter article content..."
                     />
                   </div>
-                </div>
+                </template>
               </div>
-            </a-spin>
+            </div>
           </div>
         </template>
-
       </div>
     </div>
-
     <!-- Preview Modal -->
     <a-modal
       v-model:visible="previewVisible"
@@ -522,13 +515,27 @@
         </a-form-item>
       </a-form>
     </a-modal>
+    </template>
+    <template v-else>
+      <div class="domain-notice">
+        <div class="notice-content">
+          <exclamation-circle-outlined class="notice-icon" />
+          <h2>No Site Configured</h2>
+          <p>Please configure your domain in settings to use the asset management features</p>
+          <a-button type="primary" @click="goToDashboard">
+            Configure Domain
+          </a-button>
+        </div>
+      </div>
+    </template>
   </page-layout>
 </template>
 
 <script>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import PageLayout from './layout/PageLayout.vue'
 import { 
+  ExclamationCircleOutlined,
   EyeOutlined, 
   EditOutlined, 
   DeleteOutlined, 
@@ -538,11 +545,9 @@ import {
   LinkOutlined,
   SettingOutlined
 } from '@ant-design/icons-vue'
-import { message, Modal } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import apiClient from '../api/api';
-import { Form } from 'ant-design-vue';
 import { useRouter } from 'vue-router';
-import { inject } from 'vue';
 
 export default {
   name: 'BrandAssetsPage',
@@ -558,20 +563,48 @@ export default {
     SettingOutlined
   },
   setup() {
-    const activeTab = ref('knowledge')
-    const loading = ref(false)
-    const assets = ref([])
     const router = useRouter();
+    const domainConfigured = ref(false);
+    const loading = ref(true);
+    const activeTab = ref('knowledge')
+    const assets = ref([])
+    const pollTimer = ref(null);
+
+    // Check domain configuration status
+    const checkDomainStatus = async () => {
+      try {
+        loading.value = true;
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.getProductsByCustomerId(customerId);
+        domainConfigured.value = response.data?.domainStatus || false;
+      } catch (error) {
+        console.error('Failed to fetch product info:', error);
+        domainConfigured.value = false;
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    // Navigate to settings page
+    const goToDashboard = () => {
+      router.push('/dashboard');
+    };
+
+    onMounted(async () => {
+      await checkDomainStatus();
+      if (domainConfigured.value) {
+        fetchAssets();
+      }
+    });
 
     const goToHelpCenter = () => {
       router.push('/help-center')
     }
     
-    // 修获取资产列表的方法
     const fetchAssets = async () => {
       loading.value = true
       try {
-        const customerId = localStorage.getItem('currentUserId')
+        const customerId = localStorage.getItem('currentCustomerId')
         const mediaType = activeTab.value === 'images' ? 'image' : 'video'
         const response = await apiClient.getMedia(
           customerId,
@@ -600,22 +633,11 @@ export default {
       }
     }
 
-    // 监听标签页变化时重新获取数据
+    // 监听标化时重新获取数据
     watch(activeTab, (newValue) => {
       if (newValue === 'links') {
         fetchLinks()
       } else if (newValue === 'domains') {
-        loadProductInfo()
-      } else {
-        fetchAssets()
-      }
-    })
-
-    // 组件挂载时
-    onMounted(() => {
-      if (activeTab.value === 'links') {
-        fetchLinks()
-      } else if (activeTab.value === 'domains') {
         loadProductInfo()
       } else {
         fetchAssets()
@@ -725,14 +747,6 @@ export default {
       message.success('Category deleted successfully')
     }
 
-    const editCategory = (category) => {
-      categoryForm.value = {
-        id: category.id,
-        name: category.name
-      }
-      editCategoryModalVisible.value = true
-    }
-
     const handleEditCategory = () => {
       if (categoryForm.value.name) {
         const index = categories.value.findIndex(c => c.id === categoryForm.value.id)
@@ -756,7 +770,7 @@ export default {
     const fileInput = ref(null)
     const uploading = ref(false)
     
-    // 显示上传模态框
+    // 示上传模态框
     const showUploadModal = () => {
       uploadModalVisible.value = true
     }
@@ -784,7 +798,7 @@ export default {
         
         // 设置初始文件名（去掉扩展名并替换空格）
         const initialName = file.name
-          .replace(/\.[^/.]+$/, "")  // 移除扩展名
+          .replace(/\.[^/.]+$/, "")  // 除扩展名
           .replace(/\s+/g, '_');     // 替换空格为下划线
         
         mediaForm.value.mediaName = initialName;
@@ -817,7 +831,7 @@ export default {
       try {
         const formData = new FormData();
         formData.append('file', uploadFile.value);
-        formData.append('customerId', localStorage.getItem('currentUserId'));
+        formData.append('customerId', localStorage.getItem('currentCustomerId'));
         formData.append('mediaType', activeTab.value === 'images' ? 'image' : 'video');
         formData.append('mediaName', mediaForm.value.mediaName);
         formData.append('description', mediaForm.value.description || '');
@@ -1000,11 +1014,11 @@ export default {
     const linksLoading = ref(false)
     const internalLinks = ref([])
 
-    // 获取内部链接数据的方法
+    // 获取内部链接数的方法
     const fetchLinks = async () => {
       linksLoading.value = true
       try {
-        const customerId = localStorage.getItem('currentUserId')
+        const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.getInternalLinks(customerId, {
           page: 1,
           limit: 100 // 可以根据需求调整
@@ -1056,7 +1070,7 @@ export default {
         await linkFormRef.value.validate()
         linkSubmitting.value = true
         
-        const customerId = localStorage.getItem('currentUserId')
+        const customerId = localStorage.getItem('currentCustomerId')
         const linkData = {
           customerId,
           link: linkForm.value.link,
@@ -1178,59 +1192,92 @@ export default {
       mediaFormValidateStatus.value = newVal && !newVal.includes(' ');
     });
 
-    // Add these to the setup() function
+    // 修改这些响应式变量定义
     const groupedArticles = ref({})
     const currentArticle = ref(null)
     const editableContent = ref('')
     const saving = ref(false)
+    const knowledgeStatus = ref('') // 新增:用于存储知识库状态
+    const processingKnowledge = ref(false) // 新增:用于显示处理状态
+    const knowledgeTime = ref('0'); // 添加处理时间的响应式变量
 
-    // Add these methods to setup()
-    const getHelpCenterData = async () => {
+    // 修改 getKnowledgeStatus 方法
+    const getKnowledgeStatus = async () => {
       try {
-        const userName = 'kreado'
-        const data = await apiClient.getHelpCenterData(userName)
-        return data
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.getKnowledgeProcessStatus(customerId);
+        // 保存处理时间
+        knowledgeTime.value = response.data.executeTime || '0';
+        return {
+          currentStep: response.data.executeStep,
+          executeTime: response.data.executeTime
+        };
       } catch (error) {
-        console.error('Failed to fetch help center data:', error)
-        throw error
+        console.error('获取知识库状态失败:', error);
+        throw error;
       }
-    }
+    };
 
-    const groupArticlesByLabel = (response) => {
-      const grouped = {}
-      if (Array.isArray(response.data)) {
-        response.data.forEach(article => {
-          // Add random quality rating (A, B, or C)
-          const qualities = ['A', 'B', 'C']
-          article.quality = qualities[Math.floor(Math.random() * qualities.length)]
-          
-          if (!grouped[article.label]) {
-            grouped[article.label] = []
-          }
-          grouped[article.label].push(article)
-        })
-      } else {
-        console.error('Response data is not an array:', response.data)
-      }
-      groupedArticles.value = grouped
-    }
-
-    const initData = async () => {
+    const getKnowledgeCenter = async () => {
       try {
-        loading.value = true
-        const response = await getHelpCenterData()
-        console.log('Help center data response:', response) // Debug log
-        if (response && response.data) {
-          groupArticlesByLabel(response)
-        } else {
-          console.error('Invalid response format:', response)
-        }
+        const customerId = localStorage.getItem('currentCustomerId')
+        const response = await apiClient.getKnowledgeCenter(customerId)
+        console.log('API返回数据:', response)
+        return response.data || [] // 确保返回数组
       } catch (error) {
-        console.error('Failed to initialize help center data:', error)
+        console.error('获取知识库内容失败:', error)
+        message.error('获取知识库内容失败')
+        return []
       } finally {
-        loading.value = false
+
       }
     }
+
+    // 修改 initKnowledgeBase 方法
+    const initKnowledgeBase = async () => {
+      try {
+        loading.value = true;
+        processingKnowledge.value = true;
+        
+        // 开始轮询状态
+        const pollStatus = async () => {
+          const status = await getKnowledgeStatus();
+          knowledgeStatus.value = status.currentStep;
+          
+          // 如果状态不是 'end'，继续轮询
+          if (status.currentStep !== 'end') {
+            setTimeout(pollStatus, 60000); // 每5秒轮询一次
+          } else {
+            // 状态为 'end' 时，获取知识库内容
+            processingKnowledge.value = false;
+            const centerData = await getKnowledgeCenter();
+            if (centerData && Array.isArray(centerData)) {
+              groupArticlesByLabel(centerData);
+            }
+          }
+        };
+
+        // 启动轮询
+        await pollStatus();
+        
+      } catch (error) {
+        console.error('初始化知识库失败:', error);
+        message.error('加载知识库失败');
+      } finally {
+        loading.value = false;
+      }
+    };
+
+    // 修改watch
+    watch(
+      () => activeTab.value,
+      (newValue) => {
+        if (newValue === 'knowledge') {
+          initKnowledgeBase()
+        }
+      },
+      { immediate: true }
+    )
 
     const selectArticle = (article) => {
       currentArticle.value = article
@@ -1243,38 +1290,33 @@ export default {
     }
 
     const saveArticle = async () => {
+      if (!currentArticle.value) return;
+
+      saving.value = true;
       try {
-        saving.value = true
-        await apiClient.updateArticle({
-          ...currentArticle.value,
-          content: editableContent.value
-        })
-        message.success('Article saved successfully')
-      } catch (error) {
-        console.error('Failed to save article:', error)
-        message.error('Failed to save article')
-      } finally {
-        saving.value = false
-      }
-    }
-
-    // Add to watch
-    watch(
-      () => activeTab.value,
-      (newValue) => {
-        if (newValue === 'knowledge') {
-          initData()
+        const updateData = {
+          content: editableContent.value,
+          description: currentArticle.value.description,
+          source: currentArticle.value.source,
+          tags: currentArticle.value.tags,
+          title: currentArticle.value.title
+        };
+        const response = await apiClient.updateKnowledge(currentArticle.value.id, updateData);
+        
+        if (response && response.code === 200) {
+          message.success('Article updated successfully');
+        } else if (response && response.code === 500) {
+          message.error('Update content failed: ' + response.message);
+        } else {
+          message.error('Unexpected response from server');
         }
-      },
-      { immediate: true } // Add this to run on mount
-    )
-
-    // Add onMounted hook to ensure data is loaded
-    onMounted(() => {
-      if (activeTab.value === 'knowledge') {
-        initData()
+      } catch (error) {
+        console.error('Failed to save article:', error);
+        message.error('Failed to save changes');
+      } finally {
+        saving.value = false;
       }
-    })
+    };
 
     const getCategoryStats = (articles) => {
       return {
@@ -1284,7 +1326,42 @@ export default {
       }
     }
 
+    // 修改 groupArticlesByLabel 方法
+    const groupArticlesByLabel = (articles) => {
+      if (!articles || !articles.length) {
+        console.log('没有文章数据')
+        groupedArticles.value = {}
+        return
+      }
+      
+      console.log('原始文章数据:', articles)
+      
+      // 根据 label 分组
+      groupedArticles.value = articles.reduce((acc, article) => {
+        const label = article.label || 'Uncategorized' // 使用 label 字段，如果没有则归类为 Uncategorized
+        if (!acc[label]) {
+          acc[label] = []
+        }
+        acc[label].push({
+          id: article.kId,
+          title: article.title,
+          label: article.label,
+          description: article.description || '',
+          content: article.content,
+          source: article.source,
+          quality: article.quality || 'C', // 添加质量评级，默认为 C
+          createdAt: article.createdAt || ''
+        })
+        return acc
+      }, {})
+
+      console.log('按 label 分组后的数据:', groupedArticles.value)
+    }
+
     return {
+      domainConfigured,
+      loading,
+      goToDashboard,
       activeTab,
       loading,
       assets,
@@ -1355,13 +1432,62 @@ export default {
       selectArticle,
       clearCurrentArticle,
       saveArticle,
-      getCategoryStats
+      getCategoryStats,
+      pollTimer,
+      knowledgeStatus,
+      knowledgeTime,
+      processingKnowledge
     }
   }
 }
 </script>
 
 <style scoped>
+.domain-notice {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 200px);
+  background: #fff;
+  border-radius: 16px;
+}
+
+.notice-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.notice-icon {
+  font-size: 48px;
+  color: #faad14;
+  margin-bottom: 24px;
+}
+
+.notice-content h2 {
+  font-size: 24px;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.notice-content p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.notice-content .ant-btn {
+  background: linear-gradient(135deg, #60A5FA, #3B82F6);
+  border: none;
+  height: 40px;
+  padding: 0 32px;
+  font-size: 16px;
+  border-radius: 20px;
+}
+
+.notice-content .ant-btn:hover {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+}
+
 .page-content {
   display: flex;
   gap: 24px;
@@ -1628,7 +1754,7 @@ export default {
   margin-bottom: 16px !important;
 }
 
-/* 确保加载状态在内容区域中完全居中 */
+/* 确保加载状态在内容区域完全居中 */
 .assets-grid {
   min-height: calc(100vh - 300px); /* 调整高度以应你的布局 */
   position: relative;
@@ -2356,5 +2482,41 @@ export default {
     padding-left: 0;
     border-left: none;
   }
+}
+
+.traffic-light-descriptions {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.traffic-light-descriptions p {
+  margin: 0;
+  font-size: 14px;
+  color: #4b5563;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-green {
+  background-color: #52c41a;
+}
+
+.status-yellow {
+  background-color: #faad14;
+}
+
+.status-red {
+  background-color: #ff4d4f;
 }
 </style> 

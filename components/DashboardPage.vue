@@ -5,171 +5,194 @@
     icon="📊"
   >
     <!-- Product info and statistics banner -->
-    <div class="info-banner">
+    <div class="dashboard-content">
       <!-- Product Info Card -->
-      <div class="product-info">
-        <div class="card-header">
-          <h3>Product Information</h3>
-          <div class="header-actions">
-            <a-button type="link" class="delete-link" @click="deleteProduct">
-              <DeleteOutlined /> Delete
-            </a-button>
-            <a-button 
-              type="link" 
-              class="sitemap-link" 
-              @click="showSitemapModal" 
-              :disabled="!productInfo || loadingSitemap || !productInfo?.projectWebsite"
-            >
-              <template v-if="loadingSitemap">Loading...</template>
-              <template v-else-if="!productInfo?.projectWebsite">Add your website to get sitemap automatically 👉</template>
-              <template v-else>Sitemap</template>
-            </a-button>
-            <a-button 
-              type="link" 
-              class="edit-link" 
-              @click="editProductInfo"
-              :disabled="!productInfo"
-            >
-              <EditOutlined /> Edit
-            </a-button>
+      <a-card class="info-card">
+        <template #title>
+          <div class="card-title">
+            <span>Product Information</span>
+            <a-space>
+              <a-button 
+                type="link" 
+                danger 
+                @click="deleteProduct" 
+                v-if="productInfo?.productId"
+              >
+                <DeleteOutlined /> Delete
+              </a-button>
+              <a-button 
+                type="link" 
+                @click="showSitemapModal" 
+                :disabled="!productInfo || loadingSitemap || !productInfo?.projectWebsite || !productInfo?.domainStatus"
+                v-if="productInfo?.productId"
+              >
+                <template v-if="loadingSitemap">Loading...</template>
+                <template v-else-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
+                  Add your site to get sitemap automatically →
+                </template>
+                <template v-else>Sitemap</template>
+              </a-button>
+              <a-button 
+                type="link" 
+                @click="editProductInfo"
+                :disabled="!productInfo"
+                v-if="productInfo?.productId"
+              >
+                <EditOutlined /> Edit
+              </a-button>
+            </a-space>
           </div>
-        </div>
-        <div class="info-list">
-          <!-- Product Name -->
-          <div class="info-row">
-            <div class="info-label">Product Name</div>
-            <div class="info-content">
-              <template v-if="productInfo">
-                {{ productInfo.productName }}
-              </template>
-              <template v-else>
-                <span class="error-text">Loading Data...</span>
-              </template>
-            </div>
-          </div>
+        </template>
 
-          <!-- Product Description -->
-          <div class="info-row">
-            <div class="info-label">Product Description</div>
-            <div class="info-content">
-              <template v-if="productInfo">
-                <div class="description-text">{{ productInfo.productDesc }}</div>
-              </template>
-              <template v-else>
-                <span class="error-text">Loading Data...</span>
-              </template>
-            </div>
-          </div>
+        <!-- Loading skeleton -->
+        <template v-if="!productInfo">
+          <a-skeleton active :paragraph="{ rows: 3 }" />
+        </template>
+        
+        <!-- Error state -->
+        <template v-else-if="!productInfo.productId">
+          <a-result
+            status="error"
+            title="Failed to load product information"
+            sub-title="Please contact support@website-lm.com"
+          />
+        </template>
+        
+        <!-- Product info content -->
+        <template v-else>
+          <a-descriptions>
+            <a-descriptions-item label="Product Name">
+              {{ productInfo.productName }}
+            </a-descriptions-item>
 
-          <!-- Your Site -->
-          <div class="info-row">
-            <div class="info-label">Your Site</div>
-            <div class="info-content">
-              <template v-if="productInfo">
-                <a :href="productInfo.projectWebsite" target="_blank" class="site-link">{{ productInfo.projectWebsite }}</a>
-              </template>
-              <template v-else>
-                <span class="error-text">Loading Data...</span>
-              </template>
-            </div>
-          </div>
-
-          <!-- Your Competitors -->
-          <div class="info-row">
-            <div class="info-label">Your Competitors</div>
-            <div class="info-content">
-              <template v-if="productInfo">
-                <a-tag v-for="comp in competitors" :key="comp.name">
-                  <a :href="'https://' + comp.url" target="_blank" class="competitor-link">
-                    {{ comp.name }}
+            <a-descriptions-item label="Your Site">
+              <template v-if="productInfo.projectWebsite">
+                <a-space>
+                  <a :href="productInfo.projectWebsite" target="_blank">
+                    {{ productInfo.projectWebsite }}
                   </a>
-                </a-tag>
+                  <template v-if="productInfo.domainStatus">
+                    <a-tag color="success">
+                      <CheckCircleOutlined /> Verified
+                    </a-tag>
+                  </template>
+                  <template v-else>
+                    <a-button 
+                      type="primary" 
+                      size="small"
+                      @click="openEditWithBasicInfoToVerify"
+                      :loading="goStartVerifying"
+                    >
+                      Go Start Verifying
+                    </a-button>
+                  </template>
+                </a-space>
               </template>
               <template v-else>
-                <span class="error-text">Loading Data...</span>
+                <a-typography-text type="secondary">
+                  No site added... <a @click="editProductInfo()">click here to add your site →</a>
+                </a-typography-text>
               </template>
-            </div>
-          </div>
-        </div>
-      </div>
+            </a-descriptions-item>
 
-      <!-- Metrics Container -->
-      <div class="metrics-container">
-        <!-- Pages Metric -->
-        <div class="metric-item">
-          <div class="metric-icon">📄</div>
-          <div class="metric-data">
-            <div class="metric-row">
-              <h4>{{ generatedPages.length }}</h4>
-              <span class="metric-label">Generated Pages</span>
-            </div>
-            <div class="metric-row">
-              <h4>{{ publishedPages || 0 }}</h4>
-              <span class="metric-label">Published Pages</span>
-            </div>
-          </div>
-        </div>
+            <a-descriptions-item label="Your Competitors">
+              <template v-if="competitors.length">
+                <a-space wrap>
+                  <a-tag 
+                    v-for="(comp, index) in competitors" 
+                    :key="comp.name"
+                    :color="['blue', 'green', 'orange', 'purple'][index % 4]"
+                  >
+                    <a :href="'https://' + comp.url" target="_blank">
+                      {{ comp.name }}
+                    </a>
+                  </a-tag>
+                </a-space>
+              </template>
+              <template v-else>
+                <a-typography-text type="secondary">
+                  No competitors added
+                </a-typography-text>
+              </template>
+            </a-descriptions-item>
+          </a-descriptions>
+        </template>
+      </a-card>
 
-        <!-- Visits Metric -->
-        <div class="metric-item">
-          <div class="metric-header">
-            <div class="metric-icon-container">
-              <div class="metric-icon">👥</div>
-              <div v-if="isGscConnected && gscSites.length > 0" class="connected-site">
-                {{ gscSites[0].siteUrl }}
-              </div>
-            </div>
-            <a-button 
-              class="connect-gsc-btn" 
-              type="link" 
-              @click="connectGSC"
-              :disabled="isGscConnected"
-            >
-              {{ isGscConnected ? 'Connected!' : 'Connect GSC' }}
-            </a-button>
-          </div>
-          <div class="metric-data">
-            <div class="metric-row">
-              <h4>-</h4>
-              <span class="metric-label">Total Visits</span>
-            </div>
-            <div class="metric-trend positive">
-              <span class="trend-icon">↑</span>
-              <span>-</span>
-            </div>
-          </div>
-        </div>
+      <!-- Metrics Cards -->
+      <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
+        <a-col :span="8">
+          <a-card>
+            <template #title>
+              <span>📄 Pages</span>
+            </template>
+            <a-statistic-group>
+              <a-statistic 
+                title="Generated Pages" 
+                :value="generatedPages.length"
+              />
+              <a-statistic 
+                title="Published Pages" 
+                :value="publishedPages || 0" 
+              />
+            </a-statistic-group>
+          </a-card>
+        </a-col>
 
-        <!-- Clicks Metric -->
-        <div class="metric-item">
-          <div class="metric-header">
-            <div class="metric-icon-container">
-              <div class="metric-icon">🎯</div>
-              <div v-if="isGscConnected && gscSites.length > 0" class="connected-site">
-                {{ gscSites[0].siteUrl }}
-              </div>
-            </div>
-            <a-button 
-              class="connect-gsc-btn" 
-              type="link" 
-              @click="connectGSC"
-              :disabled="isGscConnected"
-            >
-              {{ isGscConnected ? 'Connected!' : 'Connect GSC' }}
-            </a-button>
-          </div>
-          <div class="metric-data">
-            <div class="metric-row">
-              <h4>-</h4>
-              <span class="metric-label">Total Clicks</span>
-            </div>
-            <div class="metric-trend positive">
-              <span class="trend-icon">↑</span>
-              <span>-</span>
-            </div>
-          </div>
-        </div>
-      </div>
+        <a-col :span="8">
+          <a-card>
+            <template #title>
+              <a-space>
+                <span>👥 Visits</span>
+                <a-typography-text type="secondary" v-if="isGscConnected && gscSites.length > 0">
+                  {{ gscSites[0].siteUrl }}
+                </a-typography-text>
+              </a-space>
+            </template>
+            <template #extra>
+              <a-button 
+                type="link" 
+                @click="connectGSC"
+                :disabled="isGscConnected"
+              >
+                {{ isGscConnected ? 'Connected!' : 'Connect GSC' }}
+              </a-button>
+            </template>
+            <a-statistic title="Total Visits" value="-">
+              <template #suffix>
+                <a-tag color="success">↑ -</a-tag>
+              </template>
+            </a-statistic>
+          </a-card>
+        </a-col>
+
+        <a-col :span="8">
+          <a-card>
+            <template #title>
+              <a-space>
+                <span>🎯 Clicks</span>
+                <a-typography-text type="secondary" v-if="isGscConnected && gscSites.length > 0">
+                  {{ gscSites[0].siteUrl }}
+                </a-typography-text>
+              </a-space>
+            </template>
+            <template #extra>
+              <a-button 
+                type="link" 
+                @click="connectGSC"
+                :disabled="isGscConnected"
+              >
+                {{ isGscConnected ? 'Connected!' : 'Connect GSC' }}
+              </a-button>
+            </template>
+            <a-statistic title="Total Clicks" value="-">
+              <template #suffix>
+                <a-tag color="success">↑ -</a-tag>
+              </template>
+            </a-statistic>
+          </a-card>
+        </a-col>
+      </a-row>
     </div>
   </page-layout>
 
@@ -180,255 +203,163 @@
     :closable="!!formState.productId"
     :width="800"
     :footer="null"
-    :class="['product-modal', {'onboarding-modal': !formState.productId}]"
+    :class="['product-modal']"
   >
     <template #title>
-      <div v-if="!formState.productId" class="onboarding-header">
-        <div class="glow-effect"></div>
-        <div class="title-container">
-          <div class="welcome-badge">BETA</div>
-          <h2 class="modal-title onboarding-title">
-            🚀 Welcome to WebsiteLM!
-          </h2>
-          <p class="modal-subtitle">
-            Let's set up your product to create your AI marketing assistant
-          </p>
-        </div>
-      </div>
-      <div v-else class="modal-title">
-        ✏️ Edit Product Information
+      <div class="modal-title">
+        <template v-if="!formState.productId">
+          <a-tag color="blue">BETA</a-tag>
+          <span>🚀 Welcome to WebsiteLM!</span>
+        </template>
+        <template v-else>
+          <span>✏️ Edit Product Information</span>
+        </template>
       </div>
     </template>
-    
-    <div class="setup-form">
-      <a-steps 
-        :current="currentStep" 
-        class="setup-steps"
-        size="small"
-      >
-        <a-step title="Basic Info" />
-        <a-step title="Market Analysis" />
-      </a-steps>
 
-      <a-form 
-        :model="formState" 
-        class="brand-form"
-        layout="vertical"
-        @finish="handleOnboardingFinish"
-        ref="formRef"
+    <a-form 
+      :model="formState" 
+      layout="vertical"
+      @finish="handleOnboardingFinish"
+      ref="formRef"
+    >
+      <!-- 基本信息 -->
+      <a-form-item 
+        label="Product Name" 
+        name="productName"
+        :rules="[{ required: true, message: 'Please enter product name' }]"
       >
-        <!-- Step 1: Basic Info -->
-        <div v-show="currentStep === 0" class="step-content">
-          <div class="basic-info-section">
-            <a-form-item 
-              label="Product Name" 
-              name="productName"
-              :rules="[{ required: true, message: 'Please enter product name' }]"
-            >
-              <a-input 
-                v-model:value="formState.productName" 
-                placeholder="Enter your product name"
-                :maxLength="50"
-                class="compact-input"
-              />
-            </a-form-item>
+        <a-input 
+          v-model:value="formState.productName" 
+          placeholder="Enter your product name"
+          :maxLength="50"
+        />
+      </a-form-item>
 
-            <a-form-item 
-              label="Official Website" 
-              name="website"
-            >
-              <a-input-group compact>
-                <a-select
-                  v-model:value="websitePrefix"
-                  style="width: 90px"
-                  :disabled="true"
-                  :open="false"
+      <!-- 网站信息和域名验证 -->
+      <a-form-item 
+        label="Official Website" 
+        name="website"
+      >
+        <a-input-group compact>
+          <a-select
+            v-model:value="websitePrefix"
+            style="width: 90px"
+            :disabled="true"
+          >
+            <a-select-option value="https://">https://</a-select-option>
+          </a-select>
+          <a-input 
+            v-model:value="formState.website" 
+            style="width: calc(100% - 90px)"
+            placeholder="example.com"
+            @change="handleWebsiteChange"
+          />
+        </a-input-group>
+
+        <!-- 域名验证部分 -->
+        <template v-if="formState.productId">
+          <template v-if="(!productInfo.domainStatus || formState.website !== productInfo.projectWebsite?.replace('https://', '')) && formState.website">
+            <a-typography-text type="secondary" class="mt-3 d-block">
+              <InfoCircleOutlined /> Domain verification required for automatic sitemap and content fetching
+            </a-typography-text>
+            
+            <div class="mt-3">
+              <template v-if="!showVerifyRecord">
+                <a-button 
+                  type="primary" 
+                  @click="startVerify"
+                  :disabled="!formState.website"
+                  :loading="startVerifying"
                 >
-                  <a-select-option value="https://">https://</a-select-option>
-                </a-select>
-                <a-input 
-                  v-model:value="formState.website" 
-                  style="width: calc(100% - 90px)"
-                  placeholder="example.com"
-                  @change="handleWebsiteChange"
-                  class="compact-input"
-                />
-              </a-input-group>
-            </a-form-item>
-          </div>
-        </div>
-
-        <!-- Step 2: Market Analysis -->
-        <div v-show="currentStep === 1" class="step-content">
-          <!-- 原有的 competitors-section 内容 -->
-          <div class="competitors-section">
-            <!-- Competitors Section First -->
-            <a-form-item 
-              name="competitors"
-            >
-            <template #label>
-              <span class="required-mark">*</span>
-              Add your main competitors
-            </template>
-              <div class="competitors-container">
-                <div class="competitors-header">
-                  <div class="header-top">
-                    <div class="competitors-title">
-                      <CompetitorIcon class="icon" />
-                    </div>
-                    <!-- 将竞品标签移到这里 -->
-                    <div class="competitors-list" v-if="formState.competitors.length > 0">
-                      <a-tag 
-                        v-for="(comp, index) in formState.competitors" 
-                        :key="index"
-                        closable
-                        @close.prevent="removeCompetitor(index)"
-                        class="competitor-tag"
-                      >
-                        <div class="competitor-info">
-                          <span class="competitor-name">{{ comp.name }}</span>
-                          <a :href="'https://' + comp.url" target="_blank" class="competitor-link">
-                            <LinkOutlined />
-                            {{ comp.url }}
-                          </a>
-                        </div>
-                      </a-tag>
-                    </div>
+                  Start Verifying
+                </a-button>
+              </template>
+              <template v-else>
+                <div class="verify-record-container">
+                  <div class="verify-record-row">
+                    <span class="verify-label">Host:</span>
+                    <a-typography-text code copyable>
+                      {{ verifyRecord?.host || '_' }}
+                    </a-typography-text>
                   </div>
-                  <div class="competitors-description">
-                    <p>We'll analyze your competitors' keywords performance to:</p>
-                    <ul>
-                      <li>
-                        <CheckCircleOutlined class="check-icon" />
-                        <span>Identify high-performing keywords in your industry</span>
-                      </li>
-                      <li>
-                        <CheckCircleOutlined class="check-icon" />
-                        <span>Optimize your content strategy based on market data</span>
-                      </li>
-                      <li>
-                        <CheckCircleOutlined class="check-icon" />
-                        <span>Track your ranking performance against competitors</span>
-                      </li>
-                    </ul>
+                  <div class="verify-record-row">
+                    <span class="verify-label">Value:</span>
+                    <a-typography-text code copyable>
+                      {{ verifyRecord?.value || '_' }}
+                    </a-typography-text>
                   </div>
+                  <a-button 
+                    type="primary" 
+                    @click="verifyNow"
+                    :loading="verifying"
+                    class="mt-3"
+                  >
+                    Verify Now
+                  </a-button>
                 </div>
-
-                <!-- Add competitor input -->
-                <div class="add-competitor">
-                  <div class="input-group-wrapper">
-                    <a-input
-                      v-model:value="newCompetitor.name"
-                      class="competitor-name-input"
-                      placeholder="Competitor name"
-                    >
-                      <template #prefix>
-                        <TeamOutlined class="input-icon" />
-                      </template>
-                    </a-input>
-                    <a-input
-                      v-model:value="newCompetitor.url"
-                      class="competitor-url-input"
-                      placeholder="Website (e.g. example.com)"
-                    >
-                      <template #prefix>
-                        <GlobalOutlined class="input-icon" />
-                      </template>
-                    </a-input>
-                    <a-button 
-                      type="primary"
-                      class="add-button"
-                      @click="addCompetitor"
-                      :disabled="!newCompetitor.name || !newCompetitor.url"
-                    >
-                      <PlusOutlined /> Add
-                    </a-button>
-                  </div>
-                  <div class="competitor-limit-hint">
-                    <InfoCircleOutlined />
-                    <span>You can add up to 4 main competitors</span>
-                  </div>
-                </div>
-              </div>
-            </a-form-item>
-
-            <!-- 添加展开/收起按��� -->
-            <div class="features-toggle" @click="toggleFeatures">
-              <span>Need help finding your competitors?</span>
-              <DownOutlined :class="['toggle-icon', { 'is-expanded': showFeatures }]" />
+              </template>
             </div>
+          </template>
+          <template v-else-if="productInfo.domainStatus && formState.website === productInfo.projectWebsite?.replace('https://', '')">
+            <a-tag color="success" class="mt-3">
+              <CheckCircleOutlined /> Domain Verified
+            </a-tag>
+          </template>
+        </template>
+      </a-form-item>
 
-            <!-- Product Features Section with transition -->
-            <div class="features-wrapper" :class="{ 'expanded': showFeatures }">
-              <a-form-item 
-                label="Don't know your competitors? Describe your product features and we'll help you find relevant competitors" 
-                name="coreFeatures"
-                :rules="[{ required: false }]"
-              >
-                <div class="features-input-wrapper">
-                  <a-textarea 
-                    v-model:value="formState.coreFeatures"
-                    :rows="6"
-                    :autoSize="false"
-                    placeholder="E.g., Our product is a project management tool that helps teams:
-- Track tasks and deadlines
-- Collaborate on projects in real-time
-- Generate automated reports
-- Integrate with popular tools like Slack and GitHub"
-                    :maxLength="1000"
-                    style="resize: none;"
-                  />
-                </div>
-              </a-form-item>
-            </div>
-          </div>
+      <!-- 竞品分析 -->
+      <a-form-item label="Competitors">
+        <div class="competitors-section">
+          <a-space wrap>
+            <a-tag 
+              v-for="(comp, index) in formState.competitors" 
+              :key="index"
+              closable
+              @close="removeCompetitor(index)"
+              :color="['blue', 'green', 'orange', 'purple'][index % 4]"
+            >
+              {{ comp.name }}
+            </a-tag>
+          </a-space>
+
+          <a-space class="mt-3">
+            <a-input
+              v-model:value="newCompetitor.name"
+              placeholder="Competitor name"
+              style="width: 200px"
+            />
+            <a-input
+              v-model:value="newCompetitor.url"
+              placeholder="Website (e.g. example.com)"
+              style="width: 200px"
+            />
+            <a-button 
+              type="primary"
+              @click="addCompetitor"
+              :disabled="!newCompetitor.name || !newCompetitor.url"
+            >
+              <template #icon><PlusOutlined /></template>
+              Add
+            </a-button>
+          </a-space>
         </div>
+      </a-form-item>
 
-        <div class="steps-action">
-          <div class="action-buttons">
-            <a-button 
-              v-if="currentStep === 1" 
-              @click="prevStep"
-            >
-              Previous
-            </a-button>
-            <a-button 
-              v-if="currentStep === 0" 
-              type="primary" 
-              @click="nextStep"
-              :disabled="!formState.productName"
-            >
-              Next
-            </a-button>
-            <a-button 
-              v-if="currentStep === 1" 
-              type="primary" 
-              html-type="submit"
-              :loading="loading"
-              :disabled="formState.competitors.length === 0" 
-              class="submit-button"
-            >
-              {{ formState.competitors.length === 0 ? 'Add competitors to continue' : 'Start Using WebsiteLM' }}
-            </a-button>
-          </div>
-        </div>
-      </a-form>
-    </div>
-  </a-modal>
-
-  <!-- Add generating mask -->
-  <a-modal
-    v-model:open="generatingModalVisible"
-    :footer="null"
-    :closable="false"
-    :maskClosable="false"
-    class="generating-modal"
-  >
-    <div class="generating-content">
-      <a-spin size="large" />
-      <h3>AI is analyzing your website...</h3>
-      <p>This may take a few moments. Please wait while we generate product features.</p>
-    </div>
+      <!-- 底部按钮 -->
+      <a-form-item>
+        <a-button 
+          type="primary" 
+          html-type="submit"
+          :loading="loading"
+          :disabled="!formState.productName"
+          block
+        >
+          {{ formState.productId ? 'Save Changes' : 'Start Using WebsiteLM' }}
+        </a-button>
+      </a-form-item>
+    </a-form>
   </a-modal>
 
   <!-- Add success modal component -->
@@ -437,7 +368,7 @@
     @close="handleSuccessModalClose"
   />
 
-  <!-- 添加新的 Sitemap 模态框 -->
+  <!-- 添加新 Sitemap 模态框 -->
   <a-modal
     v-model:open="sitemapModalVisible"
     title="Website Structure"
@@ -512,14 +443,16 @@
 <script>
 import { defineComponent, ref, onMounted, onUnmounted } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
-import { EditOutlined, DeleteOutlined, ThunderboltOutlined, FileTextOutlined, LineChartOutlined, NodeIndexOutlined } from '@ant-design/icons-vue'
+import { CopyOutlined, EditOutlined, DeleteOutlined, ThunderboltOutlined, FileTextOutlined, LineChartOutlined, NodeIndexOutlined } from '@ant-design/icons-vue'
 import apiClient from '../api/api'
 import SuccessModal from './SuccessModal.vue'
 import { CalendarOutlined, LinkOutlined, SearchOutlined, FolderOpenOutlined } from '@ant-design/icons-vue'
 import { GlobalOutlined } from '@ant-design/icons-vue'
+import { Modal } from 'ant-design-vue'
 
 export default defineComponent({
   components: {
+    CopyOutlined,
     PageLayout,
     EditOutlined,
     DeleteOutlined,
@@ -573,6 +506,12 @@ export default defineComponent({
       findingCompetitors: false,
       currentStep: 0, // 添加当前步骤
       showFeatures: false, // 添加新的数据属性
+      showVerifyRecord: false,
+      verifyRecord: '',
+      verifying: false,
+      startVerifying: false,
+      goStartVerifying: false,
+      originalDomainStatus: null, // 新增：保存原始域名验证状态
     }
   },
   created() {
@@ -616,33 +555,67 @@ export default defineComponent({
     }
   },
   methods: {
-    editProductInfo() {
-      if (this.productInfo) {
-        const competitors = this.productInfo.competeProduct ? 
-          this.productInfo.competeProduct.split(',').map(item => {
-            const [name, url] = item.split('|');
-            return { name, url };
-          }) : [];
-
-        this.formState = {
-          productId: this.productInfo.productId,
-          productName: this.productInfo.productName,
-          website: this.productInfo.projectWebsite?.replace('https://', ''),
-          coreFeatures: this.productInfo.productDesc,
-          competitors: competitors
-        }
-        this.onboardingModalVisible = true
+    async copyRecord(text) {
+      try {
+        await navigator.clipboard.writeText(text);
+        this.$message.success('Copied to clipboard');
+      } catch (error) {
+        this.$message.error('Failed to copy');
       }
+    },
+
+    async checkDomainVerification() {
+      if (!this.formState.website) return;
+
+      try {
+        this.goStartVerifying = true;
+        const domain = this.formState.website.replace(/^https?:\/\//, '');
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.getDomain({
+          customerId,
+          domainName: domain
+        });
+        if (response?.code === 200 && response.data?.textRecord) {
+          // 如果存在TXT记录,显示验证记录
+          this.verifyRecord = JSON.parse(response.data.textRecord);
+          this.showVerifyRecord = true;
+        }
+      } catch (error) {
+        console.error('检查域名验证状态失败:', error);
+        this.showVerifyRecord = false;
+        this.verifyRecord = null;
+      } finally {
+        this.goStartVerifying = false;
+      }
+    },
+
+    openEditWithBasicInfo() {
+      this.currentStep = 0; // 强制显示第一步
+      this.editProductInfo(); // 用现的编方法
+    },
+
+    editProductInfo() {
+      this.originalDomainStatus = this.productInfo?.domainStatus;
+      this.formState = {
+        productId: this.productInfo.productId,
+        productName: this.productInfo.productName,
+        website: this.productInfo.projectWebsite?.replace('https://', ''),
+        coreFeatures: this.productInfo.productDesc,
+        competitors: this.competitors,
+        domainStatus: this.productInfo.domainStatus
+      };
+      this.onboardingModalVisible = true;
     },
     
     async loadProductInfo() {
       try {
-        const customerId = localStorage.getItem('currentUserId')
-        const response = await apiClient.getProductsByCustomerId(customerId)
+        const response = await apiClient.getProductsByCustomerId()
         
         if (response?.code === 200) {
           this.productInfo = response.data
           if (!response.data) {
+            // Reset step to 0 when opening onboarding
+            this.currentStep = 0;
             this.formState = {
               productId: undefined,
               productName: '',
@@ -652,14 +625,25 @@ export default defineComponent({
             }
             this.onboardingModalVisible = true
           } else {
-            this.getSitemap()
+            if (this.productInfo.domainStatus) {
+              this.getSitemap()
+            }
           }
         } else {
-          this.productInfo = null
+          // Handle error response code
+          this.$notification.error({
+            message: 'Failed to Load Product',
+            description: 'Unable to load product information. Please try again later.'
+          });
+          this.productInfo = {} // 修改这里: 从 null 改为空对象
         }
       } catch (error) {
         console.error('Failed to load product information:', error)
-        this.productInfo = null
+        this.$notification.error({
+          message: 'Failed to Load Product',
+          description: 'An error occurred while loading product information. Please try again later.'
+        });
+        this.productInfo = {} // 修改这里: 从 null 改为空对象
       }
     },
     handleCompetitorChange(value) {
@@ -670,64 +654,140 @@ export default defineComponent({
       }
     },
     async handleOnboardingFinish() {
-      this.loading = true
+      const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
+      const isDomainVerified = this.productInfo?.domainStatus;
+
+      // 检查域名是否被修改且之前已验证
+      if (isDomainVerified && this.formState.website !== currentDomain && this.formState.website) {
+        // 显示确认对话框
+        const confirmed = await new Promise(resolve => {
+          Modal.confirm({
+            title: 'Domain Change Confirmation',
+            content: 'Changing the domain will invalidate the existing knowledge base, images, videos, internal links, and subdomains. Do you want to proceed and verify the new domain?',
+            okText: 'Yes',
+            cancelText: 'No',
+            onOk: () => resolve(true),
+            onCancel: () => resolve(false),
+          });
+        });
+
+        if (!confirmed) {
+          return; // 如果用户取消，则不继续执行
+        }
+      }
+
+      this.loading = true;
       try {
         const formData = {
-          customerId: localStorage.getItem('currentUserId'),
+          customerId: localStorage.getItem('currentCustomerId'),
           productName: this.formState.productName,
           productDesc: this.formState.coreFeatures,
           competeProduct: this.formState.competitors.map(comp => 
             `${comp.name}|${comp.url}`
           ).join(','),
           website: this.formState.website || '',
-          sitemap: ''
+          sitemap: '',
+          domainStatus: this.formState.website !== currentDomain ? false : this.originalDomainStatus
+        };
+
+        let response;
+        if (this.formState.productId) {
+          // 编辑模式 - 调用更新接口
+          response = await apiClient.updateProduct(this.formState.productId, formData);
+        } else {
+          // Onboarding模式 - 调用创建接口
+          response = await apiClient.createProduct(formData);
         }
 
-        let response
-        if (this.formState.productId) {
-          response = await apiClient.updateProduct(this.formState.productId, formData)
-        } else {
-          response = await apiClient.createProduct(formData)
+        if (this.formState.website !== currentDomain && this.formState.website) {
+          await this.generateNewVerificationRecord();
         }
 
         if (response?.code === 200) {
           if (!this.formState.productId) {
-            this.successModalVisible = true
-            this.formState = {
-              productId: undefined,
-              productName: '',
-              website: '',
-              coreFeatures: '',
-              competitors: []
-            }
-            this.newCompetitor = {
-              name: '',
-              url: ''
-            }
+            this.successModalVisible = true;
+            this.resetFormState();
           } else {
             this.$notification.success({
               message: 'Product Updated',
               description: 'Product information has been updated successfully.'
-            })
+            });
           }
           
-          this.onboardingModalVisible = false
-          setTimeout(() => {
-            this.loadProductInfo()
-          }, 2000)
+          this.onboardingModalVisible = false;
+          await this.loadProductInfo();
         }
       } catch (error) {
-        console.error('Operation failed:', error)
+        console.error('操作失败:', error);
         this.$notification.error({
-          message: this.formState.productId ? 'Update Failed' : 'Setup Failed',
-          description: error.message || 'Failed to save product information. Please try again.'
-        })
+          message: this.formState.productId ? '更新失败' : '设置失败',
+          description: error.message || '保存品信息失败。请重试。'
+        });
       } finally {
-        this.loading = false
+        this.loading = false;
+        this.originalDomainStatus = null; // 重置原始状态
       }
     },
+
+    // 新增方法：生成新的验证记录
+    async generateNewVerificationRecord() {
+      try {
+        const domain = this.formState.website.replace(/^https?:\/\//, '');
+        const response = await apiClient.createDomainWithTXT({
+          customerId: localStorage.getItem('currentCustomerId'),
+          domainName: domain
+        });
+        
+        if (response?.code === 200) {
+          this.verifyRecord = JSON.parse(response.data.txt);
+          this.showVerifyRecord = true;
+          
+          // 显示新的验证记录提示
+          this.$notification.info({
+            message: 'Domain Verification Required',
+            description: 'A new verification record has been generated for your domain. Please add it to your DNS settings.',
+            duration: 0
+          });
+        }
+      } catch (error) {
+        console.error('Failed to generate verification record:', error);
+        this.$notification.error({
+          message: 'Verification Record Generation Failed',
+          description: error.message || 'Failed to generate new verification record.'
+        });
+      }
+    },
+
+    resetFormState() {
+      this.formState = {
+        productId: undefined,
+        productName: '',
+        website: '',
+        coreFeatures: '',
+        competitors: [],
+        domainStatus: false // 确保重置时验证状态为 false
+      };
+      this.showVerifyRecord = false;
+      this.verifyRecord = null;
+    },
+
     async deleteProduct() {
       try {
+        // Add confirmation dialog using Modal.confirm
+        const confirmed = await new Promise(resolve => {
+          Modal.confirm({
+            title: 'Delete Product',
+            content: 'Are you sure you want to delete this product? This action cannot be undone.',
+            okText: 'Delete',
+            okType: 'danger',
+            cancelText: 'Cancel',
+            onOk: () => resolve(true),
+            onCancel: () => resolve(false),
+          });
+        });
+
+        if (!confirmed) return;
+
         const response = await apiClient.deleteProduct(this.productInfo.productId)
         if (response?.code === 200) {
           this.$notification.success({
@@ -752,7 +812,20 @@ export default defineComponent({
       }
     },
     handleWebsiteChange(e) {
-      this.formState.website = e.target.value.trim()
+      const newWebsite = e.target.value.trim();
+      const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
+      
+      if (newWebsite !== currentDomain) {
+        // 只修改 formState 中的状态
+        this.showVerifyRecord = false;
+        this.verifyRecord = null;
+        this.formState.domainStatus = false;
+      } else {
+        // 如果改回原来的域名，使用保存的原始状态
+        this.formState.domainStatus = this.originalDomainStatus;
+      }
+      
+      this.formState.website = newWebsite;
     },
     handleSuccessModalClose() {
       this.successModalVisible = false
@@ -784,33 +857,56 @@ export default defineComponent({
       this.formState.competitors = newCompetitors;
     },
     async getSitemap() {
-      if (!this.productInfo?.projectWebsite) {
+      if (!this.productInfo?.projectWebsite || !this.productInfo.domainStatus) {
         return;
       }
       
       try {
         this.loadingSitemap = true;
-        const customerId = localStorage.getItem('currentUserId');
+        const customerId = localStorage.getItem('currentCustomerId');
         const response = await apiClient.getSitemap(customerId);
 
-        if (response?.code !== 200 || !response?.data) {
+        // 检查响应是否成功但数据为空
+        if (response?.code === 200) {
+          if (!response.data) {
+            // 处理数据为 null 的情况
+            this.allPages = [];
+            this.sitemapData = [{
+              key: 'empty',
+              title: 'No pages found',
+              selectable: false,
+              children: []
+            }];
+            return;
+          }
+
+          const urls = response.data.sitemaps?.[0]?.urlset?.urls || [];
+          if (!Array.isArray(urls)) {
+            this.allPages = [];
+            this.sitemapData = [{
+              key: 'empty',
+              title: 'No pages found',
+              selectable: false,
+              children: []
+            }];
+            return;
+          }
+
+          this.allPages = urls;
+          this.sitemapData = this.processSitemap(urls);
+        } else {
           throw new Error('Failed to get sitemap');
         }
-
-        const urls = response.data.sitemaps?.[0]?.urlset?.urls || [];
-        if (!Array.isArray(urls)) {
-          this.allPages = [];
-          this.sitemapData = [];
-          return;
-        }
-
-        this.allPages = urls;
-        this.sitemapData = this.processSitemap(urls);
         
       } catch (error) {
         console.error('Failed to get sitemap:', error);
         this.$message.error('Failed to get sitemap, please try again later');
-        this.sitemapData = null;
+        this.sitemapData = [{
+          key: 'error',
+          title: 'Failed to load sitemap',
+          selectable: false,
+          children: []
+        }];
       } finally {
         this.loadingSitemap = false;
       }
@@ -874,7 +970,7 @@ export default defineComponent({
       const getAllPages = (node) => {
         let pages = [];
         
-        // 只有当节点有实际的URL（不是虚拟目录）时才添加
+        // 有当节点有实际的URL（不是虚拟目录时才添加
         if (node.key && node.key.startsWith('http')) {
           pages.push({ loc: node.key });
         }
@@ -906,7 +1002,7 @@ export default defineComponent({
       }
       
       try {
-        const customerId = localStorage.getItem('currentUserId')
+        const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.gscAuth(customerId)
         
         if (response?.code === 200 && response.redirectURL) {
@@ -948,7 +1044,7 @@ export default defineComponent({
 
     async loadGscData() {
       try {
-        const customerId = localStorage.getItem('currentUserId')
+        const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.getGscSites(customerId)
         
         if (response?.code === 200 && response?.data) {
@@ -962,7 +1058,7 @@ export default defineComponent({
 
     async checkGscStatus() {
       try {
-        const customerId = localStorage.getItem('currentUserId')
+        const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.checkGscAuth(customerId)
         
         if (response?.code === 1201) {
@@ -999,7 +1095,7 @@ export default defineComponent({
     },
     async findCompetitors() {
       if (!this.formState.coreFeatures) {
-        this.$message.warning('请先输入产品描述');
+        this.$message.warning('Please enter product description first');
         return;
       }
 
@@ -1010,7 +1106,6 @@ export default defineComponent({
         });
 
         if (response?.code === 200 && response.data) {
-          // 将返回的竞品数据添加到competitors列表中
           const newCompetitors = response.data.map(comp => ({
             name: comp.name,
             url: comp.url
@@ -1018,10 +1113,10 @@ export default defineComponent({
           
           this.formState.competitors = [...newCompetitors];
           
-          this.$message.success('successfully find your competitors!');
+          this.$message.success('Successfully found your competitors!');
         }
       } catch (error) {
-        this.$message.error('查询竞品失败: ' + (error.message || '未知错误'));
+        this.$message.error('Failed to find competitors: ' + (error.message || 'Unknown error'));
       } finally {
         this.findingCompetitors = false;
       }
@@ -1036,968 +1131,250 @@ export default defineComponent({
     },
     toggleFeatures() {
       this.showFeatures = !this.showFeatures;
+    },
+    openEditWithBasicInfoToVerify() {
+      this.currentStep = 0;
+      this.openEditWithBasicInfo();
+    },
+
+    async startVerify() {
+      this.startVerifying = true;
+      try {
+        // 先保存新的域名信息
+        const formData = {
+          customerId: localStorage.getItem('currentCustomerId'),
+          productName: this.formState.productName,
+          productDesc: this.formState.coreFeatures,
+          competeProduct: this.formState.competitors.map(comp => 
+            `${comp.name}|${comp.url}`
+          ).join(','),
+          website: this.formState.website,
+          sitemap: ''
+        };
+
+        // 更新产品信息
+        const updateResponse = await apiClient.updateProduct(this.formState.productId, formData);
+        if (updateResponse?.code !== 200) {
+          throw new Error('Failed to update product information');
+        }
+
+        // 重新加载产品信息
+        await this.loadProductInfo();
+
+        // 继续域名验证流程
+        const domain = this.formState.website.replace(/^https?:\/\//, '');
+        const response = await apiClient.createDomainWithTXT({
+          customerId: localStorage.getItem('currentCustomerId'),
+          domainName: domain
+        });
+        
+        if (response?.code === 200) {
+          this.verifyRecord = JSON.parse(response.data.txt);
+          this.showVerifyRecord = true;
+        }
+      } catch (error) {
+        this.$message.error('Failed to start verification: ' + (error.message || 'Unknown error'));
+      } finally {
+        this.startVerifying = false;
+      }
+    },
+
+    async verifyNow() {
+      if (!this.formState?.website) return;
+      
+      this.verifying = true;
+      try {
+        const response = await apiClient.validateDomain({
+          customerId: localStorage.getItem('currentCustomerId'),
+        });
+        
+        if (response?.code === 200) {
+          this.$message.success('Domain verified successfully!');
+          this.showVerifyRecord = false;
+          await this.loadProductInfo();
+        } else {
+          this.$message.error('Verification failed. If you have added the TXT record correctly, please wait for some seconds and try again.');
+        }
+      } catch (error) {
+        this.$message.error('Verification failed: ' + (error.message || 'Unknown error'));
+      } finally {
+        this.verifying = false;
+      }
+    },
+    watch: {
+      onboardingModalVisible(newVal) {
+        if (newVal) {
+          // Reset to first step whenever modal is opened
+          this.currentStep = 0;
+        }
+      }
+    },
+    // 添加关闭弹窗的处理方法
+    handleModalClose() {
+      const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
+      if (this.formState.website === currentDomain) {
+        // 使用保存的原始状态
+        this.formState.domainStatus = this.originalDomainStatus;
+        this.showVerifyRecord = false;
+        this.verifyRecord = null;
+      }
+      this.onboardingModalVisible = false;
+      // 重置原始状态
+      this.originalDomainStatus = null;
     }
   }
 })
 </script>
 
 <style scoped>
-.required-mark {
-  color: #ff4d4f;
-  margin-right: 4px;
-  font-family: SimSun, sans-serif;
-  font-size: 14px;
-}
-
-.page-header {
-  margin-bottom: 16px;
-}
-
-.gradient-text {
-  background: linear-gradient(135deg, #1890FF 0%, #40A9FF 50%, #69C0FF 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.section-card {
-  height: 100%;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 0;
-}
-
-.earnings-banner {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
-  padding: 32px;
-  border-radius: 16px;
-  margin-bottom: 24px;
-  border: 1px solid rgba(231, 241, 255, 0.8);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-}
-
-.banner-title {
-  font-size: 1.5rem;
-  color: #1a1a1a;
-  margin-bottom: 24px;
-  font-weight: 600;
-}
-
-.earnings-content {
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-
-.metrics-container {
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: stretch;
-  gap: 12px;
-  height: 100%;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-}
-
-.metric-item {
-  flex: 1;
-  position: relative;
-  border: 1px solid rgba(124, 58, 237, 0.1);
-  padding: 16px;
-  min-width: 160px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 220px;
-  
-  @media (max-width: 768px) {
-    min-height: 180px;
-  }
-}
-
-.metric-icon {
-  font-size: 20px;
-  margin-bottom: 12px;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.metric-item h4 {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 4px 0;
-}
-
-.metric-label {
-  font-size: 13px;
-  color: #64748b;
-  margin: 4px 0;
-}
-
-.metric-trend {
-  font-size: 12px;
-  margin-top: 8px;
-}
-
-.metric-trend.positive {
-  color: #10B981;
-}
-
-.trend-icon {
-  font-weight: bold;
-}
-
-.no-data-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40px 20px;
-}
-
-.no-data-content {
-  text-align: center;
-}
-
-.no-data-icon {
-  margin-bottom: 16px;
-}
-
-.no-data-title {
-  font-size: 18px;
-  color: #374151;
-  margin-bottom: 8px;
-}
-
-.no-data-description {
-  color: #6B7280;
-  margin-bottom: 24px;
-}
-
-.create-button {
-  background: #1890ff;
-  border-color: #1890ff;
-}
-
-.create-button:hover {
-  background: #4338CA;
-  border-color: #4338CA;
-}
-
-:deep(.ant-col-lg-4\.8) {
-  width: 20%;
-  flex: 0 0 20%;
-}
-
-@media (max-width: 1400px) {
-  .info-banner {
-    flex-direction: column;
-  }
-  
-  .product-info {
-    flex: 0 0 auto;
-    width: 100%;
-    margin-bottom: 24px;
-  }
-
-  .metrics-container {
-    width: 100%;
-    flex-wrap: wrap;
-  }
-
-  .metric-item {
-    flex: 1 1 calc(33.333% - 16px);
-    min-width: 160px;
-  }
-}
-
-.info-banner {
+.dashboard-content {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  margin-bottom: 16px;
 }
 
-.product-info {
-  width: 100%;
-  min-width: unset;
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  min-height: 220px;
-}
-
-.info-list {
+.card-title {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.info-row {
-  display: flex;
-  align-items: center;
-  min-height: 24px;
-}
-
-.info-label {
-  flex: 0 0 140px;
-  font-size: 13px;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-.info-content {
-  flex: 1;
-  font-size: 14px;
-  color: #111827;
-  padding: 0;
-  min-width: 0;
-
-  .ant-tag {
-    margin-right: 8px;   /* 添加右边距 */
-    
-    &:last-child {
-      margin-right: 0;   /* 最后一个标签需要右边距 */
-    }
-  }
-  
-  @media (max-width: 576px) {
-    width: 100%;
-    padding: 0;
-  }
-}
-
-.truncated-text {
-  white-space: normal;
-  word-break: break-word;
-}
-
-.action-buttons-container {
-  display: flex;
-  gap: 8px;
-  padding: 16px 0;
-}
-
-.action-buttons-container .ant-btn {
-  min-width: 120px;
-}
-
-.action-buttons-container .ant-btn-primary {
-  background: #1890ff;
-  border-color: #1890ff;
-}
-
-.action-buttons-container .ant-btn-primary:hover {
-  background: #6D28D9;
-  border-color: #6D28D9;
-}
-
-.metrics-container {
-  width: 100%;
-  display: flex;
-  gap: 12px;
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.product-modal {
-  .modal-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #1a1a1a;
-  }
-  
-  .modal-subtitle {
-    color: #666;
-    margin-top: 8px;
-  }
-  
-  .setup-form {
-    margin-top: 24px;
-  }
-  
-  .submit-button {
-    width: 100%;
-    height: 40px;
-    background: #5ba5ff;
-    border-color: #5ba5ff;
-    
-    &:hover {
-      background: #5ba5ff;
-      border-color: #5ba5ff;
-    }
-  }
-  
-  &.onboarding-modal {
-    .modal-title {
-      text-align: center;
-    }
-    
-    .modal-subtitle {
-      text-align: center;
-    }
-  }
-}
-
-.delete-button {
-  color: #dc2626;
-  padding: 4px 12px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-}
-
-.delete-button:hover {
-  color: #b91c1c;
-  background: rgba(220, 38, 38, 0.1);
-}
-
-.modal-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1a1a1a;
-  
-  &.onboarding-title {
-    font-size: 28px;
-    background: linear-gradient(135deg, #1890FF 0%, #40A9FF 50%, #69C0FF 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-}
-
-.modal-subtitle {
-  color: #666;
-  margin-top: 8px;
-  font-size: 16px;
-}
-
-.onboarding-modal {
-  .ant-modal-content {
-    background: linear-gradient(to bottom, #ffffff, #f8fafc);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.onboarding-header {
-  position: relative;
-  padding: 16px 0 ;
-  overflow: hidden;
-  text-align: center;
-}
-
-.glow-effect {
-  position: absolute;
-  top: -100px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 600px;
-  height: 200px;
-  background: radial-gradient(
-    circle at center,
-    rgba(79, 70, 229, 0.15) 0%,
-    rgba(124, 58, 237, 0.15) 25%,
-    rgba(236, 72, 153, 0.15) 50%,
-    transparent 70%
-  );
-  filter: blur(20px);
-  pointer-events: none;
-}
-
-.title-container {
-  position: relative;
-  z-index: 1;
-}
-
-.welcome-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  background: linear-gradient(135deg, #1890FF, #40A9FF);
-  color: white;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  letter-spacing: 1px;
-  box-shadow: 0 2px 10px rgba(24, 144, 255, 0.3);
-}
-
-.modal-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0;
-  
-  &.onboarding-title {
-    font-size: 28px;
-    font-weight: 700;
-    background: linear-gradient(135deg, #1890FF 0%, #40A9FF 50%, #69C0FF 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    margin-bottom: 8px;
-    letter-spacing: -0.5px;
-  }
-}
-
-.modal-subtitle {
-  color: #64748b;
-  font-size: 16px;
-  line-height: 1.6;
-  max-width: 480px;
-  margin: 0 auto;
-}
-
-.ant-form-item {
-  transition: all 0.3s ease;
-
-  margin-bottom: 12px !important;
-  
-  &:hover {
-    transform: translateX(4px);
-  }
-}
-
-/* Improve input box */
-.ant-input, .ant-input-affix-wrapper {
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
-  
-  &:hover, &:focus {
-    border-color: #1890FF;
-    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
-  }
-}
-
-/* Improve button */
-.ant-btn-primary {
-  background: linear-gradient(135deg, #1890FF, #40A9FF);
-  border: none;
-  height: 40px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(24, 144, 255, 0.3);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
-  }
-}
-
-.generating-modal {
-  :deep(.ant-modal-content) {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-  }
-}
-
-.generating-content {
-  text-align: center;
-  padding: 32px;
-
-  h3 {
-    margin: 24px 0 12px;
-    font-size: 20px;
-    color: #1a1a1a;
-  }
-
-  p {
-    color: #666;
-    margin: 0;
-  }
-}
-
-:deep(.ant-input-group-compact) {
-  display: flex;
-}
-
-:deep(.ant-input-group-compact .ant-btn) {
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  height: 32px;
-  line-height: 32px;
-  padding: 0 8px;
-}
-
-.coming-soon-text {
-  color: #1890ff;
-  font-size: 12px;
-  margin-top: 4px;
-  font-style: italic;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  background: linear-gradient(135deg, #ECFDF5, #D1FAE5);
-  color: #059669;
-  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1);
-}
-
-.product-info:hover {
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.05);
-}
-
-@media (max-width: 1400px) {
-  .product-info {
-    padding: 12px;
-  }
-  
-  .info-value {
-    max-width: 140px;
-  }
-}
-
-/* Title area */
-.product-info h3 {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1F2937;
-  margin: 0 0 12px 0;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(124, 58, 237, 0.08);
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  line-height: 1.2;
-}
-
-/* Edit button */
-.edit-button {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #1890ff;
-  background: rgba(124, 58, 237, 0.04);
-  border: 1px solid rgba(124, 58, 237, 0.12);
-  height: auto;
-}
-
-.edit-button:hover {
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(124, 58, 237, 0.12));
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);
-  color: #1890ff;
-}
-
-/* Information item container */
-.info-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Information item */
-.info-item {
-  display: grid;
-  grid-template-columns: 100px 1fr;
-  gap: 12px;
-  padding: 6px 8px;
-  background: transparent;
-  border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.info-item:hover {
-  background: rgba(124, 58, 237, 0.02);
-}
-
-.info-label {
-  color: #6B7280;
-  font-size: 12px;
-  font-weight: 500;
-  display: flex;
   align-items: center;
 }
 
-.info-label::before {
-  content: none;
-}
-
-.info-value {
-  justify-self: flex-end;
-  color: #1F2937;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 4px 8px;
-  background: rgba(124, 58, 237, 0.03);
-  border-radius: 4px;
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Status badge */
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 11px;
-  background: #ECFDF5;
-  color: #059669;
-}
-
-
-@media (max-width: 1400px) {
-  .product-info {
-    padding: 12px;
-  }
-  
-  .info-value {
-    max-width: 140px;
-  }
-}
-
-/* Competitor tag container */
-.competitors-container {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-}
-
-/* Competitor tag */
-.competitor-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 6px;
-  background: rgba(124, 58, 237, 0.03);
-  border-radius: 4px;
-  font-size: 12px;
-  color: #1890ff;
-  white-space: nowrap;
-}
-
-/* Tag group style */
-.tags-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  justify-content: flex-end;
-}
-
-/* Add responsive style */
-.pages-analytics-section {
-  overflow-x: auto;
-  
-  @media (max-width: 768px) {
-    padding: 16px;
-    
-    .section-header {
-      flex-direction: column;
-      gap: 16px;
-      
-      .header-controls {
-        flex-wrap: wrap;
-        width: 100%;
-        
-        .ant-input-search,
-        .ant-select {
-          width: 100% !important;
-        }
-      }
-    }
-  }
-}
-
-/* Optimize table display on small screens */
-:deep(.ant-table) {
-  @media (max-width: 768px) {
-    .ant-table-content {
-      overflow-x: auto;
-    }
-    
-    .page-title-cell {
-      .title-content {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      
-      .page-meta {
-        flex-direction: column;
-        gap: 4px;
-      }
-    }
-    
-    .metrics-cell {
-      flex-direction: column;
-      gap: 8px;
-    }
-  }
-}
-
-/* Add theme color related styles */
-:deep(.ant-tag) {
-  &.ant-tag-blue {
-    color: #1890ff;
-    background: #e6f7ff;
-    border-color: #91d5ff;
-  }
-  
-  &.ant-tag-green {
-    color: #52c41a;
-    background: #f6ffed;
-    border-color: #b7eb8f;
-  }
-  
-  &.ant-tag-red {
-    color: #f5222d;
-    background: #fff1f0;
-    border-color: #ffa39e;
-  }
-  
-  &.ant-tag-purple {
-    color: #722ed1;
-    background: #f9f0ff;
-    border-color: #d3adf7;
-  }
-  
-  &.ant-tag-orange {
-    color: #fa8c16;
-    background: #fff7e6;
-    border-color: #ffd591;
-  }
-}
-
-.view-controls {
-  margin: 0 0 16px 0;
-  padding: 16px 0;
+/* 覆盖一些 Ant Design 默认样式 */
+:deep(.ant-card-head) {
   border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 16px;
+}
+
+:deep(.ant-descriptions-item) {
+  padding-bottom: 16px;
+}
+
+.d-block {
+  display: block;
+}
+
+.verify-record-container {
+  background: #fafafa;
+  padding: 12px;
+  border-radius: 6px;
+  margin-top: 12px;
+}
+
+.verify-record-row {
   display: flex;
-  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
-/* Add purple theme style */
-:deep(.view-switcher) {
-  .ant-radio-button-wrapper {
-    height: 36px;
-    padding: 0;
-    border-color: #1890ff;
-    position: relative;
-    transition: all 0.3s ease;
-    
-    &:first-child {
-      border-left-color: #1890ff;
-    }
-    
-    &:not(:first-child)::before {
-      background-color: #1890ff;
-    }
-    
-    .switcher-content {
-      display: inline-flex;
-      align-items: center;
-      height: 100%;
-      padding: 0 16px;
-      gap: 8px;
-      
-      .anticon {
-        font-size: 16px;
-      }
-      
-      .switcher-text {
-        font-size: 14px;
-        line-height: 1;
-      }
-    }
-    
-    /* Unselected state */
-    color: #1890ff;
-    background: white;
-    
-    &:hover {
-      color: white;
-      background: #9F67FF;
-      border-color: #9F67FF;
-    }
-    
-    /* Selected state */
-    &.ant-radio-button-wrapper-checked {
-      color: white;
-      background: #1890ff;
-      border-color: #1890ff;
-      box-shadow: -1px 0 0 0 #1890ff;
-      
-      &:hover {
-        background: #9F67FF;
-        border-color: #9F67FF;
-      }
-      
-      &::before {
-        background-color: #1890ff;
-      }
-    }
-  }
-}
-
-/* Add transition animation */
-.pages-analytics-section,
-.keywords-analytics-section {
-  transition: all 0.3s ease;
-}
-
-/* Optimize table style */
-:deep(.keywords-analytics-section) {
-  .ant-table-wrapper {
-    .ant-table {
-      /* Increase cell padding */
-      .ant-table-cell {
-        padding: 16px 24px;
-        
-        /* Header style */
-        &.ant-table-cell-fix-left {
-          font-weight: 600;
-        }
-      }
-      
-      /* Ensure content is vertically centered */
-      .ant-table-row {
-        .ant-table-cell {
-          vertical-align: middle;
-        }
-      }
-      
-      /* Optimize hover effect */
-      .ant-table-row:hover {
-        .ant-table-cell {
-          background: #f5f3ff;
-        }
-      }
-    }
-  }
-}
-
-/* If you need to adjust table borders and dividers */
-:deep(.ant-table) {
-  .ant-table-cell {
-    border-right: 1px solid #f0f0f0;
-    
-    &:last-child {
-      border-right: none;
-    }
-  }
-}
-
-/* Add related styles */
-.competitors-list {
-  margin-bottom: 12px;
-}
-
-.competitor-link {
+.verify-label {
+  min-width: 50px;
   color: #666;
 }
 
-.competitor-link:hover {
-  color: #1890ff;
+/* Add these new styles */
+.ant-row .ant-card {
+  height: 100%;  /* Make all cards in the row full height */
 }
 
-.sitemap-action {
+:deep(.ant-card-body) {
+  height: calc(100% - 57px);  /* Subtract header height */
   display: flex;
+  flex-direction: column;
   justify-content: center;
-  padding: 40px 0;
 }
 
+:deep(.ant-statistic-group) {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+:deep(.ant-card .ant-statistic) {
+  text-align: center;
+}
+
+/* Sitemap Modal Styles */
 .sitemap-modal {
-  :deep(.ant-modal-content) {
-    background: #FFFFFF;
-    border-radius: 16px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    max-height: 80vh;
-  }
-  
-  :deep(.ant-modal-header) {
-    border-bottom: none;
-    padding: 12px 16px;
-  }
-  
   :deep(.ant-modal-body) {
     padding: 0;
   }
 }
 
-.sitemap-header {
-  display: none;
+.sitemap-modal-content {
+  min-height: 600px;
 }
 
 .sitemap-container {
   display: flex;
-  height: 500px;
+  height: 600px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.tree-section, .pages-section {
-  flex: 0 0 50%;
-  width: 50%;
+/* Left Tree Section */
+.tree-section {
+  width: 40%;
+  border-right: 1px solid #f0f0f0;
   display: flex;
   flex-direction: column;
 }
 
-.tree-section {
-  border-right: 1px solid rgba(24, 144, 255, 0.1);
+/* Right Pages Section */
+.pages-section {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
 }
 
+/* Common Section Header Style */
 .section-header {
-  padding: 16px 24px;
-  border-bottom: 1px solid rgba(24, 144, 255, 0.1);
+  padding: 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  font-weight: 500;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 500;
-  color: #374151;
-  
-  .anticon {
-    color: #1890FF;
+}
+
+/* Content Areas */
+.tree-content,
+.pages-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* Custom Tree Styles */
+.custom-tree {
+  :deep(.ant-tree-node-content-wrapper) {
+    display: flex;
+    align-items: center;
   }
 }
 
-.tree-content, .pages-content {
-  flex: 1;
-  padding: 12px;
-  overflow-y: auto;
-}
-
+/* Page List Styles */
 .page-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
 }
 
 .page-item {
-  padding: 8px 12px;
+  padding: 12px;
+  border: 1px solid #f0f0f0;
   border-radius: 6px;
-  background: #f9fafb;
-  
+  transition: all 0.3s;
+
   &:hover {
-    background: #f3f4f6;
-    transform: translateX(4px);
+    background: #fafafa;
   }
 }
 
 .page-info {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 8px;
 }
 
@@ -2005,977 +1382,54 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #1890FF;
-  width: 100%;
+  color: #1890ff;
   
   .page-url {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: pre-wrap;
     word-break: break-all;
   }
 }
 
-.page-date {
-  display: none;
-}
-
+/* Empty State */
 .empty-state {
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  color: #9ca3af;
+  color: #999;
   gap: 16px;
   
-  .anticon {
+  :deep(.anticon) {
     font-size: 32px;
-  }
-}
-
-:deep(.custom-tree) {
-  :deep(.ant-tree-list) {
-    height: auto !important;
-  }
-  
-  :deep(.ant-tree-list-holder-inner) {
-    transform: none !important;
-  }
-  
-  /* 其他树的样式... */
-}
-
-.sitemap-section {
-  margin-top: 24px;
-  padding: 32px;
-  border-radius: 16px;
-  background: white;
-  position: relative;
-  overflow: hidden;
-  flex: 1;
-  min-height: 400px;
-}
-
-.sitemap-content {
-  position: relative;
-  height: 100%;
-  min-height: 400px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.sitemap-illustration {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.9;
-  border-radius: 16px;
-}
-
-.sitemap-overlay {
-  position: relative;
-  z-index: 1;
-  padding: 40px;
-  
-  h3 {
-    font-size: 28px;
-    font-weight: 600;
-    color: #ffffff;
-    margin-bottom: 16px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   }
   
   p {
-    color: #ffffff;
-    margin-bottom: 32px;
-    font-size: 16px;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    margin: 0;
+  }
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
   }
   
-  .ant-btn {
-    min-width: 180px;
-    height: 48px;
-    background: #ffffff;
-    border-color: #ffffff;
-    color: #1890ff;
-    font-size: 16px;
+  &::-webkit-scrollbar-track {
+    background: #f0f0f0;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
     
     &:hover {
-      background: #f3f4f6;
-      border-color: #f3f4f6;
-      color: #6D28D9;
+      background: #999;
     }
   }
 }
 
-/* 修改 card-header 样式 */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.card-header h3 {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1F2937;
-  line-height: 1.2;
-}
-
-.edit-link {
-  padding: 4px 8px;
-  color: #1890FF;
-  font-size: 12px;
-  border-radius: 6px;
-  background: rgba(24, 144, 255, 0.04);
-  border: 1px solid rgba(24, 144, 255, 0.12);
-  height: auto;
-}
-
-.edit-link:hover {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.12), rgba(64, 169, 255, 0.12));
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.08);
-  color: #1890FF;
-}
-
-.header-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.delete-link {
-  padding: 4px 8px;
-  color: #dc2626;
-  font-size: 12px;
-  border-radius: 6px;
-  background: rgba(220, 38, 38, 0.04);
-  border: 1px solid rgba(220, 38, 38, 0.12);
-  height: auto;
-}
-
-.delete-link:hover {
-  background: rgba(220, 38, 38, 0.12);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.08);
-  color: #dc2626;
-}
-
-.site-link {
-  color: #3ca9fd;
-  text-decoration: none;
-}
-
-.site-link:hover {
-  text-decoration: underline;
-}
-
-.metric-data {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.metric-row {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.metric-row h4 {
-  font-size: 20px;
-  margin: 0;
-  color: #1F2937;
-}
-
-.metric-row .metric-label {
-  font-size: 12px;
-  color: #6B7280;
-}
-
-.metric-item {
-  position: relative;
-}
-
-.connect-gsc-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  height: 24px;
-  background: transparent !important;
-  border: none;
-  color: #1890FF;
-  font-size: 12px;
-  padding: 0 8px;
-  box-shadow: none;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    color: #40A9FF;
-    background: rgba(24, 144, 255, 0.05) !important;
-  }
-  
-  &[disabled] {
-    color: #10B981 !important; /* 成功色 */
-    cursor: default;
-    opacity: 1;
-  }
-  
-  &:disabled:hover {
-    background: transparent !important;
-    transform: none;
-  }
-}
-
-.connect-gsc-btn:active {
-  transform: translateY(0);
-  box-shadow: none;
-}
-
-.empty-state.elegant {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: 48px 24px;
-  text-align: center;
-  background: linear-gradient(to bottom, #ffffff, #f8fafc);
-  border-radius: 12px;
-}
-
-.empty-icon {
-  width: 64px;
-  height: 64px;
-  background: linear-gradient(135deg, #E6F7FF, #BAE7FF);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-  box-shadow: 0 8px 16px -4px rgba(124, 58, 237, 0.1);
-}
-
-.empty-icon :deep(.anticon) {
-  font-size: 28px;
-  color: #1890FF;
-}
-
-.empty-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: #1F2937;
-  margin-bottom: 12px;
-  background: linear-gradient(135deg, #1890FF, #40A9FF);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.empty-description {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #6B7280;
-  max-width: 280px;
-  margin-bottom: 24px;
-}
-
-.action-button {
-  height: 40px;
-  padding: 0 24px;
-  font-weight: 500;
-  background: linear-gradient(135deg, #1890FF, #40A9FF);
-  border: none;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.2);
-  transition: all 0.3s ease;
-}
-
-.action-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.3);
-}
-
-.action-button:active {
-  transform: translateY(0);
-}
-
-.description-text {
-  white-space: normal;
-  word-break: break-word;
-  line-height: 1.5;
-  color: #111827;
-}
-
-.sitemap-link {
-  padding: 4px 8px;
-  color: #1890FF;
-  font-size: 12px;
-  border-radius: 6px;
-  background: rgba(24, 144, 255, 0.04);
-  border: 1px solid rgba(24, 144, 255, 0.12);
-  height: auto;
-  white-space: nowrap;
-  
-  &:disabled {
-    color: #666;
-    cursor: default;
-    background: transparent;
-    border: none;
-    
-    &:hover {
-      background: transparent;
-      transform: none;
-      box-shadow: none;
-    }
-  }
-}
-
-.sitemap-link:hover {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.12), rgba(64, 169, 255, 0.12));
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.08);
-  color: #1890FF;
-}
-
-.gsc-success-modal {
-  :deep(.ant-modal-content) {
-    border-radius: 16px;
-    padding: 32px;
-    text-align: center;
-  }
-}
-
-.success-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px;
-}
-
-.success-icon {
-  font-size: 48px;
-  margin-bottom: 24px;
-  animation: bounce 1s ease infinite;
-}
-
-.success-content h3 {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1F2937;
-  margin-bottom: 16px;
-}
-
-.success-content p {
-  font-size: 16px;
-  color: #6B7280;
-  line-height: 1.6;
-  margin-bottom: 32px;
-}
-
-.success-content .ant-btn {
-  min-width: 160px;
-  height: 40px;
-  font-size: 16px;
-  background: linear-gradient(135deg, #1890FF, #40A9FF);
-  border: none;
-  
-  &:hover {
-    background: linear-gradient(135deg, #40A9FF, #69C0FF);
-    transform: translateY(-1px);
-  }
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.features-input-wrapper {
-  position: relative;
-  margin-top: 8px;
-  width: 95%;  
-  margin-left: auto; 
-  margin-right: auto;
-}
-
-.find-competitors-btn {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  height: 32px;
-  padding: 0 16px;
-  font-size: 13px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: #1890ff;
-  border-color: #1890ff;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
-  
-  &:hover {
-    background: #40a9ff;
-    border-color: #40a9ff;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-  }
-  
-  &:disabled {
-    background: #f5f5f5;
-    border-color: #d9d9d9;
-    color: rgba(0, 0, 0, 0.25);
-    box-shadow: none;
-    
-    &:hover {
-      transform: none;
-    }
-  }
-  
-  .anticon {
-    font-size: 14px;
-  }
-}
-
-.competitors-section {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid rgba(24, 144, 255, 0.1);
-}
-
-.competitors-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 12px;
-}
-
-.competitors-description {
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.competitors-description p {
-  margin-bottom: 8px;
-}
-
-.competitors-description ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.competitors-description li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-  color: #374151;
-}
-
-.check-icon {
-  color: #1890ff;
-  font-size: 16px;
-}
-
-.competitor-tag {
-  margin-bottom: 8px;
-  padding: 6px 10px;
-  background: white;
-  border: 1px solid rgba(24, 144, 255, 0.2);
-}
-
-.competitor-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.competitor-name {
-  font-weight: 500;
-  color: #1f2937;
-}
-
-.competitor-link {
-  color: #6b7280;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.input-icon {
-  color: #1890ff;
-}
-
-.competitor-limit-hint {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #6b7280;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* 添加新的样式 */
-.form-section {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.product-info-section {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid rgba(24, 144, 255, 0.1);
-}
-
-.competitors-section {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid rgba(24, 144, 255, 0.1);
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(24, 144, 255, 0.1);
-}
-
-.features-description {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 12px;
-  color: #6b7280;
-  font-size: 14px;
-  
-  .info-icon {
-    color: #1890ff;
-    margin-top: 3px;
-  }
-}
-
-/* 修复样式问题 */
-.competitors-container {
-  width: 100%;
-}
-
-.competitors-header {
-  width: 100%;
-}
-
-.competitors-description {
-  width: 100%;
-}
-
-.competitors-description ul {
-  width: 100%;
-  padding-left: 0;
-}
-
-.competitors-description li {
-  width: 100%;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.check-icon {
-  flex-shrink: 0;
-  margin-top: 4px;
-}
-
-.competitor-tag {
-  width: 100%;
-  margin-bottom: 8px;
-  padding: 8px 12px;
-  background: white;
-  border: 1px solid rgba(24, 144, 255, 0.2);
-}
-
-.competitor-info {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.competitor-name {
-  font-weight: 500;
-  color: #1f2937;
-}
-
-.competitor-link {
-  color: #6b7280;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.input-icon {
-  color: #1890ff;
-}
-
-.competitor-limit-hint {
-  margin-top: 8px;
-  font-size: 12px;
-  color: #6b7280;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* 添加新的样式 */
-.form-section {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-}
-
-.product-info-section {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid rgba(24, 144, 255, 0.1);
-}
-
-.competitors-section {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 20px;
-  border: 1px solid rgba(24, 144, 255, 0.1);
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(24, 144, 255, 0.1);
-}
-
-.features-description {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 12px;
-  color: #6b7280;
-  font-size: 14px;
-  width: 100%;
-}
-
-/* 修改输入框相关样式 */
-.input-group-wrapper {
-  display: flex;
-  gap: 8px;
-  width: 100%;
-  margin-bottom: 8px;
-}
-
-.competitor-name-input {
-  flex: 2;  /* 占据更多空间 */
-}
-
-.competitor-url-input {
-  flex: 3;  /* 网址输入框稍长一些 */
-}
-
-.add-button {
-  width: 100px;  /* 固定添加按钮宽度 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-.input-icon {
-  color: #1890ff;
-}
-
-/* 确保所有父级容器都占满宽度 */
-.competitors-section {
-  width: 100%;
-}
-
-.competitors-container {
-  width: 100%;
-}
-
-.add-competitor {
-  width: 100%;
-}
-
-.input-group-wrapper {
-  display: flex;
-  gap: 8px;
-  width: 100%;
-  margin-bottom: 8px;
-}
-
-.competitor-name-input,
-.competitor-url-input,
-.add-button {
-  height: 32px;
-}
-
-.competitor-name-input {
-  flex: 2;
-}
-
-.competitor-url-input {
-  flex: 3;
-}
-
-.add-button {
-  flex: 0 0 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-}
-
-/* 覆盖 Ant Design 的默认样式 */
-:deep(.ant-input-affix-wrapper) {
-  width: 100%;
-}
-
-:deep(.ant-form-item-control-input) {
-  width: 100%;
-}
-
-:deep(.ant-form-item-control-input-content) {
-  width: 100%;
-}
-
-/* 新增和修改的样式 */
-.header-top {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.competitors-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1f2937;
-  white-space: nowrap;
-}
-
-.competitors-list {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  flex: 1;
-}
-
-.competitor-tag {
-  margin: 0;
-  padding: 4px 8px;
-  background: white;
-  border: 1px solid rgba(24, 144, 255, 0.2);
-}
-
-.competitor-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-}
-
-.competitor-name {
-  font-weight: 500;
-  color: #1f2937;
-}
-
-.competitor-link {
-  color: #6b7280;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.setup-steps {
-  margin-bottom: 24px;
-  padding: 0 40px;
-}
-
-.step-content {
-  min-height: 200px;
-}
-
-.basic-info-section {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.compact-input {
-  max-width: 100%;
-}
-
-.steps-action {
-  margin-top: 24px;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  padding: 0 24px;
-}
-
-/* 调整弹窗高度 */
-:deep(.ant-modal-body) {
-  max-height: 600px;
-  overflow-y: auto;
-}
-
-/* 优化步骤条样式 */
-:deep(.ant-steps-item-title) {
-  font-size: 14px;
-}
-
-:deep(.ant-steps-item-active .ant-steps-item-title) {
-  color: #1890ff;
-}
-
-/* 添加新的样式 */
-.features-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #1890ff;
-  cursor: pointer;
-  font-size: 14px;
-  user-select: none;
-}
-
-.toggle-icon {
-  transition: transform 0.3s ease;
-}
-
-.toggle-icon.is-expanded {
-  transform: rotate(180deg);
-}
-
-.features-wrapper {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease-out;
-}
-
-.features-wrapper.expanded {
-  max-height: 500px; /* 根据实际内容调整 */
-}
-
-/* 修改按钮容器样式 */
-.steps-action {
-  margin-top: 24px;
-  padding: 20px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.action-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  align-items: center;
-  
-  .ant-btn {
-    min-width: 120px;  /* 统一按钮最小宽度 */
-    height: 40px;      /* 统一按钮高度 */
-    font-size: 14px;   /* 统一字体大小 */
-    display: flex;     /* 使用flex布局确保内容居中 */
-    align-items: center;
-    justify-content: center;
-    padding: 0 24px;   /* 统一内边距 */
-    
-    &.submit-button {
-      background: #1890ff;
-      border-color: #1890ff;
-      
-      &:hover {
-        background: #40a9ff;
-        border-color: #40a9ff;
-      }
-    }
-  }
-}
-
-/* 移除之前的 submit-button margin */
-.submit-button {
-  margin-left: 0;  /* 移除之前的左边距 */
-}
-
-/* 修改竞品标签容器样式 */
-.competitors-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  width: 100%;
-}
-
-/* 修改竞品标签样式 */
-.competitor-tag {
-  display: inline-flex;
-  max-width: fit-content; /* 根据内容自适应宽度 */
-  background: white;
-  border: 1px solid rgba(24, 144, 255, 0.2);
-  border-radius: 4px;
-  padding: 4px 8px;
-}
-
-/* 修改竞品信息样式 */
-.competitor-info {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 100%;
-}
-
-.competitor-name {
-  font-weight: 500;
-  color: #1f2937;
-  white-space: nowrap;
-}
-
-.competitor-link {
-  color: #6b7280;
-  font-size: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  max-width: 200px; /* 限制链接最大宽度 */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+/* 添加或修改以下样式 */
+:deep(.ant-typography-secondary) {
+  font-size: 12px; /* 调整为你需要的字号 */
 }
 </style>
-

@@ -4,7 +4,23 @@
     description="Analyze competitors and plan your SEO keywords"
     icon="📊"
   >
-    <!-- 主标签页 -->
+
+    <!-- Domain not configured notice -->
+    <template v-if="!domainConfigured">
+      <div class="domain-notice">
+        <div class="notice-content">
+          <exclamation-circle-outlined class="notice-icon" />
+          <h2>No Site Configured</h2>
+          <p>Please configure your domain in settings to use the keyword planning features</p>
+          <a-button type="primary" @click="goToDashboard">
+            Configure Domain
+          </a-button>
+        </div>
+      </div>
+    </template>
+
+    <template v-else>
+      <!-- 主标签页 -->
     <a-tabs v-model:activeKey="activeTabKey">
       <template #rightExtra>
         <a-button 
@@ -191,6 +207,7 @@
         <div>Processing task {{ currentTaskIndex + 1 }} of {{ selectedRows.length }}</div>
       </a-space>
     </a-modal>
+    </template>
   </page-layout>
 </template>
 
@@ -201,7 +218,8 @@ import {
   RobotOutlined,
   LeftOutlined,
   RightOutlined,
-  LoadingOutlined
+  LoadingOutlined,
+  ExclamationCircleOutlined
 } from '@ant-design/icons-vue'
 import { useRouter } from 'vue-router'
 import KeywordsTable from './KeywordsTable.vue'
@@ -234,6 +252,7 @@ export default defineComponent({
 
   setup() {
     const router = useRouter()
+    const domainConfigured = ref(false)
     
     // 基础状态
     const loading = ref(false)
@@ -270,6 +289,34 @@ export default defineComponent({
       undeveloped: { current: 1, pageSize: 10, total: 0 },
       unique: { current: 1, pageSize: 10, total: 0 },
       weak: { current: 1, pageSize: 10, total: 0 }
+    })
+
+    // Add domain status check
+    const checkDomainStatus = async () => {
+      try {
+        const customerId = localStorage.getItem('currentCustomerId')
+        const response = await apiClient.getProductsByCustomerId(customerId)
+        domainConfigured.value = response.data?.domainStatus || false
+      } catch (error) {
+        console.error('Failed to fetch product info:', error)
+        domainConfigured.value = false
+      }
+    }
+
+    // Add navigation to settings
+    const goToDashboard = () => {
+      router.push('/dashboard')
+    }
+
+    // Modify onMounted to check domain status first
+    onMounted(async () => {
+      await checkDomainStatus()
+      if (domainConfigured.value) {
+        // Only load data if domain is configured
+        loadProductInfo()
+        fetchKeywordsData('common', 1)
+        fetchBatchData()
+      }
     })
 
     // 计算属性
@@ -348,7 +395,7 @@ export default defineComponent({
     // 方法定义
     const loadProductInfo = async () => {
       try {
-        const customerId = localStorage.getItem('currentUserId')
+        const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.getProductsByCustomerId(customerId)
         if (response?.code === 200) {
           productInfo.value = response.data
@@ -480,7 +527,7 @@ export default defineComponent({
             batchId: Date.now().toString(),
             batchName: taskNames.value[i],
             createdAt: new Date().toISOString(),
-            customerId: localStorage.getItem('currentUserId'),
+            customerId: localStorage.getItem('currentCustomerId'),
             generationStatus: "pending",
             articleType: task.Category === 'Blog' ? 'Blog' : 'Landing Page',
             relatedKeyword: task.Keywords,
@@ -509,7 +556,7 @@ export default defineComponent({
 
     const fetchBatchData = async () => {
       try {
-        const customerId = localStorage.getItem('currentUserId')
+        const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.getBatchHistoryData(customerId)
         if (response.code === 200) {
           batchData.value = response.data
@@ -544,6 +591,8 @@ export default defineComponent({
     })
 
     return {
+      domainConfigured,
+      goToDashboard,
       loading,
       activeTabKey,
       comparisonType,
@@ -582,6 +631,50 @@ export default defineComponent({
 </script>
 
 <style>
+.domain-notice {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 200px);
+  background: #fff;
+  border-radius: 16px;
+}
+
+.notice-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.notice-icon {
+  font-size: 48px;
+  color: #faad14;
+  margin-bottom: 24px;
+}
+
+.notice-content h2 {
+  font-size: 24px;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.notice-content p {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.notice-content .ant-btn {
+  background: linear-gradient(135deg, #60A5FA, #3B82F6);
+  border: none;
+  height: 40px;
+  padding: 0 32px;
+  font-size: 16px;
+  border-radius: 20px;
+}
+
+.notice-content .ant-btn:hover {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+}
 /* 最小必要的样式 */
 .ant-tag {
   margin: 2px;

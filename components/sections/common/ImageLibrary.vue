@@ -61,7 +61,7 @@ export default {
     const fetchAssets = async () => {
       loading.value = true
       try {
-        const customerId = localStorage.getItem('currentUserId')
+        const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.getMedia(customerId, 'image')
         assets.value = response.data ? response.data.map(item => ({
           id: item.mediaId,
