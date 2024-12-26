@@ -116,7 +116,7 @@
               />
             </a-form-item>
 
-            <!-- 基本信息 -->
+            <!-- 基��信息 -->
             <a-form-item label="Basic Information">
               <div class="info-grid">
                 <div class="info-item">
@@ -276,7 +276,7 @@ export default defineComponent({
     const selectedLanguages = ref(['en', 'zh']) // 默认全选
 
     const languageOptions = [
-      { label: 'English', value: 'en', disabled: true }, // ��语必选
+      { label: 'English', value: 'en', disabled: true }, // 语必选
       { label: '中文', value: 'zh' }
     ]
 
@@ -315,7 +315,6 @@ export default defineComponent({
         // Only load data if domain is configured
         loadProductInfo()
         fetchKeywordsData('common', 1)
-        fetchBatchData()
       }
     })
 
@@ -544,7 +543,6 @@ export default defineComponent({
         }
 
         message.success(`Successfully created ${selectedRows.value.length} tasks`)
-        fetchBatchData()
       } catch (error) {
         message.error('Failed to create tasks')
       } finally {
@@ -554,40 +552,16 @@ export default defineComponent({
       }
     }
 
-    const fetchBatchData = async () => {
-      try {
-        const customerId = localStorage.getItem('currentCustomerId')
-        const response = await apiClient.getBatchHistoryData(customerId)
-        if (response.code === 200) {
-          batchData.value = response.data
-          updateArticlesTaskStatus()
-        }
-      } catch (error) {
-        message.error('Failed to fetch batch data')
-      }
-    }
-
-    const updateArticlesTaskStatus = () => {
-      if (!firstArticlesData.value || !batchData.value) return
-      firstArticlesData.value = firstArticlesData.value.map(article => ({
-        ...article,
-        taskStatus: batchData.value.some(batch => batch.topic === article['English Title'])
-          ? 'has_task'
-          : 'no_task'
-      }))
-    }
-
     const getTaskStatusColor = (status) => status === 'has_task' ? '#10B981' : '#F43F5E'
     const getTaskStatusLabel = (status) => status === 'has_task' ? 'Task Created' : 'No Task'
 
     // 监听数据变化
-    watch(batchData, updateArticlesTaskStatus)
+    watch(batchData)
 
     // 组件挂载
     onMounted(() => {
       loadProductInfo()
       fetchKeywordsData('common', 1)
-      fetchBatchData()
     })
 
     return {
