@@ -1,12 +1,58 @@
 <template>
-  <a-layout style="height: 100vh; background: linear-gradient(135deg, #E8F0FF 0%, #C7D9FF 100%);">
-    <a-layout-content
-      style="display: flex; align-items: center; justify-content: center; height: 100%; padding: 20px;"
+  <a-layout style="height: 100vh;">
+    <a-layout-sider 
+      width="50%"
+      class="left-side"
     >
-      <div
-        class="login-container"
-        style="width: 400px; padding: 40px; background: rgba(255, 255, 255, 0.95); border-radius: 24px; box-shadow: 0 8px 32px rgba(108, 152, 255, 0.15); border: 1px solid rgba(108, 152, 255, 0.2);"
-      >
+      <div class="slogan-container">
+        <div class="brand-mark">
+          <div class="glowing-circle"></div>
+          <div class="pulse-ring"></div>
+        </div>
+        
+        <h1 class="main-slogan">
+          <span class="gradient-text">AI-crafted Content</span>
+          <br/>That Delivers Results.
+        </h1>
+        <p class="sub-slogan">
+          Dominate search results and drive more traffic with AI-generated landing pages 
+          and blog posts that are optimized for your audience and search engines.
+        </p>
+
+        <div class="feature-grid">
+          <div class="feature-item">
+            <div class="feature-icon">✨</div>
+            <div class="feature-text">AI-Powered<br/>Content Creation</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-text">SEO-Optimized<br/>Strategy</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📈</div>
+            <div class="feature-text">Drive Organic<br/>Traffic</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 背景动画效果 -->
+      <div class="animated-shapes">
+        <div class="shape circle"></div>
+        <div class="shape square"></div>
+        <div class="shape triangle"></div>
+        <div class="floating-dots"></div>
+      </div>
+
+      <!-- 底部装饰 -->
+      <div class="bottom-decoration">
+        <div class="wave-pattern"></div>
+      </div>
+    </a-layout-sider>
+
+    <a-layout-content
+      class="right-side"
+    >
+      <div class="login-container">
         <div class="logo-section">
           <h2 class="app-title">
             <span class="website-text">Website</span><span class="lm-text">LM</span> 
@@ -264,7 +310,7 @@
     </a-layout-content>
   </a-layout>
 
-  <!-- 添加首次登录设置密码的弹窗 -->
+  <!-- 添加次登录设置密码的弹窗 -->
   <a-modal
     v-model:visible="showSetPasswordModal"
     title="设置密码"
@@ -810,7 +856,7 @@ export default {
       if (!newPassword || !confirmPassword) {
         this.$notification.error({
           message: '错误',
-          description: '请填写所有字段'
+          description: '请写写所有字段'
         });
         return;
       }
@@ -1069,5 +1115,396 @@ export default {
   color: #999;
   cursor: not-allowed;
   background: #f5f5f5;
+}
+
+:deep(.ant-layout-sider) {
+  position: relative;
+  overflow: hidden;
+}
+
+.login-container {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+/* 左侧样式 */
+.left-side {
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.brand-mark {
+  position: relative;
+  margin-bottom: 40px;
+}
+
+.glowing-circle {
+  width: 12px;
+  height: 12px;
+  background: #4B89FF;
+  border-radius: 50%;
+  position: relative;
+  animation: glow 2s ease-in-out infinite;
+}
+
+.pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  border: 2px solid #4B89FF;
+  border-radius: 50%;
+  animation: pulse 2s ease-out infinite;
+}
+
+.slogan-container {
+  max-width: 600px;
+  z-index: 1;
+  position: relative;
+}
+
+.main-slogan {
+  font-size: 56px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 24px;
+  color: #2C5282;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #4B89FF 0%, #2C5282 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sub-slogan {
+  font-size: 18px;
+  line-height: 1.8;
+  color: #4A5568;
+  margin-bottom: 40px;
+  animation: fadeInUp 0.8s ease-out 0.2s backwards;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 80px;
+  padding: 0 20px;
+  width: 100%;
+}
+
+.feature-item {
+  background: rgba(75, 137, 255, 0.03);
+  padding: 40px 30px;
+  border-radius: 24px;
+  text-align: center;
+  transition: all 0.4s ease;
+  border: 1px solid rgba(75, 137, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+  min-height: 220px;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, 
+    rgba(75, 137, 255, 0.15) 0%, 
+    rgba(44, 82, 130, 0.15) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.feature-item:hover {
+  transform: translateY(-12px);
+  border-color: rgba(75, 137, 255, 0.3);
+  box-shadow: 
+    0 12px 32px rgba(75, 137, 255, 0.15),
+    0 4px 8px rgba(75, 137, 255, 0.1);
+}
+
+.feature-item:hover::before {
+  opacity: 1;
+}
+
+.feature-icon {
+  font-size: 48px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: rgba(75, 137, 255, 0.05);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover .feature-icon {
+  transform: scale(1.1);
+  background: rgba(75, 137, 255, 0.1);
+}
+
+.feature-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2C5282;
+  position: relative;
+  z-index: 1;
+  margin-top: 16px;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  width: 100%;
+}
+
+.feature-item:nth-child(1)::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(75, 137, 255, 0.1) 0%, transparent 70%);
+  top: -20px;
+  left: -20px;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.feature-item:nth-child(2)::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(44, 82, 130, 0.1) 0%, transparent 70%);
+  bottom: -20px;
+  right: -20px;
+  border-radius: 50%;
+  z-index: 0;
+}
+
+.feature-item:nth-child(3)::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(75, 137, 255, 0.1) 0%, transparent 70%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 0;
+}
+
+@keyframes pulse-glow {
+  0% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 0.5; }
+}
+
+.feature-item::after {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.floating-dots {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background-image: 
+    radial-gradient(#4B89FF 1px, transparent 1px),
+    radial-gradient(#2C5282 1px, transparent 1px);
+  background-size: 50px 50px, 40px 40px;
+  background-position: 0 0, 25px 25px;
+  opacity: 0.05;
+  animation: floatBackground 20s linear infinite;
+  transform: translateY(-50%);
+}
+
+.wave-pattern {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(45deg, #4B89FF 25%, transparent 25%) -50px 0,
+              linear-gradient(-45deg, #4B89FF 25%, transparent 25%) -50px 0;
+  background-size: 100px 100px;
+  background-color: transparent;
+  opacity: 0.05;
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px #4B89FF; }
+  50% { box-shadow: 0 0 40px #4B89FF; }
+}
+
+@keyframes pulse {
+  0% { 
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+  100% { 
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+@keyframes floatBackground {
+  0% { 
+    transform: translateY(-50%) rotate(0deg); 
+  }
+  100% { 
+    transform: translateY(-50%) rotate(360deg); 
+  }
+}
+
+.shape {
+  position: absolute;
+  opacity: 0.1;
+  filter: blur(2px);
+}
+
+.circle {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4B89FF 0%, #2C5282 100%);
+  top: 10%;
+  left: 10%;
+  animation: float 15s ease-in-out infinite;
+}
+
+.square {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(135deg, rgba(44, 82, 130, 0.1) 0%, rgba(75, 137, 255, 0.1) 100%);
+  bottom: 15%;
+  right: 20%;
+  animation: float 20s ease-in-out infinite;
+  transform: rotate(45deg);
+  opacity: 0.08;
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 100px solid transparent;
+  border-right: 100px solid transparent;
+  border-bottom: 175px solid rgba(75, 137, 255, 0.15);
+  top: 50%;
+  left: 50%;
+  animation: float 18s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0) rotate(0deg); 
+    filter: blur(2px);
+  }
+  50% { 
+    transform: translateY(-30px) rotate(5deg); 
+    filter: blur(4px);
+  }
+}
+
+/* 右侧样式 */
+.right-side {
+  width: 50%;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E6E9FF 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.right-side::before {
+  content: '';
+  position: absolute;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(
+    circle,
+    rgba(75, 137, 255, 0.15) 0%,
+    rgba(75, 137, 255, 0.1) 20%,
+    rgba(75, 137, 255, 0.05) 40%,
+    transparent 70%
+  );
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: background-glow 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes background-glow {
+  0%, 100% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+/* 修改登录容器样式 */
+.login-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.6),
+    0 0 60px rgba(75, 137, 255, 0.2),
+    0 0 100px rgba(75, 137, 255, 0.1),
+    0 0 140px rgba(75, 137, 255, 0.05);
+  width: 400px;
+  padding: 40px;
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  animation: container-glow 6s ease-in-out infinite;
+}
+
+/* 增强发光动画 */
+@keyframes container-glow {
+  0%, 100% {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.6),
+      0 0 60px rgba(75, 137, 255, 0.2),
+      0 0 100px rgba(75, 137, 255, 0.1),
+      0 0 140px rgba(75, 137, 255, 0.05);
+  }
+  50% {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.1),
+      0 0 0 1px rgba(255, 255, 255, 0.6),
+      0 0 80px rgba(75, 137, 255, 0.3),
+      0 0 120px rgba(75, 137, 255, 0.2),
+      0 0 160px rgba(75, 137, 255, 0.1);
+  }
 }
 </style>
