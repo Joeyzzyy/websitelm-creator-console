@@ -346,11 +346,12 @@
   }
   
   .preview-area {
-    background: white;
+    background: #f8fafc;
     min-width: 768px;
     overflow-y: auto;
     height: 800px;
     border-radius: 8px;
+    padding: 24px;
   }
   
   .preview-header {
@@ -358,14 +359,12 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 16px;
-    padding: 0 16px;
-    background: #f8fafc;
-    border-radius: 8px;
-    height: 48px;
+    color: #64748b;
+    font-weight: 500;
   }
   
   .preview-content {
-    height: calc(100% - 64px);
+    height: calc(100% - 40px);
     overflow-y: auto;
   }
   

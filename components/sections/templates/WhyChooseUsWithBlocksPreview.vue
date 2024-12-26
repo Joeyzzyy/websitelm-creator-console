@@ -5,10 +5,6 @@ const props = defineProps({
   section: {
     type: Object,
     required: true
-  },
-  author: {
-    type: Object,
-    default: () => ({})
   }
 });
 

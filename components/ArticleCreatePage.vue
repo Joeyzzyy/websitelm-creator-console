@@ -10,7 +10,13 @@
 
     <div v-else>
       <!-- 左侧面板 -->
-      <div class="side-nav">
+      <div class="side-nav" :class="{ 'collapsed': isSideNavCollapsed }">
+        <div class="collapse-button" @click="toggleSideNav">
+          <div class="collapse-icon">
+            <LeftOutlined :class="{ 'rotated': isSideNavCollapsed }" />
+          </div>
+        </div>
+        
         <a-tabs 
           v-model:activeKey="activeTab"
           class="compact-tabs"
@@ -227,7 +233,7 @@
       </div>
 
       <!-- 内容区域 -->
-      <div class="editor-content" @dragover.prevent @drop="handleDrop">
+      <div class="editor-content" :class="{ 'expanded': isSideNavCollapsed }" @dragover.prevent @drop="handleDrop">
         <div class="sections-container">
           <!-- 空状态提示 -->
           <div v-if="articleData.sections.length === 0" class="empty-state">
@@ -269,6 +275,7 @@
         :keywords-stats="articleData?.pageStats"
         @refresh="handleRefreshMetrics"
         :defaultCollapsed="true"
+        :isCollapsible="true"
       />
     </div>
   </div>
@@ -290,7 +297,7 @@ import {
   AlignLeftOutlined,
   ReloadOutlined,
   EyeOutlined,
-  
+  LeftOutlined
 } from '@ant-design/icons-vue';
 import SectionWrapper from './sections/index.vue';
 import { useRouter, useRoute } from 'vue-router';
@@ -315,7 +322,7 @@ import MeetOurTeam from './sections/templates/MeetOurTeam.vue';
 import JobList from './sections/templates/JobList.vue';
 import CallToActionWithEmailInput from './sections/templates/CallToActionWithEmailInput.vue';
 import config from '../config/settings';
-
+import KeyResultsWithTextBlock from './sections/templates/KeyResultsWithTextBlock.vue';
 export default defineComponent({
   name: 'ArticleCreatePage',
   components: {
@@ -331,6 +338,7 @@ export default defineComponent({
     AlignLeftOutlined,
     ReloadOutlined,
     EyeOutlined,
+    LeftOutlined,
     SectionWrapper,
     TitleSection,
     TitleSectionWithImage,
@@ -345,6 +353,7 @@ export default defineComponent({
     Faqs,
     CallToActionComplex,
     FeaturesTabbed,
+    KeyResultsWithTextBlock,
     FloatingStats,
     MeetOurTeam,
     JobList,
@@ -506,7 +515,7 @@ export default defineComponent({
 
     // 添加组件到文章
     const addComponent = (component, index = null) => {
-      console.log('Adding component:', component); // 添加这行
+      console.log('Adding component:', component); // 添加这
       try {
         // 检查组件是否已存在
         const componentExists = articleData.value.sections.some(
@@ -786,7 +795,7 @@ export default defineComponent({
         allContent += extractText(section) + ' ';
       });
 
-      // 计���关键词统计
+      // 计算关键词统计
       const words = allContent.toLowerCase().split(/\s+/);
       const totalWords = words.length;
 
@@ -816,7 +825,7 @@ export default defineComponent({
     const handleRefreshMetrics = async () => {
       refreshingMetrics.value = true;
       try {
-        // 新算统计数据
+        // 新算计数
         calculateContentMetrics();
         // 添加动画效果
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -984,6 +993,14 @@ export default defineComponent({
       }
     }
 
+    // 添加新的响应式变量
+    const isSideNavCollapsed = ref(false);
+    
+    // 添加切换侧边栏的方法
+    const toggleSideNav = () => {
+      isSideNavCollapsed.value = !isSideNavCollapsed.value;
+    };
+
     return {
       loading,
       saving,
@@ -1021,6 +1038,8 @@ export default defineComponent({
       confirmPublish,
       verifiedDomains,
       loadVerifiedDomains,
+      isSideNavCollapsed,
+      toggleSideNav,
     };
   }
 });
@@ -1041,7 +1060,7 @@ export default defineComponent({
 /* 左侧导航式增强 */
 .side-nav {
   position: fixed;
-  left: 24px;
+  left: 40px;
   top: 88px;
   bottom: 24px;
   width: 300px;
@@ -1051,6 +1070,73 @@ export default defineComponent({
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.side-nav.collapsed {
+  width: 48px;
+  overflow: hidden;
+}
+
+.collapse-button {
+  position: absolute;
+  right: 0px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 40px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.collapse-button:hover {
+  background: #f0f9ff;
+  border-color: #38BDF8;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.2);
+}
+
+.collapse-button:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.collapse-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12px;
+  height: 12px;
+  color: #64748b;
+  transition: all 0.3s ease;
+}
+
+.collapse-button:hover .collapse-icon {
+  color: #38BDF8;
+}
+
+.collapse-icon .anticon {
+  font-size: 10px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapse-icon .anticon.rotated {
+  transform: rotate(180deg);
+}
+
+/* 优化收缩动画 */
+.side-nav {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.side-nav.collapsed .collapse-button {
+  right: 0px;
 }
 
 /* 组件列表样式 */
@@ -1225,8 +1311,13 @@ export default defineComponent({
   overflow-y: auto;
   height: 100vh;
   padding: 88px 32px 32px;
-  margin-left: 320px;
+  margin-left: 356px;
   max-width: 1500px; /* 增加内容区最大宽度 */
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.editor-content.expanded {
+  margin-left: 104px;
 }
 
 /* 顶部操作栏样式 */
@@ -1300,9 +1391,9 @@ export default defineComponent({
     left: 24px;
   }
   
-  .editor-content {
-    margin-left: 324px;
-    width: calc(100% - 324px);
+  .editor-content.expanded {
+    margin-left: 72px;
+    width: calc(100% - 72px);
   }
 }
 

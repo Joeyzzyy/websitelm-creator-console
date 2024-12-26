@@ -5,27 +5,26 @@ const props = defineProps({
       required: true
     }
 });
-
-const { topContent, bottomContent } = props.section;
-const { icon, title, description } = topContent;
 </script>
 
 <template>
   <div class="w-full bg-white py-16 md:py-24">
     <div class="max-w-6xl mx-auto px-4">
       <div class="text-center mb-12">
-        <div v-if="icon" class="text-4xl mb-4">{{ icon }}</div>
+        <div v-if="props.section.topContent.icon" class="text-4xl mb-4">
+          {{ props.section.topContent.icon }}
+        </div>
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-          {{ title }}
+          {{ props.section.topContent.title }}
         </h2>
         <p class="text-base text-gray-600 max-w-2xl mx-auto">
-          {{ description }}
+          {{ props.section.topContent.description }}
         </p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div
-          v-for="(module, index) in bottomContent"
+          v-for="(module, index) in props.section.bottomContent"
           :key="index"
           class="rounded-lg transition-all duration-200 bg-white border border-gray-100 hover:border-gray-200 hover:shadow-sm p-8 group flex flex-col items-center text-center"
         >

@@ -291,18 +291,16 @@ const componentValidationRules = {
     //   ]
     // },
   
-    // KeyResultsWithTextBlock: {
-    //   requiredFields: [
-    //     'leftContent.title',
-    //     'leftContent.content',
-    //     'rightContent'
-    //   ],
-    //   allowedFields: [
-    //     'leftContent.title',
-    //     'leftContent.content',
-    //     'rightContent'  
-    //   ]
-    // },
+    KeyResultsWithTextBlock: {
+      requiredFields: [
+        'leftContent',
+        'rightContent'
+      ],
+      allowedFields: [
+        'leftContent',
+        'rightContent'  
+      ]
+    },
   
     // HowItWorksWithThreeBlocks: {
     //   requiredFields: [

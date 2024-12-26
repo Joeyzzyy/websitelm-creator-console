@@ -1,5 +1,5 @@
 <template>
-  <page-layout title="Task Management" description="Manage your AI-generation tasks" icon="✨">
+  <page-layout title="Page Management" description="Manage your AI-generation pages here" icon="✨">
     <div class="task-container">
       <!-- Header -->
       <div class="header">
@@ -81,7 +81,7 @@
 
                 <template v-if="column.key === 'hasEmpty'">
                   <a-tag :color="record.hasEmpty ? 'warning' : 'success'">
-                    {{ record.hasEmpty ? 'Has Empty' : 'Complete' }}
+                    {{ record.hasEmpty ? 'Has Empty Fields' : 'Complete' }}
                   </a-tag>
                 </template>
 

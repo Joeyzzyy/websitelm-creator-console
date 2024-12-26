@@ -17,6 +17,16 @@ export const availableComponents = [
     ]
   },
   {
+    category: 'Blog Writing',
+    items: [
+      {
+        type: 'KeyResultsWithTextBlock',
+        label: 'Key Results With Text Block',
+        template: createCleanComponentData('KeyResultsWithTextBlock')
+      }
+    ]
+  },
+  {
     category: 'Hero Sections',
     items: [
       {

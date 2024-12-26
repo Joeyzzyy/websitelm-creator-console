@@ -180,9 +180,8 @@
                               :loading="saving"
                               @click="saveDeploymentSettings"
                               class="save-btn"
-                              :disabled="deploymentForm.method === 'subfolder'"
                             >
-                              {{ deploymentForm.method === 'subfolder' ? 'Coming soon...' : 'Add' }}
+                              Add
                             </a-button>
                           </a-form-item>
                         </div>

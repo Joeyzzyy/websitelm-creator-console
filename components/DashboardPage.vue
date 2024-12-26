@@ -238,7 +238,7 @@
             <template #title>
               <span>📈 Traffic Analytics (Last 15 Days)</span>
             </template>
-            <!-- 未连接 GSC ��显示提示 -->
+            <!-- 未连接 GSC 时显示提示 -->
             <div v-if="!isGscConnected" class="not-connected-notice">
               <a-empty description="Google Search Console Not Connected" />
             </div>
@@ -509,7 +509,7 @@ import SuccessModal from './SuccessModal.vue'
 import { CalendarOutlined, LinkOutlined, SearchOutlined, FolderOpenOutlined } from '@ant-design/icons-vue'
 import { GlobalOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
-import * as echarts from 'echarts' // 需要安�� echarts
+import * as echarts from 'echarts' // 需要安装 echarts
 
 export default defineComponent({
   components: {
@@ -770,7 +770,7 @@ export default defineComponent({
           // 编辑式 - 调用更接口
           response = await apiClient.updateProduct(this.formState.productId, formData);
         } else {
-          // Onboarding模式 - 调用创建接口
+          // Onboarding模式 - 调���创建接口
           response = await apiClient.createProduct(formData);
         }
 
@@ -1295,7 +1295,7 @@ export default defineComponent({
         this.verifyRecord = null;
       }
       this.onboardingModalVisible = false;
-      // 重置原始状态
+      // 重置原始���态
       this.originalDomainStatus = null;
     },
     async loadGscAnalytics() {
@@ -1524,11 +1524,6 @@ export default defineComponent({
         this.chart.resize()
       }
     },
-
-    async fetchData() {
-      // 获取数据的具体实现
-      // ...
-    }
   }
 })
 </script>
@@ -1551,9 +1546,6 @@ export default defineComponent({
   border-bottom: 1px solid #f0f0f0;
 }
 
-:deep(.ant-descriptions-item) {
-  padding-bottom: 16px;
-}
 
 .d-block {
   display: block;
@@ -1735,7 +1727,7 @@ export default defineComponent({
 
 /* 添加或修改以下样式 */
 :deep(.ant-typography-secondary) {
-  font-size: 12px; /* ��整为你需要的字号 */
+  font-size: 12px; /* 整为你需要的字号 */
 }
 
 .competitors-section {
@@ -1768,5 +1760,11 @@ export default defineComponent({
 
 .ant-card-body {
   padding: 0px 24px 0px 24px;
+}
+
+/* 覆盖 Descriptions 组件的 padding */
+:deep(.ant-descriptions .ant-descriptions-row > th),
+:deep(.ant-descriptions .ant-descriptions-row > td) {
+  padding-bottom: 0;  /* 移除底部 padding */
 }
 </style>
