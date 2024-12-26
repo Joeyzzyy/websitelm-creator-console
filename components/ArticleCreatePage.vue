@@ -57,8 +57,15 @@
 
                 <a-form-item label="Topic">
                   <a-input
-                    v-model:value="batchInfo.topic"
+                    v-model:value="articleData.topic"
                     placeholder="Enter topic"
+                  />
+                </a-form-item>
+
+                <a-form-item v-if="isEditMode" label="URL Suffix">
+                  <a-input
+                    v-model:value="articleData.urlSuffix"
+                    placeholder="Enter URL suffix"
                   />
                 </a-form-item>
 
@@ -71,35 +78,36 @@
                   />
                 </a-form-item>
 
-                <a-form-item label="Article Type">
+                <a-form-item label="Page Type">
+                  <template v-if="isEditMode">
+                    <div class="readonly-field">
+                      {{ articleData.articleType }}
+                    </div>
+                  </template>
                   <a-select
-                    v-model:value="batchInfo.articleType"
+                    v-else
+                    v-model:value="articleData.articleType"
+                    allowClear
+                    placeholder="Select page type"
                   >
-                    <a-select-option value="blog">Blog</a-select-option>
-                    <a-select-option value="landingpage">Landing Page</a-select-option>
+                    <a-select-option value="Blog">Blog</a-select-option>
+                    <a-select-option value="Landing Page">Landing Page</a-select-option>
                   </a-select>
                 </a-form-item>
 
                 <a-form-item label="Language">
                   <template v-if="isEditMode">
                     <div class="readonly-field">
-                      {{ getLanguageLabel(batchInfo.language) }}
+                      {{ getLanguageLabel(articleData.language) }}
                     </div>
                   </template>
                   <a-select
                     v-else
-                    v-model:value="batchInfo.language"
+                    v-model:value="articleData.language"
                   >
                     <a-select-option value="en">English</a-select-option>
                     <a-select-option value="zh">中文</a-select-option>
                   </a-select>
-                </a-form-item>
-
-                <a-form-item label="URL Suffix">
-                  <a-input
-                    v-model:value="articleData.urlSuffix"
-                    placeholder="Enter URL suffix"
-                  />
                 </a-form-item>
               </a-form>
             </div>
@@ -177,20 +185,32 @@
         </a-button>
         
         <div class="header-actions">
-          <template v-if="!isEditMode">
+          <template v-if="isEditMode">
+            <a-button 
+              type="default"
+              @click="handlePreview"
+              :style="{ height: '36px' }"
+            >
+              <EyeOutlined /> Preview
+            </a-button>
+            <a-tooltip :title="getPublishTooltip(articleData)">
+              <a-button
+                :type="articleData.publishStatus === 'publish' ? 'default' : 'primary'"
+                @click="handlePublish"
+                :disabled="!canPublish"
+                :loading="publishing"
+                :style="{ height: '36px' }"
+              >
+                {{ articleData.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
+              </a-button>
+            </a-tooltip>
             <a-button 
               type="primary"
               @click="() => handleSave(false)"
               :loading="saving"
+              :style="{ height: '36px' }"
             >
               Save Page
-            </a-button>
-            <a-button 
-              type="link"
-              @click="() => handleSave(true)"
-              :loading="saving"
-            >
-              Save & Quit
             </a-button>
           </template>
           <template v-else>
@@ -198,6 +218,7 @@
               type="primary"
               @click="() => handleSave(false)"
               :loading="saving"
+              :style="{ height: '36px' }"
             >
               Save Page
             </a-button>
@@ -247,13 +268,14 @@
         :metrics="contentMetrics"
         :keywords-stats="articleData?.pageStats"
         @refresh="handleRefreshMetrics"
+        :defaultCollapsed="true"
       />
     </div>
   </div>
 </template>
 
 <script>
-import { defineComponent, ref, watch, nextTick, computed, onMounted } from 'vue';
+import { defineComponent, ref, watch, nextTick, computed, onMounted, reactive } from 'vue';
 import { message } from 'ant-design-vue';
 import { 
   ArrowLeftOutlined, 
@@ -267,6 +289,7 @@ import {
   UnorderedListOutlined,
   AlignLeftOutlined,
   ReloadOutlined,
+  EyeOutlined,
 } from '@ant-design/icons-vue';
 import SectionWrapper from './sections/index.vue';
 import { useRouter, useRoute } from 'vue-router';
@@ -290,6 +313,7 @@ import { availableComponents } from '../config/availableComponents';
 import MeetOurTeam from './sections/templates/MeetOurTeam.vue';
 import JobList from './sections/templates/JobList.vue';
 import CallToActionWithEmailInput from './sections/templates/CallToActionWithEmailInput.vue';
+import config from '../config/settings';
 
 export default defineComponent({
   name: 'ArticleCreatePage',
@@ -305,6 +329,7 @@ export default defineComponent({
     UnorderedListOutlined,
     AlignLeftOutlined,
     ReloadOutlined,
+    EyeOutlined,
     SectionWrapper,
     TitleSection,
     TitleSectionWithImage,
@@ -343,35 +368,32 @@ export default defineComponent({
 
     // 在组件挂载时初始化数据
     onMounted(async () => {
+      await loadProductInfo();
+      await loadVerifiedDomains();
       try {
         if (isEditMode.value) {
           console.log('Edit mode detected, fetching article data...');
           const response = await apiClient.getArticleById(pageId.value);
           
           if (response?.code === 200 && response.data) {
+            console.log('Original articleType:', response.data.articleType);
+
             const articleDataWithSections = {
               ...response.data,
-              sections: response.data.sections || []
+              sections: response.data.sections || [],
+              urlSuffix: response.data.suffixURL || '',
+              keywords: response.data.relatedKeyword ? response.data.relatedKeyword.split(',') : [],
+              topic: response.data.topic || '',
+              articleType: response.data.articleType || '',
+              language: response.data.language || 'en',
             };
+
+            console.log('Processed articleType:', articleDataWithSections.articleType);
             
-            // 先保存原始数据
             originalArticle.value = JSON.parse(JSON.stringify(articleDataWithSections));
-            
-            // 再设置当前数据
             articleData.value = articleDataWithSections;
             
-            // 设置批次信息
-            batchInfo.value = {
-              articleType: response.data.articleType || 'landingpage',
-              language: response.data.language || 'en',
-              topic: response.data.topic || '',
-              relatedKeyword: response.data.relatedKeyword || ''
-            };
-            
-            console.log('Article data initialized:', {
-              original: originalArticle.value,
-              current: articleData.value
-            });
+            console.log('Final articleType:', articleData.value.articleType);
           } else {
             throw new Error(response?.message || 'Invalid response data');
           }
@@ -478,7 +500,7 @@ export default defineComponent({
       }
     };
 
-    // 添加新的响应式变量来跟踪拖拽的源引
+    // 添加新响应式变量来跟踪拖拽的源引
     const dragSourceIndex = ref(null);
 
     // 添加组件到文章
@@ -616,25 +638,6 @@ export default defineComponent({
       calculateContentMetrics();
     }, { deep: true });
 
-    // 修改批次信息的默认值，设置默认语言为英语
-    const batchInfo = ref({
-      articleType: 'landingpage',
-      language: 'en', // 默认设置为英语
-      relatedKeyword: '',
-      topic: ''
-    });
-
-    // 生成时间戳格式的批次名称
-    const generateBatchName = () => {
-      const now = new Date();
-      return now.getFullYear() +
-        ('0' + (now.getMonth() + 1)).slice(-2) +
-        ('0' + now.getDate()).slice(-2) +
-        ('0' + now.getHours()).slice(-2) +
-        ('0' + now.getMinutes()).slice(-2) +
-        ('0' + now.getSeconds()).slice(-2);
-    };
-
     const handleSave = async (shouldQuit = false) => {
       try {
         // 基本信息验证
@@ -659,7 +662,7 @@ export default defineComponent({
           throw new Error('Customer ID not found');
         }
 
-        // 处理 keywords：将数组转换为逗号分隔的字符串
+        // 处理 keywords将数组转换为逗号分隔的字符串
         const processedKeywords = Array.isArray(articleData.value.keywords)
           ? articleData.value.keywords.filter(k => k).join(',')
           : (articleData.value.keywords || '');
@@ -670,54 +673,46 @@ export default defineComponent({
           // 编辑模式：使用全量更新
           const updatePromises = [];
 
-          // 检查基本信息是否有变化
-          const hasBasicInfoChanges = 
-            articleData.value.title !== originalArticle.value.title ||
-            articleData.value.subTitle !== originalArticle.value.subTitle ||
-            articleData.value.description !== originalArticle.value.description;
-
-          // 如果基本信息有变化，添加更新请求
-          if (hasBasicInfoChanges) {
-            const pageUpdateData = {
-              title: articleData.value.title,
-              subTitle: articleData.value.subTitle,
-              description: articleData.value.description
-            };
-            updatePromises.push(
-              apiClient.updatePage(pageId.value, pageUpdateData)
-            );
-          }
-
+          // 直接更新页面所有信息
+          const pageUpdateData = {
+            title: articleData.value.title,
+            subTitle: articleData.value.subTitle,
+            description: articleData.value.description,
+            summary: articleData.value.summary,
+            topic: articleData.value.topic,
+            articleType: articleData.value.articleType,
+            suffixURL: articleData.value.urlSuffix,
+            relatedKeyword: processedKeywords,
+          };
+          
+          console.log('Saving page data:', pageUpdateData); // 添加日志
+          
+          // 添加更新页面信息的请求
           updatePromises.push(
-            apiClient.updateFullSections(articleData.value.pageId, {sections: articleData.value.sections})
+            apiClient.updatePage(pageId.value, pageUpdateData)
           );
 
-          response = await Promise.all(updatePromises);
+          // 添加更新sections请求
+          updatePromises.push(
+            apiClient.updateFullSections(pageId.value, {sections: articleData.value.sections})
+          );
 
+          // 并行执行所有更新请求
+          response = await Promise.all(updatePromises);
         } else {
           const requestData = {
-            batch: {
-              articleType: batchInfo.value.articleType,
-              batchId: '', 
-              batchName: generateBatchName(),
-              customerId: customerId,
-              languages: batchInfo.value.language,
-              numberOfWords: 2500,
-              relatedKeyword: processedKeywords,
-              topic: batchInfo.value.topic || '',
-              totalPages: 1
-            },
             page: {
               author: '',
-              batchId: '',
-              coverImage: '',
               customerId: customerId,
               description: articleData.value.description || '',
-              language: batchInfo.value.language,
+              language: articleData.value.language,
               subTitle: articleData.value.subTitle,
               summary: articleData.value.summary || '',
               title: articleData.value.title,
-              suffixURL: articleData.value.urlSuffix || ''
+              suffixURL: articleData.value.urlSuffix || '',
+              topic: articleData.value.topic,
+              articleType: articleData.value.articleType,
+              relatedKeyword: processedKeywords,
             },
             sections: articleData.value.sections
           };
@@ -790,7 +785,7 @@ export default defineComponent({
         allContent += extractText(section) + ' ';
       });
 
-      // 计算关键词统计
+      // 计���关键词统计
       const words = allContent.toLowerCase().split(/\s+/);
       const totalWords = words.length;
 
@@ -820,7 +815,7 @@ export default defineComponent({
     const handleRefreshMetrics = async () => {
       refreshingMetrics.value = true;
       try {
-        // 重新计算统计数据
+        // 新算统计数据
         calculateContentMetrics();
         // 添加动画效果
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -871,6 +866,123 @@ export default defineComponent({
       return languages[langCode] || langCode;
     };
 
+    const productInfo = ref(null);
+
+    const loadProductInfo = async () => {
+      try {
+        const response = await apiClient.getProductsByCustomerId();
+        
+        if (response?.code === 200) {
+          productInfo.value = response.data;
+        } else {
+          // 处理错误应
+          message.error('Failed to load product information');
+          productInfo.value = {}; // 设置为空对象而不是 null
+        }
+      } catch (error) {
+        console.error('Failed to load product information:', error);
+        message.error('Failed to load product information: ' + (error.message || 'Unknown error'));
+        productInfo.value = {}; // 设置为空对象而不是 null
+      }
+    };
+
+    const getPreviewUrl = (article) => {
+      return `${config.domains.preview}${article.language === 'zh' ? 'zh/' : 'en/'}${article.previewId}`;
+    };
+
+    const handlePreview = () => {
+      const previewUrl = getPreviewUrl({
+        previewId: articleData.value.previewId,
+        language: articleData.value.language
+      });
+      window.open(previewUrl, '_blank');
+    };
+
+    // 添加新的响应式变量
+    const publishing = ref(false)
+    const publishModal = reactive({
+      visible: false,
+      title: '',
+      content: '',
+      action: null
+    })
+
+    // 添加发布相关的方法
+    const canPublish = computed(() => {
+      return verifiedDomains.value.length > 0
+    })
+
+    const getPublishTooltip = (article) => {
+      if (!canPublish.value) {
+        return 'No verified sub-domain available. Please verify a domain in Settings first.'
+      }
+      return ''
+    }
+
+    const handlePublish = () => {
+      const isPublished = articleData.value.publishStatus === 'publish'
+      
+      if (!isPublished && !canPublish.value) {
+        message.error('No verified sub-domain available. Please verify a domain in Settings first.')
+        return
+      }
+
+      publishModal.visible = true
+      publishModal.title = isPublished ? 'Confirm Unpublish' : 'Confirm Publish'
+      publishModal.content = isPublished 
+        ? 'Are you sure you want to unpublish this page?' 
+        : 'Are you sure you want to publish this page?'
+      publishModal.action = isPublished ? 'unpublish' : 'publish'
+    }
+
+    const confirmPublish = async () => {
+      try {
+        publishing.value = true
+        const pageId = route.query.id || route.params.id
+        
+        await apiClient.updatePageStatus(pageId, publishModal.action)
+        
+        // 更新本地状态
+        articleData.value.publishStatus = publishModal.action === 'publish' ? 'publish' : 'create'
+        
+        message.success(`${publishModal.action === 'publish' ? 'Published' : 'Unpublished'} successfully`)
+        publishModal.visible = false
+      } catch (error) {
+        console.error('Publish action failed:', error)
+        message.error('Operation failed: ' + (error.message || 'Unknown error'))
+      } finally {
+        publishing.value = false
+      }
+    }
+
+    // 添加 verifiedDomains 响应式变量
+    const verifiedDomains = ref([])
+
+    // 添加加载域名信息的方法
+    const loadVerifiedDomains = async () => {
+      try {
+        const projectId = 'prj_ySV5jK2SgENiBpE5D2aTaeI3KfAo'
+        
+        const response = await apiClient.getVercelDomainInfo(projectId)
+        
+        // 确保 productInfo 已加载
+        if (!productInfo.value) {
+          await loadProductInfo()
+        }
+        
+        // 查找所有已验证的域名
+        verifiedDomains.value = response?.domains
+          ?.filter(domain => {
+            const isVerified = domain.verified || !domain.configDetails?.misconfigured
+            const hasProductInfo = productInfo.value?.projectWebsite === domain.name && productInfo.value?.domainStatus
+            return isVerified && hasProductInfo
+          })
+          ?.map(domain => domain.name) || []
+      } catch (error) {
+        console.error('Failed to load domain info:', error)
+      }
+    }
+
     return {
       loading,
       saving,
@@ -889,7 +1001,6 @@ export default defineComponent({
       handleSave,
       handleBack,
       availableComponents,
-      batchInfo,
       getKeywordStats,
       calculateKeywordStats,
       refreshingMetrics,
@@ -899,6 +1010,16 @@ export default defineComponent({
       pageId,
       getLanguageLabel,
       originalArticle,
+      productInfo,
+      handlePreview,
+      publishing,
+      publishModal,
+      canPublish,
+      getPublishTooltip,
+      handlePublish,
+      confirmPublish,
+      verifiedDomains,
+      loadVerifiedDomains,
     };
   }
 });
@@ -1017,7 +1138,7 @@ export default defineComponent({
   line-height: 1.5;
 }
 
-/* 拖放相关样式 */
+/* 放相关样式 */
 .section-wrapper {
   position: relative;
   transition: all 0.3s ease;
@@ -1126,6 +1247,14 @@ export default defineComponent({
 .header-actions {
   display: flex;
   gap: 12px;
+  align-items: center;
+}
+
+:deep(.ant-btn) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* 加载状态样式 */
@@ -1351,7 +1480,7 @@ export default defineComponent({
   }
 }
 
-/* 添加 Basic Info 表单样式 */
+/* 加 Basic Info 表单样式 */
 .basic-info-form {
   padding: 16px;
   height: calc(100vh - 180px);

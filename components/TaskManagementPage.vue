@@ -4,7 +4,7 @@
       <!-- Header -->
       <div class="header">
         <div class="header-left">
-          <h3>Task List</h3>
+          <h3>Page List</h3>
           <a-button type="link" :loading="loading" @click="handleRefresh">
             <template #icon><ReloadOutlined /></template>
             Refresh
@@ -26,7 +26,7 @@
         <div class="header-right">
           <a-input
             v-model:value="searchQuery"
-            placeholder="Search by task name..."
+            placeholder="Search by page title..."
             class="search-input"
             @input="handleSearch"
           >
@@ -43,74 +43,94 @@
         <div class="task-list">
           <!-- Empty State -->
           <div v-if="!loading && !tasks.length" class="empty-state">
-            <h3>No Task Available</h3>
-            <p>Go to "Keyword Planning" button to start creating your first task</p>
+            <h3>No Pages Available</h3>
+            <p>Go to "Keyword Planning" to start creating your first task</p>
           </div>
           
-          <!-- Task Cards -->
-          <div v-else-if="!loading" v-for="task in filteredTasks" :key="task.batchId" class="task-card">
-            <!-- Task Header -->
-            <div class="task-header">
-              <div class="task-info">
-                <h4>{{ task.batchName }}</h4>
-                <span>{{ task.createdAt }}</span>
-              </div>
-              
-              <div class="task-actions">
-                <a-tag :color="getStatusColor(task.status)">
-                  {{ task.articles.length }} Articles ({{ getPublishedCount(task.articles) }} Published)
-                </a-tag>
-                <a-button type="link" @click="deleteBatch(task.batchId)">
-                  <DeleteOutlined style="color: #ff4d4f" />
-                </a-button>
-              </div>
-            </div>
+            <a-table v-else-if="!loading"
+              :columns="columns"
+              :data-source="tasks"
+              :loading="loading"
+              :pagination="pagination"
+              @change="handleTableChange"
+            >
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.key === 'title'">
+                  <router-link :to="`/edit/${record.pageId}`">
+                    {{ record.title }}
+                  </router-link>
+                </template>
 
-            <!-- Articles Grid -->
-            <div class="article-list">
-              <div v-for="article in task.articles" :key="article.id" class="article-item">
-                <div class="article-content">
-                  <div class="article-tags">
-                    <a-tag 
-                      v-if="article.publishStatus === 'publish'" 
-                      class="published-tag"
-                      color="#52c41a">
-                      Published
-                    </a-tag>
-                    <a-tag 
-                      v-if="article.hasEmpty"
-                      class="warning-tag"
-                      color="red">
-                      Has Empty Fields
-                    </a-tag>
-                  </div>
-                  <div class="article-title">{{ article.title }}</div>
-                  <div class="article-meta">
-                    <div class="tags">
-                      <a-tag :color="getTypeColor(article.category)">{{ article.category }}</a-tag>
-                      <a-tag :color="getLangColor(article.lang)">{{ getLangLabel(article.lang) }}</a-tag>
-                    </div>
-                  </div>
-                  
-                  <div class="action-buttons">
-                    <a class="text-button" :href="getPreviewUrl(article)" target="_blank">Preview</a>
-                    <a class="text-button" @click="confirmPublishAction(article)">
-                      {{ article.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
-                    </a>
-                    <a class="text-button" @click="editArticle(article)">Edit</a>
-                    <a 
-                      v-if="article.publishStatus === 'publish'"
-                      class="text-button"
-                      :href="getPublishUrl(article)" 
-                      target="_blank"
-                    >View Published Page</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+                <template v-if="column.key === 'type'">
+                  <span>{{ record.articleType || '-' }}</span>
+                </template>
+
+                <template v-if="column.key === 'wordCount'">
+                  <span>{{ record.numberOfWords || '-' }}</span>
+                </template>
+
+                <template v-if="column.key === 'lang'">
+                  <span>{{ record.lang.toUpperCase() }}</span>
+                </template>
+
+                <template v-if="column.key === 'status'">
+                  <a-tag :color="getStatusColor(record.publishStatus)">
+                    {{ getStatusLabel(record.publishStatus) }}
+                  </a-tag>
+                </template>
+
+                <template v-if="column.key === 'hasEmpty'">
+                  <a-tag :color="record.hasEmpty ? 'warning' : 'success'">
+                    {{ record.hasEmpty ? 'Has Empty' : 'Complete' }}
+                  </a-tag>
+                </template>
+
+                <template v-if="column.key === 'actions'">
+                  <a-space>
+                    <a-button 
+                      type="primary"
+                      size="small"
+                      @click="handleEdit(record)"
+                    >
+                      Edit
+                    </a-button>
+                    <a-tooltip :title="getPublishTooltip(record)">
+                      <a-button
+                        :type="record.publishStatus === 'publish' ? 'default' : 'primary'"
+                        size="small"
+                        @click="handlePublish(record)"
+                        :disabled="!canPublish(record)"
+                      >
+                        {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
+                      </a-button>
+                    </a-tooltip>
+                    <a-button
+                      type="primary"
+                      danger
+                      size="small"
+                      @click="handleDelete(record)"
+                    >
+                      Delete
+                    </a-button>
+                  </a-space>
+                </template>
+              </template>
+            </a-table>
+          
         </div>
       </a-spin>
+
+      <!-- 在task-list底部添加分页组件 -->
+      <div class="pagination-wrapper">
+        <a-pagination
+          v-model:current="pagination.current"
+          :total="pagination.total"
+          :pageSize="pagination.pageSize"
+          show-size-changer
+          :show-total="(total) => `Total ${total} items`"
+          @change="handlePageChange"
+        />
+      </div>
     </div>
 
     <!-- Confirmation Modal -->
@@ -163,6 +183,11 @@ export default {
     const tasks = ref([])
     const loading = ref(false)
     const verifiedDomains = ref([])
+    const pagination = reactive({
+      current: 1,
+      pageSize: 10,
+      total: 0
+    })
     
     const modalConfig = reactive({
       visible: false,
@@ -177,6 +202,8 @@ export default {
     
     const loadingProgress = ref(0)
     
+    const productInfo = ref(null)
+    
     // 添加计算属性于过滤任务
     const filteredTasks = computed(() => {
       if (!searchQuery.value) return tasks.value
@@ -186,6 +213,49 @@ export default {
         task.batchName.toLowerCase().includes(query)
       )
     })
+
+    const columns = [
+      {
+        title: 'Title',
+        dataIndex: 'title',
+        key: 'title',
+        width: '25%'
+      },
+      {
+        title: 'Type',
+        dataIndex: 'articleType',
+        key: 'type',
+        width: '10%'
+      },
+      {
+        title: 'Word Count',
+        dataIndex: 'numberOfWords',
+        key: 'wordCount',
+        width: '10%'
+      },
+      {
+        title: 'Language',
+        dataIndex: 'lang',
+        key: 'lang',
+        width: '10%'
+      },
+      {
+        title: 'Status',
+        dataIndex: 'publishStatus',
+        key: 'status',
+        width: '10%'
+      },
+      {
+        title: 'Empty Fields',
+        key: 'hasEmpty',
+        width: '10%'
+      },
+      {
+        title: 'Actions',
+        key: 'actions',
+        width: '25%'
+      }
+    ]
 
     const getProjectId = (customerId) => {
       switch (customerId) {
@@ -201,13 +271,17 @@ export default {
     const loadProductInfo = async () => {
       try {
         const response = await apiClient.getProductsByCustomerId()
+        
         if (response?.code === 200) {
           productInfo.value = response.data
         } else {
-          console.error('Failed to load product information')
+          message.error('Failed to load product information')
+          productInfo.value = {}
         }
       } catch (error) {
         console.error('Failed to load product information:', error)
+        message.error('Failed to load product information: ' + (error.message || 'Unknown error'))
+        productInfo.value = {}
       }
     }
 
@@ -217,6 +291,11 @@ export default {
         const projectId = getProjectId(customerId)
         
         const response = await apiClient.getVercelDomainInfo(projectId)
+        
+        // 确保 productInfo 已加载
+        if (!productInfo.value) {
+          await loadProductInfo()
+        }
         
         // 查找所有已验证的域名
         verifiedDomains.value = response?.domains
@@ -231,53 +310,50 @@ export default {
       }
     }
 
-    // Fetch task list
+    // fetchTasks 方法的修改
     const fetchTasks = async () => {
       loading.value = true
-      loadingProgress.value = 0
       try {
         const userId = localStorage.getItem('currentCustomerId')
-        const res = await apiClient.getBatchHistoryData(userId)
-        if(res.code === 200) {
-          const totalBatches = res.data.length
-          let completedBatches = 0
-          
-          tasks.value = await Promise.all(res.data.map(async batch => {
-            loadVerifiedDomains();
-
-            // Get English articles
-            const enRes = await apiClient.getBatchPagesData(batch.batchId)
-            const enArticles = (enRes?.data || []).map(article => {
-              // 检查文章sections是否有空值
-              const hasEmpty = checkArticleForEmptyFields(article)
-              return {...article, lang: 'en', hasEmpty}
-            })
-            
-            // Get Chinese articles
-            const zhRes = await apiClient.getBatchPagesData(batch.batchId, 'zh')
-            const zhArticles = (zhRes?.data || []).map(article => {
-              // 检查文章sections是否有空值  
-              const hasEmpty = checkArticleForEmptyFields(article)
-              return {...article, lang: 'zh', hasEmpty}
-            })
-
-            completedBatches++
-            loadingProgress.value = Math.floor((completedBatches / totalBatches) * 100)
-
-            return {
-              ...batch,
-              articles: [...enArticles, ...zhArticles],
-              createdAt: new Date(batch.createdAt).toLocaleString('en-US')
-            }
+        
+        const response = await apiClient.getPages({
+          customerId: userId,
+          page: pagination.current,
+          limit: pagination.pageSize
+        })
+        
+        if (response?.code === 200 && response?.data) {
+          const pages = response.data.map(page => ({
+            key: page.pageId,
+            pageId: page.pageId,
+            title: page.title,
+            lang: page.lang || 'en',
+            publishStatus: page.publishStatus,
+            hasEmpty: checkArticleForEmptyFields(page),
+            suffixURL: page.suffixURL,
+            articleType: page.articleType,
+            numberOfWords: page.numberOfWords,
+            description: page.description
           }))
+
+          tasks.value = pages
+          pagination.total = response.TotalCount || 0
+        } else {
+          // 添加错误处理
+          message.error('Failed to fetch tasks: Invalid response')
         }
       } catch(err) {
-        console.log(err)
-        message.error('Failed to fetch task list')
+        console.error(err)
+        message.error('Failed to fetch tasks')
       } finally {
-        loading.value = false
-        loadingProgress.value = 0
+        loading.value = false  // 确保loading状态被重置
       }
+    }
+
+    const handleTableChange = (pag) => {
+      pagination.current = pag.current
+      pagination.pageSize = pag.pageSize
+      fetchTasks()
     }
 
     // 添加检查文章内容的函数
@@ -337,16 +413,6 @@ export default {
         return hasEmptyField
       })
     }
-
-    // Delete task
-    const deleteBatch = (batchId) => {
-      modalConfig.visible = true
-      modalConfig.title = 'Confirm Delete'
-      modalConfig.content = 'Are you sure you want to delete this task?'
-      modalConfig.type = 'delete_batch'
-      modalConfig.data = batchId
-    }
-
     // Delete article
     const deleteArticle = (article) => {
       modalConfig.visible = true
@@ -415,13 +481,8 @@ export default {
     }
 
     const getPreviewUrl = (article) => {
-      const customerId = localStorage.getItem('currentCustomerId')
-      const previewDomain = customerId === '673f4f19caf5b79765874fe8' || customerId === '67525da4ba5fcadf228e56c1'
-        ? config.domains.kreado_preview 
-        : config.domains.preview
-        
-      return `${previewDomain}${article.lang === 'zh' ? 'zh/' : 'en/'}${article.pageLangId}`
-    }
+      return `${config.domains.preview}${article.lang === 'zh' ? 'zh/' : 'en/'}${article.previewId}`;
+    };
     
     const getPublishUrl = (article) => {
       // 如果没有验证域名,返回空
@@ -429,19 +490,21 @@ export default {
         return ''
       }
       
-      // 使用第一个验证域名���为发布域名
+      // 使用第一个验证名为发布域名
       const publishDomain = verifiedDomains.value[0]
-      return `https://${publishDomain}/${article.lang === 'zh' ? 'zh/' : 'en/'}${article.pageLangId}`
+      return `https://${publishDomain}/${article.lang === 'zh' ? 'zh/' : 'en/'}${article.pageId}`
     }
 
     // Style methods
     const getStatusColor = (status) => {
-      const colors = {
-        completed: 'success',
-        in_progress: 'processing',
-        failed: 'error'
+      switch (status) {
+        case 'create':
+          return 'default'
+        case 'publish':
+          return 'success'
+        default:
+          return 'default'
       }
-      return colors[status] || 'default'
     }
 
     const getTypeColor = (type) => {
@@ -469,6 +532,32 @@ export default {
       window.open('/page-writer', '_blank')
     }
 
+    // 添加分页变化处理函数
+    const handlePageChange = (page, pageSize) => {
+      pagination.current = page
+      pagination.pageSize = pageSize
+      fetchTasks()
+    }
+
+    // 添加状态标签显示函数
+    const getStatusLabel = (status) => {
+      switch (status) {
+        case 'create':
+          return 'Not Published'
+        case 'publish':
+          return 'Published'
+        default:
+          return status
+      }
+    }
+
+    const getPublishTooltip = (record) => {
+      if (verifiedDomains.value.length === 0) {
+        return 'No verified sub-domain available. Please verify a domain in Settings first.'
+      }
+      return ''; // 返回空字符串时不会显示tooltip
+    }
+
     onMounted(async () => {
       fetchTasks()
       await loadProductInfo()
@@ -478,26 +567,28 @@ export default {
     return {
       tasks,
       loading,
+      columns,
       modalConfig,
-      deleteBatch,
-      deleteArticle,
+      handleDelete: deleteArticle,
+      handleEdit: editArticle,
+      handlePublish: confirmPublishAction,
       handleModalConfirm,
-      confirmPublishAction,
-      editArticle,
-      getPreviewUrl,
-      getPublishUrl,
       getStatusColor,
-      getTypeColor,
-      getLangColor,
-      getLangLabel,
-      getPublishedCount,
       handleRefresh: fetchTasks,
-      config,
       searchQuery,
       filteredTasks,
       loadingProgress,
       verifiedDomains,
-      handleAddPage
+      handleAddPage,
+      pagination,
+      handleTableChange,
+      handlePageChange,
+      canPublish: () => verifiedDomains.value.length > 0,
+      getStatusLabel,
+      getPublishTooltip,
+      productInfo,
+      loadProductInfo,
+      loadVerifiedDomains
     }
   }
 }
@@ -837,5 +928,12 @@ export default {
   display: inline-flex;
   gap: 8px;
   margin-left: 4px;
+}
+
+.pagination-wrapper {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px;
 }
 </style>

@@ -126,7 +126,7 @@ export default defineComponent({
   emits: ['refresh'],
 
   setup(props, { emit }) {
-    const isCollapsed = ref(false);
+    const isCollapsed = ref(true);
     const refreshing = ref(false);
 
     const toggleCollapse = () => {

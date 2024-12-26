@@ -76,59 +76,6 @@ const login = async (email, password) => {
     }
 };
 
-const getBatchPagesData = async (batchId, lang, page, limit) => {
-  try {
-    const response = await apiClient.get('/pages', {params: {batchId, lang, page, limit}});
-    return response.data;
-  } catch (error) {
-    console.error('获取批次历史数据失败:', error);
-    return null;
-  }
-};
-
-// 新增：获取特定批次详细信息的接口
-const getBatchDetails = async (batchId) => {
-  try {
-    const response = await apiClient.get(`/batches/${batchId}`);
-    return response.data;
-  } catch (error) {
-    console.error('获取批次详细信息失败:', error);
-    return null;
-  }
-};
-
-const getBatchHistoryData = async (customerId, page, limit) => {
-  try {
-    const response = await apiClient.get('/batches', {params: {customerId, page, limit}});
-    return response.data;
-  } catch (error) {
-    console.error('获取批次历史据失败:', error);
-    return null;
-  }
-};
-
-// 新增：发布batch生成任务接口
-const createBatchTask = async (taskData) => {
-  try {
-    const response = await apiClient.post('/batches', taskData);
-    return response.data;
-  } catch (error) {
-    console.error('发布批次生成任务失败:', error);
-    return null;
-  }
-};
-
-// 新增：删除batch接口
-const deleteBatch = async (batchId) => {
-  try {
-    const response = await apiClient.delete(`/batches/${batchId}`);
-    return response.data;
-  } catch (error) {
-    console.error('删除批次失败:', error);
-    return null;
-  }
-};
-
 const getCategories = async (customerId) => {
   try {
     const response = await apiClient.get(`/categories/${customerId}?categoryName=ArticleType`);
@@ -327,7 +274,7 @@ const updatePageStatus = async (pageId, status) => {
   }
 };
 
-// 更基本信息
+// ��基本信息
 const updatePage = async (pageId, pageData) => {
   try {
     const response = await apiClient.put(`/pages/${pageId}`, pageData);
@@ -423,7 +370,7 @@ const uploadMedia = async (formData) => {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      timeout: 5 * 60 * 1000, // 设置为 5 分��
+      timeout: 5 * 60 * 1000, // 设置为 5 分钟
     });
     return response.data;
   } catch (error) {
@@ -589,7 +536,7 @@ const createInternalLink = async (linkData) => {
   }
 };
 
-// 新增：更新内部链接的方法
+// 新增：更新内部链接的���法
 const updateInternalLink = async (linkId, linkData) => {
   try {
     const response = await apiClient.put(`/internal/links/${linkId}`, linkData);
@@ -731,7 +678,7 @@ const resetPassword = async (resetData) => {
     const response = await apiClient.post('/customer/reset-password', resetData);
     return response.data;
   } catch (error) {
-    console.error('��置密码失败:', error);
+    console.error('重置密码失败:', error);
     return null;
   }
 };
@@ -787,7 +734,7 @@ const getKnowledgeCenter = async () => {
     const response = await apiClient.get('/knowledge/center');
     return response.data;
   } catch (error) {
-    console.error('获取knowledge center内容列表失败:', error);
+    console.error('获取knowledge center内���列表失败:', error);
     return null;
   }
 };
@@ -863,6 +810,24 @@ const updateFullSections = async (pageId, sectionsData) => {
   }
 };
 
+// 获取页面列表
+const getPages = async (params) => {
+  try {
+    const { customerId, lang, page, limit } = params;
+    const response = await apiClient.get('/pages', {
+      params: {
+        customerId,
+        page,
+        limit
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('获取页面列表失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -875,20 +840,15 @@ export default {
   sendEmailCode,
   login,
   getKeywords,
-  getBatchHistoryData,
   getLinks,
   postLinks,
   putLinks,
   deleteGroupLinks,
   deleteLinks,
-  deleteBatch,
   getCategories,
-  createBatchTask,
   addKeyword,
   deleteKeyword,
   editKeyword,
-  getBatchDetails,
-  getBatchPagesData,
   getVercelDomains,
   getDomains,
   deleteDomain,
@@ -930,5 +890,6 @@ export default {
   getKnowledgeProcessStatus,
   changePassword,
   createManualPage,
-  updateFullSections
+  updateFullSections,
+  getPages
 };
