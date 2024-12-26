@@ -12,11 +12,10 @@
 import CallToAction from './templates/CallToAction.vue'
 import Faqs from './templates/Faqs.vue'
 import HowItWorksWithThreeBlocks from './templates/HowItWorksWithThreeBlocks.vue'
-import ProductBenefitsWithFourBlocks from './templates/ProductBenefitsWithFourBlocks.vue'
+import ProductBenefitsWithBlocks from './templates/ProductBenefitsWithBlocks.vue'
 import HowItWorksWithWorkflow from './templates/HowItWorksWithWorkflow.vue'
-import WhyChooseUsWithSixSmallBlocks from './templates/WhyChooseUsWithSixSmallBlocks.vue'
-import WhyChooseUsWithTwoHugeBlocks from './templates/WhyChooseUsWithTwoHugeBlocks.vue'
-import MoreInsightsWithFourCards from './templates/MoreInsightsWithFourCards.vue'
+import WhyChooseUsWithSmallBlocks from './templates/WhyChooseUsWithSmallBlocks.vue'
+import WhyChooseUsWithBlocks from './templates/WhyChooseUsWithBlocks.vue'
 import ProductComparisonTable from './templates/ProductComparisonTable.vue'
 import HeroSectionWithVideo from './templates/HeroSectionWithVideo.vue'
 import KeyResultsWithThreeCards from './templates/KeyResultsWithThreeCards.vue'
@@ -31,11 +30,10 @@ const SECTION_COMPONENTS = {
   CallToAction: CallToAction,
   Faqs: Faqs,
   HowItWorksWithThreeBlocks: HowItWorksWithThreeBlocks,
-  ProductBenefitsWithFourBlocks: ProductBenefitsWithFourBlocks,
+  ProductBenefitsWithFourBlocks: ProductBenefitsWithBlocks,
   HowItWorksWithWorkflow: HowItWorksWithWorkflow,
-  WhyChooseUsWithSixSmallBlocks: WhyChooseUsWithSixSmallBlocks,
-  WhyChooseUsWithTwoHugeBlocks: WhyChooseUsWithTwoHugeBlocks,
-  MoreInsightsWithFourCards: MoreInsightsWithFourCards,
+  WhyChooseUsWithSixSmallBlocks: WhyChooseUsWithSmallBlocks,
+  WhyChooseUsWithTwoHugeBlocks: WhyChooseUsWithBlocks,
   ProductComparisonTable: ProductComparisonTable,
   HeroSectionWithVideo: HeroSectionWithVideo,
   KeyResultsWithThreeCards: KeyResultsWithThreeCards,

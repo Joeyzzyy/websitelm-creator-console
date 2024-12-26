@@ -16,6 +16,12 @@ const routes = [
     meta: { hideNavigation: true }
   },
   {
+    path: '/page-writer',
+    name: 'ArticleCreate',
+    component: () => import('../components/ArticleCreatePage.vue'),
+    meta: { hideNavigation: true }
+  },
+  {
     path: '/help-center',
     name: 'HelpCenter',
     component: () => import('../components/HelpCenterPage.vue'),

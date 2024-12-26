@@ -1,191 +1,331 @@
 <template>
-    <div class="section-container">
-      <!-- 顶部内容 -->
-      <div class="top-content">
-        <a-form layout="vertical">
-          <a-form-item label="Title">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.title }}</span>
-              <a-input
-                v-model:value="localSection.topContent.title"
-                :disabled="disabled"
-                @change="handleChange"
-              />
-            </div>
-          </a-form-item>
+  <div class="section-wrapper">
+    <!-- 编辑区域 -->
+    <div class="editor-area">
+      <div class="section-container">
+        <!-- 顶部内容 -->
+        <div class="top-content">
+          <a-form layout="vertical">
+            <a-form-item label="Emoji">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.emoji }}</span>
+                <a-input
+                  v-model:value="localSection.topContent.icon"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
+
+            <a-form-item label="Title">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.title }}</span>
+                <a-input
+                  v-model:value="localSection.topContent.title"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
   
-          <a-form-item label="Button Text">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.buttonText }}</span>
-              <a-input
-                v-model:value="localSection.topContent.buttonText"
-                :disabled="disabled"
-                @change="handleChange"
-              />
-            </div>
-          </a-form-item>
-        </a-form>
-      </div>
-  
-      <!-- 底部箭头流程 -->
-      <div class="bottom-content">
-        <div class="arrow-flow">
-          <div 
-            v-for="(item, index) in localSection.bottomContent" 
-            :key="index"
-            class="flow-item"
-          >
-            <div class="flow-content">
-              <a-form layout="vertical">
-                <div class="flow-header">
-                  <span>Step {{ item.number }}</span>
-                  <!-- <a-button 
-                    v-if="!disabled" 
-                    type="link" 
-                    danger 
-                    @click="removeStep(index)"
-                  >
-                    Remove
-                  </a-button> -->
-                </div>
-  
-                <a-form-item label="Number">
-                  <div class="input-with-tag">
-                    <span class="html-tag">{{ tags.number }}</span>
-                    <a-input
-                      v-model:value="item.number"
-                      :disabled="disabled"
-                      @change="handleChange"
-                    />
-                  </div>
-                </a-form-item>
-  
-                <a-form-item label="Content">
-                  <div class="input-with-tag">
-                    <span class="html-tag">{{ tags.content }}</span>
-                    <a-textarea
-                      v-model:value="item.content"
-                      :disabled="disabled"
-                      :rows="3"
-                      @change="handleChange"
-                    />
-                  </div>
-                </a-form-item>
-              </a-form>
-            </div>
-            <div v-if="index < localSection.bottomContent.length - 1" class="arrow">
-              →
-            </div>
-          </div>
+            <a-form-item label="Description">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.description }}</span>
+                <a-input
+                  v-model:value="localSection.topContent.description"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
+          </a-form>
         </div>
   
-        <a-button 
-          v-if="!disabled && localSection.bottomContent.length < 3" 
-          type="dashed" 
-          block 
-          @click="addStep"
-        >
-          Add Step
-        </a-button>
+        <!-- 底部箭头流程 -->
+        <div class="bottom-content">
+          <div class="arrow-flow">
+            <div 
+              v-for="(item, index) in localSection.bottomContent" 
+              :key="index"
+              class="flow-item"
+            >
+              <div class="flow-content">
+                <a-form layout="vertical">
+                  <div class="flow-header">
+                    <span>Step {{ item.number }}</span>
+                  </div>
+  
+                  <a-form-item label="Number">
+                    <div class="input-with-tag">
+                      <span class="html-tag">{{ tags.number }}</span>
+                      <a-input
+                        v-model:value="item.number"
+                        :disabled="disabled"
+                        @change="handleChange"
+                      />
+                    </div>
+                  </a-form-item>
+  
+                  <a-form-item label="Step Title">
+                    <div class="input-with-tag">
+                      <span class="html-tag">{{ tags.stepTitle }}</span>
+                      <a-input
+                        v-model:value="item.title"
+                        :disabled="disabled"
+                        @change="handleChange"
+                      />
+                    </div>
+                  </a-form-item>
+  
+                  <a-form-item label="Step Subtitle">
+                    <div class="input-with-tag">
+                      <span class="html-tag">{{ tags.stepSubTitle }}</span>
+                      <a-input
+                        v-model:value="item.subTitle"
+                        :disabled="disabled"
+                        @change="handleChange"
+                      />
+                    </div>
+                  </a-form-item>
+  
+                  <a-form-item label="Content">
+                    <div class="input-with-tag">
+                      <span class="html-tag">{{ tags.content }}</span>
+                      <a-textarea
+                        v-model:value="item.content"
+                        :disabled="disabled"
+                        :rows="3"
+                        @change="handleChange"
+                      />
+                    </div>
+                  </a-form-item>
+                </a-form>
+              </div>
+              <div v-if="index < localSection.bottomContent.length - 1" class="arrow">
+                →
+              </div>
+            </div>
+          </div>
+  
+          <a-button 
+            v-if="!disabled && localSection.bottomContent.length < 3" 
+            type="dashed" 
+            block 
+            @click="addStep"
+          >
+            Add Step
+          </a-button>
+        </div>
       </div>
     </div>
-  </template>
-  
-  <script>
-  import BaseSection from '../common/BaseSection.vue'
-  import { SECTION_TAGS } from '../common/SectionTag'
-  
-  export default {
-    name: 'HowItWorksWithWorkflow',
-    extends: BaseSection,
-    data() {
-      return {
-        localSection: JSON.parse(JSON.stringify(this.section))
-      }
-    },
-    watch: {
-      section: {
-        handler(newVal) {
-          this.localSection = JSON.parse(JSON.stringify(newVal))
+
+    <!-- 预览区域 -->
+    <div class="preview-area">
+      <div class="preview-header">
+        <span>Preview</span>
+      </div>
+      
+      <div class="preview-content">
+        <HowItWorksWithWorkflowPreview 
+          :section="localSection"
+          :styles="styles"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import BaseSection from '../common/BaseSection.vue'
+import { SECTION_TAGS } from '../common/SectionTag'
+import themeConfig from '../../../assets/config/themeConfig'
+import HowItWorksWithWorkflowPreview from './HowItWorksWithWorkflowPreview.vue'
+
+export default {
+  name: 'HowItWorksWithWorkflow',
+  extends: BaseSection,
+  components: {
+    HowItWorksWithWorkflowPreview
+  },
+  data() {
+    return {
+      localSection: {
+        topContent: {
+          icon: '🔄',
+          title: 'How it works',
+          description: 'Discover our simple three-step process'
         },
-        deep: true
-      }
-    },
-    computed: {
-      tags() {
-        return SECTION_TAGS.HowItWorksWithWorkflow
-      }
-    },
-    methods: {
-      handleChange() {
-        this.emitUpdate(this.localSection)
+        bottomContent: [
+          {
+            number: 'Step 1',
+            title: 'Sign up for an account',
+            subTitle: 'Sign up for an account',
+            content: 'Sign up for an account'
+          },
+          {
+            number: 'Step 2',
+            title: 'Configure your preferences',
+            subTitle: 'Configure your preferences',
+            content: 'Configure your preferences'
+          },
+          {
+            number: 'Step 3',
+            title: 'Start using the platform',
+            subTitle: 'Start using the platform',
+            content: 'Start using the platform'
+          }
+        ],
       },
-      addStep() {
-        if (this.localSection.bottomContent.length < 3) {
-          this.localSection.bottomContent.push({
-            number: String(this.localSection.bottomContent.length + 1),
-            content: ''
-          })
-          this.handleChange()
+      styles: themeConfig.normal
+    }
+  },
+  created() {
+    if (this.section) {
+      this.localSection = JSON.parse(JSON.stringify(this.section))
+    }
+    if (!Array.isArray(this.localSection.bottomContent)) {
+      this.localSection.bottomContent = []
+    }
+  },
+  watch: {
+    section: {
+      handler(newVal) {
+        this.localSection = JSON.parse(JSON.stringify(newVal))
+        if (!Array.isArray(this.localSection.bottomContent)) {
+          this.localSection.bottomContent = []
         }
       },
-      removeStep(index) {
-        this.localSection.bottomContent.splice(index, 1)
-        // 重新编号
-        this.localSection.bottomContent.forEach((item, i) => {
-          item.number = String(i + 1)
+      deep: true
+    }
+  },
+  computed: {
+    tags() {
+      return SECTION_TAGS.HowItWorksWithWorkflow
+    }
+  },
+  methods: {
+    handleChange() {
+      this.emitUpdate(this.localSection)
+    },
+    addStep() {
+      if (this.localSection.bottomContent.length < 3) {
+        const stepNumber = this.localSection.bottomContent.length + 1;
+        this.localSection.bottomContent.push({
+          number: `Step ${stepNumber}`,
+          title: '',
+          subTitle: '',
+          content: ''
         })
         this.handleChange()
       }
+    },
+    removeStep(index) {
+      this.localSection.bottomContent.splice(index, 1)
+      // 重新编号
+      this.localSection.bottomContent.forEach((item, i) => {
+        item.number = String(i + 1)
+      })
+      this.handleChange()
     }
   }
-  </script>
-  
-  <style scoped>
-  @import '../../../assets/styles/section-form.css';
-  
-  .arrow-flow {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    margin: 32px 0;
-  }
-  
-  .flow-item {
-    flex: 1;
-    position: relative;
-  }
-  
-  .arrow {
-    position: absolute;
-    right: -18px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #1890ff;
-    font-size: 20px;
-  }
-  
-  :deep(.ant-form-item) {
-    background: #f8fafc;
-    padding: 20px;
-    border-radius: 8px;
-  }
-  
-  .html-tag {
-    display: inline-block;
-    padding: 2px 8px;
-    background-color: #e6f7ff;
-    border: 1px solid #91d5ff;
-    border-radius: 4px;
-    color: #0050b3;
-    font-size: 12px;
-    margin-right: 8px;
-    font-family: monospace;
-  }
-  
-  .input-with-tag {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  </style>
+}
+</script>
+
+<style scoped>
+/* 基础布局样式 */
+.section-wrapper {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 24px;
+  min-height: 500px;
+}
+
+/* 编辑区域和预览区域样式 */
+.editor-area,
+.preview-area {
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.editor-area {
+  background: white;
+  height: 600px;
+  overflow-y: auto;
+}
+
+.preview-area {
+  background: #f8fafc;
+  min-width: 768px;
+  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  height: 48px;
+}
+
+.preview-content {
+  background: white;
+  border-radius: 8px;
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@import '../../../assets/styles/section-form.css';
+
+.arrow-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin: 32px 0;
+}
+
+.flow-item {
+  width: 100%;
+  position: relative;
+}
+
+.arrow {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%) rotate(90deg);
+  color: #1890ff;
+  font-size: 20px;
+}
+
+:deep(.ant-form-item) {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.html-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  border-radius: 4px;
+  color: #0050b3;
+  font-size: 12px;
+  margin-right: 8px;
+  font-family: monospace;
+}
+
+.input-with-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+</style>

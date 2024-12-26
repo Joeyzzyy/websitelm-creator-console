@@ -9,6 +9,10 @@
             <template #icon><ReloadOutlined /></template>
             Refresh
           </a-button>
+          <a-button type="primary" @click="handleAddPage">
+            <template #icon><PlusOutlined /></template>
+            Manual Add Page
+          </a-button>
           <span v-show="verifiedDomains.length === 0" class="domain-label">
             No verified sub-domain available - <router-link to="/settings">click here to add sub-domain</router-link>
           </span>
@@ -133,7 +137,8 @@ import {
   ExportOutlined,
   CloudUploadOutlined,
   CloudDownloadOutlined,
-  SearchOutlined
+  SearchOutlined,
+  PlusOutlined
 } from '@ant-design/icons-vue'
 import PageLayout from './layout/PageLayout.vue'
 import apiClient from '../api/api'
@@ -150,7 +155,8 @@ export default {
     ExportOutlined,
     CloudUploadOutlined,
     CloudDownloadOutlined,
-    SearchOutlined
+    SearchOutlined,
+    PlusOutlined
   },
 
   setup() {
@@ -316,7 +322,7 @@ export default {
             }
           })
 
-          // ��全地检查标题字段
+          // 全地检查标题字段
           const titleFields = ['title', 'subtitle', 'subTitle']
           titleFields.forEach(field => {
             const value = section[field]
@@ -404,7 +410,7 @@ export default {
 
     // Edit article
     const editArticle = (article) => {
-      const url = `/article-edit?id=${article.pageLangId}&batchId=${article.batchId}&lang=${article.lang}`
+      const url = `/page-writer?mode=edit&id=${article.pageId}&batchId=${article.batchId}&lang=${article.lang}`
       window.open(url, '_blank')
     }
 
@@ -423,7 +429,7 @@ export default {
         return ''
       }
       
-      // 使用第一个验证域名作为发布域名
+      // 使用第一个验证域名���为发布域名
       const publishDomain = verifiedDomains.value[0]
       return `https://${publishDomain}/${article.lang === 'zh' ? 'zh/' : 'en/'}${article.pageLangId}`
     }
@@ -459,6 +465,10 @@ export default {
       return articles.filter(a => a.publishStatus === 'publish').length
     }
 
+    const handleAddPage = () => {
+      window.open('/page-writer', '_blank')
+    }
+
     onMounted(async () => {
       fetchTasks()
       await loadProductInfo()
@@ -487,6 +497,7 @@ export default {
       filteredTasks,
       loadingProgress,
       verifiedDomains,
+      handleAddPage
     }
   }
 }

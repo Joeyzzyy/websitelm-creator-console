@@ -1,29 +1,55 @@
 <template>
     <div class="section-container">
       <a-form layout="vertical">
-        <div v-for="(item, index) in localSection.leftContent" :key="index">
-          <a-form-item :label="`Result ${index + 1}`">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.percentage }}</span>
-              <a-input
-                v-model:value="item.percentage"
-                :disabled="disabled"
-                placeholder="Achievement percentage"
-                @change="handleContentChange"
-              />
-            </div>
-            <div class="input-with-tag mt-3">
-              <span class="html-tag">{{ tags.description }}</span>
-              <a-textarea
-                v-model:value="item.description"
-                :disabled="disabled"
-                :rows="4"
-                placeholder="Contextual explanation with timeframe and impact"
-                @change="handleContentChange"
-              />
-            </div>
-          </a-form-item>
+        <div class="section-description">
+          You can add up to 3 key results
         </div>
+        <div class="results-container">
+          <div v-for="(item, index) in localSection.leftContent" :key="index" class="result-card">
+            <div class="result-header">
+              <span>Result {{ index + 1 }}</span>
+              <a-button 
+                v-if="!disabled"
+                type="text"
+                danger
+                @click="removeResult(index)"
+              >
+                <delete-outlined />
+              </a-button>
+            </div>
+            <a-form-item :label="`Result ${index + 1}`">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.percentage }}</span>
+                <a-input
+                  v-model:value="item.percentage"
+                  :disabled="disabled"
+                  placeholder="Achievement percentage"
+                  @change="handleContentChange"
+                />
+              </div>
+              <div class="input-with-tag mt-3">
+                <span class="html-tag">{{ tags.description }}</span>
+                <a-textarea
+                  v-model:value="item.description"
+                  :disabled="disabled"
+                  :rows="4"
+                  placeholder="Contextual explanation with timeframe and impact"
+                  @change="handleContentChange"
+                />
+              </div>
+            </a-form-item>
+          </div>
+        </div>
+
+        <a-button 
+          v-if="!disabled && localSection.leftContent.length < 3" 
+          type="dashed" 
+          block 
+          class="add-result-btn"
+          @click="addResult"
+        >
+          Add Result
+        </a-button>
 
         <a-form-item label="Image">
           <div class="input-with-tag">
@@ -78,12 +104,14 @@
   import BaseSection from '../common/BaseSection.vue'
   import { SECTION_TAGS } from '../common/SectionTag'
   import ImageLibrary from '../common/ImageLibrary.vue'
+  import { DeleteOutlined } from '@ant-design/icons-vue'
   
   export default {
     name: 'KeyResultsWithImage',
     extends: BaseSection,
     components: {
-      ImageLibrary
+      ImageLibrary,
+      DeleteOutlined
     },
     computed: {
       tags() {
@@ -137,6 +165,23 @@
           this.handleContentChange();
         }
         this.closeImageLibrary()
+      },
+      addResult() {
+        if (!Array.isArray(this.localSection.leftContent)) {
+          this.localSection.leftContent = []
+        }
+        
+        if (this.localSection.leftContent.length < 3) {
+          this.localSection.leftContent.push({
+            percentage: '',
+            description: ''
+          })
+          this.handleContentChange()
+        }
+      },
+      removeResult(index) {
+        this.localSection.leftContent.splice(index, 1)
+        this.handleContentChange()
       }
     },
     watch: {
@@ -160,7 +205,6 @@
   @import '../../../assets/styles/section-form.css';
   
   :deep(.ant-form-item) {
-    background: #f8fafc;
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 24px;
@@ -218,5 +262,46 @@
     background: linear-gradient(135deg, #3883ca, #2875d9);
     transform: translateY(-1px);
     box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+  }
+  
+  .result-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+  }
+  
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .result-header span {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 14px;
+  }
+  
+  .add-result-btn {
+    margin-bottom: 24px;
+    height: 44px;
+    font-size: 14px;
+  }
+  
+  .results-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  
+  .section-description {
+    color: #6b7280;
+    font-size: 14px;
+    margin-bottom: 16px;
   }
   </style> 

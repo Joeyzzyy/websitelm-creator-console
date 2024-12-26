@@ -1,41 +1,87 @@
 <template>
-  <div class="section-container">
-    <a-form layout="vertical">
-      <div v-for="(faq, index) in localSection.bottomContent" :key="index">
-        <a-form-item :label="`FAQ ${index + 1}`">
-          <div class="input-with-tag">
-            <span class="html-tag">{{ tags.question }}</span>
-            <a-input
-              v-model:value="faq.question"
-              :disabled="disabled"
-              placeholder="Question"
-              @change="handleChange"
-            />
-          </div>
-          
-          <div class="input-with-tag">
-            <span class="html-tag">{{ tags.answer }}</span>
-            <a-textarea
-              v-model:value="faq.answer"
-              :disabled="disabled"
-              :rows="4"
-              placeholder="Answer"
-              @change="handleChange"
-            />
-          </div>
-        </a-form-item>
+  <div class="section-wrapper">
+    <!-- 编辑区域 -->
+    <div class="editor-area">
+      <a-form layout="vertical">
+        <div v-for="(faq, index) in localSection.bottomContent" :key="index">
+          <a-form-item>
+            <div class="faq-header">
+              <span>FAQ #{{index + 1}}</span>
+              <a-button 
+                type="text" 
+                danger 
+                @click="removeFaq(index)"
+                :disabled="disabled"
+              >
+                <delete-outlined />
+              </a-button>
+            </div>
+
+            <div class="input-with-tag">
+              <span class="html-tag">{{ tags.question }}</span>
+              <a-input
+                v-model:value="faq.question"
+                :disabled="disabled"
+                placeholder="Question"
+                @change="handleChange"
+              />
+            </div>
+            
+            <div class="input-with-tag">
+              <span class="html-tag">{{ tags.answer }}</span>
+              <a-textarea
+                v-model:value="faq.answer"
+                :disabled="disabled"
+                :rows="4"
+                placeholder="Answer"
+                @change="handleChange"
+              />
+            </div>
+          </a-form-item>
+        </div>
+
+        <a-button 
+          type="primary" 
+          @click="addFaq" 
+          :disabled="disabled"
+          style="margin-top: 8px"
+        >
+          <plus-outlined /> Add New FAQ
+        </a-button>
+      </a-form>
+    </div>
+
+    <!-- 预览区域 -->
+    <div class="preview-area">
+      <div class="preview-header">
+        <span>Preview</span>
       </div>
-    </a-form>
+      
+      <div class="preview-content">
+        <FaqsSectionPreview 
+          :section="localSection"
+          :styles="styles"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
+import themeConfig from '../../../assets/config/themeConfig'
+import FaqsSectionPreview from './FaqsPreview.vue'
+import { PlusOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 
 export default {
   name: 'Faqs',
   extends: BaseSection,
+  components: {
+    FaqsSectionPreview,
+    PlusOutlined,
+    DeleteOutlined
+  },
   computed: {
     tags() {
       return SECTION_TAGS.Faqs
@@ -43,7 +89,8 @@ export default {
   },
   data() {
     return {
-      localSection: JSON.parse(JSON.stringify(this.section))
+      localSection: JSON.parse(JSON.stringify(this.section)),
+      styles: themeConfig.normal
     }
   },
   watch: {
@@ -57,23 +104,70 @@ export default {
   methods: {
     handleChange() {
       this.emitUpdate(this.localSection)
+    },
+    addFaq() {
+      this.localSection.bottomContent.push({
+        question: '',
+        answer: ''
+      })
+      this.handleChange()
+    },
+    removeFaq(index) {
+      this.localSection.bottomContent.splice(index, 1)
+      this.handleChange()
     }
   }
 }
 </script>
 
 <style scoped>
-@import '../../../assets/styles/section-form.css';
+.section-wrapper {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 24px;
+  min-height: 500px;
+}
 
-.section-container {
+.editor-area,
+.preview-area {
+  border-radius: 8px;
   padding: 24px;
 }
 
-:deep(.ant-form-item) {
-  margin-bottom: 24px;
+.editor-area {
+  background: white;
+  max-height: 1000px;
+  overflow-y: auto;
+}
+
+.preview-area {
   background: #f8fafc;
-  padding: 20px;
+  min-width: 768px;
+  overflow-x: auto;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 16px;
+  background: #f8fafc;
   border-radius: 8px;
+  height: 48px;
+}
+
+.preview-content {
+  background: white;
+  border-radius: 8px;
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .html-tag {
@@ -92,6 +186,20 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-bottom: 12px;
+}
+
+:deep(.ant-form-item) {
+  margin-bottom: 24px;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.faq-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
 }
 </style>

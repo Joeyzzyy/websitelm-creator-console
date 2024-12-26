@@ -1,8 +1,13 @@
 <template>
-    <div class="section-container">
+  <div class="section-wrapper">
+    <!-- 编辑区域 -->
+    <div class="editor-area">
       <a-row :gutter="24">
         <!-- 左侧表格内容 -->
         <a-col :span="12">
+          <div style="margin-bottom: 12px; color: #666;">
+            Table Content Area - Maximum 4 items allowed
+          </div>
           <div v-for="(item, index) in localSection.leftContent" :key="index">
             <a-form layout="vertical">
               <a-form-item :label="`Item ${index + 1}`">
@@ -16,9 +21,9 @@
                   />
                 </div>
                 <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.title }}</span>
+                  <span class="html-tag">{{ tags.contentTitle }}</span>
                   <a-input
-                    v-model:value="item.title"
+                    v-model:value="item.contentTitle"
                     :disabled="disabled"
                     placeholder="Title"
                     @change="handleChange"
@@ -47,9 +52,10 @@
           </div>
           
           <a-button 
-            v-if="!disabled" 
+            v-if="!disabled && localSection.leftContent.length < 4" 
             type="dashed" 
             block 
+            class="add-item-btn"
             @click="addLeftItem"
           >
             Add Item
@@ -102,100 +108,369 @@
                 />
               </div>
             </a-form-item>
+  
+            <a-form-item label="Button Link">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.buttonLink }}</span>
+                <a-input
+                  v-model:value="localSection.rightContent.buttonLink"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
           </a-form>
         </a-col>
       </a-row>
     </div>
-  </template>
-  
-  <script>
-  import BaseSection from '../common/BaseSection.vue'
-  import { SECTION_TAGS } from '../common/SectionTag'
-  
-  export default {
-    name: 'ProductBenefitsWithTable',
-    extends: BaseSection,
-    computed: {
-      tags() {
-        return SECTION_TAGS.ProductBenefitsWithTable
-      }
+
+    <!-- 预览区域 -->
+    <div class="preview-area">
+      <div class="preview-header">
+        <span>Preview</span>
+      </div>
+      
+      <div 
+        class="preview-content"
+        :class="[
+          styles.section.base,
+          styles.section.background.primary
+        ]"
+      >
+        <div 
+          class="content-wrapper"
+          :class="[
+            styles.section.padding.base
+          ]"
+        >
+          <div class="flex-container">
+            <!-- 左侧内容 -->
+            <div class="left-side">
+              <div class="benefits-grid">
+                <div 
+                  v-for="(item, index) in localSection.leftContent" 
+                  :key="index"
+                  class="benefit-card"
+                  :class="[
+                    styles.card.background,
+                    styles.card.border
+                  ]"
+                >
+                  <div :class="[styles.text.icon]" class="icon">{{ item.icon }}</div>
+                  <div class="card-content">
+                    <h3 :class="[
+                      styles.typography.h3.fontSize,
+                      styles.typography.h3.fontWeight,
+                      styles.typography.h3.color
+                    ]">
+                      {{ item.contentTitle }}
+                    </h3>
+                    <p :class="[
+                      styles.typography.paragraph.fontSize,
+                      styles.typography.paragraph.color
+                    ]">
+                      {{ item.content }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 右侧内容 -->
+            <div class="right-side">
+              <div :class="[styles.text.icon]" class="main-icon">
+                {{ localSection.rightContent.icon }}
+              </div>
+              <h2 :class="[
+                styles.typography.h2.fontSize,
+                styles.typography.h2.fontWeight,
+                styles.typography.h2.color
+              ]">
+                {{ localSection.rightContent.title }}
+              </h2>
+              <p :class="[
+                styles.typography.paragraph.fontSize,
+                styles.text.color.secondary
+              ]" class="subtitle">
+                {{ localSection.rightContent.subTitle }}
+              </p>
+              <a-button 
+                v-if="localSection.rightContent.buttonText"
+                :class="getButtonStyle"
+                size="large"
+                :href="getButtonLink"
+              >
+                {{ localSection.rightContent.buttonText }}
+              </a-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import BaseSection from '../common/BaseSection.vue'
+import { SECTION_TAGS } from '../common/SectionTag'
+import themeConfig from '../../../assets/config/themeConfig'
+
+export default {
+  name: 'ProductBenefitsWithTable',
+  extends: BaseSection,
+  computed: {
+    tags() {
+      return SECTION_TAGS.ProductBenefitsWithTable
     },
-    data() {
-      return {
-        localSection: {
-          leftContent: [],
-          rightContent: {
-            icon: '',
-            title: '',
-            subTitle: '',
-            buttonText: ''
-          },
-          ...JSON.parse(JSON.stringify(this.section || {}))
-        }
-      }
+    getButtonStyle() {
+      return `${this.styles.button.base} ${this.styles.button.variants.secondary}`
     },
-    watch: {
-      section: {
-        handler(newVal) {
-          this.localSection = JSON.parse(JSON.stringify(newVal))
-        },
-        deep: true
-      }
-    },
-    methods: {
-      handleChange() {
-        this.emitUpdate(this.localSection)
-      },
-      addLeftItem() {
-        this.localSection.leftContent.push({
+    getButtonLink() {
+      const link = this.localSection.rightContent.buttonLink
+      return link?.startsWith('http') ? link : `https://${link}`
+    }
+  },
+  data() {
+    return {
+      localSection: {
+        leftContent: [],
+        rightContent: {
           icon: '',
           title: '',
+          subTitle: '',
+          buttonText: '',
+          buttonLink: ''
+        },
+        ...JSON.parse(JSON.stringify(this.section || {}))
+      },
+      styles: themeConfig.normal
+    }
+  },
+  watch: {
+    section: {
+      handler(newVal) {
+        this.localSection = JSON.parse(JSON.stringify(newVal))
+      },
+      deep: true
+    }
+  },
+  methods: {
+    handleChange() {
+      this.$nextTick(() => {
+        this.emitUpdate(this.localSection)
+      })
+    },
+    addLeftItem() {
+      if (!Array.isArray(this.localSection.leftContent)) {
+        this.localSection.leftContent = []
+      }
+      if (this.localSection.leftContent.length < 4) {
+        this.localSection.leftContent.push({
+          icon: '',
+          contentTitle: '',
           content: ''
         })
         this.handleChange()
-      },
-      removeLeftItem(index) {
-        this.localSection.leftContent.splice(index, 1)
-        this.handleChange()
       }
+    },
+    removeLeftItem(index) {
+      this.localSection.leftContent.splice(index, 1)
+      this.handleChange()
     }
   }
-  </script>
-  
-  <style scoped>
-  @import '../../../assets/styles/section-form.css';
+}
+</script>
 
-  :deep(.ant-col) {
-    margin-bottom: 24px;
-  }
+<style scoped>
+@import '../../../assets/styles/section-form.css';
 
-  :deep(.ant-form-item) {
-    background: #f8fafc;
-    padding: 20px;
-    border-radius: 8px;
-  }
+/* 基础表单项样式 */
+:deep(.ant-form-item) {
+  margin-bottom: 24px;
+}
 
-  .html-tag {
-    display: inline-block;
-    padding: 2px 8px;
-    background-color: #e6f7ff;
-    border: 1px solid #91d5ff;
-    border-radius: 4px;
-    color: #0050b3;
-    font-size: 12px;
-    margin-right: 8px;
-    font-family: monospace;
-  }
+/* 左侧内容卡片样式 */
+.left-content-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
 
-  .input-with-tag {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 12px;
-  }
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
 
-  .right-content {
-    padding-left: 24px;
-    border-left: 1px solid #e5e7eb;
-  }
-  </style>
+.card-header span {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+/* HTML 标签样式 */
+.html-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  border-radius: 4px;
+  color: #0050b3;
+  font-size: 12px;
+  margin-right: 8px;
+  font-family: monospace;
+}
+
+/* 输入框组合样式 */
+.input-with-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.input-with-tag:last-child {
+  margin-bottom: 0;
+}
+
+/* 添加按钮样式 */
+.add-item-btn {
+  margin-bottom: 24px;
+  height: 44px;
+  font-size: 14px;
+}
+
+/* 右侧内容区域样式 */
+.right-content {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+/* 表单控件样式 */
+:deep(.ant-input),
+:deep(.ant-textarea) {
+  border-radius: 6px;
+  border-color: #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+:deep(.ant-input:hover),
+:deep(.ant-textarea:hover) {
+  border-color: #1677ff;
+}
+
+/* 删除按钮样式 */
+:deep(.ant-btn-link) {
+  color: #ef4444;
+  padding: 4px 8px;
+  height: auto;
+}
+
+:deep(.ant-btn-link:hover) {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* 整体容器样式 */
+.section-container {
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 16px;
+}
+
+/* 添加新的样式 */
+.section-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.editor-area {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.preview-area {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 24px;
+  min-width: 768px;
+  overflow-x: auto;
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 16px;
+}
+
+.preview-content {
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  min-height: 500px;
+}
+
+.content-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.flex-container {
+  display: flex;
+  gap: 48px;
+}
+
+.left-side, .right-side {
+  flex: 1;
+}
+
+.benefits-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.benefit-card {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.icon {
+  font-size: 24px;
+}
+
+.main-icon {
+  font-size: 32px;
+  margin-bottom: 16px;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.subtitle {
+  margin: 16px 0 24px;
+}
+
+.action-button {
+  display: inline-block;
+  text-decoration: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+}
+</style>

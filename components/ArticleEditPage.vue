@@ -183,7 +183,7 @@
     
         <!-- 章内容区 -->
         <div class="editor-content">
-          <!-- Sections容器直��容 -->
+          <!-- Sections容器直接容 -->
           <div class="sections-container">
             <template v-for="(section, index) in articleData.sections" :key="section.sectionId">
               <div class="section-wrapper" :data-section-id="section.sectionId">
@@ -298,7 +298,7 @@
       const router = useRouter();
       const loading = ref(true);
   
-      // 获文��数据后立即创深拷贝
+      // 获文数据后立即创深拷贝
       const originalArticle = ref(null);
   
       // 加载文章数据
@@ -315,7 +315,7 @@
             throw new Error('无效的响应数据');
           }
 
-          const article = response.data[0];
+          const article = response.data;
           console.log('解析到的文章数据:', article);
           
           if (!article) {
@@ -376,7 +376,7 @@
             throw new Error('Article ID not found');
           }
   
-          // 直接使用之前保存的 originalArticle 进行比较
+          // 直接���用之前保存的 originalArticle 进行比较
           const hasBasicInfoChanges = 
             articleData.value.title !== originalArticle.value.title ||
             articleData.value.subTitle !== originalArticle.value.subTitle ||
@@ -542,7 +542,6 @@
         const element = document.querySelector(`[data-section-id="${sectionId}"]`);
         const headerOffset = 100; // 设置一个合适的偏移量，根据你的 header 高度调整
         const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
 
         document.querySelector('.editor-content').scrollTo({
           top: element.offsetTop - headerOffset,
@@ -631,7 +630,7 @@
         isPublishModalVisible.value = false;
       };
   
-      // 取消取消布操作
+      // 取消取��布操作
       const cancelUnpublish = () => {
         isUnpublishModalVisible.value = false;
       };
@@ -651,25 +650,38 @@
   
       // 计算内容指标的函数
       const calculateContentMetrics = () => {
-        // 初始化计数器
         let h1Count = 0;
         let h2Count = 0;
         let h3Count = 0;
         let paragraphsCount = 0;
         let imagesCount = 0;
 
-        // 遍历所有 sections 统计标签数量
+        // 添加递归处理函数
+        const processTagsRecursively = (tags) => {
+          if (!tags) return;
+          
+          Object.entries(tags).forEach(([key, value]) => {
+            if (typeof value === 'object') {
+              // 如果是对象，继续递归处理
+              processTagsRecursively(value);
+            } else {
+              // 如果是标签值，进行统计
+              switch (value) {
+                case 'h1': h1Count++; break;
+                case 'h2': h2Count++; break;
+                case 'h3': h3Count++; break;
+                case 'p': paragraphsCount++; break;
+                case 'img': imagesCount++; break;
+              }
+            }
+          });
+        };
+
+        // 遍历所有 sections 并递归处理标签
         articleData.value?.sections?.forEach(section => {
           const sectionTags = getSectionTags(section.componentName);
-          
           if (sectionTags) {
-            Object.entries(sectionTags).forEach(([key, tagType]) => {
-              if (tagType === 'h1') h1Count++;
-              else if (tagType === 'h2') h2Count++;
-              else if (tagType === 'h3') h3Count++;
-              else if (tagType === 'p') paragraphsCount++;
-              else if (tagType === 'img') imagesCount++;
-            });
+            processTagsRecursively(sectionTags);
           }
         });
 
@@ -1127,7 +1139,7 @@
     background: #d1d5db;
   }
   
-  /* 确保内容区域有合适的内边�� */
+  /* 确保内容区域有合适的内边距 */
   :deep(.ant-tabs-tabpane) {
     padding: 2px;
   }

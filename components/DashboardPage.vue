@@ -68,7 +68,7 @@
             <a-descriptions-item label="Your Site">
               <template v-if="productInfo.projectWebsite">
                 <a-space>
-                  <a :href="productInfo.projectWebsite" target="_blank">
+                  <a :href="'https://' + productInfo.projectWebsite" target="_blank">
                     {{ productInfo.projectWebsite }}
                   </a>
                   <template v-if="productInfo.domainStatus">
@@ -121,75 +121,129 @@
 
       <!-- Metrics Cards -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
-        <a-col :span="8">
+        <a-col :span="12">
+          <a-card>
+            <template #title>
+                <span>👥 Traffic </span>
+                <a-typography-text type="secondary" v-if="isGscConnected && gscSites.length > 0">
+                  {{ gscSites[0].siteUrl }}
+                </a-typography-text>
+            </template>
+            <template #extra>
+              <a-button 
+                type="link" 
+                @click="connectGSC"
+                :disabled="isGscConnected"
+              >
+                {{ isGscConnected ? 'Google Search Console Connected!' : 'Connect Google Search Console' }}
+              </a-button>
+            </template>
+            <!-- 未连接 GSC 时显示提示 -->
+            <div v-if="!isGscConnected" class="not-connected-notice">
+              <a-empty description="Google Search Console Not Connected" />
+            </div>
+            <!-- 数据内容 -->
+            <a-row v-else :gutter="[16, 8]">
+              <a-col :span="8">
+                <a-statistic 
+                  title="Impressions" 
+                  :value="gscAnalytics?.impressions || 0"
+                  :precision="0"
+                  :value-style="{ fontSize: '16px' }"
+                  :title-style="{ fontSize: '12px' }"
+                >
+                  <template #suffix>
+                    <a-tag size="small" color="success" v-if="gscAnalytics?.impressionsChange">
+                      <span style="font-size: 12px">↑ {{ gscAnalytics.impressionsChange }}%</span>
+                    </a-tag>
+                  </template>
+                </a-statistic>
+              </a-col>
+              <a-col :span="8">
+                <a-statistic 
+                  title="Clicks" 
+                  :value="gscAnalytics?.clicks || 0"
+                  :precision="0"
+                  :value-style="{ fontSize: '16px' }"
+                  :title-style="{ fontSize: '12px' }"
+                >
+                  <template #suffix>
+                    <a-tag size="small" color="success" v-if="gscAnalytics?.clicksChange">
+                      <span style="font-size: 12px">↑ {{ gscAnalytics.clicksChange }}%</span>
+                    </a-tag>
+                  </template>
+                </a-statistic>
+              </a-col>
+            </a-row>
+          </a-card>
+        </a-col>
+
+        <!-- Pages 卡片 -->
+        <a-col :span="12">
           <a-card>
             <template #title>
               <span>📄 Pages</span>
             </template>
-            <a-statistic-group>
-              <a-statistic 
-                title="Generated Pages" 
-                :value="generatedPages.length"
-              />
-              <a-statistic 
-                title="Published Pages" 
-                :value="publishedPages || 0" 
-              />
-            </a-statistic-group>
+            <!-- 数据内容 -->
+            <a-row :gutter="[16, 8]">
+              <a-col :span="8">
+                <a-statistic 
+                  title="Generated" 
+                  :value="productInfo?.generatedPages || 0"
+                  :value-style="{ fontSize: '16px' }"
+                  :title-style="{ fontSize: '12px' }"
+                >
+                  <template #suffix>
+                    <a-tag size="small" color="success" v-if="productInfo?.generatedPagesChange">
+                      <span style="font-size: 12px">↑ {{ productInfo.generatedPagesChange }}%</span>
+                    </a-tag>
+                  </template>
+                </a-statistic>
+              </a-col>
+              <a-col :span="8">
+                <a-statistic 
+                  title="Published" 
+                  :value="0"
+                  :value-style="{ fontSize: '16px' }"
+                  :title-style="{ fontSize: '12px' }"
+                >
+                  <template #suffix>
+                    <a-tag size="small">
+                      <span style="font-size: 12px">Not published</span>
+                    </a-tag>
+                  </template>
+                </a-statistic>
+              </a-col>
+              <a-col :span="8">
+                <a-statistic 
+                  title="Indexed" 
+                  :value="0"
+                  :value-style="{ fontSize: '16px' }"
+                  :title-style="{ fontSize: '12px' }"
+                >
+                  <template #suffix>
+                    <a-tag size="small">
+                      <span style="font-size: 12px">Not indexed</span>
+                    </a-tag>
+                  </template>
+                </a-statistic>
+              </a-col>
+            </a-row>
           </a-card>
         </a-col>
 
-        <a-col :span="8">
+        <!-- 图表卡片 -->
+        <a-col :span="24">
           <a-card>
             <template #title>
-              <a-space>
-                <span>👥 Visits</span>
-                <a-typography-text type="secondary" v-if="isGscConnected && gscSites.length > 0">
-                  {{ gscSites[0].siteUrl }}
-                </a-typography-text>
-              </a-space>
+              <span>📈 Traffic Analytics (Last 15 Days)</span>
             </template>
-            <template #extra>
-              <a-button 
-                type="link" 
-                @click="connectGSC"
-                :disabled="isGscConnected"
-              >
-                {{ isGscConnected ? 'Connected!' : 'Connect GSC' }}
-              </a-button>
-            </template>
-            <a-statistic title="Total Visits" value="-">
-              <template #suffix>
-                <a-tag color="success">↑ -</a-tag>
-              </template>
-            </a-statistic>
-          </a-card>
-        </a-col>
-
-        <a-col :span="8">
-          <a-card>
-            <template #title>
-              <a-space>
-                <span>🎯 Clicks</span>
-                <a-typography-text type="secondary" v-if="isGscConnected && gscSites.length > 0">
-                  {{ gscSites[0].siteUrl }}
-                </a-typography-text>
-              </a-space>
-            </template>
-            <template #extra>
-              <a-button 
-                type="link" 
-                @click="connectGSC"
-                :disabled="isGscConnected"
-              >
-                {{ isGscConnected ? 'Connected!' : 'Connect GSC' }}
-              </a-button>
-            </template>
-            <a-statistic title="Total Clicks" value="-">
-              <template #suffix>
-                <a-tag color="success">↑ -</a-tag>
-              </template>
-            </a-statistic>
+            <!-- 未连接 GSC ��显示提示 -->
+            <div v-if="!isGscConnected" class="not-connected-notice">
+              <a-empty description="Google Search Console Not Connected" />
+            </div>
+            <!-- 数据加载完成后显示图表 -->
+            <div v-else ref="chartRef" style="height: 500px; width: 100%;"></div>
           </a-card>
         </a-col>
       </a-row>
@@ -312,38 +366,44 @@
       <!-- 竞品分析 -->
       <a-form-item label="Competitors">
         <div class="competitors-section">
-          <a-space wrap>
-            <a-tag 
-              v-for="(comp, index) in formState.competitors" 
-              :key="index"
-              closable
-              @close="removeCompetitor(index)"
-              :color="['blue', 'green', 'orange', 'purple'][index % 4]"
-            >
-              {{ comp.name }}
-            </a-tag>
-          </a-space>
+          <!-- 第一行: 已添加的竞品标签 -->
+          <div class="competitors-tags">
+            <a-space wrap>
+              <a-tag 
+                v-for="(comp, index) in formState.competitors" 
+                :key="index"
+                closable
+                @close="removeCompetitor(index)"
+                :color="['blue', 'green', 'orange', 'purple'][index % 4]"
+              >
+                {{ comp.name }}
+              </a-tag>
+            </a-space>
+          </div>
 
-          <a-space class="mt-3">
-            <a-input
-              v-model:value="newCompetitor.name"
-              placeholder="Competitor name"
-              style="width: 200px"
-            />
-            <a-input
-              v-model:value="newCompetitor.url"
-              placeholder="Website (e.g. example.com)"
-              style="width: 200px"
-            />
-            <a-button 
-              type="primary"
-              @click="addCompetitor"
-              :disabled="!newCompetitor.name || !newCompetitor.url"
-            >
-              <template #icon><PlusOutlined /></template>
-              Add
-            </a-button>
-          </a-space>
+          <!-- 第二行: 输入框和添加按钮 -->
+          <div class="competitors-input">
+            <a-space>
+              <a-input
+                v-model:value="newCompetitor.name"
+                placeholder="Competitor name"
+                style="width: 200px"
+              />
+              <a-input
+                v-model:value="newCompetitor.url"
+                placeholder="Website (e.g. example.com)"
+                style="width: 200px"
+              />
+              <a-button 
+                type="primary"
+                @click="addCompetitor"
+                :disabled="!newCompetitor.name || !newCompetitor.url"
+              >
+                <template #icon><PlusOutlined /></template>
+                Add
+              </a-button>
+            </a-space>
+          </div>
         </div>
       </a-form-item>
 
@@ -433,7 +493,7 @@
     class="gsc-success-modal"
   >
     <div class="success-content">
-      <div class="success-icon">✨</div>
+      <div class="success-icon"></div>
       <h3>Connected Successfully!</h3>
       <p>Please close this window and refresh the page</p>
     </div>
@@ -441,7 +501,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, onUnmounted } from 'vue'
+import { defineComponent, ref, onMounted, onUnmounted, watch } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
 import { CopyOutlined, EditOutlined, DeleteOutlined, ThunderboltOutlined, FileTextOutlined, LineChartOutlined, NodeIndexOutlined } from '@ant-design/icons-vue'
 import apiClient from '../api/api'
@@ -449,6 +509,7 @@ import SuccessModal from './SuccessModal.vue'
 import { CalendarOutlined, LinkOutlined, SearchOutlined, FolderOpenOutlined } from '@ant-design/icons-vue'
 import { GlobalOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
+import * as echarts from 'echarts' // 需要安�� echarts
 
 export default defineComponent({
   components: {
@@ -474,7 +535,7 @@ export default defineComponent({
       purchases: '-',
       productInfo: null,
       onboardingModalVisible: false,
-      loading: false,
+      loading: true,
       websitePrefix: 'https://',
       defaultCompetitors: [],
       formState: {
@@ -512,6 +573,7 @@ export default defineComponent({
       startVerifying: false,
       goStartVerifying: false,
       originalDomainStatus: null, // 新增：保存原始域名验证状态
+      chart: null, // 添加到 data 中，使其成为响应式数据
     }
   },
   created() {
@@ -530,9 +592,21 @@ export default defineComponent({
     const isComponentMounted = ref(false)
     const pagesTable = ref(null)
     const productModalVisible = ref(false)
+    const chartRef = ref(null)
+    let chart = null
+    
+    const initChart = () => {
+      if (chart) {
+        chart.dispose()
+      }
+      chart = echarts.init(chartRef.value)
+    }
     
     onMounted(() => {
       isComponentMounted.value = true
+      if (chartRef.value) {
+        initChart()
+      }
     })
 
     onUnmounted(() => {
@@ -542,7 +616,8 @@ export default defineComponent({
       showOnboardingModal,
       isComponentMounted,
       pagesTable,
-      productModalVisible
+      productModalVisible,
+      chartRef
     }
   },
   computed: {
@@ -635,7 +710,7 @@ export default defineComponent({
             message: 'Failed to Load Product',
             description: 'Unable to load product information. Please try again later.'
           });
-          this.productInfo = {} // 修改这里: 从 null 改为空对象
+          this.productInfo = {} // 修改这里: 从 null 改为对象
         }
       } catch (error) {
         console.error('Failed to load product information:', error)
@@ -657,7 +732,7 @@ export default defineComponent({
       const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
       const isDomainVerified = this.productInfo?.domainStatus;
 
-      // 检查域名是否被修改且之前已验证
+      // 检查域名否被修改且之前已验证
       if (isDomainVerified && this.formState.website !== currentDomain && this.formState.website) {
         // 显示确认对话框
         const confirmed = await new Promise(resolve => {
@@ -672,7 +747,7 @@ export default defineComponent({
         });
 
         if (!confirmed) {
-          return; // 如果用户取消，则不继续执行
+          return; // 果用户取消，则不继续执行
         }
       }
 
@@ -692,7 +767,7 @@ export default defineComponent({
 
         let response;
         if (this.formState.productId) {
-          // 编辑模式 - 调用更新接口
+          // 编辑式 - 调用更接口
           response = await apiClient.updateProduct(this.formState.productId, formData);
         } else {
           // Onboarding模式 - 调用创建接口
@@ -765,7 +840,7 @@ export default defineComponent({
         website: '',
         coreFeatures: '',
         competitors: [],
-        domainStatus: false // 确保重置时验证状态为 false
+        domainStatus: false // 确保重置验证状态为 false
       };
       this.showVerifyRecord = false;
       this.verifyRecord = null;
@@ -821,7 +896,7 @@ export default defineComponent({
         this.verifyRecord = null;
         this.formState.domainStatus = false;
       } else {
-        // 如果改回原来的域名，使用保存的原始状态
+        // 如果改原的域名，使用保存的原始状态
         this.formState.domainStatus = this.originalDomainStatus;
       }
       
@@ -966,11 +1041,11 @@ export default defineComponent({
         return;
       }
 
-      // 获取所有实际存在的页面（过滤掉虚拟目录）
+      // 获取所有实际的页面（过滤掉虚拟目录）
       const getAllPages = (node) => {
         let pages = [];
         
-        // 有当节点有实际的URL（不是虚拟目录时才添加
+        // 有当节点实际的URL（不是虚拟目录时才添加
         if (node.key && node.key.startsWith('http')) {
           pages.push({ loc: node.key });
         }
@@ -1072,6 +1147,7 @@ export default defineComponent({
         
         if (this.isGscConnected) {
           await this.loadGscData()
+          await this.loadGscAnalytics()
         } else {
           this.gscSites = []
           this.gscAnalytics = null
@@ -1158,7 +1234,7 @@ export default defineComponent({
           throw new Error('Failed to update product information');
         }
 
-        // 重新加载产品信息
+        // 重新载产品信息
         await this.loadProductInfo();
 
         // 继续域名验证流程
@@ -1221,6 +1297,237 @@ export default defineComponent({
       this.onboardingModalVisible = false;
       // 重置原始状态
       this.originalDomainStatus = null;
+    },
+    async loadGscAnalytics() {
+      if (!this.isGscConnected || !this.gscSites.length) {
+        return;
+      }
+
+      try {
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.getGscAnalytics(
+          customerId,
+          this.gscSites[0].siteUrl
+        );
+        
+        if (response?.code === 200 && response.data) {
+          console.log('Raw analytics data:', response.data) // 添加调试日志
+          const analyticsData = this.processGscAnalytics(response.data);
+          console.log('Processed analytics data:', analyticsData) // 添加调试日志
+          this.gscAnalytics = analyticsData;
+          
+          this.$nextTick(() => {
+            this.initChart(); // 改为调用 initChart
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load GSC analytics:', error);
+      }
+    },
+
+    // 添加数据处理方法
+    processGscAnalytics(data) {
+      if (!Array.isArray(data) || data.length === 0) {
+        return null;
+      }
+
+      // 按日期排序
+      data.sort((a, b) => new Date(a.keys[1]) - new Date(b.keys[1]));
+
+      // 提取每日数据
+      const dailyData = data.map(item => ({
+        date: item.keys[1],
+        impressions: item.impressions || 0,
+        clicks: item.clicks || 0,
+        ctr: item.ctr || 0
+      }));
+
+      // 计算总量和环比（保持原有逻辑）
+      const totals = {
+        impressions: 0,
+        clicks: 0,
+        ctr: 0
+      };
+
+      const halfLength = Math.floor(data.length / 2);
+      const firstHalf = {
+        impressions: 0,
+        clicks: 0
+      };
+      const secondHalf = {
+        impressions: 0,
+        clicks: 0
+      };
+
+      data.forEach((item, index) => {
+        totals.impressions += item.impressions || 0;
+        totals.clicks += item.clicks || 0;
+
+        if (index < halfLength) {
+          firstHalf.impressions += item.impressions || 0;
+          firstHalf.clicks += item.clicks || 0;
+        } else {
+          secondHalf.impressions += item.impressions || 0;
+          secondHalf.clicks += item.clicks || 0;
+        }
+      });
+
+      totals.ctr = totals.clicks > 0 ? 
+        ((totals.clicks / totals.impressions) * 100).toFixed(2) : 0;
+
+      const impressionsChange = firstHalf.impressions > 0 ?
+        (((secondHalf.impressions - firstHalf.impressions) / firstHalf.impressions) * 100).toFixed(1) : 0;
+      
+      const clicksChange = firstHalf.clicks > 0 ?
+        (((secondHalf.clicks - firstHalf.clicks) / firstHalf.clicks) * 100).toFixed(1) : 0;
+
+      return {
+        impressions: totals.impressions,
+        clicks: totals.clicks,
+        ctr: totals.ctr,
+        impressionsChange: impressionsChange > 0 ? impressionsChange : null,
+        clicksChange: clicksChange > 0 ? clicksChange : null,
+        dailyData // 添加每日数据
+      };
+    },
+
+    // 添加图表新方法
+    updateChart() {
+      if (!this.chart || !this.gscAnalytics?.dailyData) {
+        console.log('No chart or no data available')
+        return
+      }
+
+      const data = this.gscAnalytics.dailyData
+      const maxValue = Math.max(
+        ...data.map(item => item.impressions),
+        ...data.map(item => item.clicks)
+      )
+      const yAxisMax = Math.ceil(maxValue * 1.1)
+
+      const option = {
+        tooltip: {
+          trigger: 'item',
+          formatter: function(params) {
+            return `${params.seriesName}: ${params.value}`
+          }
+        },
+        legend: {
+          data: ['Impressions', 'Clicks'],
+          selected: {
+            'Impressions': true,
+            'Clicks': true
+          },
+          top: 10,
+          left: 'center',
+          icon: 'circle',
+          selectedMode: false  // 禁用图例点击交互
+        },
+        grid: {
+          left: 60,
+          right: 60,
+          bottom: 100,
+          top: 50,
+          containLabel: true,
+          height: 450
+        },
+        xAxis: {
+          type: 'category',
+          data: data.map(item => item.date),
+          axisLabel: {
+            rotate: 45,
+            formatter: function(value) {
+              const dayData = data.find(item => item.date === value)
+              if (!dayData) return value
+              return [
+                `${value}`,
+                `{ctrStyle|CTR: ${(dayData.ctr * 100).toFixed(1)}%}`
+              ].join('\n')
+            },
+            rich: {
+              ctrStyle: {
+                color: '#1890ff',     // 改用蓝色
+                fontWeight: 'bold',
+                fontSize: 12
+              }
+            }
+          }
+        },
+        yAxis: {
+          type: 'value',
+          name: 'Impressions & Clicks',
+          min: 0,
+          max: yAxisMax,
+          axisLine: { show: true },
+          axisLabel: { formatter: '{value}' },
+          splitLine: {
+            show: true,
+            lineStyle: { type: 'dashed' }
+          }
+        },
+        series: [
+          {
+            name: 'Impressions',
+            type: 'line',
+            data: data.map(item => item.impressions),
+            color: '#1890ff',
+            symbol: 'circle',
+            symbolSize: 6,
+            lineStyle: { width: 2 }
+          },
+          {
+            name: 'Clicks',
+            type: 'line',
+            data: data.map(item => item.clicks),
+            color: '#52c41a',
+            symbol: 'circle',
+            symbolSize: 6,
+            lineStyle: { width: 2 }
+          }
+        ]
+      }
+
+      this.chart.setOption(option, { notMerge: true })
+    },
+
+    // 监听口小变化，调整图表大小
+    '$window.innerWidth'() {
+      if (this.chart) {
+        this.chart.resize();
+      }
+    },
+
+    initChart() {
+      if (this.chart) {
+        this.chart.dispose()
+      }
+      if (this.chartRef) {
+        this.chart = echarts.init(this.chartRef)
+        this.updateChart() // 初始化后立即更新数据
+      }
+    },
+
+    mounted() {
+      this.initChart()
+      window.addEventListener('resize', this.handleResize)
+    },
+
+    beforeUnmount() {
+      window.removeEventListener('resize', this.handleResize)
+      if (this.chart) {
+        this.chart.dispose()
+      }
+    },
+
+    handleResize() {
+      if (this.chart) {
+        this.chart.resize()
+      }
+    },
+
+    async fetchData() {
+      // 获取数据的具体实现
+      // ...
     }
   }
 })
@@ -1242,7 +1549,6 @@ export default defineComponent({
 /* 覆盖一些 Ant Design 默认样式 */
 :deep(.ant-card-head) {
   border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 16px;
 }
 
 :deep(.ant-descriptions-item) {
@@ -1278,7 +1584,6 @@ export default defineComponent({
 }
 
 :deep(.ant-card-body) {
-  height: calc(100% - 57px);  /* Subtract header height */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1430,6 +1735,38 @@ export default defineComponent({
 
 /* 添加或修改以下样式 */
 :deep(.ant-typography-secondary) {
-  font-size: 12px; /* 调整为你需要的字号 */
+  font-size: 12px; /* ��整为你需要的字号 */
+}
+
+.competitors-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.competitors-tags {
+  min-height: 32px;
+}
+
+.competitors-input {
+  padding-top: 0;
+}
+
+:deep(.ant-empty) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.not-connected-notice {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.ant-card-body {
+  padding: 0px 24px 0px 24px;
 }
 </style>

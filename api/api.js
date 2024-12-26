@@ -327,7 +327,7 @@ const updatePageStatus = async (pageId, status) => {
   }
 };
 
-// 更��基本信息
+// 更基本信息
 const updatePage = async (pageId, pageData) => {
   try {
     const response = await apiClient.put(`/pages/${pageId}`, pageData);
@@ -339,9 +339,9 @@ const updatePage = async (pageId, pageData) => {
 };
 
 // 新增：获取单篇文章的方法
-const getArticleById = async (articleId, lang) => {
+const getArticleById = async (articleId) => {
   try {
-    const response = await apiClient.get(`/pages/${lang}/${articleId}`);
+    const response = await apiClient.get(`/pages/${articleId}`);
     return response.data;
   } catch (error) {
     console.error('获取文章详情败:', error);
@@ -423,7 +423,7 @@ const uploadMedia = async (formData) => {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      timeout: 5 * 60 * 1000, // 设置为 5 分钟
+      timeout: 5 * 60 * 1000, // 设置为 5 分��
     });
     return response.data;
   } catch (error) {
@@ -532,10 +532,13 @@ const deleteGscSite = async (siteUrl) => {
   }
 };
 
-const getGscAnalytics = async (siteUrl) => {
+const getGscAnalytics = async (customerId, siteUrl) => {
   try {
     const response = await apiClient.get('/sites/analytics', {
-      params: { siteUrl }
+      params: { 
+        customerId: customerId,
+        siteURL: siteUrl,
+      }
     });
     return response.data;
   } catch (error) {
@@ -728,7 +731,7 @@ const resetPassword = async (resetData) => {
     const response = await apiClient.post('/customer/reset-password', resetData);
     return response.data;
   } catch (error) {
-    console.error('重置密码失败:', error);
+    console.error('��置密码失败:', error);
     return null;
   }
 };
@@ -839,6 +842,27 @@ const changePassword = async (passwordData) => {
   }
 };
 
+// 新增：手动创建页面的方法
+const createManualPage = async (pageData) => {
+  try {
+    const response = await apiClient.post('/manual/pages', pageData);
+    return response.data;
+  } catch (error) {
+    console.error('手动创建页面失败:', error);
+    return null;
+  }
+};
+
+const updateFullSections = async (pageId, sectionsData) => {
+  try {
+    const response = await apiClient.put(`/sections/full/${pageId}`, sectionsData);
+    return response.data;
+  } catch (error) {
+    console.error('全量更新页面sections失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -904,5 +928,7 @@ export default {
   getKnowledgeById,
   updateKnowledge,
   getKnowledgeProcessStatus,
-  changePassword
+  changePassword,
+  createManualPage,
+  updateFullSections
 };
