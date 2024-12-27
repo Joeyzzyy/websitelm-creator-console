@@ -90,6 +90,11 @@ export const availableComponents = [
         type: 'ProductBenefitsWithBlocks',
         label: 'Benefits Blocks',
         template: createCleanComponentData('ProductBenefitsWithBlocks')
+      },
+      {
+        type: 'ProductBenefitsWithTable',
+        label: 'Benefits Table',
+        template: createCleanComponentData('ProductBenefitsWithTable')
       }
     ]
   },

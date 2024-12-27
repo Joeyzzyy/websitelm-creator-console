@@ -470,6 +470,37 @@ export const createCleanComponentData = (componentType) => {
               contentText: 'Built with enterprise needs in mind, our platform offers robust security features and unlimited scalability. All content is processed and stored with bank-level encryption, ensuring your sensitive data remains protected. The cloud-based infrastructure automatically scales to handle any volume of video generation, making it suitable for businesses of all sizes, from startups to global enterprises.'
           }
         ]
+      },
+
+      ProductBenefitsWithTable: {
+        leftContent: [
+          {
+            icon: '🎥',
+            contentTitle: 'AI Video Creation',
+            content: 'Generate professional videos automatically'
+          },
+          {
+            icon: '🌍',
+            contentTitle: 'Global Reach',
+            content: 'Support for 40+ languages'
+          },
+          {
+            icon: '⚡',
+            contentTitle: 'Fast Processing',
+            content: 'Complete videos in minutes'
+          },
+          {
+            icon: '💰',
+            contentTitle: 'Cost Effective',
+            content: 'Save up to 90% on video production'
+          }
+        ],
+        rightContent: {
+          icon: '🚀',
+          title: 'Ready to Transform Your Video Marketing?',
+          subTitle: 'Join thousands of businesses using websitelm AI',
+          buttonText: 'Start Free Trial'
+        }
       }
   };
 

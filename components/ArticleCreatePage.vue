@@ -423,6 +423,8 @@ import CallToActionWithEmailInputPreview from './sections/templates/CallToAction
 import KeyResultsWithTextBlock from './sections/templates/KeyResultsWithTextBlock.vue';
 import KeyResultsWithTextBlockPreview from './sections/templates/KeyResultsWithTextBlockPreview.vue';
 import WhyChooseUsWithSmallBlocksPreview from './sections/templates/WhyChooseUsWithSmallBlocksPreview.vue';
+import ProductBenefitsWithTable from './sections/templates/ProductBenefitsWithTable.vue';
+import ProductBenefitsWithTablePreview from './sections/templates/ProductBenefitsWithTablePreview.vue';
 import { VERCEL_CONFIG } from '../config/vercelConfig';
 import { createCleanComponentData } from '../utils/componentDataFactory';
 import { availableComponents } from '../config/availableComponents';
@@ -464,6 +466,7 @@ export default defineComponent({
     MeetOurTeam,
     JobList,
     CallToActionWithEmailInput,
+    ProductBenefitsWithTable,
     TitleSectionPreview,
     TitleSectionWithImagePreview,
     HeroSectionWithVideoPreview,
@@ -481,6 +484,7 @@ export default defineComponent({
     HowItWorksWithWorkflowPreview,
     ProductBenefitsWithBlocksPreview,
     UserReviewsWithMovingCardsPreview,
+    ProductBenefitsWithTablePreview,
   },
 
   setup() {

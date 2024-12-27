@@ -10,7 +10,20 @@
           </div>
           <div v-for="(item, index) in localSection.leftContent" :key="index">
             <a-form layout="vertical">
-              <a-form-item :label="`Item ${index + 1}`">
+              <a-form-item>
+                <div class="flex justify-between items-center mb-2">
+                  <span>Item {{ index + 1 }}</span>
+                  <a-button 
+                    v-if="!disabled" 
+                    type="text" 
+                    class="delete-btn" 
+                    @click="removeLeftItem(index)"
+                  >
+                    <template #icon>
+                      <delete-outlined />
+                    </template>
+                  </a-button>
+                </div>
                 <div class="input-with-tag">
                   <span class="html-tag">{{ tags.icon }}</span>
                   <a-input
@@ -39,14 +52,6 @@
                     @change="handleChange"
                   />
                 </div>
-                <a-button 
-                  v-if="!disabled" 
-                  type="link" 
-                  danger 
-                  @click="removeLeftItem(index)"
-                >
-                  Remove Item
-                </a-button>
               </a-form-item>
             </a-form>
           </div>
@@ -130,81 +135,11 @@
         <span>Preview</span>
       </div>
       
-      <div 
-        class="preview-content"
-        :class="[
-          styles.section.base,
-          styles.section.background.primary
-        ]"
-      >
-        <div 
-          class="content-wrapper"
-          :class="[
-            styles.section.padding.base
-          ]"
-        >
-          <div class="flex-container">
-            <!-- 左侧内容 -->
-            <div class="left-side">
-              <div class="benefits-grid">
-                <div 
-                  v-for="(item, index) in localSection.leftContent" 
-                  :key="index"
-                  class="benefit-card"
-                  :class="[
-                    styles.card.background,
-                    styles.card.border
-                  ]"
-                >
-                  <div :class="[styles.text.icon]" class="icon">{{ item.icon }}</div>
-                  <div class="card-content">
-                    <h3 :class="[
-                      styles.typography.h3.fontSize,
-                      styles.typography.h3.fontWeight,
-                      styles.typography.h3.color
-                    ]">
-                      {{ item.contentTitle }}
-                    </h3>
-                    <p :class="[
-                      styles.typography.paragraph.fontSize,
-                      styles.typography.paragraph.color
-                    ]">
-                      {{ item.content }}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 右侧内容 -->
-            <div class="right-side">
-              <div :class="[styles.text.icon]" class="main-icon">
-                {{ localSection.rightContent.icon }}
-              </div>
-              <h2 :class="[
-                styles.typography.h2.fontSize,
-                styles.typography.h2.fontWeight,
-                styles.typography.h2.color
-              ]">
-                {{ localSection.rightContent.title }}
-              </h2>
-              <p :class="[
-                styles.typography.paragraph.fontSize,
-                styles.text.color.secondary
-              ]" class="subtitle">
-                {{ localSection.rightContent.subTitle }}
-              </p>
-              <a-button 
-                v-if="localSection.rightContent.buttonText"
-                :class="getButtonStyle"
-                size="large"
-                :href="getButtonLink"
-              >
-                {{ localSection.rightContent.buttonText }}
-              </a-button>
-            </div>
-          </div>
-        </div>
+      <div class="preview-content">
+        <ProductBenefitsWithTablePreview 
+          :section="localSection"
+          :styles="styles"
+        />
       </div>
     </div>
   </div>
@@ -214,10 +149,16 @@
 import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import themeConfig from '../../../assets/config/themeConfig'
+import ProductBenefitsWithTablePreview from './ProductBenefitsWithTablePreview.vue'
+import { DeleteOutlined } from '@ant-design/icons-vue'
 
 export default {
   name: 'ProductBenefitsWithTable',
   extends: BaseSection,
+  components: {
+    ProductBenefitsWithTablePreview,
+    DeleteOutlined
+  },
   computed: {
     tags() {
       return SECTION_TAGS.ProductBenefitsWithTable
@@ -287,6 +228,9 @@ export default {
 /* 基础表单项样式 */
 :deep(.ant-form-item) {
   margin-bottom: 24px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
 }
 
 /* 左侧内容卡片样式 */
@@ -472,5 +416,34 @@ export default {
   text-decoration: none;
   padding: 12px 24px;
   border-radius: 6px;
+}
+
+.delete-btn {
+  color: #ff4d4f !important;
+  transition: all 0.3s;
+  padding: 4px;
+  height: 24px;
+  width: 24px;
+  line-height: 1;
+}
+
+.delete-btn:hover {
+  color: #ff7875 !important;
+  background: rgba(255, 77, 79, 0.1);
+}
+
+:deep(.anticon) {
+  font-size: 14px;
+  color: inherit;
+}
+
+/* 为每个 item 容器添加间距 */
+.left-content > div {
+  margin-bottom: 24px;
+}
+
+/* 最后一个 item 不需要底部间距 */
+.left-content > div:last-child {
+  margin-bottom: 0;
 }
 </style>

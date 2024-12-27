@@ -249,24 +249,22 @@ const componentValidationRules = {
       ]
     },
     
-    // ProductBenefitsWithTable: {
-    //   requiredFields: [
-    //     'leftContent',  
-    //     'rightContent.icon',
-    //     'rightContent.title',
-    //     'rightContent.subTitle',
-    //     'rightContent.buttonText',
-    //     'rightContent.buttonLink'
-    //   ],
-    //   allowedFields: [
-    //     'leftContent',  
-    //     'rightContent.icon',
-    //     'rightContent.title',
-    //     'rightContent.subTitle',
-    //     'rightContent.buttonText',
-    //     'rightContent.buttonLink'
-    //   ]
-    // },
+    ProductBenefitsWithTable: {
+      requiredFields: [
+        'leftContent.icon',
+        'leftContent.title',  
+        'leftContent.subTitle',
+        'leftContent.buttonText',
+        'rightContent',
+      ],
+      allowedFields: [
+        'leftContent.icon',
+        'leftContent.title',  
+        'leftContent.subTitle',
+        'leftContent.buttonText',
+        'rightContent',
+      ]
+    },
   
     // KeyResultsWithImage: {
     //   requiredFields: [
