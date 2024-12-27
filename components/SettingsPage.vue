@@ -37,63 +37,7 @@
                       <p class="website-url">{{ productInfo.projectWebsite }}</p>
                     </div>
                     
-                    <div class="configured-domains" v-if="currentDomainConfigs?.length > 0">
-                      <div class="domains-header">
-                        <h3>Added Subdomains</h3>
-                        <a-button 
-                          type="link"
-                          class="refresh-btn"
-                          :loading="refreshing"
-                          @click="handleRefresh"
-                        >
-                          <reload-outlined />
-                        </a-button>
-                      </div>
-                      <div class="domain-list">
-                        <div v-for="domain in currentDomainConfigs" :key="domain.name" class="domain-item">
-                          <div class="domain-info">
-                            <span class="domain-name">{{ domain.name }}</span>
-                            <a-tag :color="getDomainStatusColor(domain)">
-                              {{ getDomainStatusText(domain) }}
-                            </a-tag>
-                          </div>
-                          <template v-if="domain.configDetails?.misconfigured">
-                            <div class="dns-config-alert">
-                              <a-alert
-                                type="warning"
-                                show-icon
-                                message="DNS Configuration Required"
-                                description="Please add the following DNS record to your domain provider:"
-                              />
-                              <div class="dns-table-wrapper">
-                                <a-table
-                                  :dataSource="[{
-                                    type: 'CNAME',
-                                    name: domain.name.split('.')[0],
-                                    value: 'cname.vercel-dns.com.'
-                                  }]"
-                                  :columns="dnsColumns"
-                                  :pagination="false"
-                                  size="small"
-                                  class="dns-table"
-                                >
-                                </a-table>
-                              </div>
-                            </div>
-                          </template>
-                          <div class="domain-actions">
-                            <span class="domain-date">Added on {{ new Date(domain.createdAt).toLocaleDateString() }}</span>
-                            <a-button 
-                              type="link" 
-                              danger
-                              @click="showDeleteConfirm(domain.name)"
-                            >
-                              <delete-outlined />
-                            </a-button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                   
 
                     <div class="deployment-settings">
                       <h3>Deployment Settings</h3>
@@ -137,6 +81,35 @@
                           </div>
                         </a-form-item>
 
+                        <div class="input-section" v-if="deploymentForm.method === 'subfolder'">
+                          <a-spin :spinning="subfolderLoading">
+                            <div class="section-header">
+                              <h3>Subfolder Management</h3>
+                              <a-button type="primary" @click="showSubfolderModal = true">
+                                Add Subfolder
+                              </a-button>
+                            </div>
+
+                            <div class="subfolder-list">
+                              <a-table 
+                                :dataSource="subfolders" 
+                                :columns="subfolderColumns" 
+                                :pagination="false"
+                              >
+                                <template #bodyCell="{ column, text, record, index }">
+                                  <template v-if="column.key === 'action'">
+                                    <a-button type="link" danger @click="confirmDeleteSubfolder(index)">
+                                      Delete
+                                    </a-button>
+                                  </template>
+                                  <template v-if="column.key === 'preview'">
+                                    <span>{{ productInfo?.projectWebsite }}/{{ text }}</span>
+                                  </template>
+                                </template>
+                              </a-table>
+                            </div>
+                          </a-spin>
+                        </div>
                         <div class="input-section" v-if="deploymentForm.method === 'subdomain'">
                           <a-form-item 
                             label="Enter your subdomain"
@@ -163,47 +136,65 @@
                               Add
                             </a-button>
                           </a-form-item>
-                        </div>
 
-                        <div class="input-section" v-if="deploymentForm.method === 'subfolder'">
-                          <a-spin :spinning="subfolderLoading">
-                            <div class="section-header">
-                              <h3>Subfolder Management</h3>
-                              <a-button type="primary" @click="showSubfolderModal = true">
-                                Add Subfolder
-                              </a-button>
-                            </div>
-
-                            <div class="subfolder-list" v-if="subfolders.length > 0">
-                              <a-table 
-                                :dataSource="subfolders" 
-                                :columns="subfolderColumns" 
-                                :pagination="false"
-                              >
-                                <template #bodyCell="{ column, text, record, index }">
-                                  <template v-if="column.key === 'action'">
-                                    <a-button type="link" danger @click="deleteSubfolder(index)">
-                                      Delete
-                                    </a-button>
-                                  </template>
-                                  <template v-if="column.key === 'preview'">
-                                    <span>{{ productInfo?.projectWebsite }}/{{ text }}</span>
-                                  </template>
-                                </template>
-                              </a-table>
-
-                              <div class="save-actions">
+                          <a-spin :spinning="subdomainLoading">
+                            <div class="configured-domains" v-if="currentDomainConfigs?.length > 0">
+                              <div class="domains-header">
+                                <h3>Added Subdomains</h3>
                                 <a-button 
-                                  type="primary" 
-                                  :loading="savingSubfolders" 
-                                  @click="saveSubfolders"
+                                  type="link"
+                                  class="refresh-btn"
+                                  :loading="refreshing"
+                                  @click="handleRefresh"
                                 >
-                                  Save Changes
+                                  <reload-outlined />
                                 </a-button>
                               </div>
+                              <div class="domain-list">
+                                <div v-for="domain in currentDomainConfigs" :key="domain.name" class="domain-item">
+                                  <div class="domain-info">
+                                    <span class="domain-name">{{ domain.name }}</span>
+                                    <a-tag :color="getDomainStatusColor(domain)">
+                                      {{ getDomainStatusText(domain) }}
+                                    </a-tag>
+                                  </div>
+                                  <template v-if="domain.configDetails?.misconfigured">
+                                    <div class="dns-config-alert">
+                                      <a-alert
+                                        type="warning"
+                                        show-icon
+                                        message="DNS Configuration Required"
+                                        description="Please add the following DNS record to your domain provider:"
+                                      />
+                                      <div class="dns-table-wrapper">
+                                        <a-table
+                                          :dataSource="[{
+                                            type: 'CNAME',
+                                            name: domain.name.split('.')[0],
+                                            value: 'cname.vercel-dns.com.'
+                                          }]"
+                                          :columns="dnsColumns"
+                                          :pagination="false"
+                                          size="small"
+                                          class="dns-table"
+                                        >
+                                        </a-table>
+                                      </div>
+                                    </div>
+                                  </template>
+                                  <div class="domain-actions">
+                                    <span class="domain-date">Added on {{ new Date(domain.createdAt).toLocaleDateString() }}</span>
+                                    <a-button 
+                                      type="link" 
+                                      danger
+                                      @click="showDeleteConfirm(domain.name)"
+                                    >
+                                      <delete-outlined />
+                                    </a-button>
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-
-                            <a-empty v-else description="No subfolders yet" />
                           </a-spin>
                         </div>
                       </a-form>
@@ -212,7 +203,8 @@
                     <a-modal
                       v-model:visible="showSubfolderModal"
                       title="Add Subfolder"
-                      @ok="addNewSubfolder"
+                      @ok="handleAddSubfolder"
+                      :confirmLoading="savingSubfolders"
                       :okButtonProps="{ disabled: !newSubfolder }"
                     >
                       <div class="subfolder-input">
@@ -314,7 +306,6 @@
         </template>
       </div>
     </div>
-
   </page-layout>
 </template>
 
@@ -325,6 +316,8 @@ import PageLayout from './layout/PageLayout.vue'
 import { useRouter } from 'vue-router';
 import { SettingOutlined, DeleteOutlined, ReloadOutlined, CloseOutlined } from '@ant-design/icons-vue'
 import apiClient from '../api/api';
+import { VERCEL_CONFIG } from '../config/vercelConfig';
+
 
 export default {
   name: 'SettingsPage',
@@ -336,6 +329,7 @@ export default {
     CloseOutlined,
   },
   setup() {
+    const PROJECT_ID = VERCEL_CONFIG.PROJECT_ID;
     const cooldown = ref(0);
     const cooldownTimer = ref(null);
     const router = useRouter();
@@ -344,6 +338,7 @@ export default {
     };
     const activeTab = ref('domains');
     const domainLoading = ref(false);
+    const subdomainLoading = ref(false);
     const domainModalVisible = ref(false);
     const savingDomain = ref(false);
     const websitePrefix = ref('https://');
@@ -460,7 +455,7 @@ export default {
             });
 
             if (response?.code === 200) {
-              // 更新本地存储的邮箱
+              // 更新地存储的邮箱
               currentEmail.value = emailForm.value.newEmail;
               localStorage.setItem('currentCustomerEmail', emailForm.value.newEmail);
               
@@ -528,18 +523,6 @@ export default {
       };
     };
 
-    // 添加获取 projectId 的工具方法
-    const getProjectId = (customerId) => {
-      switch (customerId) {
-        case '673f4f19caf5b79765874fe8':
-          return 'prj_7SXIhcIx5SOYKKVzhhRvnmUdoN7g';
-        case '67525da4ba5fcadf228e56c1':
-          return 'prj_7SXIhcIx5SOYKKVzhhRvnmUdoN7g';
-        default:
-          return 'prj_ySV5jK2SgENiBpE5D2aTaeI3KfAo'; // 默认值待定
-      }
-    };
-
     const showDeleteConfirm = (domainName) => {
       Modal.confirm({
         title: 'Confirm Delete',
@@ -549,10 +532,7 @@ export default {
         cancelText: 'Cancel',
         async onOk() {
           try {
-            const customerId = localStorage.getItem('currentCustomerId');
-            const projectId = getProjectId(customerId);
-            
-            await apiClient.deleteVercelDomain(projectId, domainName);
+            await apiClient.deleteVercelDomain(PROJECT_ID, domainName);
             message.success('Domain deleted successfully');
             await loadVercelDomainInfo();
           } catch (error) {
@@ -640,15 +620,18 @@ export default {
     // 添加新的方法来获取 Vercel 域名信息
     const loadVercelDomainInfo = async () => {
       try {
+        subdomainLoading.value = true;
         const customerId = localStorage.getItem('currentCustomerId');
-        const projectId = getProjectId(customerId);
+        const projectId = PROJECT_ID;
 
         const response = await apiClient.getVercelDomainInfo(projectId);
         vercelDomainInfo.value = response;
-        processVercelDomainInfo(response);
+        await processVercelDomainInfo(response);
       } catch (error) {
         console.error('Failed to load Vercel domain info:', error);
         message.error('Failed to load domain information');
+      } finally {
+        subdomainLoading.value = false;
       }
     };
 
@@ -733,7 +716,7 @@ export default {
       saving.value = true;
       try {
         const customerId = localStorage.getItem('currentCustomerId');
-        const projectId = getProjectId(customerId);
+        const projectId = PROJECT_ID;
 
         const domainData = {
           name: `${deploymentForm.value.prefix}.${productInfo.value.projectWebsite}`
@@ -802,30 +785,68 @@ export default {
       },
     ];
 
-    const deleteSubfolder = (index) => {
-      subfolders.value.splice(index, 1);
+    const confirmDeleteSubfolder = (index) => {
+      Modal.confirm({
+        title: 'Delete Subfolder',
+        content: `Are you sure you want to delete this subfolder?`,
+        okText: 'Delete',
+        okType: 'danger',
+        cancelText: 'Cancel',
+        async onOk() {
+          try {
+            const subfoldersToSave = [...subfolders.value];
+            subfoldersToSave.splice(index, 1);
+            
+            // 直接保存更新后的数组
+            await apiClient.updateSubfolders(subfoldersToSave.map(item => item.text));
+            subfolders.value = subfoldersToSave;
+            message.success('Subfolder deleted successfully');
+          } catch (error) {
+            console.error('Failed to delete subfolder:', error);
+            message.error('Failed to delete subfolder');
+          }
+        },
+      });
     };
 
-    const addNewSubfolder = () => {
+    const handleAddSubfolder = async () => {
       if (!newSubfolder.value) {
         message.warning('Please enter a subfolder name');
         return;
       }
 
-      // 简化：只存储文件夹名称
-      const subfolder = {
-        text: newSubfolder.value,
-        preview: newSubfolder.value  // 添加 preview 字段
-      };
+      // 检查是否已存在相同的子文件夹
+      const normalizedNewSubfolder = newSubfolder.value.toLowerCase().trim();
+      const exists = subfolders.value.some(item => 
+        item.text.toLowerCase().trim() === normalizedNewSubfolder
+      );
 
-      if (subfolders.value.some(item => item.text === newSubfolder.value)) {
-        message.warning('This subfolder already exists');
+      if (exists) {
+        message.error('This subfolder already exists');
         return;
       }
 
-      subfolders.value.push(subfolder);
-      newSubfolder.value = '';
-      showSubfolderModal.value = false;
+      try {
+        savingSubfolders.value = true;
+        const newSubfolders = [
+          ...subfolders.value,
+          {
+            text: newSubfolder.value.trim(),
+            preview: newSubfolder.value.trim()
+          }
+        ];
+
+        await apiClient.updateSubfolders(newSubfolders.map(item => item.text));
+        subfolders.value = newSubfolders;
+        newSubfolder.value = '';
+        showSubfolderModal.value = false;
+        message.success('Subfolder added successfully');
+      } catch (error) {
+        console.error('Failed to add subfolder:', error);
+        message.error('Failed to add subfolder');
+      } finally {
+        savingSubfolders.value = false;
+      }
     };
 
     const saveSubfolders = async () => {
@@ -889,10 +910,11 @@ export default {
       newSubfolder,
       subfolderColumns,
       loadSubfolders,
-      deleteSubfolder,
-      addNewSubfolder,
+      confirmDeleteSubfolder,
+      handleAddSubfolder,
       saveSubfolders,
       subfolderLoading,
+      subdomainLoading,
     };
   }
 }
@@ -1478,12 +1500,6 @@ export default {
 
 .subfolder-list {
   margin-top: 16px;
-}
-
-.save-actions {
-  margin-top: 16px;
-  display: flex;
-  justify-content: flex-end;
 }
 
 .subfolder-input {

@@ -218,8 +218,65 @@
                         </a-form-item>
                       </div>
 
-                      <!-- Summary 移到右列底部 -->
-                      <a-form-item label="Summary">
+                      <!-- Deployment Method 放在 Summary 上面 -->
+                      <a-form-item 
+                        label="Deployment Method"
+                        style="margin-top: 24px;"
+                      >
+                        <a-radio-group v-model:value="articleData.deploymentMethod">
+                          <a-radio value="subfolder">Subfolder</a-radio>
+                          <a-radio value="subdomain">Subdomain</a-radio>
+                        </a-radio-group>
+
+                        <div v-if="articleData.deploymentMethod" style="margin-top: 16px;">
+                          <a-select
+                            v-if="articleData.deploymentMethod === 'subdomain'"
+                            v-model:value="articleData.deployTarget"
+                            placeholder="Select subdomain"
+                            :loading="loadingDeployTargets"
+                            style="width: 100%;"
+                          >
+                            <a-select-option 
+                              v-for="domain in availableSubdomains" 
+                              :key="domain.name"
+                              :value="domain.name"
+                            >
+                              {{ domain.name }}
+                            </a-select-option>
+                          </a-select>
+
+                          <a-select
+                            v-else
+                            v-model:value="articleData.deployTarget"
+                            placeholder="Select subfolder"
+                            :loading="loadingDeployTargets"
+                            style="width: 100%;"
+                          >
+                            <a-select-option 
+                              v-for="folder in availableSubfolders" 
+                              :key="folder.text"
+                              :value="folder.text"
+                            >
+                              {{ folder.text }}
+                            </a-select-option>
+                          </a-select>
+
+                          <!-- 修改预览URL显示逻辑 -->
+                          <div class="preview-url-hint" v-if="articleData.deployTarget">
+                            <div class="hint-label">This page could be published to:</div>
+                            <div class="preview-url">{{ getPreviewDeployUrl }}</div>
+                            <div class="url-note">
+                              Note: The URL slug is a unique identifier for this page and will be generated after saving.
+                            </div>
+                          </div>
+                        </div>
+                      </a-form-item>
+
+                      <!-- Summary 放在 Deployment Method 下面 -->
+                      <a-form-item 
+                        label="Summary"
+                        style="margin-top: 24px;"
+                      >
                         <a-textarea
                           v-model:value="articleData.summary"
                           placeholder="Enter page summary"
@@ -240,7 +297,7 @@
             <p>Drag or click components from the left to start creating</p>
           </div>
 
-          <!-- 其他组�����列表 -->
+          <!-- 其他组件列表 -->
           <div 
             v-for="(section, index) in articleData.sections" 
             :key="index"
@@ -323,6 +380,7 @@ import JobList from './sections/templates/JobList.vue';
 import CallToActionWithEmailInput from './sections/templates/CallToActionWithEmailInput.vue';
 import config from '../config/settings';
 import KeyResultsWithTextBlock from './sections/templates/KeyResultsWithTextBlock.vue';
+import { VERCEL_CONFIG } from '../config/vercelConfig';
 export default defineComponent({
   name: 'ArticleCreatePage',
   components: {
@@ -438,12 +496,16 @@ export default defineComponent({
       description: '',
       summary: '',
       sections: [],
+      deploymentMethod: 'subfolder',
+      deployTarget: null,
+      language: 'en',
       pageStats: {
         genKeyword: [],
         wordCount: 0,
         keywords: [],
         keywordStats: []
-      }
+      },
+      articleType: 'Landing Page'
     });
 
     // Content metrics
@@ -513,7 +575,7 @@ export default defineComponent({
     // 添加新响应式变量来跟踪拖拽的源引
     const dragSourceIndex = ref(null);
 
-    // 添加组件到文章
+    // 添加组件到文
     const addComponent = (component, index = null) => {
       console.log('Adding component:', component); // 添加这
       try {
@@ -655,10 +717,6 @@ export default defineComponent({
           message.error('Page title is required');
           return;
         }
-        if (!articleData.value.subTitle) {
-          message.error('Page subtitle is required');
-          return;
-        }
         if (!articleData.value.description) {
           message.error('Page description is required');
           return;
@@ -672,7 +730,7 @@ export default defineComponent({
           throw new Error('Customer ID not found');
         }
 
-        // 处理 keywords将数组转换为逗号分隔的字��串
+        // 处理 keywords将数组转换为逗号分隔的字符串
         const processedKeywords = Array.isArray(articleData.value.keywords)
           ? articleData.value.keywords.filter(k => k).join(',')
           : (articleData.value.keywords || '');
@@ -707,7 +765,7 @@ export default defineComponent({
             apiClient.updateFullSections(pageId.value, {sections: articleData.value.sections})
           );
 
-          // 并行执行所有更新请求
+          // 并行行所有更新请求
           response = await Promise.all(updatePromises);
         } else {
           const requestData = {
@@ -769,7 +827,7 @@ export default defineComponent({
         return;
       }
 
-      // 初始化 pageStats 如果不存在
+      // 始化 pageStats 如果不存在
       if (!articleData.value.pageStats) {
         articleData.value.pageStats = {
           genKeyword: [],
@@ -980,7 +1038,7 @@ export default defineComponent({
           await loadProductInfo()
         }
         
-        // 查找所有已验证的����名
+        // 查找所有已验证的域名
         verifiedDomains.value = response?.domains
           ?.filter(domain => {
             const isVerified = domain.verified || !domain.configDetails?.misconfigured
@@ -1000,6 +1058,110 @@ export default defineComponent({
     const toggleSideNav = () => {
       isSideNavCollapsed.value = !isSideNavCollapsed.value;
     };
+
+    const loadingDeployTargets = ref(false);
+    const availableSubdomains = ref([]);
+    const availableSubfolders = ref([]);
+
+    // 加载部署目标选项
+    const loadDeployTargets = async (method) => {
+      loadingDeployTargets.value = true;
+      try {
+        if (method === 'subdomain') {
+          const projectId = VERCEL_CONFIG.PROJECT_ID;
+          const response = await apiClient.getVercelDomainInfo(projectId);
+          
+          if (response?.domains) {
+            // 先清空现有数据
+            availableSubdomains.value = [];
+            
+            // 过滤有效域名，只保留当前客户域名相关的子域名
+            const filteredDomains = response.domains.filter(domain => {
+              const isVerified = domain.verified || !domain.configDetails?.misconfigured;
+              const belongsToCustomer = domain.apexName === productInfo.value?.projectWebsite;
+              return isVerified && domain.name && belongsToCustomer;
+            });
+
+            // 确保数据更新是响应式的
+            availableSubdomains.value = [...filteredDomains];
+            
+            // 如果有可用域名，设置第一个为默认值
+            if (filteredDomains.length > 0) {
+              const defaultDomain = filteredDomains[0].name;
+              articleData.value.deployTarget = defaultDomain;
+            }
+          }
+        } else {
+          const response = await apiClient.getSubfolders();
+          if (response?.code === 200 && response?.data) {
+            const folders = response.data.map(folder => ({
+              text: folder
+            }));
+            
+            availableSubfolders.value = [...folders];
+            
+            if (folders.length > 0) {
+              await nextTick();
+              articleData.value = {
+                ...articleData.value,
+                deployTarget: folders[0].text
+              };
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load deploy targets:', error);
+        message.error('Failed to load deployment options');
+      } finally {
+        loadingDeployTargets.value = false;
+      }
+    };
+
+    watch(() => articleData.value.deploymentMethod, (newMethod) => {
+      if (newMethod) {
+        loadDeployTargets(newMethod);
+      }
+    }, { immediate: true });
+
+    watch(() => availableSubfolders.value, (newFolders) => {
+      if (newFolders?.length > 0) {
+        nextTick(() => {
+          articleData.value.deployTarget = newFolders[0].text;
+        });
+      }
+    }, { deep: true });
+
+    // 在编辑模式下初始化数据时添加部署相关信息
+    const initializeArticleData = (data) => {
+      // ... 现有的初始化逻辑 ...
+      
+      // 添加部署相关字段
+      articleData.value.deploymentMethod = data.deploymentMethod || 'subdomain';
+      articleData.value.deployTarget = data.deployTarget || null;
+      
+      // 加载对应的部署目标选项
+      if (articleData.value.deploymentMethod) {
+        loadDeployTargets(articleData.value.deploymentMethod);
+      }
+    };
+
+    // 在 script setup 部分添加计算属性
+    const getPreviewDeployUrl = computed(() => {
+      if (!articleData.value.deployTarget) {
+        return '';
+      }
+
+      const slug = articleData.value.urlSuffix || '{slug}';
+
+      if (articleData.value.deploymentMethod === 'subdomain') {
+        return `https://${articleData.value.deployTarget}/${slug}`;
+      } else {
+        // 使用 customer 的 projectWebsite
+        const baseUrl = productInfo.value?.projectWebsite;
+        if (!baseUrl) return '';
+        return `https://${baseUrl}/${articleData.value.deployTarget}/${slug}`;
+      }
+    });
 
     return {
       loading,
@@ -1040,6 +1202,10 @@ export default defineComponent({
       loadVerifiedDomains,
       isSideNavCollapsed,
       toggleSideNav,
+      loadingDeployTargets,
+      availableSubdomains,
+      availableSubfolders,
+      getPreviewDeployUrl,
     };
   }
 });
@@ -1054,7 +1220,7 @@ export default defineComponent({
   right: 0;
   bottom: 0;
   display: flex;
-  justify-content: center;
+  width: 100%;
 }
 
 /* 左侧导航式增强 */
@@ -1275,13 +1441,14 @@ export default defineComponent({
 }
 
 .editor-content {
+  position: relative;
   flex: 1;
   overflow-y: auto;
   height: 100vh;
   padding: 88px 32px 32px;
   margin-left: 356px;
-  max-width: 1500px; /* 增加内容区最大宽度 */
-  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
 }
 
 .editor-content.expanded {
@@ -1448,6 +1615,7 @@ export default defineComponent({
 /* 修改样式 */
 .sections-container {
   width: 100%;
+  max-width: 100%;
   margin: 0 auto;
 }
 
@@ -1522,284 +1690,6 @@ export default defineComponent({
   padding: 12px 32px;
 }
 
-:deep(.ant-form-item) {
-  margin-bottom: 0;
-  margin-right: 16px;
-}
-
-:deep(.ant-form-item-label) {
-  label {
-    color: #6b7280;
-    font-size: 13px;
-  }
-}
-
-/* 加 Basic Info 表单样式 */
-.basic-info-form {
-  padding: 16px;
-  overflow-y: auto;
-}
-
-.basic-info-form :deep(.ant-form-item) {
-  margin-bottom: 16px;
-}
-
-.basic-info-form :deep(.ant-form-item-label) {
-  padding-bottom: 4px;
-}
-
-.basic-info-form :deep(.ant-form-item-label > label) {
-  color: #374151;
-  font-weight: 500;
-}
-
-.basic-info-form :deep(.ant-input),
-.basic-info-form :deep(.ant-select) {
-  border-radius: 6px;
-}
-
-.basic-info-form :deep(.ant-input:hover),
-.basic-info-form :deep(.ant-select:hover) {
-  border-color: #38BDF8;
-}
-
-.basic-info-form :deep(.ant-input:focus),
-.basic-info-form :deep(.ant-select-focused) {
-  border-color: #38BDF8;
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
-}
-
-/* 添加新的样式 */
-.selected-components-list {
-  padding: 16px;
-  height: calc(100vh - 180px);
-  overflow-y: auto;
-}
-
-.empty-hint {
-  text-align: center;
-  color: #999;
-  padding: 20px;
-}
-
-.selected-items {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.selected-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  cursor: move;
-}
-
-.selected-item:hover {
-  background: #f1f5f9;
-  border-color: #38BDF8;
-}
-
-.item-name {
-  font-size: 14px;
-  color: #374151;
-}
-
-.item-actions {
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.selected-item:hover .item-actions {
-  opacity: 1;
-}
-
-/* 添加紧凑型 tabs 样式 */
-.compact-tabs {
-  :deep(.ant-tabs-nav) {
-    margin: 0;
-    padding: 8px 8px 0;
-  }
-
-  :deep(.ant-tabs-tab) {
-    padding: 8px 12px !important;
-    margin: 0 2px !important;
-    min-width: 80px;
-    justify-content: center;
-  }
-
-  :deep(.ant-tabs-tab-btn) {
-    font-size: 13px;
-  }
-
-  :deep(.ant-tabs-ink-bar) {
-    display: none;
-  }
-
-  :deep(.ant-tabs-tab-active) {
-    background: #e0f2fe;
-    border-radius: 4px;
-  }
-
-  :deep(.ant-tabs-tab-active .ant-tabs-tab-btn) {
-    color: #0284c7 !important;
-    font-weight: 500;
-  }
-
-  :deep(.ant-tabs-nav-list) {
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-
-/* 添加关键词相关样式 */
-.keywords-section {
-  padding: 16px;
-}
-
-.keywords-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.keyword-item {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 12px;
-  border: 1px solid #e5e7eb;
-}
-
-.keyword-name {
-  font-weight: 500;
-  color: #1f2937;
-  margin-bottom: 4px;
-}
-
-.keyword-density {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.count-number,
-.density-number {
-  color: #38BDF8;
-  font-weight: 500;
-}
-
-/* 添加更紧凑的统计指标样式 */
-.guideline-section {
-  margin-bottom: 16px;
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1f2937;
-  margin-bottom: 12px;
-}
-
-.metrics-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.metric-card {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  background: white;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
-}
-
-.metric-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.metric-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: rgba(56, 189, 248, 0.1);
-  border-radius: 6px;
-  color: #38BDF8;
-  font-size: 14px;
-}
-
-.metric-info {
-  flex: 1;
-}
-
-.metric-label {
-  display: block;
-  font-size: 12px;
-  color: #6b7280;
-  margin-bottom: 1px;
-}
-
-.metric-value {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1f2937;
-}
-
-.headings-card .heading-stats {
-  display: flex;
-  gap: 12px;
-}
-
-.heading-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.stat-label {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.stat-value {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1f2937;
-}
-
-.word-count-card {
-  background: #f0f9ff;
-  border-color: #38BDF8;
-}
-
-.word-count-card .metric-value {
-  color: #0284c7;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.section-title {
-  margin-bottom: 0; /* 覆盖原来的 margin-bottom */
-}
-
 :deep(.anticon-reload) {
   font-size: 14px;
 }
@@ -1830,7 +1720,7 @@ export default defineComponent({
   align-items: center;
 }
 
-/* 修改按钮样式 */
+/* 改按钮样式 */
 .header-actions {
   display: flex;
   gap: 12px;
@@ -2065,8 +1955,7 @@ export default defineComponent({
 .other-fields-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 24px;
 }
 
 /* 调整表单项间距 */
@@ -2113,7 +2002,7 @@ export default defineComponent({
   height: auto !important;
 }
 
-/* 确保选择框内的标签���确换行显示 */
+/* 确保选择框内的标签正确换行显示 */
 :deep(.ant-select-multiple .ant-select-selection-overflow) {
   flex-wrap: wrap;
   padding: 4px 0;
@@ -2122,5 +2011,52 @@ export default defineComponent({
 :deep(.ant-select-multiple .ant-select-selection-item) {
   margin-top: 2px;
   margin-bottom: 2px;
+}
+
+/* 添加部署选择相关样式 */
+.deployment-options {
+  margin-top: 8px;
+}
+
+:deep(.ant-radio-group) {
+  display: flex;
+  gap: 24px;
+}
+
+:deep(.ant-radio-wrapper) {
+  font-size: 14px;
+}
+
+.preview-url-hint {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.hint-label {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.preview-url {
+  font-family: monospace;
+  font-size: 13px;
+  color: #0284c7;
+  word-break: break-all;
+  padding: 4px 8px;
+  background: rgba(56, 189, 248, 0.1);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.url-note {
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+  margin-top: 8px;
+  line-height: 1.4;
 }
 </style>
