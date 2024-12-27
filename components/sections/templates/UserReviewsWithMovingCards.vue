@@ -71,6 +71,7 @@
                   :disabled="disabled"
                   @change="handleChange"
                   :rows="3"
+                  :style="{ minHeight: '120px' }"
                 />
               </div>
             </a-form-item>

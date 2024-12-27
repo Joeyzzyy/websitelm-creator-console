@@ -25,6 +25,7 @@
                   :disabled="disabled"
                   :rows="3"
                   @change="handleChange"
+                  :style="{ minHeight: '120px' }"
                 />
               </div>
             </a-form-item>
@@ -121,11 +122,12 @@
                     <a-form-item label="Content">
                       <div class="input-with-tag">
                         <span class="html-tag">{{ tags.moduleContent }}</span>
-                        <a-textarea
+                        <a-textarea 
                           v-model:value="module.content"
                           :disabled="disabled"
                           :rows="3"
                           @change="handleChange"
+                          :style="{ minHeight: '120px' }"
                         />
                       </div>
                     </a-form-item>

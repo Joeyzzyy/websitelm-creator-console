@@ -5,7 +5,6 @@
       <a-form layout="vertical">
         <!-- 顶部内容 -->
         <div class="content-section">
-          <h3 class="section-title">Top Content</h3>
           <a-form-item label="Title">
             <div class="input-with-tag">
               <span class="html-tag">{{ tags.title }}</span>
@@ -24,7 +23,8 @@
                 v-model:value="localSection.topContent.description"
                 :disabled="disabled"
                 @change="handleChange"
-                :rows="4"
+                :rows="2"
+                :style="{ minHeight: '120px' }"
               />
             </div>
           </a-form-item>
@@ -32,7 +32,6 @@
 
         <!-- 底部内容 -->
         <div class="content-section">
-          <h3 class="section-title">Bottom Content</h3>
           <a-form-item label="Section Title">
             <div class="input-with-tag">
               <span class="html-tag">{{ tags.topTitle }}</span>
@@ -46,7 +45,6 @@
 
           <!-- 关键优势列表 -->
           <div class="benefits-list">
-            <h4 class="subsection-title">Key Benefits</h4>
             <div v-for="(item, index) in localSection.bottomContent.content" :key="index" class="benefit-item">
               <a-form-item :label="`Benefit ${index + 1} Title`">
                 <div class="input-with-tag">
@@ -66,7 +64,8 @@
                     v-model:value="item.description"
                     :disabled="disabled"
                     @change="handleChange"
-                    :rows="2"
+                    :rows="4"
+                    :style="{ minHeight: '120px' }"
                   />
                 </div>
               </a-form-item>
@@ -81,6 +80,7 @@
                 :disabled="disabled"
                 @change="handleChange"
                 :rows="2"
+                :style="{ minHeight: '120px' }"
               />
             </div>
           </a-form-item>
@@ -93,6 +93,7 @@
                 :disabled="disabled"
                 @change="handleChange"
                 :rows="2"
+                :style="{ minHeight: '120px' }"
               />
             </div>
           </a-form-item>

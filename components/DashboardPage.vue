@@ -17,12 +17,13 @@
                 danger 
                 @click="deleteProduct" 
                 v-if="productInfo?.productId"
+                class="align-button"
               >
                 <DeleteOutlined /> Delete
               </a-button>
               <a-button 
                 type="link" 
-                @click="showSitemapModal" 
+                @click="getSitemap"
                 :disabled="!productInfo || loadingSitemap || !productInfo?.projectWebsite || !productInfo?.domainStatus"
                 v-if="productInfo?.productId"
               >
@@ -30,13 +31,13 @@
                 <template v-else-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
                   Add your site to get sitemap automatically →
                 </template>
-                <template v-else>Sitemap</template>
               </a-button>
               <a-button 
                 type="link" 
                 @click="editProductInfo"
                 :disabled="!productInfo"
                 v-if="productInfo?.productId"
+                class="align-button"
               >
                 <EditOutlined /> Edit
               </a-button>
@@ -118,6 +119,77 @@
           </a-descriptions>
         </template>
       </a-card>
+
+      <!-- Sitemap Panel -->
+      <a-collapse 
+        v-if="productInfo?.productId"
+        class="sitemap-collapse"
+        :bordered="false"
+      >
+        <a-collapse-panel key="sitemap">
+          <template #header>
+            <div class="panel-header">
+              <span>🗺️ Website Structure</span>
+              <a-space>
+                <a-tag v-if="allPages?.length" color="blue">
+                  {{ allPages.length }} Pages
+                </a-tag>
+                <a-button 
+                  type="link" 
+                  size="small"
+                  :disabled="!productInfo || loadingSitemap || !productInfo?.projectWebsite || !productInfo?.domainStatus"
+                  @click="getSitemap"
+                >
+                  <template v-if="loadingSitemap">Loading...</template>
+                  <template v-else-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
+                    Add your site to get sitemap automatically →
+                  </template>
+                  <template v-else>Refresh Sitemap</template>
+                </a-button>
+              </a-space>
+            </div>
+          </template>
+
+          <!-- Loading skeleton -->
+          <template v-if="loadingSitemap">
+            <a-skeleton active :paragraph="{ rows: 2 }" />
+          </template>
+
+          <!-- Content -->
+          <template v-else>
+            <template v-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
+              <a-empty description="Add and verify your site to get sitemap automatically">
+                <template #extra>
+                  <a-button type="primary" @click="openEditWithBasicInfoToVerify">
+                    Add Your Site
+                  </a-button>
+                </template>
+              </a-empty>
+            </template>
+            <template v-else-if="sitemapData?.length">
+              <div class="sitemap-content">
+                <a-tree
+                  :tree-data="sitemapData"
+                  :default-expanded-keys="['root']"
+                  class="sitemap-tree"
+                >
+                  <template #title="{ title, key }">
+                    <div class="tree-node-title">
+                      <span>{{ title }}</span>
+                      <a v-if="key.startsWith('http')" :href="key" target="_blank">
+                        <LinkOutlined />
+                      </a>
+                    </div>
+                  </template>
+                </a-tree>
+              </div>
+            </template>
+            <template v-else>
+              <a-empty description="No pages found" />
+            </template>
+          </template>
+        </a-collapse-panel>
+      </a-collapse>
 
       <!-- Metrics Cards -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
@@ -428,62 +500,6 @@
     @close="handleSuccessModalClose"
   />
 
-  <!-- 添加新 Sitemap 模态框 -->
-  <a-modal
-    v-model:open="sitemapModalVisible"
-    title="Website Structure"
-    :width="1000"
-    :footer="null"
-    class="sitemap-modal"
-  >
-    <div class="sitemap-modal-content">
-      <div class="sitemap-container">
-        <!-- Left: Tree structure -->
-        <div class="tree-section">
-          <div class="section-header">
-            <SearchOutlined />
-            <span>Navigation Tree</span>
-          </div>
-          <div class="tree-content custom-scrollbar">
-            <a-tree 
-              :tree-data="sitemapData" 
-              @select="handleTreeSelect"
-              class="custom-tree"
-            />
-          </div>
-        </div>
-        
-        <!-- Right: Page details -->
-        <div class="pages-section">
-          <div class="section-header">
-            <FileTextOutlined />
-            <span>Page List</span>
-          </div>
-          <div class="pages-content custom-scrollbar">
-            <template v-if="selectedPages.length">
-              <div class="page-list">
-                <div v-for="page in selectedPages" :key="page.loc" class="page-item">
-                  <div class="page-info">
-                    <a :href="page.loc" target="_blank" class="page-link">
-                      <LinkOutlined />
-                      <span class="page-url">{{ page.loc }}</span>
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </template>
-            <template v-else>
-              <div class="empty-state">
-                <FolderOpenOutlined />
-                <p>Select a category from the tree to view pages</p>
-              </div>
-            </template>
-          </div>
-        </div>
-      </div> 
-    </div>
-  </a-modal>
-
   <!-- 添加 GSC 连接成功的 Modal -->
   <a-modal
     v-model:open="gscSuccessModalVisible"
@@ -535,7 +551,7 @@ export default defineComponent({
       purchases: '-',
       productInfo: null,
       onboardingModalVisible: false,
-      loading: true,
+      loading: false,
       websitePrefix: 'https://',
       defaultCompetitors: [],
       formState: {
@@ -556,8 +572,6 @@ export default defineComponent({
       sitemapData: [],
       allPages: [],
       loadingSitemap: false,
-      selectedPages: [],
-      sitemapModalVisible: false,
       publishedPages: 0,
       isGscConnected: false,
       gscSites: [],
@@ -770,7 +784,7 @@ export default defineComponent({
           // 编辑式 - 调用更接口
           response = await apiClient.updateProduct(this.formState.productId, formData);
         } else {
-          // Onboarding模式 - 调���创建接口
+          // Onboarding模式 - 调用创建接口
           response = await apiClient.createProduct(formData);
         }
 
@@ -1061,12 +1075,6 @@ export default defineComponent({
 
       this.selectedPages = getAllPages(node);
     },
-    showSitemapModal() {
-      this.sitemapModalVisible = true;
-      if (!this.sitemapData) {
-        this.getSitemap();
-      }
-    },
     formatDate(dateString) {
       if (!dateString) return '';
       return new Date(dateString).toLocaleDateString();
@@ -1295,7 +1303,7 @@ export default defineComponent({
         this.verifyRecord = null;
       }
       this.onboardingModalVisible = false;
-      // 重置原始���态
+      // 重置原始状态
       this.originalDomainStatus = null;
     },
     async loadGscAnalytics() {
@@ -1342,7 +1350,7 @@ export default defineComponent({
         ctr: item.ctr || 0
       }));
 
-      // 计算总量和环比（保持原有逻辑）
+      // 计算总量和环比（保持原逻辑）
       const totals = {
         impressions: 0,
         clicks: 0,
@@ -1591,40 +1599,6 @@ export default defineComponent({
   text-align: center;
 }
 
-/* Sitemap Modal Styles */
-.sitemap-modal {
-  :deep(.ant-modal-body) {
-    padding: 0;
-  }
-}
-
-.sitemap-modal-content {
-  min-height: 600px;
-}
-
-.sitemap-container {
-  display: flex;
-  height: 600px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-/* Left Tree Section */
-.tree-section {
-  width: 40%;
-  border-right: 1px solid #f0f0f0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Right Pages Section */
-.pages-section {
-  width: 60%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Common Section Header Style */
 .section-header {
   padding: 16px;
   background: #fafafa;
@@ -1635,7 +1609,6 @@ export default defineComponent({
   gap: 8px;
 }
 
-/* Content Areas */
 .tree-content,
 .pages-content {
   flex: 1;
@@ -1643,7 +1616,6 @@ export default defineComponent({
   padding: 16px;
 }
 
-/* Custom Tree Styles */
 .custom-tree {
   :deep(.ant-tree-node-content-wrapper) {
     display: flex;
@@ -1651,7 +1623,6 @@ export default defineComponent({
   }
 }
 
-/* Page List Styles */
 .page-list {
   display: flex;
   flex-direction: column;
@@ -1725,46 +1696,29 @@ export default defineComponent({
   }
 }
 
-/* 添加或修改以下样式 */
-:deep(.ant-typography-secondary) {
-  font-size: 12px; /* 整为你需要的字号 */
+/* 修改 descriptions 组件的样式，移除所有底部间距 */
+:deep(.ant-descriptions-item) {
+  align-items: center !important;
+  padding-bottom: 0 !important;  /* 移除底部 padding */
 }
 
-.competitors-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.competitors-tags {
-  min-height: 32px;
-}
-
-.competitors-input {
-  padding-top: 0;
-}
-
-:deep(.ant-empty) {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.not-connected-notice {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-}
-
-.ant-card-body {
-  padding: 0px 24px 0px 24px;
+:deep(.ant-descriptions-item-label),
+:deep(.ant-descriptions-item-content) {
+  display: flex !important;
+  align-items: center !important;
+  min-height: 32px !important;
+  line-height: 32px !important;
 }
 
 /* 覆盖 Descriptions 组件的 padding */
 :deep(.ant-descriptions .ant-descriptions-row > th),
 :deep(.ant-descriptions .ant-descriptions-row > td) {
   padding-bottom: 0;  /* 移除底部 padding */
+}
+
+:deep(.align-button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 </style>

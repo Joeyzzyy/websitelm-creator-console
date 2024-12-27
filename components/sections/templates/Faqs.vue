@@ -35,6 +35,7 @@
                 :rows="4"
                 placeholder="Answer"
                 @change="handleChange"
+                :style="{ minHeight: '120px' }"
               />
             </div>
           </a-form-item>

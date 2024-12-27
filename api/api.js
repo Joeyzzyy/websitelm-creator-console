@@ -224,7 +224,7 @@ const deleteDomain = async (domainId) => {
     const response = await apiClient.delete(`/domain/${domainId}`);
     return response.data;
   } catch (error) {
-    console.error('删除域名失败:', error);
+    console.error('删除域名���败:', error);
     return null;
   }
 };
@@ -274,7 +274,7 @@ const updatePageStatus = async (pageId, status) => {
   }
 };
 
-// ��基本信息
+// 基本信息
 const updatePage = async (pageId, pageData) => {
   try {
     const response = await apiClient.put(`/pages/${pageId}`, pageData);
@@ -536,7 +536,7 @@ const createInternalLink = async (linkData) => {
   }
 };
 
-// 新增：更新内部链接的���法
+// 新增：更新内部链接的方法
 const updateInternalLink = async (linkId, linkData) => {
   try {
     const response = await apiClient.put(`/internal/links/${linkId}`, linkData);
@@ -734,7 +734,7 @@ const getKnowledgeCenter = async () => {
     const response = await apiClient.get('/knowledge/center');
     return response.data;
   } catch (error) {
-    console.error('获取knowledge center内���列表失败:', error);
+    console.error('获取knowledge center��容列表失败:', error);
     return null;
   }
 };
@@ -828,6 +828,30 @@ const getPages = async (params) => {
   }
 };
 
+// 新增：更新子文件夹的方法
+const updateSubfolders = async (subfolders) => {
+  try {
+    const response = await apiClient.put('/customer/subfloder', {
+      subfloder: subfolders
+    });
+    return response.data;
+  } catch (error) {
+    console.error('更新子文件夹���败:', error);
+    return null;
+  }
+};
+
+// 新增：获取用户子文件夹的方法
+const getSubfolders = async () => {
+  try {
+    const response = await apiClient.get('/customer/subfloder');
+    return response.data;
+  } catch (error) {
+    console.error('获取用户子文件夹失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -891,5 +915,7 @@ export default {
   changePassword,
   createManualPage,
   updateFullSections,
-  getPages
+  getPages,
+  updateSubfolders,
+  getSubfolders
 };

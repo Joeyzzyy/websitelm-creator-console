@@ -137,43 +137,22 @@
                           </div>
                         </a-form-item>
 
-                        <div class="input-section">
-                          <template v-if="deploymentForm.method === 'subdomain'">
-                            <a-form-item 
-                              label="Enter your subdomain"
-                              required
-                            >
-                              <div class="url-preview">
-                                <a-input
-                                  v-model:value="deploymentForm.prefix"
-                                  placeholder="blog"
-                                  :disabled="saving"
-                                  class="custom-input"
-                                />
-                                <span class="url-separator">.</span>
-                                <span class="base-domain">{{ productInfo.projectWebsite }}</span>
-                              </div>
-                            </a-form-item>
-                          </template>
-
-                          <template v-if="deploymentForm.method === 'subfolder'">
-                            <a-form-item
-                              label="Enter your subfolder path"
-                              required
-                            >
-                              <div class="url-preview">
-                                <span class="base-domain">{{ productInfo.projectWebsite }}</span>
-                                <span class="url-separator">/</span>
-                                <a-input
-                                  v-model:value="deploymentForm.suffix"
-                                  placeholder="blog"
-                                  :disabled="saving"
-                                  class="custom-input"
-                                />
-                              </div>
-                            </a-form-item>
-                          </template>
-
+                        <div class="input-section" v-if="deploymentForm.method === 'subdomain'">
+                          <a-form-item 
+                            label="Enter your subdomain"
+                            required
+                          >
+                            <div class="url-preview">
+                              <a-input
+                                v-model:value="deploymentForm.prefix"
+                                placeholder="blog"
+                                :disabled="saving"
+                                class="custom-input"
+                              />
+                              <span class="url-separator">.</span>
+                              <span class="base-domain">{{ productInfo.projectWebsite }}</span>
+                            </div>
+                          </a-form-item>
                           <a-form-item>
                             <a-button 
                               type="primary"
@@ -185,8 +164,62 @@
                             </a-button>
                           </a-form-item>
                         </div>
+
+                        <div class="input-section" v-if="deploymentForm.method === 'subfolder'">
+                          <a-spin :spinning="subfolderLoading">
+                            <div class="section-header">
+                              <h3>Subfolder Management</h3>
+                              <a-button type="primary" @click="showSubfolderModal = true">
+                                Add Subfolder
+                              </a-button>
+                            </div>
+
+                            <div class="subfolder-list" v-if="subfolders.length > 0">
+                              <a-table 
+                                :dataSource="subfolders" 
+                                :columns="subfolderColumns" 
+                                :pagination="false"
+                              >
+                                <template #bodyCell="{ column, text, record, index }">
+                                  <template v-if="column.key === 'action'">
+                                    <a-button type="link" danger @click="deleteSubfolder(index)">
+                                      Delete
+                                    </a-button>
+                                  </template>
+                                  <template v-if="column.key === 'preview'">
+                                    <span>{{ productInfo?.projectWebsite }}/{{ text }}</span>
+                                  </template>
+                                </template>
+                              </a-table>
+
+                              <div class="save-actions">
+                                <a-button 
+                                  type="primary" 
+                                  :loading="savingSubfolders" 
+                                  @click="saveSubfolders"
+                                >
+                                  Save Changes
+                                </a-button>
+                              </div>
+                            </div>
+
+                            <a-empty v-else description="No subfolders yet" />
+                          </a-spin>
+                        </div>
                       </a-form>
                     </div>
+
+                    <a-modal
+                      v-model:visible="showSubfolderModal"
+                      title="Add Subfolder"
+                      @ok="addNewSubfolder"
+                      :okButtonProps="{ disabled: !newSubfolder }"
+                    >
+                      <div class="subfolder-input">
+                        <span class="base-url">{{ productInfo?.projectWebsite }}/</span>
+                        <a-input v-model:value="newSubfolder" placeholder="Enter subfolder name" />
+                      </div>
+                    </a-modal>
                   </div>
                 </template>
               </div>
@@ -623,6 +656,10 @@ export default {
     watch(activeTab, (newValue) => {
       if (newValue === 'domains') {
         loadProductInfo();
+        // 当切换到domains标签时，如果选择了subfolder方法，则加载子文件夹数据
+        if (deploymentForm.value.method === 'subfolder') {
+          loadSubfolders();
+        }
       } else if (newValue === 'login-email') {
         showEmailForm.value = false;
         emailForm.value = {
@@ -631,6 +668,36 @@ export default {
         };
       }
     });
+
+    // 监听部署方法的变化
+    watch(() => deploymentForm.value.method, (newMethod) => {
+      if (newMethod === 'subfolder') {
+        loadSubfolders();
+      }
+    });
+
+    // 修改loadSubfolders方法
+    const loadSubfolders = async () => {
+      try {
+        subfolderLoading.value = true;
+        const response = await apiClient.getSubfolders();
+        if (response?.code === 200 && response?.data) {
+          // 直接将字符串数组转换为所需的对象格式
+          subfolders.value = response.data.map(subfolder => ({
+            text: subfolder,
+            preview: subfolder  // 这里的 preview 会在表格中显示完整路径
+          }));
+        } else {
+          subfolders.value = [];
+        }
+      } catch (error) {
+        console.error('Failed to load subfolders:', error);
+        message.error('Failed to load subfolder list');
+        subfolders.value = [];
+      } finally {
+        subfolderLoading.value = false;
+      }
+    };
 
     // 在组件挂载时加载产品信息
     onMounted(() => {
@@ -711,6 +778,77 @@ export default {
       return 'Pending';
     };
 
+    const subfolders = ref([]);
+    const savingSubfolders = ref(false);
+    const showSubfolderModal = ref(false);
+    const newSubfolder = ref('');
+
+    const subfolderColumns = [
+      {
+        title: 'Subfolder',
+        dataIndex: 'text',
+        key: 'text',
+      },
+      {
+        title: 'Preview',
+        dataIndex: 'preview',
+        key: 'preview',
+        customRender: ({ text }) => `${productInfo.value?.projectWebsite}/${text}`
+      },
+      {
+        title: 'Action',
+        key: 'action',
+        width: 100,
+      },
+    ];
+
+    const deleteSubfolder = (index) => {
+      subfolders.value.splice(index, 1);
+    };
+
+    const addNewSubfolder = () => {
+      if (!newSubfolder.value) {
+        message.warning('Please enter a subfolder name');
+        return;
+      }
+
+      // 简化：只存储文件夹名称
+      const subfolder = {
+        text: newSubfolder.value,
+        preview: newSubfolder.value  // 添加 preview 字段
+      };
+
+      if (subfolders.value.some(item => item.text === newSubfolder.value)) {
+        message.warning('This subfolder already exists');
+        return;
+      }
+
+      subfolders.value.push(subfolder);
+      newSubfolder.value = '';
+      showSubfolderModal.value = false;
+    };
+
+    const saveSubfolders = async () => {
+      try {
+        savingSubfolders.value = true;
+        // 转换回字符串数组格式再发送
+        const subfoldersToSave = subfolders.value.map(item => item.text);
+
+        console.log('subfoldersToSave', subfoldersToSave);
+        
+        await apiClient.updateSubfolders(subfoldersToSave);
+        
+        message.success('Subfolders saved successfully');
+      } catch (error) {
+        console.error('Failed to save subfolders:', error);
+        message.error('Failed to save subfolders');
+      } finally {
+        savingSubfolders.value = false;
+      }
+    };
+
+    const subfolderLoading = ref(false);
+
     return {
       cooldown,
       goToDashboard,
@@ -745,6 +883,16 @@ export default {
       sendVerificationCode,
       confirmEmailChange,
       cancelEmailChange,
+      subfolders,
+      savingSubfolders,
+      showSubfolderModal,
+      newSubfolder,
+      subfolderColumns,
+      loadSubfolders,
+      deleteSubfolder,
+      addNewSubfolder,
+      saveSubfolders,
+      subfolderLoading,
     };
   }
 }
@@ -915,6 +1063,17 @@ export default {
   padding: 24px;
   border-radius: 12px;
   margin-top: 24px;
+}
+
+.input-section .section-header {
+  margin-bottom: 24px;
+}
+
+.input-section .section-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
 }
 
 .url-preview {
@@ -1315,5 +1474,26 @@ export default {
   color: #60A5FA;
   background: #F0F7FF;
   border-radius: 4px;
+}
+
+.subfolder-list {
+  margin-top: 16px;
+}
+
+.save-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.subfolder-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.base-url {
+  color: #666;
+  white-space: nowrap;
 }
 </style> 

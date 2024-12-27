@@ -21,104 +21,6 @@
           v-model:activeKey="activeTab"
           class="compact-tabs"
         >
-          <!-- 添加 Basic Info tab -->
-          <a-tab-pane key="basicInfo" tab="Info">
-            <div class="basic-info-form">
-              <a-form layout="vertical">
-                <a-form-item label="Title" required>
-                  <a-textarea
-                    v-model:value="articleData.title"
-                    placeholder="Enter page title"
-                    :rows="2"
-                    :auto-size="{ minRows: 2, maxRows: 4 }"
-                    class="title-input"
-                  />
-                </a-form-item>
-
-                <a-form-item label="Subtitle" required>
-                  <a-textarea
-                    v-model:value="articleData.subTitle"
-                    placeholder="Enter page subtitle"
-                    :rows="2"
-                    :auto-size="{ minRows: 2, maxRows: 4 }"
-                    class="subtitle-input"
-                  />
-                </a-form-item>
-
-                <a-form-item label="Description" required>
-                  <a-textarea
-                    v-model:value="articleData.description"
-                    placeholder="Enter page description"
-                    :rows="4"
-                  />
-                </a-form-item>
-
-                <a-form-item label="Summary">
-                  <a-textarea
-                    v-model:value="articleData.summary"
-                    placeholder="Enter page summary"
-                    :rows="4"
-                  />
-                </a-form-item>
-
-                <a-form-item label="Topic">
-                  <a-input
-                    v-model:value="articleData.topic"
-                    placeholder="Enter topic"
-                  />
-                </a-form-item>
-
-                <a-form-item v-if="isEditMode" label="URL Suffix">
-                  <a-input
-                    v-model:value="articleData.urlSuffix"
-                    placeholder="Enter URL suffix"
-                  />
-                </a-form-item>
-
-                <a-form-item label="Keywords">
-                  <a-select
-                    v-model:value="articleData.keywords"
-                    mode="tags"
-                    placeholder="Enter keywords"
-                    :token-separators="[',']"
-                  />
-                </a-form-item>
-
-                <a-form-item label="Page Type">
-                  <template v-if="isEditMode">
-                    <div class="readonly-field">
-                      {{ articleData.articleType }}
-                    </div>
-                  </template>
-                  <a-select
-                    v-else
-                    v-model:value="articleData.articleType"
-                    allowClear
-                    placeholder="Select page type"
-                  >
-                    <a-select-option value="Blog">Blog</a-select-option>
-                    <a-select-option value="Landing Page">Landing Page</a-select-option>
-                  </a-select>
-                </a-form-item>
-
-                <a-form-item label="Language">
-                  <template v-if="isEditMode">
-                    <div class="readonly-field">
-                      {{ getLanguageLabel(articleData.language) }}
-                    </div>
-                  </template>
-                  <a-select
-                    v-else
-                    v-model:value="articleData.language"
-                  >
-                    <a-select-option value="en">English</a-select-option>
-                    <a-select-option value="zh">中文</a-select-option>
-                  </a-select>
-                </a-form-item>
-              </a-form>
-            </div>
-          </a-tab-pane>
-
           <!-- 组件选择面板 -->
           <a-tab-pane key="components" tab="Add">
             <div class="components-list">
@@ -143,7 +45,7 @@
             </div>
           </a-tab-pane>
 
-          <!-- 新增：Selected Components tab -->
+          <!-- Selected Components tab -->
           <a-tab-pane key="selectedComponents" tab="Selected">
             <div class="selected-components-list">
               <!-- 空态提示 -->
@@ -151,7 +53,7 @@
                 <p>No components added yet</p>
               </div>
 
-              <!-- 已选组件列表：保留拖拽排序功能 -->
+              <!-- 已选组件列表 -->
               <div 
                 v-else
                 class="selected-items"
@@ -235,12 +137,110 @@
       <!-- 内容区域 -->
       <div class="editor-content" :class="{ 'expanded': isSideNavCollapsed }" @dragover.prevent @drop="handleDrop">
         <div class="sections-container">
-          <!-- 空状态提示 -->
+          <!-- 固定的紧凑型 Info 组件 -->
+          <div class="section-wrapper info-section">
+            <div class="component-label">Page Information</div>
+            <div class="basic-info-form">
+              <a-form layout="horizontal">
+                <div class="form-grid">
+                  <!-- 将内容分为两列 -->
+                  <div class="form-columns">
+                    <!-- TDK 分组 - 左列 -->
+                    <div class="tdk-section">
+                      <div class="tdk-label">TDK Information</div>
+                      <!-- Title -->
+                      <a-form-item label="Title" required>
+                        <a-input
+                          v-model:value="articleData.title"
+                          placeholder="Enter page title"
+                        />
+                      </a-form-item>
+
+                      <!-- Description -->
+                      <a-form-item label="Description" required>
+                        <a-textarea
+                          v-model:value="articleData.description"
+                          placeholder="Enter page description"
+                          :rows="4"
+                          :auto-size="{ minRows: 4, maxRows: 6 }"
+                          style="min-height: 80px;"
+                        />
+                      </a-form-item>
+
+                      <!-- Keywords -->
+                      <a-form-item label="Keywords" required>
+                        <a-select
+                          v-model:value="articleData.keywords"
+                          mode="tags"
+                          placeholder="Enter keywords"
+                          :token-separators="[',']"
+                          style="min-height: 80px;"
+                        />
+                      </a-form-item>
+                    </div>
+
+                    <!-- 其他字段 - 右列 -->
+                    <div class="other-fields-section">
+                      <div class="section-label">Other Information</div>
+                      <div class="other-fields-grid">
+                        <a-form-item label="Topic" required>
+                          <a-input
+                            v-model:value="articleData.topic"
+                            placeholder="Enter topic"
+                          />
+                        </a-form-item>
+
+                        <a-form-item v-if="isEditMode" label="URL" required>
+                          <a-input
+                            v-model:value="articleData.urlSuffix"
+                            placeholder="Enter URL suffix"
+                          />
+                        </a-form-item>
+
+                        <a-form-item label="Type">
+                          <template v-if="isEditMode">
+                            <div class="readonly-field">{{ articleData.articleType }}</div>
+                          </template>
+                          <a-select v-else v-model:value="articleData.articleType" allowClear>
+                            <a-select-option value="Blog">Blog</a-select-option>
+                            <a-select-option value="Landing Page">Landing Page</a-select-option>
+                          </a-select>
+                        </a-form-item>
+
+                        <a-form-item label="Lang">
+                          <template v-if="isEditMode">
+                            <div class="readonly-field">{{ getLanguageLabel(articleData.language) }}</div>
+                          </template>
+                          <a-select v-else v-model:value="articleData.language">
+                            <a-select-option value="en">English</a-select-option>
+                            <a-select-option value="zh">中文</a-select-option>
+                          </a-select>
+                        </a-form-item>
+                      </div>
+
+                      <!-- Summary 移到右列底部 -->
+                      <a-form-item label="Summary">
+                        <a-textarea
+                          v-model:value="articleData.summary"
+                          placeholder="Enter page summary"
+                          :rows="4"
+                          :auto-size="{ minRows: 4, maxRows: 6 }"
+                          style="min-height: 80px;"
+                        />
+                      </a-form-item>
+                    </div>
+                  </div>
+                </div>
+              </a-form>
+            </div>
+          </div>
+
+          <!-- 空状态提示 - 只在没有其他组件时显示 -->
           <div v-if="articleData.sections.length === 0" class="empty-state">
             <p>Drag or click components from the left to start creating</p>
           </div>
 
-          <!-- 组件列表：移除 draggable 和拖拽相关事件 -->
+          <!-- 其他组�����列表 -->
           <div 
             v-for="(section, index) in articleData.sections" 
             :key="index"
@@ -430,7 +430,7 @@ export default defineComponent({
     });
 
     const saving = ref(false);
-    const activeTab = ref('basicInfo');
+    const activeTab = ref('components');
     const activeCategories = ref(['basic']);
     const articleData = ref({
       title: '',
@@ -472,7 +472,7 @@ export default defineComponent({
       event.dataTransfer.effectAllowed = 'move';
     };
 
-    // 修改为只处理组件列表中的拖拽排序
+    // 修改为只处理组件列表中拖拽排序
     const handleSectionDragStart = (event, index) => {
       dragSourceIndex.value = index;
       event.dataTransfer.effectAllowed = 'move';
@@ -482,7 +482,7 @@ export default defineComponent({
       event.preventDefault();
       
       if (dragSourceIndex.value !== null && dragSourceIndex.value !== targetIndex) {
-        // 获取要移动的组件
+        // 获取要移动的组
         const movedSection = articleData.value.sections[dragSourceIndex.value];
         
         // 从原位置删除
@@ -643,7 +643,7 @@ export default defineComponent({
       contentMetrics.value = metrics;
     };
 
-    // 监听 sections 变化时更新统计
+    // 监听 sections 变化更新统计
     watch(() => articleData.value.sections, () => {
       calculateContentMetrics();
     }, { deep: true });
@@ -672,7 +672,7 @@ export default defineComponent({
           throw new Error('Customer ID not found');
         }
 
-        // 处理 keywords将数组转换为逗号分隔的字符串
+        // 处理 keywords将数组转换为逗号分隔的字��串
         const processedKeywords = Array.isArray(articleData.value.keywords)
           ? articleData.value.keywords.filter(k => k).join(',')
           : (articleData.value.keywords || '');
@@ -843,7 +843,7 @@ export default defineComponent({
         const targetSection = document.getElementById(sectionId);
         
         if (targetSection) {
-          const headerHeight = 64; // 顶部导航栏高度
+          const headerHeight = 64; // 部导航栏高度
           const scrollContainer = document.querySelector('.editor-content');
           const rect = targetSection.getBoundingClientRect();
           
@@ -980,7 +980,7 @@ export default defineComponent({
           await loadProductInfo()
         }
         
-        // 查找所有已验证的域名
+        // 查找所有已验证的����名
         verifiedDomains.value = response?.domains
           ?.filter(domain => {
             const isVerified = domain.verified || !domain.configDetails?.misconfigured
@@ -1146,11 +1146,6 @@ export default defineComponent({
   overflow-y: auto;
 }
 
-.components-section {
-  background: #ffffff;
-  border-radius: 12px;
-}
-
 /* 组件项样式 */
 .component-item {
   display: flex;
@@ -1173,33 +1168,6 @@ export default defineComponent({
 
 .component-item:active {
   transform: translateX(4px) scale(0.98);
-}
-
-.component-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: rgba(56, 189, 248, 0.1);
-  border-radius: 8px;
-  color: #38BDF8;
-}
-
-.component-info {
-  flex: 1;
-}
-
-.component-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1f2937;
-  margin-bottom: 4px;
-}
-
-.component-desc {
-  font-size: 12px;
-  color: #6b7280;
 }
 
 /* 空状态提示 */
@@ -1225,7 +1193,7 @@ export default defineComponent({
   line-height: 1.5;
 }
 
-/* 放相关样式 */
+/* 放相样式 */
 .section-wrapper {
   position: relative;
   transition: all 0.3s ease;
@@ -1547,12 +1515,6 @@ export default defineComponent({
   font-weight: 500;
 }
 
-/* 添加批次信息样式 */
-.batch-info {
-  flex: 1;
-  margin: 0 24px;
-}
-
 /* 调整顶部操作栏高度 */
 .editor-header {
   height: auto;
@@ -1575,7 +1537,6 @@ export default defineComponent({
 /* 加 Basic Info 表单样式 */
 .basic-info-form {
   padding: 16px;
-  height: calc(100vh - 180px);
   overflow-y: auto;
 }
 
@@ -1696,40 +1657,6 @@ export default defineComponent({
 }
 
 /* 添加关键词相关样式 */
-.keywords-section {
-  padding: 16px;
-}
-
-.keywords-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.keyword-item {
-  background: #f8fafc;
-  border-radius: 8px;
-  padding: 12px;
-  border: 1px solid #e5e7eb;
-}
-
-.keyword-name {
-  font-weight: 500;
-  color: #1f2937;
-  margin-bottom: 4px;
-}
-
-.keyword-density {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.count-number,
-.density-number {
-  color: #38BDF8;
-  font-weight: 500;
-}
-
 .keywords-section {
   padding: 16px;
 }
@@ -1931,5 +1858,269 @@ export default defineComponent({
   .ant-input:focus {
     box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
   }
+}
+
+/* Info section 样式 */
+.info-section {
+  margin-bottom: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+.info-section .basic-info-form {
+  padding: 32px 12px 8px;
+}
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+:deep(.ant-form-item) {
+  margin-bottom: 0;
+}
+
+:deep(.ant-form-item-label) {
+  padding: 0;
+  line-height: 24px;
+  
+  label {
+    font-size: 12px;
+    color: #4b5563;
+    height: 20px;
+  }
+}
+
+:deep(.ant-form-item-control-input) {
+  min-height: 28px;
+}
+
+:deep(.ant-input), :deep(.ant-select-selector) {
+  height: 28px !important;
+  padding: 0 8px !important;
+  font-size: 13px;
+}
+
+:deep(.ant-select-selection-search-input) {
+  height: 26px !important;
+}
+
+:deep(.ant-select-selection-item) {
+  line-height: 26px !important;
+}
+
+.readonly-field {
+  padding: 0 8px;
+  background-color: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  color: #595959;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+}
+
+.component-label {
+  position: absolute;
+  left: 12px;
+  top: 8px;
+  z-index: 10;
+  background: rgba(56, 189, 248, 0.1);
+  color: #0284C7;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* 添加 textarea 相关样式 */
+:deep(.ant-input[type="textarea"]) {
+  padding: 4px 8px !important;
+  font-size: 13px;
+  line-height: 1.5;
+  min-height: auto !important;
+}
+
+:deep(.ant-input-textarea-show-count::after) {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+/* TDK 区域样式增强 */
+.tdk-section {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.tdk-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0284C7;
+  margin-bottom: 12px;
+  padding-left: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tdk-label::before {
+  content: '';
+  width: 4px;
+  height: 16px;
+  background: #38BDF8;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* TDK 输入框样式增强 */
+.tdk-section :deep(.ant-form-item) {
+  margin-bottom: 12px;
+}
+
+.tdk-section :deep(.ant-input),
+.tdk-section :deep(.ant-select-selector) {
+  border-color: #e5e7eb;
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.tdk-section :deep(.ant-input:hover),
+.tdk-section :deep(.ant-select-selector:hover) {
+  border-color: #38BDF8;
+  background: #f0f9ff;
+}
+
+.tdk-section :deep(.ant-input:focus),
+.tdk-section :deep(.ant-select-focused .ant-select-selector) {
+  border-color: #38BDF8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+  background: #ffffff;
+}
+
+.tdk-section :deep(.ant-form-item-label) {
+  padding-bottom: 4px;
+}
+
+.tdk-section :deep(.ant-form-item-label > label) {
+  color: #1f2937;
+  font-weight: 500;
+  font-size: 13px;
+  height: auto;
+}
+
+.tdk-section :deep(.ant-form-item-required::before) {
+  color: #f43f5e !important;
+}
+
+/* 修改表单网格布局 */
+.form-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+/* TDK 区域样式调整 */
+.tdk-section {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  height: fit-content;
+}
+
+/* 其他字段区域样式 */
+.other-fields-section {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.section-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0284C7;
+  margin-bottom: 12px;
+  padding-left: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-label::before {
+  content: '';
+  width: 4px;
+  height: 16px;
+  background: #38BDF8;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.other-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+/* 调整表单项间距 */
+:deep(.ant-form-item) {
+  margin-bottom: 12px;
+}
+
+/* 确保最后一个表单项没有底部间距 */
+:deep(.ant-form-item:last-child) {
+  margin-bottom: 0;
+}
+
+/* 确保两列等高 */
+.form-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.tdk-section,
+.other-fields-section {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  height: 100%; /* 确保两列等高 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 调整文本框样式 */
+:deep(.ant-input-textarea) {
+  height: 100%;
+}
+
+:deep(.ant-input-textarea textarea) {
+  min-height: 80px !important;
+  resize: vertical;
+}
+
+:deep(.ant-select-multiple .ant-select-selector) {
+  min-height: 80px !important;
+  height: auto !important;
+}
+
+/* 确保选择框内的标签���确换行显示 */
+:deep(.ant-select-multiple .ant-select-selection-overflow) {
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+
+:deep(.ant-select-multiple .ant-select-selection-item) {
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 </style>
