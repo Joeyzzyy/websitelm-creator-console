@@ -36,7 +36,7 @@
                     class="component-item"
                     draggable="true"
                     @dragstart="handleDragStart($event, component)"
-                    @click="addComponent(component)"
+                    @click="showComponentPreview(component)"
                   >
                     <span>{{ component.label }}</span>
                   </div>
@@ -145,7 +145,7 @@
                 <div class="form-grid">
                   <!-- 将内容分为两列 -->
                   <div class="form-columns">
-                    <!-- TDK 分组 - 左列 -->
+                    <!-- TDK 分组 - 左侧 -->
                     <div class="tdk-section">
                       <div class="tdk-label">TDK Information</div>
                       <!-- Title -->
@@ -193,7 +193,7 @@
                         <a-form-item v-if="isEditMode" label="Slug" required>
                           <a-input
                             v-model:value="articleData.slug"
-                            placeholder="Enter URL slug"
+                            placeholder="Enter page slug here"
                           />
                         </a-form-item>
 
@@ -223,7 +223,9 @@
                         label="Deployment Method"
                         style="margin-top: 24px;"
                       >
-                        <a-radio-group v-model:value="articleData.deploymentMethod">
+                        <a-radio-group 
+                          v-model:value="articleData.deploymentMethod" 
+                        >
                           <a-radio value="subfolder">Subfolder</a-radio>
                           <a-radio value="subdomain">Subdomain</a-radio>
                         </a-radio-group>
@@ -292,7 +294,7 @@
             </div>
           </div>
 
-          <!-- 空状态提示 - 只���没有其他组件时显示 -->
+          <!-- 空状态提示 - 只有没有其他组件时显示 -->
           <div v-if="articleData.sections.length === 0" class="empty-state">
             <p>Drag or click components from the left to start creating</p>
           </div>
@@ -334,6 +336,33 @@
         :defaultCollapsed="true"
         :isCollapsible="true"
       />
+
+      <!-- 添加预览弹窗 -->
+      <a-modal
+        v-model:visible="previewModal.visible"
+        :title="previewModal.title"
+        :width="1200"
+        :footer="null"
+        centered
+        @cancel="handlePreviewCancel"
+      >
+        <div class="preview-modal-content">
+          <!-- 预览内容区域 - 直接使用对应的 Preview 组件 -->
+          <div class="preview-component-wrapper">
+            <component 
+              :is="`${previewModal.componentName}Preview`"
+              :section="previewModal.componentData"
+              :styles="themeConfig.normal"
+            />
+          </div>
+          
+          <!-- 底部操作按钮 -->
+          <div class="preview-modal-footer">
+            <a-button @click="handlePreviewCancel">Cancel</a-button>
+            <a-button type="primary" @click="handlePreviewAdd">Add Component</a-button>
+          </div>
+        </div>
+      </a-modal>
     </div>
   </div>
 </template>
@@ -361,26 +390,45 @@ import { useRouter, useRoute } from 'vue-router';
 import apiClient from '../api/api';
 import FloatingStats from './FloatingStats.vue';
 import TitleSection from './sections/templates/TitleSection.vue';
+import TitleSectionPreview from './sections/templates/TitleSectionPreview.vue';
 import TitleSectionWithImage from './sections/templates/TitleSectionWithImage.vue';
+import TitleSectionWithImagePreview from './sections/templates/TitleSectionWithImagePreview.vue';
 import HeroSectionWithVideo from './sections/templates/HeroSectionWithVideo.vue';
+import HeroSectionWithVideoPreview from './sections/templates/HeroSectionWithVideoPreview.vue';
 import HeroSectionWithMultipleTexts from './sections/templates/HeroSectionWithMultipleTexts.vue';
+import HeroSectionWithMultipleTextsPreview from './sections/templates/HeroSectionWithMultipleTextsPreview.vue';
 import WhyChooseUsWithSmallBlocks from './sections/templates/WhyChooseUsWithSmallBlocks.vue';
 import WhyChooseUsWithBlocks from './sections/templates/WhyChooseUsWithBlocks.vue';
+import WhyChooseUsWithBlocksPreview from './sections/templates/WhyChooseUsWithBlocksPreview.vue';
 import HowItWorksWithWorkflow from './sections/templates/HowItWorksWithWorkflow.vue';
+import HowItWorksWithWorkflowPreview from './sections/templates/HowItWorksWithWorkflowPreview.vue';
 import ProductBenefitsWithBlocks from './sections/templates/ProductBenefitsWithBlocks.vue';
+import ProductBenefitsWithBlocksPreview from './sections/templates/ProductBenefitsWithBlocksPreview.vue';
 import UserReviewsWithMovingCards from './sections/templates/UserReviewsWithMovingCards.vue';
+import UserReviewsWithMovingCardsPreview from './sections/templates/UserReviewsWithMovingCardsPreview.vue';
 import Faqs from './sections/templates/Faqs.vue';
+import FaqsPreview from './sections/templates/FaqsPreview.vue';
 import CallToActionComplex from './sections/templates/CallToActionComplex.vue';
+import CallToActionComplexPreview from './sections/templates/CallToActionComplexPreview.vue';
 import WhyChooseUsWithStory from './sections/templates/WhyChooseUsWithStory.vue';
+import WhyChooseUsWithStoryPreview from './sections/templates/WhyChooseUsWithStoryPreview.vue';
 import FeaturesTabbed from './sections/templates/FeaturesTabbed.vue';
+import FeaturesTabbedPreview from './sections/templates/FeaturesTabbedPreview.vue';
+import MeetOurTeam from './sections/templates/MeetOurTeam.vue';
+import MeetOurTeamPreview from './sections/templates/MeetOurTeamPreview.vue';
+import JobList from './sections/templates/JobList.vue';
+import JobListPreview from './sections/templates/JobListPreview.vue';
+import CallToActionWithEmailInput from './sections/templates/CallToActionWithEmailInput.vue';
+import CallToActionWithEmailInputPreview from './sections/templates/CallToActionWithEmailInputPreview.vue';
+import KeyResultsWithTextBlock from './sections/templates/KeyResultsWithTextBlock.vue';
+import KeyResultsWithTextBlockPreview from './sections/templates/KeyResultsWithTextBlockPreview.vue';
+import WhyChooseUsWithSmallBlocksPreview from './sections/templates/WhyChooseUsWithSmallBlocksPreview.vue';
+import { VERCEL_CONFIG } from '../config/vercelConfig';
 import { createCleanComponentData } from '../utils/componentDataFactory';
 import { availableComponents } from '../config/availableComponents';
-import MeetOurTeam from './sections/templates/MeetOurTeam.vue';
-import JobList from './sections/templates/JobList.vue';
-import CallToActionWithEmailInput from './sections/templates/CallToActionWithEmailInput.vue';
+import themeConfig from '../assets/config/themeConfig';
 import config from '../config/settings';
-import KeyResultsWithTextBlock from './sections/templates/KeyResultsWithTextBlock.vue';
-import { VERCEL_CONFIG } from '../config/vercelConfig';
+
 export default defineComponent({
   name: 'ArticleCreatePage',
   components: {
@@ -398,6 +446,7 @@ export default defineComponent({
     EyeOutlined,
     LeftOutlined,
     SectionWrapper,
+    FloatingStats,
     TitleSection,
     TitleSectionWithImage,
     HeroSectionWithVideo,
@@ -412,10 +461,26 @@ export default defineComponent({
     CallToActionComplex,
     FeaturesTabbed,
     KeyResultsWithTextBlock,
-    FloatingStats,
     MeetOurTeam,
     JobList,
-    CallToActionWithEmailInput
+    CallToActionWithEmailInput,
+    TitleSectionPreview,
+    TitleSectionWithImagePreview,
+    HeroSectionWithVideoPreview,
+    HeroSectionWithMultipleTextsPreview,
+    WhyChooseUsWithSmallBlocksPreview,
+    WhyChooseUsWithBlocksPreview,
+    WhyChooseUsWithStoryPreview,
+    FeaturesTabbedPreview,
+    FaqsPreview,
+    CallToActionComplexPreview,
+    KeyResultsWithTextBlockPreview,
+    MeetOurTeamPreview,
+    JobListPreview,
+    CallToActionWithEmailInputPreview, 
+    HowItWorksWithWorkflowPreview,
+    ProductBenefitsWithBlocksPreview,
+    UserReviewsWithMovingCardsPreview,
   },
 
   setup() {
@@ -437,51 +502,38 @@ export default defineComponent({
     // 在组件挂载时初始化数据
     onMounted(async () => {
       await loadProductInfo();
-      await loadVerifiedDomains();
+      await loadDeployTargets('subfolder');
+      
       try {
         if (isEditMode.value) {
           console.log('Edit mode detected, fetching article data...');
           const response = await apiClient.getArticleById(pageId.value);
           
           if (response?.code === 200 && response.data) {
-            console.log('Original articleType:', response.data.articleType);
-
-            const articleDataWithSections = {
-              ...response.data,
-              sections: response.data.sections || [],
-              slug: response.data.slug || '',
-              keywords: response.data.relatedKeyword ? response.data.relatedKeyword.split(',') : [],
-              topic: response.data.topic || '',
-              articleType: response.data.articleType || '',
-              language: response.data.language || 'en',
-            };
-
-            console.log('Processed articleType:', articleDataWithSections.articleType);
-            
-            originalArticle.value = JSON.parse(JSON.stringify(articleDataWithSections));
-            articleData.value = articleDataWithSections;
-            
-            console.log('Final articleType:', articleData.value.articleType);
+            initializeArticleData(response.data);
           } else {
             throw new Error(response?.message || 'Invalid response data');
           }
+        } else {
+          // 新建模式下初始化默认数据
+          initializeArticleData({
+            title: '',
+            subTitle: '',
+            description: '',
+            sections: [],
+            deploymentMethod: 'subfolder' // 确保新建时也使用 subfolder 作为默认值
+          });
         }
       } catch (error) {
         console.error('Initialize error:', error);
         message.error('Failed to initialize: ' + (error.message || 'Unknown error'));
-        // 初始化失败时，设置默认值
-        originalArticle.value = {
+        // 初始化失败时的默认值
+        initializeArticleData({
           title: '',
           subTitle: '',
           description: '',
           sections: []
-        };
-        articleData.value = {
-          title: '',
-          subTitle: '',
-          description: '',
-          sections: []
-        };
+        });
       } finally {
         loading.value = false;
       }
@@ -578,22 +630,12 @@ export default defineComponent({
 
     // 添加组件到文
     const addComponent = (component, index = null) => {
-      console.log('Adding component:', component); // 添加这
+      console.log('Adding component:', component);
       try {
-        // 检查组件是否已存在
-        const componentExists = articleData.value.sections.some(
-          section => section.componentName === component.type
-        );
-
-        if (componentExists) {
-          message.warning(`This component "${component.label}" has already been added`);
-          return;
-        }
-
         // 使用 createCleanComponentData 创建干净的组件数据
         const newSection = createCleanComponentData(component.type);
 
-        // 添加新组件到指定位或末尾
+        // 添加新组件到指定位置或末尾
         if (index !== null) {
           articleData.value.sections.splice(index + 1, 0, newSection);
         } else {
@@ -602,7 +644,7 @@ export default defineComponent({
 
         calculateContentMetrics();
 
-        // 加滚动逻辑
+        // 添加滚动逻辑
         nextTick(() => {
           const sections = document.querySelectorAll('.section-wrapper');
           const lastSection = sections[sections.length - 1];
@@ -739,7 +781,7 @@ export default defineComponent({
         let response;
         
         if (isEditMode.value) {
-          // 编辑模式���使用全量更新
+          // 编辑模式使用全量更新
           const updatePromises = [];
 
           // 直接更新页面所有信息
@@ -754,7 +796,7 @@ export default defineComponent({
             relatedKeyword: processedKeywords,
           };
           
-          console.log('Saving page data:', pageUpdateData); // 添加日志
+          console.log('Saving page data:', pageUpdateData); // 加日志
           
           // 添加更新页面信息的请求
           updatePromises.push(
@@ -766,7 +808,7 @@ export default defineComponent({
             apiClient.updateFullSections(pageId.value, {sections: articleData.value.sections})
           );
 
-          // 并行行所有更新请求
+          // 并行所有更新请求
           response = await Promise.all(updatePromises);
         } else {
           const requestData = {
@@ -795,9 +837,8 @@ export default defineComponent({
         if (shouldQuit) {
           router.push('/task-management');
         } else if (!isEditMode.value) {
-          const batchId = response.data.batchId
           const pageId = response.data.pageId
-          router.push(`/page-writer?mode=edit&id=${pageId}&batchId=${batchId}&lang=${articleData.value.language}`);
+          router.push(`/page-writer?mode=edit&id=${pageId}&lang=${articleData.value.language}`);
         }
 
       } catch (error) {
@@ -950,17 +991,17 @@ export default defineComponent({
       } catch (error) {
         console.error('Failed to load product information:', error);
         message.error('Failed to load product information: ' + (error.message || 'Unknown error'));
-        productInfo.value = {}; // 设置为空对象而不是 null
+        productInfo.value = {}; // 设置空对象而不是 null
       }
     };
 
     const getPreviewUrl = (article) => {
-      return `${config.domains.preview}${article.language === 'zh' ? 'zh/' : 'en/'}${article.previewId}`;
+      return `${config.domains.preview}${article.language === 'zh' ? 'zh/' : 'en/'}${article.slug}`;
     };
 
     const handlePreview = () => {
       const previewUrl = getPreviewUrl({
-        previewId: articleData.value.previewId,
+        slug: articleData.value.slug,
         language: articleData.value.language
       });
       window.open(previewUrl, '_blank');
@@ -1038,7 +1079,7 @@ export default defineComponent({
           await loadProductInfo()
         }
         
-        // 查找所有已验证的域名
+        // 查找所有验证的域名
         verifiedDomains.value = response?.domains
           ?.filter(domain => {
             const isVerified = domain.verified || !domain.configDetails?.misconfigured
@@ -1054,7 +1095,7 @@ export default defineComponent({
     // 添加新的响应式变量
     const isSideNavCollapsed = ref(false);
     
-    // 添加切换侧边栏的方法
+    // 添加切换���边栏的方法
     const toggleSideNav = () => {
       isSideNavCollapsed.value = !isSideNavCollapsed.value;
     };
@@ -1072,10 +1113,10 @@ export default defineComponent({
           const response = await apiClient.getVercelDomainInfo(projectId);
           
           if (response?.domains) {
-            // 先清空现有数据
+            // 先清现有数据
             availableSubdomains.value = [];
             
-            // 过滤有效域名，只保留当前客户域名相关的子域名
+            // 过滤有效域名，只留当前客户域名相关的子域名
             const filteredDomains = response.domains.filter(domain => {
               const isVerified = domain.verified || !domain.configDetails?.misconfigured;
               const belongsToCustomer = domain.apexName === productInfo.value?.projectWebsite;
@@ -1133,11 +1174,21 @@ export default defineComponent({
 
     // 在编辑模式下初始化数据时添加部署相关信息
     const initializeArticleData = (data) => {
-      // ... 现有的初始化逻辑 ...
+      // 初始化基础数据
+      articleData.value = {
+        ...data,
+        sections: data.sections || [],
+        slug: data.slug || '',
+        keywords: data.relatedKeyword ? data.relatedKeyword.split(',') : [],
+        topic: data.topic || '',
+        articleType: data.articleType || '',
+        language: data.language || 'en',
+        deploymentMethod: data.deploymentMethod || 'subfolder', // 修改默认值为 subfolder
+        deployTarget: data.deployTarget || null
+      };
       
-      // 添加部署相关字段
-      articleData.value.deploymentMethod = data.deploymentMethod || 'subdomain';
-      articleData.value.deployTarget = data.deployTarget || null;
+      // 保存原始数据用于比较
+      originalArticle.value = JSON.parse(JSON.stringify(articleData.value));
       
       // 加载对应的部署目标选项
       if (articleData.value.deploymentMethod) {
@@ -1162,6 +1213,37 @@ export default defineComponent({
         return `https://${baseUrl}/${articleData.value.deployTarget}/${slug}`;
       }
     });
+
+    // 添加预览弹窗相关的响应式数据
+    const previewModal = reactive({
+      visible: false,
+      title: '',
+      componentName: '',
+      componentData: null,
+      selectedComponent: null
+    });
+
+    // 显示组件预览
+    const showComponentPreview = (component) => {
+      previewModal.visible = true;
+      previewModal.title = `Preview: ${component.label}`;
+      previewModal.componentName = component.type;
+      previewModal.componentData = createCleanComponentData(component.type);
+      previewModal.selectedComponent = component;
+    };
+
+    // 处理预览取消
+    const handlePreviewCancel = () => {
+      previewModal.visible = false;
+    };
+
+    // 处理预览中的添加操作
+    const handlePreviewAdd = () => {
+      if (previewModal.selectedComponent) {
+        addComponent(previewModal.selectedComponent);
+      }
+      previewModal.visible = false;
+    };
 
     return {
       loading,
@@ -1206,13 +1288,18 @@ export default defineComponent({
       availableSubdomains,
       availableSubfolders,
       getPreviewDeployUrl,
+      previewModal,
+      showComponentPreview,
+      handlePreviewCancel,
+      handlePreviewAdd,
+      themeConfig
     };
   }
 });
 </script>
 
 <style scoped>
-/* 保持 EditPage 相同的基础布样式 */
+/* 保持 EditPage 同的基础布样式 */
 .article-editor {
   position: fixed;
   top: 0;
@@ -1326,12 +1413,15 @@ export default defineComponent({
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid #e5e7eb;
+  position: relative;
 }
 
 .component-item:hover {
   background: rgba(56, 189, 248, 0.05);
   border-color: #38BDF8;
   transform: translateX(4px);
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.2);
 }
 
 .component-item:active {
@@ -1550,7 +1640,7 @@ export default defineComponent({
 
 @media screen and (max-width: 1024px) {
   .article-editor {
-    min-width: 900px; /* 设置较小屏幕下的最小宽度 */
+    min-width: 900px; /* 设置较小屏���下的最小宽度 */
   }
   
   .editor-content {
@@ -2143,5 +2233,141 @@ export default defineComponent({
 
 .selected-components-list::-webkit-scrollbar-thumb:hover {
   background: #d1d5db;
+}
+
+/* 添加预览气泡相关样式 */
+:deep(.component-preview-tooltip) {
+  max-width: 400px;
+  padding: 0;
+}
+
+:deep(.ant-tooltip-inner) {
+  padding: 0;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.preview-content {
+  width: 360px;
+}
+
+.preview-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.preview-info {
+  padding: 16px;
+}
+
+.preview-info h4 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.preview-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+/* 优化组件项的悬浮效果 */
+.component-item {
+  position: relative;
+}
+
+.component-item:hover {
+  z-index: 1;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.2);
+}
+
+/* 添加预览弹窗相关样式 */
+.preview-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.preview-component-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+  min-height: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 48px 24px; /* 增加内边距让预览内容更居中 */
+}
+
+/* 美化预览区域的滚动条 */
+.preview-component-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.preview-component-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.preview-component-wrapper::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+
+.preview-component-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+:deep(.ant-modal-content) {
+  padding: 24px;
+  border-radius: 16px;
+}
+
+:deep(.ant-modal-body) {
+  padding: 24px 0 0 0;
+  max-height: calc(90vh - 120px); /* 限制最大高度 */
+}
+
+/* 修改预览弹窗底部按钮样式 */
+.preview-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.preview-modal-footer :deep(.ant-btn) {
+  height: 36px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 调整预览弹窗内容区域的上下间距 */
+.preview-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* 移除原有的 gap */
+}
+
+/* 调整预览组件容器的样式 */
+.preview-component-wrapper {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+  min-height: 400px;
+  max-height: calc(80vh - 120px); /* 调整最大高度，为底部按钮留出空间 */
+  overflow-y: auto;
+  padding: 48px 24px;
+  margin-bottom: 24px; /* 添加底部间距 */
 }
 </style>

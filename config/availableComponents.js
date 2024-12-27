@@ -7,7 +7,9 @@ export const availableComponents = [
       {
         type: 'TitleSection',
         label: 'Standard ',
-        template: createCleanComponentData('TitleSection')
+        template: createCleanComponentData('TitleSection'),
+        preview: "/previews/title-section.png",
+        description: "A simple and elegant title section with optional subtitle and description."
       },
       {
         type: 'TitleSectionWithImage',

@@ -20,7 +20,7 @@ export const createCleanComponentData = (componentType) => {
           publishDate: new Date().toISOString().split('T')[0]
         },
         rightContent: {
-          imageUrl: 'https://placeholder.com/800x600',
+          imageUrl: '/assets/images/placeholder.png',
           imageAlt: 'Default Image'
         }
       },
@@ -81,7 +81,7 @@ export const createCleanComponentData = (componentType) => {
             description: 'Detailed description of feature 1',
             content: 'Extended content for feature 1',
             buttonText: 'Learn More',
-            imageUrl: 'https://placeholder.com/400x300',
+            imageUrl: '/assets/images/placeholder.png',
             imageAlt: 'Feature 1 illustration'
           },
           { 
@@ -89,7 +89,7 @@ export const createCleanComponentData = (componentType) => {
             description: 'Detailed description of feature 2',
             content: 'Extended content for feature 2',
             buttonText: 'Learn More',
-            imageUrl: 'https://placeholder.com/400x300',
+            imageUrl: '/assets/images/placeholder.png',
             imageAlt: 'Feature 2 illustration'
           }
         ]
@@ -122,7 +122,7 @@ export const createCleanComponentData = (componentType) => {
             subTitle: 'Subtitle of benefit 1',
             content: 'Description of benefit 1',
             buttonText: 'Learn More',
-            imageUrl: 'https://placeholder.com/400x300',
+            imageUrl: '/assets/images/placeholder.png',
             imageAlt: 'Benefit 1 illustration'
           },
           { 
@@ -131,7 +131,7 @@ export const createCleanComponentData = (componentType) => {
             subTitle: 'Subtitle of benefit 2',
             content: 'Description of benefit 2',
             buttonText: 'Learn More',
-            imageUrl: 'https://placeholder.com/400x300',
+            imageUrl: '/assets/images/placeholder.png',
             imageAlt: 'Benefit 2 illustration'
           },
           { 
@@ -140,7 +140,7 @@ export const createCleanComponentData = (componentType) => {
             subTitle: 'Subtitle of benefit 2',
             content: 'Description of benefit 3',
             buttonText: 'Learn More',
-            imageUrl: 'https://placeholder.com/400x300',
+            imageUrl: '/assets/images/placeholder.png',
             imageAlt: 'Benefit 3 illustration'
           },
           { 
@@ -149,7 +149,7 @@ export const createCleanComponentData = (componentType) => {
             subTitle: 'Subtitle of benefit 4',
             content: 'Description of benefit 4',
             buttonText: 'Learn More',
-            imageUrl: 'https://placeholder.com/400x300',
+            imageUrl: '/assets/images/placeholder.png',
             imageAlt: 'Benefit 4 illustration'
           }
         ]
@@ -161,7 +161,7 @@ export const createCleanComponentData = (componentType) => {
             {
               name: "David Miller",
               position: "Innovation Director - FutureCorp",
-              avatarUrl: "https://placeholder.com/800x600",
+              avatarUrl: '/assets/images/placeholder.png',
               avatarAlt: "David Miller's avatar",
               title: "Revolutionary Content Creation",
               content: "websitelm AI has completely transformed our approach to video marketing. The AI-driven content generation is not just fast - it's incredibly intelligent and adaptable."
@@ -169,7 +169,7 @@ export const createCleanComponentData = (componentType) => {
             {
               name: "Alexandra Peters",
               position: "Global Marketing Head - TechVision",
-              avatarUrl: "https://placeholder.com/800x600",
+              avatarUrl: '/assets/images/placeholder.png',
               avatarAlt: "Sarah Chen's avatar",
               title: "Exceptional Marketing Results",
               content: "The versatility and speed of websitelm AI's video generation have given us a competitive edge. Our marketing campaigns are now more dynamic and engaging than ever."
@@ -177,7 +177,7 @@ export const createCleanComponentData = (componentType) => {
             {
               name: "Thomas Wright",
               position: "Digital Strategy Lead - MediaPro",
-              avatarUrl: "https://placeholder.com/800x600",
+              avatarUrl: '/assets/images/placeholder.png',
               avatarAlt: "Sarah Chen's avatar",
               title: "Game-Changing Efficiency",
               content: "What used to take our team weeks now happens in minutes. The quality and consistency of the AI-generated videos have exceeded all our expectations."
@@ -185,7 +185,7 @@ export const createCleanComponentData = (componentType) => {
             {
               name: "Caroline Foster",
               position: "Brand Director - GlobalBrands",
-              avatarUrl: "https://placeholder.com/800x600",
+              avatarUrl: '/assets/images/placeholder.png',
               avatarAlt: "Sarah Chen's avatar",
               title: "Perfect for Brand Building",
               content: "websitelm AI maintains our brand consistency across all markets while allowing for local customization. It's the perfect balance of efficiency and brand control."
@@ -193,7 +193,7 @@ export const createCleanComponentData = (componentType) => {
             {
               name: "Richard Martinez",
               position: "Operations Manager - ScaleUp Inc",
-              avatarUrl: "https://placeholder.com/800x600",
+              avatarUrl: '/assets/images/placeholder.png',
               avatarAlt: "Sarah Chen's avatar",
               title: "Streamlined Production Process",
               content: "The automated workflow and intelligent content generation have revolutionized our video production. We're creating more content with better results and lower costs."
@@ -262,7 +262,7 @@ export const createCleanComponentData = (componentType) => {
         title: 'Why Choose Us With Story',
         description: 'Display founder story and detailed product/service introduction',
         leftContent: {
-          avatarUrl: 'https://placeholder.com/800x600',
+          avatarUrl: '/assets/images/placeholder.png',
           avatarAlt: 'Michael Zhang',
           name: 'Michael Zhang',
           title: 'Founder & CEO',
@@ -301,7 +301,7 @@ export const createCleanComponentData = (componentType) => {
             tabName: 'Authentic authorship',
             title: 'Verify authentic authorship',
             description: 'Ensure academic integrity with our authentication tools',
-            imageUrl: 'https://placeholder.com/800x600',
+            imageUrl: '/assets/images/placeholder.png',
             imageAlt: 'Authentic authorship',
             buttonText: 'Get Started Now',
           },
@@ -309,7 +309,7 @@ export const createCleanComponentData = (componentType) => {
             tabName: 'Cite AI use',
             title: 'Make it easy to disclose your AI use',
             description: 'Our transparency features make it easy to acknowledge when you\'ve used AI',
-            imageUrl: 'https://placeholder.com/800x600',
+            imageUrl: '/assets/images/placeholder.png',
             imageAlt: 'Cite AI use',
             buttonText: 'Get Started Now',
           },
@@ -317,7 +317,7 @@ export const createCleanComponentData = (componentType) => {
             tabName: 'AI checker',
             title: 'AI checker',
             description: 'Our AI checker helps you detect AI-generated content',
-            imageUrl: 'https://placeholder.com/800x600',
+            imageUrl: '/assets/images/placeholder.png',
             imageAlt: 'AI checker',
             buttonText: 'Get Started Now',
           }
@@ -335,7 +335,7 @@ export const createCleanComponentData = (componentType) => {
             name: 'Michael Zhang',
             title: 'Chief Executive Officer',
             description: '15 years of experience in the tech industry, having held leadership positions at several renowned technology companies. Focused on AI innovation and business applications.',
-            avatarUrl: 'https://placeholder.com/800x600',
+            avatarUrl: '/assets/images/placeholder.png',
             avatarAlt: 'Michael Zhang',
             socials: []
           },
@@ -343,7 +343,7 @@ export const createCleanComponentData = (componentType) => {
             name: 'Sarah Li',
             title: 'Product Director',
             description: '10 years of product management experience, specializing in user experience design and product strategy. Led teams in developing multiple successful enterprise products.',
-            avatarUrl: 'https://placeholder.com/800x600',
+            avatarUrl: '/assets/images/placeholder.png',
             avatarAlt: 'Sarah Li',
             socials: []
           },
@@ -351,7 +351,7 @@ export const createCleanComponentData = (componentType) => {
             name: 'David Wang',
             title: 'Technical Director',
             description: 'Focused on AI and machine learning, with extensive experience in technical architecture design. Dedicated to transforming cutting-edge technology into practical solutions.',
-            avatarUrl: 'https://placeholder.com/800x600',
+            avatarUrl: '/assets/images/placeholder.png',
             avatarAlt: 'David Wang',
             socials: []
           }

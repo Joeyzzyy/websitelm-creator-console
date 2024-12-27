@@ -16,7 +16,7 @@
           <span v-show="verifiedDomains.length === 0" class="domain-label">
             No verified sub-domain available - <router-link to="/settings">click here to add sub-domain</router-link>
           </span>
-          <span v-show="verifiedDomains.length > 0" class="domain-label">Pages will be published to:</span>
+          <span v-show="verifiedDomains.length > 0" class="domain-label">Pages could be published to:</span>
           <div class="domain-tags">
             <a-tag v-for="domain in verifiedDomains" :key="domain" color="success">
               {{ domain }}
@@ -163,6 +163,7 @@ import {
 import PageLayout from './layout/PageLayout.vue'
 import apiClient from '../api/api'
 import config from '../config/settings'
+import { VERCEL_CONFIG } from '../config/vercelConfig'
 
 export default {
   name: 'TaskManagementPage',
@@ -287,28 +288,28 @@ export default {
 
     const loadVerifiedDomains = async () => {
       try {
-        const customerId = localStorage.getItem('currentCustomerId')
-        const projectId = getProjectId(customerId)
-        
-        const response = await apiClient.getVercelDomainInfo(projectId)
+        const projectId = VERCEL_CONFIG.PROJECT_ID;
+        const response = await apiClient.getVercelDomainInfo(projectId);
         
         // 确保 productInfo 已加载
         if (!productInfo.value) {
-          await loadProductInfo()
+          await loadProductInfo();
         }
         
         // 查找所有已验证的域名
         verifiedDomains.value = response?.domains
           ?.filter(domain => {
-            const isVerified = domain.verified || !domain.configDetails?.misconfigured
-            const hasProductInfo = productInfo.value?.projectWebsite === domain.name && productInfo.value?.domainStatus
-            return isVerified && hasProductInfo
+            const isVerified = domain.verified || !domain.configDetails?.misconfigured;
+            const hasProductInfo = productInfo.value?.projectWebsite === domain.apexName && productInfo.value?.domainStatus;
+            return isVerified && hasProductInfo;
           })
-          ?.map(domain => domain.name) || []
+          ?.map(domain => domain.name) || [];
+
+          console.log('verifiedDomains', verifiedDomains.value)
       } catch (error) {
-        console.error('Failed to load domain info:', error)
+        console.error('Failed to load domain info:', error);
       }
-    }
+    };
 
     // fetchTasks 方法的修改
     const fetchTasks = async () => {
@@ -360,7 +361,7 @@ export default {
     const checkArticleForEmptyFields = (article) => {
       if (!article.sections) return false
 
-      // 遍历所有sections检查空值
+      // 遍历���有sections检查空值
       return article.sections.some(section => {
         let hasEmptyField = false
         
@@ -476,12 +477,12 @@ export default {
 
     // Edit article
     const editArticle = (article) => {
-      const url = `/page-writer?mode=edit&id=${article.pageId}&batchId=${article.batchId}&lang=${article.lang}`
+      const url = `/page-writer?mode=edit&id=${article.pageId}&lang=${article.lang}`
       window.open(url, '_blank')
     }
 
     const getPreviewUrl = (article) => {
-      return `${config.domains.preview}${article.lang === 'zh' ? 'zh/' : 'en/'}${article.previewId}`;
+      return `${config.domains.preview}${article.lang === 'zh' ? 'zh/' : 'en/'}${article.slug}`;
     };
     
     const getPublishUrl = (article) => {
@@ -492,7 +493,7 @@ export default {
       
       // 使用第一个验证名为发布域名
       const publishDomain = verifiedDomains.value[0]
-      return `https://${publishDomain}/${article.lang === 'zh' ? 'zh/' : 'en/'}${article.pageId}`
+      return `https://${publishDomain}/${article.lang === 'zh' ? 'zh/' : 'en/'}${article.slug}`
     }
 
     // Style methods
