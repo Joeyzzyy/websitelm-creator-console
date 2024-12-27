@@ -292,7 +292,7 @@
             </div>
           </div>
 
-          <!-- 空状态提示 - 只在没有其他组件时显示 -->
+          <!-- 空状态提示 - 只���没有其他组件时显示 -->
           <div v-if="articleData.sections.length === 0" class="empty-state">
             <p>Drag or click components from the left to start creating</p>
           </div>
@@ -738,7 +738,7 @@ export default defineComponent({
         let response;
         
         if (isEditMode.value) {
-          // 编辑模式：使用全量更新
+          // 编辑模式���使用全量更新
           const updatePromises = [];
 
           // 直接更新页面所有信息
@@ -1212,7 +1212,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* 保持与 EditPage 相同的基础布样式 */
+/* 保持��� EditPage 相同的基础布样式 */
 .article-editor {
   position: fixed;
   top: 0;
@@ -1221,6 +1221,8 @@ export default defineComponent({
   bottom: 0;
   display: flex;
   width: 100%;
+  min-width: 768px; /* 添加最小宽度限制 */
+  overflow-x: auto; /* 当宽度小于最小宽度时允许横向滚动 */
 }
 
 /* 左侧导航式增强 */
@@ -1447,8 +1449,8 @@ export default defineComponent({
   height: 100vh;
   padding: 88px 32px 32px;
   margin-left: 356px;
+  min-width: 600px; /* 设置内容区最小宽度 */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  width: 100%;
 }
 
 .editor-content.expanded {
@@ -1520,27 +1522,39 @@ export default defineComponent({
   100% { transform: rotate(360deg); }
 }
 
-/* 响应式调整 */
-@media (max-width: 1300px) {
+/* 响应式布局调整 */
+@media screen and (max-width: 1400px) {
   .side-nav {
-    left: 24px;
-  }
-  
-  .editor-content.expanded {
-    margin-left: 72px;
-    width: calc(100% - 72px);
-  }
-}
-
-@media (max-width: 1200px) {
-  .side-nav {
-    display: none;
+    width: 280px;
   }
   
   .editor-content {
-    margin-left: 0;
-    width: 100%;
-    padding: 88px 16px 24px;
+    margin-left: 336px;
+  }
+  
+  .editor-content.expanded {
+    margin-left: 84px;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .side-nav {
+    width: 240px;
+  }
+  
+  .editor-content {
+    margin-left: 296px;
+    padding: 88px 24px 24px;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .article-editor {
+    min-width: 900px; /* 设置较小屏幕下的最小宽度 */
+  }
+  
+  .editor-content {
+    min-width: 500px;
   }
 }
 
@@ -1683,7 +1697,7 @@ export default defineComponent({
   font-weight: 500;
 }
 
-/* 调整顶部操作栏高度 */
+/* 调整顶部操作栏高�� */
 .editor-header {
   height: auto;
   min-height: 64px;
@@ -1907,7 +1921,7 @@ export default defineComponent({
   color: #f43f5e !important;
 }
 
-/* 修改表单网格布局 */
+/* 修改表单网��布局 */
 .form-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
