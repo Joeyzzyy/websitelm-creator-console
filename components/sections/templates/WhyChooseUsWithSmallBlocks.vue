@@ -1,88 +1,93 @@
 <template>
   <div class="section-wrapper">
-    <!-- 编辑区域 -->
     <div class="editor-area">
-      <a-form layout="vertical">
-        <!-- Top Content -->
-        <a-form-item label="Emoji">
-          <div class="input-with-tag">
-            <span class="html-tag">{{ tags.emoji }}</span>
-            <a-input v-model:value="localSection.topContent.icon" @change="handleChange" />
-          </div>
-        </a-form-item>
-        
-        <a-form-item label="Title">
-          <div class="input-with-tag">
-            <span class="html-tag">{{ tags.title }}</span>
-            <a-input v-model:value="localSection.topContent.title" @change="handleChange" />
-          </div>
-        </a-form-item>
-        
-        <a-form-item label="Description">
-          <div class="input-with-tag">
-            <span class="html-tag">{{ tags.description }}</span>
-            <a-textarea
-              v-model:value="localSection.topContent.description"
-              :rows="3"
-              @change="handleChange"
-            />
-          </div>
-        </a-form-item>
-
-        <!-- Bottom Content -->
-        <div class="bottom-content">
-          <div class="flex justify-between items-center mb-4">
-            <h3>Modules</h3>
-            <a-button 
-              type="primary" 
-              @click="addModule"
-              :disabled="localSection.bottomContent.length >= 6"
-            >
-              Add Module
-            </a-button>
-          </div>
+      <div class="editor-header">
+        <h2 class="component-title">Why Choose Us With Small Blocks</h2>
+      </div>
+      <div class="editor-content">
+        <a-form layout="vertical">
+          <!-- Top Content -->
+          <a-form-item label="Emoji">
+            <div class="input-with-tag">
+              <span class="html-tag">{{ tags.emoji }}</span>
+              <a-input v-model:value="localSection.topContent.icon" @change="handleChange" />
+            </div>
+          </a-form-item>
           
-          <div class="module-grid">
-            <div v-for="(module, index) in localSection.bottomContent" :key="index">
-              <a-form-item>
-                <div class="flex justify-between items-center mb-2">
-                  <span>Module {{ index + 1 }}</span>
-                  <a-button type="text" class="delete-btn" @click="removeModule(index)">
-                    <template #icon>
-                      <delete-outlined />
-                    </template>
-                  </a-button>
-                </div>
-                <div class="input-with-tag mb-2">
-                  <span class="html-tag">{{ tags.icon }}</span>
-                  <a-input
-                    v-model:value="module.icon"
-                    placeholder="Icon"
-                    @change="handleChange"
-                  />
-                </div>
-                <div class="input-with-tag mb-2">
-                  <span class="html-tag">{{ tags.moduleTitle }}</span>
-                  <a-input
-                    v-model:value="module.title"
-                    placeholder="Title"
-                    @change="handleChange"
-                  />
-                </div>
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.moduleContent }}</span>
-                  <a-textarea
-                    v-model:value="module.content"
-                    placeholder="Content"
-                    :rows="3"
-                    @change="handleChange"
-                  />
-                </div>
-              </a-form-item>
+          <a-form-item label="Title">
+            <div class="input-with-tag">
+              <span class="html-tag">{{ tags.title }}</span>
+              <a-input v-model:value="localSection.topContent.title" @change="handleChange" />
+            </div>
+          </a-form-item>
+          
+          <a-form-item label="Description">
+            <div class="input-with-tag">
+              <span class="html-tag">{{ tags.description }}</span>
+              <a-textarea
+                v-model:value="localSection.topContent.description"
+                :rows="3"
+                @change="handleChange"
+              />
+            </div>
+          </a-form-item>
+
+          <!-- Bottom Content -->
+          <div class="bottom-content">
+            <div class="flex justify-between items-center mb-4">
+              <h3>Modules</h3>
+              <a-button 
+                type="primary" 
+                @click="addModule"
+                :disabled="localSection.bottomContent.length >= 6"
+              >
+                Add Module
+              </a-button>
+            </div>
+            
+            <div class="module-grid">
+              <div v-for="(module, index) in localSection.bottomContent" :key="index">
+                <a-form-item>
+                  <div class="flex justify-between items-center mb-2">
+                    <span>Module {{ index + 1 }}</span>
+                    <a-button type="text" class="delete-btn" @click="removeModule(index)">
+                      <template #icon>
+                        <delete-outlined />
+                      </template>
+                    </a-button>
+                  </div>
+                  <div class="input-with-tag mb-2">
+                    <span class="html-tag">{{ tags.icon }}</span>
+                    <a-input
+                      v-model:value="module.icon"
+                      placeholder="Icon"
+                      @change="handleChange"
+                    />
+                  </div>
+                  <div class="input-with-tag mb-2">
+                    <span class="html-tag">{{ tags.moduleTitle }}</span>
+                    <a-input
+                      v-model:value="module.title"
+                      placeholder="Title"
+                      @change="handleChange"
+                    />
+                  </div>
+                  <div class="input-with-tag">
+                    <span class="html-tag">{{ tags.moduleContent }}</span>
+                    <a-textarea
+                      v-model:value="module.content"
+                      placeholder="Content"
+                      :rows="3"
+                      @change="handleChange"
+                      :style="{ minHeight: '80px' }"
+                    />
+                  </div>
+                </a-form-item>
+              </div>
             </div>
           </div>
-        </div>
-      </a-form>
+        </a-form>
+      </div>
     </div>
 
     <!-- 预览区域 -->
@@ -278,5 +283,37 @@ export default {
 :deep(.anticon) {
   font-size: 14px;
   color: inherit;
+}
+
+.editor-area {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.editor-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 10;
+}
+
+.component-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.editor-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
 }
 </style>

@@ -2,120 +2,125 @@
   <div class="section-wrapper">
     <!-- 编辑区域 -->
     <div class="editor-area">
-      <div class="section-container">
-        <!-- 顶部内容 -->
-        <div class="top-content">
-          <a-form layout="vertical">
-            <a-form-item label="Emoji">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.emoji }}</span>
-                <a-input
-                  v-model:value="localSection.topContent.icon"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
+      <div class="editor-header">
+        <h2 class="component-title">How It Works With Workflow</h2>
+      </div>
+      <div class="editor-content">
+        <div class="section-container">
+          <!-- 顶部内容 -->
+          <div class="top-content">
+            <a-form layout="vertical">
+              <a-form-item label="Emoji">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.emoji }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.icon"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
 
-            <a-form-item label="Title">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.title }}</span>
-                <a-input
-                  v-model:value="localSection.topContent.title"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
+              <a-form-item label="Title">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.title }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.title"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
   
-            <a-form-item label="Description">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.description }}</span>
-                <a-input
-                  v-model:value="localSection.topContent.description"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-          </a-form>
-        </div>
-  
-        <!-- 底部箭头流程 -->
-        <div class="bottom-content">
-          <div class="arrow-flow">
-            <div 
-              v-for="(item, index) in localSection.bottomContent" 
-              :key="index"
-              class="flow-item"
-            >
-              <div class="flow-content">
-                <a-form layout="vertical">
-                  <div class="flow-header">
-                    <span>Step {{ item.number }}</span>
-                  </div>
-  
-                  <a-form-item label="Number">
-                    <div class="input-with-tag">
-                      <span class="html-tag">{{ tags.number }}</span>
-                      <a-input
-                        v-model:value="item.number"
-                        :disabled="disabled"
-                        @change="handleChange"
-                      />
-                    </div>
-                  </a-form-item>
-  
-                  <a-form-item label="Step Title">
-                    <div class="input-with-tag">
-                      <span class="html-tag">{{ tags.stepTitle }}</span>
-                      <a-input
-                        v-model:value="item.title"
-                        :disabled="disabled"
-                        @change="handleChange"
-                      />
-                    </div>
-                  </a-form-item>
-  
-                  <a-form-item label="Step Subtitle">
-                    <div class="input-with-tag">
-                      <span class="html-tag">{{ tags.stepSubTitle }}</span>
-                      <a-input
-                        v-model:value="item.subTitle"
-                        :disabled="disabled"
-                        @change="handleChange"
-                      />
-                    </div>
-                  </a-form-item>
-  
-                  <a-form-item label="Content">
-                    <div class="input-with-tag">
-                      <span class="html-tag">{{ tags.content }}</span>
-                      <a-textarea
-                        v-model:value="item.content"
-                        :disabled="disabled"
-                        :rows="3"
-                        @change="handleChange"
-                        :style="{ minHeight: '120px' }"
-                      />
-                    </div>
-                  </a-form-item>
-                </a-form>
-              </div>
-              <div v-if="index < localSection.bottomContent.length - 1" class="arrow">
-                →
-              </div>
-            </div>
+              <a-form-item label="Description">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.description }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.description"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+            </a-form>
           </div>
   
-          <a-button 
-            v-if="!disabled && localSection.bottomContent.length < 3" 
-            type="dashed" 
-            block 
-            @click="addStep"
-          >
-            Add Step
-          </a-button>
+          <!-- 底部箭头流程 -->
+          <div class="bottom-content">
+            <div class="arrow-flow">
+              <div 
+                v-for="(item, index) in localSection.bottomContent" 
+                :key="index"
+                class="flow-item"
+              >
+                <div class="flow-content">
+                  <a-form layout="vertical">
+                    <div class="flow-header">
+                      <span>Step {{ item.number }}</span>
+                    </div>
+  
+                    <a-form-item label="Number">
+                      <div class="input-with-tag">
+                        <span class="html-tag">{{ tags.number }}</span>
+                        <a-input
+                          v-model:value="item.number"
+                          :disabled="disabled"
+                          @change="handleChange"
+                        />
+                      </div>
+                    </a-form-item>
+  
+                    <a-form-item label="Step Title">
+                      <div class="input-with-tag">
+                        <span class="html-tag">{{ tags.stepTitle }}</span>
+                        <a-input
+                          v-model:value="item.title"
+                          :disabled="disabled"
+                          @change="handleChange"
+                        />
+                      </div>
+                    </a-form-item>
+  
+                    <a-form-item label="Step Subtitle">
+                      <div class="input-with-tag">
+                        <span class="html-tag">{{ tags.stepSubTitle }}</span>
+                        <a-input
+                          v-model:value="item.subTitle"
+                          :disabled="disabled"
+                          @change="handleChange"
+                        />
+                      </div>
+                    </a-form-item>
+  
+                    <a-form-item label="Content">
+                      <div class="input-with-tag">
+                        <span class="html-tag">{{ tags.content }}</span>
+                        <a-textarea
+                          v-model:value="item.content"
+                          :disabled="disabled"
+                          :rows="3"
+                          @change="handleChange"
+                          :style="{ minHeight: '120px' }"
+                        />
+                      </div>
+                    </a-form-item>
+                  </a-form>
+                </div>
+                <div v-if="index < localSection.bottomContent.length - 1" class="arrow">
+                  →
+                </div>
+              </div>
+            </div>
+  
+            <a-button 
+              v-if="!disabled && localSection.bottomContent.length < 3" 
+              type="dashed" 
+              block 
+              @click="addStep"
+            >
+              Add Step
+            </a-button>
+          </div>
         </div>
       </div>
     </div>
@@ -250,8 +255,34 @@ export default {
 
 .editor-area {
   background: white;
-  height: 600px;
+  display: flex;
+  flex-direction: column;
+  max-height: 1000px;
+  position: relative;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.editor-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 10;
+}
+
+.component-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.editor-content {
+  flex: 1;
   overflow-y: auto;
+  padding: 24px;
 }
 
 .preview-area {

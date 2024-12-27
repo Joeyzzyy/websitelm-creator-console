@@ -2,131 +2,136 @@
   <div class="section-wrapper">
     <!-- 编辑区域 -->
     <div class="editor-area">
-      <a-row :gutter="24">
-        <!-- 左侧表格内容 -->
-        <a-col :span="12">
-          <div style="margin-bottom: 12px; color: #666;">
-            Table Content Area - Maximum 4 items allowed
-          </div>
-          <div v-for="(item, index) in localSection.leftContent" :key="index">
+      <div class="editor-header">
+        <h2 class="component-title">Product Benefits With Table</h2>
+      </div>
+      <div class="editor-content">
+        <a-row :gutter="24">
+          <!-- 左侧表格内容 -->
+          <a-col :span="12">
+            <div style="margin-bottom: 12px; color: #666;">
+              Table Content Area - Maximum 4 items allowed
+            </div>
+            <div v-for="(item, index) in localSection.leftContent" :key="index">
+              <a-form layout="vertical">
+                <a-form-item>
+                  <div class="flex justify-between items-center mb-2">
+                    <span>Item {{ index + 1 }}</span>
+                    <a-button 
+                      v-if="!disabled" 
+                      type="text" 
+                      class="delete-btn" 
+                      @click="removeLeftItem(index)"
+                    >
+                      <template #icon>
+                        <delete-outlined />
+                      </template>
+                    </a-button>
+                  </div>
+                  <div class="input-with-tag">
+                    <span class="html-tag">{{ tags.icon }}</span>
+                    <a-input
+                      v-model:value="item.icon"
+                      :disabled="disabled"
+                      placeholder="Icon"
+                      @change="handleChange"
+                    />
+                  </div>
+                  <div class="input-with-tag">
+                    <span class="html-tag">{{ tags.contentTitle }}</span>
+                    <a-input
+                      v-model:value="item.contentTitle"
+                      :disabled="disabled"
+                      placeholder="Title"
+                      @change="handleChange"
+                    />
+                  </div>
+                  <div class="input-with-tag">
+                    <span class="html-tag">{{ tags.content }}</span>
+                    <a-textarea
+                      v-model:value="item.content"
+                      :disabled="disabled"
+                      :rows="3"
+                      placeholder="Content"
+                      @change="handleChange"
+                    />
+                  </div>
+                </a-form-item>
+              </a-form>
+            </div>
+            
+            <a-button 
+              v-if="!disabled && localSection.leftContent.length < 4" 
+              type="dashed" 
+              block 
+              class="add-item-btn"
+              @click="addLeftItem"
+            >
+              Add Item
+            </a-button>
+          </a-col>
+    
+          <!-- 右侧标题内容 -->
+          <a-col :span="12">
             <a-form layout="vertical">
-              <a-form-item>
-                <div class="flex justify-between items-center mb-2">
-                  <span>Item {{ index + 1 }}</span>
-                  <a-button 
-                    v-if="!disabled" 
-                    type="text" 
-                    class="delete-btn" 
-                    @click="removeLeftItem(index)"
-                  >
-                    <template #icon>
-                      <delete-outlined />
-                    </template>
-                  </a-button>
-                </div>
+              <a-form-item label="Icon">
                 <div class="input-with-tag">
                   <span class="html-tag">{{ tags.icon }}</span>
                   <a-input
-                    v-model:value="item.icon"
+                    v-model:value="localSection.rightContent.icon"
                     :disabled="disabled"
-                    placeholder="Icon"
                     @change="handleChange"
                   />
                 </div>
+              </a-form-item>
+    
+              <a-form-item label="Title">
                 <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.contentTitle }}</span>
+                  <span class="html-tag">{{ tags.title }}</span>
                   <a-input
-                    v-model:value="item.contentTitle"
+                    v-model:value="localSection.rightContent.title"
                     :disabled="disabled"
-                    placeholder="Title"
                     @change="handleChange"
                   />
                 </div>
+              </a-form-item>
+    
+              <a-form-item label="Subtitle">
                 <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.content }}</span>
-                  <a-textarea
-                    v-model:value="item.content"
+                  <span class="html-tag">{{ tags.subTitle }}</span>
+                  <a-input
+                    v-model:value="localSection.rightContent.subTitle"
                     :disabled="disabled"
-                    :rows="3"
-                    placeholder="Content"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+    
+              <a-form-item label="Button Text">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.buttonText }}</span>
+                  <a-input
+                    v-model:value="localSection.rightContent.buttonText"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+    
+              <a-form-item label="Button Link">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.buttonLink }}</span>
+                  <a-input
+                    v-model:value="localSection.rightContent.buttonLink"
+                    :disabled="disabled"
                     @change="handleChange"
                   />
                 </div>
               </a-form-item>
             </a-form>
-          </div>
-          
-          <a-button 
-            v-if="!disabled && localSection.leftContent.length < 4" 
-            type="dashed" 
-            block 
-            class="add-item-btn"
-            @click="addLeftItem"
-          >
-            Add Item
-          </a-button>
-        </a-col>
-  
-        <!-- 右侧标题内容 -->
-        <a-col :span="12">
-          <a-form layout="vertical">
-            <a-form-item label="Icon">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.icon }}</span>
-                <a-input
-                  v-model:value="localSection.rightContent.icon"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-  
-            <a-form-item label="Title">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.title }}</span>
-                <a-input
-                  v-model:value="localSection.rightContent.title"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-  
-            <a-form-item label="Subtitle">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.subTitle }}</span>
-                <a-input
-                  v-model:value="localSection.rightContent.subTitle"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-  
-            <a-form-item label="Button Text">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.buttonText }}</span>
-                <a-input
-                  v-model:value="localSection.rightContent.buttonText"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-  
-            <a-form-item label="Button Link">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.buttonLink }}</span>
-                <a-input
-                  v-model:value="localSection.rightContent.buttonLink"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-          </a-form>
-        </a-col>
-      </a-row>
+          </a-col>
+        </a-row>
+      </div>
     </div>
 
     <!-- 预览区域 -->
@@ -338,16 +343,42 @@ export default {
 
 .editor-area {
   background: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
   border-radius: 8px;
+  padding: 24px;
+}
+
+.editor-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 10;
+}
+
+.component-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.editor-content {
+  flex: 1;
+  overflow-y: auto;
   padding: 24px;
 }
 
 .preview-area {
   background: #f8fafc;
+  min-width: 768px;
   border-radius: 8px;
   padding: 24px;
-  min-width: 768px;
-  overflow-x: auto;
+  height: fit-content;
 }
 
 .preview-header {
@@ -359,10 +390,12 @@ export default {
 }
 
 .preview-content {
-  border-radius: 8px;
-  overflow: hidden;
   background: white;
-  min-height: 500px;
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .content-wrapper {

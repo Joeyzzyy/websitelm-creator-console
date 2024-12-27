@@ -1,127 +1,133 @@
 <template>
   <div class="section-wrapper">
-    <!-- 编辑区域 -->
     <div class="editor-area">
-      <!-- 顶部内容 -->
-      <div class="top-content">
-        <h3 class="section-title">{{ localSection.title }}</h3>
+      <div class="editor-header">
+        <h2 class="component-title">Key Results With Text Block</h2>
       </div>
-
-      <!-- 左侧指标部分 -->
-      <div class="left-content">
-        <a-form layout="vertical">
-          <div v-for="(item, index) in localSection.leftContent" :key="index">
-            <a-form-item :label="`Result ${index + 1}`">
-              <div class="display-switch">
-                <span class="switch-label">Display Or Not:</span>
-                <a-switch
-                  v-model:checked="item.display"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-              
-              <div class="input-with-tag" v-show="item.display">
-                <span class="html-tag">{{ tags.percentage }}</span>
-                <a-input
-                  v-model:value="item.percentage"
-                  :disabled="disabled"
-                  placeholder="Achievement percentage"
-                  @change="handleChange"
-                />
-              </div>
-              
-              <div class="input-with-tag" v-show="item.display">
-                <span class="html-tag">{{ tags.description }}</span>
-                <a-textarea
-                  v-model:value="item.description"
-                  :disabled="disabled"
-                  :rows="4"
-                  placeholder="Metric description"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-          </div>
-        </a-form>
-      </div>
-
-      <!-- 右侧内容部分 -->
-      <div class="right-content">
-        <div class="content-header-with-button">
-          <span>Feature Sections</span>
-          <a-button 
-            v-if="!disabled"
-            type="primary" 
-            class="add-content-btn"
-            @click="addContent"
-          >
-            Add Feature Section
-          </a-button>
+      <div class="editor-content">
+        <!-- 顶部内容 -->
+        <div class="top-content">
+          <h3 class="section-title">{{ localSection.title }}</h3>
         </div>
 
-        <a-row :gutter="24">
-          <a-col 
-            v-for="(item, index) in localSection.rightContent" 
-            :key="index"
-            :span="24"
-          >
-            <div class="content-item">
-              <div class="content-header">
-                <span>Feature Section {{ index + 1 }}</span>
-                <a-button 
-                  v-if="!disabled"
-                  type="text"
-                  danger
-                  class="delete-btn"
-                  @click="removeContent(index)"
-                >
-                  <DeleteOutlined />
-                </a-button>
-              </div>
-
-              <a-form layout="vertical">
-                <a-form-item label="Content Title">
-                  <div class="input-with-tag">
-                    <span class="html-tag">{{ tags.contentTitle }}</span>
-                    <a-input
-                      v-model:value="item.contentTitle"
-                      :disabled="disabled"
-                      @change="handleChange"
-                    />
-                  </div>
-                </a-form-item>
-
-                <a-form-item label="Content Text">
-                  <div class="input-with-tag">
-                    <span class="html-tag">{{ tags.contentText }}</span>
-                    <a-textarea
-                      v-model:value="item.contentText"
-                      :disabled="disabled"
-                      :rows="6"
-                      @change="handleChange"
-                    />
-                  </div>
-                </a-form-item>
-              </a-form>
+        <!-- 左侧指标部分 -->
+        <div class="left-content">
+          <a-form layout="vertical">
+            <div v-for="(item, index) in localSection.leftContent" :key="index">
+              <a-form-item :label="`Result ${index + 1}`">
+                <div class="display-switch">
+                  <span class="switch-label">Display Or Not:</span>
+                  <a-switch
+                    v-model:checked="item.display"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+                
+                <div class="input-with-tag" v-show="item.display">
+                  <span class="html-tag">{{ tags.percentage }}</span>
+                  <a-input
+                    v-model:value="item.percentage"
+                    :disabled="disabled"
+                    placeholder="Achievement percentage"
+                    @change="handleChange"
+                  />
+                </div>
+                
+                <div class="input-with-tag" v-show="item.display">
+                  <span class="html-tag">{{ tags.description }}</span>
+                  <a-textarea
+                    v-model:value="item.description"
+                    :disabled="disabled"
+                    :rows="4"
+                    placeholder="Metric description"
+                    @change="handleChange"
+                    :style="{ minHeight: '60px' }"
+                  />
+                </div>
+              </a-form-item>
             </div>
-          </a-col>
-        </a-row>
-      </div>
+          </a-form>
+        </div>
 
-      <!-- 链接输入弹窗 -->
-      <a-modal
-        v-model:visible="linkModalVisible"
-        title="Add Link"
-        @ok="handleAddLink"
-        @cancel="handleCancelLink"
-      >
-        <p class="selected-text-preview">Selected Text: {{ selectedText }}</p>
-        <a-input 
-          v-model:value="linkUrl"
-          placeholder="Please enter URL"
-        />
-      </a-modal>
+        <!-- 右侧内容部分 -->
+        <div class="right-content">
+          <div class="content-header-with-button">
+            <span>Feature Sections</span>
+            <a-button 
+              v-if="!disabled"
+              type="primary" 
+              class="add-content-btn"
+              @click="addContent"
+            >
+              Add Feature Section
+            </a-button>
+          </div>
+
+          <a-row :gutter="24">
+            <a-col 
+              v-for="(item, index) in localSection.rightContent" 
+              :key="index"
+              :span="24"
+            >
+              <div class="content-item">
+                <div class="content-header">
+                  <span>Feature Section {{ index + 1 }}</span>
+                  <a-button 
+                    v-if="!disabled"
+                    type="text"
+                    danger
+                    class="delete-btn"
+                    @click="removeContent(index)"
+                  >
+                    <DeleteOutlined />
+                  </a-button>
+                </div>
+
+                <a-form layout="vertical">
+                  <a-form-item label="Content Title">
+                    <div class="input-with-tag">
+                      <span class="html-tag">{{ tags.contentTitle }}</span>
+                      <a-input
+                        v-model:value="item.contentTitle"
+                        :disabled="disabled"
+                        @change="handleChange"
+                      />
+                    </div>
+                  </a-form-item>
+
+                  <a-form-item label="Content Text">
+                    <div class="input-with-tag">
+                      <span class="html-tag">{{ tags.contentText }}</span>
+                      <a-textarea
+                        v-model:value="item.contentText"
+                        :disabled="disabled"
+                        :rows="6"
+                        @change="handleChange"
+                        :style="{ minHeight: '240px' }"
+                      />
+                    </div>
+                  </a-form-item>
+                </a-form>
+              </div>
+            </a-col>
+          </a-row>
+        </div>
+
+        <!-- 链接输入弹窗 -->
+        <a-modal
+          v-model:visible="linkModalVisible"
+          title="Add Link"
+          @ok="handleAddLink"
+          @cancel="handleCancelLink"
+        >
+          <p class="selected-text-preview">Selected Text: {{ selectedText }}</p>
+          <a-input 
+            v-model:value="linkUrl"
+            placeholder="Please enter URL"
+          />
+        </a-modal>
+      </div>
     </div>
 
     <!-- 预览区域 -->
@@ -401,10 +407,35 @@ export default {
 }
 
 .editor-area {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  max-height: 1200px;
+  position: relative;
   border-radius: 8px;
   padding: 24px;
-  height: 800px;
+}
+
+.editor-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 10;
+}
+
+.component-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.editor-content {
+  flex: 1;
   overflow-y: auto;
+  padding: 24px;
 }
 
 .preview-area {

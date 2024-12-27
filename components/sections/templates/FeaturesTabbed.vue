@@ -2,120 +2,125 @@
     <div class="section-wrapper">
       <!-- 编辑区域 -->
       <div class="editor-area">
-        <a-form layout="vertical">
-          <a-form-item label="Title">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.title }}</span>
-              <a-input
-                v-model:value="localSection.title"
-                :disabled="disabled"
-                @change="handleChange"
-              />
-            </div>
-          </a-form-item>
-  
-          <a-form-item label="Description">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.description }}</span>
-              <a-textarea
-                v-model:value="localSection.description"
-                :disabled="disabled"
-                @change="handleChange"
-                :style="{ minHeight: '120px' }"
-              />
-            </div>
-          </a-form-item>
-  
-          <!-- 标签页内容编辑 -->
-          <div class="tabs-editor">
-            <div class="tabs-header">
-              <h3>Tabs Content</h3>
-              <a-button type="primary" @click="addTab" :disabled="disabled">
-                Add Tab
-              </a-button>
-            </div>
-            
-            <div v-for="(tab, index) in localSection.bottomContent" :key="index" class="tab-item">
-              <div class="tab-header">
-                <h4>Tab {{ index + 1 }}</h4>
-                <a-button 
-                  type="text" 
-                  shape="circle"
+        <div class="editor-header">
+          <h2 class="component-title">Features Tabbed</h2>
+        </div>
+        <div class="editor-content">
+          <a-form layout="vertical">
+            <a-form-item label="Title">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.title }}</span>
+                <a-input
+                  v-model:value="localSection.title"
                   :disabled="disabled"
-                  @click="removeTab(index)"
-                >
-                  <template #icon>
-                    <delete-outlined />
-                  </template>
-                </a-button>
+                  @change="handleChange"
+                />
               </div>
+            </a-form-item>
   
-              <a-form-item label="Tab Name">
-                <a-input
-                  v-model:value="tab.tabName"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </a-form-item>
-  
-              <a-form-item label="Title">
-                <a-input
-                  v-model:value="tab.title"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </a-form-item>
-  
-              <a-form-item label="Description">
+            <a-form-item label="Description">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.description }}</span>
                 <a-textarea
-                  v-model:value="tab.description"
+                  v-model:value="localSection.description"
                   :disabled="disabled"
                   @change="handleChange"
                   :style="{ minHeight: '120px' }"
                 />
-              </a-form-item>
-
-              <a-form-item label="Button Text">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.buttonText }}</span>
+              </div>
+            </a-form-item>
+  
+            <!-- 标签页内容编辑 -->
+            <div class="tabs-editor">
+              <div class="tabs-header">
+                <h3>Tabs Content</h3>
+                <a-button type="primary" @click="addTab" :disabled="disabled">
+                  Add Tab
+                </a-button>
+              </div>
+              
+              <div v-for="(tab, index) in localSection.bottomContent" :key="index" class="tab-item">
+                <div class="tab-header">
+                  <h4>Tab {{ index + 1 }}</h4>
+                  <a-button 
+                    type="text" 
+                    shape="circle"
+                    :disabled="disabled"
+                    @click="removeTab(index)"
+                  >
+                    <template #icon>
+                      <delete-outlined />
+                    </template>
+                  </a-button>
+                </div>
+  
+                <a-form-item label="Tab Name">
                   <a-input
-                    v-model:value="tab.buttonText"
+                    v-model:value="tab.tabName"
                     :disabled="disabled"
                     @change="handleChange"
                   />
-                </div>
-              </a-form-item>
+                </a-form-item>
   
-              <a-form-item label="Image URL">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.imageUrl }}</span>
-                  <div class="image-input-wrapper">
+                <a-form-item label="Title">
+                  <a-input
+                    v-model:value="tab.title"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </a-form-item>
+  
+                <a-form-item label="Description">
+                  <a-textarea
+                    v-model:value="tab.description"
+                    :disabled="disabled"
+                    @change="handleChange"
+                    :style="{ minHeight: '120px' }"
+                  />
+                </a-form-item>
+
+                <a-form-item label="Button Text">
+                  <div class="input-with-tag">
+                    <span class="html-tag">{{ tags.buttonText }}</span>
                     <a-input
-                      v-model:value="tab.imageUrl"
+                      v-model:value="tab.buttonText"
                       :disabled="disabled"
                       @change="handleChange"
                     />
-                    <a-button 
-                      type="primary"
-                      class="change-image-btn"
-                      @click="openImageLibrary(index)"
-                    >
-                      Change
-                    </a-button>
                   </div>
-                </div>
-              </a-form-item>
+                </a-form-item>
   
-              <a-form-item label="Image Alt">
-                <a-input
-                  v-model:value="tab.imageAlt"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </a-form-item>
+                <a-form-item label="Image URL">
+                  <div class="input-with-tag">
+                    <span class="html-tag">{{ tags.imageUrl }}</span>
+                    <div class="image-input-wrapper">
+                      <a-input
+                        v-model:value="tab.imageUrl"
+                        :disabled="disabled"
+                        @change="handleChange"
+                      />
+                      <a-button 
+                        type="primary"
+                        class="change-image-btn"
+                        @click="openImageLibrary(index)"
+                      >
+                        Change
+                      </a-button>
+                    </div>
+                  </div>
+                </a-form-item>
+  
+                <a-form-item label="Image Alt">
+                  <a-input
+                    v-model:value="tab.imageAlt"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </a-form-item>
+              </div>
             </div>
-          </div>
-        </a-form>
+          </a-form>
+        </div>
       </div>
   
       <!-- 预览区域 -->
@@ -285,8 +290,34 @@
   /* ===== 表单编辑区域样式 ===== */
   .editor-area {
     background: white;
-    max-height: 600px;
+    display: flex;
+    flex-direction: column;
+    max-height: 1000px;
+    position: relative;
+    border-radius: 8px;
+    padding: 24px;
+  }
+  
+  .editor-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    z-index: 10;
+  }
+  
+  .component-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+  
+  .editor-content {
+    flex: 1;
     overflow-y: auto;
+    padding: 24px;
   }
   
   /* 表单输入框样式 */
@@ -318,9 +349,9 @@
   .preview-area {
     background: #f8fafc;
     min-width: 768px;
-    overflow-x: auto;
-    display: flex;
-    flex-direction: column;
+    border-radius: 8px;
+    padding: 24px;
+    height: fit-content;
   }
   
   .preview-header {
@@ -337,7 +368,6 @@
   .preview-content {
     background: white;
     border-radius: 8px;
-    flex: 1;
     padding: 24px;
     display: flex;
     align-items: center;

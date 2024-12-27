@@ -1,130 +1,134 @@
 <template>
   <div class="section-wrapper">
-    <!-- 编辑区域 -->
     <div class="editor-area">
-      <a-form layout="vertical">
-        <!-- 顶部内容 -->
-        <div class="content-section">
-          <a-form-item label="Title">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.title }}</span>
-              <a-input
-                v-model:value="localSection.topContent.title"
-                :disabled="disabled"
-                @change="handleChange"
-              />
-            </div>
-          </a-form-item>
-          
-          <a-form-item label="Description">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.topDescription }}</span>
-              <a-textarea
-                v-model:value="localSection.topContent.description"
-                :disabled="disabled"
-                @change="handleChange"
-                :rows="2"
-                :style="{ minHeight: '120px' }"
-              />
-            </div>
-          </a-form-item>
-        </div>
-
-        <!-- 底部内容 -->
-        <div class="content-section">
-          <a-form-item label="Section Title">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.topTitle }}</span>
-              <a-input
-                v-model:value="localSection.bottomContent.title"
-                :disabled="disabled"
-                @change="handleChange"
-              />
-            </div>
-          </a-form-item>
-
-          <!-- 关键优势列表 -->
-          <div class="benefits-list">
-            <div v-for="(item, index) in localSection.bottomContent.content" :key="index" class="benefit-item">
-              <a-form-item :label="`Benefit ${index + 1} Title`">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.contentTitle }}</span>
-                  <a-input
-                    v-model:value="item.title"
-                    :disabled="disabled"
-                    @change="handleChange"
-                  />
-                </div>
-              </a-form-item>
-              
-              <a-form-item :label="`Benefit ${index + 1} Description`">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.contentDescription }}</span>
-                  <a-textarea
-                    v-model:value="item.description"
-                    :disabled="disabled"
-                    @change="handleChange"
-                    :rows="4"
-                    :style="{ minHeight: '120px' }"
-                  />
-                </div>
-              </a-form-item>
-            </div>
+      <div class="editor-header">
+        <h2 class="component-title">Call To Action Complex</h2>
+      </div>
+      <div class="editor-content">
+        <a-form layout="vertical">
+          <!-- 顶部内容 -->
+          <div class="content-section">
+            <a-form-item label="Title">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.title }}</span>
+                <a-input
+                  v-model:value="localSection.topContent.title"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
+            
+            <a-form-item label="Des cription">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.topDescription }}</span>
+                <a-textarea
+                  v-model:value="localSection.topContent.description"
+                  :disabled="disabled"
+                  @change="handleChange"
+                  :rows="2"
+                  :style="{ minHeight: '120px' }"
+                />
+              </div>
+            </a-form-item>
           </div>
 
-          <a-form-item label="Call to Action Top">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.callToActionEngagementTop }}</span>
-              <a-textarea
-                v-model:value="localSection.bottomContent.callToActionEngagementTop"
-                :disabled="disabled"
-                @change="handleChange"
-                :rows="2"
-                :style="{ minHeight: '120px' }"
-              />
-            </div>
-          </a-form-item>
+          <!-- 底部内容 -->
+          <div class="content-section">
+            <a-form-item label="Section Title">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.topTitle }}</span>
+                <a-input
+                  v-model:value="localSection.bottomContent.title"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
 
-          <a-form-item label="Call to Action Bottom">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.callToActionEngagementBottom }}</span>
-              <a-textarea
-                v-model:value="localSection.bottomContent.callToActionEngagementBottom"
-                :disabled="disabled"
-                @change="handleChange"
-                :rows="2"
-                :style="{ minHeight: '120px' }"
-              />
+            <!-- 关键优势列表 -->
+            <div class="benefits-list">
+              <div v-for="(item, index) in localSection.bottomContent.content" :key="index" class="benefit-item">
+                <a-form-item :label="`Benefit ${index + 1} Title`">
+                  <div class="input-with-tag">
+                    <span class="html-tag">{{ tags.contentTitle }}</span>
+                    <a-input
+                      v-model:value="item.title"
+                      :disabled="disabled"
+                      @change="handleChange"
+                    />
+                  </div>
+                </a-form-item>
+                
+                <a-form-item :label="`Benefit ${index + 1} Description`">
+                  <div class="input-with-tag">
+                    <span class="html-tag">{{ tags.contentDescription }}</span>
+                    <a-textarea
+                      v-model:value="item.description"
+                      :disabled="disabled"
+                      @change="handleChange"
+                      :rows="4"
+                      :style="{ minHeight: '120px' }"
+                    />
+                  </div>
+                </a-form-item>
+              </div>
             </div>
-          </a-form-item>
-        </div>
 
-        <!-- 按钮设置 -->
-        <div class="content-section">
-          <h3 class="section-title">Buttons</h3>
-          <a-form-item label="Primary Button Text">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.buttonText }}</span>
-              <a-input
-                v-model:value="localSection.bottomContent.buttonText"
-                :disabled="disabled"
-                @change="handleChange"
-              />
-            </div>
-          </a-form-item>
+            <a-form-item label="Call to Action Top">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.callToActionEngagementTop }}</span>
+                <a-textarea
+                  v-model:value="localSection.bottomContent.callToActionEngagementTop"
+                  :disabled="disabled"
+                  @change="handleChange"
+                  :rows="2"
+                  :style="{ minHeight: '120px' }"
+                />
+              </div>
+            </a-form-item>
 
-          <a-form-item label="CTA Button Text">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.ctaButtonText }}</span>
-              <a-input
-                v-model:value="localSection.bottomContent.ctaButtonText"
-                :disabled="disabled"
-                @change="handleChange"
-              />
-            </div>
-          </a-form-item>
-        </div>
-      </a-form>
+            <a-form-item label="Call to Action Bottom">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.callToActionEngagementBottom }}</span>
+                <a-textarea
+                  v-model:value="localSection.bottomContent.callToActionEngagementBottom"
+                  :disabled="disabled"
+                  @change="handleChange"
+                  :rows="2"
+                  :style="{ minHeight: '120px' }"
+                />
+              </div>
+            </a-form-item>
+          </div>
+
+          <!-- 按钮设置 -->
+          <div class="content-section">
+            <h3 class="section-title">Buttons</h3>
+            <a-form-item label="Primary Button Text">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.buttonText }}</span>
+                <a-input
+                  v-model:value="localSection.bottomContent.buttonText"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
+
+            <a-form-item label="CTA Button Text">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.ctaButtonText }}</span>
+                <a-input
+                  v-model:value="localSection.bottomContent.ctaButtonText"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
+          </div>
+        </a-form>
+      </div>
     </div>
 
     <!-- 预览区域 -->
@@ -219,6 +223,32 @@ export default {
 /* 编辑区域样式 */
 .editor-area {
   background: white;
+  display: flex;
+  flex-direction: column;
+  max-height: 1000px;
+  position: relative;
+}
+
+.editor-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 10;
+}
+
+.component-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.editor-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
 }
 
 /* 预览区域样式 */

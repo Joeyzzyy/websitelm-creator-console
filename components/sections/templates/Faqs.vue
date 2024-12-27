@@ -1,55 +1,59 @@
 <template>
   <div class="section-wrapper">
-    <!-- 编辑区域 -->
     <div class="editor-area">
-      <a-form layout="vertical">
-        <div v-for="(faq, index) in localSection.bottomContent" :key="index">
-          <a-form-item>
-            <div class="faq-header">
-              <span>FAQ #{{index + 1}}</span>
-              <a-button 
-                type="text" 
-                danger 
-                @click="removeFaq(index)"
-                :disabled="disabled"
-              >
-                <delete-outlined />
-              </a-button>
-            </div>
+      <div class="editor-header">
+        <h2 class="component-title">FAQs</h2>
+      </div>
+      <div class="editor-content">
+        <a-form layout="vertical">
+          <div v-for="(faq, index) in localSection.bottomContent" :key="index">
+            <a-form-item>
+              <div class="faq-header">
+                <span>FAQ #{{index + 1}}</span>
+                <a-button 
+                  type="text" 
+                  danger 
+                  @click="removeFaq(index)"
+                  :disabled="disabled"
+                >
+                  <delete-outlined />
+                </a-button>
+              </div>
 
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.question }}</span>
-              <a-input
-                v-model:value="faq.question"
-                :disabled="disabled"
-                placeholder="Question"
-                @change="handleChange"
-              />
-            </div>
-            
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.answer }}</span>
-              <a-textarea
-                v-model:value="faq.answer"
-                :disabled="disabled"
-                :rows="4"
-                placeholder="Answer"
-                @change="handleChange"
-                :style="{ minHeight: '120px' }"
-              />
-            </div>
-          </a-form-item>
-        </div>
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.question }}</span>
+                <a-input
+                  v-model:value="faq.question"
+                  :disabled="disabled"
+                  placeholder="Question"
+                  @change="handleChange"
+                />
+              </div>
+              
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.answer }}</span>
+                <a-textarea
+                  v-model:value="faq.answer"
+                  :disabled="disabled"
+                  :rows="4"
+                  placeholder="Answer"
+                  @change="handleChange"
+                  :style="{ minHeight: '120px' }"
+                />
+              </div>
+            </a-form-item>
+          </div>
 
-        <a-button 
-          type="primary" 
-          @click="addFaq" 
-          :disabled="disabled"
-          style="margin-top: 8px"
-        >
-          <plus-outlined /> Add New FAQ
-        </a-button>
-      </a-form>
+          <a-button 
+            type="primary" 
+            @click="addFaq" 
+            :disabled="disabled"
+            style="margin-top: 8px"
+          >
+            <plus-outlined /> Add New FAQ
+          </a-button>
+        </a-form>
+      </div>
     </div>
 
     <!-- 预览区域 -->
@@ -137,8 +141,32 @@ export default {
 
 .editor-area {
   background: white;
+  display: flex;
+  flex-direction: column;
   max-height: 1000px;
+  position: relative;
+}
+
+.editor-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 10;
+}
+
+.component-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.editor-content {
+  flex: 1;
   overflow-y: auto;
+  padding: 24px;
 }
 
 .preview-area {

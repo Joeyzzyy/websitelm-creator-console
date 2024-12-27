@@ -175,7 +175,18 @@
                           placeholder="Enter keywords"
                           :token-separators="[',']"
                           style="min-height: 80px;"
-                        />
+                          @paste="handleKeywordsPaste"
+                        >
+                          <template #suffixIcon>
+                            <PlusOutlined />
+                          </template>
+                          <template #clearIcon>
+                            <DeleteOutlined />
+                          </template>
+                          <a-select-option v-for="keyword in articleData.keywords" :key="keyword" :value="keyword">
+                            {{ keyword }}
+                          </a-select-option>
+                        </a-select>
                       </a-form-item>
                     </div>
 
@@ -788,7 +799,7 @@ export default defineComponent({
           // 编辑模式使用全量更新
           const updatePromises = [];
 
-          // 直接更新页面所有信息
+          // 直���更新页面所有信息
           const pageUpdateData = {
             title: articleData.value.title,
             subTitle: articleData.value.subTitle,
@@ -866,7 +877,7 @@ export default defineComponent({
       return stats;
     };
 
-    // 添加关键词统计的计算方法
+    // 添加关键词统计的计算��法
     const calculateKeywordStats = () => {
       if (!articleData.value.sections || articleData.value.sections.length === 0) {
         return;
@@ -1099,7 +1110,7 @@ export default defineComponent({
     // 添加新的响应式变量
     const isSideNavCollapsed = ref(false);
     
-    // 添加切换���边栏的方法
+    // 添加切换边栏的方法
     const toggleSideNav = () => {
       isSideNavCollapsed.value = !isSideNavCollapsed.value;
     };
@@ -1249,6 +1260,24 @@ export default defineComponent({
       previewModal.visible = false;
     };
 
+    // 添加处理粘贴事件的方法
+    const handleKeywordsPaste = (event) => {
+      event.preventDefault();
+      const pastedText = event.clipboardData.getData('text');
+      const keywords = pastedText
+        .split(',')
+        .map(keyword => keyword.trim())
+        .filter(keyword => keyword);
+      
+      // 更新关键词数组，确保不重复
+      articleData.value.keywords = [
+        ...new Set([
+          ...(articleData.value.keywords || []),
+          ...keywords
+        ])
+      ];
+    };
+
     return {
       loading,
       saving,
@@ -1296,7 +1325,8 @@ export default defineComponent({
       showComponentPreview,
       handlePreviewCancel,
       handlePreviewAdd,
-      themeConfig
+      themeConfig,
+      handleKeywordsPaste
     };
   }
 });
@@ -1644,7 +1674,7 @@ export default defineComponent({
 
 @media screen and (max-width: 1024px) {
   .article-editor {
-    min-width: 900px; /* 设置较小屏���下的最小宽度 */
+    min-width: 900px; /* 设置较小屏下的最小宽度 */
   }
   
   .editor-content {
@@ -2239,7 +2269,7 @@ export default defineComponent({
   background: #d1d5db;
 }
 
-/* 添加预览气泡相关样式 */
+/* 添加预览气泡相��样式 */
 :deep(.component-preview-tooltip) {
   max-width: 400px;
   padding: 0;
@@ -2373,5 +2403,45 @@ export default defineComponent({
   overflow-y: auto;
   padding: 48px 24px;
   margin-bottom: 24px; /* 添加底部间距 */
+}
+
+/* Keywords 标签样式优化 */
+:deep(.ant-select-multiple .ant-select-selection-item) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  margin: 2px;
+  background: #f0f9ff;
+  border-color: #38bdf8;
+  border-radius: 4px;
+  color: #0284c7;
+  font-size: 13px;
+  line-height: 22px;
+  height: 24px;
+}
+
+:deep(.ant-select-multiple .ant-select-selection-item-remove) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  color: #0284c7;
+  font-size: 12px;
+  height: 16px;
+  width: 16px;
+  line-height: 1;
+}
+
+:deep(.ant-select-multiple .ant-select-selection-item-remove:hover) {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 50%;
+}
+
+:deep(.ant-select-multiple .ant-select-selection-item-content) {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
 }
 </style>

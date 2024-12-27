@@ -2,122 +2,127 @@
   <div class="section-wrapper">
     <!-- 编辑区域 -->
     <div class="editor-area">
-      <a-form layout="vertical">
-        <a-form-item label="Section Title">
-          <div class="input-with-tag">
-            <span class="html-tag">{{ tags.title }}</span>
-            <a-input
-              v-model:value="localSection.title"
-              :disabled="disabled"
-              @change="handleChange"
-            />
-          </div>
-        </a-form-item>
-
-        <!-- 评论卡片列表 -->
-        <div v-for="(review, index) in localSection.bottomContent" :key="index">
-          <div class="review-card">
-            <div class="review-card-header">
-              <h3>Review Card #{{ index + 1 }}</h3>
-              <a-button 
-                type="text" 
-                danger 
-                class="delete-button"
-                @click="removeReview(index)"
+      <div class="editor-header">
+        <h2 class="component-title">User Reviews With Moving Cards</h2>
+      </div>
+      <div class="editor-content">
+        <a-form layout="vertical">
+          <a-form-item label="Section Title">
+            <div class="input-with-tag">
+              <span class="html-tag">{{ tags.title }}</span>
+              <a-input
+                v-model:value="localSection.title"
                 :disabled="disabled"
-              >
-                <DeleteOutlined />
-              </a-button>
+                @change="handleChange"
+              />
             </div>
+          </a-form-item>
 
-            <a-form-item label="Name">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.name }}</span>
-                <a-input
-                  v-model:value="review.name"
+          <!-- 评论卡片列表 -->
+          <div v-for="(review, index) in localSection.bottomContent" :key="index">
+            <div class="review-card">
+              <div class="review-card-header">
+                <h3>Review Card #{{ index + 1 }}</h3>
+                <a-button 
+                  type="text" 
+                  danger 
+                  class="delete-button"
+                  @click="removeReview(index)"
                   :disabled="disabled"
-                  @change="handleChange"
-                />
+                >
+                  <DeleteOutlined />
+                </a-button>
               </div>
-            </a-form-item>
 
-            <a-form-item label="Position">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.position }}</span>
-                <a-input
-                  v-model:value="review.position"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-
-            <a-form-item label="Title">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.reviewTitle }}</span>
-                <a-input
-                  v-model:value="review.title"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-
-            <a-form-item label="Content">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.content }}</span>
-                <a-textarea
-                  v-model:value="review.content"
-                  :disabled="disabled"
-                  @change="handleChange"
-                  :rows="3"
-                  :style="{ minHeight: '120px' }"
-                />
-              </div>
-            </a-form-item>
-
-            <a-form-item label="Avatar URL">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.avatarUrl }}</span>
-                <div class="image-input-group">
+              <a-form-item label="Name">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.name }}</span>
                   <a-input
-                    v-model:value="review.avatarUrl"
+                    v-model:value="review.name"
                     :disabled="disabled"
                     @change="handleChange"
                   />
-                  <a-button 
-                    type="primary"
-                    class="change-image-btn"
-                    @click="openImageLibrary(index)"
-                  >
-                    Change
-                  </a-button>
                 </div>
-              </div>
-            </a-form-item>
+              </a-form-item>
 
-            <a-form-item label="Avatar Alt Text">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.avatarAlt }}</span>
-                <a-input
-                  v-model:value="review.avatarAlt"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
+              <a-form-item label="Position">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.position }}</span>
+                  <a-input
+                    v-model:value="review.position"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+
+              <a-form-item label="Title">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.reviewTitle }}</span>
+                  <a-input
+                    v-model:value="review.title"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+
+              <a-form-item label="Content">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.content }}</span>
+                  <a-textarea
+                    v-model:value="review.content"
+                    :disabled="disabled"
+                    @change="handleChange"
+                    :rows="3"
+                    :style="{ minHeight: '120px' }"
+                  />
+                </div>
+              </a-form-item>
+
+              <a-form-item label="Avatar URL">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.avatarUrl }}</span>
+                  <div class="image-input-group">
+                    <a-input
+                      v-model:value="review.avatarUrl"
+                      :disabled="disabled"
+                      @change="handleChange"
+                    />
+                    <a-button 
+                      type="primary"
+                      class="change-image-btn"
+                      @click="openImageLibrary(index)"
+                    >
+                      Change
+                    </a-button>
+                  </div>
+                </div>
+              </a-form-item>
+
+              <a-form-item label="Avatar Alt Text">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.avatarAlt }}</span>
+                  <a-input
+                    v-model:value="review.avatarAlt"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+            </div>
           </div>
-        </div>
 
-        <a-button 
-          type="dashed" 
-          block 
-          @click="addNewReview" 
-          :disabled="disabled"
-        >
-          Add Review Card
-        </a-button>
-      </a-form>
+          <a-button 
+            type="dashed" 
+            block 
+            @click="addNewReview" 
+            :disabled="disabled"
+          >
+            Add Review Card
+          </a-button>
+        </a-form>
+      </div>
     </div>
 
     <!-- 预览区域 -->
@@ -243,11 +248,35 @@ export default {
 }
 
 .editor-area {
+  background: white;
+  display: flex;
+  flex-direction: column;
+  max-height: 1000px;
+  position: relative;
   border-radius: 8px;
   padding: 24px;
+}
+
+.editor-header {
+  position: sticky;
+  top: 0;
   background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 10;
+}
+
+.component-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.editor-content {
+  flex: 1;
   overflow-y: auto;
-  max-height: 800px;
+  padding: 24px;
 }
 
 .input-with-tag {

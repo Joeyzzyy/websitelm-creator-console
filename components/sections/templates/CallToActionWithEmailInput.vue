@@ -1,44 +1,49 @@
 <template>
     <div class="section-wrapper">
       <div class="editor-area">
-        <a-form layout="vertical">
-          <!-- 基本设置 -->
-          <div class="content-section">
-            <h3 class="section-title">Basic Settings</h3>
-            <a-form-item label="Title">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.title }}</span>
-                <a-input
-                  v-model:value="localSection.title"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-            
-            <a-form-item label="Input Placeholder">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.inputPlaceholder }}</span>
-                <a-input
-                  v-model:value="localSection.bottomContent.inputPlaceholder"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-            
-            <a-form-item label="Button Text">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.buttonText }}</span>
-                <a-input
-                  v-model:value="localSection.buttonText"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-          </div>
-        </a-form>
+        <div class="editor-header">
+          <h2 class="component-title">Call To Action With Email Input</h2>
+        </div>
+        <div class="editor-content">
+          <a-form layout="vertical">
+            <!-- 基本设置 -->
+            <div class="content-section">
+              <h3 class="section-title">Basic Settings</h3>
+              <a-form-item label="Title">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.title }}</span>
+                  <a-input
+                    v-model:value="localSection.title"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+              
+              <a-form-item label="Input Placeholder">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.inputPlaceholder }}</span>
+                  <a-input
+                    v-model:value="localSection.bottomContent.inputPlaceholder"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+              
+              <a-form-item label="Button Text">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.buttonText }}</span>
+                  <a-input
+                    v-model:value="localSection.buttonText"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+            </div>
+          </a-form>
+        </div>
       </div>
   
       <!-- 预览区域 -->
@@ -119,6 +124,32 @@
   
   .editor-area {
     background: white;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+  }
+  
+  .editor-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    z-index: 10;
+  }
+  
+  .component-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+  
+  .editor-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
   }
   
   .preview-area {

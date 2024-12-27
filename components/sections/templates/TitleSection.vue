@@ -2,57 +2,62 @@
   <div class="section-wrapper">
     <!-- 编辑区域 -->
     <div class="editor-area">
-      <a-form layout="vertical">
-        <a-form-item label="Title">
-          <div class="input-with-tag">
-            <span class="html-tag">{{ tags.title }}</span>
-            <a-input
-              v-model:value="localSection.title"
-              :disabled="disabled"
-              @change="handleChange"
-            />
-          </div>
-        </a-form-item>
-
-        <a-form-item label="Subtitle">
-          <div class="input-with-tag">
-            <span class="html-tag">{{ tags.subTitle }}</span>
-            <a-input
-              v-model:value="localSection.subTitle"
-              :disabled="disabled"
-              @change="handleChange"
-            />
-          </div>
-        </a-form-item>
-
-        <div class="bottom-content">
-          <a-form-item label="Author">
+      <div class="editor-header">
+        <h2 class="component-title">Title Section</h2>
+      </div>
+      <div class="editor-content">
+        <a-form layout="vertical">
+          <a-form-item label="Title">
             <div class="input-with-tag">
-              <span class="html-tag">{{ tags.author }}</span>
+              <span class="html-tag">{{ tags.title }}</span>
               <a-input
-                v-model:value="localSection.bottomContent.author"
+                v-model:value="localSection.title"
                 :disabled="disabled"
                 @change="handleChange"
               />
             </div>
           </a-form-item>
 
-          <a-form-item label="Publish Date">
+          <a-form-item label="Subtitle">
             <div class="input-with-tag">
-              <span class="html-tag">{{ tags.publishDate }}</span>
-              <a-date-picker
-                v-model:value="localSection.bottomContent.publishDate"
+              <span class="html-tag">{{ tags.subTitle }}</span>
+              <a-input
+                v-model:value="localSection.subTitle"
                 :disabled="disabled"
                 @change="handleChange"
-                format="YYYY-MM-DD"
-                :allow-clear="false"
-                style="width: 100%"
-                value-format="YYYY-MM-DD"
               />
             </div>
           </a-form-item>
-        </div>
-      </a-form>
+
+          <div class="bottom-content">
+            <a-form-item label="Author">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.author }}</span>
+                <a-input
+                  v-model:value="localSection.bottomContent.author"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
+
+            <a-form-item label="Publish Date">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.publishDate }}</span>
+                <a-date-picker
+                  v-model:value="localSection.bottomContent.publishDate"
+                  :disabled="disabled"
+                  @change="handleChange"
+                  format="YYYY-MM-DD"
+                  :allow-clear="false"
+                  style="width: 100%"
+                  value-format="YYYY-MM-DD"
+                />
+              </div>
+            </a-form-item>
+          </div>
+        </a-form>
+      </div>
     </div>
 
     <!-- 预览区域 -->
@@ -176,6 +181,34 @@ export default {
 /* ===== 表单编辑区域样式 ===== */
 .editor-area {
   background: white;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+.editor-header {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 10;
+}
+
+.component-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.editor-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
 }
 
 /* 表单输入框样式 */

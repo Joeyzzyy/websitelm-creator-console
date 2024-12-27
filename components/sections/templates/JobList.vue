@@ -2,95 +2,100 @@
     <div class="section-wrapper">
       <!-- 编辑区域 -->
       <div class="editor-area">
-        <a-form layout="vertical">
-          <!-- 顶部内容编辑 -->
-          <a-form-item label="Title">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.title }}</span>
-              <a-input
-                v-model:value="localSection.topContent.title"
-                :disabled="disabled"
-                @change="handleChange"
-              />
-            </div>
-          </a-form-item>
-  
-          <a-form-item label="Description">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.description }}</span>
-              <a-input
-                v-model:value="localSection.topContent.description"
-                :disabled="disabled"
-                @change="handleChange"
-              />
-            </div>
-          </a-form-item>
-  
-          <!-- 职位列表编辑 -->
-          <div class="jobs-editor">
-            <div class="jobs-header">
-              <h2>Job List</h2>
-              <a-button type="primary" @click="addJob">
-                <plus-outlined /> Add Job
-              </a-button>
-            </div>
-  
-            <div v-for="(job, index) in localSection.bottomContent" :key="index" class="job-item-editor">
-              <div class="job-header">
-                <h3>Job {{ index + 1 }}</h3>
-                <a-button type="text" danger @click="removeJob(index)">
-                  <delete-outlined />
-                </a-button>
-              </div>
-              
-              <a-form-item :label="`Position ${index + 1}`">
-                <a-input v-model:value="job.position" @change="handleChange" />
-              </a-form-item>
-              
-              <div class="job-details-grid">
-                <a-form-item label="Type">
-                  <a-input v-model:value="job.type" @change="handleChange" />
-                </a-form-item>
-                
-                <a-form-item label="Location">
-                  <a-input v-model:value="job.location" @change="handleChange" />
-                </a-form-item>
-                
-                <a-form-item label="Salary">
-                  <a-input v-model:value="job.salary" @change="handleChange" />
-                </a-form-item>
-              </div>
-  
-              <a-form-item label="Tags">
-                <a-select
-                  v-model:value="job.tags"
-                  mode="tags"
-                  style="width: 100%"
+        <div class="editor-header">
+          <h2 class="component-title">Job List</h2>
+        </div>
+        <div class="editor-content">
+          <a-form layout="vertical">
+            <!-- 顶部内容编辑 -->
+            <a-form-item label="Title">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.title }}</span>
+                <a-input
+                  v-model:value="localSection.topContent.title"
+                  :disabled="disabled"
                   @change="handleChange"
                 />
-              </a-form-item>
-  
-              <!-- 职责和要求编辑 -->
-              <div class="requirements-grid">
-                <a-form-item label="Responsibilities">
-                  <a-textarea
-                    v-model:value="job.responsibilities"
-                    :auto-size="{ minRows: 3 }"
-                    @change="handleChange"
-                  />
+              </div>
+            </a-form-item>
+    
+            <a-form-item label="Description">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.description }}</span>
+                <a-input
+                  v-model:value="localSection.topContent.description"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
+    
+            <!-- 职位列表编辑 -->
+            <div class="jobs-editor">
+              <div class="jobs-header">
+                <h2>Job List</h2>
+                <a-button type="primary" @click="addJob">
+                  <plus-outlined /> Add Job
+                </a-button>
+              </div>
+    
+              <div v-for="(job, index) in localSection.bottomContent" :key="index" class="job-item-editor">
+                <div class="job-header">
+                  <h3>Job {{ index + 1 }}</h3>
+                  <a-button type="text" danger @click="removeJob(index)">
+                    <delete-outlined />
+                  </a-button>
+                </div>
+                
+                <a-form-item :label="`Position ${index + 1}`">
+                  <a-input v-model:value="job.position" @change="handleChange" />
                 </a-form-item>
                 
-                <a-form-item label="Requirements">
-                  <a-textarea
-                    v-model:value="job.requirements"
-                    :auto-size="{ minRows: 3 }"
+                <div class="job-details-grid">
+                  <a-form-item label="Type">
+                    <a-input v-model:value="job.type" @change="handleChange" />
+                  </a-form-item>
+                  
+                  <a-form-item label="Location">
+                    <a-input v-model:value="job.location" @change="handleChange" />
+                  </a-form-item>
+                  
+                  <a-form-item label="Salary">
+                    <a-input v-model:value="job.salary" @change="handleChange" />
+                  </a-form-item>
+                </div>
+    
+                <a-form-item label="Tags">
+                  <a-select
+                    v-model:value="job.tags"
+                    mode="tags"
+                    style="width: 100%"
                     @change="handleChange"
                   />
                 </a-form-item>
+    
+                <!-- 职责和要求编辑 -->
+                <div class="requirements-grid">
+                  <a-form-item label="Responsibilities">
+                    <a-textarea
+                      v-model:value="job.responsibilities"
+                      :auto-size="{ minRows: 3 }"
+                      @change="handleChange"
+                    />
+                  </a-form-item>
+                  
+                  <a-form-item label="Requirements">
+                    <a-textarea
+                      v-model:value="job.requirements"
+                      :auto-size="{ minRows: 3 }"
+                      @change="handleChange"
+                    />
+                  </a-form-item>
+                </div>
               </div>
             </div>
-          </div>
-        </a-form>
+          </a-form>
+        </div>
       </div>
   
       <!-- 预览区域 -->
@@ -220,8 +225,32 @@
   /* ===== 表单编辑区域样式 ===== */
   .editor-area {
     background: white;
+    display: flex;
+    flex-direction: column;
     max-height: 1200px;
+    position: relative;
+  }
+  
+  .editor-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    z-index: 10;
+  }
+  
+  .component-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+  
+  .editor-content {
+    flex: 1;
     overflow-y: auto;
+    padding: 24px;
   }
   
   /* 表单输入框样式 */

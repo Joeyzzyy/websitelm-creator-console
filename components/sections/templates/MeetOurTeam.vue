@@ -2,74 +2,28 @@
     <div class="section-wrapper">
       <!-- 编辑区域 -->
       <div class="editor-area">
-        <a-form layout="vertical">
-          <!-- Top Content -->
-          <a-form-item label="Subtitle">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.subtitle }}</span>
-              <a-input
-                v-model:value="localSection.topContent.subtitle"
-                :disabled="disabled"
-                @change="handleChange"
-              />
-            </div>
-          </a-form-item>
-  
-          <a-form-item label="Title">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.title }}</span>
-              <a-input
-                v-model:value="localSection.topContent.title"
-                :disabled="disabled"
-                @change="handleChange"
-              />
-            </div>
-          </a-form-item>
-  
-          <a-form-item label="Description">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.description }}</span>
-              <a-textarea
-                v-model:value="localSection.topContent.description"
-                :disabled="disabled"
-                @change="handleChange"
-                :rows="3"
-              />
-            </div>
-          </a-form-item>
-  
-          <!-- Team Members -->
-          <div class="team-members-header">
-            <h2>Team Members</h2>
-            <a-button type="primary" @click="addTeamMember">
-              <plus-outlined /> Add Member
-            </a-button>
-          </div>
-  
-          <div v-for="(member, index) in localSection.bottomContent" :key="index" class="team-member">
-            <div class="team-member-header">
-              <h3>Team Member {{ index + 1 }}</h3>
-              <a-button type="text" danger @click="removeTeamMember(index)">
-                <delete-outlined />
-              </a-button>
-            </div>
-            
-            <a-form-item label="Name">
+        <div class="editor-header">
+          <h2 class="component-title">Meet Our Team</h2>
+        </div>
+        <div class="editor-content">
+          <a-form layout="vertical">
+            <!-- Top Content -->
+            <a-form-item label="Subtitle">
               <div class="input-with-tag">
-                <span class="html-tag">{{ tags.memberName }}</span>
+                <span class="html-tag">{{ tags.subtitle }}</span>
                 <a-input
-                  v-model:value="member.name"
+                  v-model:value="localSection.topContent.subtitle"
                   :disabled="disabled"
                   @change="handleChange"
                 />
               </div>
             </a-form-item>
   
-            <a-form-item label="Job Title">
+            <a-form-item label="Title">
               <div class="input-with-tag">
-                <span class="html-tag">{{ tags.memberTitle }}</span>
+                <span class="html-tag">{{ tags.title }}</span>
                 <a-input
-                  v-model:value="member.title"
+                  v-model:value="localSection.topContent.title"
                   :disabled="disabled"
                   @change="handleChange"
                 />
@@ -78,84 +32,136 @@
   
             <a-form-item label="Description">
               <div class="input-with-tag">
-                <span class="html-tag">{{ tags.memberDescription }}</span>
+                <span class="html-tag">{{ tags.description }}</span>
                 <a-textarea
-                  v-model:value="member.description"
+                  v-model:value="localSection.topContent.description"
                   :disabled="disabled"
                   @change="handleChange"
-                  :rows="2"
+                  :rows="3"
                 />
               </div>
             </a-form-item>
   
-            <!-- Social Links -->
-            <div class="social-links">
-              <div class="social-links-header">
-                <span>Social Links</span>
-                <a-button type="link" size="small" @click="addSocialLink(index)">
-                  <plus-outlined /> Add
-                </a-button>
-              </div>
-              
-              <div v-for="(social, socialIndex) in member.socials" :key="socialIndex" class="social-link-item">
-                <a-select
-                  v-model:value="social.platform"
-                  style="width: 120px"
-                  :disabled="disabled"
-                  @change="handleChange"
-                >
-                  <a-select-option v-for="platform in availablePlatforms" 
-                    :key="platform.value" 
-                    :value="platform.value"
-                  >
-                    {{ platform.label }}
-                  </a-select-option>
-                </a-select>
-                
-                <a-input
-                  v-model:value="social.url"
-                  :disabled="disabled"
-                  placeholder="input link"
-                  @change="handleChange"
-                />
-                
-                <a-button 
-                  type="text" 
-                  danger 
-                  @click="removeSocialLink(index, socialIndex)"
-                >
+            <!-- Team Members -->
+            <div class="team-members-header">
+              <h2>Team Members</h2>
+              <a-button type="primary" @click="addTeamMember">
+                <plus-outlined /> Add Member
+              </a-button>
+            </div>
+  
+            <div v-for="(member, index) in localSection.bottomContent" :key="index" class="team-member">
+              <div class="team-member-header">
+                <h3>Team Member {{ index + 1 }}</h3>
+                <a-button type="text" danger @click="removeTeamMember(index)">
                   <delete-outlined />
                 </a-button>
               </div>
-            </div>
-  
-            <!-- Avatar -->
-            <a-form-item label="Avatar">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.memberAvatar }}</span>
-                <div class="image-input-wrapper">
+              
+              <a-form-item label="Name">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.memberName }}</span>
                   <a-input
-                    v-model:value="member.avatarUrl"
+                    v-model:value="member.name"
                     :disabled="disabled"
-                    placeholder="Avatar URL"
                     @change="handleChange"
                   />
-                  <a-button 
-                    type="primary"
-                    class="change-image-btn"
-                    @click="openImageLibrary(index)"
+                </div>
+              </a-form-item>
+  
+              <a-form-item label="Job Title">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.memberTitle }}</span>
+                  <a-input
+                    v-model:value="member.title"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+  
+              <a-form-item label="Description">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.memberDescription }}</span>
+                  <a-textarea
+                    v-model:value="member.description"
+                    :disabled="disabled"
+                    @change="handleChange"
+                    :rows="2"
+                    :style="{ minHeight: '80px' }"
+                  />
+                </div>
+              </a-form-item>
+  
+              <!-- Social Links -->
+              <div class="social-links">
+                <div class="social-links-header">
+                  <span>Social Links</span>
+                  <a-button type="link" size="small" @click="addSocialLink(index)">
+                    <plus-outlined /> Add
+                  </a-button>
+                </div>
+                
+                <div v-for="(social, socialIndex) in member.socials" :key="socialIndex" class="social-link-item">
+                  <a-select
+                    v-model:value="social.platform"
+                    style="width: 120px"
+                    :disabled="disabled"
+                    @change="handleChange"
                   >
-                    Change
+                    <a-select-option v-for="platform in availablePlatforms" 
+                      :key="platform.value" 
+                      :value="platform.value"
+                    >
+                      {{ platform.label }}
+                    </a-select-option>
+                  </a-select>
+                  
+                  <a-input
+                    v-model:value="social.url"
+                    :disabled="disabled"
+                    placeholder="input link"
+                    @change="handleChange"
+                  />
+                  
+                  <a-button 
+                    type="text" 
+                    danger 
+                    @click="removeSocialLink(index, socialIndex)"
+                  >
+                    <delete-outlined />
                   </a-button>
                 </div>
               </div>
-            </a-form-item>
   
-            <div class="image-preview" v-if="member.avatarUrl">
-              <a-image :src="member.avatarUrl" :width="100" />
+              <!-- Avatar -->
+              <a-form-item label="Avatar">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.memberAvatar }}</span>
+                  <div class="image-input-wrapper">
+                    <a-input
+                      v-model:value="member.avatarUrl"
+                      :disabled="disabled"
+                      placeholder="Avatar URL"
+                      @change="handleChange"
+                    />
+                    <a-button 
+                      type="primary"
+                      class="change-image-btn"
+                      @click="openImageLibrary(index)"
+                    >
+                      Change
+                    </a-button>
+                  </div>
+                </div>
+              </a-form-item>
+  
+              <div class="image-preview" v-if="member.avatarUrl">
+                <a-image :src="member.avatarUrl" :width="100" />
+              </div>
             </div>
-          </div>
-        </a-form>
+          </a-form>
+        </div>
       </div>
   
       <!-- 预览区域 -->
@@ -356,8 +362,32 @@
   /* ===== 表单编辑区域样式 ===== */
   .editor-area {
     background: white;
+    display: flex;
+    flex-direction: column;
     max-height: 800px;
+    position: relative;
+  }
+  
+  .editor-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    z-index: 10;
+  }
+  
+  .component-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+  
+  .editor-content {
+    flex: 1;
     overflow-y: auto;
+    padding: 24px;
   }
   
   /* 表单输入框样式 */
