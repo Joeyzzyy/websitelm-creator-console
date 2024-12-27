@@ -141,13 +141,14 @@
           <div class="section-wrapper info-section">
             <div class="component-label">Page Information</div>
             <div class="basic-info-form">
-              <a-form layout="horizontal">
+              <a-form layout="vertical">
                 <div class="form-grid">
                   <!-- 将内容分为两列 -->
                   <div class="form-columns">
                     <!-- TDK 分组 - 左侧 -->
                     <div class="tdk-section">
                       <div class="tdk-label">TDK Information</div>
+                      
                       <!-- Title -->
                       <a-form-item label="Title" required>
                         <a-input
@@ -2443,5 +2444,48 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   line-height: 1;
+}
+
+/* 调整 form-item 样式 */
+:deep(.ant-form-item) {
+  margin-bottom: 16px;
+}
+
+:deep(.ant-form-vertical .ant-form-item-label) {
+  padding: 0 0 4px;
+}
+
+:deep(.ant-form-item-label > label) {
+  height: auto;
+  margin: 0;
+  color: #1f2937;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+:deep(.ant-form-item-required::before) {
+  color: #f43f5e !important;
+  margin-right: 4px;
+}
+
+/* 输入框样式保持不变 */
+:deep(.ant-input),
+:deep(.ant-select-selector) {
+  border-color: #e5e7eb;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+:deep(.ant-input:hover),
+:deep(.ant-select-selector:hover) {
+  border-color: #38BDF8;
+  background: #f0f9ff;
+}
+
+:deep(.ant-input:focus),
+:deep(.ant-select-focused .ant-select-selector) {
+  border-color: #38BDF8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+  background: #ffffff;
 }
 </style>
