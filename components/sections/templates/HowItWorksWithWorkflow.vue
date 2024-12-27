@@ -13,11 +13,20 @@
               <a-form-item label="Emoji">
                 <div class="input-with-tag">
                   <span class="html-tag">{{ tags.emoji }}</span>
-                  <a-input
-                    v-model:value="localSection.topContent.icon"
-                    :disabled="disabled"
-                    @change="handleChange"
-                  />
+                  <div class="emoji-input-wrapper">
+                    <a-input
+                      v-model:value="localSection.topContent.icon"
+                      :disabled="disabled"
+                      @change="handleChange"
+                    />
+                    <a-button
+                      v-if="!disabled"
+                      class="emoji-trigger"
+                      @click="(e) => showEmojiPicker(e)"
+                    >
+                      😊
+                    </a-button>
+                  </div>
                 </div>
               </a-form-item>
 
@@ -138,6 +147,21 @@
         />
       </div>
     </div>
+
+    <!-- 添加 Emoji Picker Modal -->
+    <a-modal
+      v-model:visible="emojiPickerVisible"
+      :footer="null"
+      :closable="false"
+      :width="350"
+      centered
+      class="emoji-picker-modal"
+      @cancel="closeEmojiPicker"
+    >
+      <EmojiPicker
+        @select="onEmojiSelect"
+      />
+    </a-modal>
   </div>
 </template>
 
@@ -146,12 +170,15 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import themeConfig from '../../../assets/config/themeConfig'
 import HowItWorksWithWorkflowPreview from './HowItWorksWithWorkflowPreview.vue'
+import EmojiPicker from 'vue3-emoji-picker'
+import 'vue3-emoji-picker/css'
 
 export default {
   name: 'HowItWorksWithWorkflow',
   extends: BaseSection,
   components: {
-    HowItWorksWithWorkflowPreview
+    HowItWorksWithWorkflowPreview,
+    EmojiPicker
   },
   data() {
     return {
@@ -182,7 +209,8 @@ export default {
           }
         ],
       },
-      styles: themeConfig.normal
+      styles: themeConfig.normal,
+      emojiPickerVisible: false
     }
   },
   created() {
@@ -231,6 +259,20 @@ export default {
       this.localSection.bottomContent.forEach((item, i) => {
         item.number = String(i + 1)
       })
+      this.handleChange()
+    },
+    showEmojiPicker(e) {
+      e.stopPropagation()
+      this.emojiPickerVisible = true
+    },
+    
+    closeEmojiPicker() {
+      this.emojiPickerVisible = false
+    },
+    
+    onEmojiSelect(emoji) {
+      this.localSection.topContent.icon = emoji.i
+      this.closeEmojiPicker()
       this.handleChange()
     }
   }
@@ -359,5 +401,34 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.emoji-input-wrapper {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.emoji-trigger {
+  padding: 0 8px;
+}
+
+:deep(.emoji-picker-modal) {
+  .ant-modal-content {
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .ant-modal-body {
+    padding: 0;
+  }
+}
+
+:deep(.v3-emoji-picker) {
+  --ep-color-bg: #ffffff;
+  --ep-color-border: #e4e7ea;
+  --ep-color-hover: #f7f9fa;
+  border: none;
+  box-shadow: none;
 }
 </style>

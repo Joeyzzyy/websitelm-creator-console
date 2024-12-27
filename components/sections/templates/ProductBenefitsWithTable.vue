@@ -30,12 +30,21 @@
                   </div>
                   <div class="input-with-tag">
                     <span class="html-tag">{{ tags.icon }}</span>
-                    <a-input
-                      v-model:value="item.icon"
-                      :disabled="disabled"
-                      placeholder="Icon"
-                      @change="handleChange"
-                    />
+                    <div class="emoji-input-wrapper">
+                      <a-input
+                        v-model:value="item.icon"
+                        :disabled="disabled"
+                        placeholder="Icon"
+                        @change="handleChange"
+                      />
+                      <a-button
+                        v-if="!disabled"
+                        class="emoji-trigger"
+                        @click="(e) => showEmojiPicker(e, index, 'left')"
+                      >
+                        😊
+                      </a-button>
+                    </div>
                   </div>
                   <div class="input-with-tag">
                     <span class="html-tag">{{ tags.contentTitle }}</span>
@@ -77,11 +86,20 @@
               <a-form-item label="Icon">
                 <div class="input-with-tag">
                   <span class="html-tag">{{ tags.icon }}</span>
-                  <a-input
-                    v-model:value="localSection.rightContent.icon"
-                    :disabled="disabled"
-                    @change="handleChange"
-                  />
+                  <div class="emoji-input-wrapper">
+                    <a-input
+                      v-model:value="localSection.rightContent.icon"
+                      :disabled="disabled"
+                      @change="handleChange"
+                    />
+                    <a-button
+                      v-if="!disabled"
+                      class="emoji-trigger"
+                      @click="(e) => showEmojiPicker(e, 0, 'right')"
+                    >
+                      😊
+                    </a-button>
+                  </div>
                 </div>
               </a-form-item>
     
@@ -147,6 +165,21 @@
         />
       </div>
     </div>
+
+    <!-- Emoji Picker Modal -->
+    <a-modal
+      v-model:visible="emojiPickerVisible"
+      :footer="null"
+      :closable="false"
+      :width="350"
+      centered
+      class="emoji-picker-modal"
+      @cancel="closeEmojiPicker"
+    >
+      <EmojiPicker
+        @select="onEmojiSelect"
+      />
+    </a-modal>
   </div>
 </template>
 
@@ -156,13 +189,16 @@ import { SECTION_TAGS } from '../common/SectionTag'
 import themeConfig from '../../../assets/config/themeConfig'
 import ProductBenefitsWithTablePreview from './ProductBenefitsWithTablePreview.vue'
 import { DeleteOutlined } from '@ant-design/icons-vue'
+import EmojiPicker from 'vue3-emoji-picker'
+import 'vue3-emoji-picker/css'
 
 export default {
   name: 'ProductBenefitsWithTable',
   extends: BaseSection,
   components: {
     ProductBenefitsWithTablePreview,
-    DeleteOutlined
+    DeleteOutlined,
+    EmojiPicker
   },
   computed: {
     tags() {
@@ -189,7 +225,12 @@ export default {
         },
         ...JSON.parse(JSON.stringify(this.section || {}))
       },
-      styles: themeConfig.normal
+      styles: themeConfig.normal,
+      emojiPickerVisible: false,
+      currentTarget: {
+        index: null,
+        side: null // 'left' 或 'right'
+      }
     }
   },
   watch: {
@@ -221,6 +262,25 @@ export default {
     },
     removeLeftItem(index) {
       this.localSection.leftContent.splice(index, 1)
+      this.handleChange()
+    },
+    showEmojiPicker(e, index, side) {
+      e.stopPropagation()
+      this.currentTarget = { index, side }
+      this.emojiPickerVisible = true
+    },
+    closeEmojiPicker() {
+      this.emojiPickerVisible = false
+      this.currentTarget = { index: null, side: null }
+    },
+    onEmojiSelect(emoji) {
+      const { index, side } = this.currentTarget
+      if (side === 'left') {
+        this.localSection.leftContent[index].icon = emoji.i
+      } else if (side === 'right') {
+        this.localSection.rightContent.icon = emoji.i
+      }
+      this.closeEmojiPicker()
       this.handleChange()
     }
   }
@@ -478,5 +538,34 @@ export default {
 /* 最后一个 item 不需要底部间距 */
 .left-content > div:last-child {
   margin-bottom: 0;
+}
+
+.emoji-input-wrapper {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.emoji-trigger {
+  padding: 0 8px;
+}
+
+:deep(.emoji-picker-modal) {
+  .ant-modal-content {
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .ant-modal-body {
+    padding: 0;
+  }
+}
+
+:deep(.v3-emoji-picker) {
+  --ep-color-bg: #ffffff;
+  --ep-color-border: #e4e7ea;
+  --ep-color-hover: #f7f9fa;
+  border: none;
+  box-shadow: none;
 }
 </style>

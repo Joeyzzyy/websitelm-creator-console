@@ -13,12 +13,21 @@
             <a-form-item label="Icon">
               <div class="input-with-tag">
                 <span class="html-tag">{{ tags.emoji }}</span>
-                <a-input
-                  v-model:value="localSection.topContent.icon"
-                  :disabled="disabled"
-                  placeholder="Emoji"
-                  @change="handleChange"
-                />
+                <div class="emoji-input-wrapper">
+                  <a-input
+                    v-model:value="localSection.topContent.icon"
+                    :disabled="disabled"
+                    placeholder="Emoji"
+                    @change="handleChange"
+                  />
+                  <a-button
+                    v-if="!disabled"
+                    class="emoji-trigger"
+                    @click="(e) => showEmojiPicker(e)"
+                  >
+                    😊
+                  </a-button>
+                </div>
               </div>
             </a-form-item>
             
@@ -168,6 +177,21 @@
             @close="closeImageLibrary"
           />
         </a-modal>
+
+        <!-- 添加 Emoji Picker Modal -->
+        <a-modal
+          v-model:visible="emojiPickerVisible"
+          :footer="null"
+          :closable="false"
+          :width="350"
+          centered
+          class="emoji-picker-modal"
+          @cancel="closeEmojiPicker"
+        >
+          <EmojiPicker
+            @select="onEmojiSelect"
+          />
+        </a-modal>
       </div>
     </div>
 
@@ -194,6 +218,8 @@ import ImageLibrary from '../common/ImageLibrary.vue'
 import WhyChooseUsWithBlocksPreview from './WhyChooseUsWithBlocksPreview.vue'
 import themeConfig from '../../../assets/config/themeConfig'
 import { DeleteOutlined } from '@ant-design/icons-vue'
+import EmojiPicker from 'vue3-emoji-picker'
+import 'vue3-emoji-picker/css'
 
 export default {
   name: 'WhyChooseUsWithTwoHugeBlocks',
@@ -201,7 +227,8 @@ export default {
   components: {
     DeleteOutlined,
     ImageLibrary,
-    WhyChooseUsWithBlocksPreview
+    WhyChooseUsWithBlocksPreview,
+    EmojiPicker
   },
   computed: {
     tags() {
@@ -212,6 +239,7 @@ export default {
     return {
       localSection: {
         topContent: {
+          icon: '',
           title: '',
           description: ''
         },
@@ -220,7 +248,8 @@ export default {
       imageLibraryVisible: false,
       selectedImage: null,
       currentModuleIndex: null,
-      styles: themeConfig.normal
+      styles: themeConfig.normal,
+      emojiPickerVisible: false
     }
   },
   created() {
@@ -290,6 +319,18 @@ export default {
         this.handleChange()
       }
       this.closeImageLibrary()
+    },
+    showEmojiPicker(e) {
+      e.stopPropagation()
+      this.emojiPickerVisible = true
+    },
+    closeEmojiPicker() {
+      this.emojiPickerVisible = false
+    },
+    onEmojiSelect(emoji) {
+      this.localSection.topContent.icon = emoji.i
+      this.closeEmojiPicker()
+      this.handleChange()
     }
   }
 }
@@ -463,5 +504,34 @@ export default {
 .module-header :deep(.anticon) {
   font-size: 14px;
   color: inherit;
+}
+
+.emoji-input-wrapper {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
+.emoji-trigger {
+  padding: 0 8px;
+}
+
+:deep(.emoji-picker-modal) {
+  .ant-modal-content {
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .ant-modal-body {
+    padding: 0;
+  }
+}
+
+:deep(.v3-emoji-picker) {
+  --ep-color-bg: #ffffff;
+  --ep-color-border: #e4e7ea;
+  --ep-color-hover: #f7f9fa;
+  border: none;
+  box-shadow: none;
 }
 </style>
