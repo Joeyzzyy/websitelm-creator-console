@@ -73,6 +73,9 @@ const handleRedirect = (e) => {
               <h3 class="text-xl md:text-2xl font-semibold text-gray-900 mb-2">
                 {{ module.title }}
               </h3>
+              <h4 class="text-lg md:text-xl font-semibold text-gray-700">
+                {{ module.subTitle }}
+              </h4>
               <p class="text-base text-gray-600">
                 {{ module.content }}
               </p>

@@ -92,13 +92,13 @@
                   :disabled="disabled"
                   :rows="4"
                   @change="handleChange"
+                  :style="{ minHeight: '120px' }"
                 />
               </div>
             </a-form-item>
           </a-form>
         </div>
     
-        <!-- 侧内容 -->
         <div class="right-content">
           <div class="content-header-with-button">
             <span>Story Sections</span>
@@ -151,6 +151,7 @@
                     :disabled="disabled"
                     :rows="6"
                     @change="handleChange"
+                    :style="{ minHeight: '120px' }"
                   />
                 </div>
               </a-form-item>
