@@ -190,10 +190,10 @@
                           />
                         </a-form-item>
 
-                        <a-form-item v-if="isEditMode" label="URL" required>
+                        <a-form-item v-if="isEditMode" label="Slug" required>
                           <a-input
-                            v-model:value="articleData.urlSuffix"
-                            placeholder="Enter URL suffix"
+                            v-model:value="articleData.slug"
+                            placeholder="Enter URL slug"
                           />
                         </a-form-item>
 
@@ -449,7 +449,7 @@ export default defineComponent({
             const articleDataWithSections = {
               ...response.data,
               sections: response.data.sections || [],
-              urlSuffix: response.data.suffixURL || '',
+              slug: response.data.slug || '',
               keywords: response.data.relatedKeyword ? response.data.relatedKeyword.split(',') : [],
               topic: response.data.topic || '',
               articleType: response.data.articleType || '',
@@ -499,6 +499,7 @@ export default defineComponent({
       deploymentMethod: 'subfolder',
       deployTarget: null,
       language: 'en',
+      slug: '',
       pageStats: {
         genKeyword: [],
         wordCount: 0,
@@ -749,7 +750,7 @@ export default defineComponent({
             summary: articleData.value.summary,
             topic: articleData.value.topic,
             articleType: articleData.value.articleType,
-            suffixURL: articleData.value.urlSuffix,
+            slug: articleData.value.slug,
             relatedKeyword: processedKeywords,
           };
           
@@ -777,7 +778,7 @@ export default defineComponent({
               subTitle: articleData.value.subTitle,
               summary: articleData.value.summary || '',
               title: articleData.value.title,
-              suffixURL: articleData.value.urlSuffix || '',
+              slug: articleData.value.slug || '',
               topic: articleData.value.topic,
               articleType: articleData.value.articleType,
               relatedKeyword: processedKeywords,
@@ -791,7 +792,6 @@ export default defineComponent({
         hide();
         message.success('Saved successfully');
 
-        // 如果需要退出，则返回列表页
         if (shouldQuit) {
           router.push('/task-management');
         } else if (!isEditMode.value) {
@@ -1151,7 +1151,7 @@ export default defineComponent({
         return '';
       }
 
-      const slug = articleData.value.urlSuffix || '{slug}';
+      const slug = articleData.value.slug || '{slug}';
 
       if (articleData.value.deploymentMethod === 'subdomain') {
         return `https://${articleData.value.deployTarget}/${slug}`;
@@ -1212,7 +1212,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* 保持��� EditPage 相同的基础布样式 */
+/* 保持 EditPage 相同的基础布样式 */
 .article-editor {
   position: fixed;
   top: 0;
@@ -1697,7 +1697,7 @@ export default defineComponent({
   font-weight: 500;
 }
 
-/* 调整顶部操作栏高�� */
+/* 调整顶部操作栏高 */
 .editor-header {
   height: auto;
   min-height: 64px;
@@ -1921,7 +1921,7 @@ export default defineComponent({
   color: #f43f5e !important;
 }
 
-/* 修改表单网��布局 */
+/* 修改表单网布局 */
 .form-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -2072,5 +2072,76 @@ export default defineComponent({
   font-style: italic;
   margin-top: 8px;
   line-height: 1.4;
+}
+
+/* Selected Components List Styles */
+.selected-components-list {
+  padding: 16px;
+  height: calc(100vh - 180px);
+  overflow-y: auto;
+}
+
+.empty-hint {
+  text-align: center;
+  padding: 24px 16px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.selected-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.selected-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: move;
+  transition: all 0.3s ease;
+}
+
+.selected-item:hover {
+  background: rgba(56, 189, 248, 0.05);
+  border-color: #38BDF8;
+  transform: translateX(4px);
+}
+
+.selected-item:active {
+  transform: translateX(4px) scale(0.98);
+}
+
+.item-name {
+  font-size: 14px;
+  color: #1f2937;
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 美化滚动条 */
+.selected-components-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.selected-components-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.selected-components-list::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+
+.selected-components-list::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
 }
 </style>

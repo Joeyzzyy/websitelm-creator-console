@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 const props = defineProps({
   section: {
@@ -8,7 +8,15 @@ const props = defineProps({
   }
 });
 
-const activeTab = ref(props.section?.bottomContent?.[0]?.tabName);
+const activeTab = ref('');
+
+// 监听 section 变化，确保 activeTab 始终有效
+watch(() => props.section?.bottomContent, (newContent) => {
+  if (newContent?.length && (!activeTab.value || !newContent.find(tab => tab.tabName === activeTab.value))) {
+    activeTab.value = newContent[0].tabName;
+  }
+}, { immediate: true });
+
 const activeContent = computed(() => 
   props.section?.bottomContent?.find(tab => tab.tabName === activeTab.value)
 );
@@ -57,7 +65,7 @@ const activeContent = computed(() =>
         <button 
           class="px-4 py-2 text-sm rounded-3xl font-semibold transition-all duration-200 bg-[#3374FF] text-white hover:bg-[#2861E5] hover:scale-105"
         >
-          {{ section.buttonText }}
+          {{ activeContent.buttonText }}
         </button>
       </div>
       <div class="w-full md:w-1/3">

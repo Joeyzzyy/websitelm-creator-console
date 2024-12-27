@@ -21,17 +21,7 @@
                 v-model:value="localSection.description"
                 :disabled="disabled"
                 @change="handleChange"
-              />
-            </div>
-          </a-form-item>
-  
-          <a-form-item label="Button Text">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.buttonText }}</span>
-              <a-input
-                v-model:value="localSection.buttonText"
-                :disabled="disabled"
-                @change="handleChange"
+                :style="{ minHeight: '120px' }"
               />
             </div>
           </a-form-item>
@@ -81,7 +71,19 @@
                   v-model:value="tab.description"
                   :disabled="disabled"
                   @change="handleChange"
+                  :style="{ minHeight: '120px' }"
                 />
+              </a-form-item>
+
+              <a-form-item label="Button Text">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.buttonText }}</span>
+                  <a-input
+                    v-model:value="tab.buttonText"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
               </a-form-item>
   
               <a-form-item label="Image URL">
@@ -168,8 +170,7 @@
           title: '',
           description: '',
           buttonText: '',
-          bottomContent: [],
-          ...JSON.parse(JSON.stringify(this.section))
+          bottomContent: []
         },
         styles: themeConfig.normal,
         imageLibraryVisible: false,
@@ -191,12 +192,30 @@
       }
     },
     created() {
-      
+      this.localSection = Object.assign({
+        title: '',
+        description: '',
+        buttonText: '',
+        bottomContent: []
+      }, JSON.parse(JSON.stringify(this.section)))
+
+      if (!Array.isArray(this.localSection.bottomContent)) {
+        this.localSection.bottomContent = []
+      }
     },
     watch: {
       section: {
         handler(newVal) {
-          this.localSection = JSON.parse(JSON.stringify(newVal))
+          this.localSection = Object.assign({
+            title: '',
+            description: '',
+            buttonText: '',
+            bottomContent: []
+          }, JSON.parse(JSON.stringify(newVal)))
+          
+          if (!Array.isArray(this.localSection.bottomContent)) {
+            this.localSection.bottomContent = []
+          }
         },
         deep: true
       }

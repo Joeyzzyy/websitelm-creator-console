@@ -295,28 +295,31 @@ export const createCleanComponentData = (componentType) => {
       FeaturesTabbed: {
         title: 'Writing Features Kit',
         description: 'Our AI-driven features include content detection, plagiarism checking, and automatic citation, helping you submit works with transparency and originality.',
-        buttonText: 'Get Started Now',
+        
         bottomContent: [
           {
             tabName: 'Authentic authorship',
             title: 'Verify authentic authorship',
             description: 'Ensure academic integrity with our authentication tools',
             imageUrl: 'https://placeholder.com/800x600',
-            imageAlt: 'Authentic authorship'
+            imageAlt: 'Authentic authorship',
+            buttonText: 'Get Started Now',
           },
           {
             tabName: 'Cite AI use',
             title: 'Make it easy to disclose your AI use',
             description: 'Our transparency features make it easy to acknowledge when you\'ve used AI',
             imageUrl: 'https://placeholder.com/800x600',
-            imageAlt: 'Cite AI use'
+            imageAlt: 'Cite AI use',
+            buttonText: 'Get Started Now',
           },
           {
             tabName: 'AI checker',
             title: 'AI checker',
             description: 'Our AI checker helps you detect AI-generated content',
             imageUrl: 'https://placeholder.com/800x600',
-            imageAlt: 'AI checker'
+            imageAlt: 'AI checker',
+            buttonText: 'Get Started Now',
           }
         ]
       },
