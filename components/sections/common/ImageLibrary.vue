@@ -1,6 +1,13 @@
 <template>
   <div class="image-library">
-    <!-- 图片网格展示区域 -->
+    <!-- 添加上传按钮 -->
+    <div class="library-header">
+      <a-button type="primary" @click="showUploadModal">
+        <upload-outlined /> Upload Image
+      </a-button>
+    </div>
+
+    <!-- 现有的图片网格展示区域 -->
     <a-spin :spinning="loading" tip="Loading images...">
       <div class="assets-grid">
         <template v-if="!showEmptyState">
@@ -38,18 +45,104 @@
         </div>
       </div>
     </a-spin>
+
+    <!-- 添加上传模态框 -->
+    <a-modal
+      v-model:visible="uploadModalVisible"
+      title="Upload Image"
+      @ok="handleUploadOk"
+      @cancel="handleUploadCancel"
+      :okButtonProps="{ 
+        disabled: !uploadFile || !isMediaFormValid,
+        loading: uploading
+      }"
+    >
+      <div class="upload-container">
+        <div 
+          v-if="!uploadFile" 
+          class="upload-area" 
+          @click="triggerFileInput"
+          @dragover.prevent
+          @drop.prevent="handleFileDrop"
+        >
+          <upload-outlined class="upload-icon" />
+          <p>Click or drag file to upload</p>
+          <p class="upload-hint">Supports JPG, PNG, WebP formats (Max: 1MB)</p>
+        </div>
+        
+        <template v-else>
+          <div class="preview-container">
+            <div class="preview-wrapper">
+              <img
+                :src="previewUrl"
+                class="upload-preview"
+              />
+            </div>
+          </div>
+
+          <a-form
+            :model="mediaForm"
+            :rules="mediaFormRules"
+            ref="mediaFormRef"
+            layout="vertical"
+            class="media-form"
+          >
+            <a-form-item 
+              name="mediaName" 
+              label="Name"
+              :validateTrigger="['blur', 'change']"
+            >
+              <a-input 
+                v-model:value="mediaForm.mediaName" 
+                placeholder="Enter file name"
+                :maxLength="50"
+              />
+            </a-form-item>
+            
+            <a-form-item 
+              name="description" 
+              label="Description"
+            >
+              <a-textarea 
+                v-model:value="mediaForm.description" 
+                placeholder="Enter description (optional)"
+                :maxLength="200"
+                :rows="3"
+              />
+            </a-form-item>
+          </a-form>
+
+          <div class="preview-actions">
+            <a-button type="primary" danger @click="removeUpload">
+              <delete-outlined /> Remove
+            </a-button>
+          </div>
+        </template>
+        
+        <input
+          type="file"
+          ref="fileInput"
+          accept="image/*"
+          style="display: none"
+          @change="handleFileChange"
+        />
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script>
 import { ref, computed } from 'vue'
-import { CheckOutlined } from '@ant-design/icons-vue'
+import { CheckOutlined, UploadOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { message } from 'ant-design-vue'
 import apiClient from '../../../api/api'
 
 export default {
   name: 'ImageLibrary',
   components: {
-    CheckOutlined
+    CheckOutlined,
+    UploadOutlined,
+    DeleteOutlined
   },
   emits: ['select', 'close'],
   setup(props, { emit }) {
@@ -89,12 +182,134 @@ export default {
     // 初始加载
     fetchAssets()
 
+    // 添加上传相关的响应式变量
+    const uploadModalVisible = ref(false)
+    const uploadFile = ref(null)
+    const previewUrl = ref('')
+    const fileInput = ref(null)
+    const uploading = ref(false)
+    const mediaFormRef = ref()
+    
+    const mediaForm = ref({
+      mediaName: '',
+      description: ''
+    })
+    
+    const mediaFormRules = {
+      mediaName: [
+        { required: true, message: 'Please enter file name' },
+        { max: 50, message: 'Name cannot exceed 50 characters' }
+      ]
+    }
+
+    const isMediaFormValid = computed(() => {
+      return mediaForm.value.mediaName && 
+             !mediaForm.value.mediaName.includes(' ') && 
+             mediaForm.value.mediaName.length <= 50
+    })
+
+    // 上传相关方法
+    const showUploadModal = () => {
+      uploadModalVisible.value = true
+    }
+
+    const triggerFileInput = () => {
+      fileInput.value.click()
+    }
+
+    const handleFileDrop = (e) => {
+      const file = e.dataTransfer.files[0]
+      if (file) handleFileSelect(file)
+    }
+
+    const handleFileChange = (e) => {
+      const file = e.target.files[0]
+      if (file) handleFileSelect(file)
+    }
+
+    const handleFileSelect = (file) => {
+      if (file.size > 1024 * 1024) {
+        message.error('File size exceeds 1MB limit')
+        if (fileInput.value) fileInput.value.value = ''
+        return
+      }
+
+      uploadFile.value = file
+      previewUrl.value = URL.createObjectURL(file)
+      
+      const initialName = file.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/\s+/g, '_')
+      
+      mediaForm.value.mediaName = initialName
+    }
+
+    const removeUpload = () => {
+      uploadFile.value = null
+      previewUrl.value = ''
+      mediaForm.value = {
+        mediaName: '',
+        description: ''
+      }
+      if (fileInput.value) fileInput.value.value = ''
+    }
+
+    const handleUploadOk = async () => {
+      if (!uploadFile.value || !mediaForm.value.mediaName) return
+
+      uploading.value = true
+      loading.value = true
+      try {
+        const formData = new FormData()
+        formData.append('file', uploadFile.value)
+        formData.append('customerId', localStorage.getItem('currentCustomerId'))
+        formData.append('mediaType', 'image')
+        formData.append('mediaName', mediaForm.value.mediaName)
+        formData.append('description', mediaForm.value.description || '')
+        formData.append('categoryName', 'media')
+
+        const response = await apiClient.uploadMedia(formData)
+        
+        message.success('Upload successful')
+        uploadModalVisible.value = false
+        removeUpload()
+        await fetchAssets() // 重新加载图片列表
+      } catch (error) {
+        console.error('Upload failed:', error)
+        message.error('Upload failed, please try again')
+      } finally {
+        uploading.value = false
+        loading.value = false
+      }
+    }
+
+    const handleUploadCancel = () => {
+      uploadModalVisible.value = false
+      removeUpload()
+    }
+
     return {
       loading,
       assets,
       selectedAsset,
       showEmptyState,
-      selectAsset
+      selectAsset,
+      uploadModalVisible,
+      uploadFile,
+      previewUrl,
+      fileInput,
+      uploading,
+      mediaForm,
+      mediaFormRef,
+      mediaFormRules,
+      isMediaFormValid,
+      showUploadModal,
+      triggerFileInput,
+      handleFileChange,
+      handleFileDrop,
+      removeUpload,
+      handleUploadOk,
+      handleUploadCancel
     }
   }
 }
@@ -188,5 +403,66 @@ export default {
 
 :deep(.ant-spin-container) {
   height: 100%;
+}
+
+.library-header {
+  padding: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.upload-container {
+  padding: 20px;
+}
+
+.upload-area {
+  border: 2px dashed #d9d9d9;
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.upload-area:hover {
+  border-color: #3B82F6;
+}
+
+.upload-icon {
+  font-size: 32px;
+  color: #3B82F6;
+  margin-bottom: 8px;
+}
+
+.upload-hint {
+  color: #6b7280;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.preview-container {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.preview-wrapper {
+  margin-bottom: 16px;
+}
+
+.upload-preview {
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+}
+
+.preview-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.media-form {
+  margin-top: 16px;
 }
 </style> 
