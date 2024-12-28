@@ -23,7 +23,7 @@
               </a-button>
               <a-button 
                 type="link" 
-                @click="getSitemap"
+                @click.stop="getSitemap(true)"
                 :disabled="!productInfo || loadingSitemap || !productInfo?.projectWebsite || !productInfo?.domainStatus"
                 v-if="productInfo?.productId"
               >
@@ -74,7 +74,7 @@
                   </a>
                   <template v-if="productInfo.domainStatus">
                     <a-tag color="success">
-                      <CheckCircleOutlined /> Verified
+                      Verified
                     </a-tag>
                   </template>
                   <template v-else>
@@ -98,17 +98,19 @@
 
             <a-descriptions-item label="Your Competitors">
               <template v-if="competitors.length">
-                <a-space wrap>
-                  <a-tag 
-                    v-for="(comp, index) in competitors" 
-                    :key="comp.name"
-                    :color="['blue', 'green', 'orange', 'purple'][index % 4]"
-                  >
-                    <a :href="'https://' + comp.url" target="_blank">
-                      {{ comp.name }}
-                    </a>
-                  </a-tag>
-                </a-space>
+                <div class="competitors-tags">
+                  <a-space wrap>
+                    <a-tag 
+                      v-for="(comp, index) in competitors" 
+                      :key="comp.name"
+                      :color="['blue', 'green', 'orange', 'purple'][index % 4]"
+                    >
+                      <a :href="'https://' + comp.url" target="_blank">
+                        {{ comp.name }}
+                      </a>
+                    </a-tag>
+                  </a-space>
+                </div>
               </template>
               <template v-else>
                 <a-typography-text type="secondary">
@@ -120,99 +122,181 @@
         </template>
       </a-card>
 
-      <!-- Sitemap Panel -->
-      <a-collapse 
-        v-if="productInfo?.productId"
-        class="sitemap-collapse"
-        :bordered="false"
-      >
-        <a-collapse-panel key="sitemap">
-          <template #header>
-            <div class="panel-header">
-              <span>🗺️ Website Structure</span>
-              <a-space>
-                <a-tag v-if="allPages?.length" color="blue">
-                  {{ allPages.length }} Pages
-                </a-tag>
-                <a-button 
-                  type="link" 
-                  size="small"
-                  :disabled="!productInfo || loadingSitemap || !productInfo?.projectWebsite || !productInfo?.domainStatus"
-                  @click="getSitemap"
-                >
-                  <template v-if="loadingSitemap">Loading...</template>
-                  <template v-else-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
-                    Add your site to get sitemap automatically →
-                  </template>
-                  <template v-else>Refresh Sitemap</template>
-                </a-button>
-              </a-space>
-            </div>
-          </template>
-
-          <!-- Loading skeleton -->
-          <template v-if="loadingSitemap">
-            <a-skeleton active :paragraph="{ rows: 2 }" />
-          </template>
-
-          <!-- Content -->
-          <template v-else>
-            <template v-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
-              <a-empty description="Add and verify your site to get sitemap automatically">
-                <template #extra>
-                  <a-button type="primary" @click="openEditWithBasicInfoToVerify">
-                    Add Your Site
+      <!-- Sitemap and Pages Row -->
+      <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
+        <!-- Sitemap Panel - 占据 2/3 宽度 -->
+        <a-col :span="16">
+          <a-card class="sitemap-card">
+            <template #title>
+              <div class="panel-header">
+                <span>🗺️ Website Structure</span>
+                <a-space>
+                  <a-tag style="font-size: 12px" v-if="allPages?.length" color="blue">
+                    {{ allPages.length }} Pages
+                  </a-tag>
+                  <a-button 
+                    type="link" 
+                    size="small"
+                    :disabled="!productInfo || loadingSitemap || !productInfo?.projectWebsite || !productInfo?.domainStatus"
+                    @click="handleRefreshSitemap"
+                  >
+                    <template v-if="loadingSitemap">Loading...</template>
+                    <template v-else-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
+                      Add your site to get sitemap automatically →
+                    </template>
+                    <template v-else>Refresh Sitemap</template>
                   </a-button>
-                </template>
-              </a-empty>
-            </template>
-            <template v-else-if="sitemapData?.length">
-              <div class="sitemap-content">
-                <a-tree
-                  :tree-data="sitemapData"
-                  :default-expanded-keys="['root']"
-                  class="sitemap-tree"
-                >
-                  <template #title="{ title, key }">
-                    <div class="tree-node-title">
-                      <span>{{ title }}</span>
-                      <a v-if="key.startsWith('http')" :href="key" target="_blank">
-                        <LinkOutlined />
-                      </a>
-                    </div>
-                  </template>
-                </a-tree>
+                </a-space>
               </div>
             </template>
-            <template v-else>
-              <a-empty description="No pages found" />
+
+            <!-- Loading skeleton -->
+            <template v-if="loadingSitemap">
+              <a-skeleton active :paragraph="{ rows: 2 }" />
             </template>
-          </template>
-        </a-collapse-panel>
-      </a-collapse>
+
+            <!-- Content -->
+            <template v-else>
+              <template v-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
+                <a-empty 
+                  description="Add and verify your site to get sitemap automatically"
+                  class="centered-empty-state"
+                >
+                  <template #extra>
+                    <a-button type="primary" @click="openEditWithBasicInfoToVerify">
+                      Add Your Site
+                    </a-button>
+                  </template>
+                </a-empty>
+              </template>
+              <template v-else-if="sitemapData?.length">
+                <div class="sitemap-content">
+                  <a-tree
+                    :tree-data="sitemapData"
+                    :default-expanded-keys="['root']"
+                    class="sitemap-tree"
+                    @select="handleTreeSelect"
+                  >
+                    <template #title="{ title, key }">
+                      <div class="tree-node-title">
+                        <span>{{ title }}</span>
+                        <a-space>
+                          <a-button
+                            v-if="!key.includes('folder_')"
+                            :href="getVisitUrl(key)"
+                            target="_blank"
+                            class="visit-link"
+                            @click.stop
+                            type="link"
+                            size="small"
+                          >
+                            <GlobalOutlined /> Visit
+                          </a-button>
+                          <a-spin v-if="loadingUrls[key]" size="small" />
+                          <template v-if="nodeUrls[key]">
+                            <a-button
+                              v-for="url in nodeUrls[key]"
+                              :key="url"
+                              :href="url"
+                              target="_blank"
+                              type="link"
+                              size="small"
+                              class="url-link"
+                            >
+                              <LinkOutlined />
+                            </a-button>
+                          </template>
+                        </a-space>
+                      </div>
+                    </template>
+                  </a-tree>
+                </div>
+              </template>
+              <template v-else>
+                <a-empty 
+                  description="No pages found" 
+                  class="centered-empty-state"
+                />
+              </template>
+            </template>
+          </a-card>
+        </a-col>
+
+        <!-- Pages Card - 占据 1/3 宽度 -->
+        <a-col :span="8">
+          <a-card class="pages-card">
+            <template #title>
+              <span>📄 Pages</span>
+            </template>
+            <a-row :gutter="[16, 16]">
+              <a-col :span="24">
+                <a-statistic 
+                  title="Generated" 
+                  :value="productInfo?.generatedPages || 0"
+                  :value-style="{ fontSize: '16px' }"
+                  :title-style="{ fontSize: '12px' }"
+                >
+                  <template #suffix>
+                    <a-tag size="small" color="success" v-if="productInfo?.generatedPagesChange">
+                      <span style="font-size: 12px">↑ {{ productInfo.generatedPagesChange }}%</span>
+                    </a-tag>
+                  </template>
+                </a-statistic>
+              </a-col>
+              <a-col :span="24">
+                <a-statistic 
+                  title="Published" 
+                  :value="0"
+                  :value-style="{ fontSize: '16px' }"
+                  :title-style="{ fontSize: '12px' }"
+                >
+                  <template #suffix>
+                    <a-tag size="small">
+                      <span style="font-size: 12px">Not published</span>
+                    </a-tag>
+                  </template>
+                </a-statistic>
+              </a-col>
+              <a-col :span="24">
+                <a-statistic 
+                  title="Indexed" 
+                  :value="0"
+                  :value-style="{ fontSize: '16px' }"
+                  :title-style="{ fontSize: '12px' }"
+                >
+                  <template #suffix>
+                    <a-tag size="small">
+                      <span style="font-size: 12px">Not indexed</span>
+                    </a-tag>
+                  </template>
+                </a-statistic>
+              </a-col>
+            </a-row>
+          </a-card>
+        </a-col>
+      </a-row>
 
       <!-- Metrics Cards -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
-        <a-col :span="12">
+        <!-- Traffic 卡片 - 占满一行 -->
+        <a-col :span="24">
           <a-card>
             <template #title>
-                <span>👥 Traffic </span>
-                <a-typography-text type="secondary" v-if="isGscConnected && gscSites.length > 0">
-                  {{ gscSites[0].siteUrl }}
-                </a-typography-text>
+              <span>👥 Traffic </span>
+              <a-typography-text type="secondary" v-if="isGscConnected && gscSites.length > 0">
+                {{ gscSites[0].siteUrl }}
+              </a-typography-text>
             </template>
-            <template #extra>
-              <a-button 
-                type="link" 
-                @click="connectGSC"
-                :disabled="isGscConnected"
-              >
-                {{ isGscConnected ? 'Google Search Console Connected!' : 'Connect Google Search Console' }}
-              </a-button>
-            </template>
-            <!-- 未连接 GSC 时显示提示 -->
+            <!-- 未连接 GSC 时显示��示 -->
             <div v-if="!isGscConnected" class="not-connected-notice">
-              <a-empty description="Google Search Console Not Connected" />
+              <a-empty>
+                <a-button 
+                  type="primary" 
+                  @click="connectGSC"
+                >
+                  Connect Google Search Console
+                </a-button>
+              </a-empty>
             </div>
             <!-- 数据内容 -->
             <a-row v-else :gutter="[16, 8]">
@@ -250,60 +334,6 @@
           </a-card>
         </a-col>
 
-        <!-- Pages 卡片 -->
-        <a-col :span="12">
-          <a-card>
-            <template #title>
-              <span>📄 Pages</span>
-            </template>
-            <!-- 数据内容 -->
-            <a-row :gutter="[16, 8]">
-              <a-col :span="8">
-                <a-statistic 
-                  title="Generated" 
-                  :value="productInfo?.generatedPages || 0"
-                  :value-style="{ fontSize: '16px' }"
-                  :title-style="{ fontSize: '12px' }"
-                >
-                  <template #suffix>
-                    <a-tag size="small" color="success" v-if="productInfo?.generatedPagesChange">
-                      <span style="font-size: 12px">↑ {{ productInfo.generatedPagesChange }}%</span>
-                    </a-tag>
-                  </template>
-                </a-statistic>
-              </a-col>
-              <a-col :span="8">
-                <a-statistic 
-                  title="Published" 
-                  :value="0"
-                  :value-style="{ fontSize: '16px' }"
-                  :title-style="{ fontSize: '12px' }"
-                >
-                  <template #suffix>
-                    <a-tag size="small">
-                      <span style="font-size: 12px">Not published</span>
-                    </a-tag>
-                  </template>
-                </a-statistic>
-              </a-col>
-              <a-col :span="8">
-                <a-statistic 
-                  title="Indexed" 
-                  :value="0"
-                  :value-style="{ fontSize: '16px' }"
-                  :title-style="{ fontSize: '12px' }"
-                >
-                  <template #suffix>
-                    <a-tag size="small">
-                      <span style="font-size: 12px">Not indexed</span>
-                    </a-tag>
-                  </template>
-                </a-statistic>
-              </a-col>
-            </a-row>
-          </a-card>
-        </a-col>
-
         <!-- 图表卡片 -->
         <a-col :span="24">
           <a-card>
@@ -311,8 +341,15 @@
               <span>📈 Traffic Analytics (Last 15 Days)</span>
             </template>
             <!-- 未连接 GSC 时显示提示 -->
-            <div v-if="!isGscConnected" class="not-connected-notice">
-              <a-empty description="Google Search Console Not Connected" />
+            <div v-if="!isGscConnected" class="traffic-analytics">
+              <a-empty class="centered-empty-state">
+                <a-button 
+                  type="primary" 
+                  @click="connectGSC"
+                >
+                  Connect Google Search Console
+                </a-button>
+              </a-empty>
             </div>
             <!-- 数据加载完成后显示图表 -->
             <div v-else ref="chartRef" style="height: 500px; width: 100%;"></div>
@@ -438,7 +475,7 @@
       <!-- 竞品分析 -->
       <a-form-item label="Competitors">
         <div class="competitors-section">
-          <!-- 第一行: 已添加的竞品标签 -->
+          <!-- 第一行: 添加的竞品标签 -->
           <div class="competitors-tags">
             <a-space wrap>
               <a-tag 
@@ -519,11 +556,25 @@
 <script>
 import { defineComponent, ref, onMounted, onUnmounted, watch } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
-import { CopyOutlined, EditOutlined, DeleteOutlined, ThunderboltOutlined, FileTextOutlined, LineChartOutlined, NodeIndexOutlined } from '@ant-design/icons-vue'
+import { 
+  CopyOutlined, 
+  EditOutlined, 
+  DeleteOutlined, 
+  ThunderboltOutlined, 
+  FileTextOutlined, 
+  LineChartOutlined, 
+  NodeIndexOutlined,
+  CalendarOutlined, 
+  LinkOutlined, 
+  SearchOutlined, 
+  FolderOpenOutlined,
+  GlobalOutlined,
+  InfoCircleOutlined,
+  PlusOutlined,
+  CheckCircleOutlined
+} from '@ant-design/icons-vue'
 import apiClient from '../api/api'
 import SuccessModal from './SuccessModal.vue'
-import { CalendarOutlined, LinkOutlined, SearchOutlined, FolderOpenOutlined } from '@ant-design/icons-vue'
-import { GlobalOutlined } from '@ant-design/icons-vue'
 import { Modal } from 'ant-design-vue'
 import * as echarts from 'echarts' // 需要安装 echarts
 
@@ -534,15 +585,17 @@ export default defineComponent({
     EditOutlined,
     DeleteOutlined,
     ThunderboltOutlined,
-    SuccessModal,
-    CalendarOutlined,
-    LinkOutlined,
     FileTextOutlined,
     LineChartOutlined,
     NodeIndexOutlined,
+    CalendarOutlined,
+    LinkOutlined,
     SearchOutlined,
     FolderOpenOutlined,
-    GlobalOutlined
+    GlobalOutlined,
+    CheckCircleOutlined,
+    InfoCircleOutlined,
+    PlusOutlined
   },
   data() {
     return {
@@ -588,6 +641,9 @@ export default defineComponent({
       goStartVerifying: false,
       originalDomainStatus: null, // 新增：保存原始域名验证状态
       chart: null, // 添加到 data 中，使其成为响应式数据
+      loadingUrls: {}, // 新增: 记录每个节点的加载状态
+      nodeUrls: {}, // 新增: 缓存每个节点的URLs
+      activeCollapseKeys: ['sitemap'],
     }
   },
   created() {
@@ -724,7 +780,7 @@ export default defineComponent({
             message: 'Failed to Load Product',
             description: 'Unable to load product information. Please try again later.'
           });
-          this.productInfo = {} // 修改这里: 从 null 改为对象
+          this.productInfo = {} // 修改这里: 从 null 改为空对象
         }
       } catch (error) {
         console.error('Failed to load product information:', error)
@@ -746,7 +802,7 @@ export default defineComponent({
       const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
       const isDomainVerified = this.productInfo?.domainStatus;
 
-      // 检查域名否被修改且之前已验证
+      // 检查域名是否被修改且之前已验证
       if (isDomainVerified && this.formState.website !== currentDomain && this.formState.website) {
         // 显示确认对话框
         const confirmed = await new Promise(resolve => {
@@ -761,7 +817,7 @@ export default defineComponent({
         });
 
         if (!confirmed) {
-          return; // 果用户取消，则不继续执行
+          return;
         }
       }
 
@@ -776,18 +832,18 @@ export default defineComponent({
           ).join(','),
           website: this.formState.website || '',
           sitemap: '',
+          // 如果域名改变强制设置为未验证状态
           domainStatus: this.formState.website !== currentDomain ? false : this.originalDomainStatus
         };
 
         let response;
         if (this.formState.productId) {
-          // 编辑式 - 调用更接口
           response = await apiClient.updateProduct(this.formState.productId, formData);
         } else {
-          // Onboarding模式 - 调用创建接口
           response = await apiClient.createProduct(formData);
         }
 
+        // 如果域名改变，生成新的验证记录
         if (this.formState.website !== currentDomain && this.formState.website) {
           await this.generateNewVerificationRecord();
         }
@@ -804,13 +860,13 @@ export default defineComponent({
           }
           
           this.onboardingModalVisible = false;
-          await this.loadProductInfo();
+          await this.loadProductInfo(); // 重新加载产品信息
         }
       } catch (error) {
         console.error('操作失败:', error);
         this.$notification.error({
           message: this.formState.productId ? '更新失败' : '设置失败',
-          description: error.message || '保存品信息失败。请重试。'
+          description: error.message || '保存产品信息失败。请重试。'
         });
       } finally {
         this.loading = false;
@@ -818,7 +874,7 @@ export default defineComponent({
       }
     },
 
-    // 新增方法：生成新的验证记录
+    // 新方法：生成新的验证记录
     async generateNewVerificationRecord() {
       try {
         const domain = this.formState.website.replace(/^https?:\/\//, '');
@@ -854,7 +910,7 @@ export default defineComponent({
         website: '',
         coreFeatures: '',
         competitors: [],
-        domainStatus: false // 确保重置验证状态为 false
+        domainStatus: false // 确保重置验证状态 false
       };
       this.showVerifyRecord = false;
       this.verifyRecord = null;
@@ -904,17 +960,43 @@ export default defineComponent({
       const newWebsite = e.target.value.trim();
       const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
       
+      // 立即重置所有相关状态
       if (newWebsite !== currentDomain) {
-        // 只修改 formState 中的状态
+        // 立即重置所有验证相关的状态
         this.showVerifyRecord = false;
         this.verifyRecord = null;
-        this.formState.domainStatus = false;
+        
+        // 立即更新 formState
+        this.formState = {
+          ...this.formState,
+          website: newWebsite,
+          domainStatus: false
+        };
+        
+        // 立即更新 productInfo
+        if (this.productInfo) {
+          this.productInfo = {
+            ...this.productInfo,
+            projectWebsite: newWebsite,
+            domainStatus: false
+          };
+        }
       } else {
-        // 如果改原的域名，使用保存的原始状态
-        this.formState.domainStatus = this.originalDomainStatus;
+        // 如果改回原来的域名，使用保存的原始状态
+        this.formState = {
+          ...this.formState,
+          website: newWebsite,
+          domainStatus: this.originalDomainStatus
+        };
+        
+        if (this.productInfo) {
+          this.productInfo = {
+            ...this.productInfo,
+            projectWebsite: newWebsite,
+            domainStatus: this.originalDomainStatus
+          };
+        }
       }
-      
-      this.formState.website = newWebsite;
     },
     handleSuccessModalClose() {
       this.successModalVisible = false
@@ -945,7 +1027,7 @@ export default defineComponent({
       newCompetitors.splice(index, 1);
       this.formState.competitors = newCompetitors;
     },
-    async getSitemap() {
+    async getSitemap(isRefresh = false) {
       if (!this.productInfo?.projectWebsite || !this.productInfo.domainStatus) {
         return;
       }
@@ -953,12 +1035,15 @@ export default defineComponent({
       try {
         this.loadingSitemap = true;
         const customerId = localStorage.getItem('currentCustomerId');
+
+        if (isRefresh) {
+          await apiClient.updateSitemap(customerId);
+        }
+        
         const response = await apiClient.getSitemap(customerId);
 
-        // 检查响应是否成功但数据为空
         if (response?.code === 200) {
           if (!response.data) {
-            // 处理数据为 null 的情况
             this.allPages = [];
             this.sitemapData = [{
               key: 'empty',
@@ -969,24 +1054,11 @@ export default defineComponent({
             return;
           }
 
-          const urls = response.data.sitemaps?.[0]?.urlset?.urls || [];
-          if (!Array.isArray(urls)) {
-            this.allPages = [];
-            this.sitemapData = [{
-              key: 'empty',
-              title: 'No pages found',
-              selectable: false,
-              children: []
-            }];
-            return;
-          }
-
-          this.allPages = urls;
-          this.sitemapData = this.processSitemap(urls);
+          this.allPages = response.data.flatMap(folder => folder.urls);
+          this.sitemapData = this.processSitemap(response.data);
         } else {
           throw new Error('Failed to get sitemap');
         }
-        
       } catch (error) {
         console.error('Failed to get sitemap:', error);
         this.$message.error('Failed to get sitemap, please try again later');
@@ -1001,79 +1073,51 @@ export default defineComponent({
       }
     },
 
-    processSitemap(urls) {
-      const pathMap = new Map();
-      const rootPages = [];
-      
-      urls.forEach(url => {
-        const urlObj = new URL(url.loc);
-        const pathname = urlObj.pathname;
-        const segments = pathname.split('/').filter(Boolean);
-        
-        if (segments.length === 0 || segments.length === 1) {
-          rootPages.push({
-            ...url,
-            displayPath: urlObj.hostname + pathname
-          });
-        } else {
-          const firstSegment = segments[0];
-          if (!pathMap.has(firstSegment)) {
-            pathMap.set(firstSegment, {
-              pages: []
-            });
-          }
-          pathMap.get(firstSegment).pages.push(url);
-        }
-      });
+    processSitemap(sitemapData) {
+      if (!Array.isArray(sitemapData)) {
+        return [{
+          key: 'empty',
+          title: 'No pages found',
+          selectable: false,
+          children: []
+        }];
+      }
 
-      // Build tree structure
-      const treeNodes = Array.from(pathMap.entries()).map(([key, value]) => ({
-        key,
-        title: `${key} (${value.pages.length})`,
-        children: value.pages.map(page => ({
-          key: page.loc,
-          title: new URL(page.loc).pathname
+      // 处理新的数据格式
+      return sitemapData.map(folder => ({
+        key: folder.name,
+        title: `${folder.name} (${folder.childNum})`,
+        children: folder.urls.map(url => ({
+          key: url,
+          title: new URL(url).pathname || '/'
         }))
       }));
-
-      // Add root directory node
-      if (rootPages.length > 0) {
-        treeNodes.unshift({
-          key: 'root',
-          title: `Root Directory (${rootPages.length})`,
-          children: rootPages.map(page => ({
-            key: page.loc,
-            title: page.displayPath
-          }))
-        });
-      }
-      return treeNodes;
     },
-    handleTreeSelect(selectedKeys, { node }) {
-      if (selectedKeys.length === 0) {
-        this.selectedPages = [];
-        return;
+    async handleTreeSelect(selectedKeys, { node }) {
+      if (!selectedKeys.length || !node?.key) return;
+      
+      // 设置加载状态
+      this.loadingUrls[node.key] = true;
+
+      try {
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.getSitemapUrls({
+          customerId,
+          websiteId: node.key, // 使用节点的 key 作为 websiteId
+          page: 1,
+          limit: 100,
+          folder: node.key
+        });
+
+        if (response?.code === 200) {
+          this.nodeUrls[node.key] = response.data;
+        }
+      } catch (error) {
+        console.error('Failed to get sitemap URLs:', error);
+        this.$message.error('Failed to load URLs');
+      } finally {
+        this.loadingUrls[node.key] = false;
       }
-
-      // 获取所有实际的页面（过滤掉虚拟目录）
-      const getAllPages = (node) => {
-        let pages = [];
-        
-        // 有当节点实际的URL（不是虚拟目录时才添加
-        if (node.key && node.key.startsWith('http')) {
-          pages.push({ loc: node.key });
-        }
-        
-        // 递归处理子节点
-        if (node.children) {
-          node.children.forEach(child => {
-            pages = pages.concat(getAllPages(child));
-          });
-        }
-        return pages;
-      };
-
-      this.selectedPages = getAllPages(node);
     },
     formatDate(dateString) {
       if (!dateString) return '';
@@ -1081,7 +1125,7 @@ export default defineComponent({
     },
     async connectGSC() {
       if (this.isGscConnected) {
-        return // 如果已经连接，不执行任何操作
+        return // 如果已连接，不执行任何操作
       }
       
       try {
@@ -1224,29 +1268,34 @@ export default defineComponent({
     async startVerify() {
       this.startVerifying = true;
       try {
-        // 先保存新的域名信息
-        const formData = {
-          customerId: localStorage.getItem('currentCustomerId'),
-          productName: this.formState.productName,
-          productDesc: this.formState.coreFeatures,
-          competeProduct: this.formState.competitors.map(comp => 
-            `${comp.name}|${comp.url}`
-          ).join(','),
-          website: this.formState.website,
-          sitemap: ''
-        };
+        const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
+        const domain = this.formState.website.replace(/^https?:\/\//, '');
 
-        // 更新产品信息
-        const updateResponse = await apiClient.updateProduct(this.formState.productId, formData);
-        if (updateResponse?.code !== 200) {
-          throw new Error('Failed to update product information');
+        // 如果域名发生变化，先更新产品信息
+        if (domain !== currentDomain) {
+          const formData = {
+            customerId: localStorage.getItem('currentCustomerId'),
+            productName: this.formState.productName,
+            productDesc: this.formState.coreFeatures,
+            competeProduct: this.formState.competitors.map(comp => 
+              `${comp.name}|${comp.url}`
+            ).join(','),
+            website: domain,
+            sitemap: '',
+            domainStatus: false // 确保新域名的验证状态为 false
+          };
+
+          // 更新产品信息
+          const updateResponse = await apiClient.updateProduct(this.formState.productId, formData);
+          if (updateResponse?.code !== 200) {
+            throw new Error('Failed to update product information');
+          }
+
+          // 重新加载产品信息
+          await this.loadProductInfo();
         }
 
-        // 重新载产品信息
-        await this.loadProductInfo();
-
-        // 继续域名验证流程
-        const domain = this.formState.website.replace(/^https?:\/\//, '');
+        // 获取验证记录
         const response = await apiClient.createDomainWithTXT({
           customerId: localStorage.getItem('currentCustomerId'),
           domainName: domain
@@ -1255,9 +1304,26 @@ export default defineComponent({
         if (response?.code === 200) {
           this.verifyRecord = JSON.parse(response.data.txt);
           this.showVerifyRecord = true;
+          
+          // 确保产��信息中的验证状态为 false
+          if (this.productInfo) {
+            this.productInfo = {
+              ...this.productInfo,
+              domainStatus: false
+            };
+          }
+        } else {
+          throw new Error('Failed to get verification record');
         }
       } catch (error) {
         this.$message.error('Failed to start verification: ' + (error.message || 'Unknown error'));
+        // 确保在失败时也重置验证状态
+        if (this.productInfo) {
+          this.productInfo = {
+            ...this.productInfo,
+            domainStatus: false
+          };
+        }
       } finally {
         this.startVerifying = false;
       }
@@ -1333,7 +1399,7 @@ export default defineComponent({
       }
     },
 
-    // 添加数据处理方法
+    // 添加处理方法
     processGscAnalytics(data) {
       if (!Array.isArray(data) || data.length === 0) {
         return null;
@@ -1511,7 +1577,7 @@ export default defineComponent({
       }
       if (this.chartRef) {
         this.chart = echarts.init(this.chartRef)
-        this.updateChart() // 初始化后立即更新数据
+        this.updateChart() // 始化后立即更新数据
       }
     },
 
@@ -1532,6 +1598,26 @@ export default defineComponent({
         this.chart.resize()
       }
     },
+
+    async handleRefreshSitemap(e) {
+      // 阻止事件冒泡
+      e.stopPropagation();
+      
+      // 确保 sitemap 面板保持展开状态
+      if (!this.activeCollapseKeys.includes('sitemap')) {
+        this.activeCollapseKeys = ['sitemap'];
+      }
+      
+      // 执行刷新操作
+      await this.getSitemap(true);
+    },
+
+    getVisitUrl(key) {
+      if (key === 'root') {
+        return `https://${this.productInfo?.projectWebsite}`;
+      }
+      return key;
+    },
   }
 })
 </script>
@@ -1540,7 +1626,8 @@ export default defineComponent({
 .dashboard-content {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
+  padding: 0 0 24px;
 }
 
 .card-title {
@@ -1583,12 +1670,6 @@ export default defineComponent({
   height: 100%;  /* Make all cards in the row full height */
 }
 
-:deep(.ant-card-body) {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
 :deep(.ant-statistic-group) {
   display: flex;
   justify-content: space-around;
@@ -1597,103 +1678,6 @@ export default defineComponent({
 
 :deep(.ant-card .ant-statistic) {
   text-align: center;
-}
-
-.section-header {
-  padding: 16px;
-  background: #fafafa;
-  border-bottom: 1px solid #f0f0f0;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.tree-content,
-.pages-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-}
-
-.custom-tree {
-  :deep(.ant-tree-node-content-wrapper) {
-    display: flex;
-    align-items: center;
-  }
-}
-
-.page-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.page-item {
-  padding: 12px;
-  border: 1px solid #f0f0f0;
-  border-radius: 6px;
-  transition: all 0.3s;
-
-  &:hover {
-    background: #fafafa;
-  }
-}
-
-.page-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.page-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #1890ff;
-  
-  .page-url {
-    word-break: break-all;
-  }
-}
-
-/* Empty State */
-.empty-state {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #999;
-  gap: 16px;
-  
-  :deep(.anticon) {
-    font-size: 32px;
-  }
-  
-  p {
-    margin: 0;
-  }
-}
-
-/* Custom Scrollbar */
-.custom-scrollbar {
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: #f0f0f0;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
-    
-    &:hover {
-      background: #999;
-    }
-  }
 }
 
 /* 修改 descriptions 组件的样式，移除所有底部间距 */
@@ -1720,5 +1704,181 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+
+/* 优化卡片样式 */
+:deep(.ant-card) {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  transition: box-shadow 0.3s;
+
+  &:hover {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* 信息卡片样式优化 */
+.info-card {
+  :deep(.ant-card-head) {
+    background: #fafafa;
+    border-radius: 8px 8px 0 0;
+  }
+  
+  :deep(.ant-descriptions-item-label) {
+    font-weight: 500;
+    color: #666;
+  }
+}
+
+/* 统计数据卡片样式 */
+:deep(.ant-statistic) {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 6px;
+  
+  .ant-statistic-title {
+    color: #666;
+    margin-bottom: 8px;
+  }
+  
+  .ant-statistic-content {
+    color: #262626;
+    font-weight: 600;
+  }
+}
+
+/* 图表卡片样式 */
+.traffic-analytics {
+  height: 100%;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Sitemap 面板样式 */
+.sitemap-card {
+  height: 100%;
+  
+  :deep(.ant-card-head) {
+    background: linear-gradient(to right, #f0f7ff, #f8fafc);
+    border-radius: 16px 16px 0 0;
+    padding: 24px;
+    border-bottom: 2px solid #e6f4ff;
+  }
+  
+  :deep(.ant-card-body) {
+    padding: 24px !important;
+    height: calc(100% - 76px); /* 减去头部高度 */
+    overflow-y: auto;
+    
+    /* 自定义滚动条 */
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f8fafc;
+      border-radius: 4px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #bfdbfe;
+      border-radius: 4px;
+      border: 2px solid #f8fafc;
+      
+      &:hover {
+        background: #1890ff;
+      }
+    }
+  }
+}
+
+/* 确保行布局正确 */
+.ant-row {
+  margin: 0 -8px;
+  
+  .ant-col {
+    padding: 0 8px;
+  }
+}
+
+/* 标签样式优化 */
+:deep(.ant-tag) {
+  border-radius: 4px;
+  padding: 2px 8px;
+  
+  &.ant-tag-success {
+    background: #f6ffed;
+    border-color: #b7eb8f;
+  }
+}
+
+/* 统计卡片行样式 */
+.ant-row {
+  :deep(.ant-card) {
+    background: #fff;
+    
+    .ant-card-head {
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .ant-statistic {
+      transition: transform 0.3s;
+      
+      &:hover {
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+.tree-node-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+.visit-link {
+  opacity: 1 !important;
+  color: #1890ff;
+  
+  &:hover {
+    color: #40a9ff;
+  }
+}
+
+.url-link {
+  color: #52c41a;
+  
+  &:hover {
+    color: #73d13d;
+  }
+}
+
+/* 更新树节点样式 */
+.sitemap-tree {
+  :deep(.ant-tree-node-content-wrapper) {
+    width: 100%;
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* 添加新的样式 */
+.centered-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;  /* 设置最小高度确保有足够空间居中 */
+}
+
+/* 确保父容器也支持flex布局 */
+.sitemap-card :deep(.ant-card-body) {
+  display: flex;
+  flex-direction: column;
 }
 </style>

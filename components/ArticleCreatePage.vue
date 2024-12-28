@@ -105,7 +105,7 @@
               <a-button
                 :type="articleData.publishStatus === 'publish' ? 'default' : 'primary'"
                 @click="handlePublish"
-                :disabled="!canPublish"
+                :disabled="!canPublish()"
                 :loading="publishing"
                 :style="{ height: '36px' }"
               >
@@ -195,7 +195,34 @@
                     <div class="other-fields-section">
                       <div class="section-label">Other Information</div>
                       <div class="other-fields-grid">
-                        <a-form-item label="Topic" required>
+                        <a-form-item label="Type" required>
+                          <template v-if="isEditMode">
+                            <div class="readonly-field">{{ articleData.articleType }}</div>
+                          </template>
+                          <a-select v-else v-model:value="articleData.articleType" allowClear>
+                            <a-select-option value="Blog">Blog</a-select-option>
+                            <a-select-option value="Landing Page">Landing Page</a-select-option>
+                          </a-select>
+                        </a-form-item>
+
+                        <a-form-item label="Lang" required>
+                          <template v-if="isEditMode">
+                            <div class="readonly-field">{{ getLanguageLabel(articleData.language) }}</div>
+                          </template>
+                          <a-select v-else v-model:value="articleData.language">
+                            <a-select-option value="en">English</a-select-option>
+                            <a-select-option value="zh">中文</a-select-option>
+                          </a-select>
+                        </a-form-item>
+
+                        <a-form-item label="Author" required>
+                          <a-input
+                            v-model:value="articleData.author"
+                            placeholder="Enter author name"
+                          />
+                        </a-form-item>
+
+                        <a-form-item label="Topic">
                           <a-input
                             v-model:value="articleData.topic"
                             placeholder="Enter topic"
@@ -207,26 +234,6 @@
                             v-model:value="articleData.slug"
                             placeholder="Enter page slug here"
                           />
-                        </a-form-item>
-
-                        <a-form-item label="Type">
-                          <template v-if="isEditMode">
-                            <div class="readonly-field">{{ articleData.articleType }}</div>
-                          </template>
-                          <a-select v-else v-model:value="articleData.articleType" allowClear>
-                            <a-select-option value="Blog">Blog</a-select-option>
-                            <a-select-option value="Landing Page">Landing Page</a-select-option>
-                          </a-select>
-                        </a-form-item>
-
-                        <a-form-item label="Lang">
-                          <template v-if="isEditMode">
-                            <div class="readonly-field">{{ getLanguageLabel(articleData.language) }}</div>
-                          </template>
-                          <a-select v-else v-model:value="articleData.language">
-                            <a-select-option value="en">English</a-select-option>
-                            <a-select-option value="zh">中文</a-select-option>
-                          </a-select>
                         </a-form-item>
                       </div>
 
@@ -518,11 +525,11 @@ export default defineComponent({
     // 在组件挂载时初始化数据
     onMounted(async () => {
       await loadProductInfo();
+      await loadVerifiedDomains(); 
       await loadDeployTargets('subfolder');
       
       try {
         if (isEditMode.value) {
-          console.log('Edit mode detected, fetching article data...');
           const response = await apiClient.getArticleById(pageId.value);
           
           if (response?.code === 200 && response.data) {
@@ -537,13 +544,12 @@ export default defineComponent({
             subTitle: '',
             description: '',
             sections: [],
-            deploymentMethod: 'subfolder' // 确保新建时也使用 subfolder 作为默认值
+            deploymentMethod: 'subfolder'
           });
         }
       } catch (error) {
         console.error('Initialize error:', error);
         message.error('Failed to initialize: ' + (error.message || 'Unknown error'));
-        // 初始化失败时的默认值
         initializeArticleData({
           title: '',
           subTitle: '',
@@ -568,6 +574,7 @@ export default defineComponent({
       deployTarget: null,
       language: 'en',
       slug: '',
+      author: '', // 添加 author 字段
       pageStats: {
         genKeyword: [],
         wordCount: 0,
@@ -641,7 +648,7 @@ export default defineComponent({
       }
     };
 
-    // 添加新响应式变量来跟踪拖拽的源引
+    // 添加新响���式变量来跟踪拖拽的源引
     const dragSourceIndex = ref(null);
 
     // 添加组件到文
@@ -771,13 +778,33 @@ export default defineComponent({
 
     const handleSave = async (shouldQuit = false) => {
       try {
-        // 基本信息验证
-        if (!articleData.value.title) {
-          message.error('Page title is required');
-          return;
+        // 必填字段验证
+        const requiredFields = {
+          title: 'Page title',
+          description: 'Page description',
+          articleType: 'Type',
+          language: 'Language',
+          author: 'Author',
+          keywords: 'Keywords'
+        };
+
+        // 检查所有必填字段
+        for (const [field, label] of Object.entries(requiredFields)) {
+          if (field === 'keywords') {
+            // 特殊处理 keywords 数组
+            if (!articleData.value[field] || !articleData.value[field].length) {
+              message.error(`${label} is required`);
+              return;
+            }
+          } else if (!articleData.value[field]) {
+            message.error(`${label} is required`);
+            return;
+          }
         }
-        if (!articleData.value.description) {
-          message.error('Page description is required');
+
+        // 编辑模式下额外检查 slug
+        if (isEditMode.value && !articleData.value.slug) {
+          message.error('Page slug is required');
           return;
         }
 
@@ -800,7 +827,7 @@ export default defineComponent({
           // 编辑模式使用全量更新
           const updatePromises = [];
 
-          // 直���更新页面所有信息
+          // 直接更新页面所有信息
           const pageUpdateData = {
             title: articleData.value.title,
             subTitle: articleData.value.subTitle,
@@ -809,27 +836,26 @@ export default defineComponent({
             topic: articleData.value.topic,
             articleType: articleData.value.articleType,
             slug: articleData.value.slug,
+            author: articleData.value.author,  // 确保使用表单中的 author
             relatedKeyword: processedKeywords,
+            numberOfWords: 2000
           };
           
-          console.log('Saving page data:', pageUpdateData); // 加日志
+          console.log('Saving page data:', pageUpdateData);
           
-          // 添加更新页面信息的请求
           updatePromises.push(
             apiClient.updatePage(pageId.value, pageUpdateData)
           );
 
-          // 添加更新sections请求
           updatePromises.push(
             apiClient.updateFullSections(pageId.value, {sections: articleData.value.sections})
           );
 
-          // 并行所有更新请求
           response = await Promise.all(updatePromises);
         } else {
           const requestData = {
             page: {
-              author: '',
+              author: articleData.value.author,  // 确保使用表单中的 author
               customerId: customerId,
               description: articleData.value.description || '',
               language: articleData.value.language,
@@ -840,6 +866,7 @@ export default defineComponent({
               topic: articleData.value.topic,
               articleType: articleData.value.articleType,
               relatedKeyword: processedKeywords,
+              numberOfWords: 2000
             },
             sections: articleData.value.sections
           };
@@ -1032,33 +1059,73 @@ export default defineComponent({
       action: null
     })
 
-    // 添加发布相关的方法
-    const canPublish = computed(() => {
-      return verifiedDomains.value.length > 0
-    })
+    const getPublishBlockReasons = () => {
+      const reasons = [];
 
-    const getPublishTooltip = (article) => {
-      if (!canPublish.value) {
-        return 'No verified sub-domain available. Please verify a domain in Settings first.'
+      // Check for verified domains
+      if (verifiedDomains.value.length === 0) {
+        reasons.push('No verified domain available. Please verify a domain in Settings first.');
       }
-      return ''
-    }
+
+      // Check required fields
+      const requiredFields = {
+        title: 'Title',
+        description: 'Description',
+        articleType: 'Type',
+        language: 'Language',
+        author: 'Author',
+        keywords: 'Keywords',
+        deploymentMethod: 'Deployment Method',
+        deployTarget: 'Deploy Target',
+        slug: 'Page Slug'
+      };
+
+      // Check all required fields
+      for (const [field, label] of Object.entries(requiredFields)) {
+        const value = articleData.value[field];
+        if (!value || (Array.isArray(value) && value.length === 0)) {
+          reasons.push(`${label} is required. `);
+        }
+      }
+
+      // Check for content sections
+      if (articleData.value.sections.length === 0) {
+        reasons.push('At least one content section is required');
+      }
+
+      return reasons;
+    };
+
+    const getPublishTooltip = () => {
+      const reasons = getPublishBlockReasons();
+      if (reasons.length > 0) {
+        return 'Cannot publish because:\n' + reasons.join('\n');
+      }
+      return '';
+    };
+
+    const canPublish = () => {
+      return getPublishBlockReasons().length === 0;
+    };
 
     const handlePublish = () => {
-      const isPublished = articleData.value.publishStatus === 'publish'
+      const isPublished = articleData.value.publishStatus === 'publish';
       
-      if (!isPublished && !canPublish.value) {
-        message.error('No verified sub-domain available. Please verify a domain in Settings first.')
-        return
+      console.log('verifiedDomains', verifiedDomains.value);
+      // 只在要发布时检查 verified domains
+      if (!isPublished && verifiedDomains.value.length === 0) {
+        message.error('No verified sub-domain available. Please verify a domain in Settings first.');
+        return;
       }
 
-      publishModal.visible = true
-      publishModal.title = isPublished ? 'Confirm Unpublish' : 'Confirm Publish'
+      publishModal.visible = true;
+      publishModal.title = isPublished ? 'Confirm Unpublish' : 'Confirm Publish';
       publishModal.content = isPublished 
-        ? 'Are you sure you want to unpublish this page?' 
-        : 'Are you sure you want to publish this page?'
-      publishModal.action = isPublished ? 'unpublish' : 'publish'
-    }
+        ? 'Are you sure you want to unpublish this article?' 
+        : 'Are you sure you want to publish this article?';
+      publishModal.type = 'publish_action';
+      publishModal.data = articleData.value;
+    };
 
     const confirmPublish = async () => {
       try {
@@ -1086,27 +1153,35 @@ export default defineComponent({
     // 添加加载域名信息的方法
     const loadVerifiedDomains = async () => {
       try {
-        const projectId = 'prj_ySV5jK2SgENiBpE5D2aTaeI3KfAo'
-        
-        const response = await apiClient.getVercelDomainInfo(projectId)
+        const projectId = VERCEL_CONFIG.PROJECT_ID;
+        const response = await apiClient.getVercelDomainInfo(projectId);
         
         // 确保 productInfo 已加载
         if (!productInfo.value) {
-          await loadProductInfo()
+          await loadProductInfo();
         }
         
-        // 查找所有验证的域名
-        verifiedDomains.value = response?.domains
+        // 获取验证过的域名
+        const domains = response?.domains
           ?.filter(domain => {
-            const isVerified = domain.verified || !domain.configDetails?.misconfigured
-            const hasProductInfo = productInfo.value?.projectWebsite === domain.name && productInfo.value?.domainStatus
-            return isVerified && hasProductInfo
+            const isVerified = domain.verified || !domain.configDetails?.misconfigured;
+            const hasProductInfo = productInfo.value?.projectWebsite === domain.apexName && productInfo.value?.domainStatus;
+            return isVerified && hasProductInfo;
           })
-          ?.map(domain => domain.name) || []
+          ?.map(domain => domain.name) || [];
+
+        // 加载子文件夹
+        await loadSubfolders();
+        
+        // 合并域名和子文件夹路径
+        verifiedDomains.value = [
+          ...domains,
+          ...(subfolders.value.map(subfolder => `${productInfo.value?.projectWebsite}/${subfolder}`))
+        ];
       } catch (error) {
-        console.error('Failed to load domain info:', error)
+        console.error('Failed to load domain info:', error);
       }
-    }
+    };
 
     // 添加新的响应式变量
     const isSideNavCollapsed = ref(false);
@@ -1197,7 +1272,7 @@ export default defineComponent({
         slug: data.slug || '',
         keywords: data.relatedKeyword ? data.relatedKeyword.split(',') : [],
         topic: data.topic || '',
-        articleType: data.articleType || '',
+        articleType: data.articleType || 'Landing Page',
         language: data.language || 'en',
         deploymentMethod: data.deploymentMethod || 'subfolder', // 修改默认值为 subfolder
         deployTarget: data.deployTarget || null
@@ -1279,6 +1354,22 @@ export default defineComponent({
       ];
     };
 
+    // 添加 subfolders 响应式变量
+    const subfolders = ref([]);
+
+    // 添加 loadSubfolders 方法
+    const loadSubfolders = async () => {
+      try {
+        const response = await apiClient.getSubfolders();
+        if (response?.code === 200 && response?.data) {
+          subfolders.value = response.data;
+        }
+      } catch (error) {
+        console.error('Failed to load subfolders:', error);
+        message.error('Failed to load subfolder options');
+      }
+    };
+
     return {
       loading,
       saving,
@@ -1327,7 +1418,9 @@ export default defineComponent({
       handlePreviewCancel,
       handlePreviewAdd,
       themeConfig,
-      handleKeywordsPaste
+      handleKeywordsPaste,
+      subfolders,
+      loadSubfolders
     };
   }
 });
@@ -2141,7 +2234,7 @@ export default defineComponent({
   height: auto !important;
 }
 
-/* 确保选择框内的标签正确换行显示 */
+/* 确保选择框内的���签正确换行显示 */
 :deep(.ant-select-multiple .ant-select-selection-overflow) {
   flex-wrap: wrap;
   padding: 4px 0;
@@ -2152,7 +2245,7 @@ export default defineComponent({
   margin-bottom: 2px;
 }
 
-/* 添加部署选择相关样式 */
+/* 添加部署��择相关样式 */
 .deployment-options {
   margin-top: 8px;
 }

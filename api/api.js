@@ -175,7 +175,7 @@ const editKeyword = async (keywordId, keywordType, subKeywordId, term) => {
         {subKeywordId: subKeywordId, term: term});
     return response.data;
   } catch (error) {
-    console.error('删除关键词失败:', error);
+    console.error('删除���键词失败:', error);
     throw error;
   }
 };
@@ -224,7 +224,7 @@ const deleteDomain = async (domainId) => {
     const response = await apiClient.delete(`/domain/${domainId}`);
     return response.data;
   } catch (error) {
-    console.error('删除域名���败:', error);
+    console.error('删除域名失败:', error);
     return null;
   }
 };
@@ -734,7 +734,7 @@ const getKnowledgeCenter = async () => {
     const response = await apiClient.get('/knowledge/center');
     return response.data;
   } catch (error) {
-    console.error('获取knowledge center��容列表失败:', error);
+    console.error('获取knowledge center内容列表失败:', error);
     return null;
   }
 };
@@ -836,7 +836,7 @@ const updateSubfolders = async (subfolders) => {
     });
     return response.data;
   } catch (error) {
-    console.error('更新子文件夹���败:', error);
+    console.error('更新子文件夹失败:', error);
     return null;
   }
 };
@@ -851,6 +851,38 @@ const getSubfolders = async () => {
     return null;
   }
 };
+
+// 新增：更新sitemap的方法
+const updateSitemap = async (customerId) => {
+  try {
+    const response = await apiClient.put(`/products/sitemap`, null, {
+      params: { customerId }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('更新sitemap失败:', error);
+    return null;
+  }
+};
+
+const getSitemapUrls = async (params) => {
+  try {
+    const { customerId, websiteId, page, limit } = params;
+    const response = await apiClient.get('/products/sitemap/urls', {
+      params: {
+        customerId,
+        websiteId,
+        page,
+        limit
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('获取sitemap URLs列表失败:', error);
+    return null;
+  }
+};
+
 
 export default {
   validateDomain,
@@ -917,5 +949,7 @@ export default {
   updateFullSections,
   getPages,
   updateSubfolders,
-  getSubfolders
+  getSubfolders,
+  updateSitemap,
+  getSitemapUrls
 };

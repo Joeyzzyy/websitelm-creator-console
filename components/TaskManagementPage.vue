@@ -184,6 +184,7 @@ export default {
     const tasks = ref([])
     const loading = ref(false)
     const verifiedDomains = ref([])
+    const subfolders = ref([])
     const pagination = reactive({
       current: 1,
       pageSize: 10,
@@ -220,18 +221,12 @@ export default {
         title: 'Title',
         dataIndex: 'title',
         key: 'title',
-        width: '25%'
+        width: '30%'
       },
       {
         title: 'Type',
         dataIndex: 'articleType',
         key: 'type',
-        width: '10%'
-      },
-      {
-        title: 'Word Count',
-        dataIndex: 'numberOfWords',
-        key: 'wordCount',
         width: '10%'
       },
       {
@@ -249,7 +244,7 @@ export default {
       {
         title: 'Empty Fields',
         key: 'hasEmpty',
-        width: '10%'
+        width: '15%'
       },
       {
         title: 'Actions',
@@ -286,6 +281,17 @@ export default {
       }
     }
 
+    const loadSubfolders = async () => {
+      try {
+        const response = await apiClient.getSubfolders();
+        if (response?.code === 200 && response?.data) {
+          subfolders.value = response.data;
+        }
+      } catch (error) {
+        console.error('Failed to load subfolders:', error);
+      }
+    };
+
     const loadVerifiedDomains = async () => {
       try {
         const projectId = VERCEL_CONFIG.PROJECT_ID;
@@ -296,8 +302,8 @@ export default {
           await loadProductInfo();
         }
         
-        // 查找所有已验证的域名
-        verifiedDomains.value = response?.domains
+        // 获取验证过的域名
+        const domains = response?.domains
           ?.filter(domain => {
             const isVerified = domain.verified || !domain.configDetails?.misconfigured;
             const hasProductInfo = productInfo.value?.projectWebsite === domain.apexName && productInfo.value?.domainStatus;
@@ -305,7 +311,16 @@ export default {
           })
           ?.map(domain => domain.name) || [];
 
-          console.log('verifiedDomains', verifiedDomains.value)
+        // 加载子文件夹
+        await loadSubfolders();
+        
+        // 合并域名和子文件夹路径
+        verifiedDomains.value = [
+          ...domains,
+          ...(subfolders.value.map(subfolder => `${productInfo.value?.projectWebsite}/${subfolder}`))
+        ];
+
+        console.log('verifiedDomains', verifiedDomains.value)
       } catch (error) {
         console.error('Failed to load domain info:', error);
       }
@@ -361,7 +376,7 @@ export default {
     const checkArticleForEmptyFields = (article) => {
       if (!article.sections) return false
 
-      // 遍历���有sections检查空值
+      // 遍历所有sections检查空值
       return article.sections.some(section => {
         let hasEmptyField = false
         
@@ -552,12 +567,50 @@ export default {
       }
     }
 
-    const getPublishTooltip = (record) => {
+    const getPublishBlockReasons = (record) => {
+      const reasons = [];
+
+      // Check for verified domains
       if (verifiedDomains.value.length === 0) {
-        return 'No verified sub-domain available. Please verify a domain in Settings first.'
+        reasons.push('No verified domain available. Please verify a domain in Settings first.');
       }
-      return ''; // 返回空字符串时不会显示tooltip
-    }
+
+      // Check required fields
+      const requiredFields = {
+        title: 'Title',
+        description: 'Description',
+        articleType: 'Type',
+        lang: 'Language',
+        suffixURL: 'Page Slug'
+      };
+
+      // Check all required fields
+      for (const [field, label] of Object.entries(requiredFields)) {
+        const value = record[field];
+        if (!value || (Array.isArray(value) && value.length === 0)) {
+          reasons.push(`${label} is required`);
+        }
+      }
+
+      // Check if page has empty fields
+      if (record.hasEmpty) {
+        reasons.push('Page contains empty required fields');
+      }
+
+      return reasons;
+    };
+
+    const getPublishTooltip = (record) => {
+      const reasons = getPublishBlockReasons(record);
+      if (reasons.length > 0) {
+        return 'Cannot publish because:\n' + reasons.join('\n');
+      }
+      return '';
+    };
+
+    const canPublish = (record) => {
+      return getPublishBlockReasons(record).length === 0;
+    };
 
     onMounted(async () => {
       fetchTasks()
@@ -584,12 +637,14 @@ export default {
       pagination,
       handleTableChange,
       handlePageChange,
-      canPublish: () => verifiedDomains.value.length > 0,
+      canPublish,
       getStatusLabel,
       getPublishTooltip,
       productInfo,
       loadProductInfo,
-      loadVerifiedDomains
+      loadVerifiedDomains,
+      subfolders,
+      loadSubfolders,
     }
   }
 }
@@ -898,16 +953,16 @@ export default {
 
 /* 添加新的样式 */
 .domain-tags {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  margin-left: 8px;
 }
 
 :deep(.ant-tag) {
-  font-size: 12px;
-  line-height: 20px;
-  padding: 0 8px;
-  border-radius: 4px;
+  margin: 0;
+  white-space: normal;
+  height: auto;
+  line-height: 1.5;
 }
 
 .domain-label {
