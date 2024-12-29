@@ -499,6 +499,26 @@ export default defineComponent({
 
     // 在组件挂载时初始化数据
     onMounted(async () => {
+      // 添加更多日志来调试
+      console.log('组件挂载，当前路由参数：', route.query);
+      console.log('refresh 参数值：', route.query.refresh);
+      console.log('needsRefresh 值：', route.query.refresh === 'true');
+      
+      // 检查 URL 中是否有 refresh 参数
+      const needsRefresh = route.query.refresh === 'true';
+      
+      if (needsRefresh) {
+        console.log('需要刷新页面...');
+        // 先移除 refresh 参数
+        const query = { ...route.query };
+        delete query.refresh;
+        // 更新 URL，移除 refresh 参数
+        await router.replace({ query });
+        // 然后再刷新页面
+        window.location.reload();
+        return;
+      }
+
       await loadProductInfo();
       await loadVerifiedDomains(); 
       await loadDeployTargets('subfolder');
@@ -859,7 +879,8 @@ export default defineComponent({
           router.push('/task-management');
         } else if (!isEditMode.value) {
           const pageId = response.data.pageId
-          router.push(`/page-writer?mode=edit&id=${pageId}&lang=${articleData.value.language}`);
+          // 使用 window.location.href 来进行真实的页面跳转
+          window.location.href = `/page-writer?mode=edit&id=${pageId}&lang=${articleData.value.language}&refresh=true`;
         }
 
       } catch (error) {
@@ -1053,8 +1074,7 @@ export default defineComponent({
         language: 'Language',
         author: 'Author',
         keywords: 'Keywords',
-        deploymentMethod: 'Deployment Method',
-        deployTarget: 'Deploy Target',
+        publishUrl: 'Publish URL',  // 将 deploymentMethod 和 deployTarget 改为 publishUrl
         slug: 'Page Slug'
       };
 

@@ -349,20 +349,23 @@ export default {
             suffixURL: page.suffixURL,
             articleType: page.articleType,
             numberOfWords: page.numberOfWords,
-            description: page.description
+            description: page.description,
+            author: page.author,
+            relatedKeyword: page.relatedKeyword,
+            publishURL: page.publishURL,
+            slug: page.slug
           }))
 
           tasks.value = pages
           pagination.total = response.TotalCount || 0
         } else {
-          // 添加错误处理
           message.error('Failed to fetch tasks: Invalid response')
         }
       } catch(err) {
         console.error(err)
         message.error('Failed to fetch tasks')
       } finally {
-        loading.value = false  // 确保loading状态被重置
+        loading.value = false
       }
     }
 
@@ -570,24 +573,35 @@ export default {
     const getPublishBlockReasons = (record) => {
       const reasons = [];
 
+      // Debug log
+      console.log('Checking record:', {
+        author: record.author,
+        relatedKeyword: record.relatedKeyword,
+        publishURL: record.publishURL,
+        slug: record.slug
+      });
+
       // Check for verified domains
       if (verifiedDomains.value.length === 0) {
         reasons.push('No verified domain available. Please verify a domain in Settings first.');
       }
 
-      // Check required fields
+      // Check required fields with correct field names
       const requiredFields = {
         title: 'Title',
         description: 'Description',
         articleType: 'Type',
         lang: 'Language',
-        slug: 'Slug',
-        publishURL: 'Publish URL'
+        author: 'Author',
+        relatedKeyword: 'Keywords',
+        publishURL: 'Publish URL',
+        slug: 'Page Slug'
       };
 
-      // Check all required fields
+      // Check all required fields with debug info
       for (const [field, label] of Object.entries(requiredFields)) {
         const value = record[field];
+        console.log(`Checking ${field}:`, value);
         if (!value || (Array.isArray(value) && value.length === 0)) {
           reasons.push(`${label} is required`);
         }
@@ -598,6 +612,7 @@ export default {
         reasons.push('Page contains empty required fields');
       }
 
+      console.log('Publish block reasons:', reasons);
       return reasons;
     };
 
