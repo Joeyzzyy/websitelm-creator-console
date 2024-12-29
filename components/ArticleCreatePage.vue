@@ -237,58 +237,33 @@
                         </a-form-item>
                       </div>
 
-                      <!-- Deployment Method 放在 Summary 上面 -->
+                      <!-- 将 Deployment Method 改为 Publish URL -->
                       <a-form-item 
-                        label="Deployment Method"
+                        label="Publish URL"
                         style="margin-top: 24px;"
+                        required
                       >
-                        <a-radio-group 
-                          v-model:value="articleData.deploymentMethod" 
+                        <a-select
+                          v-model:value="articleData.publishUrl"
+                          placeholder="Select publish URL"
+                          :loading="loadingDeployTargets"
+                          style="width: 100%;"
                         >
-                          <a-radio value="subfolder">Subfolder</a-radio>
-                          <a-radio value="subdomain">Subdomain</a-radio>
-                        </a-radio-group>
-
-                        <div v-if="articleData.deploymentMethod" style="margin-top: 16px;">
-                          <a-select
-                            v-if="articleData.deploymentMethod === 'subdomain'"
-                            v-model:value="articleData.deployTarget"
-                            placeholder="Select subdomain"
-                            :loading="loadingDeployTargets"
-                            style="width: 100%;"
+                          <a-select-option 
+                            v-for="domain in availablePublishUrls" 
+                            :key="domain"
+                            :value="domain"
                           >
-                            <a-select-option 
-                              v-for="domain in availableSubdomains" 
-                              :key="domain.name"
-                              :value="domain.name"
-                            >
-                              {{ domain.name }}
-                            </a-select-option>
-                          </a-select>
+                            {{ domain }}
+                          </a-select-option>
+                        </a-select>
 
-                          <a-select
-                            v-else
-                            v-model:value="articleData.deployTarget"
-                            placeholder="Select subfolder"
-                            :loading="loadingDeployTargets"
-                            style="width: 100%;"
-                          >
-                            <a-select-option 
-                              v-for="folder in availableSubfolders" 
-                              :key="folder.text"
-                              :value="folder.text"
-                            >
-                              {{ folder.text }}
-                            </a-select-option>
-                          </a-select>
-
-                          <!-- 修改预览URL显示逻辑 -->
-                          <div class="preview-url-hint" v-if="articleData.deployTarget">
-                            <div class="hint-label">This page could be published to:</div>
-                            <div class="preview-url">{{ getPreviewDeployUrl }}</div>
-                            <div class="url-note">
-                              Note: The URL slug is a unique identifier for this page and will be generated after saving.
-                            </div>
+                        <!-- 修改预览URL显示逻辑 -->
+                        <div class="preview-url-hint" v-if="articleData.publishUrl">
+                          <div class="hint-label">This page could be published to:</div>
+                          <div class="preview-url">{{ getPreviewPublishUrl }}</div>
+                          <div class="url-note">
+                            Note: The URL slug is a unique identifier for this page and will be generated after saving.
                           </div>
                         </div>
                       </a-form-item>
@@ -778,14 +753,15 @@ export default defineComponent({
 
     const handleSave = async (shouldQuit = false) => {
       try {
-        // 必填字段验证
+        // 修改必填字段验证
         const requiredFields = {
           title: 'Page title',
           description: 'Page description',
           articleType: 'Type',
           language: 'Language',
           author: 'Author',
-          keywords: 'Keywords'
+          keywords: 'Keywords',
+          publishUrl: 'Publish URL'  // 添加 publishUrl 为必填字段
         };
 
         // 检查所有必填字段
@@ -837,6 +813,7 @@ export default defineComponent({
             articleType: articleData.value.articleType,
             slug: articleData.value.slug,
             author: articleData.value.author,  // 确保使用表单中的 author
+            publishUrl: articleData.value.publishUrl, // 添加 publishUrl
             relatedKeyword: processedKeywords,
             numberOfWords: 2000
           };
@@ -865,6 +842,7 @@ export default defineComponent({
               slug: articleData.value.slug || '',
               topic: articleData.value.topic,
               articleType: articleData.value.articleType,
+              publishUrl: articleData.value.publishUrl, // 添加 publishUrl
               relatedKeyword: processedKeywords,
               numberOfWords: 2000
             },
@@ -1274,35 +1252,66 @@ export default defineComponent({
         topic: data.topic || '',
         articleType: data.articleType || 'Landing Page',
         language: data.language || 'en',
-        deploymentMethod: data.deploymentMethod || 'subfolder', // 修改默认值为 subfolder
-        deployTarget: data.deployTarget || null
+        publishUrl: data.publishUrl || null // 使用 publishUrl 替代 deploymentMethod 和 deployTarget
       };
       
       // 保存原始数据用于比较
       originalArticle.value = JSON.parse(JSON.stringify(articleData.value));
       
-      // 加载对应的部署目标选项
-      if (articleData.value.deploymentMethod) {
-        loadDeployTargets(articleData.value.deploymentMethod);
+      // 加载可用的发布URL
+      loadPublishUrls();
+    };
+
+    // 添加新的响应式变量
+    const availablePublishUrls = ref([]);
+
+    // 加载可用的发布URL
+    const loadPublishUrls = async () => {
+      loadingDeployTargets.value = true;
+      try {
+        const projectId = VERCEL_CONFIG.PROJECT_ID;
+        const response = await apiClient.getVercelDomainInfo(projectId);
+        
+        if (response?.domains) {
+          // 过滤有效域名
+          const filteredDomains = response.domains
+            .filter(domain => {
+              const isVerified = domain.verified || !domain.configDetails?.misconfigured;
+              const belongsToCustomer = domain.apexName === productInfo.value?.projectWebsite;
+              return isVerified && domain.name && belongsToCustomer;
+            })
+            .map(domain => domain.name);
+
+          // 获取子文件夹
+          const subfoldersResponse = await apiClient.getSubfolders();
+          const subfolderUrls = subfoldersResponse?.code === 200 && subfoldersResponse?.data
+            ? subfoldersResponse.data.map(folder => `${productInfo.value?.projectWebsite}/${folder}`)
+            : [];
+
+          // 合并域名和子文件夹URL
+          availablePublishUrls.value = [...filteredDomains, ...subfolderUrls];
+          
+          // 如果编辑模式下没有 publishUrl，设置第一个可用的URL
+          if (!articleData.value.publishUrl && availablePublishUrls.value.length > 0) {
+            articleData.value.publishUrl = availablePublishUrls.value[0];
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load publish URLs:', error);
+        message.error('Failed to load publish URL options');
+      } finally {
+        loadingDeployTargets.value = false;
       }
     };
 
-    // 在 script setup 部分添加计算属性
-    const getPreviewDeployUrl = computed(() => {
-      if (!articleData.value.deployTarget) {
+    // 修改预览URL计算属性
+    const getPreviewPublishUrl = computed(() => {
+      if (!articleData.value.publishUrl) {
         return '';
       }
 
       const slug = articleData.value.slug || '{slug}';
-
-      if (articleData.value.deploymentMethod === 'subdomain') {
-        return `https://${articleData.value.deployTarget}/${slug}`;
-      } else {
-        // 使用 customer 的 projectWebsite
-        const baseUrl = productInfo.value?.projectWebsite;
-        if (!baseUrl) return '';
-        return `https://${baseUrl}/${articleData.value.deployTarget}/${slug}`;
-      }
+      return `https://${articleData.value.publishUrl}/${slug}`;
     });
 
     // 添加预览弹窗相关的响应式数据
@@ -1412,7 +1421,7 @@ export default defineComponent({
       loadingDeployTargets,
       availableSubdomains,
       availableSubfolders,
-      getPreviewDeployUrl,
+      getPreviewPublishUrl,
       previewModal,
       showComponentPreview,
       handlePreviewCancel,
@@ -1420,7 +1429,8 @@ export default defineComponent({
       themeConfig,
       handleKeywordsPaste,
       subfolders,
-      loadSubfolders
+      loadSubfolders,
+      availablePublishUrls
     };
   }
 });

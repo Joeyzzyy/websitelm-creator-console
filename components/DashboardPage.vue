@@ -1626,7 +1626,7 @@ export default defineComponent({
 .dashboard-content {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 16px;
   padding: 0 0 24px;
 }
 

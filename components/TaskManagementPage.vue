@@ -81,7 +81,7 @@
 
                 <template v-if="column.key === 'hasEmpty'">
                   <a-tag :color="record.hasEmpty ? 'warning' : 'success'">
-                    {{ record.hasEmpty ? 'Has Empty Fields' : 'Complete' }}
+                    {{ record.hasEmpty ? 'Has Empty Fields' : 'No Empty Fields - Completed' }}
                   </a-tag>
                 </template>
 
@@ -244,12 +244,12 @@ export default {
       {
         title: 'Empty Fields',
         key: 'hasEmpty',
-        width: '15%'
+        width: '20%'
       },
       {
         title: 'Actions',
         key: 'actions',
-        width: '25%'
+        width: '20%'
       }
     ]
 
@@ -581,7 +581,8 @@ export default {
         description: 'Description',
         articleType: 'Type',
         lang: 'Language',
-        suffixURL: 'Page Slug'
+        slug: 'Slug',
+        publishURL: 'Publish URL'
       };
 
       // Check all required fields
@@ -675,6 +676,7 @@ export default {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .task-list {
@@ -991,5 +993,30 @@ export default {
   display: flex;
   justify-content: flex-end;
   padding: 16px;
+}
+
+/* 添加新的样式 */
+.header-left :deep(.ant-btn-primary) {
+  font-size: 12px;
+  height: 28px;
+  padding: 0 12px;
+  opacity: 0.8;
+}
+
+.header-left :deep(.ant-btn-primary:hover) {
+  opacity: 1;
+}
+
+.header-left :deep(.ant-btn-link) {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 8px;
+}
+
+.header-left :deep(.ant-btn-link .anticon) {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
 }
 </style>
