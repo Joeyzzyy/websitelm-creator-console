@@ -782,7 +782,7 @@ export default defineComponent({
         // 检查 slug 是否有效
         if (!isSlugValid.value) {
           message.error('Please modify the duplicate slug before saving');
-          return;
+          return; // 直接返回，不继续执行保存操作
         }
 
         // 修改必填字段验证
@@ -793,7 +793,7 @@ export default defineComponent({
           language: 'Language',
           author: 'Author',
           keywords: 'Keywords',
-          publishUrl: 'Publish URL'  // 添加 publishUrl 为必填字段
+          publishUrl: 'Publish URL'
         };
 
         // 检查所有必填字段
@@ -1446,14 +1446,28 @@ export default defineComponent({
       try {
         const response = await apiClient.checkSlugExists(slug, pageId.value);
         
-        if (response.exists && response.currentPageId !== pageId.value) {
-          slugStatus.value = 'error';
-          slugError.value = 'This slug is already in use, please choose another one';
-          isSlugValid.value = false;
+        if (response.code === 200) {
+          // data 为 true 表示重复，false 表示不重复
+          if (response.data === true) {
+            slugStatus.value = 'error';
+            slugError.value = 'This slug is already in use, please choose another one';
+            isSlugValid.value = false;
+          } else {
+            // slug 不重复，可以使用
+            slugStatus.value = 'success';
+            slugError.value = '';
+            isSlugValid.value = true;
+          }
+        } else {
+          // API 返回非 200 状态码
+          throw new Error(response.message || 'Failed to check slug');
         }
       } catch (error) {
         console.error('Check slug failed:', error);
-        message.error('检查 Slug 失败: ' + (error.message || '未知错误'));
+        message.error('Failed to check slug: ' + (error.message || 'Unknown error'));
+        // 发生错误时设置为无效状态
+        slugStatus.value = 'error';
+        isSlugValid.value = false;
       }
     };
 
