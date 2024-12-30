@@ -1061,12 +1061,12 @@ export default defineComponent({
     const getPublishBlockReasons = () => {
       const reasons = [];
 
-      // Check for verified domains
+      // 检查是否有已验证的域名
       if (verifiedDomains.value.length === 0) {
         reasons.push('No verified domain available. Please verify a domain in Settings first.');
       }
 
-      // Check required fields
+      // 检查必填字段
       const requiredFields = {
         title: 'Title',
         description: 'Description',
@@ -1074,20 +1074,20 @@ export default defineComponent({
         language: 'Language',
         author: 'Author',
         keywords: 'Keywords',
-        publishUrl: 'Publish URL',  // 将 deploymentMethod 和 deployTarget 改为 publishUrl
+        publishUrl: 'Publish URL',
         slug: 'Page Slug'
       };
 
-      // Check all required fields
+      // 检查所有必填字段
       for (const [field, label] of Object.entries(requiredFields)) {
         const value = articleData.value[field];
         if (!value || (Array.isArray(value) && value.length === 0)) {
-          reasons.push(`${label} is required. `);
+          reasons.push(`${label} is required`);
         }
       }
 
-      // Check for content sections
-      if (articleData.value.sections.length === 0) {
+      // 检查内容部分
+      if (!articleData.value.sections || articleData.value.sections.length === 0) {
         reasons.push('At least one content section is required');
       }
 
@@ -1106,23 +1106,36 @@ export default defineComponent({
       return getPublishBlockReasons().length === 0;
     };
 
-    const handlePublish = () => {
-      const isPublished = articleData.value.publishStatus === 'publish';
-      
-      console.log('verifiedDomains', verifiedDomains.value);
-      // 只在要发布时检查 verified domains
-      if (!isPublished && verifiedDomains.value.length === 0) {
-        message.error('No verified sub-domain available. Please verify a domain in Settings first.');
-        return;
-      }
+    const handlePublish = async () => {
+      try {
+        publishing.value = true;
+        const isPublished = articleData.value.publishStatus === 'publish';
+        
+        // 只在要发布时检查 verified domains
+        if (!isPublished && verifiedDomains.value.length === 0) {
+          message.error('No verified sub-domain available. Please verify a domain in Settings first.');
+          return;
+        }
 
-      publishModal.visible = true;
-      publishModal.title = isPublished ? 'Confirm Unpublish' : 'Confirm Publish';
-      publishModal.content = isPublished 
-        ? 'Are you sure you want to unpublish this article?' 
-        : 'Are you sure you want to publish this article?';
-      publishModal.type = 'publish_action';
-      publishModal.data = articleData.value;
+        // 构建完整的发布URL
+        const fullPublishURL = `${articleData.value.publishUrl}/${articleData.value.language}/${articleData.value.slug}`;
+
+        if (isPublished) {
+          await apiClient.updatePageStatus(articleData.value.slug, 'unpublish', fullPublishURL);
+          message.success('Unpublished successfully');
+          articleData.value.publishStatus = 'create';
+        } else {
+          await apiClient.updatePageStatus(articleData.value.slug, 'publish', fullPublishURL);
+          message.success('Published successfully');
+          articleData.value.publishStatus = 'publish';
+        }
+
+      } catch (error) {
+        console.error('Publish action failed:', error);
+        message.error('Operation failed: ' + (error.message || 'Unknown error'));
+      } finally {
+        publishing.value = false;
+      }
     };
 
     const confirmPublish = async () => {

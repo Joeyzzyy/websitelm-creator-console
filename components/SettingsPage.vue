@@ -83,31 +83,122 @@
 
                         <div class="input-section" v-if="deploymentForm.method === 'subfolder'">
                           <a-spin :spinning="subfolderLoading">
-                            <div class="section-header">
-                              <h3>Subfolder Management</h3>
-                              <a-button type="primary" @click="showSubfolderModal = true">
-                                Add Subfolder
-                              </a-button>
+                            <div class="current-domain">
+                              <h3>Current Site</h3>
+                              <div class="domain-verification">
+                                <p class="website-url">{{ productInfo.projectWebsite }}</p>
+                                <a-button 
+                                  v-if="!subfolderDomainConfig"
+                                  type="primary"
+                                  @click="startVerifyingSubfolder"
+                                  :loading="verifyingSubfolder"
+                                >
+                                  Start Verifying
+                                </a-button>
+                              </div>
                             </div>
 
-                            <div class="subfolder-list">
-                              <a-table 
-                                :dataSource="subfolders" 
-                                :columns="subfolderColumns" 
-                                :pagination="false"
-                              >
-                                <template #bodyCell="{ column, text, record, index }">
-                                  <template v-if="column.key === 'action'">
-                                    <a-button type="link" danger @click="confirmDeleteSubfolder(index)">
-                                      Delete
-                                    </a-button>
-                                  </template>
-                                  <template v-if="column.key === 'preview'">
-                                    <span>{{ productInfo?.projectWebsite }}/{{ text }}</span>
-                                  </template>
-                                </template>
-                              </a-table>
+                            <div class="verification-status" v-if="subfolderDomainConfig">
+                              <div class="domains-header">
+                                <h3>Domain Verification</h3>
+                                <div class="domain-actions">
+                                  <a-button 
+                                    type="link"
+                                    class="refresh-btn"
+                                    :loading="refreshingSubfolder"
+                                    @click="handleSubfolderRefresh"
+                                  >
+                                    <reload-outlined />
+                                  </a-button>
+                                </div>
+                              </div>
+                              
+                              <template v-if="subfolderDomainConfig.misconfigured">
+                                <div class="dns-config-alert">
+                                  <a-alert
+                                    type="warning"
+                                    show-icon
+                                    message="DNS Configuration Required"
+                                    description="Please add the following DNS record to your domain provider:"
+                                  />
+                                  <div class="dns-table-wrapper">
+                                    <a-table
+                                      :dataSource="[{
+                                        type: 'A',
+                                        name: '@',
+                                        value: '76.76.21.21'
+                                      }]"
+                                      :columns="dnsColumnsWithActions"
+                                      :pagination="false"
+                                      size="small"
+                                      class="dns-table"
+                                    />
+                                  </div>
+                                </div>
+                              </template>
+                              <template v-else>
+                                <div class="verification-header">
+                                  <a-alert
+                                    type="success"
+                                    show-icon
+                                    message="Domain Verified"
+                                    description="Your domain has been successfully verified"
+                                    class="success-alert"
+                                  >
+                                    <template #message>
+                                      <div class="alert-content">
+                                        <span>Domain Verified</span>
+                                      </div>
+                                    </template>
+                                    <template #action>
+                                      <a-button 
+                                        type="link" 
+                                        danger
+                                        @click="showDeleteSubfolderDomainConfirm"
+                                        class="delete-btn"
+                                      >
+                                        <delete-outlined />
+                                      </a-button>
+                                    </template>
+                                  </a-alert>
+                                </div>
+                              </template>
                             </div>
+
+                            <template v-if="subfolderDomainConfig">
+                              <div class="verification-status">
+                                <!-- ... 验证状态显示部分保持不变 ... -->
+                              </div>
+
+                              <!-- 只在域名验证成功(非misconfigured)时显示子文件夹管理部分 -->
+                              <template v-if="!subfolderDomainConfig.misconfigured">
+                                <div class="section-header">
+                                  <h3>Subfolder Management</h3>
+                                  <a-button type="primary" @click="showSubfolderModal = true">
+                                    Add Subfolder
+                                  </a-button>
+                                </div>
+
+                                <div class="subfolder-list">
+                                  <a-table 
+                                    :dataSource="subfolders" 
+                                    :columns="subfolderColumns" 
+                                    :pagination="false"
+                                  >
+                                    <template #bodyCell="{ column, text, record, index }">
+                                      <template v-if="column.key === 'action'">
+                                        <a-button type="link" danger @click="confirmDeleteSubfolder(index)">
+                                          Delete
+                                        </a-button>
+                                      </template>
+                                      <template v-if="column.key === 'preview'">
+                                        <span>{{ productInfo?.projectWebsite }}/{{ text }}</span>
+                                      </template>
+                                    </template>
+                                  </a-table>
+                                </div>
+                              </template>
+                            </template>
                           </a-spin>
                         </div>
                         <div class="input-section" v-if="deploymentForm.method === 'subdomain'">
@@ -580,9 +671,9 @@ export default {
 
       const currentDomain = productInfo.value.projectWebsite;
       
-      // 过滤匹配的域名
+      // 过滤匹配的域名，排除主域名
       const matchingDomains = response.domains.filter(domain => {
-        return domain.apexName === currentDomain;
+        return domain.apexName === currentDomain && domain.name !== currentDomain;
       });
 
       // 为每个域名获取详细配置
@@ -870,6 +961,117 @@ export default {
 
     const subfolderLoading = ref(false);
 
+    const subfolderDomainConfig = ref(null);
+    const verifyingSubfolder = ref(false);
+    const refreshingSubfolder = ref(false);
+
+    const startVerifyingSubfolder = async () => {
+      try {
+        verifyingSubfolder.value = true;
+        const projectId = PROJECT_ID;
+        
+        // 使用主域名进行验证
+        const domainData = {
+          name: productInfo.value.projectWebsite
+        };
+        
+        // 提交验证申请
+        const response = await apiClient.addVercelDomain(projectId, domainData);
+        // 加载验证配置
+        await loadSubfolderDomainConfig();
+        
+      } catch (error) {
+        console.error('Failed to start domain verification:', error);
+        message.error('Failed to start domain verification');
+      } finally {
+        verifyingSubfolder.value = false;
+      }
+    };
+
+    const loadSubfolderDomainConfig = async () => {
+      try {
+        const config = await apiClient.getVercelDomainConfig(productInfo.value.projectWebsite);
+        
+        // 根据实际配置设置 verified 状态
+        subfolderDomainConfig.value = {
+          ...config,
+          verified: !config.misconfigured // 根据 misconfigured 状态来确定是否已验证
+        };
+        
+      } catch (error) {
+        console.error('加载域名配置失败:', error);
+        console.error('错误详情:', {
+          message: error.message,
+          response: error.response?.data,
+          status: error.response?.status
+        });
+        message.error('Failed to load domain configuration');
+      }
+    };
+
+    const handleSubfolderRefresh = async () => {
+      refreshingSubfolder.value = true;
+      try {
+        await loadSubfolderDomainConfig();
+        message.success('Refresh successful');
+      } catch (error) {
+        message.error('Refresh failed');
+      } finally {
+        refreshingSubfolder.value = false;
+      }
+    };
+
+    // 在 watch 方法中添加对 deploymentForm.method 的监听
+    watch(() => deploymentForm.value.method, async (newMethod) => {
+      if (newMethod === 'subfolder') {
+        loadSubfolders();
+        // 如果有主域名，则加载域名配置
+        if (productInfo.value?.projectWebsite) {
+          await loadSubfolderDomainConfig();
+        }
+      }
+    });
+
+    const showDeleteSubfolderDomainConfirm = () => {
+      Modal.confirm({
+        title: 'Delete Domain Verification',
+        content: `Are you sure you want to delete the domain verification for ${productInfo.value.projectWebsite}?`,
+        okText: 'Delete',
+        okType: 'danger',
+        cancelText: 'Cancel',
+        async onOk() {
+          try {
+            const projectId = PROJECT_ID;
+            await apiClient.deleteVercelDomain(projectId, productInfo.value.projectWebsite);
+            message.success('Domain verification deleted successfully');
+            subfolderDomainConfig.value = null; // 清除验证配置
+          } catch (error) {
+            console.error('Failed to delete domain verification:', error);
+            message.error('Failed to delete domain verification');
+          }
+        },
+      });
+    };
+
+    // 添加带操作列的 DNS 列定义
+    const dnsColumnsWithActions = [
+      {
+        title: 'Type',
+        dataIndex: 'type',
+        key: 'type',
+      },
+      {
+        title: 'Name',
+        dataIndex: 'name',
+        key: 'name',
+      },
+      {
+        title: 'Value',
+        dataIndex: 'value',
+        key: 'value',
+      }
+    ];
+
     return {
       cooldown,
       goToDashboard,
@@ -915,6 +1117,13 @@ export default {
       saveSubfolders,
       subfolderLoading,
       subdomainLoading,
+      subfolderDomainConfig,
+      verifyingSubfolder,
+      refreshingSubfolder,
+      startVerifyingSubfolder,
+      handleSubfolderRefresh,
+      showDeleteSubfolderDomainConfirm,
+      dnsColumnsWithActions,
     };
   }
 }
@@ -1511,5 +1720,45 @@ export default {
 .base-url {
   color: #666;
   white-space: nowrap;
+}
+
+.domain-verification {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.verification-status {
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.domain-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.verification-header {
+  display: flex;
+  align-items: flex-start;
+}
+
+.success-alert {
+  width: 100%;
+}
+
+:deep(.ant-alert-action) {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+}
+
+.delete-btn {
+  padding: 4px 8px;
+  height: auto;
 }
 </style> 

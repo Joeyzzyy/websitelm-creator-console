@@ -337,15 +337,15 @@ export default {
 
     // fetchTasks 方法的修改
     const fetchTasks = async () => {
-      loading.value = true
+      loading.value = true;
       try {
-        const userId = localStorage.getItem('currentCustomerId')
+        const userId = localStorage.getItem('currentCustomerId');
         
         const response = await apiClient.getPages({
           customerId: userId,
           page: pagination.current,
           limit: pagination.pageSize
-        })
+        });
         
         if (response?.code === 200 && response?.data) {
           const pages = response.data.map(page => ({
@@ -354,7 +354,7 @@ export default {
             title: page.title,
             lang: page.lang || 'en',
             publishStatus: page.publishStatus,
-            hasEmpty: checkArticleForEmptyFields(page),
+            sections: page.sections || [], // 确保 sections 字段存在
             suffixURL: page.suffixURL,
             articleType: page.articleType,
             numberOfWords: page.numberOfWords,
@@ -363,20 +363,20 @@ export default {
             relatedKeyword: page.relatedKeyword,
             publishURL: page.publishURL,
             slug: page.slug
-          }))
+          }));
 
-          tasks.value = pages
-          pagination.total = response.TotalCount || 0
+          tasks.value = pages;
+          pagination.total = response.TotalCount || 0;
         } else {
-          message.error('Failed to fetch tasks: Invalid response')
+          message.error('Failed to fetch tasks: Invalid response');
         }
       } catch(err) {
-        console.error(err)
-        message.error('Failed to fetch tasks')
+        console.error(err);
+        message.error('Failed to fetch tasks');
       } finally {
-        loading.value = false
+        loading.value = false;
       }
-    }
+    };
 
     const handleTableChange = (pag) => {
       pagination.current = pag.current
@@ -386,61 +386,12 @@ export default {
 
     // 添加检查文章内容的函数
     const checkArticleForEmptyFields = (article) => {
-      if (!article.sections) return false
-
-      // 遍历所有sections检查空值
-      return article.sections.some(section => {
-        let hasEmptyField = false
-        
-        const checkContent = (obj) => {
-          if (!obj) return
-          
-          Object.entries(obj).forEach(([key, value]) => {
-            // 跳过特定字段
-            if (['componentName', 'sectionId', 'display', 'color'].includes(key)) {
-              return
-            }
-            
-            if (Array.isArray(value)) {
-              value.forEach(item => {
-                if (typeof item === 'object') {
-                  checkContent(item)
-                } else if (!item || (typeof item === 'string' && !item.trim())) {
-                  hasEmptyField = true
-                }
-              })
-            } else if (typeof value === 'object') {
-              checkContent(value)
-            } else if (!value || (typeof value === 'string' && !value.trim())) {
-              hasEmptyField = true
-            }
-          })
-        }
-
-        // 检查所有内容区域
-        if (section) {
-          // 检查主要内容区域
-          ['topContent', 'leftContent', 'rightContent', 'bottomContent'].forEach(contentKey => {
-            if (section[contentKey]) {
-              checkContent(section[contentKey])
-            }
-          })
-
-          // 全地检查标题字段
-          const titleFields = ['title', 'subtitle', 'subTitle']
-          titleFields.forEach(field => {
-            const value = section[field]
-            if (value !== undefined && value !== null) {
-              if (typeof value === 'string' && !value.trim()) {
-                hasEmptyField = true
-              }
-            }
-          })
-        }
-
-        return hasEmptyField
-      })
+      if (!article.sections) return true;
+      
+      // 只检查是否有 sections，不再深度检查内容
+      return article.sections.length === 0;
     }
+
     // Delete article
     const deleteArticle = (article) => {
       modalConfig.visible = true
@@ -462,21 +413,28 @@ export default {
           await apiClient.deletePage(modalConfig.data.pageId)
           message.success('Article deleted successfully')
           fetchTasks()
-        } else if (modalConfig.type === 'publish_action') {
+        } else if (modalConfig.type === 'publish_action') {  
           const article = modalConfig.data
           const isPublished = article.publishStatus === 'publish'
           
-          if (isPublished) {
-            await apiClient.updatePageStatus(article.pageId, 'unpublish')
-            message.success('Unpublished successfully')
+          const fullPublishURL = `${article.publishURL}/${article.lang}/${article.slug}`
+          
+          const response = isPublished
+            ? await apiClient.updatePageStatus(article.pageId, 'unpublish', fullPublishURL)
+            : await apiClient.updatePageStatus(article.pageId, 'publish', fullPublishURL)
+
+          // 检查响应中的 code
+          if (response?.code === 200) {
+            message.success(isPublished ? 'Unpublished successfully' : 'Published successfully')
+            fetchTasks()
           } else {
-            await apiClient.updatePageStatus(article.pageId, 'publish')
-            message.success('Published successfully')
+            // 显示服务器返回的错误信息或默认错误信息
+            message.error(response?.message || 'Operation failed')
           }
-          fetchTasks()
         }
       } catch(err) {
-        message.error('Operation failed')
+        console.error('Operation failed:', err)
+        message.error(err?.message || 'Operation failed')
       } finally {
         modalConfig.loading = false
         modalConfig.visible = false
@@ -511,19 +469,7 @@ export default {
     const getPreviewUrl = (article) => {
       return `${config.domains.preview}${article.lang === 'zh' ? 'zh/' : 'en/'}${article.slug}`;
     };
-    
-    const getPublishUrl = (article) => {
-      // 如果没有验证域名,返回空
-      if (verifiedDomains.value.length === 0) {
-        return ''
-      }
-      
-      // 使用第一个验证名为发布域名
-      const publishDomain = verifiedDomains.value[0]
-      return `https://${publishDomain}/${article.lang === 'zh' ? 'zh/' : 'en/'}${article.slug}`
-    }
 
-    // Style methods
     const getStatusColor = (status) => {
       switch (status) {
         case 'create':
@@ -533,27 +479,6 @@ export default {
         default:
           return 'default'
       }
-    }
-
-    const getTypeColor = (type) => {
-      const colors = {
-        'Blog Post': 'blue',
-        'Landing Page': 'purple',
-        'Product Description': 'green'
-      }
-      return colors[type] || 'default'
-    }
-    
-    const getLangColor = (lang) => {
-      return lang === 'zh' ? 'orange' : 'blue'
-    }
-    
-    const getLangLabel = (lang) => {
-      return lang === 'zh' ? 'Chinese' : 'English'
-    }
-
-    const getPublishedCount = (articles) => {
-      return articles.filter(a => a.publishStatus === 'publish').length
     }
 
     const handleAddPage = () => {
@@ -582,20 +507,12 @@ export default {
     const getPublishBlockReasons = (record) => {
       const reasons = [];
 
-      // Debug log
-      console.log('Checking record:', {
-        author: record.author,
-        relatedKeyword: record.relatedKeyword,
-        publishURL: record.publishURL,
-        slug: record.slug
-      });
-
-      // Check for verified domains
+      // 1. 检查是否有已验证的域名
       if (verifiedDomains.value.length === 0) {
-        reasons.push('No verified domain available. Please verify a domain in Settings first.');
+        reasons.push('No verified domain available');
       }
 
-      // Check required fields with correct field names
+      // 2. 检查必填字段
       const requiredFields = {
         title: 'Title',
         description: 'Description',
@@ -607,21 +524,22 @@ export default {
         slug: 'Page Slug'
       };
 
-      // Check all required fields with debug info
+      // 3. 检查所有必填字段
       for (const [field, label] of Object.entries(requiredFields)) {
         const value = record[field];
-        console.log(`Checking ${field}:`, value);
         if (!value || (Array.isArray(value) && value.length === 0)) {
           reasons.push(`${label} is required`);
         }
       }
 
-      // Check if page has empty fields
-      if (record.hasEmpty) {
-        reasons.push('Page contains empty required fields');
+      // 4. 添加调试日志
+      console.log('Record sections:', record.sections);
+      
+      // 5. 修改 sections 检查逻辑，确保正确访问数据
+      if (!record.sections || record.sections.length === 0) {
+        reasons.push('At least one content section is required');
       }
 
-      console.log('Publish block reasons:', reasons);
       return reasons;
     };
 

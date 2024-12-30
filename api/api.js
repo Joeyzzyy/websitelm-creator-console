@@ -180,31 +180,6 @@ const editKeyword = async (keywordId, keywordType, subKeywordId, term) => {
   }
 };
 
-const VERCEL_API_URL = 'https://api.vercel.com';
-const VERCEL_TOKEN = 'Rmr5Bk7l1Ai8D2KfXj92U0e4';
-const PROJECT_ID = 'nextjs'; 
-
-const getVercelDomains = async () => {
-  try {
-    const response = await fetch(`${VERCEL_API_URL}/v9/projects/${PROJECT_ID}/domains`, {
-      headers: {
-        'Authorization': `Bearer ${VERCEL_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('获取Vercel域名时出错:', error);
-    throw error;
-  }
-};
-
 // 新增：获取域名的方法
 const getDomains = async (customerId, page, limit) => {
   try {
@@ -263,10 +238,11 @@ const updateSection = async (sectionId, sectionData) => {
 };
 
 // 新增：更新页面状态的方法
-const updatePageStatus = async (pageId, status) => {
-  console.log('Calling updatePageStatus:', { pageId, status }); // 添加日志
+const updatePageStatus = async (pageId, status, siteURL) => {
   try {
-    const response = await apiClient.put(`/pages/${pageId}/${status}`);
+    const response = await apiClient.put(`/pages/${pageId}/${status}`, null, {
+      params: { siteURL }
+    });
     return response.data;
   } catch (error) {
     console.error('更新页面状态失败:', error);
@@ -932,7 +908,6 @@ export default {
   addKeyword,
   deleteKeyword,
   editKeyword,
-  getVercelDomains,
   getDomains,
   deleteDomain,
   addDomain,
