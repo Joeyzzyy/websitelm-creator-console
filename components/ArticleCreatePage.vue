@@ -233,7 +233,12 @@
                           <a-input
                             v-model:value="articleData.slug"
                             placeholder="Enter page slug here"
+                            @blur="handleSlugBlur"
+                            :status="slugStatus"
                           />
+                          <div v-if="slugError" class="slug-error">
+                            {{ slugError }}
+                          </div>
                         </a-form-item>
                       </div>
 
@@ -362,7 +367,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, watch, nextTick, computed, onMounted, reactive } from 'vue';
+import { defineComponent, ref, watch, nextTick, computed, onMounted, reactive, onUnmounted } from 'vue';
 import { message } from 'ant-design-vue';
 import { 
   ArrowLeftOutlined, 
@@ -497,7 +502,6 @@ export default defineComponent({
     const loading = ref(true);
     const originalArticle = ref(null);
 
-    // 在组件挂载时初始化数据
     onMounted(async () => {
       // 添加更多日志来调试
       console.log('组件挂载，当前路由参数：', route.query);
@@ -519,6 +523,7 @@ export default defineComponent({
         return;
       }
 
+      // 初始化数据加载
       await loadProductInfo();
       await loadVerifiedDomains(); 
       await loadDeployTargets('subfolder');
@@ -533,7 +538,6 @@ export default defineComponent({
             throw new Error(response?.message || 'Invalid response data');
           }
         } else {
-          // 新建模式下初始化默认数据
           initializeArticleData({
             title: '',
             subTitle: '',
@@ -554,6 +558,8 @@ export default defineComponent({
       } finally {
         loading.value = false;
       }
+
+      autoSaveInterval.value = setInterval(autoSave, 30000);
     });
 
     const saving = ref(false);
@@ -773,6 +779,12 @@ export default defineComponent({
 
     const handleSave = async (shouldQuit = false) => {
       try {
+        // 检查 slug 是否有效
+        if (!isSlugValid.value) {
+          message.error('Please modify the duplicate slug before saving');
+          return;
+        }
+
         // 修改必填字段验证
         const requiredFields = {
           title: 'Page title',
@@ -1412,6 +1424,192 @@ export default defineComponent({
       }
     };
 
+    // 添加新的响应式变量
+    const slugStatus = ref('');
+    const slugError = ref('');
+    const isSlugValid = ref(true);
+
+    // 添加 slug 检查方法
+    const handleSlugBlur = async () => {
+      const slug = articleData.value.slug?.trim();
+      
+      // 重置状态
+      slugStatus.value = '';
+      slugError.value = '';
+      isSlugValid.value = true;
+
+      // 如果 slug 为空，不进行检查
+      if (!slug) {
+        return;
+      }
+
+      try {
+        const response = await apiClient.checkSlugExists(slug, pageId.value);
+        
+        if (response.exists && response.currentPageId !== pageId.value) {
+          slugStatus.value = 'error';
+          slugError.value = 'This slug is already in use, please choose another one';
+          isSlugValid.value = false;
+        }
+      } catch (error) {
+        console.error('Check slug failed:', error);
+        message.error('检查 Slug 失败: ' + (error.message || '未知错误'));
+      }
+    };
+
+    // 添加自动保存相关的响应式变量
+    const autoSaveInterval = ref(null);
+    const lastAutoSaveTime = ref(null);
+
+    // 检查必填字段是否都已填写
+    const checkRequiredFields = () => {
+      const requiredFields = {
+        title: 'Page title',
+        description: 'Page description',
+        articleType: 'Type',
+        language: 'Language',
+        author: 'Author',
+        keywords: 'Keywords',
+        publishUrl: 'Publish URL'
+      };
+
+      // 检查所有必填字段
+      for (const [field, label] of Object.entries(requiredFields)) {
+        if (field === 'keywords') {
+          // 特殊处理 keywords 数组
+          if (!articleData.value[field] || !articleData.value[field].length) {
+            return false;
+          }
+        } else if (!articleData.value[field]) {
+          return false;
+        }
+      }
+
+      // 编辑模式下额外检查 slug
+      if (isEditMode.value && !articleData.value.slug) {
+        return false;
+      }
+
+      return true;
+    };
+
+    // 自动保存方法
+    const autoSave = async () => {
+      try {
+        // 检查是否满足自动保存条件
+        if (!checkRequiredFields()) {
+          console.log('Required fields not filled, skipping auto-save');
+          return;
+        }
+
+        // 检查是否有内容sections
+        if (!articleData.value.sections || articleData.value.sections.length === 0) {
+          console.log('No sections to save, skipping auto-save');
+          return;
+        }
+
+        // 检查slug是否有效
+        if (!isSlugValid.value) {
+          console.log('Invalid slug, skipping auto-save');
+          return;
+        }
+
+        const customerId = localStorage.getItem('currentCustomerId');
+        if (!customerId) {
+          console.log('Customer ID not found, skipping auto-save');
+          return;
+        }
+
+        // 处理关键词
+        const processedKeywords = Array.isArray(articleData.value.keywords)
+          ? articleData.value.keywords.filter(k => k).join(',')
+          : (articleData.value.keywords || '');
+
+        if (isEditMode.value) {
+          // 编辑模式下的自动保存
+          const updatePromises = [];
+
+          const pageUpdateData = {
+            title: articleData.value.title,
+            subTitle: articleData.value.subTitle,
+            description: articleData.value.description,
+            summary: articleData.value.summary,
+            topic: articleData.value.topic,
+            articleType: articleData.value.articleType,
+            slug: articleData.value.slug,
+            author: articleData.value.author,
+            publishUrl: articleData.value.publishUrl,
+            relatedKeyword: processedKeywords,
+            numberOfWords: 2000
+          };
+
+          updatePromises.push(
+            apiClient.updatePage(pageId.value, pageUpdateData)
+          );
+
+          updatePromises.push(
+            apiClient.updateFullSections(pageId.value, {sections: articleData.value.sections})
+          );
+
+          await Promise.all(updatePromises);
+        } else {
+          // 创建模式下的自动保存
+          const requestData = {
+            page: {
+              author: articleData.value.author,
+              customerId: customerId,
+              description: articleData.value.description,
+              language: articleData.value.language,
+              subTitle: articleData.value.subTitle,
+              summary: articleData.value.summary || '',
+              title: articleData.value.title,
+              slug: articleData.value.slug || '',
+              topic: articleData.value.topic,
+              articleType: articleData.value.articleType,
+              publishUrl: articleData.value.publishUrl,
+              relatedKeyword: processedKeywords,
+              numberOfWords: 2000
+            },
+            sections: articleData.value.sections
+          };
+
+          await apiClient.createManualPage(requestData);
+        }
+
+        lastAutoSaveTime.value = new Date();
+        console.log('Auto-saved successfully at:', lastAutoSaveTime.value);
+        
+        // 添加轻量级提示
+        message.success({
+          content: 'Auto-saved successfully',
+          duration: 2,
+          class: 'auto-save-message'
+        });
+
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+        // 添加错误提示
+        message.error({
+          content: 'Auto-save failed',
+          duration: 2
+        });
+      }
+    };
+
+    // 将多个 onUnmounted 合并为一个
+    onUnmounted(() => {
+      // 清除自动保存定时器
+      if (autoSaveInterval.value) {
+        clearInterval(autoSaveInterval.value);
+      }
+    });
+
+    // 监听文章数据变化
+    watch(() => articleData.value, () => {
+      // 当数据发生变化时，可以在这里添加额外的逻辑
+      console.log('Article data changed, next auto-save scheduled');
+    }, { deep: true });
+
     return {
       loading,
       saving,
@@ -1463,7 +1661,11 @@ export default defineComponent({
       handleKeywordsPaste,
       subfolders,
       loadSubfolders,
-      availablePublishUrls
+      availablePublishUrls,
+      slugStatus,
+      slugError,
+      handleSlugBlur,
+      lastAutoSaveTime,
     };
   }
 });
@@ -2623,5 +2825,26 @@ export default defineComponent({
   border-color: #38BDF8;
   box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
   background: #ffffff;
+}
+
+/* 添加 slug 错误提示样式 */
+.slug-error {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+:deep(.ant-input-status-error) {
+  border-color: #ff4d4f !important;
+}
+
+:deep(.ant-input-status-error:hover) {
+  border-color: #ff7875 !important;
+}
+
+:deep(.ant-input-status-error:focus) {
+  border-color: #ff4d4f !important;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
 }
 </style>

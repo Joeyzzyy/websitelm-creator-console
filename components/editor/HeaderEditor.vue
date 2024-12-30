@@ -88,10 +88,7 @@
                         button-style="solid"
                       >
                         <a-radio-button value="primary">Primary</a-radio-button>
-                        <a-radio-button value="default">Default</a-radio-button>
-                        <a-radio-button value="link">Link</a-radio-button>
                         <a-radio-button value="text">Text</a-radio-button>
-                        <a-radio-button value="dashed">Dashed</a-radio-button>
                       </a-radio-group>
                     </div>
                   </div>
@@ -245,21 +242,9 @@ watch(() => props.initialData, (newValue) => {
     mainMenuItems: newValue.mainMenuItems || [],
     actionItems: (newValue.actionItems || []).map(item => ({
       ...item,
-      buttonType: item.variant === 'button' ? 'primary' : 'link'
+      buttonType: item.buttonType || 'primary'
     }))
   }
-}, { deep: true })
-
-// 在数据变化时发送更新
-watch(headerData, (newValue) => {
-  emit('update', {
-    logo: newValue.logo,
-    mainMenuItems: newValue.mainMenuItems,
-    actionItems: newValue.actionItems.map(item => ({
-      ...item,
-      variant: item.buttonType === 'primary' ? 'button' : 'link'
-    }))
-  })
 }, { deep: true })
 
 // 菜单项方法
@@ -295,7 +280,7 @@ const addActionItem = () => {
     label: '',
     href: '',
     isExternal: false,
-    buttonType: 'link'
+    buttonType: 'primary'
   })
 }
 
@@ -328,10 +313,6 @@ const handleImageSelect = () => {
   closeImageLibrary()
 }
 
-watch(headerData, (newValue) => {
-  emit('update', newValue)
-}, { deep: true })
-
 const saving = ref(false)
 
 const saveConfig = async () => {
@@ -355,6 +336,17 @@ const saveConfig = async () => {
     saving.value = false
   }
 }
+
+watch(headerData, (newValue) => {
+  emit('update', {
+    logo: newValue.logo,
+    mainMenuItems: newValue.mainMenuItems,
+    actionItems: newValue.actionItems.map(item => ({
+      ...item,
+      variant: item.buttonType === 'primary' ? 'button' : 'link'
+    }))
+  })
+}, { deep: true })
 </script>
 
 <style scoped>

@@ -887,6 +887,19 @@ const getPageLayout = async (params) => {
   }
 };
 
+// 新增：检查 slug 是否存在的方法
+const checkSlugExists = async (slug, pageId) => {
+  try {
+    const response = await apiClient.get('/pages/slug', {
+      params: { slug, pageId }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('检查 slug 是否存在失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -955,5 +968,6 @@ export default {
   updateSitemap,
   getSitemapUrls,
   updatePageLayout,
-  getPageLayout
+  getPageLayout,
+  checkSlugExists
 };
