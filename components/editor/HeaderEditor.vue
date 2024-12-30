@@ -4,7 +4,16 @@
       <HeaderPreview :data="headerData" />
     </div>
 
-    <h2 class="editor-title">Header Settings</h2>
+    <div class="editor-header">
+      <h2 class="editor-title">Header Settings</h2>
+      <a-button 
+        type="primary"
+        :loading="saving"
+        @click="saveConfig"
+      >
+        Save Changes
+      </a-button>
+    </div>
     
     <a-form layout="vertical">
       <a-row :gutter="16">
@@ -59,30 +68,32 @@
             <div class="action-list">
               <div v-for="(item, index) in headerData.actionItems" :key="index" class="action-item">
                 <a-form-item>
-                  <a-input-group compact>
-                    <a-input
-                      v-model:value="item.label"
-                      style="width: 40%"
-                      placeholder="Label"
-                    />
-                    <a-input
-                      v-model:value="item.href"
-                      style="width: 60%"
-                      placeholder="URL"
-                    />
-                  </a-input-group>
+                  <div class="action-item-content">
+                    <a-input-group compact>
+                      <a-input
+                        v-model:value="item.label"
+                        style="width: 40%"
+                        placeholder="Label"
+                      />
+                      <a-input
+                        v-model:value="item.href"
+                        style="width: 60%"
+                        placeholder="URL"
+                      />
+                    </a-input-group>
 
-                  <div class="button-style-select">
-                    <a-radio-group 
-                      v-model:value="item.buttonType" 
-                      button-style="solid"
-                    >
-                      <a-radio-button value="primary">Primary</a-radio-button>
-                      <a-radio-button value="default">Default</a-radio-button>
-                      <a-radio-button value="link">Link</a-radio-button>
-                      <a-radio-button value="text">Text</a-radio-button>
-                      <a-radio-button value="dashed">Dashed</a-radio-button>
-                    </a-radio-group>
+                    <div class="button-style-select">
+                      <a-radio-group 
+                        v-model:value="item.buttonType" 
+                        button-style="solid"
+                      >
+                        <a-radio-button value="primary">Primary</a-radio-button>
+                        <a-radio-button value="default">Default</a-radio-button>
+                        <a-radio-button value="link">Link</a-radio-button>
+                        <a-radio-button value="text">Text</a-radio-button>
+                        <a-radio-button value="dashed">Dashed</a-radio-button>
+                      </a-radio-group>
+                    </div>
                   </div>
 
                   <a-button 
@@ -192,50 +203,64 @@ import { ref, watch } from 'vue'
 import { DeleteOutlined } from '@ant-design/icons-vue'
 import HeaderPreview from './HeaderPreview.vue'
 import ImageLibrary from '../sections/common/ImageLibrary.vue'
+import apiClient from '../../api/api'
+import { message } from 'ant-design-vue'
 
 const emit = defineEmits(['update'])
 
-const headerData = ref({
-  logo: {
-    src: "assets/images/placeholder.png",
-    alt: "Logo",
-    width: 110,
-    height: 53
+const props = defineProps({
+  initialData: {
+    type: Object,
+    required: true
   },
-  mainMenuItems: [
-    { 
-      label: 'Features',
-      children: [
-        { label: 'Feature 1', href: 'https://websitelm.com/features/feature-1' },
-        { label: 'Feature 2', href: 'https://websitelm.com/features/feature-2' }
-      ]
-    },
-    { 
-      label: 'Solutions',
-      children: []
-    },
-    { 
-      label: 'Resources',
-      children: []
-    },
-  ],
-  actionItems: [
-    { 
-      key: 'login', 
-      label: 'Login',
-      href: 'https://app.websitelm.com',
-      isExternal: false,
-      buttonType: 'link'
-    },
-    { 
-      key: 'get-started', 
-      label: 'Get Started',
-      href: 'https://app.websitelm.com',
-      isExternal: false,
-      buttonType: 'primary'
-    }
-  ]
+  layoutId: {
+    type: String,
+    required: true
+  }
 })
+
+// 添加日志查看 props 数据
+console.log('Props received:', props)
+
+const headerData = ref({
+  logo: props.initialData?.logo || {
+    src: '',
+    alt: '',
+    width: 200,
+    height: 50
+  },
+  mainMenuItems: props.initialData?.mainMenuItems || [],
+  actionItems: props.initialData?.actionItems?.map(item => ({
+    ...item,
+    buttonType: item.variant === 'button' ? 'primary' : 'link'
+  })) || []
+})
+
+// 监听数据变化
+watch(() => props.initialData, (newValue) => {
+  if (!newValue) return
+  
+  headerData.value = {
+    logo: newValue.logo || headerData.value.logo,
+    mainMenuItems: newValue.mainMenuItems || [],
+    actionItems: (newValue.actionItems || []).map(item => ({
+      ...item,
+      buttonType: item.variant === 'button' ? 'primary' : 'link'
+    }))
+  }
+}, { deep: true })
+
+// 在数据变化时发送更新
+watch(headerData, (newValue) => {
+  emit('update', {
+    logo: newValue.logo,
+    mainMenuItems: newValue.mainMenuItems,
+    actionItems: newValue.actionItems.map(item => ({
+      ...item,
+      variant: item.buttonType === 'primary' ? 'button' : 'link'
+    }))
+  })
+}, { deep: true })
 
 // 菜单项方法
 const addMenuItem = () => {
@@ -306,6 +331,30 @@ const handleImageSelect = () => {
 watch(headerData, (newValue) => {
   emit('update', newValue)
 }, { deep: true })
+
+const saving = ref(false)
+
+const saveConfig = async () => {
+  try {
+    saving.value = true
+    const payload = {
+      pageHeaders: headerData.value,
+    }
+
+    const response = await apiClient.updatePageLayout(props.layoutId, payload)
+    
+    if (response?.code === 200) {
+      message.success('Header config saved successfully')
+    } else {
+      throw new Error(response?.message || 'Failed to save header config')
+    }
+  } catch (error) {
+    console.error('Failed to save header config:', error)
+    message.error(error.message || 'Failed to save header config')
+  } finally {
+    saving.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -338,11 +387,18 @@ watch(headerData, (newValue) => {
   font-weight: 500;
 }
 
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
 .editor-title {
   font-size: 20px;
   font-weight: 600;
   color: #111827;
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
 .section {
@@ -412,18 +468,21 @@ watch(headerData, (newValue) => {
 
 .action-item {
   position: relative;
-  padding-right: 40px;
   margin-bottom: 24px;
 }
 
-.button-style-select {
-  margin-top: 8px;
+.action-item-content {
+  padding-right: 40px;
 }
 
 .delete-action-btn {
   position: absolute;
   right: 0;
   top: 0;
+}
+
+.button-style-select {
+  margin-top: 8px;
 }
 
 .image-input-wrapper {

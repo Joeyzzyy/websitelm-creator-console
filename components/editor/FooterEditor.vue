@@ -4,7 +4,16 @@
       <FooterPreview :data="footerData" />
     </div>
 
-    <h2 class="editor-title">Footer Settings</h2>
+    <div class="editor-header">
+      <h2 class="editor-title">Footer Settings</h2>
+      <a-button 
+        type="primary"
+        :loading="saving"
+        @click="saveConfig"
+      >
+        Save Changes
+      </a-button>
+    </div>
     
     <a-form layout="vertical">
       <a-row :gutter="16">
@@ -127,6 +136,8 @@
 import { ref, watch } from 'vue'
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue'
 import FooterPreview from './FooterPreview.vue'
+import apiClient from '../../api/api'
+import { message } from 'ant-design-vue'
 
 const emit = defineEmits(['update'])
 
@@ -149,26 +160,32 @@ const availablePlatforms = [
   { label: 'Email', value: 'email' }
 ]
 
-const footerData = ref({
-  companyName: 'WebsiteLM',
-  description: 'AI Website Generator - AI-crafted Content That Delivers Results.',
-  features: [
-    { title: 'SEO Analysis', href: '#' },
-    { title: 'Content Generation', href: '#' },
-    { title: 'Knowledge Base', href: '#' },
-    { title: 'AI Tools', href: '#' }
-  ],
-  socialMedia: {
-    twitter: 'twitter.com/websitelm',
-    youtube: 'youtube.com/websitelm',
-    linkedin: 'linkedin.com/company/websitelm',
-    discord: 'discord.gg/websitelm'
+const props = defineProps({
+  initialData: {
+    type: Object,
+    required: true
   },
-  newsletter: {
-    text: 'Subscribe to our newsletter for the latest updates and tips.',
-    buttonText: 'Subscribe'
+  layoutId: {
+    type: String,
+    required: true
   }
 })
+
+const footerData = ref({
+  companyName: props.initialData.companyName,
+  description: props.initialData.description,
+  features: props.initialData.features,
+  socialMedia: props.initialData.socialMedia,
+  newsletter: props.initialData.newsletter
+})
+
+watch(() => props.initialData, (newValue) => {
+  footerData.value = { ...newValue }
+}, { deep: true })
+
+watch(footerData, (newValue) => {
+  emit('update', newValue)
+}, { deep: true })
 
 // Features 相关方法
 const addFeature = () => {
@@ -177,24 +194,6 @@ const addFeature = () => {
 
 const removeFeature = (index) => {
   footerData.value.features.splice(index, 1)
-}
-
-// 社交媒体相关方法
-const newSocialType = ref('')
-const newSocialUrl = ref('')
-
-const addSocialMedia = () => {
-  if (newSocialType.value && newSocialUrl.value) {
-    footerData.value.socialMedia[newSocialType.value] = newSocialUrl.value
-    newSocialType.value = ''
-    newSocialUrl.value = ''
-  }
-}
-
-const deleteSocialMedia = (platform) => {
-  const newSocialMedia = { ...footerData.value.socialMedia }
-  delete newSocialMedia[platform]
-  footerData.value.socialMedia = newSocialMedia
 }
 
 const handleSocialPlatformChange = (oldPlatform, newPlatform) => {
@@ -224,9 +223,30 @@ const handleChange = () => {
   emit('update', footerData.value)
 }
 
-watch(footerData, (newValue) => {
-  emit('update', newValue)
-}, { deep: true })
+// 添加保存相关逻辑
+const saving = ref(false)
+
+const saveConfig = async () => {
+  try {
+    saving.value = true
+    const payload = {
+      pageFooters: footerData.value,
+    }
+
+    const response = await apiClient.updatePageLayout(props.layoutId, payload)
+    
+    if (response?.code === 200) {
+      message.success('Footer config saved successfully')
+    } else {
+      throw new Error(response?.message || 'Failed to save footer config')
+    }
+  } catch (error) {
+    console.error('Failed to save footer config:', error)
+    message.error(error.message || 'Failed to save footer config')
+  } finally {
+    saving.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -324,5 +344,12 @@ watch(footerData, (newValue) => {
 .add-social-btn {
   margin-top: 12px;
   width: 100%;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
 }
 </style> 

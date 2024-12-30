@@ -855,8 +855,11 @@ export default {
 
 :deep(.ant-tag) {
   margin: 0;
-  display: flex;
+  width: auto !important;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  padding: 0 8px;
 }
 
 .article-actions {

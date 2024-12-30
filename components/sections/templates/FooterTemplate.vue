@@ -1,29 +1,46 @@
 <template>
-  <div class="grid grid-cols-1 gap-4">
-    <FooterEditor @update="updateFooter" />
+  <div>
+    <FooterEditor 
+      :initial-data="footerData"
+      :layoutId="layoutId"
+      @update="handleUpdate"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import FooterEditor from '../../editor/FooterEditor.vue'
 
-const footerData = ref(null)
+const props = defineProps({
+  initialData: {
+    type: Object,
+    required: true
+  },
+  layoutId: {
+    type: String,
+    required: true
+  }
+})
 
-const updateFooter = (data) => {
-  footerData.value = data
-}
-</script>
+const emit = defineEmits(['update'])
 
-<style scoped>
-.grid {
-  display: grid;
-  gap: 1rem;
-}
+// 创建本地响应式数据的深拷贝
+const footerData = ref(JSON.parse(JSON.stringify(props.initialData)))
 
-@media (max-width: 768px) {
-  .grid-cols-2 {
-    grid-template-columns: 1fr;
+// 处理来自编辑器的更新
+const handleUpdate = (newData) => {
+  // 添加对比检查，避免不必要的更新
+  if (JSON.stringify(footerData.value) !== JSON.stringify(newData)) {
+    footerData.value = newData
+    emit('update', newData)
   }
 }
-</style>
+
+// 监听 props 变化并更新本地数据
+watch(() => props.initialData, (newValue) => {
+  if (newValue && JSON.stringify(footerData.value) !== JSON.stringify(newValue)) {
+    footerData.value = JSON.parse(JSON.stringify(newValue))
+  }
+}, { deep: true })
+</script>

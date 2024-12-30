@@ -309,20 +309,12 @@
                   <div class="preview-header">
                     <div class="preview-header-content">
                       <h4>Header Preview</h4>
-                      <a-button 
-                        type="primary"
-                        :loading="headerSaving"
-                        @click="saveHeaderConfig"
-                      >
-                        Save Changes
-                      </a-button>
                     </div>
                   </div>
                   <div class="preview-container">
                     <HeaderTemplate 
-                      :logo="headerConfig.logo"
-                      :mainMenuItems="headerConfig.mainMenuItems"
-                      :actionItems="headerConfig.actionItems"
+                      :initialData="headerConfig"
+                      :layoutId="headerLayoutId"
                     />
                   </div>
                 </div>
@@ -340,17 +332,14 @@
                   <div class="preview-header">
                     <div class="preview-header-content">
                       <h4>Footer Preview</h4>
-                      <a-button 
-                        type="primary"
-                        :loading="footerSaving"
-                        @click="saveFooterConfig"
-                      >
-                        Save Changes
-                      </a-button>
                     </div>
                   </div>
                   <div class="preview-container">
-                    <FooterTemplate />
+                    <FooterTemplate 
+                      :initial-data="footerConfig"
+                      :layoutId="footerLayoutId"
+                      @update="handleFooterUpdate"
+                    />
                   </div>
                 </div>
               </div>
@@ -598,7 +587,6 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import PageLayout from './layout/PageLayout.vue'
 import { 
-  ExclamationCircleOutlined,
   EyeOutlined, 
   EditOutlined, 
   DeleteOutlined, 
@@ -1421,8 +1409,6 @@ export default {
         })
         return acc
       }, {})
-
-      console.log('Data grouped by label:', groupedArticles.value)
     }
 
     // 分别添加 header 和 footer 的 loading 状态
@@ -1467,102 +1453,100 @@ export default {
     // 添加新的方法来获取布局数据
     const fetchLayoutData = async (type) => {
       try {
+        if (type === 'header') {
+          headerLoading.value = true;
+        } else {
+          footerLoading.value = true;
+        }
+
         const response = await apiClient.getPageLayout({
-          type: type // 传递 header 或 footer
-        })
-        
-        if (response && response.data) {
+          type: type
+        });
+
+        if (response?.data) {
           if (type === 'header') {
-            headerLayoutId.value = response.data.pageLayoutId
-            // 解析 pageHeaders 字符串为 JSON 对象
-            const headerData = JSON.parse(response.data.pageHeaders)
+            headerLayoutId.value = response.data.pageLayoutId;
+            const headerData = response.data.pageHeaders;
+            
+            // 确保数据结构完整性
             headerConfig.value = {
-              logo: headerData.logo,
-              mainMenuItems: headerData.mainMenuItems,
-              actionItems: headerData.actionItems.map(item => ({
-                key: item.key,
-                label: item.label,
-                href: item.href,
-                isExternal: item.isExternal,
-                variant: item.buttonType === 'primary' ? 'button' : 'link' // 转换 buttonType 为 variant
-              }))
-            }
-          } else {
-            footerLayoutId.value = response.data.pageLayoutId
-            // 解析 pageFooters 字符串为 JSON 对象
-            const footerData = JSON.parse(response.data.pageFooters)
+              logo: {
+                src: headerData.logo?.src || '/images/enterprise-logo.png',
+                alt: headerData.logo?.alt || 'Logo',
+                width: headerData.logo?.width || 110,
+                height: headerData.logo?.height || 53
+              },
+              mainMenuItems: Array.isArray(headerData.mainMenuItems) 
+                ? headerData.mainMenuItems 
+                : [],
+              actionItems: Array.isArray(headerData.actionItems) 
+                ? headerData.actionItems.map(item => ({
+                    key: item.key || '',
+                    label: item.label || '',
+                    href: item.href || '#',
+                    isExternal: item.isExternal || false,
+                    variant: item.variant || 'link'
+                  }))
+                : []
+            };
+          } else if (type === 'footer') {
+            footerLayoutId.value = response.data.pageLayoutId;
+            const footerData = response.data.pageFooters;
+            
+            // 确保数据结构完整性
             footerConfig.value = {
-              companyName: footerData.companyName,
-              description: footerData.description,
-              features: footerData.features,
-              socialMedia: footerData.socialMedia,
-              newsletter: footerData.newsletter
-            }
+              companyName: footerData.companyName || '',
+              description: footerData.description || '',
+              features: Array.isArray(footerData.features) ? footerData.features : [],
+              socialMedia: footerData.socialMedia || {},
+              newsletter: {
+                text: footerData.newsletter?.text || '',
+                buttonText: footerData.newsletter?.buttonText || ''
+              }
+            };
           }
         }
       } catch (error) {
-        console.error(`Failed to load ${type} layout:`, error)
-        message.error(`Failed to load ${type} layout`)
-      }
-    }
-
-    // 添加保存状态的响应式变量
-    const headerSaving = ref(false);
-    const footerSaving = ref(false);
-
-    // 修改保存 Header 配置的方法
-    const saveHeaderConfig = async () => {
-      try {
-        headerSaving.value = true;
-        const customerId = localStorage.getItem('currentCustomerId');
-        const response = await apiClient.updatePageLayout({
-          pageLayoutId: headerLayoutId.value,
-          pageId: customerId,
-          type: 'header',
-          config: headerConfig.value
-        });
-        
-        // 检查业务code
-        if (response.data.code === 400) {
-          message.error(response.data.message || 'Failed to save header config');
-          return;
-        }
-        
-        message.success('Header config saved successfully');
-      } catch (error) {
-        console.error('Failed to save header config:', error);
-        message.error('Failed to save header config');
+        console.error('获取布局数据失败:', error);
+        message.error('加载布局配置失败');
       } finally {
-        headerSaving.value = false;
+        if (type === 'header') {
+          headerLoading.value = false;
+        } else {
+          footerLoading.value = false;
+        }
       }
     };
 
-    // 修改保存 Footer 配置的方法
-    const saveFooterConfig = async () => {
-      try {
-        footerSaving.value = true;
-        const customerId = localStorage.getItem('currentCustomerId');
-        const response = await apiClient.updatePageLayout({
-          pageLayoutId: footerLayoutId.value,
-          pageId: customerId,
-          type: 'footer',
-          config: {} // 添加实际的 footer 配置
-        });
-        
-        // 检查业务code
-        if (response.data.code === 400) {
-          message.error(response.data.message || 'Failed to save footer config');
-          return;
-        }
-        
-        message.success('Footer config saved successfully');
-      } catch (error) {
-        console.error('Failed to save footer config:', error);
-        message.error('Failed to save footer config');
-      } finally {
-        footerSaving.value = false;
+    onMounted(async () => {
+      console.log('组件挂载，当前 tab:', activeTab.value)  // 添加日志
+      if (activeTab.value === 'header') {
+        await fetchLayoutData('header')
+      } else if (activeTab.value === 'footer') {
+        await fetchLayoutData('footer')
       }
-    };
+    })
+
+    watch(() => activeTab.value, async (newValue) => {
+      console.log('tab 切换到:', newValue)  // 添加日志
+      if (newValue === 'header') {
+        await fetchLayoutData('header')
+      } else if (newValue === 'footer') {
+        await fetchLayoutData('footer')
+      }
+    })
+
+    // 添加 footer 配置相关的响应式变量
+    const footerConfig = ref({
+      companyName: '',
+      description: '',
+      features: [],
+      socialMedia: {},
+      newsletter: {
+        text: '',
+        buttonText: ''
+      }
+    })
 
     return {
       domainConfigured,
@@ -1648,10 +1632,7 @@ export default {
       headerConfig,
       headerLayoutId,
       footerLayoutId,
-      headerSaving,
-      footerSaving,
-      saveHeaderConfig,
-      saveFooterConfig,
+      footerConfig, 
     }
   }
 }
