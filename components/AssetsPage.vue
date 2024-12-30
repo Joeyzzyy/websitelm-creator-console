@@ -39,6 +39,8 @@
       <a-tab-pane key="images" tab="Images" />
       <a-tab-pane key="videos" tab="Videos" />
       <a-tab-pane key="links" tab="Internal Links" />
+      <a-tab-pane key="header" tab="Header" />
+      <a-tab-pane key="footer" tab="Footer" />
     </a-tabs>
 
     <div class="page-content">
@@ -49,7 +51,7 @@
           </div>
         </div>
 
-        <!-- 媒体资产内容 -->
+        <!-- Media Asset Content -->
         <template v-if="activeTab === 'images' || activeTab === 'videos'">
           <a-spin :spinning="loading" tip="Loading assets...">
           </a-spin>
@@ -137,7 +139,7 @@
           
         </template>
 
-        <!-- 链接内容 -->
+        <!-- Link Content -->
         <template v-else-if="activeTab === 'links'">
           <a-spin :spinning="linksLoading" tip="Loading links...">
           </a-spin>
@@ -295,6 +297,64 @@
                 </template>
               </div>
             </div>
+          </div>
+        </template>
+
+        <!-- Header Section -->
+        <template v-else-if="activeTab === 'header'">
+          <div class="header-footer-content">
+            <a-spin :spinning="headerLoading" tip="Loading...">
+              <div class="settings-section">
+                <div class="preview-section">
+                  <div class="preview-header">
+                    <div class="preview-header-content">
+                      <h4>Header Preview</h4>
+                      <a-button 
+                        type="primary"
+                        :loading="headerSaving"
+                        @click="saveHeaderConfig"
+                      >
+                        Save Changes
+                      </a-button>
+                    </div>
+                  </div>
+                  <div class="preview-container">
+                    <HeaderTemplate 
+                      :logo="headerConfig.logo"
+                      :mainMenuItems="headerConfig.mainMenuItems"
+                      :actionItems="headerConfig.actionItems"
+                    />
+                  </div>
+                </div>
+              </div>
+            </a-spin>
+          </div>
+        </template>
+
+        <!-- Footer Section -->
+        <template v-else-if="activeTab === 'footer'">
+          <div class="header-footer-content">
+            <a-spin :spinning="footerLoading" tip="Loading...">
+              <div class="settings-section">
+                <div class="preview-section">
+                  <div class="preview-header">
+                    <div class="preview-header-content">
+                      <h4>Footer Preview</h4>
+                      <a-button 
+                        type="primary"
+                        :loading="footerSaving"
+                        @click="saveFooterConfig"
+                      >
+                        Save Changes
+                      </a-button>
+                    </div>
+                  </div>
+                  <div class="preview-container">
+                    <FooterTemplate />
+                  </div>
+                </div>
+              </div>
+            </a-spin>
           </div>
         </template>
       </div>
@@ -516,17 +576,20 @@
       </a-form>
     </a-modal>
     </template>
+    
     <template v-else>
-      <div class="domain-notice">
-        <div class="notice-content">
-          <exclamation-circle-outlined class="notice-icon" />
-          <h2>No Site Configured</h2>
-          <p>Please configure your domain in settings to use the asset management features</p>
-          <a-button type="primary" @click="goToDashboard">
-            Configure Domain
-          </a-button>
+      <a-spin :spinning="loading" tip="Checking domain configuration...">
+        <div class="domain-notice">
+          <div class="notice-content" v-show="!loading">
+            <exclamation-circle-outlined class="notice-icon" />
+            <h2>No Site Configured</h2>
+            <p>Please configure your domain in settings to use the asset management features</p>
+            <a-button type="primary" @click="goToDashboard">
+              Configure Domain
+            </a-button>
+          </div>
         </div>
-      </div>
+      </a-spin>
     </template>
   </page-layout>
 </template>
@@ -548,6 +611,8 @@ import {
 import { message } from 'ant-design-vue'
 import apiClient from '../api/api';
 import { useRouter } from 'vue-router';
+import HeaderTemplate from './sections/templates/HeaderTemplate.vue'
+import FooterTemplate from './sections/templates/FooterTemplate.vue'
 
 export default {
   name: 'BrandAssetsPage',
@@ -560,7 +625,9 @@ export default {
     PlusOutlined,
     FolderOutlined,
     LinkOutlined,
-    SettingOutlined
+    SettingOutlined,
+    HeaderTemplate,
+    FooterTemplate,
   },
   setup() {
     const router = useRouter();
@@ -634,11 +701,11 @@ export default {
     }
 
     // 监听标化时重新获取数据
-    watch(activeTab, (newValue) => {
+    watch(activeTab, async (newValue) => {
       if (newValue === 'links') {
         fetchLinks()
-      } else if (newValue === 'domains') {
-        loadProductInfo()
+      } else if (newValue === 'header' || newValue === 'footer') {
+        await fetchLayoutData(newValue)
       } else {
         fetchAssets()
       }
@@ -1213,7 +1280,7 @@ export default {
           executeTime: response.data.executeTime
         };
       } catch (error) {
-        console.error('获取知识库状态失败:', error);
+        console.error('Failed to fetch knowledge base status:', error);
         throw error;
       }
     };
@@ -1222,11 +1289,11 @@ export default {
       try {
         const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.getKnowledgeCenter(customerId)
-        console.log('API返回数据:', response)
+        console.log('API response data:', response)
         return response.data || [] // 确保返回数组
       } catch (error) {
-        console.error('获取知识库内容失败:', error)
-        message.error('获取知识库内容失败')
+        console.error('Failed to fetch knowledge base content:', error)
+        message.error('Failed to load knowledge base')
         return []
       } finally {
 
@@ -1261,8 +1328,8 @@ export default {
         await pollStatus();
         
       } catch (error) {
-        console.error('初始化知识库失败:', error);
-        message.error('加载知识库失败');
+        console.error('Failed to initialize knowledge base:', error);
+        message.error('Failed to load knowledge base');
       } finally {
         loading.value = false;
       }
@@ -1329,12 +1396,12 @@ export default {
     // 修改 groupArticlesByLabel 方法
     const groupArticlesByLabel = (articles) => {
       if (!articles || !articles.length) {
-        console.log('没有文章数据')
+        console.log('No article data')
         groupedArticles.value = {}
         return
       }
       
-      console.log('原始文章数据:', articles)
+      console.log('Original article data:', articles)
       
       // 根据 label 分组
       groupedArticles.value = articles.reduce((acc, article) => {
@@ -1355,8 +1422,147 @@ export default {
         return acc
       }, {})
 
-      console.log('按 label 分组后的数据:', groupedArticles.value)
+      console.log('Data grouped by label:', groupedArticles.value)
     }
+
+    // 分别添加 header 和 footer 的 loading 状态
+    const headerLoading = ref(false);
+    const footerLoading = ref(false);
+    
+    // 添加 header 配置
+    const headerConfig = ref({
+      logo: {
+        src: "/images/enterprise-logo.png",
+        alt: "Logo",
+        width: 110,
+        height: 53
+      },
+      mainMenuItems: [
+        { key: 'features', label: 'Features' },
+        { key: 'solutions', label: 'Solutions' },
+        { key: 'resources', label: 'Resources' },
+      ],
+      actionItems: [
+        { 
+          key: 'login', 
+          label: 'Login',
+          href: 'https://app.websitelm.com',
+          isExternal: false,
+          variant: 'link'
+        },
+        { 
+          key: 'get-started', 
+          label: 'Get Started',
+          href: 'https://app.websitelm.com',
+          isExternal: false,
+          variant: 'button'
+        }
+      ]
+    })
+
+    // 添加新的响应式变量
+    const headerLayoutId = ref(null)
+    const footerLayoutId = ref(null)
+
+    // 添加新的方法来获取布局数据
+    const fetchLayoutData = async (type) => {
+      try {
+        const response = await apiClient.getPageLayout({
+          type: type // 传递 header 或 footer
+        })
+        
+        if (response && response.data) {
+          if (type === 'header') {
+            headerLayoutId.value = response.data.pageLayoutId
+            // 解析 pageHeaders 字符串为 JSON 对象
+            const headerData = JSON.parse(response.data.pageHeaders)
+            headerConfig.value = {
+              logo: headerData.logo,
+              mainMenuItems: headerData.mainMenuItems,
+              actionItems: headerData.actionItems.map(item => ({
+                key: item.key,
+                label: item.label,
+                href: item.href,
+                isExternal: item.isExternal,
+                variant: item.buttonType === 'primary' ? 'button' : 'link' // 转换 buttonType 为 variant
+              }))
+            }
+          } else {
+            footerLayoutId.value = response.data.pageLayoutId
+            // 解析 pageFooters 字符串为 JSON 对象
+            const footerData = JSON.parse(response.data.pageFooters)
+            footerConfig.value = {
+              companyName: footerData.companyName,
+              description: footerData.description,
+              features: footerData.features,
+              socialMedia: footerData.socialMedia,
+              newsletter: footerData.newsletter
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to load ${type} layout:`, error)
+        message.error(`Failed to load ${type} layout`)
+      }
+    }
+
+    // 添加保存状态的响应式变量
+    const headerSaving = ref(false);
+    const footerSaving = ref(false);
+
+    // 修改保存 Header 配置的方法
+    const saveHeaderConfig = async () => {
+      try {
+        headerSaving.value = true;
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.updatePageLayout({
+          pageLayoutId: headerLayoutId.value,
+          pageId: customerId,
+          type: 'header',
+          config: headerConfig.value
+        });
+        
+        // 检查业务code
+        if (response.data.code === 400) {
+          message.error(response.data.message || 'Failed to save header config');
+          return;
+        }
+        
+        message.success('Header config saved successfully');
+      } catch (error) {
+        console.error('Failed to save header config:', error);
+        message.error('Failed to save header config');
+      } finally {
+        headerSaving.value = false;
+      }
+    };
+
+    // 修改保存 Footer 配置的方法
+    const saveFooterConfig = async () => {
+      try {
+        footerSaving.value = true;
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.updatePageLayout({
+          pageLayoutId: footerLayoutId.value,
+          pageId: customerId,
+          type: 'footer',
+          config: {} // 添加实际的 footer 配置
+        });
+        
+        // 检查业务code
+        if (response.data.code === 400) {
+          message.error(response.data.message || 'Failed to save footer config');
+          return;
+        }
+        
+        message.success('Footer config saved successfully');
+      } catch (error) {
+        console.error('Failed to save footer config:', error);
+        message.error('Failed to save footer config');
+      } finally {
+        footerSaving.value = false;
+      }
+    };
 
     return {
       domainConfigured,
@@ -1436,7 +1642,16 @@ export default {
       pollTimer,
       knowledgeStatus,
       knowledgeTime,
-      processingKnowledge
+      processingKnowledge,
+      headerLoading,
+      footerLoading,
+      headerConfig,
+      headerLayoutId,
+      footerLayoutId,
+      headerSaving,
+      footerSaving,
+      saveHeaderConfig,
+      saveFooterConfig,
     }
   }
 }
@@ -1816,10 +2031,6 @@ export default {
   margin-top: 8px;
 }
 
-.preview-container {
-  text-align: center;
-}
-
 .preview-wrapper {
   margin-bottom: 16px;
 }
@@ -1915,10 +2126,6 @@ export default {
 
 .media-form {
   margin-top: 16px;
-  margin-bottom: 16px;
-}
-
-.preview-container {
   margin-bottom: 16px;
 }
 
@@ -2518,5 +2725,85 @@ export default {
 
 .status-red {
   background-color: #ff4d4f;
+}
+
+/* 重命名为更通用的类名，因为这个样式被 header 和 footer 共用 */
+.header-footer-content {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.settings-section {
+  margin-bottom: 32px;
+}
+
+.settings-section h3 {
+  font-size: 18px;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.section-description {
+  color: #6b7280;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+/* 添加预览相关样式 */
+.preview-sections {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.preview-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.preview-header {
+  padding: 16px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.preview-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.preview-container {
+  width: 100%;
+  background: #fff;
+  min-height: 200px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* 调整预览容器中的组件样式 */
+.preview-container :deep(.fixed) {
+  position: relative;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+/* 添加新样式 */
+.preview-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.preview-header-content h4 {
+  margin: 0;
 }
 </style> 

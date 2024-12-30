@@ -515,7 +515,7 @@ export default {
         if (response && response.code === 200) {
           window.location.href = response.data;
         } else {
-          this.$notification.success({
+          this.$notification.error({
             message: 'Error',
             description: 'Failed to get login url from Google'
           });

@@ -80,7 +80,7 @@
                 </template>
 
                 <template v-if="column.key === 'hasEmpty'">
-                  <a-tag :color="record.hasEmpty ? 'warning' : 'success'">
+                  <a-tag :color="record.hasEmpty ? 'warning' : 'success'" style="width: fit-content">
                     {{ record.hasEmpty ? 'Has Empty Fields' : 'No Empty Fields - Completed' }}
                   </a-tag>
                 </template>
@@ -93,6 +93,13 @@
                       @click="handleEdit(record)"
                     >
                       Edit
+                    </a-button>
+                    <a-button
+                      type="primary"
+                      size="small"
+                      @click="handlePreview(record)"
+                    >
+                      Preview
                     </a-button>
                     <a-tooltip :title="getPublishTooltip(record)">
                       <a-button
@@ -158,7 +165,8 @@ import {
   CloudUploadOutlined,
   CloudDownloadOutlined,
   SearchOutlined,
-  PlusOutlined
+  PlusOutlined,
+  EyeOutlined
 } from '@ant-design/icons-vue'
 import PageLayout from './layout/PageLayout.vue'
 import apiClient from '../api/api'
@@ -177,7 +185,8 @@ export default {
     CloudUploadOutlined,
     CloudDownloadOutlined,
     SearchOutlined,
-    PlusOutlined
+    PlusOutlined,
+    EyeOutlined
   },
 
   setup() {
@@ -628,6 +637,12 @@ export default {
       return getPublishBlockReasons(record).length === 0;
     };
 
+    // 添加预览处理函数
+    const handlePreview = (record) => {
+      const previewUrl = getPreviewUrl(record);
+      window.open(previewUrl, '_blank');
+    };
+
     onMounted(async () => {
       fetchTasks()
       await loadProductInfo()
@@ -661,6 +676,7 @@ export default {
       loadVerifiedDomains,
       subfolders,
       loadSubfolders,
+      handlePreview,
     }
   }
 }
@@ -1016,6 +1032,9 @@ export default {
   height: 28px;
   padding: 0 12px;
   opacity: 0.8;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .header-left :deep(.ant-btn-primary:hover) {

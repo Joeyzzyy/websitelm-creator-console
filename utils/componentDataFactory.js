@@ -295,7 +295,6 @@ export const createCleanComponentData = (componentType) => {
       FeaturesTabbed: {
         title: 'Writing Features Kit',
         description: 'Our AI-driven features include content detection, plagiarism checking, and automatic citation, helping you submit works with transparency and originality.',
-        
         bottomContent: [
           {
             tabName: 'Authentic authorship',

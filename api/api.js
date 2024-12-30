@@ -175,7 +175,7 @@ const editKeyword = async (keywordId, keywordType, subKeywordId, term) => {
         {subKeywordId: subKeywordId, term: term});
     return response.data;
   } catch (error) {
-    console.error('删除���键词失败:', error);
+    console.error('删除关键词失败:', error);
     throw error;
   }
 };
@@ -883,6 +883,33 @@ const getSitemapUrls = async (params) => {
   }
 };
 
+// 新增：更新页面布局的方法
+const updatePageLayout = async (pageLayoutId, layoutData) => {
+  try {
+    const response = await apiClient.put(`/page/layout/${pageLayoutId}`, layoutData);
+    return response.data;
+  } catch (error) {
+    console.error('更新页面布局失败:', error);
+    return null;
+  }
+};
+
+// 新增：获取页面布局的方法
+const getPageLayout = async (params) => {
+  try {
+    const { pageLayoutId, pageId } = params;
+    const response = await apiClient.get('/page/layout', {
+      params: {
+        ...(pageLayoutId && { pageLayoutId }),
+        ...(pageId && { pageId })
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('获取页面布局失败:', error);
+    return null;
+  }
+};
 
 export default {
   validateDomain,
@@ -951,5 +978,7 @@ export default {
   updateSubfolders,
   getSubfolders,
   updateSitemap,
-  getSitemapUrls
+  getSitemapUrls,
+  updatePageLayout,
+  getPageLayout
 };
