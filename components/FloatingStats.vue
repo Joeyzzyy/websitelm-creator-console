@@ -7,7 +7,7 @@
         type="text" 
         size="small"
         :loading="refreshing"
-        @click="handleRefresh"
+        @click="handleRefreshConfirm"
       >
         <template #icon><ReloadOutlined /></template>
       </a-button>
@@ -135,6 +135,7 @@ import {
   OrderedListOutlined
 } from '@ant-design/icons-vue';
 import { SECTION_TAGS } from './sections/common/SectionTag';  // 引入 SECTION_TAGS
+import { Modal } from 'ant-design-vue';
 
 export default defineComponent({
   name: 'FloatingStats',
@@ -207,16 +208,24 @@ export default defineComponent({
       isCollapsed.value = !isCollapsed.value;
     };
 
-    const handleRefresh = async () => {
-      refreshing.value = true;
-      try {
-        // 刷新整个页面
-        window.location.reload();
-      } catch (error) {
-        console.error('刷新页面失败:', error);
-      } finally {
-        refreshing.value = false;
-      }
+    const handleRefreshConfirm = () => {
+      // 使用 ant-design-vue 的 Modal.confirm
+      Modal.confirm({
+        title: 'Refresh Page',
+        content: 'Refreshing will reload the current page. Please make sure you have saved your changes.',
+        okText: 'Refresh',
+        cancelText: 'Cancel',
+        async onOk() {
+          refreshing.value = true;
+          try {
+            window.location.reload();
+          } catch (error) {
+            console.error('Failed to refresh page:', error);
+          } finally {
+            refreshing.value = false;
+          }
+        }
+      });
     };
 
     // 添加 watch 来监控数据变化
@@ -374,7 +383,7 @@ export default defineComponent({
       isCollapsed,
       refreshing,
       toggleCollapse,
-      handleRefresh,
+      handleRefreshConfirm,
       keywordsCoverage,
       missingKeywords,
       formatDensity,
@@ -435,6 +444,11 @@ export default defineComponent({
   cursor: pointer;
   color: #666;
   padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
 }
 
 .stats-content {
@@ -654,5 +668,14 @@ export default defineComponent({
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+:deep(.ant-btn-text) {
+  padding: 4px;
+  height: 24px;
+  width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
