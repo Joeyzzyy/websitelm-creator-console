@@ -329,11 +329,8 @@
       </div>
 
       <floating-stats 
-        :metrics="contentMetrics"
-        :keywords-stats="articleData?.pageStats"
+        :keywords-stats="articleData.pageStats"
         @refresh="handleRefreshMetrics"
-        :defaultCollapsed="true"
-        :isCollapsible="true"
       />
 
       <!-- Preview modal -->
@@ -503,55 +500,51 @@ export default defineComponent({
     const originalArticle = ref(null);
 
     onMounted(async () => {
-      const needsRefresh = route.query.refresh === 'true';
-      
-      if (needsRefresh) {
-        // 先移除 refresh 参数
-        const query = { ...route.query };
-        delete query.refresh;
-        // 更新 URL，移除 refresh 参数
-        await router.replace({ query });
-        // 然后再刷新页面
-        window.location.reload();
-        return;
-      }
-
       try {
         loading.value = true;
         
         if (isEditMode.value) {
           const response = await apiClient.getArticleById(pageId.value);
-          
+          // 打印完整的原始响应
+          console.log('API 原始响应：', {
+            wordCount: response.data.pageStats.wordCount,
+            keywordStats: response.data.pageStats.keywordStats.length,
+            fullStats: JSON.parse(JSON.stringify(response.data.pageStats))
+          });
+
           if (response?.code === 200 && response.data) {
+            // 在任何处理之前打印
+            console.log('处理前的数据：', {
+              wordCount: response.data.pageStats.wordCount,
+              keywordStats: response.data.pageStats.keywordStats.length,
+              fullStats: JSON.parse(JSON.stringify(response.data.pageStats))
+            });
+
             await loadProductInfo();
             await loadVerifiedDomains();
+            
+            // 在初始化前打印
+            console.log('初始化前的数据：', {
+              wordCount: response.data.pageStats.wordCount,
+              keywordStats: response.data.pageStats.keywordStats.length,
+              fullStats: JSON.parse(JSON.stringify(response.data.pageStats))
+            });
+
             initializeArticleData(response.data);
-          } else {
-            throw new Error(response?.message || 'Invalid response data');
+
+            // 在初始化后打印
+            console.log('初始化后的数据：', {
+              wordCount: articleData.value.pageStats.wordCount,
+              keywordStats: articleData.value.pageStats.keywordStats.length,
+              fullStats: JSON.parse(JSON.stringify(articleData.value.pageStats))
+            });
           }
-        } else {
-          initializeArticleData({
-            title: '',
-            subTitle: '',
-            description: '',
-            sections: [],
-            deploymentMethod: 'subfolder'
-          });
         }
       } catch (error) {
         console.error('Initialize error:', error);
-        message.error('Failed to initialize: ' + (error.message || 'Unknown error'));
-        initializeArticleData({
-          title: '',
-          subTitle: '',
-          description: '',
-          sections: []
-        });
       } finally {
         loading.value = false;
       }
-
-      autoSaveInterval.value = setInterval(autoSave, 30000);
     });
 
     const saving = ref(false);
@@ -575,16 +568,6 @@ export default defineComponent({
         keywordStats: []
       },
       articleType: 'Landing Page'
-    });
-
-    // Content metrics
-    const contentMetrics = ref({
-      h1Count: 0,
-      h2Count: 0,
-      h3Count: 0,
-      paragraphsCount: 0,
-      imagesCount: 0,
-      wordCount: 0
     });
 
     // 格式化件名称显示
@@ -658,8 +641,6 @@ export default defineComponent({
           articleData.value.sections.push(newSection);
         }
 
-        calculateContentMetrics();
-
         // 添加滚动逻辑
         nextTick(() => {
           const sections = document.querySelectorAll('.section-wrapper');
@@ -677,97 +658,20 @@ export default defineComponent({
     // 移除组件
     const removeSection = (index) => {
       articleData.value.sections.splice(index, 1);
-      calculateContentMetrics();
     };
 
     // 修改 handleSectionUpdate 方法
     const handleSectionUpdate = (updatedSection, index) => {
       try {
-        // 直接更新数据，不进行验证
         articleData.value.sections[index] = {
           ...articleData.value.sections[index],
           ...updatedSection
         };
-        calculateContentMetrics();
       } catch (error) {
         console.error('Section update error:', error);
         message.error(`Failed to update section: ${error.message}`);
       }
     };
-
-    // 计算内容统计指标
-    const calculateContentMetrics = () => {
-      let metrics = {
-        h1Count: 0,
-        h2Count: 0,
-        h3Count: 0,
-        paragraphsCount: 0,
-        imagesCount: 0,
-        wordCount: 0
-      };
-
-      articleData.value.sections.forEach(section => {
-        // 根据不同组件类型统计
-        switch (section.componentName) {
-          case 'TitleSection':
-          case 'TitleSectionWithImage':
-            if (section.title) metrics.h1Count++;
-            if (section.subTitle) metrics.h2Count++;
-            break;
-          
-          case 'HeroSectionWithVideo':
-          case 'HeroSectionWithMutipleTexts':
-            if (section.topContent?.title) metrics.h1Count++;
-            if (section.topContent?.description) {
-              metrics.paragraphsCount++;
-              metrics.wordCount += section.topContent.description.split(/\s+/).length;
-            }
-            break;
-
-          case 'WhyChooseUsWithSmallBlocks':
-          case 'WhyChooseUsWithBlocks':
-            if (section.topContent?.title) metrics.h2Count++;
-            section.bottomContent?.forEach(item => {
-              if (item.content) {
-                metrics.paragraphsCount++;
-                metrics.wordCount += item.content.split(/\s+/).length;
-              }
-              if (item.imageUrl) metrics.imagesCount++;
-            });
-            break;
-
-          case 'CallToActionComplex':
-            if (section.title) metrics.h2Count++;
-            if (section.subTitle) metrics.h3Count++;
-            
-            // 统计部内容
-            if (section.topContent?.title) metrics.h2Count++;
-            if (section.topContent?.description) {
-              metrics.paragraphsCount++;
-              metrics.wordCount += section.topContent.description.split(/\s+/).length;
-            }
-            
-            // 统计底部内容
-            if (section.bottomContent?.title) metrics.h3Count++;
-            section.bottomContent?.content?.forEach(item => {
-              if (item.description) {
-                metrics.paragraphsCount++;
-                metrics.wordCount += item.description.split(/\s+/).length;
-              }
-            });
-            break;
-
-          // 可以根据需要添加更多组件类型的统计
-        }
-      });
-
-      contentMetrics.value = metrics;
-    };
-
-    // 监听 sections 变化更新统计
-    watch(() => articleData.value.sections, () => {
-      calculateContentMetrics();
-    }, { deep: true });
 
     const handleSave = async (shouldQuit = false) => {
       try {
@@ -966,18 +870,14 @@ export default defineComponent({
       articleData.value.pageStats.wordCount = totalWords;
     };
 
-    // 监听 sections 变化，更新关键词统计
-    watch(() => articleData.value.sections, () => {
-      calculateKeywordStats();
-    }, { deep: true });
-
     const refreshingMetrics = ref(false);
     
     const handleRefreshMetrics = async () => {
+      console.log('ArticleCreatePage - 刷新前的 pageStats：', articleData.value.pageStats);
       refreshingMetrics.value = true;
       try {
         // 新算计数
-        calculateContentMetrics();
+        calculateKeywordStats();
         // 添加动画效果
         await new Promise(resolve => setTimeout(resolve, 500));
         message.success('Statistics updated');
@@ -987,6 +887,7 @@ export default defineComponent({
       } finally {
         refreshingMetrics.value = false;
       }
+      console.log('ArticleCreatePage - 刷新后的 pageStats：', articleData.value.pageStats);
     };
 
     const scrollToSection = (sectionId) => {
@@ -1327,7 +1228,11 @@ export default defineComponent({
 
     // 在编辑模式下初始化数据时添加部署相关信息
     const initializeArticleData = (data) => {
-      // 初始化基础数据
+      console.log('初始化前的原始 pageStats：', JSON.parse(JSON.stringify(data.pageStats)));
+      
+      // 创建 pageStats 的深拷贝，避免引用关系
+      const pageStats = JSON.parse(JSON.stringify(data.pageStats));
+      
       articleData.value = {
         ...data,
         sections: data.sections || [],
@@ -1336,10 +1241,12 @@ export default defineComponent({
         topic: data.topic || '',
         articleType: data.articleType || 'Landing Page',
         language: data.language || 'en',
-        publishUrl: data.publishURL || null // 使用 publishUrl 替代 deploymentMethod 和 deployTarget
+        publishUrl: data.publishURL || null,
+        // 直接使用深拷贝的 pageStats
+        pageStats: pageStats
       };
-      
-      originalArticle.value = JSON.parse(JSON.stringify(articleData.value));
+
+      console.log('初始化后的 pageStats：', JSON.parse(JSON.stringify(articleData.value.pageStats)));
     };
 
     // 添加新的响应式变量
@@ -1596,7 +1503,6 @@ export default defineComponent({
       activeTab,
       activeCategories,
       articleData,
-      contentMetrics,
       formatComponentName,
       handleDragStart,
       handleDrop,

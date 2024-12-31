@@ -1,10 +1,7 @@
 <template>
   <div class="floating-stats" :class="{ 'is-collapsed': isCollapsed }">
     <div class="stats-header">
-      <!-- 标题移到最左侧 -->
-      <h3 class="section-title" v-if="!isCollapsed">Basic Statistics</h3>
-
-      <!-- 刷新按钮紧跟标题 -->
+      <h3 class="section-title" v-if="!isCollapsed">Content Analysis</h3>
       <a-button 
         v-if="!isCollapsed"
         type="text" 
@@ -14,8 +11,6 @@
       >
         <template #icon><ReloadOutlined /></template>
       </a-button>
-
-      <!-- 关闭按钮保持在右侧 -->
       <div class="toggle-button" @click="toggleCollapse">
         <BarChartOutlined v-if="isCollapsed" />
         <CloseOutlined v-else />
@@ -24,59 +19,66 @@
 
     <div class="stats-content" v-show="!isCollapsed">
       <div class="metrics-grid">
-        <!-- Headings 统计 -->
-        <div class="metric-card headings-card">
-          <div class="metric-icon">
-            <UnorderedListOutlined />
-          </div>
-          <div class="metric-info">
-            <div class="heading-stats">
-              <div class="heading-stat">
-                <span class="stat-label">H1</span>
-                <span class="stat-value">{{ metrics.h1Count }}</span>
-              </div>
-              <div class="heading-stat">
-                <span class="stat-label">H2</span>
-                <span class="stat-value">{{ metrics.h2Count }}</span>
-              </div>
-              <div class="heading-stat">
-                <span class="stat-label">H3</span>
-                <span class="stat-value">{{ metrics.h3Count }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Paragraphs 和 Images -->
-        <div class="metric-row">
-          <div class="metric-card">
-            <div class="metric-icon">
-              <AlignLeftOutlined />
-            </div>
-            <div class="metric-info">
-              <span class="metric-label">Paragraphs</span>
-              <span class="metric-value">{{ metrics.paragraphsCount }}</span>
-            </div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-icon">
-              <PictureOutlined />
-            </div>
-            <div class="metric-info">
-              <span class="metric-label">Images</span>
-              <span class="metric-value">{{ metrics.imagesCount }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Word Count -->
+        <!-- Word Count Card -->
         <div class="metric-card word-count-card">
           <div class="metric-icon">
             <FileTextOutlined />
           </div>
           <div class="metric-info">
             <span class="metric-label">Total Words</span>
-            <span class="metric-value">{{ metrics.wordCount }}</span>
+            <span class="metric-value">{{ keywordsStats.wordCount }}</span>
+          </div>
+        </div>
+
+        <!-- Keywords Coverage -->
+        <div class="metric-card keywords-coverage-card">
+          <div class="metric-icon">
+            <TagsOutlined />
+          </div>
+          <div class="metric-info">
+            <span class="metric-label">Keywords Coverage</span>
+            <span class="metric-value">{{ keywordsCoverage }}%</span>
+            <span class="metric-subtitle">{{ keywordsStats.keywords.length }} of {{ keywordsStats.genKeyword.length }}</span>
+          </div>
+        </div>
+
+        <!-- Keywords Analysis -->
+        <div class="keywords-section">
+          <div class="section-header">
+            <span class="section-title">Keywords Analysis</span>
+          </div>
+          
+          <!-- Keywords Stats Table -->
+          <div class="keywords-table">
+            <div class="table-header">
+              <span class="keyword-col">Keyword</span>
+              <span class="count-col">Count</span>
+              <span class="density-col">Density</span>
+            </div>
+            <div class="table-body">
+              <div v-for="stat in keywordsStats.keywordStats" :key="stat.keyword" class="table-row">
+                <span class="keyword-col" :class="{ 'matched-keyword': keywordsStats.keywords.includes(stat.keyword) }">
+                  {{ stat.keyword }}
+                </span>
+                <span class="count-col">{{ stat.wordCount }}</span>
+                <span class="density-col">{{ formatDensity(stat.density) }}%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Missing Keywords -->
+          <div v-if="missingKeywords.length > 0" class="missing-keywords">
+            <div class="missing-keywords-header">
+              <span class="section-subtitle">Missing Keywords</span>
+              <a-tooltip title="Keywords that haven't been used in the content">
+                <InfoCircleOutlined />
+              </a-tooltip>
+            </div>
+            <div class="missing-keywords-list">
+              <a-tag v-for="keyword in missingKeywords" :key="keyword">
+                {{ keyword }}
+              </a-tag>
+            </div>
           </div>
         </div>
       </div>
@@ -85,15 +87,14 @@
 </template>
 
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, computed, watch } from 'vue';
 import { 
   BarChartOutlined,
   CloseOutlined,
   ReloadOutlined,
   FileTextOutlined,
-  PictureOutlined,
-  UnorderedListOutlined,
-  AlignLeftOutlined,
+  TagsOutlined,
+  InfoCircleOutlined
 } from '@ant-design/icons-vue';
 
 export default defineComponent({
@@ -104,20 +105,17 @@ export default defineComponent({
     CloseOutlined,
     ReloadOutlined,
     FileTextOutlined,
-    PictureOutlined,
-    UnorderedListOutlined,
-    AlignLeftOutlined,
+    TagsOutlined,
+    InfoCircleOutlined
   },
 
   props: {
-    metrics: {
-      type: Object,
-      required: true
-    },
     keywordsStats: {
       type: Object,
       default: () => ({
         genKeyword: [],
+        wordCount: 0,
+        keywords: [],
         keywordStats: []
       })
     }
@@ -126,8 +124,40 @@ export default defineComponent({
   emits: ['refresh'],
 
   setup(props, { emit }) {
-    const isCollapsed = ref(true);
+    const isCollapsed = ref(false);
     const refreshing = ref(false);
+
+    // 在入口处打印完整的传入数据
+    console.log('FloatingStats 接收到的完整数据：', {
+      wordCount: props.keywordsStats.wordCount,
+      genKeyword: props.keywordsStats.genKeyword,
+      keywords: props.keywordsStats.keywords,
+      keywordStats: props.keywordsStats.keywordStats
+    });
+
+    // 打印关键词统计详情
+    console.log('关键词统计详情：');
+    props.keywordsStats.keywordStats?.forEach(stat => {
+      console.log(`${stat.keyword}: ${stat.wordCount}次, 密度${stat.density.toFixed(2)}%`);
+    });
+
+    // 计算关键词覆盖率
+    const keywordsCoverage = computed(() => {
+      const total = props.keywordsStats.genKeyword.length;
+      const matched = props.keywordsStats.keywords.length;
+      return total > 0 ? Math.round((matched / total) * 100) : 0;
+    });
+
+    // 计算未使用的关键词
+    const missingKeywords = computed(() => {
+      return props.keywordsStats.genKeyword.filter(
+        keyword => !props.keywordsStats.keywords.includes(keyword)
+      );
+    });
+
+    const formatDensity = (density) => {
+      return density.toFixed(2);
+    };
 
     const toggleCollapse = () => {
       isCollapsed.value = !isCollapsed.value;
@@ -135,15 +165,34 @@ export default defineComponent({
 
     const handleRefresh = async () => {
       refreshing.value = true;
-      await emit('refresh');
-      refreshing.value = false;
+      try {
+        // 刷新整个页面
+        window.location.reload();
+      } catch (error) {
+        console.error('刷新页面失败:', error);
+      } finally {
+        refreshing.value = false;
+      }
     };
+
+    // 添加 watch 来监控数据变化
+    watch(() => props.keywordsStats, (newStats) => {
+      console.log('数据更新 - 新的统计数据：', {
+        wordCount: newStats.wordCount,
+        genKeyword: newStats.genKeyword,
+        keywords: newStats.keywords,
+        keywordStats: newStats.keywordStats
+      });
+    }, { deep: true });
 
     return {
       isCollapsed,
       refreshing,
       toggleCollapse,
-      handleRefresh
+      handleRefresh,
+      keywordsCoverage,
+      missingKeywords,
+      formatDensity
     };
   }
 });
@@ -154,7 +203,7 @@ export default defineComponent({
   position: fixed;
   right: 24px;
   bottom: 24px;
-  width: 300px;
+  width: 420px;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -168,46 +217,11 @@ export default defineComponent({
   border-radius: 24px;
 }
 
-.toggle-button {
-  position: absolute;
-  right: 12px;
-  top: 12px;
-  width: 24px;
-  height: 24px;
+.stats-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: #666;
-  transition: color 0.3s;
-  z-index: 2;
-}
-
-/* 添加折叠状态下的按钮样式 */
-.is-collapsed .toggle-button {
-  right: 50%;
-  top: 50%;
-  transform: translate(50%, -50%);
-  width: 48px;
-  height: 48px;
-  font-size: 20px;
-  color: #38BDF8;
-}
-
-.toggle-button:hover {
-  color: #38BDF8;
-}
-
-.stats-content {
-  padding: 16px;
-}
-
-/* 复用原有的统计样式 */
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  padding: 12px;
+  gap: 8px;
 }
 
 .section-title {
@@ -215,129 +229,157 @@ export default defineComponent({
   font-weight: 500;
   color: #1f2937;
   margin: 0;
+  flex-grow: 1;
+}
+
+.toggle-button {
+  cursor: pointer;
+  color: #666;
+  padding: 4px;
+}
+
+.stats-content {
+  padding: 0 16px 16px;
 }
 
 .metrics-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .metric-card {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px;
-  background: white;
-  border-radius: 6px;
+  padding: 12px;
+  background: #f8fafc;
   border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  gap: 12px;
 }
 
-.metric-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+.word-count-card,
+.keywords-coverage-card {
+  background: #f0f9ff;
+  border-color: #38BDF8;
 }
 
 .metric-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   background: rgba(56, 189, 248, 0.1);
-  border-radius: 6px;
+  border-radius: 8px;
   color: #38BDF8;
-  font-size: 14px;
 }
 
 .metric-info {
-  flex: 1;
+  flex-grow: 1;
 }
 
 .metric-label {
   display: block;
   font-size: 12px;
   color: #6b7280;
-  margin-bottom: 1px;
 }
 
 .metric-value {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   color: #1f2937;
 }
 
-.headings-card .heading-stats {
-  display: flex;
-  gap: 12px;
+.metric-subtitle {
+  display: block;
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 2px;
 }
 
-.heading-stat {
+.keywords-section {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.section-header {
   display: flex;
-  flex-direction: column;
   align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
-.stat-label {
-  font-size: 12px;
+.keywords-table {
+  font-size: 13px;
+}
+
+.table-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.table-body {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.keyword-col {
+  padding-right: 8px;
+}
+
+.count-col,
+.density-col {
+  text-align: center;
+}
+
+.matched-keyword {
+  color: #0284c7;
+  font-weight: 500;
+}
+
+.missing-keywords {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.missing-keywords-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.section-subtitle {
+  font-size: 13px;
+  font-weight: 500;
   color: #6b7280;
 }
 
-.stat-value {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1f2937;
-}
-
-.word-count-card {
-  background: #f0f9ff;
-  border-color: #38BDF8;
-}
-
-.word-count-card .metric-value {
-  color: #0284c7;
-}
-
-.stats-header {
+.missing-keywords-list {
   display: flex;
-  align-items: center;
-  padding: 12px 12px 0;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
-.section-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #1f2937;
+:deep(.ant-tag) {
   margin: 0;
-  /* 移除文本居中对齐 */
-  text-align: left;
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #ef4444;
 }
-
-.toggle-button {
-  cursor: pointer;
-  color: #666;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-}
-
-.is-collapsed .stats-header {
-  padding: 0;
-}
-
-.is-collapsed .toggle-button {
-  width: 100%;
-  height: 100%;
-  color: #38BDF8;
-  font-size: 20px;
-}
-
-/* 调整内容区域的padding */
-.stats-content {
-  padding: 12px 16px 16px;
-}
-</style> 
+</style>

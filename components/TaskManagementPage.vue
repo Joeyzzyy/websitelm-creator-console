@@ -112,6 +112,14 @@
                       </a-button>
                     </a-tooltip>
                     <a-button
+                      v-if="record.publishStatus === 'publish'"
+                      type="primary"
+                      size="small"
+                      @click="handleSubmitSitemap(record)"
+                    >
+                      Submit Sitemap
+                    </a-button>
+                    <a-button
                       type="primary"
                       danger
                       size="small"
@@ -431,6 +439,18 @@ export default {
             // 显示服务器返回的错误信息或默认错误信息
             message.error(response?.message || 'Operation failed')
           }
+        } else if (modalConfig.type === 'submit_sitemap') {
+          const record = modalConfig.data;
+          const customerId = localStorage.getItem('currentCustomerId');
+          const fullPublishURL = `${record.publishURL}/${record.lang}/${record.slug}`;
+          
+          const response = await apiClient.submitSite(customerId, fullPublishURL);
+          
+          if (response?.code === 200) {
+            message.success('Successfully submitted sitemap to Google Search Console');
+          } else {
+            message.error(response?.message || 'Failed to submit sitemap to Google Search Console');
+          }
         }
       } catch(err) {
         console.error('Operation failed:', err)
@@ -559,6 +579,15 @@ export default {
       window.open(previewUrl, '_blank');
     };
 
+    const handleSubmitSitemap = async (record) => {
+      // Show confirmation modal first
+      modalConfig.visible = true;
+      modalConfig.title = 'Submit Sitemap';
+      modalConfig.content = 'Are you sure you want to submit this page to Google Search Console?';
+      modalConfig.type = 'submit_sitemap';
+      modalConfig.data = record;
+    };
+
     onMounted(async () => {
       fetchTasks()
       await loadProductInfo()
@@ -593,6 +622,7 @@ export default {
       subfolders,
       loadSubfolders,
       handlePreview,
+      handleSubmitSitemap,
     }
   }
 }

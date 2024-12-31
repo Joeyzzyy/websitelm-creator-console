@@ -917,6 +917,21 @@ const getPublishedPagesCount = async (params = {}) => {
   }
 };
 
+const submitSite = async (customerId, siteURL) => {
+  try {
+    const response = await apiClient.post('/sites', null, {
+      params: {
+        customerId,
+        siteURL
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('提交站点失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -987,5 +1002,6 @@ export default {
   updatePageLayout,
   getPageLayout,
   checkSlugExists,
-  getPublishedPagesCount
+  getPublishedPagesCount,
+  submitSite
 };
