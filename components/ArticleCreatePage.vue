@@ -99,7 +99,7 @@
               @click="handlePreview"
               :style="{ height: '36px' }"
             >
-              <EyeOutlined /> Preview
+              Preview
             </a-button>
             <a-tooltip :title="getPublishTooltip(articleData)">
               <a-button

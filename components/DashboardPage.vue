@@ -351,6 +351,13 @@
                 </a-button>
               </a-empty>
             </div>
+            <!-- 添加无数据状态 -->
+            <div v-else-if="!gscAnalytics?.dailyData?.length" class="traffic-analytics">
+              <a-empty 
+                description="No data available" 
+                class="centered-empty-state"
+              />
+            </div>
             <!-- 数据加载完成后显示图表 -->
             <div v-else ref="chartRef" style="height: 500px; width: 100%;"></div>
           </a-card>
