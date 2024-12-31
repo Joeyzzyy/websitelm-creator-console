@@ -246,11 +246,11 @@
               <a-col :span="24">
                 <a-statistic 
                   title="Published" 
-                  :value="0"
+                  :value="publishedPages"
                   :value-style="{ fontSize: '16px' }"
                   :title-style="{ fontSize: '12px' }"
                 >
-                  <template #suffix>
+                  <template #suffix v-if="publishedPages === 0">
                     <a-tag size="small">
                       <span style="font-size: 12px">Not published</span>
                     </a-tag>
@@ -287,7 +287,7 @@
                 {{ gscSites[0].siteUrl }}
               </a-typography-text>
             </template>
-            <!-- 未连接 GSC 时显示��示 -->
+            <!-- 未连接 GSC 时显示提示 -->
             <div v-if="!isGscConnected" class="not-connected-notice">
               <a-empty>
                 <a-button 
@@ -772,6 +772,7 @@ export default defineComponent({
           } else {
             if (this.productInfo.domainStatus) {
               this.getSitemap()
+              this.loadPublishedPagesCount()
             }
           }
         } else {
@@ -1305,7 +1306,7 @@ export default defineComponent({
           this.verifyRecord = JSON.parse(response.data.txt);
           this.showVerifyRecord = true;
           
-          // 确保产��信息中的验证状态为 false
+          // 确保产品信息中的验证状态为 false
           if (this.productInfo) {
             this.productInfo = {
               ...this.productInfo,
@@ -1617,6 +1618,22 @@ export default defineComponent({
         return `https://${this.productInfo?.projectWebsite}`;
       }
       return key;
+    },
+
+    async loadPublishedPagesCount() {
+      try {
+        const response = await apiClient.getPublishedPagesCount({
+          status: 'publish' // 获取已发布状态的页面数量
+        });
+        
+        if (response?.code === 200) {
+          // 兼容新的数据结构，从 data.count 中获取数量
+          this.publishedPages = response.data?.count || 0;
+        }
+      } catch (error) {
+        console.error('Failed to load published pages count:', error);
+        this.publishedPages = 0;
+      }
     },
   }
 })

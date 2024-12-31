@@ -10,12 +10,6 @@ const routes = [
     component: () => import('../components/LoginPage.vue'),
   },
   {
-    path: '/article-edit',
-    name: 'ArticleEdit',
-    component: () => import('../components/ArticleEditPage.vue'),
-    meta: { hideNavigation: true }
-  },
-  {
     path: '/page-writer',
     name: 'ArticleCreate',
     component: () => import('../components/ArticleCreatePage.vue'),

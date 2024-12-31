@@ -503,16 +503,9 @@ export default defineComponent({
     const originalArticle = ref(null);
 
     onMounted(async () => {
-      // 添加更多日志来调试
-      console.log('组件挂载，当前路由参数：', route.query);
-      console.log('refresh 参数值：', route.query.refresh);
-      console.log('needsRefresh 值：', route.query.refresh === 'true');
-      
-      // 检查 URL 中是否有 refresh 参数
       const needsRefresh = route.query.refresh === 'true';
       
       if (needsRefresh) {
-        console.log('需要刷新页面...');
         // 先移除 refresh 参数
         const query = { ...route.query };
         delete query.refresh;
@@ -523,10 +516,9 @@ export default defineComponent({
         return;
       }
 
-      // 初始化数据加载
+      // 初始化数据加载 - 只调用一次 loadVerifiedDomains
       await loadProductInfo();
       await loadVerifiedDomains(); 
-      await loadDeployTargets('subfolder');
       
       try {
         if (isEditMode.value) {
@@ -1176,6 +1168,11 @@ export default defineComponent({
     // 添加加载域名信息的方法
     const loadVerifiedDomains = async () => {
       try {
+        // 如果已经加载过，直接返回
+        if (verifiedDomains.value.length > 0) {
+          return;
+        }
+
         const projectId = VERCEL_CONFIG.PROJECT_ID;
         const response = await apiClient.getVercelDomainInfo(projectId);
         
@@ -1193,7 +1190,7 @@ export default defineComponent({
           })
           ?.map(domain => domain.name) || [];
 
-        // 加载子文件夹
+        // 加载子文件夹（只在第一次加载）
         await loadSubfolders();
         
         // 合并域名和子文件夹路径
@@ -1201,6 +1198,14 @@ export default defineComponent({
           ...domains,
           ...(subfolders.value.map(subfolder => `${productInfo.value?.projectWebsite}/${subfolder}`))
         ];
+
+        // 同时更新 availablePublishUrls
+        availablePublishUrls.value = [...verifiedDomains.value];
+        
+        // 如果编辑模式下没有 publishUrl，设置第一个可用的URL
+        if (!articleData.value.publishUrl && availablePublishUrls.value.length > 0) {
+          articleData.value.publishUrl = availablePublishUrls.value[0];
+        }
       } catch (error) {
         console.error('Failed to load domain info:', error);
       }
@@ -1214,11 +1219,33 @@ export default defineComponent({
       isSideNavCollapsed.value = !isSideNavCollapsed.value;
     };
 
+    // 1. 首先声明所有需要的响应式变量
+    const subfolders = ref([]);
+    const hasLoadedSubfolders = ref(false);
     const loadingDeployTargets = ref(false);
     const availableSubdomains = ref([]);
     const availableSubfolders = ref([]);
 
-    // 加载部署目标选项
+    // 2. 定义 loadSubfolders 函数
+    const loadSubfolders = async () => {
+      // 如果已经加载过，直接返回
+      if (hasLoadedSubfolders.value) {
+        return;
+      }
+
+      try {
+        const response = await apiClient.getSubfolders();
+        if (response?.code === 200 && response?.data) {
+          subfolders.value = response.data;
+          hasLoadedSubfolders.value = true;
+        }
+      } catch (error) {
+        console.error('Failed to load subfolders:', error);
+        message.error('Failed to load subfolder options');
+      }
+    };
+
+    // 3. 然后再定义 loadDeployTargets 函数
     const loadDeployTargets = async (method) => {
       loadingDeployTargets.value = true;
       try {
@@ -1247,21 +1274,24 @@ export default defineComponent({
             }
           }
         } else {
-          const response = await apiClient.getSubfolders();
-          if (response?.code === 200 && response?.data) {
-            const folders = response.data.map(folder => ({
-              text: folder
-            }));
-            
-            availableSubfolders.value = [...folders];
-            
-            if (folders.length > 0) {
-              await nextTick();
-              articleData.value = {
-                ...articleData.value,
-                deployTarget: folders[0].text
-              };
-            }
+          // 确保 subfolders 已加载
+          if (!hasLoadedSubfolders.value) {
+            await loadSubfolders();
+          }
+          
+          // 使用已加载的 subfolders 数据
+          const folders = subfolders.value.map(folder => ({
+            text: folder
+          }));
+          
+          availableSubfolders.value = [...folders];
+          
+          if (folders.length > 0) {
+            await nextTick();
+            articleData.value = {
+              ...articleData.value,
+              deployTarget: folders[0].text
+            };
           }
         }
       } catch (error) {
@@ -1300,64 +1330,11 @@ export default defineComponent({
         publishUrl: data.publishUrl || null // 使用 publishUrl 替代 deploymentMethod 和 deployTarget
       };
       
-      // 保存原始数据用于比较
       originalArticle.value = JSON.parse(JSON.stringify(articleData.value));
-      
-      // 加载可用的发布URL
-      loadPublishUrls();
     };
 
     // 添加新的响应式变量
     const availablePublishUrls = ref([]);
-
-    // 加载可用的发布URL
-    const loadPublishUrls = async () => {
-      loadingDeployTargets.value = true;
-      try {
-        const projectId = VERCEL_CONFIG.PROJECT_ID;
-        const response = await apiClient.getVercelDomainInfo(projectId);
-        
-        if (response?.domains) {
-          // 过滤有效域名
-          const filteredDomains = response.domains
-            .filter(domain => {
-              const isVerified = domain.verified || !domain.configDetails?.misconfigured;
-              const belongsToCustomer = domain.apexName === productInfo.value?.projectWebsite;
-              return isVerified && domain.name && belongsToCustomer;
-            })
-            .map(domain => domain.name);
-
-          // 获取子文件夹
-          const subfoldersResponse = await apiClient.getSubfolders();
-          const subfolderUrls = subfoldersResponse?.code === 200 && subfoldersResponse?.data
-            ? subfoldersResponse.data.map(folder => `${productInfo.value?.projectWebsite}/${folder}`)
-            : [];
-
-          // 合并域名和子文件夹URL
-          availablePublishUrls.value = [...filteredDomains, ...subfolderUrls];
-          
-          // 如果编辑模式下没有 publishUrl，设置第一个可用的URL
-          if (!articleData.value.publishUrl && availablePublishUrls.value.length > 0) {
-            articleData.value.publishUrl = availablePublishUrls.value[0];
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load publish URLs:', error);
-        message.error('Failed to load publish URL options');
-      } finally {
-        loadingDeployTargets.value = false;
-      }
-    };
-
-    // 修改预览URL计算属性
-    const getPreviewPublishUrl = computed(() => {
-      if (!articleData.value.publishUrl) {
-        return '';
-      }
-
-      const slug = articleData.value.slug || '{slug}';
-      return `https://${articleData.value.publishUrl}/${slug}`;
-    });
 
     // 添加预览弹窗相关的响应式数据
     const previewModal = reactive({
@@ -1406,22 +1383,6 @@ export default defineComponent({
           ...keywords
         ])
       ];
-    };
-
-    // 添加 subfolders 响应式变量
-    const subfolders = ref([]);
-
-    // 添加 loadSubfolders 方法
-    const loadSubfolders = async () => {
-      try {
-        const response = await apiClient.getSubfolders();
-        if (response?.code === 200 && response?.data) {
-          subfolders.value = response.data;
-        }
-      } catch (error) {
-        console.error('Failed to load subfolders:', error);
-        message.error('Failed to load subfolder options');
-      }
     };
 
     // 添加新的响应式变量
@@ -1509,6 +1470,11 @@ export default defineComponent({
 
     // 自动保存方法
     const autoSave = async () => {
+      // 如果不是编辑模式,直接返回
+      if (!isEditMode.value) {
+        return;
+      }
+
       try {
         // 检查是否满足自动保存条件
         if (!checkRequiredFields()) {
@@ -1539,61 +1505,36 @@ export default defineComponent({
           ? articleData.value.keywords.filter(k => k).join(',')
           : (articleData.value.keywords || '');
 
-        if (isEditMode.value) {
-          // 编辑模式下的自动保存
-          const updatePromises = [];
+        // 编辑模式下的自动保存
+        const updatePromises = [];
 
-          const pageUpdateData = {
-            title: articleData.value.title,
-            subTitle: articleData.value.subTitle,
-            description: articleData.value.description,
-            summary: articleData.value.summary,
-            topic: articleData.value.topic,
-            articleType: articleData.value.articleType,
-            slug: articleData.value.slug,
-            author: articleData.value.author,
-            publishUrl: articleData.value.publishUrl,
-            relatedKeyword: processedKeywords,
-            numberOfWords: 2000
-          };
+        const pageUpdateData = {
+          title: articleData.value.title,
+          subTitle: articleData.value.subTitle,
+          description: articleData.value.description,
+          summary: articleData.value.summary,
+          topic: articleData.value.topic,
+          articleType: articleData.value.articleType,
+          slug: articleData.value.slug,
+          author: articleData.value.author,
+          publishUrl: articleData.value.publishUrl,
+          relatedKeyword: processedKeywords,
+          numberOfWords: 2000
+        };
 
-          updatePromises.push(
-            apiClient.updatePage(pageId.value, pageUpdateData)
-          );
+        updatePromises.push(
+          apiClient.updatePage(pageId.value, pageUpdateData)
+        );
 
-          updatePromises.push(
-            apiClient.updateFullSections(pageId.value, {sections: articleData.value.sections})
-          );
+        updatePromises.push(
+          apiClient.updateFullSections(pageId.value, {sections: articleData.value.sections})
+        );
 
-          await Promise.all(updatePromises);
-        } else {
-          // 创建模式下的自动保存
-          const requestData = {
-            page: {
-              author: articleData.value.author,
-              customerId: customerId,
-              description: articleData.value.description,
-              language: articleData.value.language,
-              subTitle: articleData.value.subTitle,
-              summary: articleData.value.summary || '',
-              title: articleData.value.title,
-              slug: articleData.value.slug || '',
-              topic: articleData.value.topic,
-              articleType: articleData.value.articleType,
-              publishUrl: articleData.value.publishUrl,
-              relatedKeyword: processedKeywords,
-              numberOfWords: 2000
-            },
-            sections: articleData.value.sections
-          };
-
-          await apiClient.createManualPage(requestData);
-        }
+        await Promise.all(updatePromises);
 
         lastAutoSaveTime.value = new Date();
         console.log('Auto-saved successfully at:', lastAutoSaveTime.value);
         
-        // 添加轻量级提示
         message.success({
           content: 'Auto-saved successfully',
           duration: 2,
@@ -1602,7 +1543,6 @@ export default defineComponent({
 
       } catch (error) {
         console.error('Auto-save failed:', error);
-        // 添加错误提示
         message.error({
           content: 'Auto-save failed',
           duration: 2
@@ -1666,7 +1606,6 @@ export default defineComponent({
       loadingDeployTargets,
       availableSubdomains,
       availableSubfolders,
-      getPreviewPublishUrl,
       previewModal,
       showComponentPreview,
       handlePreviewCancel,

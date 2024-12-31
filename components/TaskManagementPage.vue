@@ -495,12 +495,10 @@ export default {
     // 添加状态标签显示函数
     const getStatusLabel = (status) => {
       switch (status) {
-        case 'create':
-          return 'Not Published'
         case 'publish':
           return 'Published'
         default:
-          return status
+          return 'Not Published'  // 所有非 publish 状态都显示为 Not Published
       }
     }
 

@@ -900,6 +900,23 @@ const checkSlugExists = async (slug, pageId) => {
   }
 };
 
+// 新增：获取页面数量统计的方法
+const getPublishedPagesCount = async (params = {}) => {
+  try {
+    const queryParams = {
+      ...(params.lang && { lang: params.lang }),
+      ...(params.articleType && { articleType: params.articleType }),
+      ...(params.status && { status: params.status })
+    };
+
+    const response = await apiClient.get('/pages/count', { params: queryParams });
+    return response.data;
+  } catch (error) {
+    console.error('获取页面数量统计失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -969,5 +986,6 @@ export default {
   getSitemapUrls,
   updatePageLayout,
   getPageLayout,
-  checkSlugExists
+  checkSlugExists,
+  getPublishedPagesCount
 };

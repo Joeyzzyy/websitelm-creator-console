@@ -263,10 +263,6 @@
         this.closeImageLibrary()
       }
     },
-    mounted() {
-      console.log('Complete styles config:', this.styles)
-      console.log('Typography styles:', this.styles.typography.h1)
-    }
   }
   </script>
   
