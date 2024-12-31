@@ -516,15 +516,15 @@ export default defineComponent({
         return;
       }
 
-      // 初始化数据加载 - 只调用一次 loadVerifiedDomains
-      await loadProductInfo();
-      await loadVerifiedDomains(); 
-      
       try {
+        loading.value = true;
+        
         if (isEditMode.value) {
           const response = await apiClient.getArticleById(pageId.value);
           
           if (response?.code === 200 && response.data) {
+            await loadProductInfo();
+            await loadVerifiedDomains();
             initializeArticleData(response.data);
           } else {
             throw new Error(response?.message || 'Invalid response data');
@@ -1168,11 +1168,6 @@ export default defineComponent({
     // 添加加载域名信息的方法
     const loadVerifiedDomains = async () => {
       try {
-        // 如果已经加载过，直接返回
-        if (verifiedDomains.value.length > 0) {
-          return;
-        }
-
         const projectId = VERCEL_CONFIG.PROJECT_ID;
         const response = await apiClient.getVercelDomainInfo(projectId);
         
@@ -1190,7 +1185,7 @@ export default defineComponent({
           })
           ?.map(domain => domain.name) || [];
 
-        // 加载子文件夹（只在第一次加载）
+        // 加载子文件夹
         await loadSubfolders();
         
         // 合并域名和子文件夹路径
@@ -1199,15 +1194,23 @@ export default defineComponent({
           ...(subfolders.value.map(subfolder => `${productInfo.value?.projectWebsite}/${subfolder}`))
         ];
 
-        // 同时更新 availablePublishUrls
+        // 更新 availablePublishUrls
         availablePublishUrls.value = [...verifiedDomains.value];
         
-        // 如果编辑模式下没有 publishUrl，设置第一个可用的URL
-        if (!articleData.value.publishUrl && availablePublishUrls.value.length > 0) {
-          articleData.value.publishUrl = availablePublishUrls.value[0];
+        // 关键修改：在所有URL加载完成后，如果当前是编辑模式且有 publishUrl，
+        // 检查并确保它在可用列表中
+        if (isEditMode.value && articleData.value.publishUrl) {
+          if (!availablePublishUrls.value.includes(articleData.value.publishUrl)) {
+            // 如果当前的 publishUrl 不在可用列表中，将其添加到列表中
+            availablePublishUrls.value.push(articleData.value.publishUrl);
+          }
         }
+
+        console.log('Available URLs:', availablePublishUrls.value);
+
       } catch (error) {
         console.error('Failed to load domain info:', error);
+        message.error('Failed to load publish URL options');
       }
     };
 
@@ -1327,7 +1330,7 @@ export default defineComponent({
         topic: data.topic || '',
         articleType: data.articleType || 'Landing Page',
         language: data.language || 'en',
-        publishUrl: data.publishUrl || null // 使用 publishUrl 替代 deploymentMethod 和 deployTarget
+        publishUrl: data.publishURL || null // 使用 publishUrl 替代 deploymentMethod 和 deployTarget
       };
       
       originalArticle.value = JSON.parse(JSON.stringify(articleData.value));
@@ -1564,6 +1567,20 @@ export default defineComponent({
       console.log('Article data changed, next auto-save scheduled');
     }, { deep: true });
 
+    // 添加 getPreviewPublishUrl 计算属性
+    const getPreviewPublishUrl = computed(() => {
+      if (!articleData.value.publishUrl || !articleData.value.language) {
+        return '';
+      }
+
+      // 构建预览 URL
+      const baseUrl = articleData.value.publishUrl;
+      const lang = articleData.value.language;
+      const slug = articleData.value.slug || '[slug]'; // 如果没有 slug 则显示占位符
+
+      return `${baseUrl}/${lang}/${slug}`;
+    });
+
     return {
       loading,
       saving,
@@ -1619,6 +1636,7 @@ export default defineComponent({
       slugError,
       handleSlugBlur,
       lastAutoSaveTime,
+      getPreviewPublishUrl,
     };
   }
 });

@@ -91,12 +91,12 @@
               <a-form-item label="Introduction">
                 <div class="input-with-tag">
                   <span class="html-tag">{{ tags.introduction }}</span>
-                  <a-textarea
-                    v-model:value="localSection.leftContent.introduction"
+                  <textarea-with-line-break
+                    v-model="localSection.leftContent.introduction"
                     :disabled="disabled"
                     :rows="4"
+                    :textarea-style="{ minHeight: '120px' }"
                     @change="handleChange"
-                    :style="{ minHeight: '120px' }"
                   />
                 </div>
               </a-form-item>
@@ -201,6 +201,7 @@
   import WhyChooseUsWithStoryPreview from './WhyChooseUsWithStoryPreview.vue'
   import themeConfig from '../../../assets/config/themeConfig'
   import { DeleteOutlined } from '@ant-design/icons-vue'
+  import TextareaWithLineBreak from '../../common/TextareaWithLineBreak.vue'
   
   export default {
     name: 'WhyChooseUsWithStory',
@@ -208,7 +209,8 @@
     components: {
       ImageLibrary,
       WhyChooseUsWithStoryPreview,
-      DeleteOutlined
+      DeleteOutlined,
+      TextareaWithLineBreak
     },
     computed: {
       tags() {
@@ -257,15 +259,20 @@
       section: {
         handler(newVal) {
           this.localSection = Object.assign({
-            topContent: {
+            title: '',
+            description: '',
+            leftContent: {
+              avatarUrl: '',
+              avatarAlt: '',
+              name: '',
               title: '',
-              subTitle: ''
+              introduction: ''
             },
-            bottomContent: []
+            rightContent: []
           }, JSON.parse(JSON.stringify(newVal)))
           
-          if (!Array.isArray(this.localSection.bottomContent)) {
-            this.localSection.bottomContent = []
+          if (!Array.isArray(this.localSection.rightContent)) {
+            this.localSection.rightContent = []
           }
         },
         deep: true
