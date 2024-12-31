@@ -81,6 +81,43 @@
             </div>
           </div>
         </div>
+
+        <!-- 添加标题统计卡片 -->
+        <div class="metric-card headings-card">
+          <div class="metric-icon">
+            <OrderedListOutlined />
+          </div>
+          <div class="metric-info">
+            <span class="metric-label">Headings</span>
+            <div class="headings-stats">
+              <span v-for="(count, tag) in headingStats" :key="tag" class="heading-stat">
+                {{ tag.toUpperCase() }}: {{ count }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 在 keywords-section 后添加新的组件统计部分 -->
+        <div class="component-headings-section">
+          <div class="section-header">
+            <span class="section-title">Component Headings</span>
+          </div>
+          <div class="component-stats">
+            <div v-for="(stats, component) in componentHeadingStats" 
+                 :key="component" 
+                 class="component-stat-card">
+              <div class="component-name">{{ component }}</div>
+              <div class="component-heading-stats">
+                <template v-for="(count, tag) in stats" :key="tag">
+                  <span v-if="count > 0" 
+                        class="heading-stat">
+                    {{ tag.toUpperCase() }}: {{ count }}
+                  </span>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -94,8 +131,10 @@ import {
   ReloadOutlined,
   FileTextOutlined,
   TagsOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  OrderedListOutlined
 } from '@ant-design/icons-vue';
+import { SECTION_TAGS } from './sections/common/SectionTag';  // 引入 SECTION_TAGS
 
 export default defineComponent({
   name: 'FloatingStats',
@@ -106,7 +145,8 @@ export default defineComponent({
     ReloadOutlined,
     FileTextOutlined,
     TagsOutlined,
-    InfoCircleOutlined
+    InfoCircleOutlined,
+    OrderedListOutlined
   },
 
   props: {
@@ -118,6 +158,10 @@ export default defineComponent({
         keywords: [],
         keywordStats: []
       })
+    },
+    sections: {  // 添加新的 prop
+      type: Array,
+      default: () => []
     }
   },
 
@@ -185,6 +229,147 @@ export default defineComponent({
       });
     }, { deep: true });
 
+    // 添加标题统计的计算属性
+    const headingStats = computed(() => {
+      const stats = {
+        h1: 0,
+        h2: 0,
+        h3: 0,
+        h4: 0,
+        h5: 0
+      };
+
+      props.sections.forEach(section => {
+        const sectionType = section.componentName;  // 改用 componentName 替代 type
+        const sectionTags = SECTION_TAGS[sectionType] || {};
+        
+        console.log('Processing section:', {
+          componentName: sectionType,
+          tags: sectionTags,
+          sectionData: section
+        });
+
+        // 检查 topContent
+        if (section.topContent) {
+          Object.entries(section.topContent).forEach(([field, value]) => {
+            const tag = sectionTags[field];
+            if (tag in stats && value) {
+              stats[tag]++;
+            }
+          });
+        }
+
+        // 检查 leftContent
+        if (section.leftContent) {
+          Object.entries(section.leftContent).forEach(([field, value]) => {
+            const tag = sectionTags[field];
+            if (tag in stats && value) {
+              stats[tag]++;
+            }
+          });
+        }
+
+        // 检查 rightContent
+        if (Array.isArray(section.rightContent)) {
+          section.rightContent.forEach(content => {
+            Object.entries(content).forEach(([field, value]) => {
+              const tag = sectionTags[field];
+              if (tag in stats && value) {
+                stats[tag]++;
+              }
+            });
+          });
+        }
+
+        // 检查直接属性
+        Object.entries(section).forEach(([field, value]) => {
+          const tag = sectionTags[field];
+          if (tag in stats && value && typeof value === 'string') {
+            stats[tag]++;
+          }
+        });
+      });
+
+      console.log('Final heading stats:', stats);
+      return stats;
+    });
+
+    // 添加按组件分类的标题统计
+    const componentHeadingStats = computed(() => {
+      // 在入口处打印完整的传入数据
+      console.log('FloatingStats 接收到的完整数据：', {
+        sections: props.sections
+      });
+      
+      const stats = {};
+      
+      props.sections.forEach(section => {
+        const componentName = section.componentName;
+        const sectionTags = SECTION_TAGS[componentName] || {};
+        
+        // 打印每个 section 的信息
+        console.log('处理 section:', {
+          componentName,
+          tags: sectionTags,
+          sectionData: section
+        });
+
+        // 初始化该组件的统计
+        if (!stats[componentName]) {
+          stats[componentName] = {
+            h1: 0,
+            h2: 0,
+            h3: 0,
+            h4: 0,
+            h5: 0
+          };
+        }
+
+        // 统计逻辑与之前相同，但现在按组件分类
+        const countHeadings = (content) => {
+          if (!content) return;
+          
+          if (Array.isArray(content)) {
+            content.forEach(item => {
+              Object.entries(item).forEach(([field, value]) => {
+                const tag = sectionTags[field];
+                if (tag in stats[componentName] && value && typeof value === 'string') {
+                  stats[componentName][tag]++;
+                }
+              });
+            });
+            return;
+          }
+          
+          Object.entries(content).forEach(([field, value]) => {
+            const tag = sectionTags[field];
+            if (tag in stats[componentName] && value && typeof value === 'string') {
+              stats[componentName][tag]++;
+            }
+          });
+        };
+
+        // 检查所有可能包含标题的内容
+        countHeadings(section.topContent);
+        countHeadings(section.leftContent);
+        countHeadings(section.rightContent);
+        
+        // 检查直接属性
+        Object.entries(section).forEach(([field, value]) => {
+          const tag = sectionTags[field];
+          if (tag in stats[componentName] && value && typeof value === 'string') {
+            stats[componentName][tag]++;
+          }
+        });
+      });
+
+      // 打印最终统计结果
+      console.log('最终统计结果:', stats);
+      
+      // 修改过滤逻辑：直接返回 stats，因为已经有数据了
+      return stats;
+    });
+
     return {
       isCollapsed,
       refreshing,
@@ -192,7 +377,9 @@ export default defineComponent({
       handleRefresh,
       keywordsCoverage,
       missingKeywords,
-      formatDensity
+      formatDensity,
+      headingStats,
+      componentHeadingStats,
     };
   }
 });
@@ -215,6 +402,18 @@ export default defineComponent({
   width: 48px;
   height: 48px;
   border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-stats.is-collapsed .stats-header {
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .stats-header {
@@ -381,5 +580,79 @@ export default defineComponent({
   background: #fee2e2;
   border-color: #fecaca;
   color: #ef4444;
+}
+
+.headings-card {
+  background: #f0f7ff;
+  border-color: #60a5fa;
+}
+
+.headings-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.heading-stat {
+  font-size: 12px;
+  color: #3b82f6;
+  background: rgba(59, 130, 246, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.component-headings-section {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.component-headings-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.component-headings-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.component-headings-section::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+
+.component-headings-section::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+.component-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.component-stat-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.component-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.component-heading-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 </style>

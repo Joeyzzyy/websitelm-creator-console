@@ -328,8 +328,9 @@
         </div>
       </div>
 
-      <floating-stats 
+      <FloatingStats 
         :keywords-stats="articleData.pageStats"
+        :sections="articleData.sections"
         @refresh="handleRefreshMetrics"
       />
 
