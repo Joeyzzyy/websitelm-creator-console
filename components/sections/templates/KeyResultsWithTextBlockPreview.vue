@@ -36,7 +36,7 @@
                 <div class="text-6xl font-bold mb-2 text-blue-600">
                   {{ result.percentage }}%
                 </div>
-                <p class="text-sm text-gray-600">
+                <p class="text-sm text-gray-600 whitespace-pre-line">
                   {{ result.description }}
                 </p>
               </div>

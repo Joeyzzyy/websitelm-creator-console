@@ -34,7 +34,7 @@ const props = defineProps({
           <h3 class="text-xl md:text-2xl font-semibold text-gray-900 mb-2">
             {{ module.title }}
           </h3>
-          <p class="text-base text-gray-600">
+          <p class="text-base text-gray-600 whitespace-pre-line">
             {{ module.content }}
           </p>
         </div>

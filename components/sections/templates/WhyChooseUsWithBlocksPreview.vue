@@ -39,7 +39,7 @@ const handleRedirect = (e) => {
             <h3 class="text-xl md:text-2xl font-semibold text-gray-900 mb-4">
               {{ content.title }}
             </h3>
-            <p class="text-base text-gray-600 mb-6">
+            <p class="text-base text-gray-600 mb-6 whitespace-pre-line">
               {{ content.content }}
             </p>
             <button 
@@ -69,7 +69,7 @@ const handleRedirect = (e) => {
             <h3 class="text-xl md:text-2xl font-semibold text-gray-900 mb-4">
               {{ content.title }}
             </h3>
-            <p class="text-base text-gray-600 mb-6">
+            <p class="text-base text-gray-600 mb-6 whitespace-pre-line">
               {{ content.content }}
             </p>
             <button 

@@ -84,7 +84,7 @@ onUnmounted(() => {
                 <h3 class="text-xl font-bold mb-2">{{ section.leftContent.name }}</h3>
                 <p class="text-gray-600 text-sm">{{ section.leftContent.title }}</p>
               </div>
-              <div class="text-gray-700 text-sm leading-relaxed">
+              <div class="text-gray-700 text-sm leading-relaxed whitespace-pre-line">
                 {{ section.leftContent.introduction }}
               </div>
             </div>

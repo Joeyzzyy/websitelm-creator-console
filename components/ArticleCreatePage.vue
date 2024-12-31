@@ -1,6 +1,6 @@
 <template>
   <div class="article-editor">
-    <!-- 加载状态遮罩 -->
+    <!-- Loading overlay -->
     <div v-if="loading" class="loading-overlay">
       <div class="loading-spinner">
         <div class="spinner"></div>
@@ -9,7 +9,7 @@
     </div>
 
     <div v-else>
-      <!-- 左侧面板 -->
+      <!-- Left sidebar -->
       <div class="side-nav" :class="{ 'collapsed': isSideNavCollapsed }">
         <div class="collapse-button" @click="toggleSideNav">
           <div class="collapse-icon">
@@ -21,7 +21,7 @@
           v-model:activeKey="activeTab"
           class="compact-tabs"
         >
-          <!-- 组件选择面板 -->
+          <!-- Component selection panel -->
           <a-tab-pane key="components" tab="Add">
             <div class="components-list">
               <a-collapse v-model:activeKey="activeCategories">
@@ -48,12 +48,12 @@
           <!-- Selected Components tab -->
           <a-tab-pane key="selectedComponents" tab="Selected">
             <div class="selected-components-list">
-              <!-- 空态提示 -->
+              <!-- Empty state hint -->
               <div v-if="articleData.sections.length === 0" class="empty-hint">
                 <p>No components added yet</p>
               </div>
 
-              <!-- 已选组件列表 -->
+              <!-- Selected components list -->
               <div 
                 v-else
                 class="selected-items"
@@ -86,7 +86,7 @@
         </a-tabs>
       </div>
 
-      <!-- 顶部操作栏 -->
+      <!-- Header toolbar -->
       <div class="editor-header">
         <a-button type="link" @click="handleBack">
           <ArrowLeftOutlined /> Back
@@ -134,10 +134,10 @@
         </div>
       </div>
 
-      <!-- 内容区域 -->
+      <!-- Content area -->
       <div class="editor-content" :class="{ 'expanded': isSideNavCollapsed }" @dragover.prevent @drop="handleDrop">
         <div class="sections-container">
-          <!-- 固定的紧凑型 Info 组件 -->
+          <!-- Fixed compact Info component -->
           <div class="section-wrapper info-section">
             <div class="component-label">Page Information</div>
             <div class="basic-info-form">
@@ -293,12 +293,12 @@
             </div>
           </div>
 
-          <!-- 空状态提示 - 只有没有其他组件时显示 -->
+          <!-- Empty state hint - only shown when no components exist -->
           <div v-if="articleData.sections.length === 0" class="empty-state">
             <p>Drag or click components from the left to start creating</p>
           </div>
 
-          <!-- 其他组件列表 -->
+          <!-- Other components list -->
           <div 
             v-for="(section, index) in articleData.sections" 
             :key="index"
@@ -336,7 +336,7 @@
         :isCollapsible="true"
       />
 
-      <!-- 添加预览弹窗 -->
+      <!-- Preview modal -->
       <a-modal
         v-model:visible="previewModal.visible"
         :title="previewModal.title"
@@ -346,7 +346,7 @@
         @cancel="handlePreviewCancel"
       >
         <div class="preview-modal-content">
-          <!-- 预览内容区域 - 直接使用对应的 Preview 组件 -->
+          <!-- Preview content area -->
           <div class="preview-component-wrapper">
             <component 
               :is="`${previewModal.componentName}Preview`"
@@ -355,7 +355,7 @@
             />
           </div>
           
-          <!-- 底部操作按钮 -->
+          <!-- Footer action buttons -->
           <div class="preview-modal-footer">
             <a-button @click="handlePreviewCancel">Cancel</a-button>
             <a-button type="primary" @click="handlePreviewAdd">Add Component</a-button>
@@ -771,10 +771,16 @@ export default defineComponent({
 
     const handleSave = async (shouldQuit = false) => {
       try {
-        // 检查 slug 是否有效
-        if (!isSlugValid.value) {
-          message.error('Please modify the duplicate slug before saving');
-          return; // 直接返回，不继续执行保存操作
+        // 如果是编辑模式，先检查 slug
+        if (isEditMode.value) {
+          // 主动触发 slug 检查
+          await handleSlugBlur();
+          
+          // 如果 slug 无效，阻止保存
+          if (!isSlugValid.value) {
+            message.error('Slug is duplicated');
+            return;
+          }
         }
 
         // 修改必填字段验证
@@ -1471,7 +1477,7 @@ export default defineComponent({
       return true;
     };
 
-    // 自动保存方法
+    // 修改自动保存方法
     const autoSave = async () => {
       // 如果不是编辑模式,直接返回
       if (!isEditMode.value) {
@@ -1491,7 +1497,10 @@ export default defineComponent({
           return;
         }
 
-        // 检查slug是否有效
+        // 新增: 主动触发 slug 检查
+        await handleSlugBlur();
+        
+        // 新增: 检查 slug 是否有效
         if (!isSlugValid.value) {
           console.log('Invalid slug, skipping auto-save');
           return;

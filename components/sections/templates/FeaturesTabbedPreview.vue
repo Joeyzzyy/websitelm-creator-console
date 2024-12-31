@@ -59,7 +59,7 @@ const activeContent = computed(() =>
         <h3 class="text-xl md:text-2xl font-semibold text-gray-900">
           {{ activeContent?.title }}
         </h3>
-        <p class="text-base text-gray-600">
+        <p class="text-base text-gray-600 whitespace-pre-line">
           {{ activeContent?.description }}
         </p>
         <button 

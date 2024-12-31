@@ -11,7 +11,7 @@
         
         <p 
           v-if="section.topContent.description"
-          class="text-base text-gray-600 mb-3 max-w-2xl"
+          class="text-base text-gray-600 mb-3 max-w-2xl whitespace-pre-line"
         >
           {{ section.topContent.description }}
         </p>

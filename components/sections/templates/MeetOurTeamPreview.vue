@@ -84,7 +84,7 @@ const socialIcons = {
             <p class="text-base text-gray-600">
               {{ member.title }}
             </p>
-            <p class="text-sm text-gray-600 mb-6 leading-relaxed">
+            <p class="text-sm text-gray-600 mb-6 leading-relaxed whitespace-pre-line">
               {{ member.description }}
             </p>
             <div class="flex justify-center space-x-6">

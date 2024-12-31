@@ -27,7 +27,7 @@
             <h5 class="text-base md:text-lg font-medium text-gray-700 mb-2">
               {{ block.subTitle }}
             </h5>
-            <p class="text-base text-gray-600 leading-relaxed">
+            <p class="text-base text-gray-600 leading-relaxed whitespace-pre-line">
               {{ block.content }}
             </p>
           </div>

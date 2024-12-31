@@ -98,7 +98,7 @@ const handleNextCard = () => {
             <h4 class="text-lg font-semibold text-gray-900 mb-2">
               {{ review.title }}
             </h4>
-            <p class="text-base text-gray-700">
+            <p class="text-base text-gray-700 whitespace-pre-line">
               {{ review.content }}
             </p>
           </div>

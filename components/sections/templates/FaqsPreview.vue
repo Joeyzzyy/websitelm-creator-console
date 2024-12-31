@@ -36,7 +36,7 @@
             </button>
             <div class="overflow-y-auto transition-all duration-200"
                  :class="{ 'max-h-[600px] pb-4': openIndex === index, 'max-h-0': openIndex !== index }">
-              <div class="text-base text-gray-600">
+              <div class="text-base text-gray-600 whitespace-pre-line">
                 {{ faq.answer }}
               </div>
             </div>

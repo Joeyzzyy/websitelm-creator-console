@@ -21,7 +21,7 @@
             class="text-left p-6 bg-gray-50 rounded-lg"
           >
             <h4 class="text-lg font-semibold mb-2 text-gray-900">{{ item.title }}</h4>
-            <p class="text-base text-gray-600">{{ item.description }}</p>
+            <p class="text-base text-gray-600 whitespace-pre-line">{{ item.description }}</p>
           </div>
         </div>
         

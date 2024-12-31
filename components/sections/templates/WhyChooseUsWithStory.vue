@@ -91,12 +91,12 @@
               <a-form-item label="Introduction">
                 <div class="input-with-tag">
                   <span class="html-tag">{{ tags.introduction }}</span>
-                  <textarea-with-line-break
-                    v-model="localSection.leftContent.introduction"
+                  <a-textarea
+                    v-model:value="localSection.leftContent.introduction"
                     :disabled="disabled"
                     :rows="4"
-                    :textarea-style="{ minHeight: '120px' }"
                     @change="handleChange"
+                    :style="{ minHeight: '120px' }"
                   />
                 </div>
               </a-form-item>
@@ -201,7 +201,6 @@
   import WhyChooseUsWithStoryPreview from './WhyChooseUsWithStoryPreview.vue'
   import themeConfig from '../../../assets/config/themeConfig'
   import { DeleteOutlined } from '@ant-design/icons-vue'
-  import TextareaWithLineBreak from '../../common/TextareaWithLineBreak.vue'
   
   export default {
     name: 'WhyChooseUsWithStory',
@@ -209,8 +208,7 @@
     components: {
       ImageLibrary,
       WhyChooseUsWithStoryPreview,
-      DeleteOutlined,
-      TextareaWithLineBreak
+      DeleteOutlined
     },
     computed: {
       tags() {
@@ -281,20 +279,6 @@
     methods: {
       handleChange() {
         this.emitUpdate(this.localSection)
-      },
-      addModule() {
-        this.localSection.bottomContent.push({
-          title: '',
-          content: '',
-          buttonText: '',
-          imageUrl: '',
-          imageAlt: ''
-        })
-        this.handleChange()
-      },
-      removeModule(index) {
-        this.localSection.bottomContent.splice(index, 1)
-        this.handleChange()
       },
       openImageLibrary(index) {
         this.currentModuleIndex = index
