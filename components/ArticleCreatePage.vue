@@ -211,7 +211,6 @@
                           </template>
                           <a-select v-else v-model:value="articleData.language">
                             <a-select-option value="en">English</a-select-option>
-                            <a-select-option value="zh">中文</a-select-option>
                           </a-select>
                         </a-form-item>
 
@@ -923,8 +922,7 @@ export default defineComponent({
     // 添加语言标签获取方法
     const getLanguageLabel = (langCode) => {
       const languages = {
-        'en': 'English',
-        'zh': '中文'
+        'en': 'English'
       };
       return languages[langCode] || langCode;
     };
@@ -1559,7 +1557,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* 保持 EditPage 同的基础布样式 */
+/* 修改最外层容器样式 */
 .article-editor {
   position: fixed;
   top: 0;
@@ -1568,8 +1566,42 @@ export default defineComponent({
   bottom: 0;
   display: flex;
   width: 100%;
-  min-width: 768px; /* 添加最小宽度限制 */
-  overflow-x: auto; /* 当宽度小于最小宽度时允许横向滚动 */
+  overflow-x: auto;
+}
+
+/* 修改主内容区域样式 */
+.editor-content {
+  position: relative;
+  flex: 1 1 auto; /* 让它可以自动扩展填充空间 */
+  overflow-y: auto;
+  height: 100vh;
+  padding: 88px 32px 32px;
+  margin-left: 356px;
+  width: calc(100% - 356px);
+}
+
+.editor-content.expanded {
+  margin-left: 104px;
+  width: calc(100% - 104px);
+}
+
+/* 确保内容容器自动撑满 */
+.sections-container {
+  width: 100%;
+  max-width: none;
+}
+
+/* 修改基础信息表单样式 */
+.info-section {
+  width: 100%;
+  margin-bottom: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+}
+
+/* 修改表单网格布局 */
+.form-grid {
+  width: 100%;
 }
 
 /* 左侧导航式增强 */
@@ -1792,21 +1824,6 @@ export default defineComponent({
   padding: 16px 8px !important;
 }
 
-.editor-content {
-  position: relative;
-  flex: 1;
-  overflow-y: auto;
-  height: 100vh;
-  padding: 88px 32px 32px;
-  margin-left: 356px;
-  min-width: 600px; /* 设置内容区最小宽度 */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.editor-content.expanded {
-  margin-left: 104px;
-}
-
 /* 顶部操作栏样式 */
 .editor-header {
   position: fixed;
@@ -1979,8 +1996,8 @@ export default defineComponent({
 /* 修改样式 */
 .sections-container {
   width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
+  max-width: none;
+  min-width: 1100px; /* 增加最小宽度 */
 }
 
 .section-wrapper {
