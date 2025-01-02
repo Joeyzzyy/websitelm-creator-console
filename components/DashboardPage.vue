@@ -50,6 +50,7 @@
           <a-skeleton active :paragraph="{ rows: 3 }" />
         </template>
         
+        
         <!-- Error state -->
         <template v-else-if="!productInfo.productId">
           <a-result
@@ -515,7 +516,6 @@
                 @click="addCompetitor"
                 :disabled="!newCompetitor.name || !newCompetitor.url"
               >
-                <template #icon><PlusOutlined /></template>
                 Add
               </a-button>
             </a-space>
@@ -1904,5 +1904,35 @@ export default defineComponent({
 .sitemap-card :deep(.ant-card-body) {
   display: flex;
   flex-direction: column;
+}
+
+/* 更新 competitors-section 相关样式 */
+.competitors-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.competitors-tags {
+  min-height: 32px;
+  padding: 4px 0;
+  
+  :deep(.ant-tag) {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 4px;
+    
+    .anticon-close {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      margin-left: 4px;
+    }
+  }
+}
+
+.competitors-input {
+  margin-top: 4px;
+  padding-top: 4px;
 }
 </style>
