@@ -142,41 +142,59 @@
         <!-- Link Content -->
         <template v-else-if="activeTab === 'links'">
           <a-spin :spinning="linksLoading" tip="Loading links...">
-          </a-spin>
-          <a-table
-            v-if="!linksLoading" 
-            :columns="linkColumns" 
-            :dataSource="internalLinks" 
-            :pagination="{ 
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Total ${total} items`
-            }"
-            :rowKey="record => record.id"
-          >
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.key === 'operation'">
-                <a-space>
-                  <a-button type="link" @click="editLink(record)">
-                    <edit-outlined />
-                  </a-button>
-                  <a-popconfirm
-                    title="Are you sure you want to delete this link?"
-                    @confirm="deleteLink(record)"
-                    ok-text="Delete"
-                    cancel-text="Cancel"
-                  >
-                    <a-button type="link" danger>
-                      <delete-outlined />
-                    </a-button>
-                  </a-popconfirm>
-                </a-space>
-              </template>
-              <template v-if="column.key === 'link'">
-                <a :href="record.link" target="_blank">{{ record.link }}</a>
-              </template>
+            <template v-if="!linksLoading">
+              <!-- 添加空状态显示 -->
+              <div v-if="internalLinks.length === 0" class="empty-state">
+                <h3 class="empty-state-title">No Internal Links Found 🔗</h3>
+                <p class="empty-state-description">
+                  Start adding internal links to improve your site's navigation and SEO.
+                </p>
+                <a-button 
+                  type="primary" 
+                  class="upload-btn-empty" 
+                  @click="showAddLinkModal"
+                >
+                  <plus-outlined /> Add First Link
+                </a-button>
+              </div>
+              
+              <!-- 现有的表格组件 -->
+              <a-table
+                v-else
+                :columns="linkColumns" 
+                :dataSource="internalLinks" 
+                :pagination="{ 
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showTotal: (total) => `Total ${total} items`
+                }"
+                :rowKey="record => record.id"
+              >
+                <template #bodyCell="{ column, record }">
+                  <template v-if="column.key === 'operation'">
+                    <a-space>
+                      <a-button type="link" @click="editLink(record)">
+                        <edit-outlined />
+                      </a-button>
+                      <a-popconfirm
+                        title="Are you sure you want to delete this link?"
+                        @confirm="deleteLink(record)"
+                        ok-text="Delete"
+                        cancel-text="Cancel"
+                      >
+                        <a-button type="link" danger>
+                          <delete-outlined />
+                        </a-button>
+                      </a-popconfirm>
+                    </a-space>
+                  </template>
+                  <template v-if="column.key === 'link'">
+                    <a :href="record.link" target="_blank">{{ record.link }}</a>
+                  </template>
+                </template>
+              </a-table>
             </template>
-          </a-table>
+          </a-spin>
         </template>
 
         <!-- Knowledge Tab Content -->
@@ -314,7 +332,7 @@
                   <div class="preview-container">
                     <HeaderTemplate 
                       :initialData="headerConfig"
-                      :layoutId="headerLayoutId"
+                      :layoutId="layoutId || ''"
                     />
                   </div>
                 </div>
@@ -337,8 +355,7 @@
                   <div class="preview-container">
                     <FooterTemplate 
                       :initial-data="footerConfig"
-                      :layoutId="footerLayoutId"
-                      @update="handleFooterUpdate"
+                      :layoutId="layoutId || ''"
                     />
                   </div>
                 </div>
@@ -350,7 +367,7 @@
     </div>
     <!-- Preview Modal -->
     <a-modal
-      v-model:visible="previewVisible"
+      v-model:open="previewVisible"  
       :footer="null"
       width="800px"
       class="preview-modal"
@@ -373,7 +390,7 @@
 
     <!-- Upload Modal -->
     <a-modal
-      v-model:visible="uploadModalVisible"
+      v-model:open="uploadModalVisible"
       :title="`Upload ${activeTab === 'images' ? 'Images' : 'Videos'}`"
       @ok="handleUploadOk"
       @cancel="handleUploadCancel"
@@ -460,9 +477,9 @@
 
     <!-- Add Link Modal -->
     <a-modal
-      v-model:visible="linkModalVisible"
+      v-model:open="linkModalVisible"
       :title="editingLink ? 'Edit Link' : 'Add New Link'"
-      @ok="handleLinkModalOk"
+      @ok="handleLinkModalOk" 
       @cancel="handleLinkModalCancel"
       :okButtonProps="{ 
         disabled: !isLinkFormValid,
@@ -523,7 +540,7 @@
 
     <!-- Add Edit Modal -->
     <a-modal
-      v-model:visible="editModalVisible"
+      v-model:open="editModalVisible"
       title="Edit Asset"
       @ok="handleEditOk"
       @cancel="handleEditCancel"
@@ -594,7 +611,8 @@ import {
   PlusOutlined, 
   FolderOutlined, 
   LinkOutlined,
-  SettingOutlined
+  SettingOutlined,
+  ExclamationCircleOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import apiClient from '../api/api';
@@ -614,6 +632,7 @@ export default {
     FolderOutlined,
     LinkOutlined,
     SettingOutlined,
+    ExclamationCircleOutlined,
     HeaderTemplate,
     FooterTemplate,
   },
@@ -646,8 +665,6 @@ export default {
 
     // 删除其他 onMounted 钩子，合并到一个统一的 onMounted 中
     onMounted(async () => {
-      console.log('组件挂载，当前 tab:', activeTab.value);
-      
       // 检查域名配置状态
       await checkDomainStatus();
       
@@ -1059,9 +1076,10 @@ export default {
       linksLoading.value = true
       try {
         const customerId = localStorage.getItem('currentCustomerId')
+        
         const response = await apiClient.getInternalLinks(customerId, {
           page: 1,
-          limit: 100 // 可以根据需求调整
+          limit: 100
         })
         
         if (response && response.data) {
@@ -1073,8 +1091,17 @@ export default {
           }))
         }
       } catch (error) {
-        console.error('Failed to fetch internal links:', error)
-        message.error('Failed to fetch internal links')
+        console.error('Failed to fetch internal links:', error) // 保留这个错误日志
+        
+        // 使用 await 确保消息显示
+        await message.error({
+          content: error.response?.status === 404 
+            ? 'Internal links service is not available' 
+            : 'Failed to load internal links. Please try again later.',
+          duration: 3 // 显示3秒
+        })
+        
+        internalLinks.value = []
       } finally {
         linksLoading.value = false
       }
@@ -1262,7 +1289,6 @@ export default {
       try {
         const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.getKnowledgeCenter(customerId)
-        console.log('API response data:', response)
         return response.data || [] // 确保返回数组
       } catch (error) {
         console.error('Failed to fetch knowledge base content:', error)
@@ -1374,8 +1400,6 @@ export default {
         return
       }
       
-      console.log('Original article data:', articles)
-      
       // 根据 label 分组
       groupedArticles.value = articles.reduce((acc, article) => {
         const label = article.label || 'Uncategorized' // 使用 label 字段，如果没有则归类为 Uncategorized
@@ -1431,29 +1455,28 @@ export default {
       ]
     })
 
-    // 添加新的响应式变量
-    const headerLayoutId = ref(null)
-    const footerLayoutId = ref(null)
+    // 修改响应式变量定义，将 headerLayoutId 和 footerLayoutId 合并为一个
+    const layoutId = ref(null)
 
-    // 添加新的方法来获取布局数据
+    // 修改 fetchLayoutData 方法
     const fetchLayoutData = async (type) => {
       try {
         if (type === 'header') {
-          headerLoading.value = true;
+          headerLoading.value = true
         } else {
-          footerLoading.value = true;
+          footerLoading.value = true
         }
 
         const response = await apiClient.getPageLayout({
           type: type
-        });
+        })
 
         if (response?.data) {
+          // 统一设置 layoutId
+          layoutId.value = response.data.pageLayoutId
+
           if (type === 'header') {
-            headerLayoutId.value = response.data.pageLayoutId;
-            const headerData = response.data.pageHeaders;
-            
-            // 确保数据结构完整性
+            const headerData = response.data.pageHeaders
             headerConfig.value = {
               logo: {
                 src: headerData.logo?.src || '/images/enterprise-logo.png',
@@ -1473,12 +1496,9 @@ export default {
                     variant: item.variant || 'link'
                   }))
                 : []
-            };
+            }
           } else if (type === 'footer') {
-            footerLayoutId.value = response.data.pageLayoutId;
-            const footerData = response.data.pageFooters;
-            
-            // 确保数据结构完整性
+            const footerData = response.data.pageFooters
             footerConfig.value = {
               companyName: footerData.companyName || '',
               description: footerData.description || '',
@@ -1488,20 +1508,20 @@ export default {
                 text: footerData.newsletter?.text || '',
                 buttonText: footerData.newsletter?.buttonText || ''
               }
-            };
+            }
           }
         }
       } catch (error) {
-        console.error('获取布局数据失败:', error);
-        message.error('加载布局配置失败');
+        console.error('获取布局数据失败:', error)
+        message.error('加载布局配置失败')
       } finally {
         if (type === 'header') {
-          headerLoading.value = false;
+          headerLoading.value = false
         } else {
-          footerLoading.value = false;
+          footerLoading.value = false
         }
       }
-    };
+    }
 
     // 添加 footer 配置相关的响应式变量
     const footerConfig = ref({
@@ -1597,8 +1617,7 @@ export default {
       headerLoading,
       footerLoading,
       headerConfig,
-      headerLayoutId,
-      footerLayoutId,
+      layoutId,
       footerConfig, 
     }
   }

@@ -216,9 +216,6 @@ const props = defineProps({
   }
 })
 
-// 添加日志查看 props 数据
-console.log('Props received:', props)
-
 const headerData = ref({
   logo: props.initialData?.logo || {
     src: '',
