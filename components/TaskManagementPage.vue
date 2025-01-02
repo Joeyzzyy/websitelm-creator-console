@@ -59,6 +59,14 @@
                   <router-link :to="`/edit/${record.pageId}`">
                     {{ record.title }}
                   </router-link>
+                  <a-tag 
+                    v-if="record.generatorStatus === 'processing'" 
+                    color="processing"
+                    class="generating-tag"
+                  >
+                    <span class="generating-text">Generation in progress</span>
+                    <span class="dot-animation">...</span>
+                  </a-tag>
                 </template>
 
                 <template v-if="column.key === 'type'">
@@ -91,6 +99,7 @@
                       type="primary"
                       size="small"
                       @click="handleEdit(record)"
+                      :disabled="record.generatorStatus === 'processing'"
                     >
                       Edit
                     </a-button>
@@ -98,6 +107,7 @@
                       type="primary"
                       size="small"
                       @click="handlePreview(record)"
+                      :disabled="record.generatorStatus === 'processing'"
                     >
                       Preview
                     </a-button>
@@ -106,7 +116,7 @@
                         :type="record.publishStatus === 'publish' ? 'default' : 'primary'"
                         size="small"
                         @click="handlePublish(record)"
-                        :disabled="!canPublish(record)"
+                        :disabled="!canPublish(record) || record.generatorStatus === 'processing'"
                       >
                         {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
                       </a-button>
@@ -116,6 +126,7 @@
                       type="primary"
                       size="small"
                       @click="handleSubmitSitemap(record)"
+                      :disabled="record.generatorStatus === 'processing'"
                     >
                       Submit Sitemap
                     </a-button>
@@ -124,6 +135,7 @@
                       danger
                       size="small"
                       @click="handleDelete(record)"
+                      :disabled="record.generatorStatus === 'processing'"
                     >
                       Delete
                     </a-button>
@@ -367,7 +379,8 @@ export default {
             author: page.author,
             relatedKeyword: page.relatedKeyword,
             publishURL: page.publishURL,
-            slug: page.slug
+            slug: page.slug,
+            generatorStatus: page.generatorStatus || '', // 添加 generatorStatus 字段
           }));
 
           tasks.value = pages;
@@ -991,5 +1004,64 @@ export default {
   font-size: 14px;
   display: flex;
   align-items: center;
+}
+
+.generating-tag {
+  margin-left: 8px;
+  transform: rotate(-2deg);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(45deg, #1890ff, #52c41a) !important;
+  border: none !important;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
+  animation: glow 2s ease-in-out infinite;
+}
+
+.generating-text {
+  color: white !important;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.dot-animation {
+  color: white;
+  margin-left: 2px;
+  animation: dots 1.4s infinite;
+  width: 12px;
+  display: inline-block;
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 12px rgba(24, 144, 255, 0.5);
+  }
+  100% {
+    box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
+  }
+}
+
+@keyframes dots {
+  0% { content: '.'; }
+  33% { content: '..'; }
+  66% { content: '...'; }
+  100% { content: '.'; }
+}
+
+:deep(.ant-tag.generating-tag) {
+  font-size: 12px;
+  padding: 2px 10px;
+  height: 24px;
+  line-height: 20px;
+  border-radius: 12px;
+}
+
+/* 添加悬停效果 */
+.generating-tag:hover {
+  transform: rotate(-2deg) scale(1.05);
+  transition: transform 0.2s ease;
 }
 </style>
