@@ -412,7 +412,7 @@ html, body, #app {
   }
 }
 
-/* 为每个���单项添加延动画 */
+/* 为每个单项添加延动画 */
 .onboarding-modal {
   :deep(.ant-form-item:nth-child(1)) { animation-delay: 0.1s; }
   :deep(.ant-form-item:nth-child(2)) { animation-delay: 0.2s; }
@@ -587,13 +587,19 @@ export default {
   },
   setup() {
     const router = useRouter();
+    
     // 检查登录状态
     const checkAuth = () => {
       const isLoggedIn = localStorage.getItem('intelickIsLoggedIn');
       const accessToken = localStorage.getItem('accessToken');
       
       if (!isLoggedIn || !accessToken) {
-        handleLogout();
+        // 直接在这里处理登出逻辑
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('intelickIsLoggedIn');
+        localStorage.removeItem('currentCustomer');
+        localStorage.removeItem('currentCustomerId');
+        router.push('/login');
       }
     };
 

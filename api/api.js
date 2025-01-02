@@ -25,11 +25,10 @@ const noAuthUrls = ['/login'];
 
 apiClient.interceptors.request.use(
     config => {
-        // 检查当前请求是否在不需要 token 的列表中
         if (!noAuthUrls.includes(config.url)) {
-            const accessToken = localStorage.getItem('accessToken');
-            if (accessToken) {
-                config.headers['Authorization'] = `${accessToken}`;
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                config.headers['Authorization'] = `Bearer ${token}`;
             }
         }
         return config;
@@ -45,21 +44,23 @@ apiClient.interceptors.response.use(
     },
     error => {
         if (error.response && error.response.status === 401) {
-          // 只保留核心验证相关的存储项
-          localStorage.clear();
+          // 只清除认证相关的存储项
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('currentCustomerId');
 
-          if (error.response.data.message === 'User not find') {
-            message.error('User not found');
-          } else if (error.response.data.message === 'Invalid credentials') {
-            message.error('Wrong username or password');
-          } else {
-            message.error('Session expired. Please login again.');
-            // window.location.href = '/login';
-          }
-          // 强制跳转到登录页面
-          // 使用 window.location.href 确保完全重新加载页面
-          if (window.location.pathname !== '/login') {
-            window.location.href = '/login';
+          // 添加一个标志来防止重复导航
+          if (!window.isNavigatingToLogin) {
+            window.isNavigatingToLogin = true;
+            
+            if (window.location.pathname !== '/login') {
+              // 使用 replace 而不是普通导航，这样不会保留在历史记录中
+              window.location.replace('/login');
+            }
+            
+            // 清除标志（虽然在重定向后这个清除可能不会执行）
+            setTimeout(() => {
+              window.isNavigatingToLogin = false;
+            }, 1000);
           }
         }
         return Promise.reject(error);

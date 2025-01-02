@@ -629,8 +629,7 @@ export default {
     const checkDomainStatus = async () => {
       try {
         loading.value = true;
-        const customerId = localStorage.getItem('currentCustomerId');
-        const response = await apiClient.getProductsByCustomerId(customerId);
+        const response = await apiClient.getProductsByCustomerId();
         domainConfigured.value = response.data?.domainStatus || false;
       } catch (error) {
         console.error('Failed to fetch product info:', error);
@@ -645,10 +644,24 @@ export default {
       router.push('/dashboard');
     };
 
+    // 删除其他 onMounted 钩子，合并到一个统一的 onMounted 中
     onMounted(async () => {
+      console.log('组件挂载，当前 tab:', activeTab.value);
+      
+      // 检查域名配置状态
       await checkDomainStatus();
+      
+      // 如果域名已配置，根据当前标签加载相应数据
       if (domainConfigured.value) {
-        fetchAssets();
+        if (activeTab.value === 'header') {
+          await fetchLayoutData('header');
+        } else if (activeTab.value === 'footer') {
+          await fetchLayoutData('footer');
+        } else if (activeTab.value === 'links') {
+          await fetchLinks();
+        } else {
+          await fetchAssets();
+        }
       }
     });
 
@@ -729,34 +742,6 @@ export default {
         return isCorrectType && matchesCategory
       })
     })
-
-    // Methods
-    const formatDate = (date) => {
-      return new Date(date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      })
-    }
-
-    const formatFileSize = (bytes) => {
-      const units = ['B', 'KB', 'MB', 'GB']
-      let size = bytes
-      let unitIndex = 0
-      
-      while (size >= 1024 && unitIndex < units.length - 1) {
-        size /= 1024
-        unitIndex++
-      }
-      
-      return `${size.toFixed(1)} ${units[unitIndex]}`
-    }
-
-    const handleUpload = (info) => {
-      if (info.file.status === 'done') {
-        message.success(`${info.file.name} uploaded successfully`)
-      }
-    }
 
     const previewAsset = (asset) => {
       selectedAsset.value = asset
@@ -1517,24 +1502,6 @@ export default {
         }
       }
     };
-
-    onMounted(async () => {
-      console.log('组件挂载，当前 tab:', activeTab.value)  // 添加日志
-      if (activeTab.value === 'header') {
-        await fetchLayoutData('header')
-      } else if (activeTab.value === 'footer') {
-        await fetchLayoutData('footer')
-      }
-    })
-
-    watch(() => activeTab.value, async (newValue) => {
-      console.log('tab 切换到:', newValue)  // 添加日志
-      if (newValue === 'header') {
-        await fetchLayoutData('header')
-      } else if (newValue === 'footer') {
-        await fetchLayoutData('footer')
-      }
-    })
 
     // 添加 footer 配置相关的响应式变量
     const footerConfig = ref({

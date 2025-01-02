@@ -38,14 +38,12 @@ const routes = [
       {
         path: 'assets',
         name: 'Assets',
-        component: AssetsPage,
-        meta: { requiresAuth: true }
+        component: () => import('../components/AssetsPage.vue'),
       },
       {
         path: 'settings',
         name: 'Settings',
-        component: SettingsPage,
-        meta: { requiresAuth: true }
+        component: () => import('../components/SettingsPage.vue'),
       },
       {
         path: 'keywords',

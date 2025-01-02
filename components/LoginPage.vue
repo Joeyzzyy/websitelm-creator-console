@@ -662,8 +662,14 @@ export default {
             return;
           }
 
-          // Clear all old data
-          localStorage.clear();
+          // 替换 localStorage.clear() 为：
+          const keysToRemove = [
+            'accessToken',
+            'intelickIsLoggedIn',
+            'currentCustomerEmail',
+            'currentCustomerId'
+          ];
+          keysToRemove.forEach(key => localStorage.removeItem(key));
           
           // Store only necessary login information
           localStorage.setItem('intelickIsLoggedIn', 'true');
