@@ -142,6 +142,11 @@ export const availableComponents = [
     category: 'Call to Action',
     items: [
       {
+        type: 'CallToAction',
+        label: 'Simple Version',
+        template: createCleanComponentData('CallToAction')
+      },
+      {
         type: 'CallToActionComplex',
         label: 'Complex Version',
         template: createCleanComponentData('CallToActionComplex')

@@ -292,7 +292,6 @@ export default {
           productInfo.value = {}
         }
       } catch (error) {
-        console.error('Failed to load product information:', error)
         message.error('Failed to load product information: ' + (error.message || 'Unknown error'))
         productInfo.value = {}
       }
@@ -336,8 +335,6 @@ export default {
           ...domains,
           ...(subfolders.value.map(subfolder => `${productInfo.value?.projectWebsite}/${subfolder}`))
         ];
-
-        console.log('verifiedDomains', verifiedDomains.value)
       } catch (error) {
         console.error('Failed to load domain info:', error);
       }
@@ -449,7 +446,7 @@ export default {
           if (response?.code === 200) {
             message.success('Successfully submitted sitemap to Google Search Console');
           } else {
-            message.error(response?.message || 'Failed to submit sitemap to Google Search Console');
+            message.error('Failed to submit sitemap to Google Search Console');
           }
         }
       } catch(err) {
@@ -518,19 +515,17 @@ export default {
         case 'publish':
           return 'Published'
         default:
-          return 'Not Published'  // 所有非 publish 状态都显示为 Not Published
+          return 'Not Published'
       }
     }
 
     const getPublishBlockReasons = (record) => {
       const reasons = [];
 
-      // 1. 检查是否有已验证的域名
       if (verifiedDomains.value.length === 0) {
         reasons.push('No verified domain available');
       }
 
-      // 2. 检查必填字段
       const requiredFields = {
         title: 'Title',
         description: 'Description',
@@ -542,7 +537,6 @@ export default {
         slug: 'Page Slug'
       };
 
-      // 3. 检查所有必填字段
       for (const [field, label] of Object.entries(requiredFields)) {
         const value = record[field];
         if (!value || (Array.isArray(value) && value.length === 0)) {
@@ -550,10 +544,6 @@ export default {
         }
       }
 
-      // 4. 添加调试日志
-      console.log('Record sections:', record.sections);
-      
-      // 5. 修改 sections 检查逻辑，确保正确访问数据
       if (!record.sections || record.sections.length === 0) {
         reasons.push('At least one content section is required');
       }

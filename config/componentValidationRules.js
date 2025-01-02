@@ -168,6 +168,21 @@ const componentValidationRules = {
       ]
     },
   
+    CallToAction: {
+      requiredFields: [
+        'title',
+        'subTitle',
+        'bottomContent.buttonText',
+        'bottomContent.buttonLink'
+      ],
+      allowedFields: [
+        'title',
+        'subTitle',
+        'bottomContent.buttonText',
+        'bottomContent.buttonLink'
+      ]
+    },
+    
     CallToActionComplex: {
       requiredFields: [
         'title',

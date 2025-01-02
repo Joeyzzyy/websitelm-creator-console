@@ -134,16 +134,22 @@ export const SECTION_TAGS = {
     inputPlaceholder: 'input',
     buttonText: 'button'
   },
+  CallToAction: {
+    title: 'h2',
+    subTitle: 'h3',
+    buttonText: 'button',
+    buttonLink: 'a'
+  },
 
 
 
   
 
-  CallToAction: {
-    title: 'h2',
-    subTitle: 'h3',
-    buttonText: 'button'
-  },
+
+
+
+  
+  
   HowItWorksWithThreeBlocks: {
     title: 'h2',
     subTitle: 'p',

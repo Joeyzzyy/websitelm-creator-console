@@ -38,7 +38,6 @@
           @click="handleSubmitTasks"
         >
           Submit Tasks ({{ selectedRows?.length || 0 }})
-          <RobotOutlined />
         </a-button>
       </template>
 
@@ -69,7 +68,7 @@
         <a-table
           :dataSource="firstArticlesData"
           :columns="columns"
-          :rowKey="record => record.id || record['English Title']"
+          :rowKey="record => record.id || record.Title"
           :pagination="false"
           :row-selection="rowSelection"
         >
@@ -92,9 +91,9 @@
 
     <!-- 任务预览弹窗 -->
     <a-modal
-      v-model:visible="taskPreviewVisible"
-      title="Create AI Tasks"
-      width="600px"
+      v-model:open="taskPreviewVisible"
+      title="Create Page Generation Tasks"
+      width="800px"
       class="task-preview-modal"
       @cancel="cancelTaskPreview"
     >
@@ -116,32 +115,20 @@
               />
             </a-form-item>
 
-            <!-- 基��信息 -->
-            <a-form-item label="Basic Information">
-              <div class="info-grid">
-                <div class="info-item">
-                  <div class="info-label">Article Type</div>
-                  <div class="info-value">
-                    <a-tag :color="selectedRows[currentTaskIndex].Category === 'Blog' ? '#10B981' : '#3B82F6'">
-                      {{ selectedRows[currentTaskIndex].Category }}
-                    </a-tag>
-                  </div>
-                </div>
-                <div class="info-item">
-                  <div class="info-label">Number of Articles</div>
-                  <div class="info-value">1</div>
-                </div>
-                <div class="info-item">
-                  <div class="info-label">Word Count</div>
-                  <div class="info-value">1200 words</div>
-                </div>
-              </div>
-            </a-form-item>
+            <!-- 文章类型和语言选择并排显示 -->
+            <div class="form-row">
+              <!-- 文章类型 -->
+              <a-form-item label="Article Type" class="form-col">
+                <a-tag :color="selectedRows[currentTaskIndex].Category === 'Blog' ? '#10B981' : '#3B82F6'">
+                  {{ selectedRows[currentTaskIndex].Category }}
+                </a-tag>
+              </a-form-item>
 
-            <!-- 语言选择 -->
-            <a-form-item label="Languages">
-              <a-checkbox-group v-model:value="selectedLanguages" :options="languageOptions" />
-            </a-form-item>
+              <!-- 语言选择 -->
+              <a-form-item label="Language" class="form-col">
+                <a-checkbox-group v-model:value="selectedLanguages" :options="languageOptions" />
+              </a-form-item>
+            </div>
 
             <!-- 关键词 -->
             <a-form-item label="Target Keywords">
@@ -187,8 +174,7 @@
             :disabled="!taskNames[currentTaskIndex]"
           >
             <span class="submit-button-content">
-              <span>Create AI Tasks  </span>
-              <RobotOutlined />
+              <span>Create Now</span>
             </span>
           </a-button>
         </div>
@@ -197,7 +183,7 @@
 
     <!-- 进度弹窗 -->
     <a-modal
-      v-model:visible="progressVisible"
+      v-model:open="progressVisible"
       :footer="null"
       :closable="false"
     >
@@ -212,7 +198,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed, onMounted, watch } from 'vue'
+import { defineComponent, ref, computed, onMounted, watch, watchEffect } from 'vue'
 import { message } from 'ant-design-vue'
 import { 
   RobotOutlined,
@@ -273,11 +259,10 @@ export default defineComponent({
     const currentTaskIndex = ref(0)
     const taskNames = ref([])
     const batchData = ref([])
-    const selectedLanguages = ref(['en', 'zh']) // 默认全选
+    const selectedLanguages = ref(['en']) // 修改为只默认英文
 
     const languageOptions = [
-      { label: 'English', value: 'en', disabled: true }, // 语必选
-      { label: '中文', value: 'zh' }
+      { label: 'English', value: 'en', disabled: true } // 移除中文选项
     ]
 
     // 分页状态
@@ -291,15 +276,26 @@ export default defineComponent({
       weak: { current: 1, pageSize: 10, total: 0 }
     })
 
-    // Add domain status check
-    const checkDomainStatus = async () => {
+    const initializeData = async () => {
       try {
         const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.getProductsByCustomerId(customerId)
-        domainConfigured.value = response.data?.domainStatus || false
+        
+        if (response?.code === 200) {
+          domainConfigured.value = response.data?.domainStatus || false
+          productInfo.value = response.data
+          
+          if (domainConfigured.value) {
+            fetchKeywordsData('common', 1)
+            fetchTaskList()
+          }
+        } else {
+          domainConfigured.value = false
+        }
       } catch (error) {
         console.error('Failed to fetch product info:', error)
         domainConfigured.value = false
+        message.error('Failed to load product info')
       }
     }
 
@@ -308,14 +304,9 @@ export default defineComponent({
       router.push('/dashboard')
     }
 
-    // Modify onMounted to check domain status first
-    onMounted(async () => {
-      await checkDomainStatus()
-      if (domainConfigured.value) {
-        // Only load data if domain is configured
-        loadProductInfo()
-        fetchKeywordsData('common', 1)
-      }
+    // 修改 onMounted
+    onMounted(() => {
+      initializeData()
     })
 
     // 计算属性
@@ -365,13 +356,8 @@ export default defineComponent({
         onFilter: (value, record) => record.Category === value
       },
       {
-        title: 'English Title',
-        dataIndex: 'English Title',
-        ellipsis: true
-      },
-      {
-        title: 'Chinese Title',
-        dataIndex: 'Chinese Title',
+        title: 'Title',
+        dataIndex: 'Title',
         ellipsis: true
       },
       {
@@ -392,18 +378,6 @@ export default defineComponent({
     ]
 
     // 方法定义
-    const loadProductInfo = async () => {
-      try {
-        const customerId = localStorage.getItem('currentCustomerId')
-        const response = await apiClient.getProductsByCustomerId(customerId)
-        if (response?.code === 200) {
-          productInfo.value = response.data
-        }
-      } catch (error) {
-        message.error('Failed to load product info')
-      }
-    }
-
     const getCompetitorName = (competitorId) => {
       const competitor = competitors.value.find(comp => comp.id === competitorId)
       return competitor?.name || ''
@@ -486,7 +460,7 @@ export default defineComponent({
         return
       }
       taskNames.value = selectedRows.value.map(task => 
-        `${task['English Title']}-${new Date().toLocaleString()}`
+        `${task.Title}-${new Date().toLocaleString()}`
       )
       currentTaskIndex.value = 0
       taskPreviewVisible.value = true
@@ -511,7 +485,7 @@ export default defineComponent({
 
     const startBatchSubmit = async () => {
       if (!taskNames.value[currentTaskIndex.value]) {
-        message.error('Please enter a task name')
+        message.error('请输入任务名称')
         return
       }
 
@@ -522,29 +496,32 @@ export default defineComponent({
       try {
         for (let i = 0; i < selectedRows.value.length; i++) {
           const task = selectedRows.value[i]
-          await apiClient.createBatchTask({
-            batchId: Date.now().toString(),
-            batchName: taskNames.value[i],
-            createdAt: new Date().toISOString(),
-            customerId: localStorage.getItem('currentCustomerId'),
-            generationStatus: "pending",
-            articleType: task.Category === 'Blog' ? 'Blog' : 'Landing Page',
-            relatedKeyword: task.Keywords,
-            topic: task['English Title'],
-            publishStatus: "unpublished",
-            publishedCount: 0,
-            totalPages: 1,
-            updatedAt: new Date().toISOString(),
-            numberOfWords: 1200,
-            languages: selectedLanguages.value.join(',')
-          })
-          
           currentTaskIndex.value = i
+
+          const response = await apiClient.createAIPage({
+            pageType: task.Category,
+            author: '',
+            coverImage: '',
+            customerId: localStorage.getItem('currentCustomerId'),
+            description: '',
+            language: selectedLanguages.value[0],
+            numberOfWords: 2500,
+            publishURL: '',
+            relatedKeyword: task.Keywords,
+            subTitle: '',
+            title: task.Title,
+            topic: task.Title
+          })
+
+          if (!response || response.code !== 200) {
+            throw new Error(response?.message || `Failed to create the ${i + 1}th task`)
+          }
         }
 
         message.success(`Successfully created ${selectedRows.value.length} tasks`)
+        await fetchTaskList()
       } catch (error) {
-        message.error('Failed to create tasks')
+        message.error(`Task creation failed: ${error.message}`)
       } finally {
         selectedRows.value = []
         selectedRowKeys.value = []
@@ -556,13 +533,39 @@ export default defineComponent({
     const getTaskStatusLabel = (status) => status === 'has_task' ? 'Task Created' : 'No Task'
 
     // 监听数据变化
-    watch(batchData)
-
-    // 组件挂载
-    onMounted(() => {
-      loadProductInfo()
-      fetchKeywordsData('common', 1)
+    watchEffect(() => {
+      if (batchData.value) {
+        // 处理相关逻辑
+      }
     })
+
+    const fetchTaskList = async () => {
+      try {
+        const userId = localStorage.getItem('currentCustomerId')
+        const response = await apiClient.getPages({
+          customerId: userId,
+          page: 1, 
+          limit: 100
+        })
+        
+        if (response?.code === 200 && response?.data) {
+          // 获取任务列表后更新文章状态
+          updateArticlesTaskStatus(response.data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch task list:', error)
+      }
+    }
+
+    const updateArticlesTaskStatus = (taskList) => {
+      firstArticlesData.value = firstArticlesData.value.map(article => {
+        const hasTask = taskList.some(task => task.title === article.Title)
+        return {
+          ...article,
+          taskStatus: hasTask ? 'has_task' : 'no_task'
+        }
+      })
+    }
 
     return {
       domainConfigured,
@@ -598,7 +601,9 @@ export default defineComponent({
       getTaskStatusColor,
       getTaskStatusLabel,
       selectedLanguages,
-      languageOptions
+      languageOptions,
+      fetchTaskList,
+      updateArticlesTaskStatus
     }
   }
 })
@@ -767,6 +772,42 @@ export default defineComponent({
 :deep(.ant-form-item-label > label) {
   font-weight: 500;
   color: #374151;
+}
+
+/* 添加新的样式 */
+.form-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: -24px; /* 抵消最后一个form-item的margin */
+}
+
+.form-col {
+  flex: 1;
+}
+
+/* 调整关键词容器样式 */
+.keywords-container {
+  min-height: 60px; /* 减小最小高度 */
+  max-height: 120px; /* 添加最大高度 */
+  overflow-y: auto; /* 超出时显示滚动条 */
+}
+
+/* 优化标签样式 */
+.keyword-tag {
+  margin: 4px !important;
+  background: #f0f7ff !important;
+}
+
+/* 任务导航样式优化 */
+.task-navigation {
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+/* 表单项标签样式优化 */
+:deep(.ant-form-item-label > label) {
+  font-weight: 500;
+  color: #1f2937;
 }
 
 </style>

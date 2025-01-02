@@ -197,9 +197,9 @@
                       <div class="other-fields-grid">
                         <a-form-item label="Type" required>
                           <template v-if="isEditMode">
-                            <div class="readonly-field">{{ articleData.articleType }}</div>
+                            <div class="readonly-field">{{ articleData.pageType }}</div>
                           </template>
-                          <a-select v-else v-model:value="articleData.articleType" allowClear>
+                          <a-select v-else v-model:value="articleData.pageType" allowClear>
                             <a-select-option value="Blog">Blog</a-select-option>
                             <a-select-option value="Landing Page">Landing Page</a-select-option>
                           </a-select>
@@ -414,6 +414,8 @@ import MeetOurTeam from './sections/templates/MeetOurTeam.vue';
 import MeetOurTeamPreview from './sections/templates/MeetOurTeamPreview.vue';
 import JobList from './sections/templates/JobList.vue';
 import JobListPreview from './sections/templates/JobListPreview.vue';
+import CallToAction from './sections/templates/CallToAction.vue';
+import CallToActionPreview from './sections/templates/CallToActionPreview.vue';
 import CallToActionWithEmailInput from './sections/templates/CallToActionWithEmailInput.vue';
 import CallToActionWithEmailInputPreview from './sections/templates/CallToActionWithEmailInputPreview.vue';
 import KeyResultsWithTextBlock from './sections/templates/KeyResultsWithTextBlock.vue';
@@ -463,6 +465,7 @@ export default defineComponent({
     JobList,
     CallToActionWithEmailInput,
     ProductBenefitsWithTable,
+    CallToAction,
     TitleSectionPreview,
     TitleSectionWithImagePreview,
     HeroSectionWithVideoPreview,
@@ -481,6 +484,7 @@ export default defineComponent({
     ProductBenefitsWithBlocksPreview,
     UserReviewsWithMovingCardsPreview,
     ProductBenefitsWithTablePreview,
+    CallToActionPreview,
   },
 
   setup() {
@@ -567,7 +571,7 @@ export default defineComponent({
         keywords: [],
         keywordStats: []
       },
-      articleType: 'Landing Page'
+      pageType: 'Landing Page'
     });
 
     // 格式化件名称显示
@@ -691,7 +695,7 @@ export default defineComponent({
         const requiredFields = {
           title: 'Page title',
           description: 'Page description',
-          articleType: 'Type',
+          pageType: 'Type',
           language: 'Language',
           author: 'Author',
           keywords: 'Keywords',
@@ -744,7 +748,7 @@ export default defineComponent({
             description: articleData.value.description,
             summary: articleData.value.summary,
             topic: articleData.value.topic,
-            articleType: articleData.value.articleType,
+            pageType: articleData.value.pageType,
             slug: articleData.value.slug,
             author: articleData.value.author,  // 确保使用表单中的 author
             publishUrl: articleData.value.publishUrl, // 添加 publishUrl
@@ -775,7 +779,7 @@ export default defineComponent({
               title: articleData.value.title,
               slug: articleData.value.slug || '',
               topic: articleData.value.topic,
-              articleType: articleData.value.articleType,
+              pageType: articleData.value.pageType,
               publishUrl: articleData.value.publishUrl, // 添加 publishUrl
               relatedKeyword: processedKeywords,
               numberOfWords: 2000
@@ -980,7 +984,7 @@ export default defineComponent({
       const requiredFields = {
         title: 'Title',
         description: 'Description',
-        articleType: 'Type',
+        pageType: 'Type',
         language: 'Language',
         author: 'Author',
         keywords: 'Keywords',
@@ -1227,25 +1231,17 @@ export default defineComponent({
 
     // 在编辑模式下初始化数据时添加部署相关信息
     const initializeArticleData = (data) => {
-      console.log('初始化前的原始 pageStats：', JSON.parse(JSON.stringify(data.pageStats)));
-      
-      // 创建 pageStats 的深拷贝，避免引用关系
-      const pageStats = JSON.parse(JSON.stringify(data.pageStats));
-      
       articleData.value = {
         ...data,
         sections: data.sections || [],
         slug: data.slug || '',
         keywords: data.relatedKeyword ? data.relatedKeyword.split(',') : [],
         topic: data.topic || '',
-        articleType: data.articleType || 'Landing Page',
+        pageType: data.pageType || 'Landing Page',
         language: data.language || 'en',
         publishUrl: data.publishURL || null,
-        // 直接使用深拷贝的 pageStats
-        pageStats: pageStats
+        pageStats: JSON.parse(JSON.stringify(data.pageStats))
       };
-
-      console.log('初始化后的 pageStats：', JSON.parse(JSON.stringify(articleData.value.pageStats)));
     };
 
     // 添加新的响应式变量
@@ -1356,7 +1352,7 @@ export default defineComponent({
       const requiredFields = {
         title: 'Page title',
         description: 'Page description',
-        articleType: 'Type',
+        pageType: 'Type',
         language: 'Language',
         author: 'Author',
         keywords: 'Keywords',
@@ -1432,7 +1428,7 @@ export default defineComponent({
           description: articleData.value.description,
           summary: articleData.value.summary,
           topic: articleData.value.topic,
-          articleType: articleData.value.articleType,
+          pageType: articleData.value.pageType,
           slug: articleData.value.slug,
           author: articleData.value.author,
           publishUrl: articleData.value.publishUrl,
