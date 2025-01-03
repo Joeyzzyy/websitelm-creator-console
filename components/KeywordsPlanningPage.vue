@@ -108,10 +108,19 @@
                 <h2>Content Generation Planning</h2>
               </div>
               <div class="level-actions">
-                <a-radio-group v-model:value="planningView" size="small">
-                  <a-radio-button value="list">List</a-radio-button>
-                  <a-radio-button value="calendar">Calendar</a-radio-button>
-                </a-radio-group>
+                <a-space>
+                  <a-button 
+                    type="primary"
+                    :disabled="!selectedRowKeys.length"
+                    @click="handleSubmitTasks"
+                  >
+                    Batch Create ({{ selectedRowKeys.length }})
+                  </a-button>
+                  <a-radio-group v-model:value="planningView" size="small">
+                    <a-radio-button value="list">List</a-radio-button>
+                    <a-radio-button value="calendar">Calendar</a-radio-button>
+                  </a-radio-group>
+                </a-space>
               </div>
             </div>
 
@@ -170,28 +179,40 @@
               <!-- 日历视图 -->
               <div v-else key="calendar" class="calendar-view">
                 <a-calendar>
-                  <template v-slot:dateCellRender="{ current }">
-                    <div 
-                      class="date-cell" 
-                      @click="showTaskDetails(current)"
-                    >
-                      <template v-for="task in getTasksByDate(current)" :key="task.id">
-                        <div 
-                          class="task-item"
-                          :class="[
-                            `status-${task.taskStatus}`,
-                            { 'is-write-date': isWriteDate(current, task) }
-                          ]"
-                        >
-                          <div class="task-title">{{ task.Title }}</div>
-                          <div class="task-meta">
-                            <a-tag size="small">{{ task.Category }}</a-tag>
-                            <span class="task-type">
-                              {{ isWriteDate(current, task) ? 'Writing' : 'Publishing' }}
-                            </span>
+                  <template #dateFullCellRender="{ current }">
+                    <div class="calendar-cell">
+                      <div class="cell-date">{{ current.date() }}</div>
+                      <div class="cell-content">
+                        <template v-for="task in getTasksByDate(current)" :key="task.id">
+                          <div 
+                            class="task-item"
+                            :class="[
+                              `status-${task.taskStatus}`,
+                              { 'is-write-date': isWriteDate(current, task) }
+                            ]"
+                          >
+                            <div class="task-header">
+                              <template v-if="isWriteDate(current, task)">
+                                <a-checkbox
+                                  :value="task.Title"
+                                  :checked="selectedRowKeys.includes(task.Title)"
+                                  @change="(e) => handleCalendarTaskSelect(e, task)"
+                                />
+                              </template>
+                              <template v-else>
+                                <div style="width: 16px;"></div>
+                              </template>
+                              <div class="task-title">{{ task.Title }}</div>
+                            </div>
+                            <div class="task-meta">
+                              <a-tag size="small">{{ task.Category }}</a-tag>
+                              <span class="task-type" :class="{ 'publishing': !isWriteDate(current, task) }">
+                                {{ isWriteDate(current, task) ? 'Writing' : 'Publishing' }}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      </template>
+                        </template>
+                      </div>
                     </div>
                   </template>
                 </a-calendar>
@@ -378,7 +399,8 @@ import {
   ExclamationCircleOutlined,
   ArrowDownOutlined,
   CalendarOutlined,
-  ClockCircleOutlined
+  ClockCircleOutlined,
+  PlusOutlined
 } from '@ant-design/icons-vue'
 import { useRouter } from 'vue-router'
 import apiClient from '../api/api'
@@ -397,7 +419,8 @@ export default defineComponent({
     LoadingOutlined,
     ArrowDownOutlined,
     CalendarOutlined,
-    ClockCircleOutlined
+    ClockCircleOutlined,
+    PlusOutlined
   },
 
   setup() {
@@ -855,6 +878,43 @@ export default defineComponent({
       console.log('Publish:', record)
     }
 
+    // 添加日历视图任务选择处理方法
+    const handleCalendarTaskSelect = (e, task) => {
+      const checked = e.target.checked;
+      if (checked) {
+        selectedRowKeys.value = [...selectedRowKeys.value, task.Title];
+        selectedRows.value = [...selectedRows.value, task];
+      } else {
+        selectedRowKeys.value = selectedRowKeys.value.filter(key => key !== task.Title);
+        selectedRows.value = selectedRows.value.filter(row => row.Title !== task.Title);
+      }
+    }
+
+    // 获取写作任务数量
+    const getWritingTasksCount = (date) => {
+      return getTasksByDate(date).filter(task => isWriteDate(date, task)).length;
+    }
+
+    // 获取发布任务数量
+    const getPublishingTasksCount = (date) => {
+      return getTasksByDate(date).filter(task => !isWriteDate(date, task)).length;
+    }
+
+    // 获取所有日期中最大的任务数量
+    const getMaxTasksCount = computed(() => {
+      let maxCount = 0;
+      const today = dayjs();
+      const startOfMonth = today.startOf('month');
+      const endOfMonth = today.endOf('month');
+
+      for (let date = startOfMonth; date.isBefore(endOfMonth); date = date.add(1, 'day')) {
+        const tasksCount = getTasksByDate(date).length;
+        maxCount = Math.max(maxCount, tasksCount);
+      }
+
+      return maxCount;
+    });
+
     return {
       domainConfigured,
       goToDashboard,
@@ -914,6 +974,10 @@ export default defineComponent({
       getRecommendedDates,
       handleGenerate,
       handlePublish,
+      handleCalendarTaskSelect,
+      getWritingTasksCount,
+      getPublishingTasksCount,
+      getMaxTasksCount,
     }
   }
 })
@@ -1281,6 +1345,7 @@ export default defineComponent({
   height: 120px;
   margin: 0 auto;
   max-width: 800px;
+  padding: 0 40px;
 }
 
 .funnel-line {
@@ -1289,90 +1354,74 @@ export default defineComponent({
   width: 45%;
   height: 100%;
   overflow: hidden;
+  background: #F3F4F6;
+  border: 2px solid #E5E7EB;
 }
 
 .funnel-line.left {
   left: 5%;
-  transform: skew(45deg);
-  border-radius: 4px 0 0 4px;
+  transform: skew(30deg);
+  border-radius: 8px 0 0 8px;
 }
 
 .funnel-line.right {
   right: 5%;
-  transform: skew(-45deg);
-  border-radius: 0 4px 4px 0;
+  transform: skew(-30deg);
+  border-radius: 0 8px 8px 0;
 }
 
 .funnel-gradient {
   position: absolute;
-  top: 0;
+  top: -100%;
   left: 0;
   right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
-  opacity: 0.15;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(59, 130, 246, 0.1) 20%,
+    rgba(59, 130, 246, 0.2) 50%,
+    rgba(59, 130, 246, 0.1) 80%,
+    transparent
+  );
+  animation: flowDown 2s ease-in-out infinite;
 }
 
-.funnel-line::before,
+@keyframes flowDown {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(200%);
+  }
+}
+
+/* 移除旧的发光效果和渐变动画 */
 .funnel-line::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #3B82F6;
-  opacity: 0.2;
-}
-
-.funnel-line::before {
-  top: 0;
-}
-
-.funnel-line::after {
-  bottom: 0;
-}
-
-.funnel-stats {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
-}
-
-/* 添加流动动画效果 */
-.funnel-gradient {
-  animation: gradientFlow 3s ease-in-out infinite;
-  background-size: 200% 200%;
+  display: none;
 }
 
 @keyframes gradientFlow {
-  0% {
-    background-position: 0% 50%;
-    opacity: 0.1;
-  }
-  50% {
-    background-position: 100% 50%;
-    opacity: 0.2;
-  }
-  100% {
-    background-position: 0% 50%;
-    opacity: 0.1;
-  }
+  /* 移除旧的动画 */
 }
 
 /* 响应式调整 */
 @media (max-width: 768px) {
   .funnel-shape {
-    max-width: 100%;
-    height: 60px;
+    height: 80px;
+    padding: 0 20px;
   }
   
   .stats-content {
-    flex-direction: column;
-    align-items: center;
-    padding: 8px;
+    padding: 8px 16px;
+  }
+  
+  .stats-icon {
+    font-size: 16px;
+  }
+  
+  .stats-detail {
+    font-size: 12px;
   }
 }
 
@@ -1407,6 +1456,8 @@ export default defineComponent({
 /* 日历视图样式 */
 .calendar-view {
   padding: 24px;
+  background: #fff;
+  border-radius: 8px;
 }
 
 .date-cell {
@@ -1589,4 +1640,267 @@ export default defineComponent({
   height: 24px;
   padding: 0 8px;
 }
+
+/* 漏斗统计内容样式优化 */
+.funnel-stats {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.stats-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  padding: 12px 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.stats-icon {
+  font-size: 20px;
+  color: #3B82F6;
+  margin-bottom: 8px;
+}
+
+.stats-detail {
+  font-size: 13px;
+  color: #6B7280;
+  margin-top: 4px;
+}
+
+/* 漏斗形状样式优化 */
+.funnel-shape {
+  position: relative;
+  height: 120px;
+  margin: 0 auto;
+  max-width: 800px;
+  padding: 0 40px;
+}
+
+.funnel-line {
+  position: absolute;
+  top: 0;
+  width: 45%;
+  height: 100%;
+  overflow: hidden;
+  background: #F3F4F6;
+  border: 2px solid #E5E7EB;
+}
+
+.funnel-line.left {
+  left: 5%;
+  transform: skew(30deg);
+  border-radius: 8px 0 0 8px;
+}
+
+.funnel-line.right {
+  right: 5%;
+  transform: skew(-30deg);
+  border-radius: 0 8px 8px 0;
+}
+
+.funnel-gradient {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(59, 130, 246, 0.1) 20%,
+    rgba(59, 130, 246, 0.2) 50%,
+    rgba(59, 130, 246, 0.1) 80%,
+    transparent
+  );
+  animation: flowDown 2s ease-in-out infinite;
+}
+
+@keyframes flowDown {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(200%);
+  }
+}
+
+/* 移除旧的发光效果和渐变动画 */
+.funnel-line::after {
+  display: none;
+}
+
+@keyframes gradientFlow {
+  /* 移除旧的动画 */
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .funnel-shape {
+    height: 80px;
+    padding: 0 20px;
+  }
+  
+  .stats-content {
+    padding: 8px 16px;
+  }
+  
+  .stats-icon {
+    font-size: 16px;
+  }
+  
+  .stats-detail {
+    font-size: 12px;
+  }
+}
+
+.level-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+:deep(.ant-btn-primary) {
+  background: #3B82F6;
+  border-color: #3B82F6;
+}
+
+:deep(.ant-btn-primary:hover) {
+  background: #2563EB;
+  border-color: #2563EB;
+}
+
+:deep(.ant-btn-primary[disabled]) {
+  background: #E5E7EB;
+  border-color: #E5E7EB;
+}
+
+/* 更新任务项样式以适应 checkbox */
+.task-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.task-header .ant-checkbox-wrapper {
+  margin-top: 2px; /* 微调 checkbox 位置 */
+}
+
+.task-item {
+  padding: 8px 12px;
+  /* ... existing task-item styles ... */
+}
+
+.task-title {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 优化日历单元格中的内容显示 */
+:deep(.ant-picker-calendar-date-content) {
+  height: auto !important;
+  min-height: 80px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* 添加滚动条样式 */
+:deep(.ant-picker-calendar-date-content::-webkit-scrollbar) {
+  width: 4px;
+}
+
+:deep(.ant-picker-calendar-date-content::-webkit-scrollbar-thumb) {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+:deep(.ant-picker-calendar-date-content::-webkit-scrollbar-track) {
+  background: transparent;
+}
+
+/* 添加发布任务的特殊样式 */
+.task-type.publishing {
+  color: #9CA3AF;  /* 使用更浅的颜色 */
+}
+
+/* 非写作任务的样式调整 */
+.task-item:not(.is-write-date) {
+  background: #F3F4F6;  /* 更浅的背景色 */
+  border-left-color: #9CA3AF;  /* 更浅的边框色 */
+  opacity: 0.8;  /* 略微降低不可选任务的透明度 */
+}
+
+.task-item:not(.is-write-date):hover {
+  background: #F3F4F6;  /* 移除悬停效果 */
+  transform: none;  /* 移除悬停时的位移效果 */
+  cursor: default;  /* 改变鼠标样式 */
+}
+
+/* 更新日历单元格样式 */
+.calendar-cell {
+  padding: 4px;
+  min-height: 180px;
+  height: calc(180px + v-bind(getMaxTasksCount) * 52px); /* 增加每个任务的高度估算 */
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
+  border: 1px solid #f0f0f0;
+}
+
+.cell-date {
+  padding: 4px 8px;
+  font-weight: 500;
+  color: #374151;
+  background: #f9fafb;
+  border-radius: 4px 4px 0 0;
+}
+
+.cell-content {
+  flex: 1;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* 查看更多按钮样式 */
+.more-tasks {
+  margin-top: auto; /* 推到底部 */
+  padding: 4px 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.more-tasks:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* 任务项样式优化 */
+.task-item {
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  min-height: 46px;
+}
+
+.task-item:last-child {
+  margin-bottom: 6px; /* 保持与其他任务项相同的间距 */
+}
+
+/* 移除其他滚动条相关样式 */
 </style>
