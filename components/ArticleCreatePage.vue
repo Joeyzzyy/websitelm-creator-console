@@ -28,8 +28,13 @@
                 <a-collapse-panel 
                   v-for="category in availableComponents" 
                   :key="category.category" 
-                  :header="category.category"
                 >
+                  <template #header>
+                    <div class="category-header">
+                      <span>{{ category.category }}</span>
+                      <span class="category-count">{{ category.items.length }}</span>
+                    </div>
+                  </template>
                   <div 
                     v-for="component in category.items" 
                     :key="component.type"
@@ -327,7 +332,9 @@
         </div>
       </div>
 
+      <!-- 修改 FloatingStats 组件的条件渲染 -->
       <FloatingStats 
+        v-if="isEditMode"
         :keywords-stats="articleData.pageStats"
         :sections="articleData.sections"
         @refresh="handleRefreshMetrics"
@@ -398,6 +405,8 @@ import WhyChooseUsWithBlocks from './sections/templates/WhyChooseUsWithBlocks.vu
 import WhyChooseUsWithBlocksPreview from './sections/templates/WhyChooseUsWithBlocksPreview.vue';
 import HowItWorksWithWorkflow from './sections/templates/HowItWorksWithWorkflow.vue';
 import HowItWorksWithWorkflowPreview from './sections/templates/HowItWorksWithWorkflowPreview.vue';
+import HowItWorksWithBlocks from './sections/templates/HowItWorksWithBlocks.vue';
+import HowItWorksWithBlocksPreview from './sections/templates/HowItWorksWithBlocksPreview.vue';
 import ProductBenefitsWithBlocks from './sections/templates/ProductBenefitsWithBlocks.vue';
 import ProductBenefitsWithBlocksPreview from './sections/templates/ProductBenefitsWithBlocksPreview.vue';
 import UserReviewsWithMovingCards from './sections/templates/UserReviewsWithMovingCards.vue';
@@ -455,6 +464,7 @@ export default defineComponent({
     WhyChooseUsWithBlocks,
     WhyChooseUsWithStory,
     HowItWorksWithWorkflow,
+    HowItWorksWithBlocks,
     ProductBenefitsWithBlocks,
     UserReviewsWithMovingCards,
     Faqs,
@@ -481,6 +491,7 @@ export default defineComponent({
     JobListPreview,
     CallToActionWithEmailInputPreview, 
     HowItWorksWithWorkflowPreview,
+    HowItWorksWithBlocksPreview,
     ProductBenefitsWithBlocksPreview,
     UserReviewsWithMovingCardsPreview,
     ProductBenefitsWithTablePreview,
@@ -507,41 +518,14 @@ export default defineComponent({
       try {
         loading.value = true;
         
+        // 无论是否编辑模式,都先加载基础信息
+        await loadProductInfo();
+        await loadVerifiedDomains();
+        
         if (isEditMode.value) {
           const response = await apiClient.getArticleById(pageId.value);
-          // 打印完整的原始响应
-          console.log('API 原始响应：', {
-            wordCount: response.data.pageStats.wordCount,
-            keywordStats: response.data.pageStats.keywordStats.length,
-            fullStats: JSON.parse(JSON.stringify(response.data.pageStats))
-          });
-
           if (response?.code === 200 && response.data) {
-            // 在任何处理之前打印
-            console.log('处理前的数据：', {
-              wordCount: response.data.pageStats.wordCount,
-              keywordStats: response.data.pageStats.keywordStats.length,
-              fullStats: JSON.parse(JSON.stringify(response.data.pageStats))
-            });
-
-            await loadProductInfo();
-            await loadVerifiedDomains();
-            
-            // 在初始化前打印
-            console.log('初始化前的数据：', {
-              wordCount: response.data.pageStats.wordCount,
-              keywordStats: response.data.pageStats.keywordStats.length,
-              fullStats: JSON.parse(JSON.stringify(response.data.pageStats))
-            });
-
             initializeArticleData(response.data);
-
-            // 在初始化后打印
-            console.log('初始化后的数据：', {
-              wordCount: articleData.value.pageStats.wordCount,
-              keywordStats: articleData.value.pageStats.keywordStats.length,
-              fullStats: JSON.parse(JSON.stringify(articleData.value.pageStats))
-            });
           }
         }
       } catch (error) {
@@ -1492,6 +1476,11 @@ export default defineComponent({
       return `${baseUrl}/${lang}/${slug}`;
     });
 
+    // 添加新的方法来格式化分类标题
+    const getCategoryHeader = (category) => {
+      return `${category.category} (${category.items.length})`;
+    };
+
     return {
       loading,
       saving,
@@ -1547,6 +1536,7 @@ export default defineComponent({
       handleSlugBlur,
       lastAutoSaveTime,
       getPreviewPublishUrl,
+      getCategoryHeader, // 添加到返回对象中
     };
   }
 });
@@ -2746,5 +2736,82 @@ export default defineComponent({
 :deep(.ant-input-status-error:focus) {
   border-color: #ff4d4f !important;
   box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
+}
+
+/* 添加分类标题样式 */
+:deep(.ant-collapse-header) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+:deep(.ant-collapse-header-text) {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 500;
+}
+
+/* 添加组件数量样式 */
+:deep(.ant-collapse-header-text)::after {
+  content: attr(data-count);
+  font-size: 12px;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-left: 8px;
+  font-weight: normal;
+}
+
+/* 分类标题容器样式 */
+.category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* 数量标签样式 */
+.category-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  color: #38BDF8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+/* 悬浮效果 */
+:deep(.ant-collapse-item:hover) .category-count {
+  background: #38BDF8;
+  color: white;
+  border-color: #38BDF8;
+  transform: scale(1.05);
+}
+
+/* 激活状态样式 */
+:deep(.ant-collapse-item-active) .category-count {
+  background: #38BDF8;
+  color: white;
+  border-color: #38BDF8;
+}
+
+/* 调整折叠面板标题样式 */
+:deep(.ant-collapse-header) {
+  padding: 12px 16px !important;
+}
+
+:deep(.ant-collapse-header-text) {
+  flex: 1;
 }
 </style>

@@ -67,6 +67,11 @@ export const availableComponents = [
     category: 'How It Works',
     items: [
       {
+        type: 'HowItWorksWithBlocks',
+        label: 'Three Blocks',
+        template: createCleanComponentData('HowItWorksWithBlocks')
+      },
+      {
         type: 'HowItWorksWithWorkflow',
         label: 'Three Workflow Steps',
         template: createCleanComponentData('HowItWorksWithWorkflow')

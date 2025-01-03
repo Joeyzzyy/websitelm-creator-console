@@ -100,8 +100,8 @@
           </div>
         </a-col>
 
-        <!-- 第二层：内容规划 - 更窄的宽度 -->
-        <a-col :span="18">
+        <!-- 第二层：内容规划 - 调整宽度 -->
+        <a-col :span="22">
           <a-card class="funnel-level-2">
             <div class="level-header">
               <div class="level-title">
@@ -381,7 +381,6 @@ import {
   ClockCircleOutlined
 } from '@ant-design/icons-vue'
 import { useRouter } from 'vue-router'
-import KeywordsTable from './KeywordsTable.vue'
 import apiClient from '../api/api'
 import PageLayout from './layout/PageLayout.vue'
 import confirmedFirst50Titles from '../assets/data/ai-keywords-planning/confirmed-first-50-titles.json'
@@ -392,7 +391,6 @@ export default defineComponent({
   
   components: {
     PageLayout,
-    KeywordsTable,
     RobotOutlined,
     LeftOutlined,
     RightOutlined,
@@ -532,7 +530,7 @@ export default defineComponent({
         ellipsis: true
       },
       {
-        title: 'Dates',
+        title: 'Recommended Dates',
         key: 'dates',
         width: 280,
         slots: { customRender: 'dates' }
@@ -1003,38 +1001,6 @@ export default defineComponent({
   gap: 24px;
 }
 
-.progress-text {
-  color: #6B7280;
-  font-size: 14px;
-  margin-bottom: 8px;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  background: #F9FAFB;
-  padding: 16px;
-  border-radius: 8px;
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.info-label {
-  color: #6B7280;
-  font-size: 12px;
-}
-
-.info-value {
-  color: #111827;
-  font-size: 14px;
-  font-weight: 500;
-}
-
 .keywords-container {
   display: flex;
   flex-wrap: wrap;
@@ -1122,47 +1088,11 @@ export default defineComponent({
   color: #1f2937;
 }
 
-/* 新增流程布局样式 */
-.planning-flow {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  padding: 24px 0;
-}
-
-.planning-section {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.section-header {
-  padding: 0 8px;
-}
-
 .section-header h2 {
   font-size: 20px;
   font-weight: 600;
   color: #111827;
   margin-bottom: 4px;
-}
-
-.section-desc {
-  color: #6B7280;
-  font-size: 14px;
-}
-
-.section-content {
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.section-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  padding: 16px 24px;
-  border-bottom: 1px solid #f0f0f0;
 }
 
 .beta-tag {
@@ -1221,25 +1151,6 @@ export default defineComponent({
   margin-bottom: 24px;
 }
 
-.connector-line {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 2px;
-  height: 100%;
-  background: #e5e7eb;
-}
-
-.connector-stats {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #fff;
-  padding: 0 12px;
-}
-
 /* 统计数字样式优化 */
 :deep(.ant-statistic) {
   margin-bottom: 0;
@@ -1268,10 +1179,20 @@ export default defineComponent({
 /* 表格样式优化 */
 :deep(.ant-table-wrapper) {
   margin-top: 16px;
+  width: 100%;
+}
+
+:deep(.ant-table) {
+  overflow-x: auto;
 }
 
 :deep(.ant-table-tbody > tr > td) {
   padding: 12px 16px;
+  white-space: nowrap;
+}
+
+:deep(.ant-table-cell:last-child) {
+  min-width: 180px;
 }
 
 /* 响应式调整 */
@@ -1357,27 +1278,29 @@ export default defineComponent({
 /* 漏斗形状样式 */
 .funnel-shape {
   position: relative;
-  height: 80px;
+  height: 120px;
   margin: 0 auto;
-  max-width: 1000px;
+  max-width: 800px;
 }
 
 .funnel-line {
   position: absolute;
   top: 0;
-  width: 50%;
+  width: 45%;
   height: 100%;
   overflow: hidden;
 }
 
 .funnel-line.left {
-  left: 0;
-  transform: skew(30deg);
+  left: 5%;
+  transform: skew(45deg);
+  border-radius: 4px 0 0 4px;
 }
 
 .funnel-line.right {
-  right: 0;
-  transform: skew(-30deg);
+  right: 5%;
+  transform: skew(-45deg);
+  border-radius: 0 4px 4px 0;
 }
 
 .funnel-gradient {
@@ -1386,8 +1309,28 @@ export default defineComponent({
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to bottom, #3B82F6, #60A5FA);
-  opacity: 0.1;
+  background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
+  opacity: 0.15;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.funnel-line::before,
+.funnel-line::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #3B82F6;
+  opacity: 0.2;
+}
+
+.funnel-line::before {
+  top: 0;
+}
+
+.funnel-line::after {
+  bottom: 0;
 }
 
 .funnel-stats {
@@ -1398,42 +1341,24 @@ export default defineComponent({
   z-index: 1;
 }
 
-.stats-content {
-  background: #fff;
-  padding: 8px 16px;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stats-icon {
-  color: #3B82F6;
-  font-size: 16px;
-}
-
-.stats-detail {
-  color: #6B7280;
-  font-size: 13px;
-  margin-left: 4px;
-}
-
-/* 添加动画效果 */
+/* 添加流动动画效果 */
 .funnel-gradient {
-  animation: gradientFlow 2s ease-in-out infinite;
+  animation: gradientFlow 3s ease-in-out infinite;
   background-size: 200% 200%;
 }
 
 @keyframes gradientFlow {
   0% {
     background-position: 0% 50%;
+    opacity: 0.1;
   }
   50% {
     background-position: 100% 50%;
+    opacity: 0.2;
   }
   100% {
     background-position: 0% 50%;
+    opacity: 0.1;
   }
 }
 

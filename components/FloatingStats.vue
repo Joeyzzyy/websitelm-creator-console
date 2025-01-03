@@ -400,11 +400,14 @@ export default defineComponent({
   right: 24px;
   bottom: 24px;
   width: 420px;
+  max-height: calc(100vh - 180px);
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .floating-stats.is-collapsed {
@@ -452,7 +455,10 @@ export default defineComponent({
 }
 
 .stats-content {
+  flex: 1;
+  overflow-y: auto;
   padding: 0 16px 16px;
+  max-height: calc(100vh - 280px);
 }
 
 .metrics-grid {

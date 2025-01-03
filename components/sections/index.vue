@@ -11,7 +11,7 @@
 <script>
 import CallToAction from './templates/CallToAction.vue'
 import Faqs from './templates/Faqs.vue'
-import HowItWorksWithThreeBlocks from './templates/HowItWorksWithThreeBlocks.vue'
+import HowItWorksWithThreeBlocks from './templates/HowItWorksWithBlocks.vue'
 import ProductBenefitsWithBlocks from './templates/ProductBenefitsWithBlocks.vue'
 import HowItWorksWithWorkflow from './templates/HowItWorksWithWorkflow.vue'
 import WhyChooseUsWithSmallBlocks from './templates/WhyChooseUsWithSmallBlocks.vue'

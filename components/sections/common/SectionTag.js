@@ -1,3 +1,5 @@
+import HowItWorksWithThreeBlocks from "../templates/HowItWorksWithBlocks.vue"
+
 export const SECTION_TAGS = {
   TitleSection: {
     title: 'h1',
@@ -63,6 +65,15 @@ export const SECTION_TAGS = {
     stepTitle: 'h3',
     stepSubTitle: 'h4',
     number: 'span',
+    content: 'p'
+  },
+  HowItWorksWithBlocks: {
+    icon: 'span',
+    title: 'h2',
+    contentTitle: 'h3',
+    subTitle: 'p',
+    buttonText: 'button',
+    buttonLink: 'a',
     content: 'p'
   },
   ProductBenefitsWithBlocks: {

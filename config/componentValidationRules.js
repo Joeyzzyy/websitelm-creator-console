@@ -315,22 +315,22 @@ const componentValidationRules = {
       ]
     },
   
-    // HowItWorksWithThreeBlocks: {
-    //   requiredFields: [
-    //     'leftContent.icon',
-    //     'leftContent.title',
-    //     'leftContent.subTitle',
-    //     'leftContent.buttonText',
-    //     'rightContent'  
-    //   ],
-    //   allowedFields: [
-    //     'leftContent.icon',
-    //     'leftContent.title',
-    //     'leftContent.subTitle',
-    //     'leftContent.buttonText',
-    //     'rightContent' 
-    //   ]
-    // },
+    HowItWorksWithBlocks: {
+      requiredFields: [
+        'leftContent.icon',
+        'leftContent.title',
+        'leftContent.subTitle',
+        'leftContent.buttonText',
+        'rightContent'  
+      ],
+      allowedFields: [
+        'leftContent.icon',
+        'leftContent.title',
+        'leftContent.subTitle',
+        'leftContent.buttonText',
+        'rightContent' 
+      ]
+    },
   
     
   };
