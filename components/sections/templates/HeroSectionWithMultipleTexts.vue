@@ -40,11 +40,33 @@
               </div>
             </a-form-item>
     
+            <a-form-item label="Button Link">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.buttonLink }}</span>
+                <a-input
+                  v-model:value="localSection.topContent.buttonLink"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
+    
             <a-form-item label="CTA Button Text">
               <div class="input-with-tag">
                 <span class="html-tag">{{ tags.ctaButtonText }}</span>
                 <a-input
                   v-model:value="localSection.topContent.ctaButtonText"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
+
+            <a-form-item label="CTA Button Link">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.ctaButtonLink }}</span>
+                <a-input
+                  v-model:value="localSection.topContent.ctaButtonLink"
                   :disabled="disabled"
                   @change="handleChange"
                 />
@@ -122,9 +144,11 @@
           ...JSON.parse(JSON.stringify(this.section)),
           topContent: this.section.topContent || {
             title: '',
-            description: '',
+            subTitle: '',
             buttonText: '',
+            buttonLink: '#',
             ctaButtonText: '',
+            ctaButtonLink: '#'
           }
         },
         styles: themeConfig.normal,
@@ -140,9 +164,11 @@
             ...JSON.parse(JSON.stringify(newVal)),
             topContent: newVal.topContent || {
               title: '',
-              description: '',
+              subTitle: '',
               buttonText: '',
+              buttonLink: '#',
               ctaButtonText: '',
+              ctaButtonLink: '#'
             }
           }
         },

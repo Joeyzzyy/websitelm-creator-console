@@ -30,8 +30,9 @@
               </div>
               <button 
                 class="px-4 py-2 text-sm rounded-3xl font-semibold transition-all duration-200 bg-[#3374FF] text-white hover:bg-[#2861E5] hover:scale-105"
+                @click="job.buttonLink && window.open(job.buttonLink, '_blank')"
               >
-                Apply Now
+                {{ job.buttonText }}
               </button>
             </div>
 

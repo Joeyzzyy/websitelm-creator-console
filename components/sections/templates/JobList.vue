@@ -65,6 +65,16 @@
                   </a-form-item>
                 </div>
     
+                <div class="button-fields">
+                  <a-form-item label="Button Text">
+                    <a-input v-model:value="job.buttonText" @change="handleChange" />
+                  </a-form-item>
+                  
+                  <a-form-item label="Button Link">
+                    <a-input v-model:value="job.buttonLink" @change="handleChange" />
+                  </a-form-item>
+                </div>
+    
                 <a-form-item label="Tags">
                   <a-select
                     v-model:value="job.tags"
@@ -195,7 +205,9 @@
           salary: '',
           tags: [],
           responsibilities: '',
-          requirements: ''
+          requirements: '',
+          buttonText: 'Apply Now',
+          buttonLink: ''
         })
         this.handleChange()
       },
@@ -352,5 +364,12 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+  
+  .button-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
   }
   </style>

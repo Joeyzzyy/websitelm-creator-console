@@ -64,6 +64,17 @@
                 />
               </div>
             </a-form-item>
+  
+            <a-form-item label="Button Link">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.buttonLink }}</span>
+                <a-input
+                  v-model:value="localSection.leftContent.buttonLink"
+                  :disabled="disabled"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
           </div>
   
           <div class="form-section">
@@ -200,7 +211,8 @@ export default {
           icon: '',
           title: '',
           subTitle: '',
-          buttonText: ''
+          buttonText: '',
+          buttonLink: ''
         },
         rightContent: []
       },
@@ -215,7 +227,8 @@ export default {
         icon: '',
         title: '',
         subTitle: '',
-        buttonText: ''
+        buttonText: '',
+        buttonLink: ''
       },
       rightContent: []
     }, JSON.parse(JSON.stringify(this.section)))
@@ -232,7 +245,8 @@ export default {
             icon: '',
             title: '',
             subTitle: '',
-            buttonText: ''
+            buttonText: '',
+            buttonLink: ''
           },
           rightContent: []
         }, JSON.parse(JSON.stringify(newVal)))

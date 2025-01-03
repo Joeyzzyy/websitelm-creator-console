@@ -8,7 +8,19 @@
       <div class="editor-content">
         <a-form layout="vertical">
           <div v-for="(item, index) in localSection.bottomContent" :key="index">
-            <a-form-item :label="`Card ${index + 1}`">
+            <a-form-item>
+              <div class="card-header">
+                <span>Card {{ index + 1 }}</span>
+                <a-button 
+                  v-if="!disabled"
+                  type="text"
+                  danger
+                  class="delete-btn"
+                  @click="removeCard(index)"
+                >
+                  <DeleteOutlined />
+                </a-button>
+              </div>
               <a-form-item label="Logo">
                 <div class="input-with-tag">
                   <span class="html-tag">{{ tags.logo }}</span>
@@ -94,6 +106,15 @@
             </a-form-item>
           </div>
         </a-form>
+
+        <a-button 
+          v-if="!disabled"
+          type="primary" 
+          class="add-card-btn"
+          @click="addCard"
+        >
+          Add Card
+        </a-button>
       </div>
     </div>
 
@@ -103,7 +124,7 @@
         <span>Preview</span>
       </div>
       <div class="preview-content">
-        <KeyResultsWithThreeCardsPreview 
+        <KeyResultsWithCardsPreview 
           :section="localSection"
           :styles="styles"
         />
@@ -116,17 +137,19 @@
 import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import themeConfig from '../../../assets/config/themeConfig'
-import KeyResultsWithThreeCardsPreview from './KeyResultsWithThreeCardsPreview.vue'
+import KeyResultsWithCardsPreview from './KeyResultsWithCardsPreview.vue'
+import { DeleteOutlined } from '@ant-design/icons-vue'
 
 export default {
-  name: 'KeyResultsWithThreeCards',
+  name: 'KeyResultsWithCards',
   extends: BaseSection,
   components: {
-    KeyResultsWithThreeCardsPreview
+    KeyResultsWithCardsPreview,
+    DeleteOutlined
   },
   computed: {
     tags() {
-      return SECTION_TAGS.KeyResultsWithThreeCards
+      return SECTION_TAGS.KeyResultsWithCards
     }
   },
   data() {
@@ -146,6 +169,22 @@ export default {
   methods: {
     handleChange() {
       this.emitUpdate(this.localSection)
+    },
+    addCard() {
+      this.localSection.bottomContent.push({
+        competitorLogo: '',
+        competitorName: '',
+        percentage: '',
+        metric: '',
+        description: '',
+        buttonText: '',
+        buttonLink: ''
+      })
+      this.handleChange()
+    },
+    removeCard(index) {
+      this.localSection.bottomContent.splice(index, 1)
+      this.handleChange()
     }
   }
 }
@@ -276,5 +315,47 @@ export default {
   margin-bottom: 32px;  /* 卡片之间添加32px的间距 */
   padding-bottom: 16px; /* 底部内边距 */
   border-bottom: 1px solid #f0f0f0; /* 添加分隔线使视觉效果更清晰 */
+}
+
+.add-card-btn {
+  margin-top: 16px;
+  width: 100%;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.delete-btn {
+  padding: 4px 8px;
+  height: auto;
+  color: #ff4d4f;
+}
+
+.delete-btn:hover {
+  color: #ff7875;
+  background-color: #fff1f0;
+}
+
+.card-header .delete-btn {
+  color: #ff4d4f !important;
+  transition: all 0.3s;
+  padding: 4px;
+  height: 24px;
+  width: 24px;
+  line-height: 1;
+}
+
+.card-header .delete-btn:hover {
+  color: #ff7875 !important;
+  background: rgba(255, 77, 79, 0.1);
+}
+
+.card-header :deep(.anticon) {
+  font-size: 14px;
+  color: inherit;
 }
 </style> 

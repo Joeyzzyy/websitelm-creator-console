@@ -37,9 +37,9 @@ export const availableComponents = [
         template: createCleanComponentData('KeyResultsWithImage')
       },
       {
-        type: 'KeyResultsWithThreeCards',
-        label: 'With Three Cards',
-        template: createCleanComponentData('KeyResultsWithThreeCards')
+        type: 'KeyResultsWithCards',
+        label: 'With Cards',
+        template: createCleanComponentData('KeyResultsWithCards')
       }
     ]
   },
@@ -83,12 +83,12 @@ export const availableComponents = [
     items: [
       {
         type: 'HowItWorksWithBlocks',
-        label: 'Three Blocks',
+        label: 'With Blocks',
         template: createCleanComponentData('HowItWorksWithBlocks')
       },
       {
         type: 'HowItWorksWithWorkflow',
-        label: 'Three Workflow Steps',
+        label: 'With Workflow Steps',
         template: createCleanComponentData('HowItWorksWithWorkflow')
       },
     ]

@@ -90,6 +90,17 @@
                   </div>
                 </a-form-item>
   
+                <a-form-item label="Button Link">
+                  <div class="input-with-tag">
+                    <span class="html-tag">{{ tags.buttonLink }}</span>
+                    <a-input
+                      v-model:value="tab.buttonLink"
+                      :disabled="disabled"
+                      @change="handleChange"
+                    />
+                  </div>
+                </a-form-item>
+  
                 <a-form-item label="Image URL">
                   <div class="input-with-tag">
                     <span class="html-tag">{{ tags.imageUrl }}</span>
@@ -234,6 +245,8 @@
           tabName: `Tab ${this.localSection.bottomContent.length + 1}`,
           title: '',
           description: '',
+          buttonText: '',
+          buttonLink: '',
           imageUrl: '',
           imageAlt: ''
         })

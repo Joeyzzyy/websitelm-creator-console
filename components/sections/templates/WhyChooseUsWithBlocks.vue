@@ -120,6 +120,17 @@
                       />
                     </div>
                   </a-form-item>
+
+                  <a-form-item label="Button Link">
+                    <div class="input-with-tag">
+                      <span class="html-tag">{{ tags.buttonLink }}</span>
+                      <a-input
+                        v-model:value="module.buttonLink"
+                        :disabled="disabled"
+                        @change="handleChange"
+                      />
+                    </div>
+                  </a-form-item>
       
                   <a-form-item label="Image">
                     <div class="input-with-tag">
@@ -292,6 +303,7 @@ export default {
         title: '',
         content: '',
         buttonText: '',
+        buttonLink: '',
         imageUrl: '',
         imageAlt: ''
       })

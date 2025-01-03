@@ -18,7 +18,7 @@ import WhyChooseUsWithSmallBlocks from './templates/WhyChooseUsWithSmallBlocks.v
 import WhyChooseUsWithBlocks from './templates/WhyChooseUsWithBlocks.vue'
 import ProductComparisonTable from './templates/ProductComparisonTable.vue'
 import HeroSectionWithVideo from './templates/HeroSectionWithVideo.vue'
-import KeyResultsWithThreeCards from './templates/KeyResultsWithThreeCards.vue'
+import KeyResultsWithThreeCards from './templates/KeyResultsWithCards.vue'
 import KeyResultsWithTextBlock from './templates/KeyResultsWithTextBlock.vue'
 import KeyResultsWithImage from './templates/KeyResultsWithImage.vue' 
 import TitleSection from './templates/TitleSection.vue'

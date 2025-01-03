@@ -292,7 +292,7 @@ const componentValidationRules = {
         'rightContent.imageAlt'
       ]
     },
-    KeyResultsWithThreeCards: {
+    KeyResultsWithCards: {
       requiredFields: [
         'bottomContent'
       ],

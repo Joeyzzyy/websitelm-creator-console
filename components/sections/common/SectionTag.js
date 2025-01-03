@@ -25,7 +25,9 @@ export const SECTION_TAGS = {
     title: 'h2',
     subTitle: 'h3',
     buttonText: 'button',
-    ctaButtonText: 'button'
+    ctaButtonText: 'button',
+    buttonLink: 'a',
+    ctaButtonLink: 'a'
   },
   WhyChooseUsWithSmallBlocks: {
     emoji: 'span',
@@ -42,6 +44,7 @@ export const SECTION_TAGS = {
     moduleTitle: 'h3',
     moduleContent: 'p',
     buttonText: 'button',
+    buttonLink: 'a',
     image: 'img',
     imageAlt: 'alt'
   },
@@ -123,7 +126,8 @@ export const SECTION_TAGS = {
     contentButtonText: 'button',
     imageUrl: 'img',
     imageAlt: 'alt',
-    buttonText: 'button'
+    buttonText: 'button',
+    buttonLink: 'a'
   },
   MeetOurTeam: {
     subtitle: 'span',
@@ -169,7 +173,7 @@ export const SECTION_TAGS = {
     image: 'img',
     imageAlt: 'alt'
   },
-  KeyResultsWithThreeCards: {
+  KeyResultsWithCards: {
     logo: 'img',
     competitorName: 'h3',
     percentage: 'strong',

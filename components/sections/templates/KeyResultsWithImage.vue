@@ -343,6 +343,8 @@ export default {
   flex-direction: column;
   height: 100%;
   position: relative;
+  max-height: 1000px;
+  overflow: hidden;
 }
 
 .editor-header {
@@ -365,6 +367,7 @@ export default {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
+  max-height: calc(1000px - 70px);
 }
 
 .preview-area {

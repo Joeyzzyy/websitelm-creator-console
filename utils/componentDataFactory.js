@@ -1,4 +1,3 @@
-import HowItWorksWithThreeBlocks from '../components/sections/templates/HowItWorksWithBlocks.vue';
 import { componentValidationRules } from '../config/componentValidationRules';
 
 // 组件默认数据工厂
@@ -41,7 +40,9 @@ export const createCleanComponentData = (componentType) => {
         title: 'Transform Your Business',
         subTitle: 'Learn how our platform can help you grow',
         buttonText: 'Start Free Trial',
-        ctaButtonText: 'Contact Sales'
+        buttonLink: '#',
+        ctaButtonText: 'Contact Sales',
+        ctaButtonLink: '#'
       }
     },
     
@@ -116,7 +117,8 @@ export const createCleanComponentData = (componentType) => {
         icon: '🚀',
         title: 'How Our AI Works',
         subTitle: 'Transform your content into engaging videos with three simple steps',
-        buttonText: 'Start Creating'
+        buttonText: 'Start Creating',
+        buttonLink: '#'
       },
       rightContent: [
         {
@@ -151,6 +153,7 @@ export const createCleanComponentData = (componentType) => {
           subTitle: 'Subtitle of benefit 1',
           content: 'Description of benefit 1',
           buttonText: 'Learn More',
+          buttonLink: '#',
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: 'Benefit 1 illustration'
         },
@@ -160,6 +163,7 @@ export const createCleanComponentData = (componentType) => {
           subTitle: 'Subtitle of benefit 2',
           content: 'Description of benefit 2',
           buttonText: 'Learn More',
+          buttonLink: '#',
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: 'Benefit 2 illustration'
         },
@@ -169,6 +173,7 @@ export const createCleanComponentData = (componentType) => {
           subTitle: 'Subtitle of benefit 2',
           content: 'Description of benefit 3',
           buttonText: 'Learn More',
+          buttonLink: '#',
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: 'Benefit 3 illustration'
         },
@@ -178,6 +183,7 @@ export const createCleanComponentData = (componentType) => {
           subTitle: 'Subtitle of benefit 4',
           content: 'Description of benefit 4',
           buttonText: 'Learn More',
+          buttonLink: '#',
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: 'Benefit 4 illustration'
         }
@@ -332,6 +338,7 @@ export const createCleanComponentData = (componentType) => {
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: 'Authentic authorship',
           buttonText: 'Get Started Now',
+          buttonLink: '#'
         },
         {
           tabName: 'Cite AI use',
@@ -340,6 +347,7 @@ export const createCleanComponentData = (componentType) => {
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: 'Cite AI use',
           buttonText: 'Get Started Now',
+          buttonLink: '#'
         },
         {
           tabName: 'AI checker',
@@ -348,6 +356,7 @@ export const createCleanComponentData = (componentType) => {
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: 'AI checker',
           buttonText: 'Get Started Now',
+          buttonLink: '#'
         }
       ]
     },
@@ -407,7 +416,9 @@ export const createCleanComponentData = (componentType) => {
             '5+ years of frontend development experience',
             'Expert in React or Vue framework',
             'Strong teamwork and communication skills'
-          ]
+          ],
+          buttonText: 'Apply Now',
+          buttonLink: '#'
         },
         {
           position: 'Product Manager',
@@ -424,7 +435,9 @@ export const createCleanComponentData = (componentType) => {
             '3+ years of product management experience',
             'Excellent communication and coordination skills',
             'Strong analytical and problem-solving abilities'
-          ]
+          ],
+          buttonText: 'Apply Now',
+          buttonLink: '#'
         },
         {
           position: 'AI Research Engineer',
@@ -441,7 +454,9 @@ export const createCleanComponentData = (componentType) => {
             'MS/PhD in Computer Science or related field',
             'Strong background in machine learning',
             'Experience with deep learning frameworks'
-          ]
+          ],
+          buttonText: 'Apply Now',
+          buttonLink: '#'
         }
       ]
     },
@@ -527,7 +542,8 @@ export const createCleanComponentData = (componentType) => {
         icon: '🚀',
         title: 'Ready to Transform Your Video Marketing?',
         subTitle: 'Join thousands of businesses using websitelm AI',
-        buttonText: 'Start Free Trial'
+        buttonText: 'Start Free Trial',
+        buttonLink: '#'
       }
     },
 
@@ -561,7 +577,7 @@ export const createCleanComponentData = (componentType) => {
       }
     },
 
-    KeyResultsWithThreeCards: {
+    KeyResultsWithCards: {
       bottomContent: [
         {
           competitorLogo: '/assets/images/placeholder.png',

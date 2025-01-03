@@ -55,7 +55,7 @@
 
 <script>
 export default {
-  name: 'KeyResultsWithThreeCardsPreview',
+  name: 'KeyResultsWithCardsPreview',
   props: {
     section: {
       type: Object,

@@ -434,8 +434,8 @@ import ProductBenefitsWithTable from './sections/templates/ProductBenefitsWithTa
 import ProductBenefitsWithTablePreview from './sections/templates/ProductBenefitsWithTablePreview.vue';
 import KeyResultsWithImage from './sections/templates/KeyResultsWithImage.vue';
 import KeyResultsWithImagePreview from './sections/templates/KeyResultsWithImagePreview.vue';
-import KeyResultsWithThreeCards from './sections/templates/KeyResultsWithThreeCards.vue';
-import KeyResultsWithThreeCardsPreview from './sections/templates/KeyResultsWithThreeCardsPreview.vue';
+import KeyResultsWithCards from './sections/templates/KeyResultsWithCards.vue';
+import KeyResultsWithCardsPreview from './sections/templates/KeyResultsWithCardsPreview.vue';
 import { VERCEL_CONFIG } from '../config/vercelConfig';
 import { createCleanComponentData } from '../utils/componentDataFactory';
 import { availableComponents } from '../config/availableComponents';
@@ -480,7 +480,7 @@ export default defineComponent({
     CallToActionWithEmailInput,
     ProductBenefitsWithTable,
     KeyResultsWithImage,
-    KeyResultsWithThreeCards,
+    KeyResultsWithCards,
     CallToAction,
     TitleSectionPreview,
     TitleSectionWithImagePreview,
@@ -503,7 +503,7 @@ export default defineComponent({
     ProductBenefitsWithTablePreview,
     CallToActionPreview,
     KeyResultsWithImagePreview,
-    KeyResultsWithThreeCardsPreview
+    KeyResultsWithCardsPreview
   },
 
   setup() {
@@ -2821,5 +2821,46 @@ export default defineComponent({
 
 :deep(.ant-collapse-header-text) {
   flex: 1;
+}
+
+/* 修改 keywords 输入框样式 */
+:deep(.ant-select-multiple) {
+  height: auto !important;
+  max-height: 200px !important; /* 设置最大高度 */
+}
+
+:deep(.ant-select-multiple .ant-select-selector) {
+  height: auto !important;
+  max-height: 200px !important; /* 设置最大高度 */
+  padding: 4px 8px !important;
+}
+
+:deep(.ant-select-multiple .ant-select-selection-overflow) {
+  flex-wrap: wrap;
+  max-height: 192px !important; /* 留出内边距空间 */
+  overflow-y: auto !important;
+}
+
+/* 美化滚动条 */
+:deep(.ant-select-multiple .ant-select-selection-overflow::-webkit-scrollbar) {
+  width: 4px;
+}
+
+:deep(.ant-select-multiple .ant-select-selection-overflow::-webkit-scrollbar-track) {
+  background: transparent;
+}
+
+:deep(.ant-select-multiple .ant-select-selection-overflow::-webkit-scrollbar-thumb) {
+  background: #e5e7eb;
+  border-radius: 2px;
+}
+
+:deep(.ant-select-multiple .ant-select-selection-overflow::-webkit-scrollbar-thumb:hover) {
+  background: #d1d5db;
+}
+
+/* 调整标签样式 */
+:deep(.ant-select-multiple .ant-select-selection-item) {
+  margin: 2px !important;
 }
 </style>
