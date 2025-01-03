@@ -280,30 +280,26 @@ const componentValidationRules = {
         'rightContent',
       ]
     },
-  
-    // KeyResultsWithImage: {
-    //   requiredFields: [
-    //     'leftContent',  
-    //     'rightContent.imageUrl',
-    //     'rightContent.imageAlt'
-    //   ],
-    //   allowedFields: [
-    //     'leftContent',  
-    //     'rightContent.imageUrl',
-    //     'rightContent.imageAlt'
-    //   ]
-    // },
-  
-    // // 三卡片关键结果组件
-    // KeyResultsWithThreeCards: {
-    //   requiredFields: [
-    //     'bottomContent'
-    //   ],
-    //   allowedFields: [
-    //     'bottomContent'  
-    //   ]
-    // },
-  
+    KeyResultsWithImage: {
+      requiredFields: [
+        'leftContent',  
+        'rightContent.imageUrl',
+        'rightContent.imageAlt'
+      ],
+      allowedFields: [
+        'leftContent',  
+        'rightContent.imageUrl',
+        'rightContent.imageAlt'
+      ]
+    },
+    KeyResultsWithThreeCards: {
+      requiredFields: [
+        'bottomContent'
+      ],
+      allowedFields: [
+        'bottomContent'  
+      ]
+    },
     KeyResultsWithTextBlock: {
       requiredFields: [
         'leftContent',
@@ -314,7 +310,6 @@ const componentValidationRules = {
         'rightContent'  
       ]
     },
-  
     HowItWorksWithBlocks: {
       requiredFields: [
         'leftContent.icon',
@@ -331,8 +326,6 @@ const componentValidationRules = {
         'rightContent' 
       ]
     },
-  
-    
   };
 
 export { componentValidationRules };

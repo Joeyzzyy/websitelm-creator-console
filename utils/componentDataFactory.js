@@ -538,6 +538,62 @@ export const createCleanComponentData = (componentType) => {
         buttonText: "Get Started Now",
         buttonLink: "#"
       }
+    },
+
+    KeyResultsWithImage: {
+      leftContent: [
+        {
+          percentage: 95,
+          description: 'Customer Satisfaction Score, based on over 10,000 user feedbacks'
+        },
+        {
+          percentage: 80,
+          description: 'Average marketing efficiency improvement compared to traditional video production methods'
+        },
+        {
+          percentage: 70,
+          description: 'Investment return ratio in the first month'
+        }
+      ],
+      rightContent: {
+        imageUrl: '/assets/images/placeholder.png',
+        imageAlt: 'Placeholder',
+      }
+    },
+
+    KeyResultsWithThreeCards: {
+      bottomContent: [
+        {
+          competitorLogo: '/assets/images/placeholder.png',
+          competitorLogoAlt: 'Traditional Video Production',
+          competitorName: 'Traditional Video Production',
+          percentage: 85,
+          metric: 'Cost Reduction',
+          description: 'Businesses using websitelm AI report significant cost savings compared to traditional video production methods, with faster turnaround times.',
+          buttonText: 'Read Case Study',
+          buttonLink: '#'
+        },
+        {
+          competitorLogo: '/assets/images/placeholder.png',
+          competitorLogoAlt: 'Manual Localization',
+          competitorName: 'Manual Localization',
+          percentage: 90,
+          metric: 'Time Saved',
+          description: 'Our AI-powered localization process is dramatically faster than manual translation and voiceover recording methods.',
+          buttonText: 'Read Case Study',
+          buttonLink: '#'
+        },
+        {
+          competitorLogo: '/assets/images/placeholder.png',
+          competitorLogoAlt: 'Basic Video Tools',
+          competitorName: 'Basic Video Tools',
+          percentage: 73,
+          metric: 'Higher Engagement',
+          description: 'Videos created with websitelm AI show significantly higher viewer engagement rates compared to basic video creation tools.',
+          buttonText: 'Read Case Study',
+          buttonLink: '#'
+        }
+      ]
     }
   };
 

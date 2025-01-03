@@ -432,6 +432,10 @@ import KeyResultsWithTextBlockPreview from './sections/templates/KeyResultsWithT
 import WhyChooseUsWithSmallBlocksPreview from './sections/templates/WhyChooseUsWithSmallBlocksPreview.vue';
 import ProductBenefitsWithTable from './sections/templates/ProductBenefitsWithTable.vue';
 import ProductBenefitsWithTablePreview from './sections/templates/ProductBenefitsWithTablePreview.vue';
+import KeyResultsWithImage from './sections/templates/KeyResultsWithImage.vue';
+import KeyResultsWithImagePreview from './sections/templates/KeyResultsWithImagePreview.vue';
+import KeyResultsWithThreeCards from './sections/templates/KeyResultsWithThreeCards.vue';
+import KeyResultsWithThreeCardsPreview from './sections/templates/KeyResultsWithThreeCardsPreview.vue';
 import { VERCEL_CONFIG } from '../config/vercelConfig';
 import { createCleanComponentData } from '../utils/componentDataFactory';
 import { availableComponents } from '../config/availableComponents';
@@ -475,6 +479,8 @@ export default defineComponent({
     JobList,
     CallToActionWithEmailInput,
     ProductBenefitsWithTable,
+    KeyResultsWithImage,
+    KeyResultsWithThreeCards,
     CallToAction,
     TitleSectionPreview,
     TitleSectionWithImagePreview,
@@ -496,6 +502,8 @@ export default defineComponent({
     UserReviewsWithMovingCardsPreview,
     ProductBenefitsWithTablePreview,
     CallToActionPreview,
+    KeyResultsWithImagePreview,
+    KeyResultsWithThreeCardsPreview
   },
 
   setup() {

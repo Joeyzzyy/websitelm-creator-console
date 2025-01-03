@@ -23,8 +23,23 @@ export const availableComponents = [
     items: [
       {
         type: 'KeyResultsWithTextBlock',
-        label: 'Key Results With Text Block',
+        label: 'Text Block With Key Results',
         template: createCleanComponentData('KeyResultsWithTextBlock')
+      }
+    ]
+  },
+  {
+    category: 'Key Results',
+    items: [
+      {
+        type: 'KeyResultsWithImage',
+        label: 'With Image',
+        template: createCleanComponentData('KeyResultsWithImage')
+      },
+      {
+        type: 'KeyResultsWithThreeCards',
+        label: 'With Three Cards',
+        template: createCleanComponentData('KeyResultsWithThreeCards')
       }
     ]
   },

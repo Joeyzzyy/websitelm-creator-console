@@ -1,5 +1,3 @@
-import HowItWorksWithThreeBlocks from "../templates/HowItWorksWithBlocks.vue"
-
 export const SECTION_TAGS = {
   TitleSection: {
     title: 'h1',
@@ -86,6 +84,15 @@ export const SECTION_TAGS = {
     moduleSubTitle: 'h4',
     moduleContent: 'p'
   },
+  ProductBenefitsWithTable: {
+    title: 'h2',
+    subTitle: 'p',
+    buttonText: 'button',
+    icon: 'span',
+    contentTitle: 'h3',
+    content: 'p',
+    buttonLink: 'a'
+  },
   UserReviewsWithMovingCards: {
     title: 'h2',
     name: 'span',
@@ -95,7 +102,6 @@ export const SECTION_TAGS = {
     avatarAlt: 'alt',
     reviewTitle: 'h3',
   },
-
   CallToActionComplex: {
     title: 'h2',
     subTitle: 'p',
@@ -151,22 +157,11 @@ export const SECTION_TAGS = {
     buttonText: 'button',
     buttonLink: 'a'
   },
-
-
-
-  
-
-
-
-
-  
-  
-  HowItWorksWithThreeBlocks: {
-    title: 'h2',
-    subTitle: 'p',
-    buttonText: 'button',
-    moduleTitle: 'h3',
-    moduleContent: 'p'
+  KeyResultsWithTextBlock: {
+    percentage: 'strong',
+    description: 'p',
+    contentTitle: 'h3',
+    contentText: 'p'
   },
   KeyResultsWithImage: {
     percentage: 'strong',
@@ -174,43 +169,19 @@ export const SECTION_TAGS = {
     image: 'img',
     imageAlt: 'alt'
   },
-  KeyResultsWithTextBlock: {
+  KeyResultsWithThreeCards: {
+    logo: 'img',
+    competitorName: 'h3',
     percentage: 'strong',
+    metric: 'span',
     description: 'p',
-    contentTitle: 'h3',
-    contentText: 'p'
-  },
-  MoreInsightsWithFourCards: {
-    title: 'h3',
-    subTitle: 'p',
-    directTo: 'a',
-    image: 'img'
+    buttonText: 'button',
+    buttonLink: 'a'
   },
   Faqs: {
     question: 'h3',
     answer: 'p'
-  },
-  KeyResultsWithThreeCards: {
-    competitorName: 'h3',
-    percentage: 'strong',
-    metric: 'span',
-    description: 'p'
-  },
-  ProductComparisonTable: {
-    title: 'h2',
-    subTitle: 'p',
-    companyName: 'h3',
-    featureName: 'h4'
-  },
-  ProductBenefitsWithTable: {
-    title: 'h2',
-    subTitle: 'p',
-    buttonText: 'button',
-    icon: 'span',
-    contentTitle: 'h3',
-    content: 'p',
-    buttonLink: 'a'
-  }
+  },  
 }
   
 export const getSectionTags = (sectionType) => {
