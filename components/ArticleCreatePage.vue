@@ -250,13 +250,13 @@
                       <a-form-item 
                         label="Publish URL"
                         style="margin-top: 24px;"
-                        required
                       >
                         <a-select
                           v-model:value="articleData.publishUrl"
                           placeholder="Select publish URL"
                           :loading="loadingDeployTargets"
                           style="width: 100%;"
+                          allowClear
                         >
                           <a-select-option 
                             v-for="domain in availablePublishUrls" 
@@ -269,11 +269,8 @@
 
                         <!-- 修改预览URL显示逻辑 -->
                         <div class="preview-url-hint" v-if="articleData.publishUrl">
-                          <div class="hint-label">This page could be published to:</div>
+                          <div class="hint-label">This page will be published to:</div>
                           <div class="preview-url">{{ getPreviewPublishUrl }}</div>
-                          <div class="url-note">
-                            Note: The URL slug is a unique identifier for this page and will be generated after saving.
-                          </div>
                         </div>
                       </a-form-item>
 
@@ -365,6 +362,31 @@
             <a-button type="primary" @click="handlePreviewAdd">Add Component</a-button>
           </div>
         </div>
+      </a-modal>
+
+      <!-- 修改发布确认弹窗 -->
+      <a-modal
+        v-model:visible="publishModal.visible"
+        :title="publishModal.title"
+        :confirm-loading="publishModal.loading"
+        @ok="confirmPublish"
+        @cancel="handlePublishCancel"
+        :footer="articleData.publishUrl ? undefined : null"
+      >
+        <template v-if="!articleData.publishUrl">
+          <p>Please select a publish URL before publishing this page.</p>
+          <div style="text-align: right; margin-top: 24px;">
+            <a-button @click="handlePublishCancel">OK</a-button>
+          </div>
+        </template>
+        <template v-else>
+          <p>Are you sure you want to {{ articleData.publishStatus === 'publish' ? 'unpublish' : 'publish' }} this page?</p>
+          <p v-if="articleData.publishStatus !== 'publish'">
+            The page will be published to:
+            <br/>
+            <strong>{{ getPreviewPublishUrl }}</strong>
+          </p>
+        </template>
       </a-modal>
     </div>
   </div>
@@ -683,15 +705,14 @@ export default defineComponent({
           }
         }
 
-        // 修改必填字段验证
+        // 修改必填字段验证 - 移除 publishUrl 验证
         const requiredFields = {
           title: 'Page title',
           description: 'Page description',
           pageType: 'Type',
           language: 'Language',
           author: 'Author',
-          keywords: 'Keywords',
-          publishUrl: 'Publish URL'
+          keywords: 'Keywords'
         };
 
         // 检查所有必填字段
@@ -957,12 +978,13 @@ export default defineComponent({
 
     // 添加新的响应式变量
     const publishing = ref(false)
-    const publishModal = reactive({
+    const publishModal = ref({
       visible: false,
       title: '',
       content: '',
-      action: null
-    })
+      action: null,
+      loading: false
+    });
 
     const getPublishBlockReasons = () => {
       const reasons = [];
@@ -972,7 +994,7 @@ export default defineComponent({
         reasons.push('No verified domain available. Please verify a domain in Settings first.');
       }
 
-      // 检查必填字段
+      // 检查必填字段 - 移除 publishUrl
       const requiredFields = {
         title: 'Title',
         description: 'Description',
@@ -980,7 +1002,6 @@ export default defineComponent({
         language: 'Language',
         author: 'Author',
         keywords: 'Keywords',
-        publishUrl: 'Publish URL',
         slug: 'Page Slug'
       };
 
@@ -1013,25 +1034,39 @@ export default defineComponent({
     };
 
     const handlePublish = async () => {
+      // 检查是否可以发布
+      if (!canPublish()) {
+        message.error('Please fill in all required fields before publishing');
+        return;
+      }
+
+      // 设置弹窗状态
+      publishModal.value = {
+        visible: true,
+        title: articleData.value.publishStatus === 'publish' ? 'Confirm Unpublish' : 'Confirm Publish',
+        loading: false
+      };
+    };
+
+    const confirmPublish = async () => {
+      if (!articleData.value.publishUrl) {
+        publishModal.value.visible = false;
+        return;
+      }
+
       try {
         publishing.value = true;
+        publishModal.value.loading = true;
         const isPublished = articleData.value.publishStatus === 'publish';
         
-        // 只在要发布时检查 verified domains
-        if (!isPublished && verifiedDomains.value.length === 0) {
-          message.error('No verified sub-domain available. Please verify a domain in Settings first.');
-          return;
-        }
-
-        // 构建完整的发布URL
         const fullPublishURL = `${articleData.value.publishUrl}/${articleData.value.language}/${articleData.value.slug}`;
 
         if (isPublished) {
-          await apiClient.updatePageStatus(articleData.value.slug, 'unpublish', fullPublishURL);
+          await apiClient.updatePageStatus(pageId.value, 'unpublish', fullPublishURL);
           message.success('Unpublished successfully');
           articleData.value.publishStatus = 'create';
         } else {
-          await apiClient.updatePageStatus(articleData.value.slug, 'publish', fullPublishURL);
+          await apiClient.updatePageStatus(pageId.value, 'publish', fullPublishURL);
           message.success('Published successfully');
           articleData.value.publishStatus = 'publish';
         }
@@ -1041,28 +1076,14 @@ export default defineComponent({
         message.error('Operation failed: ' + (error.message || 'Unknown error'));
       } finally {
         publishing.value = false;
+        publishModal.value.loading = false;
+        publishModal.value.visible = false;
       }
     };
 
-    const confirmPublish = async () => {
-      try {
-        publishing.value = true
-        const pageId = route.query.id || route.params.id
-        
-        await apiClient.updatePageStatus(pageId, publishModal.action)
-        
-        // 更新本地状态
-        articleData.value.publishStatus = publishModal.action === 'publish' ? 'publish' : 'create'
-        
-        message.success(`${publishModal.action === 'publish' ? 'Published' : 'Unpublished'} successfully`)
-        publishModal.visible = false
-      } catch (error) {
-        console.error('Publish action failed:', error)
-        message.error('Operation failed: ' + (error.message || 'Unknown error'))
-      } finally {
-        publishing.value = false
-      }
-    }
+    const handlePublishCancel = () => {
+      publishModal.value.visible = false;
+    };
 
     // 添加 verifiedDomains 响应式变量
     const verifiedDomains = ref([])
@@ -1347,8 +1368,7 @@ export default defineComponent({
         pageType: 'Type',
         language: 'Language',
         author: 'Author',
-        keywords: 'Keywords',
-        publishUrl: 'Publish URL'
+        keywords: 'Keywords'
       };
 
       // 检查所有必填字段
@@ -1523,6 +1543,7 @@ export default defineComponent({
       getPublishTooltip,
       handlePublish,
       confirmPublish,
+      handlePublishCancel,
       verifiedDomains,
       loadVerifiedDomains,
       isSideNavCollapsed,

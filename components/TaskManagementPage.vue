@@ -56,9 +56,9 @@
             >
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'title'">
-                  <router-link :to="`/edit/${record.pageId}`">
+                  <span style="word-break: break-word; white-space: normal;">
                     {{ record.title }}
-                  </router-link>
+                  </span>
                   <a-tag 
                     v-if="record.generatorStatus === 'processing'" 
                     color="processing"
@@ -81,8 +81,12 @@
                   <span>{{ record.lang.toUpperCase() }}</span>
                 </template>
 
+                <template v-if="column.key === 'author'">
+                  <span>{{ record.author || '-' }}</span>
+                </template>
+
                 <template v-if="column.key === 'status'">
-                  <a-tag :color="getStatusColor(record.publishStatus)">
+                  <a-tag :color="getStatusColor(record.publishStatus)" style="white-space: nowrap; width: 100%;">
                     {{ getStatusLabel(record.publishStatus) }}
                   </a-tag>
                 </template>
@@ -116,7 +120,7 @@
                         :type="record.publishStatus === 'publish' ? 'default' : 'primary'"
                         size="small"
                         @click="handlePublish(record)"
-                        :disabled="!canPublish(record) || record.generatorStatus === 'processing'"
+                        :disabled="record.generatorStatus === 'processing'"
                       >
                         {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
                       </a-button>
@@ -170,6 +174,28 @@
       class="custom-modal"
     >
       <p>{{ modalConfig.content }}</p>
+    </a-modal>
+
+    <!-- Publish Confirmation Modal -->
+    <a-modal
+      v-model:visible="publishModal.visible"
+      :title="publishModal.title"
+      :confirm-loading="publishModal.loading"
+      @ok="handlePublishConfirm"
+      @cancel="handlePublishCancel"
+    >
+      <template v-if="!publishModal.data?.publishURL">
+        <p>Please set a publish URL for this page before publishing.</p>
+        <p>You can set the publish URL in the page editor.</p>
+      </template>
+      <template v-else>
+        <p>Are you sure you want to {{ publishModal.data?.publishStatus === 'publish' ? 'unpublish' : 'publish' }} this page?</p>
+        <p v-if="publishModal.data?.publishStatus !== 'publish'">
+          The page will be published to:
+          <br/>
+          <strong>{{ getFullPublishUrl(publishModal.data) }}</strong>
+        </p>
+      </template>
     </a-modal>
   </page-layout>
 </template>
@@ -265,6 +291,12 @@ export default {
         width: '10%'
       },
       {
+        title: 'Author',
+        dataIndex: 'author',
+        key: 'author',
+        width: '10%'
+      },
+      {
         title: 'Status',
         dataIndex: 'publishStatus',
         key: 'status',
@@ -273,12 +305,12 @@ export default {
       {
         title: 'Empty Fields',
         key: 'hasEmpty',
-        width: '20%'
+        width: '15%'
       },
       {
         title: 'Actions',
         key: 'actions',
-        width: '20%'
+        width: '15%'
       }
     ]
 
@@ -535,10 +567,12 @@ export default {
     const getPublishBlockReasons = (record) => {
       const reasons = [];
 
+      // 检查是否有已验证的域名
       if (verifiedDomains.value.length === 0) {
         reasons.push('No verified domain available');
       }
 
+      // 检查必填字段 - 移除 publishURL
       const requiredFields = {
         title: 'Title',
         description: 'Description',
@@ -546,7 +580,6 @@ export default {
         lang: 'Language',
         author: 'Author',
         relatedKeyword: 'Keywords',
-        publishURL: 'Publish URL',
         slug: 'Page Slug'
       };
 
@@ -591,6 +624,79 @@ export default {
       modalConfig.data = record;
     };
 
+    // 修改发布处理逻辑
+    const handlePublish = (record) => {
+      // 检查是否设置了发布URL
+      if (!record.publishURL) {
+        publishModal.value = {
+          visible: true,
+          title: 'Cannot Publish',
+          loading: false,
+          data: record
+        };
+        return;
+      }
+
+      publishModal.value = {
+        visible: true,
+        title: record.publishStatus === 'publish' ? 'Confirm Unpublish' : 'Confirm Publish',
+        loading: false,
+        data: record
+      };
+    };
+
+    // 添加获取完整发布URL的方法
+    const getFullPublishUrl = (record) => {
+      if (!record?.publishURL || !record?.lang || !record?.slug) {
+        return '';
+      }
+      return `${record.publishURL}/${record.lang}/${record.slug}`;
+    };
+
+    // 修改发布确认处理
+    const handlePublishConfirm = async () => {
+      const record = publishModal.value.data;
+      if (!record || !record.publishURL) {
+        publishModal.value.visible = false;
+        return;
+      }
+
+      publishModal.value.loading = true;
+      try {
+        const isPublished = record.publishStatus === 'publish';
+        const fullPublishURL = getFullPublishUrl(record);
+
+        const response = isPublished
+          ? await apiClient.updatePageStatus(record.pageId, 'unpublish', fullPublishURL)
+          : await apiClient.updatePageStatus(record.pageId, 'publish', fullPublishURL);
+
+        if (response?.code === 200) {
+          message.success(isPublished ? 'Unpublished successfully' : 'Published successfully');
+          fetchTasks();
+        } else {
+          message.error(response?.message || 'Operation failed');
+        }
+      } catch (error) {
+        console.error('Publish action failed:', error);
+        message.error(error?.message || 'Operation failed');
+      } finally {
+        publishModal.value.loading = false;
+        publishModal.value.visible = false;
+      }
+    };
+
+    const handlePublishCancel = () => {
+      publishModal.value.visible = false;
+    };
+
+    // 添加发布模态框的响应式变量
+    const publishModal = ref({
+      visible: false,
+      title: '',
+      loading: false,
+      data: null
+    });
+
     onMounted(async () => {
       fetchTasks()
       await loadProductInfo()
@@ -626,6 +732,11 @@ export default {
       loadSubfolders,
       handlePreview,
       handleSubmitSitemap,
+      publishModal,
+      handlePublish,
+      handlePublishConfirm,
+      handlePublishCancel,
+      getFullPublishUrl
     }
   }
 }
@@ -1063,5 +1174,22 @@ export default {
 .generating-tag:hover {
   transform: rotate(-2deg) scale(1.05);
   transition: transform 0.2s ease;
+}
+
+:deep(.ant-table-cell) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:deep(.ant-table-cell-fix-left) {
+  white-space: normal;
+  word-break: break-word;
+}
+
+:deep(.ant-tag) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
