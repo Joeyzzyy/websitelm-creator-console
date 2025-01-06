@@ -21,15 +21,32 @@
 
         <div class="feature-grid">
           <div class="feature-item">
-            <div class="feature-icon">✨</div>
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="feature-svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z"/>
+                <path d="M2 17L12 22L22 17"/>
+                <path d="M2 12L12 17L22 12"/>
+              </svg>
+            </div>
             <div class="feature-text">AI-Powered<br/>Content Creation</div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon">🎯</div>
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="feature-svg">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </div>
             <div class="feature-text">SEO-Optimized<br/>Strategy</div>
           </div>
           <div class="feature-item">
-            <div class="feature-icon">📈</div>
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="feature-svg">
+                <path d="M21 21H3L12 3l9 18z"/>
+                <path d="M12 9v8"/>
+                <path d="M8 17h8"/>
+              </svg>
+            </div>
             <div class="feature-text">Drive Organic<br/>Traffic</div>
           </div>
         </div>
@@ -1136,13 +1153,13 @@ export default {
 
 /* 左侧样式 */
 .left-side {
-  background: #fff;
+  background: linear-gradient(135deg, #1a1f35 0%, #131b2e 100%);
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 60px;
-  position: relative;
-  overflow: hidden;
 }
 
 .brand-mark {
@@ -1156,7 +1173,11 @@ export default {
   background: #4B89FF;
   border-radius: 50%;
   position: relative;
-  animation: glow 2s ease-in-out infinite;
+  box-shadow: 
+    0 0 30px #4B89FF,
+    0 0 60px #4B89FF,
+    0 0 90px rgba(75, 137, 255, 0.5);
+  animation: pulse 2s ease-in-out infinite;
 }
 
 .pulse-ring {
@@ -1174,19 +1195,25 @@ export default {
 .slogan-container {
   max-width: 600px;
   z-index: 1;
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 120px);
+  padding: 0;
 }
 
 .main-slogan {
-  font-size: 56px;
+  font-size: 52px;
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 24px;
-  color: #2C5282;
+  color: #fff;
+  text-shadow: 0 2px 15px rgba(75, 137, 255, 0.2);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #4B89FF 0%, #2C5282 100%);
+  background: linear-gradient(135deg, #4B89FF 0%, #82ffff 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1195,7 +1222,7 @@ export default {
 .sub-slogan {
   font-size: 18px;
   line-height: 1.8;
-  color: #4A5568;
+  color: rgba(255, 255, 255, 0.7);
   margin-bottom: 40px;
   animation: fadeInUp 0.8s ease-out 0.2s backwards;
 }
@@ -1204,26 +1231,21 @@ export default {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  margin-top: 80px;
-  padding: 0 20px;
+  margin-top: 60px;
   width: 100%;
+  position: relative;
 }
 
 .feature-item {
-  background: rgba(75, 137, 255, 0.03);
-  padding: 40px 30px;
-  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 30px 20px;
+  border-radius: 16px;
   text-align: center;
   transition: all 0.4s ease;
-  border: 1px solid rgba(75, 137, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
-  min-height: 220px;
-  min-width: 200px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
 .feature-item::before {
@@ -1234,19 +1256,20 @@ export default {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, 
-    rgba(75, 137, 255, 0.15) 0%, 
-    rgba(44, 82, 130, 0.15) 100%
+    rgba(75, 137, 255, 0.1) 0%, 
+    rgba(130, 255, 255, 0.1) 100%
   );
   opacity: 0;
   transition: opacity 0.4s ease;
 }
 
 .feature-item:hover {
-  transform: translateY(-12px);
-  border-color: rgba(75, 137, 255, 0.3);
+  transform: translateY(-8px);
+  border-color: rgba(75, 137, 255, 0.2);
   box-shadow: 
-    0 12px 32px rgba(75, 137, 255, 0.15),
-    0 4px 8px rgba(75, 137, 255, 0.1);
+    0 12px 32px rgba(0, 0, 0, 0.2),
+    0 4px 8px rgba(75, 137, 255, 0.1),
+    inset 0 0 20px rgba(75, 137, 255, 0.05);
 }
 
 .feature-item:hover::before {
@@ -1254,35 +1277,52 @@ export default {
 }
 
 .feature-icon {
-  font-size: 48px;
-  margin-bottom: 24px;
+  font-size: 32px;
   position: relative;
   z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 80px;
-  height: 80px;
-  background: rgba(75, 137, 255, 0.05);
-  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  background: rgba(75, 137, 255, 0.1);
+  border-radius: 16px;
+  margin: 0 auto 20px;
   transition: all 0.3s ease;
+  color: #4B89FF;
 }
 
 .feature-item:hover .feature-icon {
+  background: rgba(75, 137, 255, 0.2);
+  transform: translateY(-5px);
+}
+
+.feature-item:hover .feature-svg {
   transform: scale(1.1);
+}
+
+/* 添加发光效果 */
+.feature-icon::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
   background: rgba(75, 137, 255, 0.1);
+  filter: blur(15px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.feature-item:hover .feature-icon::after {
+  opacity: 1;
 }
 
 .feature-text {
-  font-size: 20px;
-  font-weight: 600;
-  color: #2C5282;
-  position: relative;
-  z-index: 1;
-  margin-top: 16px;
-  letter-spacing: 0.5px;
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
   line-height: 1.4;
-  width: 100%;
 }
 
 .feature-item:nth-child(1)::after {
@@ -1334,16 +1374,15 @@ export default {
 
 .floating-dots {
   position: absolute;
-  width: 200%;
-  height: 200%;
+  width: 100%;
+  height: 100%;
   background-image: 
-    radial-gradient(#4B89FF 1px, transparent 1px),
-    radial-gradient(#2C5282 1px, transparent 1px);
-  background-size: 50px 50px, 40px 40px;
-  background-position: 0 0, 25px 25px;
-  opacity: 0.05;
-  animation: floatBackground 20s linear infinite;
-  transform: translateY(-50%);
+    radial-gradient(rgba(75, 137, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(rgba(130, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: 0 0;
+  animation: floatBackground 15s linear infinite;
+  opacity: 0.3;
 }
 
 .wave-pattern {
@@ -1376,12 +1415,11 @@ export default {
 }
 
 @keyframes floatBackground {
-  0% { 
-    transform: translateY(-50%) rotate(0deg); 
-  }
-  100% { 
-    transform: translateY(-50%) rotate(360deg); 
-  }
+  0% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-5px) translateX(5px); }
+  50% { transform: translateY(-10px) translateX(0); }
+  75% { transform: translateY(-5px) translateX(-5px); }
+  100% { transform: translateY(0) translateX(0); }
 }
 
 .shape {
@@ -1512,5 +1550,98 @@ export default {
       0 0 120px rgba(75, 137, 255, 0.2),
       0 0 160px rgba(75, 137, 255, 0.1);
   }
+}
+
+/* 添加动态背景效果 */
+.animated-shapes {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+}
+
+.animated-shapes::before {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(75, 137, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(130, 255, 255, 0.1) 0%, transparent 30%);
+  animation: rotateBackground 20s linear infinite;
+}
+
+/* 添加浮动粒子效果 */
+.floating-dots {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(rgba(75, 137, 255, 0.1) 1px, transparent 1px),
+    radial-gradient(rgba(130, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: 0 0;
+  animation: floatBackground 15s linear infinite;
+  opacity: 0.3;
+}
+
+@keyframes rotateBackground {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes floatBackground {
+  0% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-5px) translateX(5px); }
+  50% { transform: translateY(-10px) translateX(0); }
+  75% { transform: translateY(-5px) translateX(-5px); }
+  100% { transform: translateY(0) translateX(0); }
+}
+
+/* 添加光晕效果 */
+.brand-mark {
+  position: relative;
+  margin-bottom: 40px;
+}
+
+.glowing-circle {
+  width: 12px;
+  height: 12px;
+  background: #4B89FF;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 
+    0 0 30px #4B89FF,
+    0 0 60px #4B89FF,
+    0 0 90px rgba(75, 137, 255, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* 添加网格背景 */
+.grid-overlay {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background-image: 
+    linear-gradient(rgba(75, 137, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(75, 137, 255, 0.03) 1px, transparent 1px);
+  background-size: 30px 30px;
+  transform: perspective(500px) rotateX(60deg);
+  animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+  0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+  100% { transform: perspective(500px) rotateX(60deg) translateY(30px); }
 }
 </style>
