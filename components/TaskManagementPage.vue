@@ -746,9 +746,6 @@ export default {
         return '';
       }
       
-      // 添加调试日志
-      console.log('PublishURL:', record.publishURL);
-      
       // 移除任何可能的 localhost 引用
       let baseUrl = record.publishURL.replace(/\/+$/, ''); // 移除末尾的斜杠
       

@@ -4,19 +4,20 @@
     description="Analyze competitors and plan your SEO keywords"
     icon="📊"
   >
-
     <!-- Domain not configured notice -->
     <template v-if="!domainConfigured">
-      <div class="domain-notice">
-        <div class="notice-content">
-          <exclamation-circle-outlined class="notice-icon" />
-          <h2>No Site Configured</h2>
-          <p>Please configure your domain in settings to use the keyword planning features</p>
-          <a-button type="primary" @click="goToDashboard">
-            Configure Domain
-          </a-button>
+      <a-spin :spinning="loading" tip="Checking domain configuration...">
+        <div class="domain-notice">
+          <div class="notice-content" v-show="!loading">
+            <exclamation-circle-outlined class="notice-icon" />
+            <h2>No Site Configured</h2>
+            <p>Please configure your domain in settings to use the keyword planning features</p>
+            <a-button type="primary" @click="goToDashboard">
+              Configure Domain
+            </a-button>
+          </div>
         </div>
-      </div>
+      </a-spin>
     </template>
 
     <template v-else>
@@ -165,7 +166,6 @@
                       <a-button 
                         type="primary" 
                         size="small"
-                        ghost
                         :disabled="record.taskStatus !== 'has_task'"
                         @click="handlePublish(record)"
                       >
@@ -426,9 +426,9 @@ export default defineComponent({
   setup() {
     const router = useRouter()
     const domainConfigured = ref(false)
+    const loading = ref(true)
     
     // 基础状态
-    const loading = ref(false)
     const activeTabKey = ref('analysis')
     const comparisonType = ref('common')
     const keywordsData = ref([])
@@ -483,6 +483,8 @@ export default defineComponent({
         console.error('Failed to fetch product info:', error)
         domainConfigured.value = false
         message.error('Failed to load product info')
+      } finally {
+        loading.value = false
       }
     }
 
@@ -643,7 +645,7 @@ export default defineComponent({
 
     const startBatchSubmit = async () => {
       if (!taskNames.value[currentTaskIndex.value]) {
-        message.error('请输入任务名称')
+        message.error('Please enter a task name')
         return
       }
 
@@ -1905,6 +1907,4 @@ export default defineComponent({
 .task-item:last-child {
   margin-bottom: 6px; /* 保持与其他任务项相同的间距 */
 }
-
-/* 移除其他滚动条相关样式 */
 </style>
