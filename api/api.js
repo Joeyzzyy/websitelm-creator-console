@@ -957,6 +957,28 @@ const createAIPage = async (pageData) => {
   }
 };
 
+// 新增：获取已发布URL列表的方法
+const getPublishUrls = async () => {
+  try {
+    const response = await apiClient.get('/pages/publish/urls');
+    return response.data;
+  } catch (error) {
+    console.error('获取已发布URL列表失败:', error);
+    return null;
+  }
+};
+
+// 新增：发布客户sitemap和url的方法
+const publishSitemapAndUrls = async () => {
+  try {
+    const response = await apiClient.post('/pages/publish/sitemap');
+    return response.data;
+  } catch (error) {
+    console.error('发布客户sitemap和url失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1029,5 +1051,7 @@ export default {
   checkSlugExists,
   getPublishedPagesCount,
   submitSite,
-  createAIPage
+  createAIPage,
+  getPublishUrls,
+  publishSitemapAndUrls
 };

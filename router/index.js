@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../components/Home.vue';
-import AssetsPage from '../components/AssetsPage.vue'
-import SettingsPage from '../components/SettingsPage.vue'
+import SubscriptionPage from '../components/SubscriptionPage.vue';
 
 const routes = [
   {
@@ -60,10 +59,35 @@ const routes = [
         redirect: '/dashboard'
       }
     ]
+  },
+  {
+    path: '/subscription',
+    name: 'Subscription',
+    component: SubscriptionPage,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/payment-success',
+    name: 'PaymentSuccess',
+    component: () => import('../components/PaymentSuccess.vue'),
+    meta: { requiresAuth: true }
   }
 ];
 
-export default createRouter({
+const router = createRouter({
   history: createWebHistory(),
   routes
 });
+
+// Add navigation guard
+router.beforeEach((to, from, next) => {
+  const isLoggedIn = localStorage.getItem('intelickIsLoggedIn');
+  
+  if (to.meta.requiresAuth && !isLoggedIn) {
+    next('/login');
+  } else {
+    next();
+  }
+});
+
+export default router;

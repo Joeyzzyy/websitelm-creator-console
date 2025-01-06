@@ -61,6 +61,7 @@
             :columns="columns"
             :data-source="tasks"
             :pagination="false"
+            :scroll="{ x: 1200 }"
             @change="handleTableChange"
           >
             <template #bodyCell="{ column, record }">
@@ -816,45 +817,56 @@ export default {
     const submitLoading = ref(false)
 
     // 收集并展示已发布的 URLs
-    const collectPublishedUrls = () => {
-      const urls = tasks.value
-        .filter(task => task.publishStatus === 'publish')
-        .map(task => `${task.publishURL}/${task.lang}/${task.slug}`)
-      
-      if (urls.length === 0) {
-        message.warning('No published pages found')
-        return
-      }
-
-      publishedUrls.value = urls
-      sitemapModal.value.visible = true
-    }
-
-    // 提交 URLs 到 Google
-    const handleSubmitUrls = async () => {
-      if (publishedUrls.value.length === 0) {
-        message.warning('No URLs to submit')
-        return
-      }
-
-      submitLoading.value = true
+    const collectPublishedUrls = async () => {
       try {
-        const customerId = localStorage.getItem('currentCustomerId')
-        const response = await apiClient.submitUrls(customerId, publishedUrls.value)
+        loading.value = true;
+        const response = await apiClient.getPublishUrls();
         
         if (response?.code === 200) {
-          message.success('Successfully submitted URLs to Google Search Console')
-          sitemapModal.value.visible = false
+          const urls = response.data || [];
+          
+          if (urls.length === 0) {
+            message.warning('No published pages found');
+            return;
+          }
+
+          publishedUrls.value = urls;
+          sitemapModal.value.visible = true;
         } else {
-          throw new Error(response?.message || 'Submission failed')
+          throw new Error(response?.message || 'Failed to get published URLs');
         }
       } catch (error) {
-        console.error('Submit URLs failed:', error)
-        message.error(error.message || 'Submission failed')
+        console.error('Failed to collect published URLs:', error);
+        message.error(error.message || 'Failed to get published URLs');
       } finally {
-        submitLoading.value = false
+        loading.value = false;
       }
-    }
+    };
+
+    // Update handleSubmitUrls method
+    const handleSubmitUrls = async () => {
+      if (publishedUrls.value.length === 0) {
+        message.warning('No URLs available for submission');
+        return;
+      }
+
+      submitLoading.value = true;
+      try {
+        const response = await apiClient.publishSitemapAndUrls();
+        
+        if (response?.code === 200) {
+          message.success('Successfully submitted URLs to Google Search Console');
+          sitemapModal.value.visible = false;
+        } else {
+          throw new Error(response?.message || 'Submission failed');
+        }
+      } catch (error) {
+        console.error('Failed to submit URLs:', error);
+        message.error(error.message || 'Submission failed');
+      } finally {
+        submitLoading.value = false;
+      }
+    };
 
     const closeSitemapModal = () => {
       sitemapModal.value.visible = false
@@ -1541,5 +1553,10 @@ export default {
 .title-link:hover {
   color: #40a9ff;
   text-decoration: underline;
+}
+
+/* 移除多余的容器样式，只保留必要的表格样式 */
+:deep(.ant-table) {
+  min-width: 1200px;
 }
 </style>
