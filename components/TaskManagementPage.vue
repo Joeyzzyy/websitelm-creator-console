@@ -1,45 +1,50 @@
 <template>
   <page-layout title="Page Management" description="Manage your AI-generation pages here" icon="✨">
-    <div class="task-container">
-      <!-- Header -->
-      <div class="header">
-        <div class="header-left">
-          <h3>Page List</h3>
-          <a-button type="link" :loading="loading" @click="handleRefresh">
-            <template #icon><ReloadOutlined /></template>
-            Refresh
-          </a-button>
-          <a-button type="primary" @click="handleAddPage">
-            <template #icon><PlusOutlined /></template>
-            Manual Add Page
-          </a-button>
-          <span v-show="verifiedDomains.length === 0" class="domain-label">
-            No verified sub-domain available - <router-link to="/settings">click here to add sub-domain</router-link>
-          </span>
-          <span v-show="verifiedDomains.length > 0" class="domain-label">Pages could be published to:</span>
-          <div class="domain-tags">
-            <a-tag v-for="domain in verifiedDomains" :key="domain" color="success">
-              {{ domain }}
-            </a-tag>
+    <a-spin :spinning="loading" tip="Loading...">
+      <div class="task-container">
+        <!-- Header -->
+        <div class="header">
+          <div class="header-left">
+            <div class="header-top">
+              <h3>Page List</h3>
+              <a-button type="link" :loading="loading" @click="handleRefresh">
+                <template #icon><ReloadOutlined /></template>
+                Refresh
+              </a-button>
+              <a-button type="primary" @click="handleAddPage">
+                <template #icon><PlusOutlined /></template>
+                Manual Add Page
+              </a-button>
+            </div>
+            
+            <div class="header-bottom">
+              <span v-show="verifiedDomains.length === 0" class="domain-label">
+                No verified sub-domain available - <router-link to="/settings">click here to add sub-domain</router-link>
+              </span>
+              <span v-show="verifiedDomains.length > 0" class="domain-label">Pages could be published to:</span>
+              <div class="domain-tags">
+                <a-tag v-for="domain in verifiedDomains" :key="domain" color="success">
+                  {{ domain }}
+                </a-tag>
+              </div>
+            </div>
+          </div>
+          <div class="header-right">
+            <a-input
+              v-model:value="searchQuery"
+              placeholder="Search by page title..."
+              class="search-input"
+              @input="handleSearch"
+            >
+              <template #prefix>
+                <SearchOutlined />
+              </template>
+            </a-input>
+            <span class="task-count">Total Tasks: {{ filteredTasks.length }}</span>
           </div>
         </div>
-        <div class="header-right">
-          <a-input
-            v-model:value="searchQuery"
-            placeholder="Search by page title..."
-            class="search-input"
-            @input="handleSearch"
-          >
-            <template #prefix>
-              <SearchOutlined />
-            </template>
-          </a-input>
-          <span class="task-count">Total Tasks: {{ filteredTasks.length }}</span>
-        </div>
-      </div>
 
-      <!-- Task List -->
-      <a-spin :spinning="loading" tip="Loading...">
+        <!-- Task List -->
         <div class="task-list">
           <!-- Empty State -->
           <div v-if="!loading && !tasks.length" class="empty-state">
@@ -47,122 +52,146 @@
             <p>Go to "Keyword Planning" to start creating your first task</p>
           </div>
           
-            <a-table v-else-if="!loading"
-              :columns="columns"
-              :data-source="tasks"
-              :loading="loading"
-              :pagination="pagination"
-              @change="handleTableChange"
-            >
-              <template #bodyCell="{ column, record }">
-                <template v-if="column.key === 'title'">
-                  <span style="word-break: break-word; white-space: normal;">
-                    {{ record.title }}
-                  </span>
-                  <a-tag 
-                    v-if="record.generatorStatus === 'processing'" 
-                    color="processing"
-                    class="generating-tag"
-                  >
-                    <span class="generating-text">Generation in progress</span>
-                    <span class="dot-animation">...</span>
-                  </a-tag>
-                </template>
-
-                <template v-if="column.key === 'type'">
-                  <span>{{ record.articleType || '-' }}</span>
-                </template>
-
-                <template v-if="column.key === 'wordCount'">
-                  <span>{{ record.numberOfWords || '-' }}</span>
-                </template>
-
-                <template v-if="column.key === 'lang'">
-                  <span>{{ record.lang.toUpperCase() }}</span>
-                </template>
-
-                <template v-if="column.key === 'author'">
-                  <span>{{ record.author || '-' }}</span>
-                </template>
-
-                <template v-if="column.key === 'status'">
-                  <a-tag :color="getStatusColor(record.publishStatus)" style="white-space: nowrap; width: 100%;">
-                    {{ getStatusLabel(record.publishStatus) }}
-                  </a-tag>
-                </template>
-
-                <template v-if="column.key === 'hasEmpty'">
-                  <a-tag :color="record.hasEmpty ? 'warning' : 'success'" style="width: fit-content">
-                    {{ record.hasEmpty ? 'Has Empty Fields' : 'No Empty Fields - Completed' }}
-                  </a-tag>
-                </template>
-
-                <template v-if="column.key === 'actions'">
-                  <a-space>
-                    <a-button 
-                      type="primary"
-                      size="small"
-                      @click="handleEdit(record)"
-                      :disabled="record.generatorStatus === 'processing'"
-                    >
-                      Edit
-                    </a-button>
-                    <a-button
-                      type="primary"
-                      size="small"
-                      @click="handlePreview(record)"
-                      :disabled="record.generatorStatus === 'processing'"
-                    >
-                      Preview
-                    </a-button>
-                    <a-tooltip :title="getPublishTooltip(record)">
-                      <a-button
-                        :type="record.publishStatus === 'publish' ? 'default' : 'primary'"
-                        size="small"
-                        @click="handlePublish(record)"
-                        :disabled="record.generatorStatus === 'processing'"
-                      >
-                        {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
-                      </a-button>
-                    </a-tooltip>
-                    <a-button
-                      v-if="record.publishStatus === 'publish'"
-                      type="primary"
-                      size="small"
-                      @click="handleSubmitSitemap(record)"
-                      :disabled="record.generatorStatus === 'processing'"
-                    >
-                      Submit Sitemap
-                    </a-button>
-                    <a-button
-                      type="primary"
-                      danger
-                      size="small"
-                      @click="handleDelete(record)"
-                      :disabled="record.generatorStatus === 'processing'"
-                    >
-                      Delete
-                    </a-button>
-                  </a-space>
-                </template>
+          <a-table
+            v-if="!loading && tasks.length > 0"
+            :columns="columns"
+            :data-source="tasks"
+            :pagination="false"
+            @change="handleTableChange"
+          >
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'title'">
+                <span style="word-break: break-word; white-space: normal;">
+                  {{ record.title }}
+                </span>
+                <a-tag 
+                  v-if="record.generatorStatus === 'processing'" 
+                  color="processing"
+                  class="generating-tag"
+                >
+                  <span class="generating-text">Generation in progress</span>
+                  <span class="dot-animation">...</span>
+                </a-tag>
+                <a-tag
+                  v-if="record.generatorStatus === 'failed'"
+                  class="generating-tag failed-tag"
+                >
+                  <span class="generating-text">Generation Failed</span>
+                </a-tag>
               </template>
-            </a-table>
-          
-        </div>
-      </a-spin>
 
-      <!-- 在task-list底部添加分页组件 -->
-      <div class="pagination-wrapper">
-        <a-pagination
-          v-model:current="pagination.current"
-          :total="pagination.total"
-          :pageSize="pagination.pageSize"
-          show-size-changer
-          :show-total="(total) => `Total ${total} items`"
-          @change="handlePageChange"
-        />
+              <template v-if="column.key === 'type'">
+                <span>{{ record.articleType || '-' }}</span>
+              </template>
+
+              <template v-if="column.key === 'pageType'">
+                <span>{{ record.pageType || '-' }}</span>
+              </template>
+
+              <template v-if="column.key === 'wordCount'">
+                <span>{{ record.numberOfWords || '-' }}</span>
+              </template>
+
+              <template v-if="column.key === 'lang'">
+                <span>{{ record.lang.toUpperCase() }}</span>
+              </template>
+
+              <template v-if="column.key === 'author'">
+                <span>{{ record.author || '-' }}</span>
+              </template>
+
+              <template v-if="column.key === 'createdAt'">
+                <span>{{ record.createdAt }}</span>
+              </template>
+
+              <template v-if="column.key === 'updatedAt'">
+                <span>{{ record.updatedAt }}</span>
+              </template>
+
+              <template v-if="column.key === 'status'">
+                <a-tag :color="getStatusColor(record.publishStatus)" style="white-space: nowrap; width: 100%;">
+                  {{ getStatusLabel(record.publishStatus) }}
+                </a-tag>
+              </template>
+
+              <template v-if="column.key === 'hasEmpty'">
+                <a-tag :color="record.hasEmpty ? 'warning' : 'success'" style="width: fit-content">
+                  {{ record.hasEmpty ? 'Has Empty Fields' : 'No Empty Fields' }}
+                </a-tag>
+              </template>
+
+              <template v-if="column.key === 'actions'">
+                <a-dropdown>
+                  <a-button size="small" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0;">
+                    <template #icon><EllipsisOutlined /></template>
+                  </a-button>
+                  <template #overlay>
+                    <a-menu>
+                      <template v-if="record.generatorStatus !== 'failed'">
+                        <a-menu-item 
+                          key="edit" 
+                          @click="handleEdit(record)"
+                          :disabled="record.generatorStatus === 'processing'"
+                        >
+                          <EditOutlined />
+                          Edit
+                        </a-menu-item>
+                        <a-menu-item 
+                          key="preview" 
+                          @click="handlePreview(record)"
+                          :disabled="record.generatorStatus === 'processing'"
+                        >
+                          <EyeOutlined />
+                          Preview
+                        </a-menu-item>
+                        <a-menu-item 
+                          key="publish"
+                          @click="handlePublish(record)"
+                          :disabled="record.generatorStatus === 'processing'"
+                        >
+                          <CloudUploadOutlined />
+                          {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
+                        </a-menu-item>
+                        <a-menu-item 
+                          v-if="record.publishStatus === 'publish'"
+                          key="sitemap"
+                          @click="handleSubmitSitemap(record)"
+                          :disabled="record.generatorStatus === 'processing'"
+                        >
+                          <GlobalOutlined />
+                          Submit Sitemap
+                        </a-menu-item>
+                      </template>
+                      <a-menu-item 
+                        key="delete"
+                        @click="handleDelete(record)"
+                        :disabled="record.generatorStatus === 'processing'"
+                        danger
+                      >
+                        <DeleteOutlined />
+                        Delete
+                      </a-menu-item>
+                    </a-menu>
+                  </template>
+                </a-dropdown>
+              </template>
+            </template>
+          </a-table>
+        </div>
+
+        <!-- 保留外部分页组件 -->
+        <div class="pagination-wrapper" v-if="!loading && tasks.length > 0">
+          <a-pagination
+            v-model:current="pagination.current"
+            :total="pagination.total"
+            :pageSize="pagination.pageSize"
+            show-size-changer
+            :show-total="(total) => `Total ${total} items`"
+            @change="handlePageChange"
+          />
+        </div>
       </div>
-    </div>
+    </a-spin>
 
     <!-- Confirmation Modal -->
     <a-modal
@@ -212,7 +241,9 @@ import {
   CloudDownloadOutlined,
   SearchOutlined,
   PlusOutlined,
-  EyeOutlined
+  EyeOutlined,
+  EllipsisOutlined,
+  GlobalOutlined
 } from '@ant-design/icons-vue'
 import PageLayout from './layout/PageLayout.vue'
 import apiClient from '../api/api'
@@ -232,7 +263,9 @@ export default {
     CloudDownloadOutlined,
     SearchOutlined,
     PlusOutlined,
-    EyeOutlined
+    EyeOutlined,
+    EllipsisOutlined,
+    GlobalOutlined
   },
 
   setup() {
@@ -276,19 +309,25 @@ export default {
         title: 'Title',
         dataIndex: 'title',
         key: 'title',
-        width: '30%'
+        width: '22%'
       },
       {
         title: 'Type',
         dataIndex: 'articleType',
         key: 'type',
-        width: '10%'
+        width: '8%'
+      },
+      {
+        title: 'Page Type',
+        dataIndex: 'pageType',
+        key: 'pageType',
+        width: '8%'
       },
       {
         title: 'Language',
         dataIndex: 'lang',
         key: 'lang',
-        width: '10%'
+        width: '8%'
       },
       {
         title: 'Author',
@@ -297,20 +336,32 @@ export default {
         width: '10%'
       },
       {
+        title: 'Created At',
+        dataIndex: 'createdAt',
+        key: 'createdAt',
+        width: '12%'
+      },
+      {
+        title: 'Updated At',
+        dataIndex: 'updatedAt',
+        key: 'updatedAt',
+        width: '12%'
+      },
+      {
         title: 'Status',
         dataIndex: 'publishStatus',
         key: 'status',
-        width: '10%'
+        width: '8%'
       },
       {
         title: 'Empty Fields',
         key: 'hasEmpty',
-        width: '15%'
+        width: '7%'
       },
       {
         title: 'Actions',
         key: 'actions',
-        width: '15%'
+        width: '5%'
       }
     ]
 
@@ -403,16 +454,19 @@ export default {
             title: page.title,
             lang: page.lang || 'en',
             publishStatus: page.publishStatus,
-            sections: page.sections || [], // 确保 sections 字段存在
+            sections: page.sections || [],
             suffixURL: page.suffixURL,
             articleType: page.articleType,
+            pageType: page.pageType || 'Blog',
             numberOfWords: page.numberOfWords,
             description: page.description,
             author: page.author,
             relatedKeyword: page.relatedKeyword,
             publishURL: page.publishURL,
             slug: page.slug,
-            generatorStatus: page.generatorStatus || '', // 添加 generatorStatus 字段
+            generatorStatus: page.generatorStatus || '',
+            createdAt: new Date(page.createdAt).toLocaleString(),
+            updatedAt: new Date(page.updatedAt).toLocaleString(),
           }));
 
           tasks.value = pages;
@@ -446,7 +500,7 @@ export default {
     const deleteArticle = (article) => {
       modalConfig.visible = true
       modalConfig.title = 'Confirm Delete'
-      modalConfig.content = 'Are you sure you want to delete this article?'
+      modalConfig.content = 'Are you sure you want to delete this page?'
       modalConfig.type = 'delete_article'
       modalConfig.data = article
     }
@@ -759,7 +813,20 @@ export default {
 
 .header-left {
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.header-top {
+  display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.header-bottom {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -771,8 +838,8 @@ export default {
 }
 
 .task-list {
-  height: calc(100vh - 200px);
-  overflow: auto;
+  height: auto;
+  overflow: visible;
 }
 
 /* Empty state styles */
@@ -932,12 +999,7 @@ export default {
 
 /* Scrollbar styles */
 .task-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.task-list::-webkit-scrollbar-thumb {
-  background: #ddd;
-  border-radius: 3px;
+  display: none;
 }
 
 /* Modal styles */
@@ -1004,6 +1066,13 @@ export default {
 }
 
 :deep(.ant-spin) {
+  /* 修改定位逻辑，考虑左侧导航栏的宽度 */
+  position: fixed !important;
+  top: 50% !important;
+  left: calc(50% + 120px) !important; /* 120px 是左侧导航栏的一半宽度，根据实际情况调整 */
+  transform: translate(-50%, -50%) !important;
+  z-index: 1000;
+
   .ant-spin-dot {
     font-size: 24px;
   }
@@ -1015,8 +1084,13 @@ export default {
   }
 }
 
+/* 移除之前的相对定位样式 */
 .ant-spin-container {
-  min-height: 200px;
+  min-height: unset;
+}
+
+.task-list {
+  min-height: unset;
 }
 
 .article-tags {
@@ -1049,9 +1123,10 @@ export default {
 
 /* 添加新的样式 */
 .domain-tags {
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-left: 4px;
 }
 
 :deep(.ant-tag) {
@@ -1064,7 +1139,6 @@ export default {
 .domain-label {
   color: #666;
   font-size: 13px;
-  margin-left: 8px;
 }
 
 .domain-label :deep(a) {
@@ -1176,20 +1250,84 @@ export default {
   transition: transform 0.2s ease;
 }
 
+/* 调整 actions 列的宽度 */
+:deep(.ant-table) .ant-table-cell:last-child {
+  width: 40px !important;
+  min-width: 40px !important;
+  padding: 8px 4px !important;
+  text-align: center;
+}
+
+/* 确保表格单元格内容正确显示 */
 :deep(.ant-table-cell) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* 标题列允许换行 */
 :deep(.ant-table-cell-fix-left) {
   white-space: normal;
   word-break: break-word;
 }
 
+/* 确保标签内容不换行且省略 */
 :deep(.ant-tag) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* 调整下拉按钮样式 */
+:deep(.ant-dropdown-trigger) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:deep(.ant-btn) {
+  min-width: 32px;
+  padding: 0;
+}
+
+:deep(.ant-btn .anticon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+/* 添加failed-tag的样式 */
+.failed-tag {
+  background: linear-gradient(45deg, #ff4d4f, #cf1322) !important;
+  border: none !important;
+  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+  animation: glow-failed 2s ease-in-out infinite;
+}
+
+@keyframes glow-failed {
+  0% {
+    box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 12px rgba(255, 77, 79, 0.5);
+  }
+  100% {
+    box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+  }
+}
+
+/* 确保failed-tag继承generating-tag的基础样式 */
+:deep(.ant-tag.generating-tag.failed-tag) {
+  font-size: 12px;
+  padding: 2px 10px;
+  height: 24px;
+  line-height: 20px;
+  border-radius: 12px;
+}
+
+.failed-tag:hover {
+  transform: rotate(-2deg) scale(1.05);
+  transition: transform 0.2s ease;
 }
 </style>

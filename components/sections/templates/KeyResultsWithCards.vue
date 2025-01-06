@@ -3,7 +3,7 @@
     <!-- 编辑区域 -->
     <div class="editor-area">
       <div class="editor-header">
-        <h2 class="component-title">Key Results With Three Cards</h2>
+        <h2 class="component-title">Key Results With Cards</h2>
       </div>
       <div class="editor-content">
         <a-form layout="vertical">
@@ -24,12 +24,21 @@
               <a-form-item label="Logo">
                 <div class="input-with-tag">
                   <span class="html-tag">{{ tags.logo }}</span>
-                  <a-input
-                    v-model:value="item.competitorLogo"
-                    :disabled="disabled"
-                    placeholder="Image path"
-                    @change="handleChange"
-                  />
+                  <div class="image-input-wrapper">
+                    <a-input
+                      v-model:value="item.competitorLogo"
+                      :disabled="disabled"
+                      placeholder="Image path"
+                      @change="handleChange"
+                    />
+                    <a-button 
+                      type="primary"
+                      class="change-image-btn"
+                      @click="openImageLibrary(index)"
+                    >
+                      Change
+                    </a-button>
+                  </div>
                 </div>
               </a-form-item>
 
@@ -130,6 +139,21 @@
         />
       </div>
     </div>
+
+    <!-- 添加图片库模态框 -->
+    <a-modal
+      v-model:visible="imageLibraryVisible"
+      title="Select Image"
+      @ok="handleImageSelect"
+      @cancel="closeImageLibrary"
+      width="800px"
+    >
+      <image-library
+        v-if="imageLibraryVisible"
+        @select="onImageSelect"
+        @close="closeImageLibrary"
+      />
+    </a-modal>
   </div>
 </template>
 
@@ -139,13 +163,15 @@ import { SECTION_TAGS } from '../common/SectionTag'
 import themeConfig from '../../../assets/config/themeConfig'
 import KeyResultsWithCardsPreview from './KeyResultsWithCardsPreview.vue'
 import { DeleteOutlined } from '@ant-design/icons-vue'
+import ImageLibrary from '../common/ImageLibrary.vue'
 
 export default {
   name: 'KeyResultsWithCards',
   extends: BaseSection,
   components: {
     KeyResultsWithCardsPreview,
-    DeleteOutlined
+    DeleteOutlined,
+    ImageLibrary
   },
   computed: {
     tags() {
@@ -155,7 +181,10 @@ export default {
   data() {
     return {
       localSection: JSON.parse(JSON.stringify(this.section)),
-      styles: themeConfig.normal
+      styles: themeConfig.normal,
+      imageLibraryVisible: false,
+      selectedImage: null,
+      currentEditingIndex: -1
     }
   },
   watch: {
@@ -185,6 +214,25 @@ export default {
     removeCard(index) {
       this.localSection.bottomContent.splice(index, 1)
       this.handleChange()
+    },
+    openImageLibrary(index) {
+      this.currentEditingIndex = index
+      this.imageLibraryVisible = true
+    },
+    closeImageLibrary() {
+      this.imageLibraryVisible = false
+      this.selectedImage = null
+      this.currentEditingIndex = -1
+    },
+    onImageSelect(image) {
+      this.selectedImage = image
+    },
+    handleImageSelect() {
+      if (this.selectedImage && this.currentEditingIndex > -1) {
+        this.localSection.bottomContent[this.currentEditingIndex].competitorLogo = this.selectedImage.url
+        this.handleChange()
+      }
+      this.closeImageLibrary()
     }
   }
 }
@@ -357,5 +405,30 @@ export default {
 .card-header :deep(.anticon) {
   font-size: 14px;
   color: inherit;
+}
+
+.image-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.change-image-btn {
+  background: linear-gradient(135deg, #468be5, #3a9ced);
+  border: none;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: white;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.change-image-btn:hover {
+  background: linear-gradient(135deg, #3883ca, #2875d9);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
 }
 </style> 

@@ -190,6 +190,7 @@
                               `status-${task.taskStatus}`,
                               { 'is-write-date': isWriteDate(current, task) }
                             ]"
+                            @click="showTaskDetails(current)"
                           >
                             <div class="task-header">
                               <template v-if="isWriteDate(current, task)">
@@ -396,7 +397,6 @@ import {
   LeftOutlined,
   RightOutlined,
   LoadingOutlined,
-  ExclamationCircleOutlined,
   ArrowDownOutlined,
   CalendarOutlined,
   ClockCircleOutlined,
@@ -405,7 +405,7 @@ import {
 import { useRouter } from 'vue-router'
 import apiClient from '../api/api'
 import PageLayout from './layout/PageLayout.vue'
-import confirmedFirst50Titles from '../assets/data/ai-keywords-planning/confirmed-first-50-titles.json'
+import testingTenTitles from '../assets/data/ai-keywords-planning/testing-ten-titles.json'
 import dayjs from 'dayjs'
 
 export default defineComponent({
@@ -436,7 +436,7 @@ export default defineComponent({
     const productInfo = ref(null)
     const analysisModalVisible = ref(false)
     const analysisLoading = ref(false)
-    const firstArticlesData = ref(confirmedFirst50Titles)
+    const firstArticlesData = ref(testingTenTitles)
     
     // 任务相关状态
     const selectedRowKeys = ref([])
@@ -536,7 +536,7 @@ export default defineComponent({
         title: 'Category',
         dataIndex: 'Category',
         width: 100,
-        filters: [...new Set(confirmedFirst50Titles.map(item => item.Category))].map(category => ({
+        filters: [...new Set(testingTenTitles.map(item => item.Category))].map(category => ({
           text: category,
           value: category,
         })),
