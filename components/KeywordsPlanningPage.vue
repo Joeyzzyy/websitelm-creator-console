@@ -678,6 +678,10 @@ export default defineComponent({
 
         message.success(`Successfully created ${selectedRows.value.length} tasks`)
         await fetchTaskList()
+        
+        // 添加跳转逻辑
+        router.push('/task-management')
+        
       } catch (error) {
         message.error(`Task creation failed: ${error.message}`)
       } finally {

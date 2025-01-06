@@ -15,6 +15,10 @@
                 <template #icon><PlusOutlined /></template>
                 Manual Add Page
               </a-button>
+              <a-button type="primary" @click="collectPublishedUrls">
+                <template #icon><GlobalOutlined /></template>
+                Submit Sitemap
+              </a-button>
             </div>
             
             <div class="header-bottom">
@@ -61,9 +65,13 @@
           >
             <template #bodyCell="{ column, record }">
               <template v-if="column.key === 'title'">
-                <span style="word-break: break-word; white-space: normal;">
+                <a 
+                  @click="handleTitleClick(record)" 
+                  class="title-link"
+                  :title="record.publishStatus === 'publish' ? getFullPublishUrl(record) : getPreviewUrl(record)"
+                >
                   {{ record.title }}
-                </span>
+                </a>
                 <a-tag 
                   v-if="record.generatorStatus === 'processing'" 
                   color="processing"
@@ -78,10 +86,6 @@
                 >
                   <span class="generating-text">Generation Failed</span>
                 </a-tag>
-              </template>
-
-              <template v-if="column.key === 'type'">
-                <span>{{ record.articleType || '-' }}</span>
               </template>
 
               <template v-if="column.key === 'pageType'">
@@ -152,15 +156,6 @@
                           <CloudUploadOutlined />
                           {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
                         </a-menu-item>
-                        <a-menu-item 
-                          v-if="record.publishStatus === 'publish'"
-                          key="sitemap"
-                          @click="handleSubmitSitemap(record)"
-                          :disabled="record.generatorStatus === 'processing'"
-                        >
-                          <GlobalOutlined />
-                          Submit Sitemap
-                        </a-menu-item>
                       </template>
                       <a-menu-item 
                         key="delete"
@@ -225,6 +220,54 @@
           <strong>{{ getFullPublishUrl(publishModal.data) }}</strong>
         </p>
       </template>
+    </a-modal>
+
+    <!-- 修改预览模态框 -->
+    <a-modal
+      v-model:visible="sitemapModal.visible"
+      title="Submit URLs to Google Search Console"
+      width="800px"
+      @ok="handleSubmitUrls"
+      @cancel="closeSitemapModal"
+      :confirmLoading="submitLoading"
+      :okText="'Submit to Google'"
+      :cancelText="'Cancel'"
+    >
+      <div class="sitemap-preview">
+        <div class="preview-header">
+          <a-alert
+            message="Below are all published page URLs. Confirm to submit to Google Search Console"
+            type="info"
+            show-icon
+            style="margin-bottom: 16px"
+          />
+          <div class="url-count">
+            Found {{ publishedUrls.length }} published pages
+          </div>
+        </div>
+        
+        <a-list
+          :data-source="publishedUrls"
+          :bordered="true"
+          size="small"
+          class="url-list"
+        >
+          <template #renderItem="{ item }">
+            <a-list-item>
+              <div class="url-item">
+                <span class="url-text">{{ item }}</span>
+                <a-button 
+                  type="link" 
+                  size="small"
+                  @click="openPreview(item)"
+                >
+                  View
+                </a-button>
+              </div>
+            </a-list-item>
+          </template>
+        </a-list>
+      </div>
     </a-modal>
   </page-layout>
 </template>
@@ -310,12 +353,6 @@ export default {
         dataIndex: 'title',
         key: 'title',
         width: '22%'
-      },
-      {
-        title: 'Type',
-        dataIndex: 'articleType',
-        key: 'type',
-        width: '8%'
       },
       {
         title: 'Page Type',
@@ -582,8 +619,12 @@ export default {
       window.open(url, '_blank')
     }
 
-    const getPreviewUrl = (article) => {
-      return `${config.domains.preview}${article.lang === 'zh' ? 'zh/' : 'en/'}${article.slug}`;
+    const getPreviewUrl = (record) => {
+      if (!record?.slug || !record?.lang) {
+        return '';
+      }
+      // 使用 config 中的预览域名
+      return `${config.domains.preview}/${record.lang}/${record.slug}`;
     };
 
     const getStatusColor = (status) => {
@@ -699,12 +740,32 @@ export default {
       };
     };
 
-    // 添加获取完整发布URL的方法
+    // 修改获取完整发布URL的方法
     const getFullPublishUrl = (record) => {
       if (!record?.publishURL || !record?.lang || !record?.slug) {
         return '';
       }
-      return `${record.publishURL}/${record.lang}/${record.slug}`;
+      
+      // 添加调试日志
+      console.log('PublishURL:', record.publishURL);
+      
+      // 移除任何可能的 localhost 引用
+      let baseUrl = record.publishURL.replace(/\/+$/, ''); // 移除末尾的斜杠
+      
+      // 如果 baseUrl 包含 localhost，尝试提取实际的域名部分
+      if (baseUrl.includes('localhost')) {
+        // 尝试从 URL 中提取实际域名部分
+        const urlParts = baseUrl.split('/');
+        // 移除包含 localhost 的部分
+        baseUrl = urlParts.slice(3).join('/');
+      }
+      
+      // 确保有正确的协议前缀
+      if (!baseUrl.startsWith('http')) {
+        baseUrl = `https://${baseUrl}`;
+      }
+      
+      return `${baseUrl}/${record.lang}/${record.slug}`;
     };
 
     // 修改发布确认处理
@@ -751,10 +812,99 @@ export default {
       data: null
     });
 
+    const sitemapModal = ref({
+      visible: false
+    })
+    const publishedUrls = ref([])
+    const submitLoading = ref(false)
+
+    // 收集并展示已发布的 URLs
+    const collectPublishedUrls = () => {
+      const urls = tasks.value
+        .filter(task => task.publishStatus === 'publish')
+        .map(task => `${task.publishURL}/${task.lang}/${task.slug}`)
+      
+      if (urls.length === 0) {
+        message.warning('No published pages found')
+        return
+      }
+
+      publishedUrls.value = urls
+      sitemapModal.value.visible = true
+    }
+
+    // 提交 URLs 到 Google
+    const handleSubmitUrls = async () => {
+      if (publishedUrls.value.length === 0) {
+        message.warning('No URLs to submit')
+        return
+      }
+
+      submitLoading.value = true
+      try {
+        const customerId = localStorage.getItem('currentCustomerId')
+        const response = await apiClient.submitUrls(customerId, publishedUrls.value)
+        
+        if (response?.code === 200) {
+          message.success('Successfully submitted URLs to Google Search Console')
+          sitemapModal.value.visible = false
+        } else {
+          throw new Error(response?.message || 'Submission failed')
+        }
+      } catch (error) {
+        console.error('Submit URLs failed:', error)
+        message.error(error.message || 'Submission failed')
+      } finally {
+        submitLoading.value = false
+      }
+    }
+
+    const closeSitemapModal = () => {
+      sitemapModal.value.visible = false
+      publishedUrls.value = []
+    }
+
+    const isMounted = ref(false)
+
+    // 添加打开预览的方法
+    const openPreview = (url) => {
+      if (typeof window !== 'undefined') {
+        // 使用与 handleTitleClick 相同的逻辑处理 URL
+        const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+        window.open(fullUrl, '_blank');
+      }
+    }
+
+    // 添加标题点击处理函数
+    const handleTitleClick = (record) => {
+      // 添加调试日志
+      console.log('Record:', record);
+      
+      const url = record.publishStatus === 'publish' 
+        ? getFullPublishUrl(record)
+        : getPreviewUrl(record);
+      
+      // 添加调试日志
+      console.log('Generated URL:', url);
+      
+      if (url) {
+        // 使用完整的 URL，如果是已发布的页面
+        if (record.publishStatus === 'publish') {
+          // 确保 URL 是完整的（包含 http:// 或 https://）
+          const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+          window.open(fullUrl, '_blank');
+        } else {
+          // 预览页面使用相对路径
+          window.open(url, '_blank');
+        }
+      }
+    };
+
     onMounted(async () => {
       fetchTasks()
       await loadProductInfo()
       await loadVerifiedDomains()
+      isMounted.value = true
     })
 
     return {
@@ -790,7 +940,17 @@ export default {
       handlePublish,
       handlePublishConfirm,
       handlePublishCancel,
-      getFullPublishUrl
+      getFullPublishUrl,
+      sitemapModal,
+      publishedUrls,
+      submitLoading,
+      collectPublishedUrls,
+      handleSubmitUrls,
+      closeSitemapModal,
+      isMounted,
+      openPreview,
+      handleTitleClick,
+      getPreviewUrl,
     }
   }
 }
@@ -1329,5 +1489,60 @@ export default {
 .failed-tag:hover {
   transform: rotate(-2deg) scale(1.05);
   transition: transform 0.2s ease;
+}
+
+.sitemap-preview {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.preview-header {
+  margin-bottom: 16px;
+}
+
+.url-count {
+  margin: 8px 0;
+  font-weight: 500;
+  color: #1890ff;
+}
+
+.url-list {
+  border-radius: 4px;
+  border: 1px solid #f0f0f0;
+}
+
+.url-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.url-text {
+  flex: 1;
+  word-break: break-all;
+  margin-right: 16px;
+}
+
+:deep(.ant-list-item) {
+  padding: 8px 16px;
+}
+
+:deep(.ant-btn-link) {
+  padding: 0 8px;
+  height: 24px;
+  font-size: 12px;
+}
+
+/* 添加标题链接样式 */
+.title-link {
+  color: #1890ff;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.title-link:hover {
+  color: #40a9ff;
+  text-decoration: underline;
 }
 </style>
