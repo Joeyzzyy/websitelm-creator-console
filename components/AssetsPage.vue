@@ -53,7 +53,7 @@
 
         <!-- Media Asset Content -->
         <template v-if="activeTab === 'images' || activeTab === 'videos'">
-          <a-spin :spinning="loading" tip="Loading assets...">
+          <a-spin :spinning="loading" tip="Loading">
           </a-spin>
           <div class="assets-grid" v-if="!loading">
             <template v-if="!showEmptyState">
@@ -141,7 +141,7 @@
 
         <!-- Link Content -->
         <template v-else-if="activeTab === 'links'">
-          <a-spin :spinning="linksLoading" tip="Loading links...">
+          <a-spin :spinning="linksLoading" tip="Loading">
             <template v-if="!linksLoading">
               <!-- 添加空状态显示 -->
               <div v-if="internalLinks.length === 0" class="empty-state">
@@ -199,7 +199,7 @@
 
         <!-- Knowledge Tab Content -->
         <template v-else-if="activeTab === 'knowledge'">
-          <a-spin :spinning="loading" tip="Loading knowledge base...">
+          <a-spin :spinning="loading" tip="Loading">
           </a-spin>
           <div class="traffic-light-descriptions" v-if="!loading">
             <p><span class="status-dot status-green"></span> Green: No human intervention needed.</p>
@@ -321,8 +321,8 @@
         <!-- Header Section -->
         <template v-else-if="activeTab === 'header'">
           <div class="header-footer-content">
-            <a-spin :spinning="headerLoading" tip="Loading...">
-              <div class="settings-section">
+            <a-spin :spinning="headerLoading" tip="Loading">
+              <div v-if="!headerLoading" class="settings-section">
                 <div class="preview-section">
                   <div class="preview-header">
                     <div class="preview-header-content">
@@ -344,8 +344,8 @@
         <!-- Footer Section -->
         <template v-else-if="activeTab === 'footer'">
           <div class="header-footer-content">
-            <a-spin :spinning="footerLoading" tip="Loading...">
-              <div class="settings-section">
+            <a-spin :spinning="footerLoading" tip="Loading">
+              <div v-if="!footerLoading" class="settings-section">
                 <div class="preview-section">
                   <div class="preview-header">
                     <div class="preview-header-content">
@@ -584,7 +584,7 @@
     </template>
     
     <template v-else>
-      <a-spin :spinning="loading" tip="Checking domain configuration...">
+      <a-spin :spinning="loading" tip="Loading">
         <div class="domain-notice">
           <div class="notice-content" v-show="!loading">
             <exclamation-circle-outlined class="notice-icon" />
