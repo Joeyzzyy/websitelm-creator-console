@@ -1,0 +1,206 @@
+{
+  "overview": {
+    "totalKeywords": 1250,
+    "stats": [
+      { "type": "missing", "label": "Missing Keywords", "count": 324, "color": "#f5222d" },
+      { "type": "weak", "label": "Weak Rankings", "count": 245, "color": "#fa8c16" },
+      { "type": "strong", "label": "Strong Rankings", "count": 186, "color": "#52c41a" },
+      { "type": "common", "label": "Common Keywords", "count": 298, "color": "#1890ff" },
+      { "type": "unique", "label": "Unique Keywords", "count": 197, "color": "#722ed1" }
+    ]
+  },
+  "recommendedKeywords": [
+    {
+      "keyword": "digital marketing strategy",
+      "krsScore": 92,
+      "searchVolume": 12500,
+      "keywordDifficulty": 25,
+      "cpcValue": 15.80
+    },
+    {
+      "keyword": "content marketing tips",
+      "krsScore": 88,
+      "searchVolume": 8200,
+      "keywordDifficulty": 35,
+      "cpcValue": 12.45
+    },
+    {
+      "keyword": "seo optimization guide",
+      "krsScore": 85,
+      "searchVolume": 6800,
+      "keywordDifficulty": 42,
+      "cpcValue": 18.20
+    },
+    {
+      "keyword": "social media marketing",
+      "krsScore": 82,
+      "searchVolume": 22000,
+      "keywordDifficulty": 58,
+      "cpcValue": 25.60
+    },
+    {
+      "keyword": "email marketing software",
+      "krsScore": 78,
+      "searchVolume": 4500,
+      "keywordDifficulty": 45,
+      "cpcValue": 20.30
+    },
+    {
+      "keyword": "marketing automation tools",
+      "krsScore": 75,
+      "searchVolume": 3200,
+      "keywordDifficulty": 62,
+      "cpcValue": 28.90
+    },
+    {
+      "keyword": "website traffic analysis",
+      "krsScore": 72,
+      "searchVolume": 2800,
+      "keywordDifficulty": 38,
+      "cpcValue": 16.75
+    },
+    {
+      "keyword": "online advertising platforms",
+      "krsScore": 68,
+      "searchVolume": 5600,
+      "keywordDifficulty": 52,
+      "cpcValue": 22.40
+    },
+    {
+      "keyword": "conversion rate optimization",
+      "krsScore": 65,
+      "searchVolume": 4100,
+      "keywordDifficulty": 68,
+      "cpcValue": 32.15
+    },
+    {
+      "keyword": "marketing analytics dashboard",
+      "krsScore": 62,
+      "searchVolume": 1900,
+      "keywordDifficulty": 48,
+      "cpcValue": 19.85
+    }
+  ],
+  "categoryDetails": {
+    "missing": {
+      "name": "Missing Keywords",
+      "count": 324,
+      "avgKD": 38,
+      "avgVolume": 800,
+      "keywords": [
+        {
+          "keyword": "cloud storage solutions",
+          "krsScore": 89,
+          "searchVolume": 1200,
+          "keywordDifficulty": 35,
+          "cpcValue": 12.40,
+          "selected": false
+        },
+        {
+          "keyword": "online backup services",
+          "krsScore": 85,
+          "searchVolume": 900,
+          "keywordDifficulty": 28,
+          "cpcValue": 10.20,
+          "selected": false
+        }
+      ]
+    },
+    "weak": {
+      "name": "Weak Rankings",
+      "count": 245,
+      "avgKD": 42,
+      "avgVolume": 950,
+      "keywords": [
+        {
+          "keyword": "cloud storage solutions",
+          "krsScore": 89,
+          "searchVolume": 1200,
+          "keywordDifficulty": 35,
+          "cpcValue": 12.40,
+          "selected": false
+        },
+        {
+          "keyword": "online backup services",
+          "krsScore": 85,
+          "searchVolume": 900,
+          "keywordDifficulty": 28,
+          "cpcValue": 10.20,
+          "selected": false
+        }
+      ]
+    },
+    "strong": {
+      "name": "Strong Rankings",
+      "count": 186,
+      "avgKD": 45,
+      "avgVolume": 1200,
+      "keywords": [
+        {
+          "keyword": "cloud storage solutions",
+          "krsScore": 89,
+          "searchVolume": 1200,
+          "keywordDifficulty": 35,
+          "cpcValue": 12.40,
+          "selected": false
+        },
+        {
+          "keyword": "online backup services",
+          "krsScore": 85,
+          "searchVolume": 900,
+          "keywordDifficulty": 28,
+          "cpcValue": 10.20,
+          "selected": false
+        }
+      ]
+    },
+    "common": {
+      "name": "Common Keywords",
+      "count": 298,
+      "avgKD": 52,
+      "avgVolume": 1500,
+      "keywords": [
+        {
+          "keyword": "cloud storage solutions",
+          "krsScore": 89,
+          "searchVolume": 1200,
+          "keywordDifficulty": 35,
+          "cpcValue": 12.40,
+          "selected": false
+        },
+        {
+          "keyword": "online backup services",
+          "krsScore": 85,
+          "searchVolume": 900,
+          "keywordDifficulty": 28,
+          "cpcValue": 10.20,
+          "selected": false
+        }
+      ]
+    },
+    "unique": {
+      "name": "Unique Keywords",
+      "count": 197,
+      "avgKD": 33,
+      "avgVolume": 600,
+      "keywords": [
+        {
+          "keyword": "cloud storage solutions",
+          "krsScore": 89,
+          "searchVolume": 1200,
+          "keywordDifficulty": 35,
+          "cpcValue": 12.40,
+          "selected": false
+        },
+        {
+          "keyword": "online backup services",
+          "krsScore": 85,
+          "searchVolume": 900,
+          "keywordDifficulty": 28,
+          "cpcValue": 10.20,
+          "selected": false
+        }
+      ]
+    }
+  }
+} 

@@ -6,18 +6,20 @@
   >
     <!-- Domain not configured notice -->
     <template v-if="!domainConfigured">
-      <a-spin :spinning="loading" tip="Checking domain configuration...">
-        <div class="domain-notice">
-          <div class="notice-content" v-show="!loading">
-            <exclamation-circle-outlined class="notice-icon" />
-            <h2>No Site Configured</h2>
-            <p>Please configure your domain in settings to use the keyword planning features</p>
-            <a-button type="primary" @click="goToDashboard">
-              Configure Domain
-            </a-button>
+      <div class="domain-container">
+        <a-spin :spinning="loading">
+          <div class="domain-notice">
+            <div class="notice-content" v-show="!loading">
+              <exclamation-circle-outlined class="notice-icon" />
+              <h2>No Site Configured</h2>
+              <p>Please configure your domain in settings to use the keyword planning features</p>
+              <a-button type="primary" @click="goToDashboard">
+                Configure Domain
+              </a-button>
+            </div>
           </div>
-        </div>
-      </a-spin>
+        </a-spin>
+      </div>
     </template>
 
     <template v-else>
@@ -66,9 +68,182 @@
               <transition name="fade" mode="out-in">
                 <!-- Keywords Analysis Content -->
                 <div v-if="activeSource === 'keywords'" key="keywords">
-                  <div class="coming-soon">
-                    <a-empty description="Keywords analysis coming soon..." />
-                  </div>
+                  <!-- 关键词分析总览 -->
+                  <a-card class="analysis-overview" :bodyStyle="{ padding: '12px' }">
+                    <template #title>
+                      <div class="overview-header">
+                        <span class="card-title">Keywords Analysis Overview</span>
+                        <a-tag color="blue" class="overview-tag">{{ totalAnalyzedKeywords }} Keywords Analyzed</a-tag>
+                      </div>
+                    </template>
+                    
+                    <!-- 分类统计 -->
+                    <div class="keywords-stats">
+                      <a-row :gutter="[8, 8]">
+                        <a-col :span="4" v-for="stat in keywordStats" :key="stat.type">
+                          <a-statistic
+                            :title="stat.label"
+                            :value="stat.count"
+                            :valueStyle="{ color: stat.color }"
+                          />
+                        </a-col>
+                      </a-row>
+                    </div>
+                  </a-card>
+
+                  <!-- 推荐关键词列表 -->
+                  <a-card class="recommended-keywords" style="margin-top: 12px" :bodyStyle="{ padding: '12px' }">
+                    <template #title>
+                      <div class="overview-header">
+                        <span class="card-title">Recommended Keywords</span>
+                        <div class="header-actions">
+                          <div class="mode-switch">
+                            <span class="mode-label" :class="{ active: !expertMode }">Basic</span>
+                            <a-switch
+                              v-model:checked="expertMode"
+                              size="small"
+                              class="custom-switch"
+                            />
+                            <span class="mode-label" :class="{ active: expertMode }">Expert</span>
+                          </div>
+                          <a-tag color="blue" class="overview-tag">Priority Sorted by KRS Score</a-tag>
+                        </div>
+                      </div>
+                    </template>
+
+                    <a-table
+                      :columns="keywordColumns"
+                      :dataSource="mockKeywordsData"
+                      :pagination="{ pageSize: 10, size: 'small' }"
+                      :loading="loading"
+                      size="small"
+                    >
+                      <!-- KRS Score Column -->
+                      <template #krsScore="{ text }">
+                        <div class="krs-score">
+                          <a-progress
+                            :percent="text"
+                            :showInfo="false"
+                            :strokeColor="getKRSColor(text)"
+                            size="small"
+                            :strokeWidth="4"
+                          />
+                          <span class="score-text">{{ text }}</span>
+                        </div>
+                      </template>
+
+                      <!-- Volume Column -->
+                      <template #searchVolume="{ text }">
+                        {{ formatNumber(text) }}
+                      </template>
+
+                      <!-- KD Column -->
+                      <template #keywordDifficulty="{ text }">
+                        <a-tag :color="getKDColor(text)">
+                          {{ text }}
+                        </a-tag>
+                      </template>
+
+                      <!-- CPC Column -->
+                      <template #cpcValue="{ text }">
+                        ${{ text.toFixed(2) }}
+                      </template>
+                    </a-table>
+                  </a-card>
+
+                  <!-- 专家模式详情 -->
+                  <a-card v-if="expertMode" class="category-details" style="margin-top: 12px">
+                    <template #title>
+                      <div class="category-header">
+                        <a-radio-group 
+                          v-model:value="selectedCategory" 
+                          size="small"
+                          class="category-radio-group"
+                        >
+                          <a-radio-button 
+                            v-for="(cat, key) in categoryDetails" 
+                            :key="key" 
+                            :value="key"
+                            class="category-radio"
+                          >
+                            <div class="radio-content">
+                              <span class="radio-label">{{ cat.name }}</span>
+                              <span class="radio-count">({{ cat.count }})</span>
+                            </div>
+                          </a-radio-button>
+                        </a-radio-group>
+                        <div class="category-stats">
+                          <span>Avg KD: {{ currentCategory.avgKD }}</span>
+                          <span>Avg Volume: {{ formatNumber(currentCategory.avgVolume) }}</span>
+                        </div>
+                      </div>
+                    </template>
+
+                    <!-- 高级筛选 -->
+                    <div class="advanced-filters">
+                      <div class="filter-group">
+                        <span class="filter-label">KD Range:</span>
+                        <a-slider
+                          v-model:value="kdRange"
+                          range
+                          :max="100"
+                          size="small"
+                          style="width: 200px"
+                        />
+                      </div>
+                      <div class="filter-group">
+                        <span class="filter-label">Min Volume:</span>
+                        <a-input-number
+                          v-model:value="minVolume"
+                          size="small"
+                          style="width: 100px"
+                        />
+                      </div>
+                      <a-button type="primary" size="small" @click="applyFilters">
+                        Apply Filters
+                      </a-button>
+                    </div>
+
+                    <!-- 关键词表格 -->
+                    <a-table
+                      :columns="categoryColumns"
+                      :dataSource="filteredCategoryKeywords"
+                      size="small"
+                      :pagination="{ pageSize: 10, size: 'small' }"
+                      :row-selection="{ selectedRowKeys: selectedRowKeys, onChange: onSelectChange }"
+                    >
+                      <!-- KD Column -->
+                      <template #keywordDifficulty="{ text }">
+                        <a-tag :color="getKDColor(text)">
+                          {{ text }}
+                        </a-tag>
+                      </template>
+
+                      <!-- Volume Column -->
+                      <template #searchVolume="{ text }">
+                        {{ formatNumber(text) }}
+                      </template>
+
+                      <!-- KRS Score Column -->
+                      <template #krsScore="{ text }">
+                        <div class="krs-score">
+                          <a-progress
+                            :percent="text"
+                            :showInfo="false"
+                            :strokeColor="getKRSColor(text)"
+                            size="small"
+                            :strokeWidth="4"
+                          />
+                          <span class="score-text">{{ text }}</span>
+                        </div>
+                      </template>
+
+                      <!-- CPC Column -->
+                      <template #cpcValue="{ text }">
+                        ${{ text.toFixed(2) }}
+                      </template>
+                    </a-table>
+                  </a-card>
                 </div>
 
                 <!-- Pages Analysis Content -->
@@ -128,13 +303,14 @@
             <!-- 视图切换 -->
             <transition name="fade" mode="out-in">
               <!-- 列表视图 -->
-              <div v-if="planningView === 'list'" key="list">
+              <div v-if="planningView === 'list'" key="list" class="table-container">
                 <a-table
                   :dataSource="firstArticlesData"
                   :columns="columns"
                   :rowKey="record => record.id || record.Title"
                   :pagination="false"
                   :row-selection="rowSelection"
+                  :scroll="{ x: 'max-content' }"
                 >
                   <template #taskStatus="{ record }">
                     <a-tag :color="getTaskStatusColor(record.taskStatus)">
@@ -144,11 +320,11 @@
                   <template #dates="{ record }">
                     <div class="date-info">
                       <div class="date-row">
-                        <calendar-outlined /> Writing: 
+                        Writing: 
                         <span class="recommended-date">{{ formatDate(getRecommendedDates(record).writeDate) }}</span>
                       </div>
                       <div class="date-row">
-                        <clock-circle-outlined /> Publishing: 
+                        Publishing: 
                         <span class="recommended-date">{{ formatDate(getRecommendedDates(record).publishDate) }}</span>
                       </div>
                     </div>
@@ -190,13 +366,14 @@
                               `status-${task.taskStatus}`,
                               { 'is-write-date': isWriteDate(current, task) }
                             ]"
-                            @click="showTaskDetails(current)"
+                            @click.stop="showTaskDetails(current)"
                           >
                             <div class="task-header">
                               <template v-if="isWriteDate(current, task)">
                                 <a-checkbox
                                   :value="task.Title"
                                   :checked="selectedRowKeys.includes(task.Title)"
+                                  @click.stop
                                   @change="(e) => handleCalendarTaskSelect(e, task)"
                                 />
                               </template>
@@ -407,6 +584,7 @@ import apiClient from '../api/api'
 import PageLayout from './layout/PageLayout.vue'
 import testingTenTitles from '../assets/data/ai-keywords-planning/testing-ten-titles.json'
 import dayjs from 'dayjs'
+import mockData from '../assets/data/ai-keywords-planning/mock-keywords-data.json'
 
 export default defineComponent({
   name: 'KeywordsPlanningPage',
@@ -529,6 +707,13 @@ export default defineComponent({
         customRender: ({ index }) => index + 1
       },
       {
+        title: 'Keywords',
+        dataIndex: 'Keywords',
+        key: 'keywords',
+        slots: { customRender: 'keywords' },
+        width: '280px'
+      },
+      {
         title: 'Task Status',
         key: 'taskStatus',
         width: 120,
@@ -550,20 +735,17 @@ export default defineComponent({
         ellipsis: true
       },
       {
-        title: 'Keywords',
-        dataIndex: 'Keywords',
-        ellipsis: true
-      },
-      {
         title: 'Recommended Dates',
         key: 'dates',
-        width: 280,
+        width: 200,
+        fixed: 'right',
         slots: { customRender: 'dates' }
       },
       {
         title: 'Action',
         key: 'action',
-        width: 180,
+        width: 140,
+        fixed: 'right',
         slots: { customRender: 'action' }
       }
     ]
@@ -921,6 +1103,151 @@ export default defineComponent({
       return maxCount;
     });
 
+    const totalAnalyzedKeywords = ref(mockData.overview.totalKeywords)
+    const keywordStats = ref(mockData.overview.stats)
+    const mockKeywordsData = ref(mockData.recommendedKeywords)
+
+    const sortBy = ref('krs')
+    const sortOrder = ref('desc')
+
+    const keywordColumns = [
+      {
+        title: 'Keyword',
+        dataIndex: 'keyword',
+        key: 'keyword',
+        width: '30%'
+      },
+      {
+        title: 'KRS Score',
+        dataIndex: 'krsScore',
+        key: 'krsScore',
+        slots: { customRender: 'krsScore' },
+        sorter: true,
+        width: '20%'
+      },
+      {
+        title: 'Volume',
+        dataIndex: 'searchVolume',
+        key: 'searchVolume',
+        slots: { customRender: 'searchVolume' },
+        sorter: true,
+        width: '15%'
+      },
+      {
+        title: 'KD',
+        dataIndex: 'keywordDifficulty',
+        key: 'keywordDifficulty',
+        slots: { customRender: 'keywordDifficulty' },
+        sorter: true,
+        width: '15%'
+      },
+      {
+        title: 'CPC',
+        dataIndex: 'cpcValue',
+        key: 'cpcValue',
+        slots: { customRender: 'cpcValue' },
+        sorter: true,
+        width: '15%'
+      }
+    ]
+
+    // 辅助函数
+    const getKRSColor = (score) => {
+      if (score >= 80) return '#52c41a'
+      if (score >= 60) return '#1890ff'
+      if (score >= 40) return '#faad14'
+      return '#f5222d'
+    }
+
+    const getKDColor = (kd) => {
+      if (kd <= 30) return 'success'
+      if (kd <= 60) return 'warning'
+      return 'error'
+    }
+
+    const formatNumber = (num) => {
+      return new Intl.NumberFormat().format(num)
+    }
+
+    // 计算排序后的关键词列表
+    const sortedKeywords = computed(() => {
+      if (!keywordsData.value) return []
+      
+      return [...keywordsData.value].sort((a, b) => {
+        const factor = sortOrder.value === 'desc' ? -1 : 1
+        return factor * (a[sortBy.value] - b[sortBy.value])
+      })
+    })
+
+    const expertMode = ref(false)
+    const selectedCategory = ref('missing')
+    const kdRange = ref([0, 60])
+    const minVolume = ref(100)
+    
+    // 从 mock 数据中获取分类详情
+    const categoryDetails = ref(mockData.categoryDetails)
+    
+    // 计算当前选中的分类数据
+    const currentCategory = computed(() => {
+      return categoryDetails.value[selectedCategory.value]
+    })
+
+    // 计算过滤后的关键词列表
+    const filteredCategoryKeywords = computed(() => {
+      if (!currentCategory.value?.keywords) return []
+      
+      return currentCategory.value.keywords.filter(kw => {
+        return kw.keywordDifficulty >= kdRange.value[0] &&
+               kw.keywordDifficulty <= kdRange.value[1] &&
+               kw.searchVolume >= minVolume.value
+      })
+    })
+
+    // 分类表格列定义
+    const categoryColumns = [
+      {
+        title: '',
+        dataIndex: 'selected',
+        width: 40,
+        slots: {
+          customRender: 'selected'
+        }
+      },
+      {
+        title: 'Keyword',
+        dataIndex: 'keyword',
+        key: 'keyword',
+      },
+      {
+        title: 'KD',
+        dataIndex: 'keywordDifficulty',
+        key: 'keywordDifficulty',
+        slots: { customRender: 'keywordDifficulty' }
+      },
+      {
+        title: 'Volume',
+        dataIndex: 'searchVolume',
+        key: 'searchVolume',
+        slots: { customRender: 'searchVolume' }
+      },
+      {
+        title: 'KRS',
+        dataIndex: 'krsScore',
+        key: 'krsScore',
+        slots: { customRender: 'krsScore' }
+      },
+      {
+        title: 'CPC',
+        dataIndex: 'cpcValue',
+        key: 'cpcValue',
+        slots: { customRender: 'cpcValue' }
+      }
+    ]
+
+    const applyFilters = () => {
+      // 实现筛选应用逻辑
+    }
+
     return {
       domainConfigured,
       goToDashboard,
@@ -984,56 +1311,54 @@ export default defineComponent({
       getWritingTasksCount,
       getPublishingTasksCount,
       getMaxTasksCount,
+      totalAnalyzedKeywords,
+      keywordStats,
+      sortBy,
+      sortOrder,
+      keywordColumns,
+      getKRSColor,
+      getKDColor,
+      formatNumber,
+      sortedKeywords,
+      mockKeywordsData,
+      expertMode,
+      selectedCategory,
+      kdRange,
+      minVolume,
+      categoryDetails,
+      categoryColumns,
+      currentCategory,
+      filteredCategoryKeywords,
+      applyFilters
     }
   }
 })
 </script>
 
 <style>
-.domain-notice {
+.domain-container {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 200px);
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 200px);
+  justify-content: center;
+}
+
+.domain-notice {
+  width: 100%;
   background: #fff;
   border-radius: 16px;
 }
 
-.notice-content {
-  text-align: center;
-  padding: 40px;
+:deep(.ant-spin) {
+  max-height: none;
 }
 
-.notice-icon {
-  font-size: 48px;
-  color: #faad14;
-  margin-bottom: 24px;
+:deep(.ant-spin-container) {
+  height: 100%;
 }
 
-.notice-content h2 {
-  font-size: 24px;
-  color: #1a1a1a;
-  margin-bottom: 16px;
-}
-
-.notice-content p {
-  font-size: 16px;
-  color: #666;
-  margin-bottom: 24px;
-}
-
-.notice-content .ant-btn {
-  background: linear-gradient(135deg, #60A5FA, #3B82F6);
-  border: none;
-  height: 40px;
-  padding: 0 32px;
-  font-size: 16px;
-  border-radius: 20px;
-}
-
-.notice-content .ant-btn:hover {
-  background: linear-gradient(135deg, #3B82F6, #2563EB);
-}
 /* 最小必要的样式 */
 .ant-tag {
   margin: 2px;
@@ -1181,8 +1506,6 @@ export default defineComponent({
 /* 漏斗层级样式 */
 .funnel-level-1 {
   margin-bottom: 24px;
-  border-radius: 8px;
-  background: linear-gradient(to bottom, #ffffff, #f8fafc);
 }
 
 .funnel-level-2 {
@@ -1431,339 +1754,6 @@ export default defineComponent({
   }
 }
 
-/* 转场动画 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* 临时占位样式 */
-.coming-soon {
-  padding: 48px;
-  text-align: center;
-  background: #fff;
-  border-radius: 8px;
-  margin-top: 16px;
-}
-
-:deep(.ant-empty) {
-  margin: 32px 0;
-}
-
-:deep(.ant-empty-description) {
-  color: #6B7280;
-}
-
-/* 日历视图样式 */
-.calendar-view {
-  padding: 24px;
-  background: #fff;
-  border-radius: 8px;
-}
-
-.date-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 4px;
-  min-height: unset; /* 移除最小高度 */
-  height: auto; /* 自动高度 */
-}
-
-.task-item {
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-  transition: all 0.2s ease;
-  border-left: 3px solid transparent;
-  margin-bottom: 4px; /* 添加底部间距 */
-}
-
-.task-item:hover {
-  transform: translateY(-1px);
-}
-
-/* 写作任务样式 */
-.task-item.is-write-date {
-  background: #eef2ff;
-  border-left-color: #4f46e5;
-}
-
-.task-item.is-write-date:hover {
-  background: #e0e7ff;
-}
-
-/* 发布任务样式 */
-.task-item:not(.is-write-date) {
-  background: #f0fdf4;
-  border-left-color: #6366f1;
-}
-
-.task-item:not(.is-write-date):hover {
-  background: #ecfdf5;
-}
-
-.task-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 2px;
-}
-
-.task-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.task-type {
-  font-size: 11px;
-  color: #6b7280;
-}
-
-:deep(.ant-picker-calendar) {
-  background: #fff;
-  border-radius: 8px;
-}
-
-:deep(.ant-picker-calendar-header) {
-  padding: 12px 16px;
-}
-
-/* 添加任务详情抽屉样式 */
-.task-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.task-detail-item {
-  padding: 16px;
-  background: #f8faff;
-  border-radius: 8px;
-  border: 1px solid #e5e7ff;
-}
-
-.task-detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.task-detail-title {
-  font-weight: 500;
-  color: #1f2937;
-}
-
-.task-detail-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.task-detail-row {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.task-detail-row .label {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.task-detail-row .value {
-  color: #374151;
-}
-
-.keywords-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
-}
-
-/* 更新抽屉样式 */
-:deep(.ant-drawer-header) {
-  border-bottom: 1px solid #e5e7ff;
-}
-
-:deep(.ant-drawer-body) {
-  padding: 24px;
-}
-
-/* 更新日历样式以适应内容 */
-:deep(.ant-picker-calendar-date-content) {
-  height: auto !important; /* 覆盖 antd 默认样式 */
-  overflow: visible !important; /* 确保内容不会被截断 */
-}
-
-:deep(.ant-picker-calendar-date) {
-  height: auto !important;
-}
-
-/* 最后一个任务项不需要底部间距 */
-.task-item:last-child {
-  margin-bottom: 0;
-}
-
-/* 添加日期信息样式 */
-.date-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.date-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #666;
-  font-size: 13px;
-}
-
-.date-row .anticon {
-  font-size: 14px;
-  color: #8B5CF6;
-}
-
-/* 添加推荐日期样式 */
-.recommended-date {
-  color: #3B82F6;
-  font-weight: 500;
-}
-
-/* 操作按钮样式 */
-:deep(.ant-btn-sm) {
-  font-size: 12px;
-  height: 24px;
-  padding: 0 8px;
-}
-
-/* 漏斗统计内容样式优化 */
-.funnel-stats {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
-}
-
-.stats-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background: white;
-  padding: 12px 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.stats-icon {
-  font-size: 20px;
-  color: #3B82F6;
-  margin-bottom: 8px;
-}
-
-.stats-detail {
-  font-size: 13px;
-  color: #6B7280;
-  margin-top: 4px;
-}
-
-/* 漏斗形状样式优化 */
-.funnel-shape {
-  position: relative;
-  height: 120px;
-  margin: 0 auto;
-  max-width: 800px;
-  padding: 0 40px;
-}
-
-.funnel-line {
-  position: absolute;
-  top: 0;
-  width: 45%;
-  height: 100%;
-  overflow: hidden;
-  background: #F3F4F6;
-  border: 2px solid #E5E7EB;
-}
-
-.funnel-line.left {
-  left: 5%;
-  transform: skew(30deg);
-  border-radius: 8px 0 0 8px;
-}
-
-.funnel-line.right {
-  right: 5%;
-  transform: skew(-30deg);
-  border-radius: 0 8px 8px 0;
-}
-
-.funnel-gradient {
-  position: absolute;
-  top: -100%;
-  left: 0;
-  right: 0;
-  height: 100%;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    rgba(59, 130, 246, 0.1) 20%,
-    rgba(59, 130, 246, 0.2) 50%,
-    rgba(59, 130, 246, 0.1) 80%,
-    transparent
-  );
-  animation: flowDown 2s ease-in-out infinite;
-}
-
-@keyframes flowDown {
-  0% {
-    transform: translateY(0%);
-  }
-  100% {
-    transform: translateY(200%);
-  }
-}
-
-/* 移除旧的发光效果和渐变动画 */
-.funnel-line::after {
-  display: none;
-}
-
-@keyframes gradientFlow {
-  /* 移除旧的动画 */
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-  .funnel-shape {
-    height: 80px;
-    padding: 0 20px;
-  }
-  
-  .stats-content {
-    padding: 8px 16px;
-  }
-  
-  .stats-icon {
-    font-size: 16px;
-  }
-  
-  .stats-detail {
-    font-size: 12px;
-  }
-}
-
 .level-actions {
   display: flex;
   align-items: center;
@@ -1789,8 +1779,8 @@ export default defineComponent({
 .task-header {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 10px;
+  margin-bottom: 6px;
 }
 
 .task-header .ant-checkbox-wrapper {
@@ -1799,112 +1789,164 @@ export default defineComponent({
 
 .task-item {
   padding: 8px 12px;
-  /* ... existing task-item styles ... */
+  border-radius: 8px;
+  background: #ffffff;
+  border-left: 3px solid transparent;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  margin-bottom: 6px;
+  
+  /* 根据任务类型设置不同的边框和背景色 */
+  &.is-write-date {
+    border-left-color: #3B82F6; /* 写作任务使用蓝色 */
+    background: linear-gradient(to right, #EFF6FF, #ffffff);
+  }
+  
+  &:not(.is-write-date) {
+    border-left-color: #10B981; /* 发布任务使用绿色 */
+    background: linear-gradient(to right, #ECFDF5, #ffffff);
+  }
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  }
 }
 
 .task-title {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 优化日历单元格中的内容显示 */
-:deep(.ant-picker-calendar-date-content) {
-  height: auto !important;
-  min-height: 80px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-/* 添加滚动条样式 */
-:deep(.ant-picker-calendar-date-content::-webkit-scrollbar) {
-  width: 4px;
-}
-
-:deep(.ant-picker-calendar-date-content::-webkit-scrollbar-thumb) {
-  background: #d1d5db;
-  border-radius: 2px;
-}
-
-:deep(.ant-picker-calendar-date-content::-webkit-scrollbar-track) {
-  background: transparent;
-}
-
-/* 添加发布任务的特殊样式 */
-.task-type.publishing {
-  color: #9CA3AF;  /* 使用更浅的颜色 */
-}
-
-/* 非写作任务的样式调整 */
-.task-item:not(.is-write-date) {
-  background: #F3F4F6;  /* 更浅的背景色 */
-  border-left-color: #9CA3AF;  /* 更浅的边框色 */
-  opacity: 0.8;  /* 略微降低不可选任务的透明度 */
-}
-
-.task-item:not(.is-write-date):hover {
-  background: #F3F4F6;  /* 移除悬停效果 */
-  transform: none;  /* 移除悬停时的位移效果 */
-  cursor: default;  /* 改变鼠标样式 */
-}
-
-/* 更新日历单元格样式 */
-.calendar-cell {
-  padding: 4px;
-  min-height: 180px;
-  height: calc(180px + v-bind(getMaxTasksCount) * 52px); /* 增加每个任务的高度估算 */
-  display: flex;
-  flex-direction: column;
-  border-radius: 6px;
-  border: 1px solid #f0f0f0;
-}
-
-.cell-date {
-  padding: 4px 8px;
+  font-size: 13px;
   font-weight: 500;
-  color: #374151;
-  background: #f9fafb;
-  border-radius: 4px 4px 0 0;
+  color: #1F2937;
+  line-height: 1.4;
 }
 
-.cell-content {
-  flex: 1;
-  padding: 8px 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-/* 查看更多按钮样式 */
-.more-tasks {
-  margin-top: auto; /* 推到底部 */
-  padding: 4px 8px;
-  background: #f3f4f6;
-  border-radius: 4px;
-  font-size: 12px;
-  color: #6b7280;
-  cursor: pointer;
+.task-meta {
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: space-between;
+  margin-top: 6px;
+  
+  .ant-tag {
+    background: #F3F4F6;
+    border: none;
+    color: #6B7280;
+    font-size: 11px;
+    padding: 1px 8px;
+    border-radius: 4px;
+  }
+  
+  .task-type {
+    font-size: 11px;
+    color: #3B82F6; /* 写作任务文字颜色 */
+    font-weight: 500;
+    
+    &.publishing {
+      color: #10B981; /* 发布任务文字颜色 */
+    }
+  }
 }
 
-.more-tasks:hover {
-  background: #e5e7eb;
-  color: #374151;
+/* 抽屉样式优化 */
+:deep(.ant-drawer-content) {
+  background: #F9FAFB;
 }
 
-/* 任务项样式优化 */
-.task-item {
-  padding: 6px 8px;
-  border-radius: 4px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  min-height: 46px;
+:deep(.ant-drawer-header) {
+  padding: 16px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #E5E7EB;
+  
+  .ant-drawer-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+  }
 }
 
-.task-item:last-child {
-  margin-bottom: 6px; /* 保持与其他任务项相同的间距 */
+.task-detail-item {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
+
+.task-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  
+  .task-detail-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #111827;
+    line-height: 1.4;
+  }
+  
+  .ant-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 500;
+    
+    &.ant-tag-blue {
+      background: #EBF5FF;
+      border-color: #BAE3FF;
+      color: #2563EB;
+    }
+    
+    &.ant-tag-cyan {
+      background: #ECFEFF;
+      border-color: #B5E8F7;
+      color: #0891B2;
+    }
+  }
+}
+
+.task-detail-content {
+  background: #F9FAFB;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.task-detail-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  .label {
+    width: 80px;
+    font-size: 12px;
+    color: #6B7280;
+    flex-shrink: 0;
+  }
+  
+  .value {
+    flex: 1;
+    font-size: 13px;
+    color: #374151;
+  }
+  
+  .keywords-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    
+    .ant-tag {
+      font-size: 11px;
+      padding: 1px 8px;
+      border-radius: 4px;
+      background: #EFF6FF;
+      border: none;
+      color: #3B82F6;
+    }
+  }
+}
+
+/* ... existing code ... */
 </style>

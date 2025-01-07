@@ -147,6 +147,14 @@
                     </template>
                     <template v-else>Refresh Sitemap</template>
                   </a-button>
+                  <a-button
+                    type="link"
+                    size="small"
+                    @click="collectPublishedUrls"
+                    :disabled="!productInfo?.productId"
+                  >
+                    Submit Sitemap
+                  </a-button>
                 </a-space>
               </div>
             </template>
@@ -283,10 +291,25 @@
         <a-col :span="24">
           <a-card>
             <template #title>
-              <span>👥 Traffic </span>
-              <a-typography-text type="secondary" v-if="isGscConnected && gscSites.length > 0">
-                {{ gscSites[0].siteUrl }}
-              </a-typography-text>
+              <div class="panel-header">
+                <span class="title-text">👥 Traffic</span>
+                <a-select
+                  v-if="isGscConnected && gscSites.length"
+                  v-model:value="selectedSiteUrl"
+                  style="width: 400px"
+                  placeholder="Select site"
+                  size="small"
+                  @change="handleSiteChange"
+                >
+                  <a-select-option 
+                    v-for="site in gscSites" 
+                    :key="site.siteUrl" 
+                    :value="site.siteUrl"
+                  >
+                    {{ site.siteUrl }}
+                  </a-select-option>
+                </a-select>
+              </div>
             </template>
             <!-- 未连接 GSC 时显示提示 -->
             <div v-if="!isGscConnected" class="not-connected-notice">
@@ -304,7 +327,7 @@
               <a-col :span="8">
                 <a-statistic 
                   title="Impressions" 
-                  :value="gscAnalytics?.impressions || 0"
+                  :value="gscAnalytics?.impressions ?? 'No data'"
                   :precision="0"
                   :value-style="{ fontSize: '16px' }"
                   :title-style="{ fontSize: '12px' }"
@@ -319,7 +342,7 @@
               <a-col :span="8">
                 <a-statistic 
                   title="Clicks" 
-                  :value="gscAnalytics?.clicks || 0"
+                  :value="gscAnalytics?.clicks ?? 'No data'"
                   :precision="0"
                   :value-style="{ fontSize: '16px' }"
                   :title-style="{ fontSize: '12px' }"
@@ -413,16 +436,25 @@
         name="website"
       >
         <a-input-group compact>
-          <a-select
-            v-model:value="websitePrefix"
-            style="width: 90px"
-            :disabled="true"
+          <span 
+            style="
+              display: inline-flex;
+              align-items: center;
+              padding: 0 11px;
+              width: 90px;
+              height: 32px;
+              color: rgba(0, 0, 0, 0.88);
+              background-color: rgb(245, 245, 245);
+              border: 1px solid #d9d9d9;
+              border-right: none;
+              border-radius: 6px 0 0 6px;
+            "
           >
-            <a-select-option value="https://">https://</a-select-option>
-          </a-select>
+            https://
+          </span>
           <a-input 
             v-model:value="formState.website" 
-            style="width: calc(100% - 90px)"
+            style="width: calc(100% - 90px); border-radius: 0 6px 6px 0;"
             placeholder="example.com"
             @change="handleWebsiteChange"
           />
@@ -558,6 +590,54 @@
       <p>Please close this window and refresh the page</p>
     </div>
   </a-modal>
+
+  <!-- 添加 Sitemap Modal -->
+  <a-modal
+    v-model:visible="sitemapModal.visible"
+    title="Submit URLs to Google Search Console"
+    width="800px"
+    @ok="handleSubmitUrls"
+    @cancel="closeSitemapModal"
+    :confirmLoading="submitLoading"
+    :okText="'Submit to Google'"
+    :cancelText="'Cancel'"
+  >
+    <div class="sitemap-preview">
+      <div class="preview-header">
+        <a-alert
+          message="Below are all published page URLs. Confirm to submit to Google Search Console"
+          type="info"
+          show-icon
+          style="margin-bottom: 16px"
+        />
+        <div class="url-count">
+          Found {{ publishedUrls.length }} published pages
+        </div>
+      </div>
+      
+      <a-list
+        :data-source="publishedUrls"
+        :bordered="true"
+        size="small"
+        class="url-list"
+      >
+        <template #renderItem="{ item }">
+          <a-list-item>
+            <div class="url-item">
+              <span class="url-text">{{ item }}</span>
+              <a-button 
+                type="link" 
+                size="small"
+                @click="openPreview(item)"
+              >
+                View
+              </a-button>
+            </div>
+          </a-list-item>
+        </template>
+      </a-list>
+    </div>
+  </a-modal>
 </template>
 
 <script>
@@ -582,7 +662,7 @@ import {
 } from '@ant-design/icons-vue'
 import apiClient from '../api/api'
 import SuccessModal from './SuccessModal.vue'
-import { Modal } from 'ant-design-vue'
+import { Modal, message } from 'ant-design-vue'
 import * as echarts from 'echarts' // 需要安装 echarts
 
 export default defineComponent({
@@ -651,6 +731,13 @@ export default defineComponent({
       loadingUrls: {}, // 新增: 记录每个节点的加载状态
       nodeUrls: {}, // 新增: 缓存每个节点的URLs
       activeCollapseKeys: ['sitemap'],
+      selectedSiteUrl: '', // 当前选中的站点URL
+      sitemapModal: {
+        visible: false,
+        publishedUrls: []
+      },
+      submitLoading: false,
+      publishedUrls: []
     }
   },
   created() {
@@ -1184,7 +1271,13 @@ export default defineComponent({
         
         if (response?.code === 200 && response?.data) {
           this.gscSites = response.data
-          console.log('GSC Sites loaded:', this.gscSites)
+          console.log('GSC Sites loaded:', this.gscSites) // 添加日志
+          
+          // 如果有站点数据，自动选择第一个
+          if (this.gscSites.length > 0) {
+            this.selectedSiteUrl = this.gscSites[0].siteUrl
+            await this.loadGscAnalytics()
+          }
         }
       } catch (error) {
         console.error('Failed to load GSC data:', error)
@@ -1195,6 +1288,8 @@ export default defineComponent({
       try {
         const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.checkGscAuth(customerId)
+        
+        console.log('GSC Status:', response) // 添加日志
         
         if (response?.code === 1201) {
           this.isGscConnected = false
@@ -1387,19 +1482,21 @@ export default defineComponent({
 
       try {
         const customerId = localStorage.getItem('currentCustomerId');
+        // 使用选中的 siteUrl
+        const siteUrl = this.selectedSiteUrl;
+        
         const response = await apiClient.getGscAnalytics(
           customerId,
-          this.gscSites[0].siteUrl
+          siteUrl
         );
         
         if (response?.code === 200 && response.data) {
-          console.log('Raw analytics data:', response.data) // 添加调试日志
           const analyticsData = this.processGscAnalytics(response.data);
-          console.log('Processed analytics data:', analyticsData) // 添加调试日志
           this.gscAnalytics = analyticsData;
           
+          // 确保图表更新
           this.$nextTick(() => {
-            this.initChart(); // 改为调用 initChart
+            this.updateChart(); // 更新图表
           });
         }
       } catch (error) {
@@ -1642,6 +1739,94 @@ export default defineComponent({
         this.publishedPages = 0;
       }
     },
+
+    async handleSiteChange(siteUrl) {
+      console.log('Site changed to:', siteUrl); // 添加日志
+      this.selectedSiteUrl = siteUrl;
+      try {
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.getGscAnalytics(
+          customerId,
+          siteUrl
+        );
+        
+        console.log('Analytics response:', response); // 添加日志
+        
+        if (response?.code === 200 && response.data) {
+          const analyticsData = this.processGscAnalytics(response.data);
+          this.gscAnalytics = analyticsData;
+          
+          // 确保图表更新
+          this.$nextTick(() => {
+            this.updateChart();
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load GSC analytics:', error);
+      }
+    },
+
+    async collectPublishedUrls() {
+      try {
+        this.loading = true;
+        const response = await apiClient.getPublishUrls();
+        
+        if (response?.code === 200) {
+          const urls = response.data || [];
+          
+          if (urls.length === 0) {
+            message.warning('No published pages found');
+            return;
+          }
+
+          this.publishedUrls = urls;
+          this.sitemapModal.visible = true;
+        } else {
+          throw new Error(response?.message || 'Failed to get published URLs');
+        }
+      } catch (error) {
+        console.error('Failed to collect published URLs:', error);
+        message.error(error.message || 'Failed to get published URLs');
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async handleSubmitUrls() {
+      if (this.publishedUrls.length === 0) {
+        message.warning('No URLs available for submission');
+        return;
+      }
+
+      this.submitLoading = true;
+      try {
+        const response = await apiClient.publishSitemapAndUrls();
+        
+        if (response?.code === 200) {
+          message.success('Successfully submitted URLs to Google Search Console');
+          this.sitemapModal.visible = false;
+        } else {
+          throw new Error(response?.message || 'Submission failed');
+        }
+      } catch (error) {
+        console.error('Failed to submit URLs:', error);
+        message.error(error.message || 'Submission failed');
+      } finally {
+        this.submitLoading = false;
+      }
+    },
+
+    closeSitemapModal() {
+      this.sitemapModal.visible = false;
+      this.publishedUrls = [];
+    },
+
+    openPreview(url) {
+      if (typeof window !== 'undefined') {
+        const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+        window.open(fullUrl, '_blank');
+      }
+    }
   }
 })
 </script>
@@ -1934,5 +2119,87 @@ export default defineComponent({
 .competitors-input {
   margin-top: 4px;
   padding-top: 4px;
+}
+
+.traffic-section {
+  margin-bottom: 24px;
+}
+
+.traffic-analytics {
+  height: 400px;
+}
+
+:deep(.ant-select) {
+  margin-bottom: 16px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;  /* 控制 Traffic 和下拉框之间的间距 */
+  height: 40px;
+  padding: 4px 0;
+}
+
+.title-text {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+:deep(.ant-select) {
+  height: 24px;
+  line-height: 24px;
+}
+
+:deep(.ant-select-selector) {
+  height: 24px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+:deep(.ant-select-selection-item) {
+  line-height: 22px !important;
+  height: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+:deep(.ant-space) {
+  display: flex;
+  align-items: center;
+}
+
+/* 添加到现有样式中 */
+.sitemap-preview {
+  .preview-header {
+    margin-bottom: 16px;
+  }
+
+  .url-count {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+
+  .url-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
+
+  .url-text {
+    flex: 1;
+    margin-right: 16px;
+    word-break: break-all;
+  }
+}
+
+:deep(.url-list) {
+  max-height: 400px;
+  overflow-y: auto;
 }
 </style>

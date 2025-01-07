@@ -9,6 +9,12 @@
           </router-link>
           <div class="flex items-center space-x-4">
             <span class="text-gray-600">{{ userEmail }}</span>
+            <button 
+              class="secret-portal-btn"
+              @click="showSecretDialog = true"
+            >
+              <span style="font-size: 14px;">🔑</span>
+            </button>
             <a-button type="link" @click="handleLogout">Logout</a-button>
           </div>
         </div>
@@ -210,6 +216,41 @@
         </div>
       </div>
     </main>
+
+    <!-- 添加弹窗组件 -->
+    <a-modal
+      v-model:visible="showSecretDialog"
+      :footer="null"
+      :closable="false"
+      width="400px"
+      class="secret-portal-modal"
+      :maskClosable="true"
+    >
+      <div class="secret-portal">
+        <div class="portal-header">
+          <div class="portal-title">✨ Free Trial Access Code ⭐️</div>
+        </div>
+        
+        <a-input
+          v-model:value="secretCode"
+          placeholder="Enter your access code"
+          class="portal-input"
+          :disabled="verifyingCode"
+          @keyup.enter="verifySecretCode"
+        />
+        
+        <div class="portal-button-container">
+          <button 
+            class="portal-verify-btn"
+            :class="{ 'verifying': verifyingCode }"
+            @click="verifySecretCode"
+          >
+            <span class="btn-text">{{ verifyingCode ? 'Checking...' : 'Start Free Trial 🚀' }}</span>
+            <div class="btn-particles"></div>
+          </button>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -232,21 +273,24 @@ const plans = [
     id: 'basic',
     name: 'Essential',
     price: {
-      monthly: '$99',
-      yearly: '$79'
+      monthly: '$29',
+      yearly: '$19'
     },
-    discount: '$240',
+    discount: '$120',
     description: 'Everything you need to start optimizing your content',
     buttonText: 'Get Started',
     features: [
       {
         title: 'Features include:',
         items: [
-          'Track 200 pages',
-          'Write and optimize 360 articles/year',
-          'Generate 60 AI-optimized articles/year',
-          'Invite 5 team members',
-          'Topic mapping and keyword research'
+          'AI keyword research (50 times/month)',
+          '500 internal links',
+          '500 images storage',
+          '100 videos storage',
+          '300 rank-ready content/month',
+          '500 pages/year',
+          'Unlimited tracking & suggestions',
+          '1 Free onboarding call'
         ]
       }
     ]
@@ -256,27 +300,29 @@ const plans = [
     name: 'Professional',
     popular: true,
     price: {
-      monthly: '$219',
-      yearly: '$175'
+      monthly: '$59',
+      yearly: '$39'
     },
-    discount: '$528',
+    discount: '$240',
     description: 'Perfect for marketing teams scaling content production',
     buttonText: 'Get Started',
     features: [
       {
         title: 'Everything in Essential, plus:',
         items: [
-          'Track 1,000 pages',
-          'Write and optimize 1,200 articles/year',
-          'Generate 240 AI-optimized articles/year',
-          'Invite 10 team members'
+          'AI keyword research (100 times/month)',
+          '1500 internal links',
+          '1500 images storage',
+          '1000 videos storage',
+          '300 rank-ready content/month',
+          '1500 pages/year'
         ]
       },
       {
         title: 'Pro features:',
         items: [
-          'Analyze up to 100 SERPs/day',
-          'SEO onboarding call'
+          'Unlimited onboarding calls',
+          'Priority support'
         ]
       }
     ]
@@ -294,11 +340,14 @@ const plans = [
       {
         title: 'Everything in Professional, plus:',
         items: [
-          'Custom team size',
-          'White-label & API access',
-          'SSO (Coming soon)',
-          'Personalized onboarding, dedicated success manager & priority support',
-          'SEO consulting services'
+          'Unlimited AI keyword research',
+          'Unlimited internal links',
+          'Unlimited storage',
+          'Custom content volume',
+          'Custom page deployment',
+          'Dedicated success manager',
+          'Custom onboarding & training',
+          'Enterprise-grade support'
         ]
       }
     ]
@@ -368,71 +417,87 @@ const FeatureAvailability = defineComponent({
 // 功能对比数据
 const featureComparison = [
   {
+    category: 'Pricing',
+    features: [
+      {
+        name: 'Monthly Pay Price',
+        essential: '$29/month',
+        professional: '$59/month',
+        enterprise: 'Contact Us'
+      },
+      {
+        name: 'Annual Pay Price',
+        essential: '$19/month',
+        professional: '$39/month',
+        enterprise: 'Contact Us'
+      }
+    ]
+  },
+  {
+    category: 'Keywords Analysis & Recommendation',
+    features: [
+      {
+        name: 'AI keyword research & recommendation',
+        essential: '50 times/month',
+        professional: '100 times/month',
+        enterprise: 'Unlimited'
+      }
+    ]
+  },
+  {
+    category: 'Assets',
+    features: [
+      {
+        name: 'Internal link URLs Configuration & Smart Insertion',
+        essential: '500 links',
+        professional: '1500 links',
+        enterprise: 'Unlimited'
+      },
+      {
+        name: 'Image Storage',
+        essential: '500 images',
+        professional: '1500 links in total',
+        enterprise: 'Unlimited'
+      },
+      {
+        name: 'Video Storage',
+        essential: '100 videos',
+        professional: '1000 videos',
+        enterprise: 'Unlimited'
+      }
+    ]
+  },
+  {
     category: 'Content Creation',
     features: [
       {
-        name: 'AI-powered content generation',
-        essential: '60/year',
-        professional: '240/year',
-        professional: 'Unlimited'
+        name: 'Rank-ready blogs | landing page generation',
+        essential: '300/month',
+        professional: '300/month',
+        enterprise: 'Contact Us'
       },
       {
-        name: 'Content optimization suggestions',
-        essential: true,
-        professional: true,
-        enterprise: true
-      },
-      {
-        name: 'SEO templates',
-        essential: '5',
-        professional: '15',
-        enterprise: 'Unlimited'
+        name: 'Number of Pages that can be deployed freely',
+        essential: '500/year',
+        professional: '1500/year',
+        enterprise: 'Contact Us'
       }
     ]
   },
   {
-    category: 'Analytics & Tracking',
+    category: 'Tracking',
     features: [
       {
-        name: 'Page tracking',
-        essential: '200',
-        professional: '1,000',
+        name: 'Page Indexing Tracking',
+        essential: 'Unlimited',
+        professional: 'Unlimited',
         enterprise: 'Unlimited'
       },
       {
-        name: 'SERP analysis',
-        essential: '10/day',
-        professional: '100/day',
+        name: 'Smart Page Generation and Publishing Suggestion',
+        essential: 'Unlimited',
+        professional: 'Unlimited',
         enterprise: 'Unlimited'
-      },
-      {
-        name: 'Custom reporting',
-        essential: false,
-        professional: true,
-        enterprise: true
-      }
-    ]
-  },
-  {
-    category: 'Team & Collaboration',
-    features: [
-      {
-        name: 'Team members',
-        essential: '5',
-        professional: '10',
-        enterprise: 'Unlimited'
-      },
-      {
-        name: 'Role-based access',
-        essential: false,
-        professional: true,
-        enterprise: true
-      },
-      {
-        name: 'Workflow automation',
-        essential: false,
-        professional: true,
-        enterprise: true
       }
     ]
   },
@@ -440,28 +505,10 @@ const featureComparison = [
     category: 'Support & Training',
     features: [
       {
-        name: 'Email support',
-        essential: true,
-        professional: true,
-        enterprise: true
-      },
-      {
-        name: 'Priority support',
-        essential: false,
-        professional: true,
-        enterprise: true
-      },
-      {
-        name: 'Dedicated success manager',
-        essential: false,
-        professional: false,
-        enterprise: true
-      },
-      {
-        name: 'Custom training sessions',
-        essential: false,
-        professional: false,
-        enterprise: true
+        name: 'Free Onhand Tutorial Meeting',
+        essential: '1 Free Onboarding Call',
+        professional: 'Unlimited Onboarding Calls',
+        enterprise: 'Unlimited Onboarding Calls'
       }
     ]
   }
@@ -476,30 +523,89 @@ const toggleFaq = (index: number) => {
 
 const faqs = [
   {
-    question: "What's included in the free trial?",
-    answer: "Our 7-day free trial includes full access to all features of the Professional plan. You can explore all the tools and capabilities without any restrictions. No credit card is required to start your trial."
+    question: "What is WebsiteLM?",
+    answer: "WebsiteLM is an AI-powered content generation and management platform designed to help users efficiently create SEO-friendly landing pages, blog posts, and help center content to improve website visibility and user traffic."
   },
   {
-    question: "Can I change my plan later?",
-    answer: "Yes, you can upgrade or downgrade your plan at any time. When upgrading, the new features will be immediately available. If you downgrade, you'll continue to have access to your current plan until the end of your billing period."
+    question: "Who can benefit from WebsiteLM?",
+    answer: "WebsiteLM is ideal for\n\nWebsite administrators\nSEO professionals\nContent creators\nMarketers\nAnyone looking to improve their website's SEO performance."
   },
   {
-    question: "How does the money-back guarantee work?",
-    answer: "We offer a no-questions-asked money-back guarantee for the first 7 days of your paid subscription. If you're not satisfied with our service, simply contact our support team within the first 7 days, and we'll process your refund."
+    question: "How does WebsiteLM improve SEO?",
+    answer: "WebsiteLM uses advanced AI algorithms to analyze your website's content and optimize it according to the latest SEO best practices. It generates SEO-optimized text, improves content structure, and ensures alignment with search engine ranking factors."
   },
   {
-    question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards (Visa, MasterCard, American Express), PayPal, and wire transfers for Enterprise plans. All payments are processed securely through our payment partners."
+    question: "What features does WebsiteLM offer?",
+    answer: "WebsiteLM offers features like\n\nWebsite Analysis: Analyzes your website's SEO, structure, user experience, and more.\nKnowledge Base Construction: Builds an AI-powered knowledge base using Retrieval-Augmented Generation (RAG) technology.\nHelp Center Generation: Automatically generates help center content based on the knowledge base.\nKeyword and Page Planning: Analyzes keyword gaps between a user's website and competitors.\nContent Generation: Automatically creates SEO-optimized content based on the planned pages and content calendar.\nMulti-Language Support: Automatically translates website content into multiple languages and optimizes each language for SEO.\nSocial Media Integration: Integrates with social media platforms to share content and drive traffic.\nData Visualization: Provides data visualizations and detailed reports on SEO performance, traffic, user behavior, and other key metrics.\nSupport for Internal and External Link Integration: Supports internal and external link integration to enhance content discoverability and help you reach a broader audience.\nInternal and External Link Integration: Supports internal and external link integration to enhance content discoverability and help you reach a broader audience."
   },
   {
-    question: "Do you offer custom enterprise solutions?",
-    answer: "Yes, our Enterprise plan is fully customizable to meet your organization's specific needs. This includes custom feature development, dedicated support, and flexible billing options. Contact our sales team to discuss your requirements."
+    question: "Can I customize the content generated by WebsiteLM?",
+    answer: "Yes! WebsiteLM allows you to review, adjust, and fine-tune AI-generated content to match your specific needs and brand voice"
   },
   {
-    question: "What kind of support is included?",
-    answer: "All plans include email support. Professional plans include priority support with faster response times. Enterprise plans receive dedicated support with a named account manager and 24/7 emergency support."
+    question: "Does WebsiteLM provide support for multiple languages?",
+    answer: "Yes, WebsiteLM has multi-language support. It can translate and optimize content for different languages, ensuring SEO performance across various regions."
+  },
+  {
+    question: "How does WebsiteLM handle data security?",
+    answer: "WebsiteLM prioritizes data security by encrypting user data during storage and transmission. It also offers access control mechanisms to ensure only authorized users can access sensitive information."
+  },
+  {
+    question: "Will WebsiteLM automatically update my website content?",
+    answer: "Yes, WebsiteLM can schedule and automatically update your website content based on a content calendar and ongoing SEO performance. Manual review and approval options are also available."
+  },
+  {
+    question: "Is WebsiteLM suitable for beginners?",
+    answer: "Absolutely! WebsiteLM is designed to be user-friendly with an intuitive interface, making it easy for beginners and experts alike to create, optimize, and manage website content."
+  },
+  {
+    question: "What kind of performance reports does WebsiteLM provide?",
+    answer: "WebsiteLM integrates with Google Search Console to provide precise insights into indexing, rankings, and traffic tracking. With detailed data visualizations and reports, you can monitor performance effectively and make informed, data-driven decisions to optimize your strategy."
+  },
+  {
+    question: "How does WebsiteLM handle content maintenance?",
+    answer: "WebsiteLM helps with ongoing content maintenance by scheduling regular content reviews to ensure all content remains accurate, up-to-date, and aligned with SEO goals."
+  },
+  {
+    question: "Can I track how well my website content is performing after publishing?",
+    answer: "Yes, WebsiteLM provides tools to monitor SEO performance, track traffic, and analyze user behavior, allowing you to make continuous improvements to your content."
+  },
+  {
+    question: "Will WebsiteLM continue to evolve and add new features?",
+    answer: "Yes, WebsiteLM is continuously improving its AI models, expanding functionality, and evolving into a platform that supports third-party developers to create plugins and applications for additional use cases."
   }
 ]
+
+// 添加新的响应式变量
+const showSecretDialog = ref(false)
+const secretCode = ref('')
+const verifyingCode = ref(false)
+
+// 验证方法
+const verifySecretCode = async () => {
+  if (!secretCode.value) return
+  
+  verifyingCode.value = true
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    const code = secretCode.value.toUpperCase()
+    if (['ESSENTIAL2024', 'PRO2024', 'ENT2024'].includes(code)) {
+      // 添加成功动画效果
+      await new Promise(resolve => setTimeout(resolve, 500))
+      showSecretDialog.value = false
+      
+      // 处理成功逻辑
+      const plan = code.split('2024')[0].toLowerCase()
+      // 这里添加跳转或激活逻辑
+    }
+  } catch (error) {
+    // 处理错误
+  } finally {
+    verifyingCode.value = false
+    secretCode.value = ''
+  }
+}
 </script>
 
 <style scoped>
@@ -592,5 +698,82 @@ html {
 .faq-answer-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+.secret-portal-btn {
+  @apply p-2 rounded-full transition-all duration-300;
+}
+
+.secret-portal-btn:hover {
+  @apply bg-gray-100;
+}
+
+.secret-portal {
+  @apply p-6 bg-white rounded-xl;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.portal-header {
+  @apply mb-8 text-center;
+}
+
+.portal-title {
+  @apply text-xl font-bold text-gray-900;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.portal-input {
+  @apply bg-gray-50 border-gray-200 text-gray-900 mb-6;
+  height: 48px;
+  border-radius: 12px;
+}
+
+.portal-input:focus {
+  @apply border-blue-500 shadow-none;
+}
+
+.portal-verify-btn {
+  @apply w-full py-3 px-6 rounded-xl text-white font-medium relative overflow-hidden;
+  background: linear-gradient(135deg, #4B89FF 0%, #2563EB 100%);
+  transition: all 0.3s ease;
+}
+
+.portal-verify-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.3);
+}
+
+.portal-verify-btn.verifying {
+  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+}
+
+/* Modal 自定义样式 */
+:deep(.ant-modal-content) {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+:deep(.ant-modal-wrap) {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+:deep(.ant-modal) {
+  padding: 0;
+}
+
+:deep(.ant-modal-body) {
+  padding: 0;
+}
+
+:deep(.ant-modal-close) {
+  color: rgba(255, 255, 255, 0.8);
+  top: 12px;
+  right: 12px;
+}
+
+:deep(.ant-modal-close:hover) {
+  color: white;
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <page-layout title="Page Management" description="Manage your AI-generation pages here" icon="✨">
-    <a-spin :spinning="loading" tip="Loading...">
+    <a-spin :spinning="loading">
       <div class="task-container">
         <!-- Header -->
         <div class="header">
@@ -11,13 +11,17 @@
                 <template #icon><ReloadOutlined /></template>
                 Refresh
               </a-button>
+              <a-button 
+                type="link" 
+                size="small"
+                @click="collectPublishedUrls"
+                :disabled="!tasks.length"
+              >
+                Submit Sitemap
+              </a-button>
               <a-button type="primary" @click="handleAddPage">
                 <template #icon><PlusOutlined /></template>
                 Manual Add Page
-              </a-button>
-              <a-button type="primary" @click="collectPublishedUrls">
-                <template #icon><GlobalOutlined /></template>
-                Submit Sitemap
               </a-button>
             </div>
             
