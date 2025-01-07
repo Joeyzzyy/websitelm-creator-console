@@ -241,13 +241,13 @@
               <a-col :span="24">
                 <a-statistic 
                   title="Generated" 
-                  :value="productInfo?.generatedPages || 0"
+                  :value="pagesDashboard?.generatorCount || 0"
                   :value-style="{ fontSize: '16px' }"
                   :title-style="{ fontSize: '12px' }"
                 >
                   <template #suffix>
-                    <a-tag size="small" color="success" v-if="productInfo?.generatedPagesChange">
-                      <span style="font-size: 12px">↑ {{ productInfo.generatedPagesChange }}%</span>
+                    <a-tag size="small" color="success" v-if="pagesDashboard?.generatedChange">
+                      <span style="font-size: 12px">↑ {{ pagesDashboard.generatedChange }}%</span>
                     </a-tag>
                   </template>
                 </a-statistic>
@@ -255,11 +255,11 @@
               <a-col :span="24">
                 <a-statistic 
                   title="Published" 
-                  :value="publishedPages"
+                  :value="pagesDashboard?.publishCount || 0"
                   :value-style="{ fontSize: '16px' }"
                   :title-style="{ fontSize: '12px' }"
                 >
-                  <template #suffix v-if="publishedPages === 0">
+                  <template #suffix v-if="pagesDashboard?.publishCount === 0">
                     <a-tag size="small">
                       <span style="font-size: 12px">Not published</span>
                     </a-tag>
@@ -269,11 +269,11 @@
               <a-col :span="24">
                 <a-statistic 
                   title="Indexed" 
-                  :value="0"
+                  :value="pagesDashboard?.indexedCount || 0"
                   :value-style="{ fontSize: '16px' }"
                   :title-style="{ fontSize: '12px' }"
                 >
-                  <template #suffix>
+                  <template #suffix v-if="pagesDashboard?.indexedCount === 0">
                     <a-tag size="small">
                       <span style="font-size: 12px">Not indexed</span>
                     </a-tag>
@@ -737,7 +737,8 @@ export default defineComponent({
         publishedUrls: []
       },
       submitLoading: false,
-      publishedUrls: []
+      publishedUrls: [],
+      pagesDashboard: null,
     }
   },
   created() {
@@ -853,7 +854,6 @@ export default defineComponent({
         if (response?.code === 200) {
           this.productInfo = response.data
           if (!response.data) {
-            // Reset step to 0 when opening onboarding
             this.currentStep = 0;
             this.formState = {
               productId: undefined,
@@ -866,7 +866,7 @@ export default defineComponent({
           } else {
             if (this.productInfo.domainStatus) {
               this.getSitemap()
-              this.loadPublishedPagesCount()
+              this.loadPagesDashboard() // 替换原来的 loadPublishedPagesCount
             }
           }
         } else {
@@ -1724,19 +1724,14 @@ export default defineComponent({
       return key;
     },
 
-    async loadPublishedPagesCount() {
+    async loadPagesDashboard() {
       try {
-        const response = await apiClient.getPublishedPagesCount({
-          status: 'publish' // 获取已发布状态的页面数量
-        });
-        
+        const response = await apiClient.getPagesDashboard();
         if (response?.code === 200) {
-          // 兼容新的数据结构，从 data.count 中获取数量
-          this.publishedPages = response.data?.count || 0;
+          this.pagesDashboard = response.data;
         }
       } catch (error) {
-        console.error('Failed to load published pages count:', error);
-        this.publishedPages = 0;
+        console.error('Failed to load pages dashboard:', error);
       }
     },
 

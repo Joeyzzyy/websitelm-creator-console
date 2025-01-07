@@ -979,6 +979,74 @@ const publishSitemapAndUrls = async () => {
   }
 };
 
+// 新增：获取页面仪表板数据的方法
+const getPagesDashboard = async () => {
+  try {
+    const response = await apiClient.get('/pages/dashboard');
+    return response.data;
+  } catch (error) {
+    console.error('获取页面仪表板数据失败:', error);
+    return null;
+  }
+};
+
+// 新增：获取页面按钮链接列表的方法
+const getPageButtonLinks = async (params = {}) => {
+  try {
+    const queryParams = {
+      ...(params.page && { page: params.page }),
+      ...(params.limit && { limit: params.limit })
+    };
+    
+    const response = await apiClient.get('/page-button-links', { params: queryParams });
+    return response.data;
+  } catch (error) {
+    console.error('获取页面按钮链接列表失败:', error);
+    return null;
+  }
+};
+
+// 新增：创建页面按钮链接的方法
+const createPageButtonLink = async (linkData) => {
+  try {
+    const response = await apiClient.post('/page-button-links', {
+      description: linkData.description,
+      link: linkData.link,
+      name: linkData.name
+    });
+    return response.data;
+  } catch (error) {
+    console.error('创建页面按钮链接失败:', error);
+    return null;
+  }
+};
+
+// 新增：更新页面按钮链接的方法
+const updatePageButtonLink = async (linkId, linkData) => {
+  try {
+    const response = await apiClient.put(`/page-button-links/${linkId}`, {
+      description: linkData.description,
+      link: linkData.link,
+      name: linkData.name
+    });
+    return response.data;
+  } catch (error) {
+    console.error('更新页面按钮链接失败:', error);
+    return null;
+  }
+};
+
+// 新增：删除页面按钮链接的方法
+const deletePageButtonLink = async (linkId) => {
+  try {
+    const response = await apiClient.delete(`/page-button-links/${linkId}`);
+    return response.data;
+  } catch (error) {
+    console.error('删除页面按钮链接失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1053,5 +1121,10 @@ export default {
   submitSite,
   createAIPage,
   getPublishUrls,
-  publishSitemapAndUrls
+  publishSitemapAndUrls,
+  getPagesDashboard,
+  getPageButtonLinks,
+  createPageButtonLink,
+  updatePageButtonLink,
+  deletePageButtonLink
 };

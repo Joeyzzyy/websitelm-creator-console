@@ -23,13 +23,13 @@
           </span>
         </a-button>
         <a-button 
-          v-else-if="activeTab === 'links'"
+          v-else-if="activeTab === 'links' || activeTab === 'button-links'"
           type="primary"
           class="ai-analyze-btn" 
           @click="showAddLinkModal"
         >
           <span class="btn-content">
-            <span>Add Link</span>
+            <span>Add {{ activeTab === 'links' ? 'Link' : 'Button Link' }}</span>
             <plus-outlined />
           </span>
         </a-button>
@@ -39,6 +39,7 @@
       <a-tab-pane key="images" tab="Images" />
       <a-tab-pane key="videos" tab="Videos" />
       <a-tab-pane key="links" tab="Internal Links" />
+      <a-tab-pane key="button-links" tab="Button Links" />
       <a-tab-pane key="header" tab="Header" />
       <a-tab-pane key="footer" tab="Footer" />
     </a-tabs>
@@ -363,6 +364,64 @@
             </a-spin>
           </div>
         </template>
+
+        <!-- Button Links Content -->
+        <template v-else-if="activeTab === 'button-links'">
+          <a-spin :spinning="buttonLinksLoading">
+            <template v-if="!buttonLinksLoading">
+              <!-- Empty state display -->
+              <div v-if="buttonLinks.length === 0" class="empty-state">
+                <h3 class="empty-state-title">No Button Links Found 🔗</h3>
+                <p class="empty-state-description">
+                  Start adding button links to enhance your site's call-to-actions.
+                </p>
+                <a-button 
+                  type="primary" 
+                  class="upload-btn-empty" 
+                  @click="showAddLinkModal"
+                >
+                  <plus-outlined /> Add First Button Link
+                </a-button>
+              </div>
+              
+              <!-- Button links table -->
+              <a-table
+                v-else
+                :columns="buttonLinkColumns" 
+                :dataSource="buttonLinks" 
+                :pagination="{ 
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showTotal: (total) => `Total ${total} items`
+                }"
+                :rowKey="record => record.id"
+              >
+                <template #bodyCell="{ column, record }">
+                  <template v-if="column.key === 'operation'">
+                    <a-space>
+                      <a-button type="link" @click="editButtonLink(record)">
+                        <edit-outlined />
+                      </a-button>
+                      <a-popconfirm
+                        title="Are you sure you want to delete this button link?"
+                        @confirm="() => deleteButtonLink(record)"
+                        ok-text="Delete"
+                        cancel-text="Cancel"
+                      >
+                        <a-button type="link" danger>
+                          <delete-outlined />
+                        </a-button>
+                      </a-popconfirm>
+                    </a-space>
+                  </template>
+                  <template v-if="column.key === 'link'">
+                    <a :href="record.link" target="_blank">{{ record.link }}</a>
+                  </template>
+                </template>
+              </a-table>
+            </template>
+          </a-spin>
+        </template>
       </div>
     </div>
     <!-- Preview Modal -->
@@ -478,7 +537,7 @@
     <!-- Add Link Modal -->
     <a-modal
       v-model:open="linkModalVisible"
-      :title="editingLink ? 'Edit Link' : 'Add New Link'"
+      :title="(activeTab === 'button-links' ? 'Button ' : 'Internal ') + (editingLink || editingButtonLink ? 'Edit' : 'Add') + ' Link'"
       @ok="handleLinkModalOk" 
       @cancel="handleLinkModalCancel"
       :okButtonProps="{ 
@@ -492,6 +551,20 @@
         ref="linkFormRef"
         layout="vertical"
       >
+        <!-- Name field -->
+        <a-form-item 
+          name="name" 
+          label="Name"
+          :validateTrigger="['blur', 'change']"
+        >
+          <a-input 
+            v-model:value="linkForm.name" 
+            placeholder="Enter link name"
+            :maxLength="50"
+          />
+        </a-form-item>
+        
+        <!-- Link URL field -->
         <a-form-item 
           name="link" 
           label="Link URL"
@@ -504,6 +577,7 @@
           />
         </a-form-item>
         
+        <!-- Description field -->
         <a-form-item 
           name="description" 
           label="Description"
@@ -517,14 +591,16 @@
           />
         </a-form-item>
         
+        <!-- Category field - only show for internal links -->
         <a-form-item 
+          v-if="activeTab === 'links'"
           name="category" 
           label="Category"
           :validateTrigger="['blur', 'change']"
         >
           <a-select
             v-model:value="linkForm.category"
-            placeholder="Select a category"
+            placeholder="Select category"
           >
             <a-select-option 
               v-for="category in linkCategories" 
@@ -676,6 +752,8 @@ export default {
           await fetchLayoutData('footer');
         } else if (activeTab.value === 'links') {
           await fetchLinks();
+        } else if (activeTab.value === 'button-links') {
+          await fetchButtonLinks(); // 添加按钮链接的初始加载
         } else {
           await fetchAssets();
         }
@@ -721,11 +799,13 @@ export default {
     // 监听标化时重新获取数据
     watch(activeTab, async (newValue) => {
       if (newValue === 'links') {
-        fetchLinks()
+        await fetchLinks()
+      } else if (newValue === 'button-links') {
+        await fetchButtonLinks() // 添加按钮链接的加载
       } else if (newValue === 'header' || newValue === 'footer') {
         await fetchLayoutData(newValue)
       } else {
-        fetchAssets()
+        await fetchAssets()
       }
     })
 
@@ -1124,6 +1204,7 @@ export default {
     const editLink = async (record) => {
       editingLink.value = record
       linkForm.value = {
+        name: record.name,
         link: record.link,
         description: record.description,
         category: record.category
@@ -1131,37 +1212,54 @@ export default {
       linkModalVisible.value = true
     }
 
-    // 处理链接表单提交
+    // 修改处理链接表单提交的方法
     const handleLinkModalOk = async () => {
       try {
         await linkFormRef.value.validate()
         linkSubmitting.value = true
         
         const customerId = localStorage.getItem('currentCustomerId')
-        const linkData = {
-          customerId,
-          link: linkForm.value.link,
-          description: linkForm.value.description,
-          category: linkForm.value.category
+        
+        if (activeTab.value === 'button-links') {
+          // 按钮链接数据结构（不包含 category）
+          const buttonLinkData = {
+            name: linkForm.value.name,
+            link: linkForm.value.link,
+            description: linkForm.value.description
+          };
+
+          if (editingButtonLink.value) {
+            await apiClient.updatePageButtonLink(editingButtonLink.value.id, buttonLinkData);
+            message.success('按钮链接更新成功');
+          } else {
+            await apiClient.createPageButtonLink(buttonLinkData);
+            message.success('按钮链接添加成功');
+          }
+          await fetchButtonLinks();
+        } else {
+          // 内部链接数据结构（包含 category）
+          const internalLinkData = {
+            customerId: localStorage.getItem('currentCustomerId'),
+            link: linkForm.value.link,
+            description: linkForm.value.description,
+            category: linkForm.value.category
+          };
+
+          if (editingLink.value) {
+            await apiClient.updateInternalLink(editingLink.value.id, internalLinkData);
+            message.success('内部链接更新成功');
+          } else {
+            await apiClient.createInternalLink(internalLinkData);
+            message.success('内部链接添加成功');
+          }
+          await fetchLinks();
         }
 
-        if (editingLink.value) {
-          console.log('editingLink.value', editingLink.value)
-          // 更新有链接
-          await apiClient.updateInternalLink(editingLink.value.id, linkData)
-          message.success('Link updated successfully')
-        } else {
-          // 创建新链接
-          await apiClient.createInternalLink(linkData)
-          message.success('Link added successfully')
-        }
-        
-        linkModalVisible.value = false
+        linkModalVisible.value = false;
         resetLinkForm()
-        fetchLinks() // 重新获取链接列表
       } catch (error) {
-        console.error('Failed to save link:', error)
-        message.error('Failed to save link')
+        console.error('保存链接失败:', error);
+        message.error('保存失败，请重试');
       } finally {
         linkSubmitting.value = false
       }
@@ -1174,38 +1272,67 @@ export default {
     const editingLink = ref(null)
     
     const linkForm = ref({
+      name: '',
       link: '',
       description: '',
       category: undefined
-    })
+    });
     
-    const linkFormRules = {
-      link: [
-        { required: true, message: 'Please enter the link URL' },
-        { type: 'url', message: 'Please enter a valid URL' }
-      ],
-      description: [
-        { required: true, message: 'Please enter the link description' },
-        { max: 500, message: 'Description cannot exceed 500 characters' }
-      ],
-      category: [
-        { required: true, message: 'Please select a category' }
-      ]
-    }
+    const linkFormRules = computed(() => {
+      if (activeTab.value === 'button-links') {
+        return {
+          name: [  // 添加 name 字段的验证规则
+            { required: true, message: 'Please enter the link name' },
+            { max: 50, message: 'Name cannot exceed 50 characters' }
+          ],
+          link: [
+            { required: true, message: 'Please enter the link URL' },
+            { type: 'url', message: 'Please enter a valid URL' }
+          ],
+          description: [
+            { required: true, message: 'Please enter the link description' },
+            { max: 500, message: 'Description cannot exceed 500 characters' }
+          ]
+        };
+      } else {
+        return {
+          link: [
+            { required: true, message: 'Please enter the link URL' },
+            { type: 'url', message: 'Please enter a valid URL' }
+          ],
+          description: [
+            { required: true, message: 'Please enter the link description' },
+            { max: 500, message: 'Description cannot exceed 500 characters' }
+          ],
+          category: [
+            { required: true, message: 'Please select a category' }
+          ]
+        };
+      }
+    });
     
     const isLinkFormValid = computed(() => {
-      return linkForm.value.link && 
-             linkForm.value.description && 
-             linkForm.value.category
+      if (activeTab.value === 'button-links') {
+        return linkForm.value.name && 
+               linkForm.value.link && 
+               linkForm.value.description
+      } else {
+        return linkForm.value.link && 
+               linkForm.value.description && 
+               linkForm.value.category
+      }
     })
     
     const resetLinkForm = () => {
       linkForm.value = {
+        name: '',
         link: '',
         description: '',
-        category: undefined
-      }
-      editingLink.value = null
+        // 只在内部链接时才需要重置 category
+        ...(activeTab.value !== 'button-links' && { category: undefined })
+      };
+      editingLink.value = null;
+      editingButtonLink.value = null;
       if (linkFormRef.value) {
         linkFormRef.value.resetFields()
       }
@@ -1535,6 +1662,86 @@ export default {
       }
     })
 
+    // 新增按钮链接相关的响应式变量
+    const buttonLinksLoading = ref(false)
+    const buttonLinks = ref([])
+    const editingButtonLink = ref(null)
+
+    // 按钮链接表格列定义
+    const buttonLinkColumns = [
+      {
+        title: 'Name',
+        dataIndex: 'name',
+        key: 'name',
+      },
+      {
+        title: 'Link',
+        dataIndex: 'link',
+        key: 'link',
+      },
+      {
+        title: 'Description',
+        dataIndex: 'description',
+        key: 'description',
+      },
+      {
+        title: 'Action',
+        key: 'operation',
+        width: 150,
+        slots: { customRender: 'bodyCell' },
+      },
+    ];
+
+    // 获取按钮链接列表
+    const fetchButtonLinks = async () => {
+      buttonLinksLoading.value = true;
+      try {
+        const response = await apiClient.getPageButtonLinks({
+          page: 1,
+          limit: 100
+        });
+        
+        if (response && response.data) {
+          buttonLinks.value = response.data.map(link => ({
+            id: link.linkId,
+            name: link.name,
+            link: link.link,
+            description: link.description
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch button links:', error);
+        message.error('加载按钮链接失败');
+        buttonLinks.value = [];
+      } finally {
+        buttonLinksLoading.value = false;
+      }
+    };
+
+    // 编辑按钮链接
+    const editButtonLink = (record) => {
+      editingButtonLink.value = record;
+      linkForm.value = {
+        name: record.name,
+        link: record.link,
+        description: record.description
+        // 不设置 category
+      };
+      linkModalVisible.value = true;
+    };
+
+    // 修正删除按钮链接的方法，使用 linkId 而不是 id
+    const deleteButtonLink = async (record) => {
+      try {
+        console.log('currentRecord', record);
+        await apiClient.deletePageButtonLink(record.id);
+        message.success('Button link deleted successfully');
+        await fetchButtonLinks();
+      } catch (error) {
+        message.error('Failed to delete button link');
+      }
+    };
+
     return {
       domainConfigured,
       loading,
@@ -1619,6 +1826,11 @@ export default {
       headerConfig,
       layoutId,
       footerConfig, 
+      buttonLinksLoading,
+      buttonLinks,
+      buttonLinkColumns,
+      editButtonLink,
+      deleteButtonLink,
     }
   }
 }
