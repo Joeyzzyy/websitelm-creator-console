@@ -38,11 +38,6 @@
                 <div class="tab-content">
                   <h3>Keywords Analysis</h3>
                   <p>Analyze competitor keywords</p>
-                  <a-statistic 
-                    :value="keywordsCount"
-                    :valueStyle="{ color: '#3B82F6', fontSize: '24px' }"
-                    class="source-stat"
-                  />
                 </div>
               </div>
               <div 
@@ -54,26 +49,34 @@
                 <div class="tab-content">
                   <h3>Top Pages Analysis</h3>
                   <p>Extract keywords from top pages</p>
-                  <a-statistic 
-                    :value="pagesCount"
-                    :valueStyle="{ color: '#3B82F6', fontSize: '24px' }"
-                    class="source-stat"
-                  />
                 </div>
               </div>
             </div>
 
             <!-- 内容区域 -->
             <div class="source-content">
+              <!-- 添加模式切换到内容区域顶部 -->
+              <div class="mode-switch-container">
+                <div class="mode-switch">
+                  <span class="mode-label" :class="{ active: !expertMode }">Basic</span>
+                  <a-switch
+                    v-model:checked="expertMode"
+                    size="small"
+                    class="custom-switch"
+                  />
+                  <span class="mode-label" :class="{ active: expertMode }">Expert</span>
+                </div>
+              </div>
+
               <transition name="fade" mode="out-in">
                 <!-- Keywords Analysis Content -->
                 <div v-if="activeSource === 'keywords'" key="keywords">
                   <!-- 关键词分析总览 -->
                   <a-card class="analysis-overview" :bodyStyle="{ padding: '12px' }">
                     <template #title>
-                      <div class="overview-header">
+                      <div class="card-header">
                         <span class="card-title">Keywords Analysis Overview</span>
-                        <a-tag color="blue" class="overview-tag">{{ totalAnalyzedKeywords }} Keywords Analyzed</a-tag>
+                        <a-tag color="blue">{{ totalAnalyzedKeywords }} Keywords Analyzed</a-tag>
                       </div>
                     </template>
                     
@@ -94,20 +97,9 @@
                   <!-- 推荐关键词列表 -->
                   <a-card class="recommended-keywords" style="margin-top: 12px" :bodyStyle="{ padding: '12px' }">
                     <template #title>
-                      <div class="overview-header">
+                      <div class="card-header">
                         <span class="card-title">Recommended Keywords</span>
-                        <div class="header-actions">
-                          <div class="mode-switch">
-                            <span class="mode-label" :class="{ active: !expertMode }">Basic</span>
-                            <a-switch
-                              v-model:checked="expertMode"
-                              size="small"
-                              class="custom-switch"
-                            />
-                            <span class="mode-label" :class="{ active: expertMode }">Expert</span>
-                          </div>
-                          <a-tag color="blue" class="overview-tag">Priority Sorted by KRS Score</a-tag>
-                        </div>
+                        <a-tag color="blue">Priority Sorted by KRS Score</a-tag>
                       </div>
                     </template>
 
@@ -1606,11 +1598,11 @@ export default defineComponent({
   }
 }
 
-/* 数据源切换样式 */
+/* 更新数据源切换样式 */
 .source-tabs {
   display: flex;
   gap: 16px;
-  padding: 24px;
+  padding: 16px; /* 减小内边距 */
   background: #f8fafc;
   border-radius: 8px 8px 0 0;
 }
@@ -1618,8 +1610,8 @@ export default defineComponent({
 .source-tab {
   flex: 1;
   display: flex;
-  gap: 16px;
-  padding: 20px;
+  gap: 12px; /* 减小间距 */
+  padding: 12px 16px; /* 减小内边距 */
   background: #fff;
   border-radius: 8px;
   cursor: pointer;
@@ -1637,35 +1629,30 @@ export default defineComponent({
 }
 
 .tab-icon {
-  font-size: 24px;
-  width: 48px;
-  height: 48px;
+  font-size: 20px; /* 减小图标大小 */
+  width: 36px; /* 减小图标容器大小 */
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #F3F4F6;
-  border-radius: 12px;
-}
-
-.tab-content {
-  flex: 1;
+  border-radius: 8px;
 }
 
 .tab-content h3 {
-  margin: 0 0 4px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #1F2937;
+  margin: 0 0 2px; /* 减小标题下边距 */
+  font-size: 14px; /* 减小标题字体大小 */
 }
 
 .tab-content p {
   margin: 0;
   color: #6B7280;
-  font-size: 14px;
+  font-size: 12px; /* 减小描述文字大小 */
 }
 
+/* 移除统计数字相关样式 */
 .source-stat {
-  margin-top: 8px;
+  display: none;
 }
 
 /* 漏斗形状样式 */
@@ -1948,5 +1935,215 @@ export default defineComponent({
   }
 }
 
-/* ... existing code ... */
+/* 添加新的样式 */
+.mode-switch-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mode-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #F3F4F6;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.mode-label {
+  font-size: 13px;
+  color: #6B7280;
+  cursor: pointer;
+  transition: color 0.3s ease;
+  
+  &.active {
+    color: #111827;
+    font-weight: 500;
+  }
+}
+
+:deep(.custom-switch) {
+  min-width: 28px;
+  height: 16px;
+  
+  .ant-switch-handle {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* 移除旧的模式切换样式 */
+.recommended-keywords .mode-switch {
+  display: none;
+}
+
+/* 添加新的标题样式 */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* 移除旧的样式 */
+.overview-header,
+.header-actions {
+  display: none;
+}
+
+/* 标签样式优化 */
+:deep(.ant-tag) {
+  margin: 0;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: normal;
+  height: 22px;
+  line-height: 18px;
+}
+
+/* 分类标签样式优化 */
+.category-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.category-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-radio {
+  border-radius: 6px !important;
+  
+  &:first-child {
+    border-radius: 6px !important;
+  }
+  
+  &:last-child {
+    border-radius: 6px !important;
+  }
+}
+
+.radio-content {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 4px;
+}
+
+.radio-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.radio-count {
+  font-size: 12px;
+  color: #6B7280;
+}
+
+/* 统计信息样式 */
+.category-stats {
+  display: flex;
+  gap: 16px;
+  padding: 8px 12px;
+  background: #F3F4F6;
+  border-radius: 6px;
+  
+  span {
+    font-size: 13px;
+    color: #4B5563;
+    display: flex;
+    align-items: center;
+    
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #3B82F6;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    &:last-child::before {
+      background: #10B981;
+    }
+  }
+}
+
+:deep(.ant-radio-group-small .ant-radio-button-wrapper) {
+  padding: 2px 12px;
+  height: 28px;
+  line-height: 24px;
+}
+
+:deep(.ant-radio-button-wrapper-checked) {
+  background: #EFF6FF !important;
+  border-color: #3B82F6 !important;
+  
+  &::before {
+    background-color: #3B82F6 !important;
+  }
+  
+  .radio-label {
+    color: #2563EB;
+  }
+  
+  .radio-count {
+    color: #3B82F6;
+  }
+}
+
+/* 内容区域间距 */
+.source-content {
+  padding-top: 24px;
+}
+
+/* 高级筛选样式优化 */
+.advanced-filters {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px;
+  background: #F9FAFB;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-label {
+  font-size: 13px;
+  color: #4B5563;
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+:deep(.ant-slider) {
+  margin: 0;
+}
+
+:deep(.ant-input-number-sm) {
+  width: 100px;
+}
+
+/* 确保按钮垂直对齐 */
+.advanced-filters .ant-btn {
+  margin-left: auto;
+}
 </style>
