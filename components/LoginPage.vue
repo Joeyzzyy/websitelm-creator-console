@@ -395,9 +395,6 @@ import { onBeforeUnmount, ref} from 'vue';
 export default {
   name: 'LoginPage',
   data() {
-    if (localStorage.getItem('intelickIsLoggedIn')) {
-      this.$router.push('/');
-    }
     return {
       form: {
         email: '',
@@ -438,13 +435,14 @@ export default {
       }
     });
   },
-  created() {
-    const savedCredentials = localStorage.getItem('rememberedCredentials');
-    if (savedCredentials) {
-      const decoded = this.decodeCredentials(savedCredentials);
-      this.form.email = decoded.email;
-      this.form.password = decoded.password;
-      this.rememberMe = true;
+  async created() {
+    if (localStorage.getItem('intelickIsLoggedIn') && localStorage.getItem('accessToken')) {
+      try {
+        this.$router.push('/');
+      } catch (error) {
+        localStorage.removeItem('intelickIsLoggedIn');
+        localStorage.removeItem('accessToken');
+      }
     }
   },
   computed: {
