@@ -268,7 +268,7 @@
               </a-col>
               <a-col :span="24">
                 <a-statistic 
-                  title="Indexed" 
+                  title="Indexed Pages Published By WebsiteLM" 
                   :value="pagesDashboard?.indexedCount || 0"
                   :value-style="{ fontSize: '16px' }"
                   :title-style="{ fontSize: '12px' }"
