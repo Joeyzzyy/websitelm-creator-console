@@ -77,6 +77,15 @@
                       <div class="card-header">
                         <span class="card-title">Keywords Analysis Overview</span>
                         <a-tag color="blue">{{ totalAnalyzedKeywords }} Keywords Analyzed</a-tag>
+                        <div class="mode-switch">
+                          <span class="mode-label" :class="{ active: !expertMode }">Basic</span>
+                          <a-switch
+                            v-model:checked="expertMode"
+                            size="small"
+                            class="custom-switch"
+                          />
+                          <span class="mode-label" :class="{ active: expertMode }">Expert</span>
+                        </div>
                       </div>
                     </template>
                     
@@ -1937,11 +1946,11 @@ export default defineComponent({
 
 /* 添加新的样式 */
 .mode-switch-container {
-  display: flex;
-  justify-content: flex-end;
+  display: none;
 }
 
 .mode-switch {
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1982,6 +1991,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
 }
 
 .card-title {
