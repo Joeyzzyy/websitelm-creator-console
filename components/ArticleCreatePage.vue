@@ -233,7 +233,8 @@
                           />
                         </a-form-item>
 
-                        <a-form-item v-if="isEditMode" label="Slug" required>
+                        <!-- 修改 slug 和 isRootPage 的布局，参考 author 和 topic 的格式 -->
+                        <a-form-item label="Slug" required>
                           <a-input
                             v-model:value="articleData.slug"
                             placeholder="Enter page slug here"
@@ -242,6 +243,9 @@
                           />
                           <div v-if="slugError" class="slug-error">
                             {{ slugError }}
+                          </div>
+                          <div class="slug-hint">
+                            Note: If this page is the website's root page, please set the slug to "home". The system will automatically handle redirects.
                           </div>
                         </a-form-item>
                       </div>
@@ -329,12 +333,14 @@
         </div>
       </div>
 
-      <!-- 修改 FloatingStats 组件的条件渲染 -->
+      <!-- 修改 FloatingStats 组件的条件渲染和默认状态 -->
       <FloatingStats 
         v-if="isEditMode"
         :keywords-stats="articleData.pageStats"
         :sections="articleData.sections"
         @refresh="handleRefreshMetrics"
+        :default-collapsed="true"
+        class="floating-stats-enhanced"
       />
 
       <!-- Preview modal -->
@@ -578,7 +584,7 @@ export default defineComponent({
       deployTarget: null,
       language: 'en',
       slug: '',
-      author: '', // 添加 author 字段
+      author: '',
       pageStats: {
         genKeyword: [],
         wordCount: 0,
@@ -693,7 +699,7 @@ export default defineComponent({
 
     const handleSave = async (shouldQuit = false) => {
       try {
-        // 如果是编辑模式，先检查 slug
+        // 如果是编辑模式，检查 slug
         if (isEditMode.value) {
           // 主动触发 slug 检查
           await handleSlugBlur();
@@ -703,6 +709,12 @@ export default defineComponent({
             message.error('Slug is duplicated');
             return;
           }
+        }
+
+        // 检查必填字段
+        if (!articleData.value.slug) {
+          message.error('Page slug is required');
+          return;
         }
 
         // 修改必填字段验证 - 移除 publishUrl 验证
@@ -727,12 +739,6 @@ export default defineComponent({
             message.error(`${label} is required`);
             return;
           }
-        }
-
-        // 编辑模式下额外检查 slug
-        if (isEditMode.value && !articleData.value.slug) {
-          message.error('Page slug is required');
-          return;
         }
 
         saving.value = true;
@@ -994,15 +1000,13 @@ export default defineComponent({
         reasons.push('No verified domain available. Please verify a domain in Settings first.');
       }
 
-      // 检查必填字段 - 移除 publishUrl
       const requiredFields = {
         title: 'Title',
         description: 'Description',
         pageType: 'Type',
         language: 'Language',
         author: 'Author',
-        keywords: 'Keywords',
-        slug: 'Page Slug'
+        keywords: 'Keywords'
       };
 
       // 检查所有必填字段
@@ -1011,6 +1015,11 @@ export default defineComponent({
         if (!value || (Array.isArray(value) && value.length === 0)) {
           reasons.push(`${label} is required`);
         }
+      }
+
+      // 检查 slug
+      if (!articleData.value.slug) {
+        reasons.push('Page Slug is required');
       }
 
       // 检查内容部分
@@ -1383,7 +1392,7 @@ export default defineComponent({
         }
       }
 
-      // 编辑模式下额外检查 slug
+      // 编辑模式下检查 slug，但如果是根页面则跳过检查
       if (isEditMode.value && !articleData.value.slug) {
         return false;
       }
@@ -2832,5 +2841,61 @@ export default defineComponent({
   padding: 2px 8px;
   border-radius: 12px;
   margin-left: 8px !important;
+}
+
+:deep(.floating-stats-enhanced .stats-toggle-button) {
+  background: linear-gradient(135deg, #818cf8, #6366f1);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+:deep(.floating-stats-enhanced .stats-toggle-button:hover) {
+  transform: translateX(-2px);
+}
+
+:deep(.floating-stats-enhanced .stats-toggle-button .anticon) {
+  color: white;
+  font-size: 16px;
+}
+
+/* 只在折叠状态下显示发光效果 */
+:deep(.floating-stats-enhanced.is-collapsed .stats-toggle-button) {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.6),
+              0 0 40px rgba(99, 102, 241, 0.4),
+              0 0 60px rgba(99, 102, 241, 0.2);
+  animation: strongPulse 2s infinite;
+}
+
+/* 增强的脉冲动画 */
+@keyframes strongPulse {
+  0% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.6),
+                0 0 40px rgba(99, 102, 241, 0.4),
+                0 0 60px rgba(99, 102, 241, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.8),
+                0 0 50px rgba(99, 102, 241, 0.6),
+                0 0 75px rgba(99, 102, 241, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.6),
+                0 0 40px rgba(99, 102, 241, 0.4),
+                0 0 60px rgba(99, 102, 241, 0.2);
+  }
+}
+
+/* 展开状态恢复正常样式 */
+:deep(.floating-stats-enhanced:not(.is-collapsed) .stats-toggle-button) {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: none;
+}
+
+.slug-hint {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 4px;
+  line-height: 1.5;
+  font-style: italic;
 }
 </style>

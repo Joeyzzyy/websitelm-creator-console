@@ -142,7 +142,6 @@
                           @click="handleEdit(record)"
                           :disabled="record.generatorStatus === 'processing'"
                         >
-                          <EditOutlined />
                           Edit
                         </a-menu-item>
                         <a-menu-item 
@@ -150,7 +149,6 @@
                           @click="handlePreview(record)"
                           :disabled="record.generatorStatus === 'processing'"
                         >
-                          <EyeOutlined />
                           Preview
                         </a-menu-item>
                         <a-menu-item 
@@ -158,7 +156,6 @@
                           @click="handlePublish(record)"
                           :disabled="record.generatorStatus === 'processing'"
                         >
-                          <CloudUploadOutlined />
                           {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
                         </a-menu-item>
                       </template>
@@ -168,7 +165,6 @@
                         :disabled="record.generatorStatus === 'processing'"
                         danger
                       >
-                        <DeleteOutlined />
                         Delete
                       </a-menu-item>
                     </a-menu>

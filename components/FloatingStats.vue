@@ -163,13 +163,17 @@ export default defineComponent({
     sections: {  // 添加新的 prop
       type: Array,
       default: () => []
+    },
+    defaultCollapsed: {
+      type: Boolean,
+      default: true  // 默认为折叠状态
     }
   },
 
   emits: ['refresh'],
 
   setup(props, { emit }) {
-    const isCollapsed = ref(false);
+    const isCollapsed = ref(props.defaultCollapsed);
     const refreshing = ref(false);
 
     // 在入口处打印完整的传入数据
@@ -403,9 +407,9 @@ export default defineComponent({
   max-height: calc(100vh - 180px);
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e5e7eb;
   z-index: 1000;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
 }
@@ -417,6 +421,10 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
+  background: linear-gradient(135deg, #4F46E5, #38BDF8);
+  box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
 }
 
 .floating-stats.is-collapsed .stats-header {
@@ -426,6 +434,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
 .stats-header {
@@ -452,6 +461,16 @@ export default defineComponent({
   justify-content: center;
   width: 24px;
   height: 24px;
+}
+
+.floating-stats.is-collapsed .toggle-button {
+  color: #ffffff;
+}
+
+.floating-stats.is-collapsed:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(79, 70, 229, 0.4);
+  background: linear-gradient(135deg, #6366F1, #60A5FA);
 }
 
 .stats-content {
