@@ -30,9 +30,9 @@
                   :key="category.category" 
                 >
                   <template #header>
-                    <div class="category-header">
+                    <div class="add-category-header">
                       <span>{{ category.category }}</span>
-                      <span class="category-count">{{ category.items.length }}</span>
+                      <span class="add-category-count">{{ category.items.length }}</span>
                     </div>
                   </template>
                   <div 
@@ -1506,7 +1506,7 @@ export default defineComponent({
 
     // 添加新的方法来格式化分类标题
     const getCategoryHeader = (category) => {
-      return `${category.category} (${category.items.length})`;
+      return `${category.category}`;
     };
 
     return {
@@ -1823,11 +1823,28 @@ export default defineComponent({
 }
 
 :deep(.ant-collapse-header) {
+  display: flex !important;
+  align-items: center !important;
   padding: 12px 16px !important;
   background: #f8fafc;
   border-radius: 8px !important;
+  line-height: 1 !important; /* 添加这行 */
+}
+
+:deep(.ant-collapse-expand-icon) {
+  padding-inline-end: 8px !important;
+  padding-inline-start: 0 !important;
+  margin-top: 0 !important; /* 添加这行 */
+  height: auto !important; /* 添加这行 */
+}
+
+:deep(.ant-collapse-header-text) {
+  flex: 1 !important;
   font-weight: 500;
-  color: #1f2937 !important;
+  color: #1f2937;
+  line-height: 1 !important; /* 添加这行 */
+  display: flex !important; /* 添加这行 */
+  align-items: center !important; /* 添加这行 */
 }
 
 :deep(.ant-collapse-content) {
@@ -2769,119 +2786,51 @@ export default defineComponent({
 
 /* 添加分类标题样式 */
 :deep(.ant-collapse-header) {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: flex !important;
+  align-items: center !important;
+  padding: 12px 16px !important;
+  background: #f8fafc;
+  border-radius: 8px !important;
+}
+
+:deep(.ant-collapse-expand-icon) {
+  padding-inline-end: 8px !important;
+  padding-inline-start: 0 !important;
 }
 
 :deep(.ant-collapse-header-text) {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex: 1 !important;
   font-weight: 500;
+  color: #1f2937;
 }
 
-/* 添加组件数量样式 */
-:deep(.ant-collapse-header-text)::after {
-  content: attr(data-count);
+.add-category-header {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  line-height: 1 !important;
+  justify-content: space-between !important; /* 添加这行 */
+}
+
+.add-category-count {
+  color: #64748b;
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+.category-title {
+  flex: 1 !important;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.category-count {
+  flex-shrink: 0 !important;
   font-size: 12px;
   color: #64748b;
   background: #f1f5f9;
   padding: 2px 8px;
   border-radius: 12px;
-  margin-left: 8px;
-  font-weight: normal;
-}
-
-/* 分类标题容器样式 */
-.category-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-/* 数量标签样式 */
-.category-count {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1;
-  color: #38BDF8;
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid rgba(56, 189, 248, 0.2);
-  border-radius: 10px;
-  transition: all 0.3s ease;
-}
-
-/* 悬浮效果 */
-:deep(.ant-collapse-item:hover) .category-count {
-  background: #38BDF8;
-  color: white;
-  border-color: #38BDF8;
-  transform: scale(1.05);
-}
-
-/* 激活状态样式 */
-:deep(.ant-collapse-item-active) .category-count {
-  background: #38BDF8;
-  color: white;
-  border-color: #38BDF8;
-}
-
-/* 调整折叠面板标题样式 */
-:deep(.ant-collapse-header) {
-  padding: 12px 16px !important;
-}
-
-:deep(.ant-collapse-header-text) {
-  flex: 1;
-}
-
-/* 修改 keywords 输入框样式 */
-:deep(.ant-select-multiple) {
-  height: auto !important;
-  max-height: 200px !important; /* 设置最大高度 */
-}
-
-:deep(.ant-select-multiple .ant-select-selector) {
-  height: auto !important;
-  max-height: 200px !important; /* 设置最大高度 */
-  padding: 4px 8px !important;
-}
-
-:deep(.ant-select-multiple .ant-select-selection-overflow) {
-  flex-wrap: wrap;
-  max-height: 192px !important; /* 留出内边距空间 */
-  overflow-y: auto !important;
-}
-
-/* 美化滚动条 */
-:deep(.ant-select-multiple .ant-select-selection-overflow::-webkit-scrollbar) {
-  width: 4px;
-}
-
-:deep(.ant-select-multiple .ant-select-selection-overflow::-webkit-scrollbar-track) {
-  background: transparent;
-}
-
-:deep(.ant-select-multiple .ant-select-selection-overflow::-webkit-scrollbar-thumb) {
-  background: #e5e7eb;
-  border-radius: 2px;
-}
-
-:deep(.ant-select-multiple .ant-select-selection-overflow::-webkit-scrollbar-thumb:hover) {
-  background: #d1d5db;
-}
-
-/* 调整标签样式 */
-:deep(.ant-select-multiple .ant-select-selection-item) {
-  margin: 2px !important;
+  margin-left: 8px !important;
 }
 </style>
