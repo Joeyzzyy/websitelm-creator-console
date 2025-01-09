@@ -8,16 +8,14 @@
     <a-card class="workflow-card">
       <a-steps :current="currentStep" direction="horizontal" class="horizontal-steps">
         <a-step title="Select Keywords" description="Choose keywords from different modes" />
-        <a-step title="Generate Topics" description="Create content topics from keywords" />
-        <a-step title="Optimize Titles" description="Generate and optimize page titles" />
-        <a-step title="Review & Publish" description="Preview and confirm tasks" />
+        <a-step title="Generate Topic Title and Outline" description="Create and optimize content structure" />
       </a-steps>
     </a-card>
 
     <!-- Main Content Area -->
     <div class="main-content">
       <!-- Left Panel: Keyword Selection -->
-      <div class="left-panel" :class="{ 'panel-collapsed': currentStep > 0 }">
+      <div class="left-panel" :class="{ 'panel-hidden': currentStep > 0 }">
         <!-- Mode Selector -->
         <a-card class="mode-selector-card">
           <div class="mode-selector-wrapper">
@@ -43,9 +41,9 @@
               <a-button 
                 type="primary" 
                 @click="nextStep"
-                :disabled="!canProceed"
+                :disabled="false"
               >
-                {{ currentStep === 3 ? 'Publish' : 'Next' }}
+                {{ currentStep === 1 ? 'Generate' : 'Next' }}
                 <RightOutlined />
               </a-button>
             </div>
@@ -75,7 +73,7 @@
                     <a-col :span="12">
                       <div class="stat-item">
                         <div class="stat-label">Compared your site with</div>
-                        <div class="stat-value compact">30 of 50 competitor pages</div>
+                        <div class="stat-value compact">50 top pages from your competitors</div>
                       </div>
                     </a-col>
                   </a-row>
@@ -183,7 +181,7 @@
           />
 
           <!-- 新手友好区域 - 两列布局 -->
-          <a-row :gutter="[24, 24]">
+          <a-row :gutter="[24, 24]" class="beginner-content">
             <!-- System Recommendations 列 -->
             <a-col :span="12">
               <a-card title="Keywords From Comparison" class="beginner-card">
@@ -204,12 +202,21 @@
                               <a-checkbox v-model:checked="item.selected">
                                 "{{ item.keyword }}"
                               </a-checkbox>
+                              <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
                               <a-tag color="cyan">KD={{ item.kd }}</a-tag>
                               <a-tag color="purple">Vol={{ item.volume }}</a-tag>
                               <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
                             </a-space>
                             <div class="keyword-reason">
-                              <InfoCircleOutlined /> {{ item.reason }}
+                              <BulbOutlined />
+                              <div class="reason-content">
+                                <span class="reason-highlight">High potential: </span>
+                                <span class="reason-detail">Low competition (</span>
+                                <span class="reason-value">KD=35</span>
+                                <span class="reason-detail">) with </span>
+                                <span class="reason-value">high search volume</span>
+                                <span class="reason-detail">. Your competitors rank well for this term.</span>
+                              </div>
                             </div>
                           </div>
                         </a-list-item>
@@ -240,12 +247,14 @@
                               <a-checkbox v-model:checked="item.selected">
                                 "{{ item.keyword }}"
                               </a-checkbox>
+                              <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
                               <a-tag color="cyan">KD={{ item.kd }}</a-tag>
                               <a-tag color="purple">Vol={{ item.volume }}</a-tag>
                               <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
                             </a-space>
                             <div class="keyword-reason">
-                              <InfoCircleOutlined /> {{ item.pageReason }}
+                              <BulbOutlined />
+                              <span class="reason-text">{{ item.pageReason }}</span>
                             </div>
                           </div>
                         </a-list-item>
@@ -257,6 +266,140 @@
             </a-col>
           </a-row>
         </div>
+
+        <!-- 在 expert 模式下的内容 -->
+        <template v-else>
+          <!-- A. 高级筛选器 -->
+          <a-card class="filter-card" :bordered="false">
+            <div class="advanced-filters">
+              <!-- 将所有控件靠左对齐 -->
+              <div class="filter-header">
+                <a-space>
+                  <a-select
+                    v-model:value="currentPreset"
+                    style="width: 200px"
+                    placeholder="Select saved filter"
+                    @change="handlePresetChange"
+                  >
+                    <a-select-option v-for="preset in savedPresets" :key="preset.id" :value="preset.id">
+                      {{ preset.name }}
+                    </a-select-option>
+                  </a-select>
+                  
+                  <a-button type="primary" @click="addFilter">
+                    <PlusOutlined /> Add Filter
+                  </a-button>
+                  <a-button @click="clearFilters">Clear All</a-button>
+                  <a-button @click="showSaveModal">Save as Preset</a-button>
+                  <a-button type="primary" @click="applyFilters">Apply Filters</a-button>
+                </a-space>
+              </div>
+
+              <!-- 筛选条件网格布局 -->
+              <div class="filter-rows">
+                <template v-for="(filter, index) in filters" :key="index">
+                  <!-- 添加 & 符号 -->
+                  <div v-if="index > 0" class="filter-connector">
+                    &
+                  </div>
+                  
+                  <div class="filter-row">
+                    <a-select 
+                      v-model:value="filter.field" 
+                      class="ant-select-field"
+                      @change="() => handleFieldChange(index)"
+                    >
+                      <a-select-option value="kd">KD</a-select-option>
+                      <a-select-option value="volume">Volume</a-select-option>
+                      <a-select-option value="cpc">CPC</a-select-option>
+                      <a-select-option value="coverage">Competitor Coverage</a-select-option>
+                      <a-select-option value="relevance">Business Relevance</a-select-option>
+                      <a-select-option value="krs">KRS</a-select-option>
+                      <a-select-option value="source">Source</a-select-option>
+                    </a-select>
+                    
+                    <!-- 特殊处理 Source 字段的选择器 -->
+                    <template v-if="filter.field === 'source'">
+                      <a-select
+                        v-model:value="filter.value"
+                        class="source-value-selector"
+                      >
+                        <a-select-option value="difference">From Keywords Difference</a-select-option>
+                        <a-select-option value="competitor">From Competitor's Top Pages</a-select-option>
+                      </a-select>
+                    </template>
+                    <template v-else>
+                      <!-- 原有的操作符和值输入 -->
+                      <a-select 
+                        v-model:value="filter.operator" 
+                        class="ant-select-operator"
+                      >
+                        <a-select-option value="<"><</a-select-option>
+                        <a-select-option value="<=">≤</a-select-option>
+                        <a-select-option value=">">></a-select-option>
+                        <a-select-option value=">=">≥</a-select-option>
+                        <a-select-option value="==">=</a-select-option>
+                        <a-select-option value="!=">≠</a-select-option>
+                      </a-select>
+                      <a-input-number 
+                        v-model:value="filter.value" 
+                        class="ant-input-value"
+                      />
+                    </template>
+
+                    <a-button 
+                      type="text" 
+                      danger
+                      @click="removeFilter(index)"
+                    >
+                      Delete
+                    </a-button>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </a-card>
+
+          <!-- B. 详细差异 & Top Pages 表格 -->
+          <a-card class="table-card" :bordered="false">
+            <div class="table-wrapper">
+              <a-table
+                :data-source="filteredKeywords"
+                :columns="columns"
+                :row-selection="rowSelection"
+                :pagination="pagination"
+                :scroll="{ x: 'max-content' }"
+                @change="handleTableChange"
+              >
+                <template #expandedRowRender="{ record }">
+                  <div class="expanded-row">
+                    <div class="expanded-section">
+                      <div class="section-title">对应页面</div>
+                      <div class="section-content">
+                        <a-space direction="vertical">
+                          <a-tag v-for="page in record.pages" :key="page.url">
+                            {{ page.url }}
+                          </a-tag>
+                        </a-space>
+                      </div>
+                    </div>
+                    <div class="expanded-section">
+                      <div class="section-title">竞品排名对比</div>
+                      <div class="section-content">
+                        <a-table
+                          :data-source="record.competitors"
+                          :columns="competitorColumns"
+                          :pagination="false"
+                          size="small"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </a-table>
+            </div>
+          </a-card>
+        </template>
       </div>
 
       <!-- Right Panel: Workspace -->
@@ -266,9 +409,14 @@
           class="workspace-card"
         >
           <template #title>
-            <span class="card-title">
-              {{ workspaceTitle }}
-            </span>
+            <div class="workspace-header">
+              <a-button @click="previousStep">
+                <LeftOutlined /> Previous
+              </a-button>
+              <span class="card-title">
+                {{ workspaceTitle }}
+              </span>
+            </div>
           </template>
           
           <!-- Workspace Content -->
@@ -282,21 +430,38 @@
         </a-card>
       </div>
     </div>
+
+    <!-- 添加保存配置的模态框 -->
+    <a-modal
+      v-model:visible="saveModalVisible"
+      title="Save Filter Preset"
+      @ok="saveCurrentPreset"
+    >
+      <a-input v-model:value="newPresetName" placeholder="Enter preset name" />
+    </a-modal>
   </page-layout>
 </template>
 
 <script>
-import { defineComponent, ref, computed } from 'vue'
+import { defineComponent, ref, computed, h } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
 import BeginnerMode from './BeginnerMode.vue'
-// import ExpertMode from './keyword-modes/ExpertMode.vue'
+import { 
+  DeleteOutlined,
+  PlusOutlined,
+  SaveOutlined,
+  // ... 其他已使用的图标
+} from '@ant-design/icons-vue'
 
 export default defineComponent({
   name: 'KeywordsPlanningPage',
   components: {
     PageLayout,
     BeginnerMode,
-    // ExpertMode
+    DeleteOutlined,
+    PlusOutlined,
+    SaveOutlined,
+    // ... 其他已使用的图标
   },
   setup() {
     const currentMode = ref('beginner')
@@ -351,7 +516,7 @@ export default defineComponent({
       { name: 'Weak', count: 150, color: 'orange' },
       { name: 'Strong', count: 80, color: 'green' },
       { name: 'Common', count: 300, color: 'blue' },
-      { name: 'Unique', count: 40, color: 'purple' }
+      { name: 'Unique', color: 'purple' }
     ])
 
     const priorities = [
@@ -392,6 +557,7 @@ export default defineComponent({
         keyword: 'cloud storage',
         kd: 35,
         volume: 1200,
+        krs: 78,
         status: { text: 'Missing', color: 'red' },
         selected: false,
         priority: 'P0',
@@ -401,6 +567,7 @@ export default defineComponent({
         keyword: 'online backup',
         kd: 40,
         volume: 900,
+        krs: 72,
         status: { text: 'Weak', color: 'orange' },
         selected: false,
         priority: 'P0',
@@ -468,10 +635,11 @@ export default defineComponent({
         keyword: 'cloud storage solutions',
         kd: 35,
         volume: 1200,
+        krs: 85,
         status: { text: 'Missing', color: 'red' },
         selected: false,
         priority: 'P0',
-        pageReason: 'Your page "/cloud-guide" ranks #15. High potential for quick improvement.'
+        pageReason: 'aiseo.ai\'s page "aiseo.ai/cloud-guide" ranks #15. High potential for quick improvement.'
       },
       {
         keyword: 'business cloud storage',
@@ -480,7 +648,7 @@ export default defineComponent({
         status: { text: 'Weak', color: 'orange' },
         selected: false,
         priority: 'P0',
-        pageReason: 'Your page "/business-solutions" ranks #8. Close to first page.'
+        pageReason: 'surferseo.com\'s page "surferseo.com/business-solutions" ranks #8. Close to first page.'
       },
       // P1 优先级关键词
       {
@@ -587,7 +755,12 @@ export default defineComponent({
     }
 
     const handleKeywordSelect = (keyword) => {
-      // 处理关键词选择逻辑
+      const index = selectedKeywords.value.findIndex(k => k.keyword === keyword.keyword)
+      if (index === -1) {
+        selectedKeywords.value.push(keyword)
+      } else {
+        selectedKeywords.value.splice(index, 1)
+      }
     }
 
     // 添加计算属性来获取所有页面关键词的总数
@@ -601,6 +774,271 @@ export default defineComponent({
     const getKeywordsByPriority = (keywords, priority) => {
       if (!keywords || !keywords.length) return []
       return keywords.value ? keywords.value.filter(k => k.priority === priority) : keywords.filter(k => k.priority === priority)
+    }
+
+    // 在 expert 模式下的内容
+    const filters = ref([
+      {
+        field: 'kd',
+        operator: '<',
+        value: 50
+      }
+    ]);
+
+    const addFilter = () => {
+      filters.value.push({
+        field: 'kd',
+        operator: '<',
+        value: 50
+      });
+    };
+
+    const removeFilter = (index) => {
+      filters.value.splice(index, 1);
+    };
+
+    const handleFieldChange = (index) => {
+      const filter = filters.value[index];
+      if (filter.field === 'source') {
+        filter.operator = '==';
+        filter.value = 'difference';
+      } else {
+        // 原有的处理逻辑
+        switch (filter.field) {
+          case 'cpc':
+            filter.value = 0.2;
+            break;
+          case 'relevance':
+            filter.value = 3;
+            break;
+          case 'krs':
+            filter.value = 50;
+            break;
+          default:
+            filter.value = 50;
+        }
+      }
+    };
+
+    const applyFilters = () => {
+      // TODO: 实现筛选逻辑
+    };
+
+    const clearFilters = () => {
+      filters.value = [{
+        field: 'kd',
+        operator: '<',
+        value: 50
+      }];
+    };
+
+    const saveFilterConfig = () => {
+      // TODO: 实现保存配置逻辑
+    };
+
+    const columns = [
+      {
+        title: 'Keyword',
+        dataIndex: 'keyword',
+        width: 200,
+        fixed: 'left',
+        customRender: ({ text }) => {
+          return h('strong', text);
+        }
+      },
+      {
+        title: 'KD',
+        dataIndex: 'kd',
+        width: 80,
+      },
+      {
+        title: 'Volume',
+        dataIndex: 'volume',
+        width: 100,
+      },
+      {
+        title: 'CPC',
+        dataIndex: 'cpc',
+        width: 100,
+      },
+      {
+        title: 'Competitor Coverage',
+        dataIndex: 'coverage',
+        width: 120,
+        customRender: ({ text }) => {
+          return h('span', `${text} competitors`);
+        }
+      },
+      {
+        title: 'Business Relevance',
+        dataIndex: 'relevance',
+        width: 140,
+        customRender: ({ text }) => {
+          const colors = ['#ff4d4f', '#faad14', '#52c41a'];
+          const score = parseInt(text);
+          return h('span', {
+            style: {
+              color: colors[Math.min(Math.floor(score/2), 2)]
+            }
+          }, `${score}/5`);
+        }
+      },
+      {
+        title: 'KRS',
+        dataIndex: 'krs',
+        width: 100,
+        customRender: ({ text }) => {
+          return h('span', {
+            style: {
+              color: text >= 70 ? '#52c41a' : text >= 40 ? '#faad14' : '#ff4d4f'
+            }
+          }, text);
+        }
+      },
+      {
+        title: 'Pages',
+        dataIndex: 'pages',
+        width: 200,
+        customRender: ({ text, record }) => {
+          return h('a', {
+            onClick: () => handlePageClick(record)
+          }, `${text.length} pages`);
+        }
+      },
+      {
+        title: 'Actions',
+        key: 'action',
+        fixed: 'right',
+        width: 100,
+        customRender: ({ record }) => {
+          return h('a-space', { size: 'middle' }, [
+            h('a', {
+              onClick: () => handleEdit(record)
+            }, 'Edit'),
+            h('a', {
+              onClick: () => handleDelete(record)
+            }, 'Delete')
+          ]);
+        }
+      },
+      {
+        title: 'From URL',
+        dataIndex: 'fromUrl',
+        width: 200,
+        ellipsis: true, // 超长时显示省略号
+        customRender: ({ text }) => {
+          if (!text) return '-';
+          return h('a-tooltip', { title: text }, () => [
+            h('a', { href: text, target: '_blank' }, text)
+          ]);
+        }
+      },
+    ];
+
+    const competitorColumns = [
+      {
+        title: 'Competitor',
+        dataIndex: 'name',
+        width: 150,
+      },
+      {
+        title: 'Rank',
+        dataIndex: 'rank',
+        width: 80,
+      },
+      {
+        title: 'URL',
+        dataIndex: 'url',
+        width: 200,
+      },
+    ];
+
+    const selectedRowKeys = ref([]);
+
+    const rowSelection = {
+      selectedRowKeys: selectedRowKeys,
+      onChange: (keys, selectedRows) => {
+        selectedRowKeys.value = keys;
+        console.log(`selectedRowKeys: ${keys}`, 'selectedRows: ', selectedRows);
+      },
+      getCheckboxProps: (record) => ({
+        disabled: record.name === 'Disabled User',
+        name: record.name,
+      }),
+    };
+
+    const pagination = {
+      pageSizeOptions: ['10', '20', '30', '40'],
+      pageSize: 10,
+      showSizeChanger: true,
+      showQuickJumper: true,
+      showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} items`,
+    };
+
+    const handleTableChange = (pagination, filters, sorter) => {
+      console.log('Table change:', pagination, filters, sorter);
+    };
+
+    const handlePageClick = (record) => {
+      console.log('Clicked page:', record);
+    };
+
+    const handleEdit = (record) => {
+      console.log('Edit:', record);
+    };
+
+    const handleDelete = (record) => {
+      console.log('Delete:', record);
+    };
+
+    const currentPreset = ref(null);
+    const saveModalVisible = ref(false);
+    const newPresetName = ref('');
+    const savedPresets = ref([
+      { id: 1, name: 'Low KD High Volume', filters: [
+        { field: 'kd', operator: '<', value: 30 },
+        { field: 'volume', operator: '>', value: 1000 }
+      ] },
+      { id: 2, name: 'High CPC Keywords', filters: [
+        { field: 'cpc', operator: '>', value: 1 }
+      ] }
+    ]);
+
+    const handlePresetChange = (presetId) => {
+      const preset = savedPresets.value.find(p => p.id === presetId);
+      if (preset) {
+        filters.value = JSON.parse(JSON.stringify(preset.filters));
+      }
+    };
+
+    const showSaveModal = () => {
+      saveModalVisible.value = true;
+    };
+
+    const saveCurrentPreset = () => {
+      if (newPresetName.value) {
+        savedPresets.value.push({
+          id: Date.now(),
+          name: newPresetName.value,
+          filters: JSON.parse(JSON.stringify(filters.value))
+        });
+        saveModalVisible.value = false;
+        newPresetName.value = '';
+      }
+    };
+
+    const currentStep = ref(0)
+    
+    const nextStep = () => {
+      if (currentStep.value < 1) {
+        currentStep.value++
+      }
+    }
+
+    const previousStep = () => {
+      if (currentStep.value > 0) {
+        currentStep.value--
+      }
     }
 
     return {
@@ -623,7 +1061,32 @@ export default defineComponent({
       getTotalPageKeywords,
       priorities,
       getKeywordsByPriority,
-      pageKeywords
+      pageKeywords,
+      filters,
+      addFilter,
+      removeFilter,
+      handleFieldChange,
+      applyFilters,
+      clearFilters,
+      saveFilterConfig,
+      columns,
+      competitorColumns,
+      rowSelection,
+      pagination,
+      handleTableChange,
+      handlePageClick,
+      handleEdit,
+      handleDelete,
+      currentPreset,
+      saveModalVisible,
+      newPresetName,
+      savedPresets,
+      handlePresetChange,
+      showSaveModal,
+      saveCurrentPreset,
+      currentStep,
+      nextStep,
+      previousStep,
     }
   }
 })
@@ -631,23 +1094,39 @@ export default defineComponent({
 
 <style scoped>
 .workflow-card {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   background: #fafafa;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  
+  :deep(.ant-card-body) {
+    padding: 8px 24px;
+  }
 }
 
 .horizontal-steps {
-  padding: 12px 24px;
+  padding: 0;
 }
 
 :deep(.ant-steps-horizontal) {
   display: flex;
   width: 100%;
   justify-content: space-between;
-}
-
-:deep(.ant-steps-item) {
-  flex: 1;
-  margin-right: 0 !important;
+  
+  .ant-steps-item-title {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  
+  .ant-steps-item-description {
+    font-size: 12px;
+    line-height: 16px;
+  }
+  
+  .ant-steps-icon {
+    font-size: 14px;
+  }
 }
 
 .main-content {
@@ -660,12 +1139,12 @@ export default defineComponent({
   transition: all 0.3s ease;
 }
 
-.panel-collapsed {
-  flex: 0 0 380px;
+.panel-hidden {
+  display: none;
 }
 
 .right-panel {
-  flex: 2;
+  flex: 1;
 }
 
 .mode-selector-card {
@@ -727,6 +1206,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding-bottom: 24px;
 }
 
 .overview-section {
@@ -751,19 +1231,20 @@ export default defineComponent({
 
 .beginner-card,
 .optimization-card {
-  height: 100%; /* 确保两个卡片高度一致 */
+  height: 100%;
+  margin-bottom: 24px;
 }
 
 .keywords-list {
   margin: 16px 0;
-  min-height: 200px; /* 给列表一个最小高度以保持对齐 */
+  min-height: 200px;
 }
 
 .action-buttons {
   display: flex;
   gap: 8px;
-  margin-top: auto; /* 让按钮固定在底部 */
-  justify-content: flex-end; /* 按钮右对齐 */
+  margin-top: auto;
+  justify-content: flex-end;
 }
 
 .page-item {
@@ -829,12 +1310,12 @@ export default defineComponent({
 
 .analytics-card {
   :deep(.ant-card-body) {
-    padding: 12px 24px; /* 减小内边距 */
+    padding: 12px 24px;
   }
 }
 
 .stat-item {
-  gap: 4px; /* 减小标签和数值之间的间距 */
+  gap: 4px;
 }
 
 .page-keywords {
@@ -845,7 +1326,7 @@ export default defineComponent({
 }
 
 .page-item {
-  gap: 8px; /* 添加各元素之间的间距 */
+  gap: 8px;
 }
 
 .mode-selector-wrapper {
@@ -866,7 +1347,7 @@ export default defineComponent({
 }
 
 .stat-value.compact {
-  font-size: 16px; /* 进一步减小数字大小 */
+  font-size: 16px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.85);
   line-height: 1.2;
@@ -1023,16 +1504,43 @@ export default defineComponent({
 }
 
 .keyword-reason {
-  padding-left: 24px;
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.65);
   display: flex;
-  align-items: center;
-  gap: 6px;
+  align-items: flex-start;
+  gap: 8px;
+  margin-left: 24px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(24, 144, 255, 0.04);
+  border-left: 3px solid #1890ff;
+  border-radius: 0 4px 4px 0;
   
   .anticon {
     color: #1890ff;
+    font-size: 16px;
+    margin-top: 2px;
   }
+}
+
+.reason-content {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.reason-highlight {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.reason-value {
+  color: #262626;
+  font-weight: 500;
+  background: rgba(24, 144, 255, 0.1);
+  padding: 0 4px;
+  border-radius: 2px;
+}
+
+.reason-detail {
+  color: #595959;
 }
 
 .priority-section {
@@ -1056,7 +1564,6 @@ export default defineComponent({
   margin-top: 8px;
 }
 
-/* 调整 tab 样式 */
 :deep(.ant-tabs-tab) {
   padding: 8px 16px;
 }
@@ -1065,7 +1572,6 @@ export default defineComponent({
   font-size: 13px;
 }
 
-/* 可以给不同优先级的 tab 添加对应的颜色 */
 :deep(.ant-tabs-tab[data-node-key="P0"]) {
   color: #f50;
 }
@@ -1168,7 +1674,6 @@ export default defineComponent({
   color: white;
 }
 
-/* 添加新的横向布局样式 */
 .analysis-steps-container {
   display: flex;
   gap: 16px;
@@ -1291,7 +1796,6 @@ export default defineComponent({
   }
 }
 
-/* 添加新的引导样式 */
 .next-step-guide {
   text-align: center;
   padding: 32px 0;
@@ -1377,7 +1881,6 @@ export default defineComponent({
   }
 }
 
-/* 添加多个装饰性箭头 */
 .guide-decorative-arrows {
   position: absolute;
   left: 0;
@@ -1418,7 +1921,6 @@ export default defineComponent({
   }
 }
 
-/* 优化单选按钮组样式 */
 :deep(.ant-radio-group) {
   display: flex;
   
@@ -1427,7 +1929,6 @@ export default defineComponent({
     padding: 0 16px;
     line-height: 30px;
     
-    /* 优化图标样式 */
     .anticon {
       font-size: 14px;
       margin-right: 4px;
@@ -1435,7 +1936,6 @@ export default defineComponent({
   }
 }
 
-/* 优化操作按钮样式 */
 .header-actions {
   display: flex;
   gap: 8px;
@@ -1448,6 +1948,167 @@ export default defineComponent({
       font-size: 14px;
     }
   }
+}
+
+.expert-mode-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.expert-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.expert-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+:deep(.ant-table-thead > tr > th) {
+  background: #fafafa;
+  font-weight: 500;
+}
+
+:deep(.ant-table-tbody > tr > td) {
+  padding: 12px 16px;
+}
+
+.filter-card {
+  :deep(.ant-card-body) {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+.advanced-filters {
+  .filter-rows {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .filter-connector {
+    font-size: 16px;
+    font-weight: bold;
+    color: rgba(0, 0, 0, 0.45);
+    padding: 0 4px;
+  }
+
+  .filter-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    background: #fafafa;
+    border-radius: 4px;
+    
+    .ant-select-field {
+      width: 200px;
+    }
+    
+    .ant-select-operator {
+      width: 45px;
+    }
+    
+    .ant-input-number {
+      width: 80px;
+    }
+    
+    .delete-btn {
+      padding: 4px;
+      margin-left: 4px;
+    }
+  }
+}
+
+.filter-actions {
+  margin: 16px 0;
+  
+  .ant-btn {
+    height: 32px;
+    
+    &:hover {
+      color: #1890ff;
+      border-color: #1890ff;
+    }
+  }
+}
+
+.filter-operations {
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+  
+  .ant-space {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+.source-value-selector {
+  width: 220px;
+}
+
+:deep(.ant-select-operator .ant-select-selection-item) {
+  text-align: center;
+  padding: 0;
+}
+
+.filter-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 4px;
+  
+  .ant-space {
+    gap: 8px;
+  }
+}
+
+.beginner-content {
+  margin-bottom: 24px;
+}
+
+.a-row:last-child {
+  margin-bottom: 0;
+}
+
+/* 添加 KRS 标签的呼吸效果 */
+.krs-tag {
+  background: linear-gradient(135deg, #1890ff, #722ed1);
+  border: none;
+  color: white;
+  font-weight: 500;
+  animation: gradientBreath 3s ease-in-out infinite;
+}
+
+@keyframes gradientBreath {
+  0%, 100% {
+    background: linear-gradient(135deg, #1890ff, #722ed1);
+    opacity: 1;
+  }
+  50% {
+    background: linear-gradient(135deg, #40a9ff, #9254de);
+    opacity: 0.8;
+  }
+}
+
+/* 覆盖 ant-design-vue 的默认标签样式 */
+:deep(.krs-tag.ant-tag) {
+  border: none;
+  padding: 2px 8px;
 }
 </style>
 

@@ -1434,10 +1434,12 @@ export default {
   text-overflow: ellipsis;
 }
 
-/* 标题列允许换行 */
+/* 标题列允许换行和宽度限制 */
 :deep(.ant-table-cell-fix-left) {
-  white-space: normal;
+  white-space: normal !important;
   word-break: break-word;
+  max-width: 200px !important; /* 添加最大宽度限制 */
+  min-width: 200px !important; /* 添加最小宽度限制 */
 }
 
 /* 确保标签内容不换行且省略 */
@@ -1548,6 +1550,10 @@ export default {
   color: #1890ff;
   cursor: pointer;
   transition: color 0.3s;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 限制最多显示2行 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .title-link:hover {
