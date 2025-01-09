@@ -2,7 +2,7 @@
   <a-layout style="height: 100vh;">
     <a-layout-sider
       v-model:collapsed="collapsed"
-      :width="220"
+      :width="180"
       :collapsed-width="80"
       style="background: linear-gradient(180deg, #F0F7FF 0%, #E6F0FF 100%); display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0, 0, 0, 0.08);"
     >
@@ -19,8 +19,15 @@
       </div>
       <!-- 头像部分 -->
       <div class="user-profile-section">
-        <div class="welcome-text">Welcome back!</div>
-        <div class="user-name-display">{{ currentCustomerEmail }}</div>
+        <div class="welcome-text" v-if="!collapsed">Welcome back!</div>
+        <div v-if="!collapsed" class="user-name-display">
+          {{ currentCustomerEmail }}
+        </div>
+        <a-tooltip v-else :title="currentCustomerEmail" placement="right">
+          <div class="user-avatar">
+            {{ getEmailInitial(currentCustomerEmail) }}
+          </div>
+        </a-tooltip>
       </div>
       <!-- 菜单部分 -->
       <div class="menu-section">
@@ -54,7 +61,7 @@
         <!-- Logout 按钮 -->
         <a-button type="link" class="bottom-action-btn" @click="handleLogout">
           <LogoutOutlined />
-          <span>Logout</span>
+          <span v-if="!collapsed">Logout</span>
         </a-button>
       </div>
     </a-layout-sider>
@@ -79,7 +86,8 @@ html, body, #app {
 .user-profile-section {
   text-align: center;
   padding: 32px 24px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -88,7 +96,7 @@ html, body, #app {
 /* 菜单部分 */
 .menu-section {
   flex: 1;
-  padding: 16px 12px;
+  padding: 24px 16px;
   overflow-y: auto;
 }
 
@@ -99,7 +107,7 @@ html, body, #app {
 :deep(.ant-menu-item) {
   height: 48px;
   line-height: 48px;
-  margin: 8px 0;
+  margin: 12px 0;
   border-radius: 12px;
   transition: all 0.3s ease;
   color: #4A4875;
@@ -149,7 +157,7 @@ html, body, #app {
 .collapse-trigger {
   position: absolute;
   right: -12px;
-  top: 20px;
+  top: 32px;
   z-index: 10;
   background: white;
   border-radius: 50%;
@@ -423,7 +431,7 @@ html, body, #app {
 /* 添加新的底部操作区样式 */
 .bottom-actions {
   margin-top: auto;
-  padding: 16px;
+  padding: 24px 16px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   background: transparent;
 }
@@ -436,7 +444,6 @@ html, body, #app {
   height: auto;
   transition: all 0.3s ease;
   border-radius: 8px;
-  margin-bottom: 4px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -456,13 +463,14 @@ html, body, #app {
 
 /* 折叠时的样式调整 */
 :deep(.ant-layout-sider.ant-layout-sider-collapsed) {
-  .bottom-action-btn span:not(.menu-icon) {
-    display: none;
-  }
-  
   .bottom-action-btn {
     padding: 8px;
     text-align: center;
+    justify-content: center;
+  }
+  
+  .bottom-action-btn span:not(.anticon) {
+    display: none;
   }
 }
 
@@ -559,6 +567,37 @@ html, body, #app {
     rgba(22, 119, 255, 0.3), 
     rgba(22, 119, 255, 0.1)
   );
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1677ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.25);
+}
+
+/* 调整折叠状态下的样式 */
+:deep(.ant-layout-sider.ant-layout-sider-collapsed) {
+  .user-profile-section {
+    padding: 16px;
+  }
+  
+  .welcome-text {
+    display: none;
+  }
 }
 </style>
 
@@ -704,6 +743,10 @@ export default {
         '/settings': 'SettingsPage',
       };
       return routeToView[this.$route.path] || 'DashboardPage';
+    },
+
+    getEmailInitial(email) {
+      return email ? email.charAt(0).toUpperCase() : '?';
     }
   },
   watch: {
