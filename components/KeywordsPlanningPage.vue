@@ -412,32 +412,212 @@
         </template>
       </div>
 
-      <!-- Right Panel: Workspace -->
-      <div class="right-panel" v-show="currentStep > 0">
-        <a-card 
-          :bordered="false"
-          class="workspace-card"
-        >
-          <template #title>
-            <div class="workspace-header">
-              <a-button @click="previousStep">
-                <LeftOutlined /> Previous
-              </a-button>
-              <span class="card-title">
-                {{ workspaceTitle }}
-              </span>
-            </div>
-          </template>
-          
-          <!-- Workspace Content -->
-          <component
-            :is="currentWorkspaceComponent"
-            :keywords="selectedKeywords"
-            :topics="generatedTopics"
-            :titles="optimizedTitles"
-            @update:data="handleWorkspaceUpdate"
-          />
-        </a-card>
+      <!-- 步骤二的内容区域 -->
+      <div v-show="currentStep > 0">
+        <!-- 顶部操作栏 -->
+        <div class="step-actions">
+          <a-space>
+            <a-button @click="previousStep">
+              <LeftOutlined /> Previous
+            </a-button>
+            <a-button 
+              type="primary"
+              :loading="isGenerating"
+              :disabled="!selectedKeywords.length"
+              @click="generateContent"
+            >
+              <ThunderboltOutlined /> Generate Content Plan
+            </a-button>
+          </a-space>
+        </div>
+
+        <!-- 内容区域 -->
+        <div class="workspace-layout">
+          <!-- 左侧已选关键词列表 -->
+          <a-card 
+            class="selected-keywords-card"
+            :bordered="false"
+          >
+            <template #title>
+              <div class="card-title">
+                <CheckCircleOutlined /> Selected Keywords
+                <a-tag>{{ selectedKeywords.length }} keywords</a-tag>
+              </div>
+            </template>
+
+            <a-list
+              :data-source="selectedKeywords"
+              size="small"
+              class="selected-keywords-list"
+            >
+              <template #renderItem="{ item }">
+                <a-list-item>
+                  <div class="selected-keyword-item">
+                    <div class="keyword-text">"{{ item.keyword }}"</div>
+                    <div class="keyword-metrics">
+                      <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
+                      <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                      <a-tag color="purple">Vol={{ item.volume }}</a-tag>
+                    </div>
+                  </div>
+                </a-list-item>
+              </template>
+            </a-list>
+          </a-card>
+
+          <!-- 添加纵向导航 -->
+          <div class="vertical-nav">
+            <a-anchor :affix="false" :bounds="50">
+              <a-anchor-link 
+                href="#content-strategy" 
+                title="Content Strategy"
+                :class="{ 'nav-disabled': !contentPlan }"
+              />
+              <a-anchor-link 
+                href="#suggested-topics" 
+                title="Suggested Topics"
+                :class="{ 'nav-disabled': !suggestedTopics.length }"
+              />
+              <a-anchor-link 
+                href="#suggested-titles" 
+                title="Suggested Titles"
+                :class="{ 'nav-disabled': !suggestedTitles.length }"
+              />
+              <a-anchor-link 
+                href="#content-outline" 
+                title="Content Outline"
+                :class="{ 'nav-disabled': !generatedOutline }"
+              />
+            </a-anchor>
+          </div>
+
+          <!-- 右侧生成内容区域 -->
+          <div class="generation-flow">
+            <!-- 1. 写作意图和页面类型 -->
+            <a-card v-if="contentPlan" id="content-strategy" class="result-card">
+              <template #title>
+                <div class="card-title">
+                  <CompassOutlined /> Content Strategy
+                </div>
+              </template>
+              
+              <a-descriptions :column="1">
+                <a-descriptions-item label="Writing Intent">
+                  <a-tag :color="contentPlan.intent.color">
+                    {{ contentPlan.intent.name }}
+                  </a-tag>
+                  <div class="intent-description">{{ contentPlan.intent.description }}</div>
+                </a-descriptions-item>
+                <a-descriptions-item label="Page Type">
+                  <a-tag :color="contentPlan.pageType.color">
+                    {{ contentPlan.pageType.name }}
+                  </a-tag>
+                  <div class="page-type-description">{{ contentPlan.pageType.description }}</div>
+                </a-descriptions-item>
+              </a-descriptions>
+            </a-card>
+
+            <!-- 2. Topic 建议 -->
+            <a-card v-if="suggestedTopics.length" id="suggested-topics" class="result-card">
+              <template #title>
+                <div class="card-title">
+                  <BulbOutlined /> Suggested Topics
+                </div>
+              </template>
+              
+              <div class="topic-list">
+                <div v-for="topic in suggestedTopics" :key="topic.id" class="topic-item">
+                  <a-checkbox 
+                    v-model:checked="topic.selected"
+                    @change="(checked) => handleTopicSelect(topic, checked)"
+                  >
+                    <div class="topic-content">
+                      <div class="topic-main">{{ topic.main }}</div>
+                      <div class="topic-reason">{{ topic.reason }}</div>
+                    </div>
+                  </a-checkbox>
+                </div>
+              </div>
+              
+              <!-- 添加确认按钮 -->
+              <div class="action-footer">
+                <a-button 
+                  type="primary"
+                  :disabled="!selectedTopicsCount"
+                  :loading="isGeneratingTitles"
+                  @click="confirmTopics"
+                >
+                  Generate Titles <RightOutlined v-if="!isGeneratingTitles" />
+                </a-button>
+              </div>
+            </a-card>
+
+            <!-- 3. Title 建议 -->
+            <a-card v-if="suggestedTitles.length" id="suggested-titles" class="result-card">
+              <template #title>
+                <div class="card-title">
+                  <FileTextOutlined /> Suggested Titles
+                </div>
+              </template>
+              
+              <div class="title-list">
+                <div v-for="title in suggestedTitles" :key="title.id" class="title-item">
+                  <a-checkbox 
+                    v-model:checked="title.selected"
+                    @change="(checked) => handleTitleSelect(title, checked)"
+                  >
+                    <div class="title-content">
+                      <div class="title-main">{{ title.text }}</div>
+                      <div class="title-metrics">
+                        <a-tag color="blue">CTR: {{ title.metrics.ctr }}%</a-tag>
+                        <a-tag color="green">SEO Score: {{ title.metrics.seoScore }}</a-tag>
+                      </div>
+                    </div>
+                  </a-checkbox>
+                </div>
+              </div>
+
+              <!-- 添加确认按钮 -->
+              <div class="action-footer">
+                <a-button 
+                  type="primary"
+                  :disabled="!selectedTitlesCount"
+                  :loading="isGeneratingOutline"
+                  @click="confirmTitles"
+                >
+                  Generate Outline <RightOutlined v-if="!isGeneratingOutline" />
+                </a-button>
+              </div>
+            </a-card>
+
+            <!-- 4. Outline -->
+            <a-card v-if="generatedOutline" id="content-outline" class="result-card">
+              <template #title>
+                <div class="card-title">
+                  <OrderedListOutlined /> Content Outline
+                </div>
+              </template>
+              
+              <div class="outline-content">
+                <div v-for="(section, index) in generatedOutline" :key="index" class="outline-section">
+                  <div class="section-header">
+                    <div class="section-title">{{ section.title }}</div>
+                    <div class="section-keywords">
+                      <a-tag v-for="keyword in section.keywords" :key="keyword" color="blue">
+                        {{ keyword }}
+                      </a-tag>
+                    </div>
+                  </div>
+                  <div class="section-points">
+                    <div v-for="(point, pIndex) in section.points" :key="pIndex" class="point-item">
+                      • {{ point }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </a-card>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -499,7 +679,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, computed, h, watch } from 'vue'
+import { defineComponent, ref, computed, h, watch, nextTick } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
 import BeginnerMode from './BeginnerMode.vue'
 import { 
@@ -508,8 +688,21 @@ import {
   SaveOutlined,
   // ... 其他已使用的图标
   EyeOutlined,
-  BulbOutlined
+  BulbOutlined,
+  CompassOutlined,
+  FileTextOutlined,
+  OrderedListOutlined
 } from '@ant-design/icons-vue'
+import {
+  overviewStats,
+  categories,
+  priorities,
+  recommendedKeywords,
+  pageKeywords,
+  savedPresets,
+  tableColumns,
+  competitorColumns
+} from '../data/keywordPlanningData'
 
 export default defineComponent({
   name: 'KeywordsPlanningPage',
@@ -521,11 +714,18 @@ export default defineComponent({
     SaveOutlined,
     // ... 其他已使用的图标
     EyeOutlined,
-    BulbOutlined
+    BulbOutlined,
+    CompassOutlined,
+    FileTextOutlined,
+    OrderedListOutlined
   },
   setup() {
     const currentMode = ref('beginner')
     const selectedKeywords = ref([])
+    const isGeneratingTitles = ref(false) 
+    const isGeneratingOutline = ref(false) 
+    
+    const columns = computed(() => tableColumns)
     
     const overviewData = ref({
       totalKeywords: 1234,
@@ -854,7 +1054,9 @@ export default defineComponent({
     // 按优先级过滤关键词的方法
     const getKeywordsByPriority = (keywords, priority) => {
       if (!keywords || !keywords.length) return []
-      return keywords.value ? keywords.value.filter(k => k.priority === priority) : keywords.filter(k => k.priority === priority)
+      return keywords.value ? 
+        keywords.value.filter(k => k.priority === priority) : 
+        keywords.filter(k => k.priority === priority)
     }
 
     // 在 expert 模式下的内容
@@ -916,123 +1118,6 @@ export default defineComponent({
     const saveFilterConfig = () => {
       // TODO: 实现保存配置逻辑
     };
-
-    const columns = [
-      {
-        title: 'Keyword',
-        dataIndex: 'keyword',
-        width: 200,
-        fixed: 'left',
-        customRender: ({ text }) => {
-          return h('strong', text);
-        }
-      },
-      {
-        title: 'KD',
-        dataIndex: 'kd',
-        width: 80,
-      },
-      {
-        title: 'Volume',
-        dataIndex: 'volume',
-        width: 100,
-      },
-      {
-        title: 'CPC',
-        dataIndex: 'cpc',
-        width: 100,
-      },
-      {
-        title: 'Competitor Coverage',
-        dataIndex: 'coverage',
-        width: 120,
-        customRender: ({ text }) => {
-          return h('span', `${text} competitors`);
-        }
-      },
-      {
-        title: 'Business Relevance',
-        dataIndex: 'relevance',
-        width: 140,
-        customRender: ({ text }) => {
-          const colors = ['#ff4d4f', '#faad14', '#52c41a'];
-          const score = parseInt(text);
-          return h('span', {
-            style: {
-              color: colors[Math.min(Math.floor(score/2), 2)]
-            }
-          }, `${score}/5`);
-        }
-      },
-      {
-        title: 'KRS',
-        dataIndex: 'krs',
-        width: 100,
-        customRender: ({ text }) => {
-          return h('span', {
-            style: {
-              color: text >= 70 ? '#52c41a' : text >= 40 ? '#faad14' : '#ff4d4f'
-            }
-          }, text);
-        }
-      },
-      {
-        title: 'Pages',
-        dataIndex: 'pages',
-        width: 200,
-        customRender: ({ text, record }) => {
-          return h('a', {
-            onClick: () => handlePageClick(record)
-          }, `${text.length} pages`);
-        }
-      },
-      {
-        title: 'Actions',
-        key: 'action',
-        fixed: 'right',
-        width: 100,
-        customRender: ({ record }) => {
-          return h('a-space', { size: 'middle' }, [
-            h('a', {
-              onClick: () => handleEdit(record)
-            }, 'Edit'),
-            h('a', {
-              onClick: () => handleDelete(record)
-            }, 'Delete')
-          ]);
-        }
-      },
-      {
-        title: 'From URL',
-        dataIndex: 'fromUrl',
-        width: 200,
-        ellipsis: true, // 超长时显示省略号
-        customRender: ({ text }) => {
-          if (!text) return '-';
-          return h('a-tooltip', { title: text }, () => [
-            h('a', { href: text, target: '_blank' }, text)
-          ]);
-        }
-      },
-    ];
-
-    const competitorColumns = [
-      {
-        title: 'Competitor',
-        dataIndex: 'name',
-        width: 150,
-      },
-      {
-        title: 'Rank',
-        dataIndex: 'rank',
-        width: 80,
-      },
-      {
-        title: 'URL',
-        dataIndex: 'url',
-        width: 200,
-      },
-    ];
 
     const selectedRowKeys = ref([]);
 
@@ -1134,6 +1219,243 @@ export default defineComponent({
       showSelectedModal.value = false
     }
 
+    const isGenerating = ref(false)
+    const contentPlan = ref(null)
+    const suggestedTopics = ref([])
+    const suggestedTitles = ref([])
+    const generatedOutline = ref(null)
+    const selectedTopic = ref(null)
+    const selectedTitle = ref(null)
+
+    const scrollToElement = (elementId) => {
+      const element = document.getElementById(elementId)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
+
+    // 监听内容生成完成后，滚动到主题建议
+    watch(contentPlan, (newValue) => {
+      if (newValue) {
+        setTimeout(() => {
+          scrollToElement('suggested-topics')
+        }, 100)
+      }
+    })
+
+    // 修改数据结构
+    const selectedTopics = ref([])
+    const selectedTitles = ref([])
+
+    // 处理 topic 选择
+    const handleTopicSelect = (topic, checked) => {
+      if (checked) {
+        selectedTopics.value.push(topic.id)
+      } else {
+        selectedTopics.value = selectedTopics.value.filter(id => id !== topic.id)
+      }
+    }
+
+    // 处理 title 选择
+    const handleTitleSelect = (title, checked) => {
+      if (checked) {
+        selectedTitles.value.push(title.id)
+      } else {
+        selectedTitles.value = selectedTitles.value.filter(id => id !== title.id)
+      }
+    }
+
+    // 添加确认处理方法
+    const confirmTopics = async () => {
+      if (selectedTopicsCount.value) {
+        isGeneratingTitles.value = true
+        try {
+          // 生成新的标题建议
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          suggestedTitles.value = [
+            {
+              id: 1,
+              text: 'Cloud Storage Solutions in 2024: The Ultimate Guide',
+              selected: false,
+              metrics: {
+                ctr: 4.5,
+                seoScore: 92
+              }
+            },
+            {
+              id: 2,
+              text: 'Best Cloud Storage Solutions: A Complete Guide for Businesses',
+              selected: false,
+              metrics: {
+                ctr: 4.2,
+                seoScore: 89
+              }
+            }
+          ]
+          // 清空后续步骤的内容
+          selectedTitles.value = []
+          generatedOutline.value = null
+          
+          await nextTick()
+          scrollToElement('suggested-titles')
+        } catch (error) {
+          console.error('Error generating titles:', error)
+          message.error('Failed to generate titles')
+        } finally {
+          isGeneratingTitles.value = false
+        }
+      }
+    }
+
+    const confirmTitles = async () => {
+      if (selectedTitlesCount.value) {
+        isGeneratingOutline.value = true
+        try {
+          // 生成新的大纲
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          generatedOutline.value = [
+            {
+              title: '1. Introduction to Cloud Storage',
+              keywords: ['cloud storage', 'digital storage'],
+              points: [
+                'What is cloud storage?',
+                'Why businesses need cloud storage solutions',
+                'Key benefits of cloud storage'
+              ]
+            },
+            {
+              title: '2. Types of Cloud Storage Solutions',
+              keywords: ['storage solutions', 'enterprise storage'],
+              points: [
+                'Personal cloud storage',
+                'Business cloud storage',
+                'Enterprise cloud storage solutions'
+              ]
+            }
+          ]
+          
+          await nextTick()
+          scrollToElement('content-outline')
+        } catch (error) {
+          console.error('Error generating outline:', error)
+          message.error('Failed to generate outline')
+        } finally {
+          isGeneratingOutline.value = false
+        }
+      }
+    }
+
+    // 修改生成内容的方法
+    const generateContent = async () => {
+      isGenerating.value = true
+      try {
+        // 清空所有现有内容和选择
+        selectedTopics.value = []
+        selectedTitles.value = []
+        suggestedTitles.value = []
+        generatedOutline.value = null
+        
+        // 重新生成内容
+        await analyzeKeywordsIntent()
+        await generateTopics()
+        
+        await nextTick()
+        scrollToElement('content-strategy')
+      } catch (error) {
+        console.error('Generation error:', error)
+        message.error('Failed to generate content plan')
+      } finally {
+        isGenerating.value = false
+      }
+    }
+
+    const analyzeKeywordsIntent = async () => {
+      // 模拟 API 调用
+      contentPlan.value = {
+        intent: {
+          name: 'Informational',
+          color: 'blue',
+          description: 'Users are seeking comprehensive information and detailed explanations.'
+        },
+        pageType: {
+          name: 'Guide',
+          color: 'green',
+          description: 'A detailed guide that covers all aspects of the topic.'
+        }
+      }
+    }
+
+    const generateTopics = async () => {
+      // 模拟 API 调用
+      suggestedTopics.value = [
+        {
+          id: 1,
+          main: 'Comprehensive Guide to Cloud Storage Solutions',
+          reason: 'Covers multiple selected keywords and matches informational intent'
+        },
+        {
+          id: 2,
+          main: 'Cloud Storage Security: A Complete Overview',
+          reason: 'Focuses on security aspects while incorporating main keywords'
+        }
+      ]
+    }
+
+    const generateTitles = async (topicId) => {
+      // 模拟 API 调用
+      suggestedTitles.value = [
+        {
+          id: 1,
+          text: 'Cloud Storage Solutions in 2024: The Ultimate Guide',
+          metrics: {
+            ctr: 4.5,
+            seoScore: 92
+          }
+        },
+        {
+          id: 2,
+          text: 'Best Cloud Storage Solutions: A Complete Guide for Businesses',
+          metrics: {
+            ctr: 4.2,
+            seoScore: 89
+          }
+        }
+      ]
+    }
+
+    const generateOutline = async (titleId) => {
+      // 模拟 API 调用
+      generatedOutline.value = [
+        {
+          title: '1. Introduction to Cloud Storage',
+          keywords: ['cloud storage', 'digital storage'],
+          points: [
+            'What is cloud storage?',
+            'Why businesses need cloud storage solutions',
+            'Key benefits of cloud storage'
+          ]
+        },
+        {
+          title: '2. Types of Cloud Storage Solutions',
+          keywords: ['storage solutions', 'enterprise storage'],
+          points: [
+            'Personal cloud storage',
+            'Business cloud storage',
+            'Enterprise cloud storage solutions'
+          ]
+        }
+      ]
+    }
+
+    // 添加计算属性来处理选中状态
+    const selectedTopicsCount = computed(() => {
+      return suggestedTopics.value.filter(topic => topic.selected).length
+    })
+
+    const selectedTitlesCount = computed(() => {
+      return suggestedTitles.value.filter(title => title.selected).length
+    })
+
     return {
       currentMode,
       selectedKeywords,
@@ -1142,25 +1464,12 @@ export default defineComponent({
       getCategoryPercent,
       viewSelected,
       clearSelection,
-      overviewStats,
-      categories,
-      recommendedKeywords,
-      topPages,
-      selectAllRecommended,
-      showAllKeywords,
-      selectAllPages,
-      handleKeywordSelect,
-      getTotalPageKeywords,
+      overviewStats: ref(overviewStats),
+      categories: ref(categories),
       priorities,
-      getKeywordsByPriority,
-      pageKeywords,
-      filters,
-      addFilter,
-      removeFilter,
-      handleFieldChange,
-      applyFilters,
-      clearFilters,
-      saveFilterConfig,
+      recommendedKeywords: ref(recommendedKeywords),
+      pageKeywords: ref(pageKeywords),
+      savedPresets: ref(savedPresets),
       columns,
       competitorColumns,
       rowSelection,
@@ -1181,7 +1490,25 @@ export default defineComponent({
       previousStep,
       showSelectedModal,
       showSelectedKeywords,
-      handleModalClose
+      handleModalClose,
+      getKeywordsByPriority,
+      isGenerating,
+      contentPlan,
+      suggestedTopics,
+      suggestedTitles,
+      generatedOutline,
+      selectedTopic,
+      selectedTitle,
+      generateContent,
+      selectedTopicsCount,
+      selectedTitlesCount,
+      handleTopicSelect,
+      handleTitleSelect,
+      confirmTopics,  // 确保这些方法被返回
+      confirmTitles,
+      scrollToElement,
+      isGeneratingTitles,
+      isGeneratingOutline,
     }
   }
 })
@@ -1682,7 +2009,7 @@ export default defineComponent({
 .analysis-flow {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
 }
 
 .flow-step {
@@ -2262,6 +2589,317 @@ export default defineComponent({
 
 .reason-value {
   color: #595959;
+}
+
+.generation-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.result-card {
+  background: #fff;
+  border-radius: 8px;
+  
+  :deep(.ant-card-head) {
+    min-height: 48px;
+    padding: 0 16px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  
+  .anticon {
+    color: #1890ff;
+  }
+}
+
+.topic-list,
+.title-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.topic-item,
+.title-item {
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  transition: all 0.3s;
+  
+  &:hover {
+    background: #fafafa;
+  }
+  
+  :deep(.ant-checkbox-wrapper) {
+    width: 100%;
+    
+    .ant-checkbox {
+      top: 2px;
+    }
+  }
+}
+
+.topic-content,
+.title-content {
+  margin-left: 8px;
+}
+
+.topic-main,
+.title-main {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 4px;
+}
+
+.topic-reason {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.title-metrics {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.outline-section {
+  margin-bottom: 20px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-header {
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 8px;
+}
+
+.section-keywords {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.point-item {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 8px;
+  padding-left: 8px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.workspace-layout {
+  display: flex;
+  gap: 24px;
+  height: calc(100vh - 200px);
+}
+
+.selected-keywords-card {
+  width: 320px;
+  flex-shrink: 0;
+  height: fit-content;
+  
+  :deep(.ant-card-body) {
+    padding: 0;
+    max-height: calc(100vh - 280px);
+    overflow-y: auto;
+  }
+}
+
+.selected-keywords-list {
+  :deep(.ant-list-item) {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+.selected-keyword-item {
+  width: 100%;
+  
+  .keyword-text {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.85);
+    margin-bottom: 8px;
+  }
+  
+  .keyword-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    
+    .ant-tag {
+      margin-right: 0;
+    }
+  }
+}
+
+.workspace-card {
+  flex: 1;
+  min-width: 0; 
+}
+
+.step-actions {
+  margin-bottom: 24px;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.workspace-layout {
+  display: flex;
+  gap: 24px;
+  height: calc(100vh - 200px);
+}
+
+.selected-keywords-card {
+  width: 320px;
+  flex-shrink: 0;
+  height: fit-content;
+  
+  :deep(.ant-card-body) {
+    padding: 0;
+    max-height: calc(100vh - 280px);
+    overflow-y: auto;
+  }
+}
+
+.generation-flow {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+
+/* 添加纵向导航样式 */
+.vertical-nav {
+  position: sticky;
+  top: 24px;
+  height: fit-content;
+  padding: 16px 0;
+  margin: 0 16px;
+  border-left: 1px solid #f0f0f0;
+  
+  :deep(.ant-anchor) {
+    padding-left: 0;
+    
+    &::before {
+      display: none;
+    }
+    
+    .ant-anchor-link {
+      padding: 4px 0 4px 16px;
+      
+      .ant-anchor-link-title {
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 13px;
+        transition: all 0.3s;
+        
+        &:hover {
+          color: #1890ff;
+        }
+      }
+      
+      &-active {
+        background: rgba(24, 144, 255, 0.04);
+        border-left: 2px solid #1890ff;
+        margin-left: -1px;
+        
+        .ant-anchor-link-title {
+          color: #1890ff;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+/* 修改工作区布局样式 */
+.workspace-layout {
+  display: flex;
+  gap: 24px;
+  height: calc(100vh - 200px);
+}
+
+.generation-flow {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 16px;
+  scroll-behavior: smooth;
+  
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #e8e8e8;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #d9d9d9;
+    }
+  }
+}
+
+/* 确保结果卡片有足够的下边距 */
+.result-card {
+  margin-bottom: 24px;
+  scroll-margin-top: 24px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.vertical-nav {
+  :deep(.nav-disabled) {
+    cursor: not-allowed;
+    opacity: 0.5;
+    
+    .ant-anchor-link-title {
+      color: rgba(0, 0, 0, 0.25) !important;
+      pointer-events: none;
+    }
+    
+    &:hover {
+      background: none;
+    }
+  }
+}
+
+.action-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.topic-list,
+.title-list {
+  margin-bottom: 0; /* 移除底部边距，因为现在有了 action-footer */
 }
 </style>
 
