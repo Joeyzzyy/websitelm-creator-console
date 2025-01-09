@@ -6,10 +6,12 @@
   >
     <!-- Workflow Steps -->
     <a-card class="workflow-card">
-      <a-steps :current="currentStep" direction="horizontal" class="horizontal-steps">
-        <a-step title="Select Keywords" description="Choose keywords from different modes" />
-        <a-step title="Generate Topic Title and Outline" description="Create and optimize content structure" />
-      </a-steps>
+      <div class="steps-container">
+        <a-steps :current="currentStep" direction="horizontal" class="horizontal-steps">
+          <a-step title="Select Keywords" description="Choose keywords from different modes" />
+          <a-step title="Generate Topic Title and Outline" description="Create and optimize content structure" />
+        </a-steps>
+      </div>
     </a-card>
 
     <!-- Main Content Area -->
@@ -160,8 +162,10 @@
                 <a-button type="link" @click="clearSelection">
                   Clear All
                 </a-button>
-                <a-button type="primary" @click="exportSelected">
-                  <ExportOutlined /> Export
+                <a-button 
+                  v-if="selectedKeywords.length"
+                  @click="showSelectedKeywords"
+                >View Selected ({{ selectedKeywords.length }})
                 </a-button>
               </a-space>
             </div>
@@ -199,7 +203,10 @@
                         <a-list-item>
                           <div class="keyword-item">
                             <a-space align="start" class="keyword-header">
-                              <a-checkbox v-model:checked="item.selected">
+                              <a-checkbox 
+                                v-model:checked="item.selected"
+                                @change="(checked) => handleKeywordSelect(item, checked)"
+                              >
                                 "{{ item.keyword }}"
                               </a-checkbox>
                               <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
@@ -230,7 +237,7 @@
             <!-- Top Pages Optimization Tips 列 -->
             <a-col :span="12">
               <a-card title="Keywords From Top Pages Optimization" class="optimization-card">
-                <p class="recommendation-text">★ Optimization opportunities by priority:</p>
+                <p class="recommendation-text">Optimization opportunities by priority:</p>
                 
                 <a-tabs v-if="pageKeywords && pageKeywords.length">
                   <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
@@ -244,7 +251,10 @@
                         <a-list-item>
                           <div class="keyword-item">
                             <a-space align="start" class="keyword-header">
-                              <a-checkbox v-model:checked="item.selected">
+                              <a-checkbox 
+                                v-model:checked="item.selected"
+                                @change="(checked) => handleKeywordSelect(item, checked)"
+                              >
                                 "{{ item.keyword }}"
                               </a-checkbox>
                               <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
@@ -439,11 +449,57 @@
     >
       <a-input v-model:value="newPresetName" placeholder="Enter preset name" />
     </a-modal>
+
+    <!-- Add modal for selected keywords -->
+    <a-modal
+      v-model:visible="showSelectedModal"
+      title="Selected Keywords"
+      width="800px"
+      @cancel="handleModalClose"
+    >
+      <a-list
+        :data-source="selectedKeywords"
+        class="selected-keywords-list"
+      >
+        <template #header>
+          <div class="list-header">
+            <span>Total Selected: {{ selectedKeywords.length }} keywords</span>
+          </div>
+        </template>
+        
+        <template #renderItem="{ item }">
+          <a-list-item>
+            <div class="selected-keyword-item">
+              <div class="keyword-main">
+                <span class="keyword-text">"{{ item.keyword }}"</span>
+                <div class="keyword-metrics">
+                  <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
+                  <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                  <a-tag color="purple">Volume={{ item.volume }}</a-tag>
+                  <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
+                </div>
+              </div>
+              <div class="keyword-reason">
+                <BulbOutlined />
+                <div class="reason-content">
+                  <span class="reason-highlight">High potential: </span>
+                  <span class="reason-value">{{ item.reason }}</span>
+                </div>
+              </div>
+            </div>
+          </a-list-item>
+        </template>
+      </a-list>
+      
+      <template #footer>
+        <a-button @click="handleModalClose">Close</a-button>
+      </template>
+    </a-modal>
   </page-layout>
 </template>
 
 <script>
-import { defineComponent, ref, computed, h } from 'vue'
+import { defineComponent, ref, computed, h, watch } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
 import BeginnerMode from './BeginnerMode.vue'
 import { 
@@ -451,6 +507,8 @@ import {
   PlusOutlined,
   SaveOutlined,
   // ... 其他已使用的图标
+  EyeOutlined,
+  BulbOutlined
 } from '@ant-design/icons-vue'
 
 export default defineComponent({
@@ -462,6 +520,8 @@ export default defineComponent({
     PlusOutlined,
     SaveOutlined,
     // ... 其他已使用的图标
+    EyeOutlined,
+    BulbOutlined
   },
   setup() {
     const currentMode = ref('beginner')
@@ -498,10 +558,8 @@ export default defineComponent({
 
     const clearSelection = () => {
       selectedKeywords.value = []
-    }
-
-    const exportSelected = () => {
-      // Implement export logic
+      recommendedKeywords.value.forEach(k => k.selected = false)
+      pageKeywords.value.forEach(k => k.selected = false)
     }
 
     // 添加新的数据结构
@@ -754,14 +812,37 @@ export default defineComponent({
       // 实现选择所有页面的逻辑
     }
 
-    const handleKeywordSelect = (keyword) => {
-      const index = selectedKeywords.value.findIndex(k => k.keyword === keyword.keyword)
-      if (index === -1) {
-        selectedKeywords.value.push(keyword)
+    const handleKeywordSelect = (keyword, isSelected) => {
+      if (isSelected) {
+        // 避免重复添加
+        if (!selectedKeywords.value.find(k => k.keyword === keyword.keyword)) {
+          selectedKeywords.value.push({
+            ...keyword,
+            selected: true
+          })
+        }
       } else {
-        selectedKeywords.value.splice(index, 1)
+        // 从已选列表中移除
+        selectedKeywords.value = selectedKeywords.value.filter(
+          k => k.keyword !== keyword.keyword
+        )
       }
     }
+
+    // 监听关键词的选中状态变化
+    watch(
+      () => [...recommendedKeywords.value, ...pageKeywords.value],
+      (keywords) => {
+        keywords.forEach(keyword => {
+          if (keyword.selected) {
+            handleKeywordSelect(keyword, true)
+          } else {
+            handleKeywordSelect(keyword, false)
+          }
+        })
+      },
+      { deep: true }
+    )
 
     // 添加计算属性来获取所有页面关键词的总数
     const getTotalPageKeywords = computed(() => {
@@ -1041,6 +1122,18 @@ export default defineComponent({
       }
     }
 
+    // Modal control
+    const showSelectedModal = ref(false)
+
+    // Methods
+    const showSelectedKeywords = () => {
+      showSelectedModal.value = true
+    }
+
+    const handleModalClose = () => {
+      showSelectedModal.value = false
+    }
+
     return {
       currentMode,
       selectedKeywords,
@@ -1049,7 +1142,6 @@ export default defineComponent({
       getCategoryPercent,
       viewSelected,
       clearSelection,
-      exportSelected,
       overviewStats,
       categories,
       recommendedKeywords,
@@ -1087,6 +1179,9 @@ export default defineComponent({
       currentStep,
       nextStep,
       previousStep,
+      showSelectedModal,
+      showSelectedKeywords,
+      handleModalClose
     }
   }
 })
@@ -1532,14 +1627,6 @@ export default defineComponent({
 }
 
 .reason-value {
-  color: #262626;
-  font-weight: 500;
-  background: rgba(24, 144, 255, 0.1);
-  padding: 0 4px;
-  border-radius: 2px;
-}
-
-.reason-detail {
   color: #595959;
 }
 
@@ -2110,5 +2197,72 @@ export default defineComponent({
   border: none;
   padding: 2px 8px;
 }
+
+.selected-keywords-list {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.list-header {
+  font-size: 14px;
+  color: #8c8c8c;
+  padding: 8px 0;
+}
+
+.selected-keyword-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.keyword-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.keyword-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #262626;
+}
+
+.keyword-metrics {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.keyword-reason {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(24, 144, 255, 0.04);
+  border-left: 3px solid #1890ff;
+  border-radius: 0 4px 4px 0;
+  
+  .anticon {
+    color: #1890ff;
+    font-size: 16px;
+    margin-top: 2px;
+  }
+}
+
+.reason-content {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.reason-highlight {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.reason-value {
+  color: #595959;
+}
 </style>
+
 
