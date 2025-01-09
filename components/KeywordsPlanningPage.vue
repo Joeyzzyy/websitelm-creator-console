@@ -125,13 +125,17 @@
 
             <!-- 添加新的引导部分 -->
             <div class="next-step-guide">
-              <div class="guide-line"></div>
               <div class="guide-content">
                 <ArrowDownOutlined class="guide-arrow" />
                 <div class="guide-text">
                   <div class="guide-title">Ready to get started?</div>
                   <div class="guide-description">Review our recommended keywords below and select the ones you want to target</div>
                 </div>
+              </div>
+              <div class="guide-decorative-arrows">
+                <div class="decorative-arrow"></div>
+                <div class="decorative-arrow"></div>
+                <div class="decorative-arrow"></div>
               </div>
             </div>
           </template>
@@ -665,7 +669,12 @@ export default defineComponent({
 }
 
 .mode-selector-card {
+  margin-bottom: 16px;
   background: #fafafa;
+  
+  :deep(.ant-card-body) {
+    padding: 12px 16px;
+  }
 }
 
 .analytics-card,
@@ -780,7 +789,16 @@ export default defineComponent({
 
 .header-actions {
   display: flex;
-  gap: 12px;
+  gap: 8px;
+  
+  .ant-btn {
+    height: 32px;
+    padding: 0 12px;
+    
+    .anticon {
+      font-size: 14px;
+    }
+  }
 }
 
 .stat-item {
@@ -834,6 +852,7 @@ export default defineComponent({
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
 }
 
 .mode-selector-card {
@@ -1152,107 +1171,157 @@ export default defineComponent({
 /* 添加新的横向布局样式 */
 .analysis-steps-container {
   display: flex;
-  gap: 24px;
+  gap: 16px;
   align-items: stretch;
-  margin-bottom: 0; /* 移除底部边距，让引导更紧凑 */
+  margin-bottom: 0;
 }
 
 .analysis-step-horizontal {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px;
+  gap: 8px;
+  padding: 12px;
   background: #fafafa;
   border-radius: 8px;
-  min-width: 0; /* 防止内容溢出 */
+  min-width: 0;
   position: relative;
-  /* 添加一个小箭头指向下一个步骤 */
+
   &:not(:last-child)::after {
     content: '';
     position: absolute;
-    right: -18px;
+    right: -12px;
     top: 50%;
-    transform: translateY(-50%);
-    width: 12px;
-    height: 12px;
+    transform: translateY(-50%) rotate(45deg);
+    width: 8px;
+    height: 8px;
     border-top: 2px solid #1890ff;
     border-right: 2px solid #1890ff;
-    transform: rotate(45deg);
   }
 }
 
 .step-badge {
   position: relative;
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
   background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-bottom: 8px;
+  margin-bottom: 0;
+
+  .step-icon {
+    font-size: 14px;
+  }
+
+  .step-number {
+    position: absolute;
+    right: -3px;
+    bottom: -3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    font-size: 11px;
+  }
 }
 
 .step-content {
   flex: 1;
+  min-width: 0;
 }
 
-/* 调整标签和内容的大小以适应横向布局 */
 .step-title {
-  font-size: 14px;
-  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
 }
 
 .step-subtitle {
   font-size: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.stat-item {
+  margin-top: 4px;
+  
+  .stat-label {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+  
+  .stat-value.compact {
+    font-size: 13px;
+    line-height: 1.2;
+  }
 }
 
 .difference-tags {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+
+  :deep(.ant-tag) {
+    font-size: 12px;
+    padding: 2px 6px;
+    margin: 0;
+    line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+
+    .anticon {
+      font-size: 12px;
+    }
+  }
 }
 
-:deep(.ant-tag) {
-  margin-right: 0;
-  white-space: normal;
-  height: auto;
-  line-height: 1.5;
+.step-description {
+  font-size: 12px;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .action-icon,
+  .arrow-icon {
+    font-size: 12px;
+  }
 }
 
 /* 添加新的引导样式 */
 .next-step-guide {
   text-align: center;
-  padding: 24px 0;
+  padding: 32px 0;
   position: relative;
-}
-
-.guide-line {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  height: 24px;
-  border-left: 2px dashed #1890ff;
-  opacity: 0.5;
+  background: linear-gradient(180deg, rgba(24,144,255,0.08) 0%, rgba(24,144,255,0) 100%);
 }
 
 .guide-content {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 24px;
-  background: #e6f7ff;
-  border-radius: 24px;
-  border: 1px solid #91d5ff;
+  gap: 16px;
+  padding: 16px 32px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+  position: relative;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(24, 144, 255, 0.2);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(24, 144, 255, 0.15);
+  }
 }
 
 .guide-arrow {
   font-size: 24px;
   color: #1890ff;
-  animation: bounce 2s infinite;
+  animation: floatArrow 2s ease-in-out infinite;
 }
 
 .guide-text {
@@ -1264,22 +1333,121 @@ export default defineComponent({
   font-weight: 500;
   color: #1890ff;
   margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &::after {
+    content: '';
+    width: 4px;
+    height: 4px;
+    background: #1890ff;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
 }
 
 .guide-description {
   font-size: 14px;
   color: rgba(0, 0, 0, 0.65);
+  position: relative;
 }
 
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+@keyframes floatArrow {
+  0%, 100% {
     transform: translateY(0);
   }
-  40% {
-    transform: translateY(-8px);
+  50% {
+    transform: translateY(8px);
   }
-  60% {
-    transform: translateY(-4px);
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 添加多个装饰性箭头 */
+.guide-decorative-arrows {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -20px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.decorative-arrow {
+  width: 2px;
+  height: 16px;
+  background: #1890ff;
+  opacity: 0.3;
+  animation: fadeInOut 1.5s infinite;
+
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+  &:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    transform: scaleY(0.4);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scaleY(0.4);
+    opacity: 0.2;
+  }
+}
+
+/* 优化单选按钮组样式 */
+:deep(.ant-radio-group) {
+  display: flex;
+  
+  .ant-radio-button-wrapper {
+    height: 32px;
+    padding: 0 16px;
+    line-height: 30px;
+    
+    /* 优化图标样式 */
+    .anticon {
+      font-size: 14px;
+      margin-right: 4px;
+    }
+  }
+}
+
+/* 优化操作按钮样式 */
+.header-actions {
+  display: flex;
+  gap: 8px;
+  
+  .ant-btn {
+    height: 32px;
+    padding: 0 12px;
+    
+    .anticon {
+      font-size: 14px;
+    }
   }
 }
 </style>
+
