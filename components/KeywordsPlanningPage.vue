@@ -6,7 +6,7 @@
   >
     <!-- Workflow Steps -->
     <a-card class="workflow-card">
-      <a-steps :current="currentStep">
+      <a-steps :current="currentStep" direction="horizontal" class="horizontal-steps">
         <a-step title="Select Keywords" description="Choose keywords from different modes" />
         <a-step title="Generate Topics" description="Create content topics from keywords" />
         <a-step title="Optimize Titles" description="Generate and optimize page titles" />
@@ -54,60 +54,83 @@
 
         <!-- Analytics Overview -->
         <a-card class="analytics-card" :bordered="false">
-          <!-- 只在 beginner 模式下显示分析信息 -->
           <template v-if="currentMode === 'beginner'">
-            <!-- 第一步：分析概况 -->
-            <div class="analysis-step">
-              <div class="step-number">1</div>
-              <div class="step-content">
-                <div class="step-title">Analysis Overview</div>
-                <a-row :gutter="[16, 16]">
-                  <a-col :span="12">
-                    <div class="stat-item">
-                      <div class="stat-label">We've analyzed</div>
-                      <div class="stat-value compact">2,500 keywords</div>
-                    </div>
-                  </a-col>
-                  <a-col :span="12">
-                    <div class="stat-item">
-                      <div class="stat-label">Compared your site with</div>
-                      <div class="stat-value compact">30 of 50 competitor pages</div>
-                    </div>
-                  </a-col>
-                </a-row>
+            <div class="analysis-steps-container">
+              <!-- 第一步：分析概况 -->
+              <div class="analysis-step-horizontal">
+                <div class="step-badge">
+                  <SearchOutlined class="step-icon" />
+                  <div class="step-number">1</div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">Analysis Overview</div>
+                  <div class="step-subtitle">We've completed a comprehensive keyword analysis</div>
+                  <a-row :gutter="[16, 16]">
+                    <a-col :span="12">
+                      <div class="stat-item">
+                        <div class="stat-label">We've analyzed</div>
+                        <div class="stat-value compact">2,500 keywords</div>
+                      </div>
+                    </a-col>
+                    <a-col :span="12">
+                      <div class="stat-item">
+                        <div class="stat-label">Compared your site with</div>
+                        <div class="stat-value compact">30 of 50 competitor pages</div>
+                      </div>
+                    </a-col>
+                  </a-row>
+                </div>
               </div>
-            </div>
 
-            <a-divider style="margin: 12px 0" />
-            
-            <!-- 第二步：发现的问题 -->
-            <div class="analysis-step">
-              <div class="step-number">2</div>
-              <div class="step-content">
-                <div class="step-title">What We Found</div>
-                <div class="difference-tags">
-                  <a-tag color="red">
-                    <InfoCircleOutlined /> 200 keywords you're missing
-                  </a-tag>
-                  <a-tag color="orange">
-                    <WarningOutlined /> 150 keywords need improvement
-                  </a-tag>
-                  <a-tag color="green">
-                    <CheckCircleOutlined /> 80 keywords performing well
-                  </a-tag>
+              <!-- 第二步：发现的问题 -->
+              <div class="analysis-step-horizontal">
+                <div class="step-badge">
+                  <BulbOutlined class="step-icon" />
+                  <div class="step-number">2</div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">What We Found</div>
+                  <div class="step-subtitle">Here's what our analysis revealed about your keyword coverage</div>
+                  <div class="difference-tags">
+                    <a-tag color="red">
+                      <InfoCircleOutlined /> 200 keywords you're missing
+                    </a-tag>
+                    <a-tag color="orange">
+                      <WarningOutlined /> 150 keywords need improvement
+                    </a-tag>
+                    <a-tag color="green">
+                      <CheckCircleOutlined /> 80 keywords performing well
+                    </a-tag>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 第三步：建议行动 -->
+              <div class="analysis-step-horizontal">
+                <div class="step-badge">
+                  <ThunderboltOutlined class="step-icon" />
+                  <div class="step-number">3</div>
+                </div>
+                <div class="step-content">
+                  <div class="step-title">Recommended Actions</div>
+                  <div class="step-subtitle">We've prioritized keywords based on potential impact and effort</div>
+                  <div class="step-description">
+                    <CheckCircleOutlined class="action-icon" /> Review and select keywords below
+                    <ArrowRightOutlined class="arrow-icon" /> Focus on P0 (Quick Wins) first
+                    <ArrowRightOutlined class="arrow-icon" /> Then move to higher effort opportunities
+                  </div>
                 </div>
               </div>
             </div>
 
-            <a-divider style="margin: 12px 0" />
-
-            <!-- 第三步：建议行动 -->
-            <div class="analysis-step">
-              <div class="step-number">3</div>
-              <div class="step-content">
-                <div class="step-title">Next Steps</div>
-                <div class="step-description">
-                  We've prepared a list of recommended keywords below. Select the ones you want to focus on first.
+            <!-- 添加新的引导部分 -->
+            <div class="next-step-guide">
+              <div class="guide-line"></div>
+              <div class="guide-content">
+                <ArrowDownOutlined class="guide-arrow" />
+                <div class="guide-text">
+                  <div class="guide-title">Ready to get started?</div>
+                  <div class="guide-description">Review our recommended keywords below and select the ones you want to target</div>
                 </div>
               </div>
             </div>
@@ -160,74 +183,72 @@
             <!-- System Recommendations 列 -->
             <a-col :span="12">
               <a-card title="Keywords From Comparison" class="beginner-card">
-                <p class="recommendation-text">We selected "20 easiest keywords" for you</p>
+                <p class="recommendation-text">We analyzed and prioritized keywords by opportunity:</p>
                 
-                <a-list
-                  :data-source="recommendedKeywords"
-                  size="small"
-                  class="keywords-list"
-                >
-                  <template #renderItem="{ item }">
-                    <a-list-item>
-                      <div class="keyword-item">
-                        <a-space align="start" class="keyword-header">
-                          <a-checkbox v-model:checked="item.selected">
-                            "{{ item.keyword }}"
-                          </a-checkbox>
-                          <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                          <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                          <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
-                        </a-space>
-                        <div class="keyword-reason">
-                          <InfoCircleOutlined /> {{ item.reason }}
-                        </div>
-                      </div>
-                    </a-list-item>
-                  </template>
-                </a-list>
-
-                <div class="action-buttons">
-                  <a-button @click="selectAllRecommended">
-                    Select All 20 Keywords
-                  </a-button>
-                </div>
+                <a-tabs>
+                  <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
+                    <div class="priority-description">{{ priority.description }}</div>
+                    <a-list
+                      :data-source="getKeywordsByPriority(recommendedKeywords, priority.level)"
+                      size="small"
+                      class="keywords-list"
+                    >
+                      <template #renderItem="{ item }">
+                        <a-list-item>
+                          <div class="keyword-item">
+                            <a-space align="start" class="keyword-header">
+                              <a-checkbox v-model:checked="item.selected">
+                                "{{ item.keyword }}"
+                              </a-checkbox>
+                              <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                              <a-tag color="purple">Vol={{ item.volume }}</a-tag>
+                              <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
+                            </a-space>
+                            <div class="keyword-reason">
+                              <InfoCircleOutlined /> {{ item.reason }}
+                            </div>
+                          </div>
+                        </a-list-item>
+                      </template>
+                    </a-list>
+                  </a-tab-pane>
+                </a-tabs>
               </a-card>
             </a-col>
 
             <!-- Top Pages Optimization Tips 列 -->
             <a-col :span="12">
               <a-card title="Keywords From Top Pages Optimization" class="optimization-card">
-                <p class="recommendation-text">★ Found 3 high-traffic pages for optimization:</p>
+                <p class="recommendation-text">★ Optimization opportunities by priority:</p>
                 
-                <a-list
-                  :data-source="recommendedKeywords"
-                  size="small"
-                  class="keywords-list"
-                >
-                  <template #renderItem="{ item }">
-                    <a-list-item>
-                      <div class="keyword-item">
-                        <a-space align="start" class="keyword-header">
-                          <a-checkbox v-model:checked="item.selected">
-                            "{{ item.keyword }}"
-                          </a-checkbox>
-                          <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                          <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                          <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
-                        </a-space>
-                        <div class="keyword-reason">
-                          <InfoCircleOutlined /> {{ item.pageReason }}
-                        </div>
-                      </div>
-                    </a-list-item>
-                  </template>
-                </a-list>
-
-                <div class="action-buttons">
-                  <a-button @click="selectAllPages">
-                    Select All {{ getTotalPageKeywords }} Keywords
-                  </a-button>
-                </div>
+                <a-tabs v-if="pageKeywords && pageKeywords.length">
+                  <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
+                    <div class="priority-description">{{ priority.description }}</div>
+                    <a-list
+                      :data-source="getKeywordsByPriority(pageKeywords, priority.level)"
+                      size="small"
+                      class="keywords-list"
+                    >
+                      <template #renderItem="{ item }">
+                        <a-list-item>
+                          <div class="keyword-item">
+                            <a-space align="start" class="keyword-header">
+                              <a-checkbox v-model:checked="item.selected">
+                                "{{ item.keyword }}"
+                              </a-checkbox>
+                              <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                              <a-tag color="purple">Vol={{ item.volume }}</a-tag>
+                              <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
+                            </a-space>
+                            <div class="keyword-reason">
+                              <InfoCircleOutlined /> {{ item.pageReason }}
+                            </div>
+                          </div>
+                        </a-list-item>
+                      </template>
+                    </a-list>
+                  </a-tab-pane>
+                </a-tabs>
               </a-card>
             </a-col>
           </a-row>
@@ -329,6 +350,39 @@ export default defineComponent({
       { name: 'Unique', count: 40, color: 'purple' }
     ])
 
+    const priorities = [
+      {
+        level: 'P0',
+        label: 'P0 - Quick Wins',
+        color: '#f50',
+        description: 'High impact, low effort opportunities'
+      },
+      {
+        level: 'P1',
+        label: 'P1 - High Priority',
+        color: '#fa8c16',
+        description: 'Important terms with good potential'
+      },
+      {
+        level: 'P2',
+        label: 'P2 - Medium Priority',
+        color: '#1890ff',
+        description: 'Valuable but requires more effort'
+      },
+      {
+        level: 'P3',
+        label: 'P3 - Low Priority',
+        color: '#52c41a',
+        description: 'Long-term opportunities'
+      },
+      {
+        level: 'P4',
+        label: 'P4 - Monitor',
+        color: '#722ed1',
+        description: 'Keep an eye on these terms'
+      }
+    ]
+
     const recommendedKeywords = ref([
       {
         keyword: 'cloud storage',
@@ -336,8 +390,8 @@ export default defineComponent({
         volume: 1200,
         status: { text: 'Missing', color: 'red' },
         selected: false,
-        reason: 'Low competition (KD=35) with high search volume. Your competitors rank well for this term.',
-        pageReason: 'This keyword appears in your top page "/cloud-guide" but is not optimized.'
+        priority: 'P0',
+        reason: 'Low competition (KD=35) with high search volume. Your competitors rank well for this term.'
       },
       {
         keyword: 'online backup',
@@ -345,10 +399,143 @@ export default defineComponent({
         volume: 900,
         status: { text: 'Weak', color: 'orange' },
         selected: false,
-        reason: 'You already rank on page 2. Small optimization could bring big traffic gains.',
-        pageReason: 'Your page "/backup-solution" ranks #15. Adding this keyword could improve ranking.'
+        priority: 'P0',
+        reason: 'You already rank on page 2. Small optimization could bring big traffic gains.'
       },
-      // ... 可以添加更多推荐关键词
+      {
+        keyword: 'best cloud storage providers',
+        kd: 45,
+        volume: 2500,
+        status: { text: 'Missing', color: 'red' },
+        selected: false,
+        priority: 'P1',
+        reason: 'High-volume term that your competitors are targeting successfully.'
+      },
+      {
+        keyword: 'secure cloud backup',
+        kd: 38,
+        volume: 800,
+        status: { text: 'Weak', color: 'orange' },
+        selected: false,
+        priority: 'P1',
+        reason: 'Currently ranking #12, good opportunity to reach first page.'
+      },
+      {
+        keyword: 'enterprise cloud storage',
+        kd: 55,
+        volume: 1500,
+        status: { text: 'Missing', color: 'red' },
+        selected: false,
+        priority: 'P2',
+        reason: 'Higher competition but matches your product offering well.'
+      },
+      {
+        keyword: 'cloud storage comparison',
+        kd: 42,
+        volume: 1100,
+        status: { text: 'Missing', color: 'red' },
+        selected: false,
+        priority: 'P2',
+        reason: 'Popular comparison term that could drive qualified traffic.'
+      },
+      {
+        keyword: 'personal cloud storage',
+        kd: 30,
+        volume: 600,
+        status: { text: 'Weak', color: 'orange' },
+        selected: false,
+        priority: 'P3',
+        reason: 'Lower volume but very relevant to your service.'
+      },
+      {
+        keyword: 'cloud storage pricing',
+        kd: 25,
+        volume: 450,
+        status: { text: 'Missing', color: 'red' },
+        selected: false,
+        priority: 'P4',
+        reason: 'Commercial intent keyword worth monitoring.'
+      }
+    ])
+
+    const pageKeywords = ref([
+      // P0 优先级关键词
+      {
+        keyword: 'cloud storage solutions',
+        kd: 35,
+        volume: 1200,
+        status: { text: 'Missing', color: 'red' },
+        selected: false,
+        priority: 'P0',
+        pageReason: 'Your page "/cloud-guide" ranks #15. High potential for quick improvement.'
+      },
+      {
+        keyword: 'business cloud storage',
+        kd: 42,
+        volume: 1800,
+        status: { text: 'Weak', color: 'orange' },
+        selected: false,
+        priority: 'P0',
+        pageReason: 'Your page "/business-solutions" ranks #8. Close to first page.'
+      },
+      // P1 优先级关键词
+      {
+        keyword: 'cloud backup services',
+        kd: 38,
+        volume: 1400,
+        status: { text: 'Missing', color: 'red' },
+        selected: false,
+        priority: 'P1',
+        pageReason: 'Perfect fit for your "/services" page. Currently not targeting this term.'
+      },
+      {
+        keyword: 'cloud storage security',
+        kd: 45,
+        volume: 2000,
+        status: { text: 'Weak', color: 'orange' },
+        selected: false,
+        priority: 'P1',
+        pageReason: 'Your "/security" page needs optimization for this key term.'
+      },
+      // P2 优先级关键词
+      {
+        keyword: 'cloud file sharing',
+        kd: 50,
+        volume: 1600,
+        status: { text: 'Missing', color: 'red' },
+        selected: false,
+        priority: 'P2',
+        pageReason: 'Good opportunity for your "/features" page to target this term.'
+      },
+      {
+        keyword: 'enterprise backup solutions',
+        kd: 48,
+        volume: 900,
+        status: { text: 'Weak', color: 'orange' },
+        selected: false,
+        priority: 'P2',
+        pageReason: 'Your "/enterprise" page could rank better for this term.'
+      },
+      // P3 优先级关键词
+      {
+        keyword: 'cloud storage reviews',
+        kd: 35,
+        volume: 800,
+        status: { text: 'Missing', color: 'red' },
+        selected: false,
+        priority: 'P3',
+        pageReason: 'Consider creating a dedicated review comparison page.'
+      },
+      // P4 优先级关键词
+      {
+        keyword: 'cloud backup pricing',
+        kd: 30,
+        volume: 500,
+        status: { text: 'Weak', color: 'orange' },
+        selected: false,
+        priority: 'P4',
+        pageReason: 'Your "/pricing" page could better target this commercial term.'
+      }
     ])
 
     const topPages = ref([
@@ -406,6 +593,12 @@ export default defineComponent({
       }, 0)
     })
 
+    // 按优先级过滤关键词的方法
+    const getKeywordsByPriority = (keywords, priority) => {
+      if (!keywords || !keywords.length) return []
+      return keywords.value ? keywords.value.filter(k => k.priority === priority) : keywords.filter(k => k.priority === priority)
+    }
+
     return {
       currentMode,
       selectedKeywords,
@@ -423,7 +616,10 @@ export default defineComponent({
       showAllKeywords,
       selectAllPages,
       handleKeywordSelect,
-      getTotalPageKeywords
+      getTotalPageKeywords,
+      priorities,
+      getKeywordsByPriority,
+      pageKeywords
     }
   }
 })
@@ -433,6 +629,21 @@ export default defineComponent({
 .workflow-card {
   margin-bottom: 24px;
   background: #fafafa;
+}
+
+.horizontal-steps {
+  padding: 12px 24px;
+}
+
+:deep(.ant-steps-horizontal) {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+:deep(.ant-steps-item) {
+  flex: 1;
+  margin-right: 0 !important;
 }
 
 .main-content {
@@ -454,7 +665,6 @@ export default defineComponent({
 }
 
 .mode-selector-card {
-  margin-bottom: 24px;
   background: #fafafa;
 }
 
@@ -683,21 +893,43 @@ export default defineComponent({
   display: flex;
   gap: 16px;
   align-items: flex-start;
-  padding: 4px 0;
+  padding: 8px 0;
+  position: relative;
 }
 
-.step-number {
-  width: 24px;
-  height: 24px;
-  border-radius: 12px;
-  background-color: #1890ff;
-  color: white;
+.step-badge {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: 500;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+}
+
+.step-icon {
+  color: white;
+  font-size: 18px;
+}
+
+.step-number {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background-color: #fff;
+  border: 2px solid #1890ff;
+  color: #1890ff;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .step-content {
@@ -705,16 +937,49 @@ export default defineComponent({
 }
 
 .step-title {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+}
+
+.step-subtitle {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 12px;
 }
 
 .step-description {
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   color: rgba(0, 0, 0, 0.65);
-  margin-top: 4px;
+  font-size: 14px;
+  
+  .action-icon {
+    color: #52c41a;
+  }
+  
+  .arrow-icon {
+    color: #1890ff;
+  }
+}
+
+.difference-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  
+  :deep(.ant-tag) {
+    margin-right: 0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+  }
 }
 
 .stat-value.compact {
@@ -722,27 +987,9 @@ export default defineComponent({
   font-weight: 500;
   color: rgba(0, 0, 0, 0.85);
   line-height: 1.2;
-}
-
-.difference-tags {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  
-  :deep(.ant-tag) {
-    margin-right: 0;
-    font-size: 13px;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-}
-
-.analytics-card {
-  :deep(.ant-card-body) {
-    padding: 16px;
-  }
 }
 
 .keyword-item {
@@ -766,6 +1013,273 @@ export default defineComponent({
   
   .anticon {
     color: #1890ff;
+  }
+}
+
+.priority-section {
+  margin-bottom: 24px;
+}
+
+.priority-header {
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.priority-description {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 16px;
+}
+
+.keywords-list {
+  margin-top: 8px;
+}
+
+/* 调整 tab 样式 */
+:deep(.ant-tabs-tab) {
+  padding: 8px 16px;
+}
+
+:deep(.ant-tabs-tab-btn) {
+  font-size: 13px;
+}
+
+/* 可以给不同优先级的 tab 添加对应的颜色 */
+:deep(.ant-tabs-tab[data-node-key="P0"]) {
+  color: #f50;
+}
+
+:deep(.ant-tabs-tab[data-node-key="P1"]) {
+  color: #fa8c16;
+}
+
+:deep(.ant-tabs-tab[data-node-key="P2"]) {
+  color: #1890ff;
+}
+
+:deep(.ant-tabs-tab[data-node-key="P3"]) {
+  color: #52c41a;
+}
+
+:deep(.ant-tabs-tab[data-node-key="P4"]) {
+  color: #722ed1;
+}
+
+.analysis-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.flow-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.flow-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  background-color: #1890ff;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.flow-content {
+  flex: 1;
+}
+
+.flow-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 8px;
+}
+
+.flow-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.highlight {
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.divider {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.flow-arrow {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.flow-hint {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.gap-tag {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.missing {
+  background-color: #ff4d4f;
+  color: white;
+}
+
+.weak {
+  background-color: #faad14;
+  color: white;
+}
+
+.strong {
+  background-color: #52c41a;
+  color: white;
+}
+
+/* 添加新的横向布局样式 */
+.analysis-steps-container {
+  display: flex;
+  gap: 24px;
+  align-items: stretch;
+  margin-bottom: 0; /* 移除底部边距，让引导更紧凑 */
+}
+
+.analysis-step-horizontal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  min-width: 0; /* 防止内容溢出 */
+  position: relative;
+  /* 添加一个小箭头指向下一个步骤 */
+  &:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    border-top: 2px solid #1890ff;
+    border-right: 2px solid #1890ff;
+    transform: rotate(45deg);
+  }
+}
+
+.step-badge {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+.step-content {
+  flex: 1;
+}
+
+/* 调整标签和内容的大小以适应横向布局 */
+.step-title {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.step-subtitle {
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.difference-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+:deep(.ant-tag) {
+  margin-right: 0;
+  white-space: normal;
+  height: auto;
+  line-height: 1.5;
+}
+
+/* 添加新的引导样式 */
+.next-step-guide {
+  text-align: center;
+  padding: 24px 0;
+  position: relative;
+}
+
+.guide-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 24px;
+  border-left: 2px dashed #1890ff;
+  opacity: 0.5;
+}
+
+.guide-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: #e6f7ff;
+  border-radius: 24px;
+  border: 1px solid #91d5ff;
+}
+
+.guide-arrow {
+  font-size: 24px;
+  color: #1890ff;
+  animation: bounce 2s infinite;
+}
+
+.guide-text {
+  text-align: left;
+}
+
+.guide-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1890ff;
+  margin-bottom: 4px;
+}
+
+.guide-description {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-8px);
+  }
+  60% {
+    transform: translateY(-4px);
   }
 }
 </style>
