@@ -421,12 +421,13 @@
               <LeftOutlined /> Previous
             </a-button>
             <a-button 
+              v-if="hasGenerated"
               type="primary"
               :loading="isGenerating"
               :disabled="!selectedKeywords.length"
               @click="generateContent"
             >
-              <ThunderboltOutlined /> Generate Content Plan
+              <ThunderboltOutlined /> Regenerate Content Plan
             </a-button>
           </a-space>
         </div>
@@ -493,129 +494,152 @@
 
           <!-- 右侧生成内容区域 -->
           <div class="generation-flow">
-            <!-- 1. 写作意图和页面类型 -->
-            <a-card v-if="contentPlan" id="content-strategy" class="result-card">
-              <template #title>
-                <div class="card-title">
-                  <CompassOutlined /> Content Strategy
+            <!-- 添加引导按钮 -->
+            <div v-if="!hasGenerated" class="empty-state">
+              <div class="empty-content">
+                <ThunderboltOutlined class="empty-icon" />
+                <div class="empty-title">Ready to create your content plan?</div>
+                <div class="empty-description">
+                  Generate a strategic content plan based on your {{ selectedKeywords.length }} selected keywords
                 </div>
-              </template>
-              
-              <a-descriptions :column="1">
-                <a-descriptions-item label="Writing Intent">
-                  <a-tag :color="contentPlan.intent.color">
-                    {{ contentPlan.intent.name }}
-                  </a-tag>
-                  <div class="intent-description">{{ contentPlan.intent.description }}</div>
-                </a-descriptions-item>
-                <a-descriptions-item label="Page Type">
-                  <a-tag :color="contentPlan.pageType.color">
-                    {{ contentPlan.pageType.name }}
-                  </a-tag>
-                  <div class="page-type-description">{{ contentPlan.pageType.description }}</div>
-                </a-descriptions-item>
-              </a-descriptions>
-            </a-card>
-
-            <!-- 2. Topic 建议 -->
-            <a-card v-if="suggestedTopics.length" id="suggested-topics" class="result-card">
-              <template #title>
-                <div class="card-title">
-                  <BulbOutlined /> Suggested Topics
-                </div>
-              </template>
-              
-              <div class="topic-list">
-                <div v-for="topic in suggestedTopics" :key="topic.id" class="topic-item">
-                  <a-checkbox 
-                    v-model:checked="topic.selected"
-                    @change="(checked) => handleTopicSelect(topic, checked)"
-                  >
-                    <div class="topic-content">
-                      <div class="topic-main">{{ topic.main }}</div>
-                      <div class="topic-reason">{{ topic.reason }}</div>
-                    </div>
-                  </a-checkbox>
-                </div>
-              </div>
-              
-              <!-- 添加确认按钮 -->
-              <div class="action-footer">
                 <a-button 
                   type="primary"
-                  :disabled="!selectedTopicsCount"
-                  :loading="isGeneratingTitles"
-                  @click="confirmTopics"
+                  size="large"
+                  :loading="isGenerating"
+                  :disabled="!selectedKeywords.length"
+                  @click="generateContent"
                 >
-                  Generate Titles <RightOutlined v-if="!isGeneratingTitles" />
+                  <ThunderboltOutlined /> Generate Content Plan
                 </a-button>
               </div>
-            </a-card>
+            </div>
 
-            <!-- 3. Title 建议 -->
-            <a-card v-if="suggestedTitles.length" id="suggested-titles" class="result-card">
-              <template #title>
-                <div class="card-title">
-                  <FileTextOutlined /> Suggested Titles
+            <!-- 现有的内容卡片 -->
+            <template v-else>
+              <!-- 1. 写作意图和页面类型 -->
+              <a-card v-if="contentPlan" id="content-strategy" class="result-card">
+                <template #title>
+                  <div class="card-title">
+                    <CompassOutlined /> Content Strategy
+                  </div>
+                </template>
+                
+                <a-descriptions :column="1">
+                  <a-descriptions-item label="Writing Intent">
+                    <a-tag :color="contentPlan.intent.color">
+                      {{ contentPlan.intent.name }}
+                    </a-tag>
+                    <div class="intent-description">{{ contentPlan.intent.description }}</div>
+                  </a-descriptions-item>
+                  <a-descriptions-item label="Page Type">
+                    <a-tag :color="contentPlan.pageType.color">
+                      {{ contentPlan.pageType.name }}
+                    </a-tag>
+                    <div class="page-type-description">{{ contentPlan.pageType.description }}</div>
+                  </a-descriptions-item>
+                </a-descriptions>
+              </a-card>
+
+              <!-- 2. Topic 建议 -->
+              <a-card v-if="suggestedTopics.length" id="suggested-topics" class="result-card">
+                <template #title>
+                  <div class="card-title">
+                    <BulbOutlined /> Suggested Topics
+                  </div>
+                </template>
+                
+                <div class="topic-list">
+                  <div v-for="topic in suggestedTopics" :key="topic.id" class="topic-item">
+                    <a-checkbox 
+                      v-model:checked="topic.selected"
+                      @change="(checked) => handleTopicSelect(topic, checked)"
+                    >
+                      <div class="topic-content">
+                        <div class="topic-main">{{ topic.main }}</div>
+                        <div class="topic-reason">{{ topic.reason }}</div>
+                      </div>
+                    </a-checkbox>
+                  </div>
                 </div>
-              </template>
-              
-              <div class="title-list">
-                <div v-for="title in suggestedTitles" :key="title.id" class="title-item">
-                  <a-checkbox 
-                    v-model:checked="title.selected"
-                    @change="(checked) => handleTitleSelect(title, checked)"
+                
+                <!-- 添加确认按钮 -->
+                <div class="action-footer">
+                  <a-button 
+                    type="primary"
+                    :disabled="!selectedTopicsCount"
+                    :loading="isGeneratingTitles"
+                    @click="confirmTopics"
                   >
-                    <div class="title-content">
-                      <div class="title-main">{{ title.text }}</div>
-                      <div class="title-metrics">
-                        <a-tag color="blue">CTR: {{ title.metrics.ctr }}%</a-tag>
-                        <a-tag color="green">SEO Score: {{ title.metrics.seoScore }}</a-tag>
+                    Generate Titles <RightOutlined v-if="!isGeneratingTitles" />
+                  </a-button>
+                </div>
+              </a-card>
+
+              <!-- 3. Title 建议 -->
+              <a-card v-if="suggestedTitles.length" id="suggested-titles" class="result-card">
+                <template #title>
+                  <div class="card-title">
+                    <FileTextOutlined /> Suggested Titles
+                  </div>
+                </template>
+                
+                <div class="title-list">
+                  <div v-for="title in suggestedTitles" :key="title.id" class="title-item">
+                    <a-checkbox 
+                      v-model:checked="title.selected"
+                      @change="(checked) => handleTitleSelect(title, checked)"
+                    >
+                      <div class="title-content">
+                        <div class="title-main">{{ title.text }}</div>
+                        <div class="title-metrics">
+                          <a-tag color="blue">CTR: {{ title.metrics.ctr }}%</a-tag>
+                          <a-tag color="green">SEO Score: {{ title.metrics.seoScore }}</a-tag>
+                        </div>
+                      </div>
+                    </a-checkbox>
+                  </div>
+                </div>
+
+                <!-- 添加确认按钮 -->
+                <div class="action-footer">
+                  <a-button 
+                    type="primary"
+                    :disabled="!selectedTitlesCount"
+                    :loading="isGeneratingOutline"
+                    @click="confirmTitles"
+                  >
+                    Generate Outline <RightOutlined v-if="!isGeneratingOutline" />
+                  </a-button>
+                </div>
+              </a-card>
+
+              <!-- 4. Outline -->
+              <a-card v-if="generatedOutline" id="content-outline" class="result-card">
+                <template #title>
+                  <div class="card-title">
+                    <OrderedListOutlined /> Content Outline
+                  </div>
+                </template>
+                
+                <div class="outline-content">
+                  <div v-for="(section, index) in generatedOutline" :key="index" class="outline-section">
+                    <div class="section-header">
+                      <div class="section-title">{{ section.title }}</div>
+                      <div class="section-keywords">
+                        <a-tag v-for="keyword in section.keywords" :key="keyword" color="blue">
+                          {{ keyword }}
+                        </a-tag>
                       </div>
                     </div>
-                  </a-checkbox>
-                </div>
-              </div>
-
-              <!-- 添加确认按钮 -->
-              <div class="action-footer">
-                <a-button 
-                  type="primary"
-                  :disabled="!selectedTitlesCount"
-                  :loading="isGeneratingOutline"
-                  @click="confirmTitles"
-                >
-                  Generate Outline <RightOutlined v-if="!isGeneratingOutline" />
-                </a-button>
-              </div>
-            </a-card>
-
-            <!-- 4. Outline -->
-            <a-card v-if="generatedOutline" id="content-outline" class="result-card">
-              <template #title>
-                <div class="card-title">
-                  <OrderedListOutlined /> Content Outline
-                </div>
-              </template>
-              
-              <div class="outline-content">
-                <div v-for="(section, index) in generatedOutline" :key="index" class="outline-section">
-                  <div class="section-header">
-                    <div class="section-title">{{ section.title }}</div>
-                    <div class="section-keywords">
-                      <a-tag v-for="keyword in section.keywords" :key="keyword" color="blue">
-                        {{ keyword }}
-                      </a-tag>
-                    </div>
-                  </div>
-                  <div class="section-points">
-                    <div v-for="(point, pIndex) in section.points" :key="pIndex" class="point-item">
-                      • {{ point }}
+                    <div class="section-points">
+                      <div v-for="(point, pIndex) in section.points" :key="pIndex" class="point-item">
+                        • {{ point }}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </a-card>
+              </a-card>
+            </template>
           </div>
         </div>
       </div>
@@ -712,7 +736,6 @@ export default defineComponent({
     DeleteOutlined,
     PlusOutlined,
     SaveOutlined,
-    // ... 其他已使用的图标
     EyeOutlined,
     BulbOutlined,
     CompassOutlined,
@@ -1359,6 +1382,9 @@ export default defineComponent({
         await analyzeKeywordsIntent()
         await generateTopics()
         
+        // 设置已生成标志
+        hasGenerated.value = true
+        
         await nextTick()
         scrollToElement('content-strategy')
       } catch (error) {
@@ -1456,6 +1482,9 @@ export default defineComponent({
       return suggestedTitles.value.filter(title => title.selected).length
     })
 
+    // 添加生成状态追踪
+    const hasGenerated = ref(false)
+
     return {
       currentMode,
       selectedKeywords,
@@ -1509,6 +1538,7 @@ export default defineComponent({
       scrollToElement,
       isGeneratingTitles,
       isGeneratingOutline,
+      hasGenerated,
     }
   }
 })
@@ -2900,6 +2930,56 @@ export default defineComponent({
 .topic-list,
 .title-list {
   margin-bottom: 0; /* 移除底部边距，因为现在有了 action-footer */
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 48px;
+}
+
+.empty-content {
+  text-align: center;
+  max-width: 400px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: #1890ff;
+  margin-bottom: 24px;
+}
+
+.empty-title {
+  font-size: 24px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 16px;
+}
+
+.empty-description {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 24px;
+}
+
+/* 添加图标呼吸动画 */
+.empty-icon {
+  animation: iconPulse 2s infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
 }
 </style>
 
