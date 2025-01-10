@@ -32,7 +32,7 @@
               </a-radio-button>
             </a-radio-group>
             
-            <!-- 移动到这里的按钮 -->
+            <!-- Mode Selector moved here -->
             <div class="header-actions">
               <a-button 
                 v-if="currentStep > 0" 
@@ -383,25 +383,58 @@
               >
                 <template #expandedRowRender="{ record }">
                   <div class="expanded-row">
+                    <!-- 对应页面部分 -->
                     <div class="expanded-section">
-                      <div class="section-title">对应页面</div>
+                      <div class="section-header">
+                        <LinkOutlined class="section-icon" />
+                        <span class="section-title">Corresponding Pages</span>
+                      </div>
                       <div class="section-content">
-                        <a-space direction="vertical">
-                          <a-tag v-for="page in record.pages" :key="page.url">
+                        <div class="page-list">
+                          <a-tag 
+                            v-for="page in record.pages" 
+                            :key="page.url"
+                            class="page-tag"
+                          >
+                            <LinkOutlined class="page-icon" />
                             {{ page.url }}
                           </a-tag>
-                        </a-space>
+                        </div>
                       </div>
                     </div>
+
+                    <!-- 竞争对手排名对比部分 -->
                     <div class="expanded-section">
-                      <div class="section-title">竞品排名对比</div>
+                      <div class="section-header">
+                        <LineChartOutlined class="section-icon" />
+                        <span class="section-title">Competitor Ranking Comparison</span>
+                      </div>
                       <div class="section-content">
                         <a-table
                           :data-source="record.competitors"
                           :columns="competitorColumns"
                           :pagination="false"
                           size="small"
-                        />
+                          class="competitor-table"
+                        >
+                          <template #bodyCell="{ column, text }">
+                            <template v-if="column.dataIndex === 'rank'">
+                              <span class="rank-cell">
+                                <TrophyOutlined class="rank-icon" />
+                                <span :class="['rank-number', getRankClass(text)]">#{{ text }}</span>
+                              </span>
+                            </template>
+                            <template v-else-if="column.dataIndex === 'url'">
+                              <a :href="text" target="_blank" class="url-link">
+                                {{ text }}
+                                <ExportOutlined class="url-icon" />
+                              </a>
+                            </template>
+                            <template v-else>
+                              {{ text }}
+                            </template>
+                          </template>
+                        </a-table>
                       </div>
                     </div>
                   </div>
@@ -470,18 +503,13 @@
           <div class="vertical-nav">
             <a-anchor :affix="false" :bounds="50">
               <a-anchor-link 
-                href="#content-strategy" 
-                title="Content Strategy"
-                :class="{ 'nav-disabled': !contentPlan }"
-              />
-              <a-anchor-link 
                 href="#suggested-topics" 
                 title="Suggested Topics"
                 :class="{ 'nav-disabled': !suggestedTopics.length }"
               />
               <a-anchor-link 
                 href="#suggested-titles" 
-                title="Suggested Titles"
+                title="Suggested TDK"
                 :class="{ 'nav-disabled': !suggestedTitles.length }"
               />
               <a-anchor-link 
@@ -516,47 +544,45 @@
 
             <!-- 现有的内容卡片 -->
             <template v-else>
-              <!-- 1. 写作意图和页面类型 -->
-              <a-card v-if="contentPlan" id="content-strategy" class="result-card">
-                <template #title>
-                  <div class="card-title">
-                    <CompassOutlined /> Content Strategy
-                  </div>
-                </template>
-                
-                <a-descriptions :column="1">
-                  <a-descriptions-item label="Writing Intent">
-                    <a-tag :color="contentPlan.intent.color">
-                      {{ contentPlan.intent.name }}
-                    </a-tag>
-                    <div class="intent-description">{{ contentPlan.intent.description }}</div>
-                  </a-descriptions-item>
-                  <a-descriptions-item label="Page Type">
-                    <a-tag :color="contentPlan.pageType.color">
-                      {{ contentPlan.pageType.name }}
-                    </a-tag>
-                    <div class="page-type-description">{{ contentPlan.pageType.description }}</div>
-                  </a-descriptions-item>
-                </a-descriptions>
-              </a-card>
-
               <!-- 2. Topic 建议 -->
               <a-card v-if="suggestedTopics.length" id="suggested-topics" class="result-card">
                 <template #title>
                   <div class="card-title">
-                    <BulbOutlined /> Suggested Topics
+                    <CompassOutlined /> Content Strategy & Topics
                   </div>
                 </template>
                 
-                <div class="topic-list">
-                  <div v-for="topic in suggestedTopics" :key="topic.id" class="topic-item">
+                <div class="content-topics-list">
+                  <div v-for="topic in suggestedTopics" :key="topic.id" class="content-topic-card">
                     <a-checkbox 
                       v-model:checked="topic.selected"
                       @change="(checked) => handleTopicSelect(topic, checked)"
                     >
-                      <div class="topic-content">
-                        <div class="topic-main">{{ topic.main }}</div>
-                        <div class="topic-reason">{{ topic.reason }}</div>
+                      <div class="content-topic-header">
+                        <div class="content-topic-title">{{ topic.main }}</div>
+                        <div class="content-topic-tags">
+                          <a-tag :color="topic.pageType.color">{{ topic.pageType.name }}</a-tag>
+                          <a-tag :color="topic.intent.color">{{ topic.intent.name }}</a-tag>
+                        </div>
+                      </div>
+                      
+                      <div class="content-topic-body">
+                        <div class="content-topic-section">
+                          <div class="content-section-label">User Intent</div>
+                          <div class="content-section-text">{{ topic.intent.description }}</div>
+                        </div>
+                        <div class="content-topic-section">
+                          <div class="content-section-label">Problem Solved</div>
+                          <div class="content-section-text">{{ topic.problemSolved }}</div>
+                        </div>
+                        <div class="content-topic-section">
+                          <div class="content-section-label">Related Keywords</div>
+                          <div class="content-keyword-tags">
+                            <a-tag v-for="kw in topic.targetKeywords" :key="kw" color="blue">
+                              {{ kw }}
+                            </a-tag>
+                          </div>
+                        </div>
                       </div>
                     </a-checkbox>
                   </div>
@@ -579,28 +605,39 @@
               <a-card v-if="suggestedTitles.length" id="suggested-titles" class="result-card">
                 <template #title>
                   <div class="card-title">
-                    <FileTextOutlined /> Suggested Titles
+                    <FileTextOutlined /> Suggested TDK
                   </div>
                 </template>
                 
-                <div class="title-list">
-                  <div v-for="title in suggestedTitles" :key="title.id" class="title-item">
+                <div class="tdk-list">
+                  <div v-for="tdk in suggestedTitles" :key="tdk.id" class="tdk-item">
                     <a-checkbox 
-                      v-model:checked="title.selected"
-                      @change="(checked) => handleTitleSelect(title, checked)"
+                      v-model:checked="tdk.selected"
+                      @change="(checked) => handleTitleSelect(tdk, checked)"
                     >
-                      <div class="title-content">
-                        <div class="title-main">{{ title.text }}</div>
-                        <div class="title-metrics">
-                          <a-tag color="blue">CTR: {{ title.metrics.ctr }}%</a-tag>
-                          <a-tag color="green">SEO Score: {{ title.metrics.seoScore }}</a-tag>
+                      <div class="tdk-content">
+                        <div class="tdk-main">
+                          <div class="tdk-section">
+                            <div class="tdk-label">Title</div>
+                            <div class="tdk-text">{{ tdk.title }}</div>
+                          </div>
+                          <div class="tdk-section">
+                            <div class="tdk-label">Description</div>
+                            <div class="tdk-text">{{ tdk.description }}</div>
+                          </div>
+                          <div class="tdk-section">
+                            <div class="tdk-label">Keywords</div>
+                            <div class="tdk-keywords">
+                              <a-tag v-for="kw in tdk.keywords" :key="kw" color="blue">{{ kw }}</a-tag>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </a-checkbox>
                   </div>
                 </div>
 
-                <!-- 添加确认按钮 -->
+                <!-- 添加操作按钮区域 -->
                 <div class="action-footer">
                   <a-button 
                     type="primary"
@@ -715,17 +752,17 @@ import {
   BulbOutlined,
   CompassOutlined,
   FileTextOutlined,
-  OrderedListOutlined
+  OrderedListOutlined,
+  LinkOutlined,
+  LineChartOutlined,
+  TrophyOutlined,
+  ExportOutlined
 } from '@ant-design/icons-vue'
 import {
-  overviewStats,
-  categories,
-  priorities,
-  recommendedKeywords,
-  pageKeywords,
-  savedPresets,
   tableColumns,
-  competitorColumns
+  competitorColumns,
+  tableData,
+  recommendedKeywords as importedRecommendedKeywords  // 重命名导入
 } from '../data/keywordPlanningData'
 
 export default defineComponent({
@@ -740,7 +777,11 @@ export default defineComponent({
     BulbOutlined,
     CompassOutlined,
     FileTextOutlined,
-    OrderedListOutlined
+    OrderedListOutlined,
+    LinkOutlined,
+    LineChartOutlined,
+    TrophyOutlined,
+    ExportOutlined
   },
   setup() {
     const currentMode = ref('beginner')
@@ -833,82 +874,8 @@ export default defineComponent({
       }
     ]
 
-    const recommendedKeywords = ref([
-      {
-        keyword: 'cloud storage',
-        kd: 35,
-        volume: 1200,
-        krs: 78,
-        status: { text: 'Missing', color: 'red' },
-        selected: false,
-        priority: 'P0',
-        reason: 'Low competition (KD=35) with high search volume. Your competitors rank well for this term.'
-      },
-      {
-        keyword: 'online backup',
-        kd: 40,
-        volume: 900,
-        krs: 72,
-        status: { text: 'Weak', color: 'orange' },
-        selected: false,
-        priority: 'P0',
-        reason: 'You already rank on page 2. Small optimization could bring big traffic gains.'
-      },
-      {
-        keyword: 'best cloud storage providers',
-        kd: 45,
-        volume: 2500,
-        status: { text: 'Missing', color: 'red' },
-        selected: false,
-        priority: 'P1',
-        reason: 'High-volume term that your competitors are targeting successfully.'
-      },
-      {
-        keyword: 'secure cloud backup',
-        kd: 38,
-        volume: 800,
-        status: { text: 'Weak', color: 'orange' },
-        selected: false,
-        priority: 'P1',
-        reason: 'Currently ranking #12, good opportunity to reach first page.'
-      },
-      {
-        keyword: 'enterprise cloud storage',
-        kd: 55,
-        volume: 1500,
-        status: { text: 'Missing', color: 'red' },
-        selected: false,
-        priority: 'P2',
-        reason: 'Higher competition but matches your product offering well.'
-      },
-      {
-        keyword: 'cloud storage comparison',
-        kd: 42,
-        volume: 1100,
-        status: { text: 'Missing', color: 'red' },
-        selected: false,
-        priority: 'P2',
-        reason: 'Popular comparison term that could drive qualified traffic.'
-      },
-      {
-        keyword: 'personal cloud storage',
-        kd: 30,
-        volume: 600,
-        status: { text: 'Weak', color: 'orange' },
-        selected: false,
-        priority: 'P3',
-        reason: 'Lower volume but very relevant to your service.'
-      },
-      {
-        keyword: 'cloud storage pricing',
-        kd: 25,
-        volume: 450,
-        status: { text: 'Missing', color: 'red' },
-        selected: false,
-        priority: 'P4',
-        reason: 'Commercial intent keyword worth monitoring.'
-      }
-    ])
+    // 将导入的数据转换为响应式
+    const recommendedKeywords = ref(importedRecommendedKeywords)
 
     const pageKeywords = ref([
       // P0 优先级关键词
@@ -1022,22 +989,10 @@ export default defineComponent({
       }
     ])
 
-    // 添加新的方法
-    const selectAllRecommended = () => {
-      recommendedKeywords.value.forEach(kw => kw.selected = true)
-    }
-
-    const showAllKeywords = () => {
-      // 实现查看所有关键词的逻辑
-    }
-
-    const selectAllPages = () => {
-      // 实现选择所有页面的逻辑
-    }
-
+    // 修改 handleKeywordSelect 方法
     const handleKeywordSelect = (keyword, isSelected) => {
+      // 更新 selectedKeywords
       if (isSelected) {
-        // 避免重复添加
         if (!selectedKeywords.value.find(k => k.keyword === keyword.keyword)) {
           selectedKeywords.value.push({
             ...keyword,
@@ -1045,24 +1000,35 @@ export default defineComponent({
           })
         }
       } else {
-        // 从已选列表中移除
         selectedKeywords.value = selectedKeywords.value.filter(
           k => k.keyword !== keyword.keyword
         )
       }
     }
 
-    // 监听关键词的选中状态变化
+    // 分别监听两个数据源
     watch(
-      () => [...recommendedKeywords.value, ...pageKeywords.value],
-      (keywords) => {
-        keywords.forEach(keyword => {
-          if (keyword.selected) {
-            handleKeywordSelect(keyword, true)
-          } else {
-            handleKeywordSelect(keyword, false)
-          }
-        })
+      () => recommendedKeywords.value,
+      (newKeywords) => {
+        // 只同步选中的关键词到 selectedKeywords
+        const selectedOnes = newKeywords.filter(k => k.selected)
+        selectedKeywords.value = [
+          ...selectedKeywords.value.filter(k => !newKeywords.find(nk => nk.keyword === k.keyword)),
+          ...selectedOnes
+        ]
+      },
+      { deep: true }
+    )
+
+    watch(
+      () => pageKeywords.value,
+      (newKeywords) => {
+        // 只同步选中的关键词到 selectedKeywords
+        const selectedOnes = newKeywords.filter(k => k.selected)
+        selectedKeywords.value = [
+          ...selectedKeywords.value.filter(k => !newKeywords.find(nk => nk.keyword === k.keyword)),
+          ...selectedOnes
+        ]
       },
       { deep: true }
     )
@@ -1280,11 +1246,11 @@ export default defineComponent({
     }
 
     // 处理 title 选择
-    const handleTitleSelect = (title, checked) => {
+    const handleTitleSelect = (tdk, checked) => {
       if (checked) {
-        selectedTitles.value.push(title.id)
+        selectedTitles.value.push(tdk.id)
       } else {
-        selectedTitles.value = selectedTitles.value.filter(id => id !== title.id)
+        selectedTitles.value = selectedTitles.value.filter(id => id !== tdk.id)
       }
     }
 
@@ -1293,32 +1259,7 @@ export default defineComponent({
       if (selectedTopicsCount.value) {
         isGeneratingTitles.value = true
         try {
-          // 生成新的标题建议
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          suggestedTitles.value = [
-            {
-              id: 1,
-              text: 'Cloud Storage Solutions in 2024: The Ultimate Guide',
-              selected: false,
-              metrics: {
-                ctr: 4.5,
-                seoScore: 92
-              }
-            },
-            {
-              id: 2,
-              text: 'Best Cloud Storage Solutions: A Complete Guide for Businesses',
-              selected: false,
-              metrics: {
-                ctr: 4.2,
-                seoScore: 89
-              }
-            }
-          ]
-          // 清空后续步骤的内容
-          selectedTitles.value = []
-          generatedOutline.value = null
-          
+          await generateTitles() // 直接调用生成标题的方法
           await nextTick()
           scrollToElement('suggested-titles')
         } catch (error) {
@@ -1378,15 +1319,14 @@ export default defineComponent({
         suggestedTitles.value = []
         generatedOutline.value = null
         
-        // 重新生成内容
-        await analyzeKeywordsIntent()
+        // 直接生成主题,跳过 Content Strategy
         await generateTopics()
         
         // 设置已生成标志
         hasGenerated.value = true
         
         await nextTick()
-        scrollToElement('content-strategy')
+        scrollToElement('suggested-topics')  // 修改滚动目标为 suggested-topics
       } catch (error) {
         console.error('Generation error:', error)
         message.error('Failed to generate content plan')
@@ -1395,82 +1335,85 @@ export default defineComponent({
       }
     }
 
-    const analyzeKeywordsIntent = async () => {
-      // 模拟 API 调用
-      contentPlan.value = {
-        intent: {
-          name: 'Informational',
-          color: 'blue',
-          description: 'Users are seeking comprehensive information and detailed explanations.'
-        },
-        pageType: {
-          name: 'Guide',
-          color: 'green',
-          description: 'A detailed guide that covers all aspects of the topic.'
-        }
-      }
-    }
-
     const generateTopics = async () => {
       // 模拟 API 调用
       suggestedTopics.value = [
         {
           id: 1,
-          main: 'Comprehensive Guide to Cloud Storage Solutions',
-          reason: 'Covers multiple selected keywords and matches informational intent'
+          main: 'Cloud Storage Solutions Comparison Guide',
+          selected: false,
+          pageType: {
+            name: 'Informational',
+            color: 'blue',
+            description: 'Comprehensive guide page'
+          },
+          intent: {
+            name: 'Research',
+            color: 'purple',
+            description: 'Users are comparing different cloud storage solutions to make an informed decision'
+          },
+          problemSolved: 'Helps users understand and compare different cloud storage options to choose the best solution for their needs',
+          targetKeywords: [
+            'cloud storage comparison',
+            'best cloud storage solutions',
+            'cloud storage providers'
+          ]
         },
         {
           id: 2,
-          main: 'Cloud Storage Security: A Complete Overview',
-          reason: 'Focuses on security aspects while incorporating main keywords'
+          main: 'Enterprise Cloud Storage Security Guide',
+          selected: false,
+          pageType: {
+            name: 'Commercial',
+            color: 'green',
+            description: 'Product feature page'
+          },
+          intent: {
+            name: 'Solution Awareness',
+            color: 'orange',
+            description: 'Users are seeking secure enterprise storage solutions'
+          },
+          problemSolved: 'Addresses enterprise concerns about cloud storage security and compliance requirements',
+          targetKeywords: [
+            'enterprise cloud storage',
+            'secure cloud storage',
+            'cloud storage security'
+          ]
         }
       ]
     }
 
-    const generateTitles = async (topicId) => {
-      // 模拟 API 调用
-      suggestedTitles.value = [
-        {
-          id: 1,
-          text: 'Cloud Storage Solutions in 2024: The Ultimate Guide',
-          metrics: {
-            ctr: 4.5,
-            seoScore: 92
+    const generateTitles = async () => {
+      try {
+        // 模拟 API 调用生成标题建议
+        suggestedTitles.value = [
+          {
+            id: 1,
+            title: 'Cloud Storage Solutions in 2024: The Ultimate Guide',
+            description: 'Comprehensive guide to cloud storage solutions. Compare features, pricing, and security options to find the best cloud storage for your needs.',
+            keywords: ['cloud storage', 'storage solutions', 'cloud comparison'],
+            selected: false,
+            metrics: {
+              ctr: 4.5,
+              seoScore: 92
+            }
+          },
+          {
+            id: 2,
+            title: 'Best Cloud Storage Solutions: A Complete Guide for Businesses',
+            description: 'Expert analysis of enterprise cloud storage solutions. Learn about security features, compliance requirements, and integration options.',
+            keywords: ['business cloud storage', 'enterprise solutions', 'secure storage'],
+            selected: false,
+            metrics: {
+              ctr: 4.2,
+              seoScore: 89
+            }
           }
-        },
-        {
-          id: 2,
-          text: 'Best Cloud Storage Solutions: A Complete Guide for Businesses',
-          metrics: {
-            ctr: 4.2,
-            seoScore: 89
-          }
-        }
-      ]
-    }
-
-    const generateOutline = async (titleId) => {
-      // 模拟 API 调用
-      generatedOutline.value = [
-        {
-          title: '1. Introduction to Cloud Storage',
-          keywords: ['cloud storage', 'digital storage'],
-          points: [
-            'What is cloud storage?',
-            'Why businesses need cloud storage solutions',
-            'Key benefits of cloud storage'
-          ]
-        },
-        {
-          title: '2. Types of Cloud Storage Solutions',
-          keywords: ['storage solutions', 'enterprise storage'],
-          points: [
-            'Personal cloud storage',
-            'Business cloud storage',
-            'Enterprise cloud storage solutions'
-          ]
-        }
-      ]
+        ]
+      } catch (error) {
+        console.error('Error generating titles:', error)
+        message.error('Failed to generate TDK suggestions')
+      }
     }
 
     // 添加计算属性来处理选中状态
@@ -1485,6 +1428,28 @@ export default defineComponent({
     // 添加生成状态追踪
     const hasGenerated = ref(false)
 
+    // 修改 filteredKeywords 的定义
+    const filteredKeywords = ref(tableData)
+
+    // 添加新的方法
+    const getRankClass = (rank) => {
+      if (rank <= 3) return 'top-3'
+      if (rank <= 10) return 'top-10'
+      return 'others'
+    }
+
+    // 添加初始化函数来同步已选中的关键词
+    const initializeSelectedKeywords = () => {
+      const preSelectedKeywords = recommendedKeywords.value.filter(k => k.selected)
+      selectedKeywords.value = preSelectedKeywords.map(k => ({
+        ...k,
+        selected: true
+      }))
+    }
+
+    // 在组件创建时立即执行初始化
+    initializeSelectedKeywords()
+
     return {
       currentMode,
       selectedKeywords,
@@ -1496,11 +1461,11 @@ export default defineComponent({
       overviewStats: ref(overviewStats),
       categories: ref(categories),
       priorities,
-      recommendedKeywords: ref(recommendedKeywords),
+      recommendedKeywords,  // 确保在 return 中暴露
       pageKeywords: ref(pageKeywords),
       savedPresets: ref(savedPresets),
       columns,
-      competitorColumns,
+      competitorColumns: computed(() => competitorColumns),
       rowSelection,
       pagination,
       handleTableChange,
@@ -1539,6 +1504,10 @@ export default defineComponent({
       isGeneratingTitles,
       isGeneratingOutline,
       hasGenerated,
+      generateTitles,
+      filteredKeywords,
+      getRankClass,
+      handleKeywordSelect,
     }
   }
 })
@@ -2434,46 +2403,26 @@ export default defineComponent({
 }
 
 .advanced-filters {
-  .filter-rows {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: center;
-    margin-bottom: 16px;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* 减小内部间距 */
+}
 
-  .filter-connector {
-    font-size: 16px;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.45);
-    padding: 0 4px;
-  }
+.filter-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* 减小筛选条件之间的间距 */
+}
 
-  .filter-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 8px;
-    background: #fafafa;
-    border-radius: 4px;
-    
-    .ant-select-field {
-      width: 200px;
-    }
-    
-    .ant-select-operator {
-      width: 45px;
-    }
-    
-    .ant-input-number {
-      width: 80px;
-    }
-    
-    .delete-btn {
-      padding: 4px;
-      margin-left: 4px;
-    }
-  }
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* 移除可能存在的外边距 */
+}
+
+.filter-connector {
+  padding: 4px 0;
+  color: rgba(0, 0, 0, 0.45);
 }
 
 .filter-actions {
@@ -2506,19 +2455,6 @@ export default defineComponent({
 :deep(.ant-select-operator .ant-select-selection-item) {
   text-align: center;
   padding: 0;
-}
-
-.filter-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-  padding: 12px;
-  background: #fafafa;
-  border-radius: 4px;
-  
-  .ant-space {
-    gap: 8px;
-  }
 }
 
 .beginner-content {
@@ -2980,6 +2916,393 @@ export default defineComponent({
     opacity: 0.6;
     transform: scale(0.9);
   }
+}
+
+.content-topics-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 16px;
+  padding: 16px; /* 添加整体列表的内边距 */
+}
+
+.content-topic-card {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  padding: 20px; /* 添加卡片的内边距 */
+  
+  &:hover {
+    border-color: #1890ff;
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+  }
+}
+
+.content-topic-header {
+  padding: 0 0 16px 0; /* 修改头部内边距 */
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 16px; /* 添加底部外边距 */
+}
+
+.content-topic-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 8px;
+}
+
+.content-topic-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.content-topic-body {
+  padding: 0; /* 重置body内边距,因为已经有卡片内边距 */
+}
+
+.content-topic-section {
+  margin-bottom: 16px; /* 增加section间距 */
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.content-section-label {
+  font-size: 13px;
+  color: #8c8c8c;
+  margin-bottom: 4px;
+}
+
+.content-section-text {
+  font-size: 14px;
+  color: #595959;
+  line-height: 1.5;
+}
+
+.content-keyword-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tdk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.tdk-item {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  padding: 20px;
+  
+  &:hover {
+    border-color: #1890ff;
+    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+  }
+}
+
+.tdk-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tdk-section {
+  margin-bottom: 12px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.tdk-label {
+  font-size: 13px;
+  color: #8c8c8c;
+  margin-bottom: 4px;
+}
+
+.tdk-text {
+  font-size: 14px;
+  color: #262626;
+  line-height: 1.5;
+}
+
+.tdk-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tdk-metrics {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* 添加新的样式 */
+.expanded-row {
+  display: flex;
+  gap: 32px;
+  padding: 16px 24px;
+  background: #fafafa;
+}
+
+.expanded-section {
+  flex: 1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.section-icon {
+  color: #1890ff;
+  font-size: 16px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.page-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.page-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  transition: all 0.3s;
+  
+  &:hover {
+    background: #e6f7ff;
+    border-color: #91d5ff;
+  }
+}
+
+.page-icon {
+  font-size: 12px;
+  color: #1890ff;
+}
+
+.competitor-table {
+  :deep(.ant-table-thead > tr > th) {
+    background: #fafafa;
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+  
+  :deep(.ant-table-tbody > tr > td) {
+    padding: 8px 16px;
+  }
+}
+
+.rank-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rank-icon {
+  font-size: 14px;
+  color: #faad14;
+}
+
+.rank-number {
+  font-weight: 500;
+  
+  &.top-3 {
+    color: #52c41a;
+  }
+  
+  &.top-10 {
+    color: #1890ff;
+  }
+  
+  &.others {
+    color: rgba(0, 0, 0, 0.65);
+  }
+}
+
+.url-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #1890ff;
+  transition: all 0.3s;
+  
+  &:hover {
+    color: #40a9ff;
+    
+    .url-icon {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}
+
+.url-icon {
+  font-size: 12px;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: all 0.3s;
+}
+
+.action-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tdk-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tdk-item {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #f0f7ff;
+  }
+}
+
+.tdk-content {
+  margin-left: 24px;
+}
+
+.tdk-section {
+  margin-bottom: 12px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.tdk-label {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 4px;
+}
+
+.tdk-text {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.85);
+  line-height: 1.5;
+}
+
+.tdk-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 修改结果卡片的样式 */
+.result-card {
+  margin-bottom: 24px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  :deep(.ant-card-body) {
+    padding: 24px;
+  }
+}
+
+/* 大纲内容样式 */
+.outline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 16px; /* 添加底部内边距 */
+}
+
+.outline-section {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 8px;
+}
+
+.section-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.section-points {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.point-item {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.85);
+  line-height: 1.6;
+  padding-left: 8px;
+}
+
+/* 修改生成流程容器的样式 */
+.generation-flow {
+  flex: 1;
+  padding: 0 24px 24px; /* 添加左右和底部内边距 */
+  overflow-y: auto;
+  max-height: calc(100vh - 200px); /* 设置最大高度，确保可滚动 */
+}
+
+/* 确保工作区布局有足够的空间 */
+.workspace-layout {
+  display: flex;
+  gap: 24px;
+  min-height: calc(100vh - 240px);
+  padding-bottom: 24px; /* 添加底部内边距 */
 }
 </style>
 

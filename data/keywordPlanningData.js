@@ -52,7 +52,7 @@ export const recommendedKeywords = [
     volume: 1200,
     krs: 78,
     status: { text: 'Missing', color: 'red' },
-    selected: false,
+    selected: true,
     priority: 'P0',
     reason: 'Low competition (KD=35) with high search volume. Your competitors rank well for this term.'
   },
@@ -66,7 +66,6 @@ export const recommendedKeywords = [
     priority: 'P0',
     reason: 'You already rank on page 2. Small optimization could bring big traffic gains.'
   },
-  // ... 其他推荐关键词
 ]
 
 export const pageKeywords = [
@@ -80,7 +79,7 @@ export const pageKeywords = [
     priority: 'P0',
     pageReason: 'aiseo.ai\'s page "aiseo.ai/cloud-guide" ranks #15. High potential for quick improvement.'
   },
-  // ... 其他页面关键词
+  // ... more page keywords
 ]
 
 export const savedPresets = [
@@ -155,5 +154,63 @@ export const competitorColumns = [
     title: 'URL',
     dataIndex: 'url',
     width: 200
+  }
+]
+
+export const tableData = [
+  {
+    key: '1',
+    keyword: 'cloud storage solutions',
+    kd: 35,
+    volume: 1200,
+    cpc: 2.5,
+    coverage: '80%',
+    relevance: 'High',
+    krs: 85,
+    status: { text: 'Missing', color: 'red' },
+    pages: [
+      { url: '/cloud-storage' },
+      { url: '/enterprise-solutions' }
+    ],
+    competitors: [
+      { name: 'Competitor A', rank: 1, url: 'https://example.com/page1' },
+      { name: 'Competitor B', rank: 3, url: 'https://example.com/page2' }
+    ]
+  },
+  {
+    key: '2',
+    keyword: 'business cloud backup',
+    kd: 42,
+    volume: 800,
+    cpc: 3.0,
+    coverage: '60%',
+    relevance: 'Medium',
+    krs: 72,
+    status: { text: 'Weak', color: 'orange' },
+    pages: [
+      { url: '/backup-solutions' }
+    ],
+    competitors: [
+      { name: 'Competitor C', rank: 2, url: 'https://example.com/page3' },
+      { name: 'Competitor D', rank: 4, url: 'https://example.com/page4' }
+    ]
+  },
+  {
+    key: '3',
+    keyword: 'enterprise cloud storage',
+    kd: 55,
+    volume: 1500,
+    cpc: 4.2,
+    coverage: '45%',
+    relevance: 'High',
+    krs: 88,
+    status: { text: 'Missing', color: 'red' },
+    pages: [
+      { url: '/enterprise' }
+    ],
+    competitors: [
+      { name: 'Competitor E', rank: 1, url: 'https://example.com/page5' },
+      { name: 'Competitor F', rank: 5, url: 'https://example.com/page6' }
+    ]
   }
 ] 
