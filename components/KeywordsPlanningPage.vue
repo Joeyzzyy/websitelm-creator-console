@@ -1311,25 +1311,22 @@ export default defineComponent({
 
     // 修改生成内容的方法
     const generateContent = async () => {
+      console.log('Before generation - layout height:', document.querySelector('.content-wrapper')?.offsetHeight)
+      console.log('Before generation - section-card height:', document.querySelector('.section-card')?.offsetHeight)
+      
       isGenerating.value = true
       try {
-        // 清空所有现有内容和选择
-        selectedTopics.value = []
-        selectedTitles.value = []
-        suggestedTitles.value = []
-        generatedOutline.value = null
-        
-        // 直接生成主题,跳过 Content Strategy
         await generateTopics()
-        
-        // 设置已生成标志
         hasGenerated.value = true
         
         await nextTick()
-        scrollToElement('suggested-topics')  // 修改滚动目标为 suggested-topics
+        
+        console.log('After generation - layout height:', document.querySelector('.content-wrapper')?.offsetHeight)
+        console.log('After generation - section-card height:', document.querySelector('.section-card')?.offsetHeight)
+        // 检查生成后的 DOM 变化
+        console.log('Content Strategy container:', document.querySelector('.content-strategy-container'))
       } catch (error) {
         console.error('Generation error:', error)
-        message.error('Failed to generate content plan')
       } finally {
         isGenerating.value = false
       }
