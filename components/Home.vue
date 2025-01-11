@@ -4,7 +4,7 @@
       v-model:collapsed="collapsed"
       :width="180"
       :collapsed-width="80"
-      style="background: linear-gradient(180deg, #F0F7FF 0%, #E6F0FF 100%); display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0, 0, 0, 0.08);"
+      style="background: linear-gradient(165deg, #1a1f35 0%, #131b2e 100%); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);"
     >
       <!-- 添加折叠按钮 -->
       <div class="collapse-trigger" @click="toggleCollapse">
@@ -86,11 +86,12 @@ html, body, #app {
 .user-profile-section {
   text-align: center;
   padding: 32px 24px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent);
 }
 
 /* 菜单部分 */
@@ -124,18 +125,21 @@ html, body, #app {
 }
 
 :deep(.ant-menu-item) {
-  color: #4A4875;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.85);
+  border-radius: 12px;
+  margin: 8px 0;
 }
 
 :deep(.ant-menu-item:hover) {
-  background: rgba(22, 119, 255, 0.15);
-  color: #1677ff;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
 }
 
 .nav-item--active {
-  background: #1677ff !important;
+  background: linear-gradient(135deg, #1677ff 0%, #1890ff 100%) !important;
   color: white !important;
-  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.25);
+  box-shadow: 0 4px 15px rgba(22, 119, 255, 0.3);
 }
 
 :deep(.ant-btn-primary:hover) {
@@ -432,14 +436,14 @@ html, body, #app {
 .bottom-actions {
   margin-top: auto;
   padding: 24px 16px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   background: transparent;
 }
 
 .bottom-action-btn {
   width: 100%;
   text-align: left;
-  color: #4A4875;
+  color: rgba(255, 255, 255, 0.85);
   padding: 8px 12px;
   height: auto;
   transition: all 0.3s ease;
@@ -451,8 +455,8 @@ html, body, #app {
 }
 
 .bottom-action-btn:hover {
-  color: #1677ff;
-  background: rgba(22, 119, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
 
 .bottom-divider {
@@ -484,13 +488,13 @@ html, body, #app {
   text-align: center;
   padding: 32px 24px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(240, 247, 255, 0.5));
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent);
   position: relative;
 }
 
 .welcome-text {
   font-size: 14px;
-  color: #8B92A5;
+  color: rgba(255, 255, 255, 0.65);
   margin-bottom: 8px;
   font-weight: 500;
   letter-spacing: 0.5px;
@@ -501,10 +505,10 @@ html, body, #app {
 .user-name-display {
   font-size: 12px;
   font-weight: 600;
-  color: #1677ff;
+  color: #fff;
   margin-top: 4px;
   padding: 8px 16px;
-  background: rgba(22, 119, 255, 0.1);
+  background: rgba(22, 119, 255, 0.15);
   border-radius: 20px;
   display: inline-block;
   transition: all 0.3s ease;

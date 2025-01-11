@@ -148,11 +148,6 @@
           class="selection-card"
           :bordered="false"
         >
-          <template #title>
-            <span class="card-title">
-              <CheckCircleOutlined /> Selected Keywords
-            </span>
-          </template>
           <a-space direction="vertical" style="width: 100%">
             <div class="selection-header">
               <span class="selection-count">
@@ -297,75 +292,72 @@
                   </a-select>
                   
                   <a-button type="primary" @click="addFilter">
-                    <PlusOutlined /> Add Filter
+                    Add Filter
                   </a-button>
                   <a-button @click="clearFilters">Clear All</a-button>
                   <a-button @click="showSaveModal">Save as Preset</a-button>
-                  <a-button type="primary" @click="applyFilters">Apply Filters</a-button>
                 </a-space>
               </div>
 
               <!-- 筛选条件网格布局 -->
               <div class="filter-rows">
-                <template v-for="(filter, index) in filters" :key="index">
-                  <!-- 添加 & 符号 -->
-                  <div v-if="index > 0" class="filter-connector">
-                    &
-                  </div>
-                  
-                  <div class="filter-row">
-                    <a-select 
-                      v-model:value="filter.field" 
-                      class="ant-select-field"
-                      @change="() => handleFieldChange(index)"
-                    >
-                      <a-select-option value="kd">KD</a-select-option>
-                      <a-select-option value="volume">Volume</a-select-option>
-                      <a-select-option value="cpc">CPC</a-select-option>
-                      <a-select-option value="coverage">Competitor Coverage</a-select-option>
-                      <a-select-option value="relevance">Business Relevance</a-select-option>
-                      <a-select-option value="krs">KRS</a-select-option>
-                      <a-select-option value="source">Source</a-select-option>
-                    </a-select>
+                <div class="filter-row">
+                  <template v-for="(filter, index) in filters" :key="index">
+                    <!-- 添加 & 符号 -->
+                    <span v-if="index > 0" class="filter-connector">&</span>
                     
-                    <!-- 特殊处理 Source 字段的选择器 -->
-                    <template v-if="filter.field === 'source'">
-                      <a-select
-                        v-model:value="filter.value"
-                        class="source-value-selector"
-                      >
-                        <a-select-option value="difference">From Keywords Difference</a-select-option>
-                        <a-select-option value="competitor">From Competitor's Top Pages</a-select-option>
-                      </a-select>
-                    </template>
-                    <template v-else>
-                      <!-- 原有的操作符和值输入 -->
+                    <div class="filter-item">
                       <a-select 
-                        v-model:value="filter.operator" 
-                        class="ant-select-operator"
+                        v-model:value="filter.field" 
+                        class="ant-select-field"
+                        @change="() => handleFieldChange(index)"
                       >
-                        <a-select-option value="<"><</a-select-option>
-                        <a-select-option value="<=">≤</a-select-option>
-                        <a-select-option value=">">></a-select-option>
-                        <a-select-option value=">=">≥</a-select-option>
-                        <a-select-option value="==">=</a-select-option>
-                        <a-select-option value="!=">≠</a-select-option>
+                        <a-select-option value="kd">KD</a-select-option>
+                        <a-select-option value="volume">Volume</a-select-option>
+                        <a-select-option value="cpc">CPC</a-select-option>
+                        <a-select-option value="coverage">Coverage</a-select-option>
+                        <a-select-option value="relevance">Relevance</a-select-option>
+                        <a-select-option value="krs">KRS</a-select-option>
+                        <a-select-option value="source">Source</a-select-option>
                       </a-select>
-                      <a-input-number 
-                        v-model:value="filter.value" 
-                        class="ant-input-value"
-                      />
-                    </template>
+                      
+                      <template v-if="filter.field === 'source'">
+                        <a-select
+                          v-model:value="filter.value"
+                          class="source-value-selector"
+                        >
+                          <a-select-option value="difference">From Difference</a-select-option>
+                          <a-select-option value="competitor">From Competitor</a-select-option>
+                        </a-select>
+                      </template>
+                      <template v-else>
+                        <a-select 
+                          v-model:value="filter.operator" 
+                          class="ant-select-operator"
+                        >
+                          <a-select-option value="<"><</a-select-option>
+                          <a-select-option value="<=">≤</a-select-option>
+                          <a-select-option value=">">></a-select-option>
+                          <a-select-option value=">=">≥</a-select-option>
+                          <a-select-option value="==">=</a-select-option>
+                          <a-select-option value="!=">≠</a-select-option>
+                        </a-select>
+                        <a-input-number 
+                          v-model:value="filter.value" 
+                          class="ant-input-value"
+                        />
+                      </template>
 
-                    <a-button 
-                      type="text" 
-                      danger
-                      @click="removeFilter(index)"
-                    >
-                      Delete
-                    </a-button>
-                  </div>
-                </template>
+                      <a-button 
+                        type="text" 
+                        danger
+                        @click="removeFilter(index)"
+                      >
+                        <DeleteOutlined />
+                      </a-button>
+                    </div>
+                  </template>
+                </div>
               </div>
             </div>
           </a-card>
@@ -501,23 +493,7 @@
 
           <!-- 添加纵向导航 -->
           <div class="vertical-nav">
-            <a-anchor :affix="false" :bounds="50">
-              <a-anchor-link 
-                href="#suggested-topics" 
-                title="Suggested Topics"
-                :class="{ 'nav-disabled': !suggestedTopics.length }"
-              />
-              <a-anchor-link 
-                href="#suggested-titles" 
-                title="Suggested TDK"
-                :class="{ 'nav-disabled': !suggestedTitles.length }"
-              />
-              <a-anchor-link 
-                href="#content-outline" 
-                title="Content Outline"
-                :class="{ 'nav-disabled': !generatedOutline }"
-              />
-            </a-anchor>
+            <a-anchor :affix="false" :bounds="50" :items="anchorItems" />
           </div>
 
           <!-- 右侧生成内容区域 -->
@@ -684,7 +660,7 @@
 
     <!-- 添加保存配置的模态框 -->
     <a-modal
-      v-model:visible="saveModalVisible"
+      v-model:open="saveModalVisible"
       title="Save Filter Preset"
       @ok="saveCurrentPreset"
     >
@@ -693,7 +669,7 @@
 
     <!-- Add modal for selected keywords -->
     <a-modal
-      v-model:visible="showSelectedModal"
+      v-model:open="showSelectedModal"
       title="Selected Keywords"
       width="800px"
       @cancel="handleModalClose"
@@ -1061,11 +1037,13 @@ export default defineComponent({
       filters.value.push({
         field: 'kd',
         operator: '<',
-        value: 50
+        value: 50,
+        id: Date.now() // 添加唯一ID以帮助Vue追踪数组变化
       });
     };
 
     const removeFilter = (index) => {
+      // 直接删除指定索引的筛选条件，不需要检查数量
       filters.value.splice(index, 1);
     };
 
@@ -1092,16 +1070,12 @@ export default defineComponent({
       }
     };
 
-    const applyFilters = () => {
-      // TODO: 实现筛选逻辑
-    };
-
     const clearFilters = () => {
-      filters.value = [{
-        field: 'kd',
-        operator: '<',
-        value: 50
-      }];
+      // 完全清空所有筛选条件
+      filters.value = [];
+
+      // 清除已保存的预设选择
+      currentPreset.value = null;
     };
 
     const saveFilterConfig = () => {
@@ -1447,6 +1421,42 @@ export default defineComponent({
     // 在组件创建时立即执行初始化
     initializeSelectedKeywords()
 
+    // 添加 anchorItems 数据
+    const anchorItems = computed(() => [
+      {
+        key: 'suggested-topics',
+        href: '#suggested-topics',
+        title: 'Suggested Topics',
+        class: !suggestedTopics.value.length ? 'nav-disabled' : ''
+      },
+      {
+        key: 'suggested-titles',
+        href: '#suggested-titles',
+        title: 'Suggested TDK',
+        class: !suggestedTitles.value.length ? 'nav-disabled' : ''
+      },
+      {
+        key: 'content-outline',
+        href: '#content-outline',
+        title: 'Content Outline',
+        class: !generatedOutline.value ? 'nav-disabled' : ''
+      }
+    ])
+
+    // 监听 filters 的变化，自动应用筛选
+    watch(
+      () => filters.value,
+      () => {
+        applyFiltersImmediately();
+      },
+      { deep: true }
+    );
+
+    const applyFiltersImmediately = () => {
+      // 在这里实现筛选逻辑
+      // ... 筛选实现代码 ...
+    };
+
     return {
       currentMode,
       selectedKeywords,
@@ -1505,6 +1515,11 @@ export default defineComponent({
       filteredKeywords,
       getRankClass,
       handleKeywordSelect,
+      addFilter,
+      removeFilter,
+      filters,
+      anchorItems,
+      clearFilters,
     }
   }
 })
@@ -2413,13 +2428,37 @@ export default defineComponent({
 
 .filter-row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   align-items: center;
-  gap: 8px; /* 移除可能存在的外边距 */
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .filter-connector {
-  padding: 4px 0;
+  margin: 0 8px;
   color: rgba(0, 0, 0, 0.45);
+  font-weight: 500;
+}
+
+.ant-select-field {
+  width: 120px;  /* 减小宽度 */
+}
+
+.ant-select-operator {
+  width: 50px;  /* 减小宽度 */
+}
+
+.ant-input-value {
+  width: 80px;  /* 减小宽度 */
+}
+
+.source-value-selector {
+  width: 140px;  /* 减小宽度 */
 }
 
 .filter-actions {
