@@ -1736,7 +1736,6 @@ export default defineComponent({
     },
 
     async handleSiteChange(siteUrl) {
-      console.log('Site changed to:', siteUrl); // 添加日志
       this.selectedSiteUrl = siteUrl;
       try {
         const customerId = localStorage.getItem('currentCustomerId');
@@ -1745,11 +1744,21 @@ export default defineComponent({
           siteUrl
         );
         
-        console.log('Analytics response:', response); // 添加日志
-        
-        if (response?.code === 200 && response.data) {
-          const analyticsData = this.processGscAnalytics(response.data);
-          this.gscAnalytics = analyticsData;
+        if (response?.code === 200) {
+          if (!response.data || response.data.length === 0) {
+            // 如果数据为空，设置为 null 或默认值
+            this.gscAnalytics = {
+              impressions: 'No data',
+              clicks: 'No data',
+              ctr: 'No data',
+              impressionsChange: null,
+              clicksChange: null,
+              dailyData: []
+            };
+          } else {
+            // 有数据时正常处理
+            this.gscAnalytics = this.processGscAnalytics(response.data);
+          }
           
           // 确保图表更新
           this.$nextTick(() => {
@@ -1758,6 +1767,15 @@ export default defineComponent({
         }
       } catch (error) {
         console.error('Failed to load GSC analytics:', error);
+        // 在错误时显示 No data
+        this.gscAnalytics = {
+          impressions: 'No data',
+          clicks: 'No data',
+          ctr: 'No data',
+          impressionsChange: null,
+          clicksChange: null,
+          dailyData: []
+        };
       }
     },
 
