@@ -65,7 +65,7 @@
             :columns="columns"
             :data-source="tasks"
             :pagination="false"
-            :scroll="{ x: 1200 }"
+            :scroll="{ x: true }"
             @change="handleTableChange"
           >
             <template #bodyCell="{ column, record }">
@@ -353,13 +353,15 @@ export default {
         title: 'Title',
         dataIndex: 'title',
         key: 'title',
-        width: '22%'
+        width: '22%',
+        ellipsis: true
       },
       {
         title: 'Page Type',
         dataIndex: 'pageType',
         key: 'pageType',
-        width: '8%'
+        width: '8%',
+        ellipsis: true
       },
       {
         title: 'Language',
@@ -399,7 +401,8 @@ export default {
       {
         title: 'Actions',
         key: 'actions',
-        width: '5%'
+        width: 80,
+        fixed: 'right'
       }
     ]
 
@@ -1438,8 +1441,9 @@ export default {
 :deep(.ant-table-cell-fix-left) {
   white-space: normal !important;
   word-break: break-word;
-  max-width: 200px !important; /* 添加最大宽度限制 */
-  min-width: 200px !important; /* 添加最小宽度限制 */
+  /* 移除最大和最小宽度限制 */
+  /* max-width: 200px !important;
+  min-width: 200px !important; */
 }
 
 /* 确保标签内容不换行且省略 */
@@ -1563,6 +1567,34 @@ export default {
 
 /* 移除多余的容器样式，只保留必要的表格样式 */
 :deep(.ant-table) {
-  min-width: 1200px;
+  /* min-width: 1200px; */
+}
+
+/* 修改表格容器样式 */
+.task-container {
+  width: 100%;
+  overflow: hidden;  /* 添加这个 */
+}
+
+.task-list {
+  width: 100%;
+  overflow: visible;  /* 修改这个 */
+}
+
+/* 添加新的滚动容器样式 */
+:deep(.ant-table-wrapper) {
+  overflow-x: auto;
+  width: 100%;
+}
+
+:deep(.ant-table-content) {
+  overflow-x: auto;
+}
+
+/* 确保操作列样式正确 */
+:deep(.ant-table-cell:last-child) {
+  padding: 8px !important;
+  text-align: center;
+  background: #fff;
 }
 </style>
