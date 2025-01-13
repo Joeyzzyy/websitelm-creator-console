@@ -177,5 +177,15 @@ export const availableComponents = [
         template: createCleanComponentData('CallToActionWithEmailInput')
       }
     ]
+  },
+  {
+    category: 'Page Lists',
+    items: [
+      {
+        type: 'PageListCard',
+        label: 'Page List Card',
+        template: createCleanComponentData('PageListCard'),
+      }
+    ]
   }
 ]; 

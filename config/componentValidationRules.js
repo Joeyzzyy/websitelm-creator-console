@@ -326,6 +326,18 @@ const componentValidationRules = {
         'rightContent' 
       ]
     },
+    PageListCard: {
+      requiredFields: [
+        'bottomContent',
+        'title',
+        'subTitle'
+      ],
+      allowedFields: [
+        'bottomContent',
+        'title',
+        'subTitle'
+      ]
+    },
   };
 
 export { componentValidationRules };

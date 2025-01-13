@@ -464,6 +464,8 @@ import KeyResultsWithImage from './sections/templates/KeyResultsWithImage.vue';
 import KeyResultsWithImagePreview from './sections/templates/KeyResultsWithImagePreview.vue';
 import KeyResultsWithCards from './sections/templates/KeyResultsWithCards.vue';
 import KeyResultsWithCardsPreview from './sections/templates/KeyResultsWithCardsPreview.vue';
+import PageListCard from './sections/templates/PageListCard.vue';
+import PageListCardPreview from './sections/templates/PageListCardPreview.vue';
 import { VERCEL_CONFIG } from '../config/vercelConfig';
 import { createCleanComponentData } from '../utils/componentDataFactory';
 import { availableComponents } from '../config/availableComponents';
@@ -510,6 +512,7 @@ export default defineComponent({
     KeyResultsWithImage,
     KeyResultsWithCards,
     CallToAction,
+    PageListCard,
     TitleSectionPreview,
     TitleSectionWithImagePreview,
     HeroSectionWithVideoPreview,
@@ -531,7 +534,8 @@ export default defineComponent({
     ProductBenefitsWithTablePreview,
     CallToActionPreview,
     KeyResultsWithImagePreview,
-    KeyResultsWithCardsPreview
+    KeyResultsWithCardsPreview,
+    PageListCardPreview
   },
 
   setup() {
@@ -704,15 +708,15 @@ export default defineComponent({
             message.error('Slug is duplicated');
             return;
           }
+
+          // 编辑模式下检查 slug
+          if (!articleData.value.slug) {
+            message.error('Page slug is required');
+            return;
+          }
         }
 
-        // 检查必填字段
-        if (!articleData.value.slug) {
-          message.error('Page slug is required');
-          return;
-        }
-
-        // 修改必填字段验证 - 移除 publishUrl 验证
+        // 修改必填字段验证 - 移除 slug 验证
         const requiredFields = {
           title: 'Page title',
           description: 'Page description',
@@ -951,7 +955,8 @@ export default defineComponent({
     };
 
     const getPreviewUrl = (article) => {
-      return `${config.domains.preview}${article.language === 'zh' ? 'zh/' : 'en/'}${article.slug}`;
+      const previewDomain = config.domains.preview.replace(/\/$/, '');
+      return `${previewDomain}/${article.language}/${article.slug}`;
     };
 
     const handlePreview = () => {

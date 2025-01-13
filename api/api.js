@@ -808,8 +808,8 @@ const getPages = async (params) => {
 // 新增：更新子文件夹的方法
 const updateSubfolders = async (subfolders) => {
   try {
-    const response = await apiClient.put('/customer/subfloder', {
-      subfloder: subfolders
+    const response = await apiClient.put('/customer/subfolder', {
+      subfolder: subfolders
     });
     return response.data;
   } catch (error) {
@@ -821,7 +821,7 @@ const updateSubfolders = async (subfolders) => {
 // 新增：获取用户子文件夹的方法
 const getSubfolders = async () => {
   try {
-    const response = await apiClient.get('/customer/subfloder');
+    const response = await apiClient.get('/customer/subfolder');
     return response.data;
   } catch (error) {
     console.error('获取用户子文件夹失败:', error);

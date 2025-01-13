@@ -185,7 +185,16 @@ export const SECTION_TAGS = {
   Faqs: {
     question: 'h3',
     answer: 'p'
-  },  
+  },
+  PageListCard: {
+    imageUrl: 'img',
+    imageAlt: 'alt',
+    subTitle: 'h3',
+    title: 'h2',
+    targetUrl: 'a',
+    cardTitle: 'h3',
+    tag: 'p'
+  }
 }
   
 export const getSectionTags = (sectionType) => {
