@@ -746,27 +746,39 @@ export default {
 
     // 修改获取完整发布URL的方法
     const getFullPublishUrl = (record) => {
+      console.log('Publishing record:', record);
       if (!record?.publishURL || !record?.lang || !record?.slug) {
+        console.log('Missing required fields:', {
+          publishURL: record?.publishURL,
+          lang: record?.lang,
+          slug: record?.slug
+        });
         return '';
       }
       
-      // 移除任何可能的 localhost 引用
-      let baseUrl = record.publishURL.replace(/\/+$/, ''); // 移除末尾的斜杠
+      // 从 publishURL 中提取基础域名和路径
+      let baseUrl = record.publishURL.replace(/\/+$/, '');
+      console.log('Base URL after cleanup:', baseUrl);
       
-      // 如果 baseUrl 包含 localhost，尝试提取实际的域名部分
-      if (baseUrl.includes('localhost')) {
-        // 尝试从 URL 中提取实际域名部分
-        const urlParts = baseUrl.split('/');
-        // 移除包含 localhost 的部分
-        baseUrl = urlParts.slice(3).join('/');
-      }
+      // 分离域名和路径
+      const [domain, ...pathParts] = baseUrl.split('/');
+      console.log('Domain:', domain);
+      console.log('Path parts:', pathParts);
       
-      // 确保有正确的协议前缀
-      if (!baseUrl.startsWith('http')) {
-        baseUrl = `https://${baseUrl}`;
-      }
+      // 构建基础URL（带协议）
+      const baseWithProtocol = domain.startsWith('http') ? domain : `https://${domain}`;
       
-      return `${baseUrl}/${record.lang}/${record.slug}`;
+      // 构建路径：如果语言不是英语，才添加语言标签
+      const pathComponents = [
+        record.lang !== 'en' ? record.lang : null,  // 只在非英语时添加语言标签
+        ...pathParts,                               // 原有的路径部分（如 tutorials）
+        record.slug                                 // slug
+      ].filter(Boolean).join('/');                 // 过滤掉空值并用斜杠连接
+      
+      const finalUrl = `${baseWithProtocol}/${pathComponents}`;
+      console.log('Final generated URL:', finalUrl);
+      
+      return finalUrl;
     };
 
     // 修改发布确认处理
