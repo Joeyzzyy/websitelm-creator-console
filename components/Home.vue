@@ -40,6 +40,7 @@
           <a-menu-item
             v-for="item in mainNavItems"
             :key="item.view"
+            :data-tour="item.view.toLowerCase()"
             :class="{ 'nav-item--active': currentView === item.view }"
           >
             <template #icon>
@@ -63,6 +64,20 @@
           <LogoutOutlined />
           <span v-if="!collapsed">Logout</span>
         </a-button>
+        
+        <!-- 添加分隔线 -->
+        <div class="bottom-divider"></div>
+        
+        <!-- View Guide 按钮 -->
+        <a-button 
+          type="link" 
+          class="bottom-action-btn view-guide-btn"
+          @click="startTour"
+          data-tour="restart-tour"
+        >
+          <QuestionCircleOutlined style="color: #1890ff" />
+          <span v-if="!collapsed">View Guide</span>
+        </a-button>
       </div>
     </a-layout-sider>
     <!-- 内容区域 -->
@@ -70,6 +85,12 @@
       <router-view />
     </a-layout-content>
   </a-layout>
+
+  <!-- 添加 Onboarding 组件 -->
+  <onboarding-tour 
+    ref="onboardingTour"
+    @complete="handleOnboardingComplete"
+  />
 </template>
 
 <style scoped>
@@ -98,6 +119,7 @@ html, body, #app {
 .menu-section {
   flex: 1;
   padding: 24px 16px;
+  padding-bottom: 120px;
   overflow-y: auto;
 }
 
@@ -432,12 +454,17 @@ html, body, #app {
   :deep(.ant-form-item:nth-child(4)) { animation-delay: 0.4s; }
 }
 
-/* 添加新的底部操作区样式 */
+/* 更新底部操作区样式 */
 .bottom-actions {
-  margin-top: auto;
-  padding: 24px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: transparent;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background: linear-gradient(to bottom, rgba(26, 31, 53, 0), #1a1f35);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .bottom-action-btn {
@@ -454,28 +481,11 @@ html, body, #app {
   font-size: 12px;
 }
 
-.bottom-action-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-}
-
+/* 添加分隔线 */
 .bottom-divider {
   height: 1px;
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.08);
   margin: 8px 0;
-}
-
-/* 折叠时的样式调整 */
-:deep(.ant-layout-sider.ant-layout-sider-collapsed) {
-  .bottom-action-btn {
-    padding: 8px;
-    text-align: center;
-    justify-content: center;
-  }
-  
-  .bottom-action-btn span:not(.anticon) {
-    display: none;
-  }
 }
 
 /* 确保图标和文字对齐 */
@@ -603,6 +613,95 @@ html, body, #app {
     display: none;
   }
 }
+
+/* 更新 View Guide 按钮样式 */
+.bottom-action-btn.view-guide-btn {
+  background: rgba(147, 51, 234, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  animation: pulseGlow 2s infinite;
+  position: relative;
+  overflow: hidden;
+  color: rgb(216, 180, 254) !important;
+}
+
+.bottom-action-btn.view-guide-btn:hover {
+  background: rgba(168, 85, 247, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+}
+
+/* 更新脉冲发光动画 */
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(168, 85, 247, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
+  }
+}
+
+/* 更新光晕效果 */
+.bottom-action-btn.view-guide-btn::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to bottom right,
+    rgba(216, 180, 254, 0) 0%,
+    rgba(216, 180, 254, 0.2) 50%,
+    rgba(216, 180, 254, 0) 100%
+  );
+  transform: rotate(45deg);
+  animation: shimmer 3s infinite;
+}
+
+/* 更新按钮中的图标颜色 */
+.bottom-action-btn.view-guide-btn .anticon {
+  color: rgb(216, 180, 254) !important;
+  font-size: 16px;
+}
+
+/* 添加渐变边框效果 */
+.bottom-action-btn.view-guide-btn::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  border-radius: 8px;
+  background: linear-gradient(45deg, 
+    rgba(236, 72, 153, 0.4),  /* 粉色 */
+    rgba(168, 85, 247, 0.4),  /* 紫色 */
+    rgba(236, 72, 153, 0.4)   /* 粉色 */
+  );
+  z-index: -1;
+  animation: borderGlow 3s infinite;
+}
+
+@keyframes borderGlow {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(100%) rotate(45deg);
+  }
+}
 </style>
 
 <script>
@@ -612,10 +711,11 @@ import TaskManagementPage from './TaskManagementPage.vue';
 import DashboardPage from './DashboardPage.vue';
 import KeywordsPlanningPage from './KeywordsPlanningPage.vue';
 import AssetsPage from './AssetsPage.vue';
-import { LogoutOutlined, RightOutlined, LeftOutlined } from '@ant-design/icons-vue'
+import { LogoutOutlined, RightOutlined, LeftOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { createVNode } from 'vue'
 import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import OnboardingTour from './OnboardingTour.vue'
 
 export default {
   name: 'Home',
@@ -626,7 +726,9 @@ export default {
     AssetsPage,
     LogoutOutlined,
     RightOutlined,
-    LeftOutlined
+    LeftOutlined,
+    QuestionCircleOutlined,
+    OnboardingTour
   },
   setup() {
     const router = useRouter();
@@ -751,6 +853,23 @@ export default {
 
     getEmailInitial(email) {
       return email ? email.charAt(0).toUpperCase() : '?';
+    },
+
+    startTour() {
+      this.$refs.onboardingTour.start()
+    },
+
+    handleOnboardingComplete() {
+      this.$message.success('Tour completed! You can always restart the tour using the button in the bottom left corner.')
+    },
+
+    checkAndStartOnboarding() {
+      const onboardingCompleted = localStorage.getItem('onboardingCompleted')
+      if (!onboardingCompleted) {
+        this.$nextTick(() => {
+          this.$refs.onboardingTour.start()
+        })
+      }
     }
   },
   watch: {
@@ -765,6 +884,9 @@ export default {
       };
       this.currentView = routeToView[to.path] || 'DashboardPage';
     }
+  },
+  mounted() {
+    this.checkAndStartOnboarding()
   }
 };
 </script>

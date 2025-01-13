@@ -402,8 +402,10 @@
     <template #title>
       <div class="modal-title">
         <template v-if="!formState.productId">
-          <a-tag color="blue">BETA</a-tag>
-          <span>🚀 Welcome to WebsiteLM!</span>
+          <div class="welcome-title">
+            <span class="beta-tag">BETA</span>
+            <span class="title-text">Welcome to WebsiteLM!</span>
+          </div>
         </template>
         <template v-else>
           <span>✏️ Edit Product Information</span>
@@ -423,11 +425,13 @@
         name="productName"
         :rules="[{ required: true, message: 'Please enter product name' }]"
       >
+        <p class="step-description">Enter the name of your existing product or service.</p>
         <a-input 
           v-model:value="formState.productName" 
           placeholder="Enter your product name"
           :maxLength="50"
         />
+        <p class="help-text">This name will be used throughout your content generation.</p>
       </a-form-item>
 
       <!-- 网站信息和域名验证 -->
@@ -435,6 +439,7 @@
         label="Official Website" 
         name="website"
       >
+        <p class="step-description">Enter your product's website URL to help us better understand and promote your product.</p>
         <a-input-group compact>
           <span 
             style="
@@ -457,8 +462,10 @@
             style="width: calc(100% - 90px); border-radius: 0 6px 6px 0;"
             placeholder="example.com"
             @change="handleWebsiteChange"
+            :disabled="verifying"
           />
         </a-input-group>
+        <p class="help-text">Make sure to enter the main domain of your product (e.g. example.com).</p>
 
         <!-- 域名验证部分 -->
         <template v-if="formState.productId">
@@ -514,6 +521,7 @@
 
       <!-- 竞品分析 -->
       <a-form-item label="Competitors">
+        <p class="step-description">Add up to 4 main competitors to help us understand your market positioning.</p>
         <div class="competitors-section">
           <!-- 第一行: 添加的竞品标签 -->
           <div class="competitors-tags">
@@ -2108,30 +2116,26 @@ export default defineComponent({
 .competitors-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .competitors-tags {
-  min-height: 32px;
-  padding: 4px 0;
+  display: none; /* 默认隐藏 */
+  min-height: 0;
+  padding: 0;
   
-  :deep(.ant-tag) {
-    display: inline-flex;
-    align-items: center;
-    margin-bottom: 4px;
-    
-    .anticon-close {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      margin-left: 4px;
-    }
+  /* 只在有内容时显示 */
+  &:not(:empty) {
+    display: block; /* 有内容时才显示 */
+    min-height: 32px;
+    padding: 4px 0;
+    margin-bottom: 8px;
   }
 }
 
 .competitors-input {
-  margin-top: 4px;
-  padding-top: 4px;
+  margin-top: 0; /* 修改这里，原来是 4px */
+  padding-top: 0; /* 修改这里，原来是 4px */
 }
 
 .traffic-section {
@@ -2214,5 +2218,150 @@ export default defineComponent({
 :deep(.url-list) {
   max-height: 400px;
   overflow-y: auto;
+}
+
+/* 添加一些辅助说明文字的样式 */
+.product-modal {
+  .step-description {
+    color: #A78BFA;
+    font-size: 13px;
+    margin: 0 0 8px;
+    line-height: 1.5;
+    padding: 6px 10px;
+    background: rgba(124, 58, 237, 0.04);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    
+    &::before {
+      content: '💡';
+      font-size: 13px;
+    }
+  }
+
+  .help-text {
+    color: #8B5CF6;
+    font-size: 12px;
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0.8;
+    
+    &::before {
+      content: 'ℹ️';
+      font-size: 12px;
+    }
+  }
+
+  :deep(.ant-form-item) {
+    margin-bottom: 16px;
+    
+    .ant-form-item-label {
+      padding-bottom: 4px;
+      
+      label {
+        font-size: 14px;
+        font-weight: 500;
+        background: linear-gradient(135deg, #4F46E5, #8B5CF6); /* 从靛蓝色到紫色的渐变 */
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: bold;
+      }
+    }
+    
+    .ant-input,
+    .ant-input-group-addon {
+      border-radius: 6px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      background: rgba(255, 255, 255, 0.02);
+      height: 36px;
+      
+      &:hover {
+        border-color: rgba(124, 58, 237, 0.4);
+      }
+      
+      &:focus {
+        border-color: #7C3AED;
+        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+      }
+    }
+  }
+
+  .competitors-section {
+    background: rgba(124, 58, 237, 0.02);
+    border: 1px solid rgba(124, 58, 237, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+    
+    .competitors-tags {
+      margin-bottom: 12px;
+      min-height: 28px;
+      
+      :deep(.ant-tag) {
+        margin: 3px;
+        padding: 3px 10px;
+        border-radius: 4px;
+        background: rgba(124, 58, 237, 0.08);
+        border: 1px solid rgba(124, 58, 237, 0.15);
+      }
+    }
+  }
+
+  :deep(.ant-btn-primary) {
+    height: 36px;
+    background: #7C3AED;
+    border: none;
+    
+    &:hover {
+      background: #8B5CF6;
+    }
+  }
+}
+
+/* 更新欢迎标题样式 */
+.welcome-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px; /* 减小字体大小 */
+  
+  .beta-tag {
+    background: linear-gradient(135deg, #7C3AED, #8B5CF6);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  
+  .title-text {
+    background: linear-gradient(135deg, #7C3AED, #8B5CF6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+  }
+}
+
+/* 优化表单间距 */
+.product-modal {
+  :deep(.ant-form-item) {
+    margin-bottom: 16px;
+    
+    .ant-form-item-label {
+      padding-bottom: 4px;
+    }
+  }
+  
+  .step-description {
+    margin: 0 0 8px;
+    padding: 6px 10px;
+  }
+  
+  .help-text {
+    margin-top: 4px;
+  }
 }
 </style>
