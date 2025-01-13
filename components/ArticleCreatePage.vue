@@ -464,7 +464,7 @@ import KeyResultsWithImage from './sections/templates/KeyResultsWithImage.vue';
 import KeyResultsWithImagePreview from './sections/templates/KeyResultsWithImagePreview.vue';
 import KeyResultsWithCards from './sections/templates/KeyResultsWithCards.vue';
 import KeyResultsWithCardsPreview from './sections/templates/KeyResultsWithCardsPreview.vue';
-import PageListCard from './sections/templates/PageListCard1.vue';
+import PageListCard from './sections/templates/PageListCard.vue';
 import PageListCardPreview from './sections/templates/PageListCardPreview.vue';
 import { VERCEL_CONFIG } from '../config/vercelConfig';
 import { createCleanComponentData } from '../utils/componentDataFactory';
