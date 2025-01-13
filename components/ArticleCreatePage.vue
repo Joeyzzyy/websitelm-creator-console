@@ -553,6 +553,7 @@ export default defineComponent({
 
     const loading = ref(true);
     const originalArticle = ref(null);
+    const n = 1;
 
     onMounted(async () => {
       try {
