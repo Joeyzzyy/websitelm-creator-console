@@ -24,7 +24,7 @@ import KeyResultsWithImage from './templates/KeyResultsWithImage.vue'
 import TitleSection from './templates/TitleSection.vue'
 import TitleSectionWithImage from './templates/TitleSectionWithImage.vue'
 import ProductBenefitsWithTable from './templates/ProductBenefitsWithTable.vue'
-import PageListCard from './templates/PageListCard.vue'
+import PageListCard from './templates/PageListCard1.vue'
 
 // 组件映射表
 const SECTION_COMPONENTS = {
