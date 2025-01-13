@@ -327,7 +327,7 @@ export default {
 
 .section-wrapper {
   display: grid;
-  grid-template-columns: 2fr 3fr;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
 }
 

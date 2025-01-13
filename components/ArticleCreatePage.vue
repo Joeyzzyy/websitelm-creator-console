@@ -233,8 +233,8 @@
                           />
                         </a-form-item>
 
-                        <!-- 修改 slug 和 isRootPage 的布局，参考 author 和 topic 的格式 -->
-                        <a-form-item label="Slug" required>
+                        <!-- 修改 slug 表单项，添加 v-if -->
+                        <a-form-item label="Slug" required v-if="isEditMode">
                           <a-input
                             v-model:value="articleData.slug"
                             placeholder="Enter page slug here"
@@ -651,21 +651,17 @@ export default defineComponent({
     // 添加新响���式变量来跟踪拖拽的源引
     const dragSourceIndex = ref(null);
 
-    // 添加组件到文
+    // 添加组件到文章
     const addComponent = (component, index = null) => {
-      console.log('Adding component:', component);
       try {
-        // 使用 createCleanComponentData 创建干净的组件数据
         const newSection = createCleanComponentData(component.type);
 
-        // 添加新组件到指定位置或末尾
         if (index !== null) {
           articleData.value.sections.splice(index + 1, 0, newSection);
         } else {
           articleData.value.sections.push(newSection);
         }
 
-        // 添加滚动逻辑
         nextTick(() => {
           const sections = document.querySelectorAll('.section-wrapper');
           const lastSection = sections[sections.length - 1];
@@ -674,7 +670,6 @@ export default defineComponent({
           }
         });
       } catch (error) {
-        console.error('Add component error:', error);
         message.error('Failed to add component');
       }
     };
@@ -896,21 +891,16 @@ export default defineComponent({
     const refreshingMetrics = ref(false);
     
     const handleRefreshMetrics = async () => {
-      console.log('ArticleCreatePage - 刷新前的 pageStats：', articleData.value.pageStats);
       refreshingMetrics.value = true;
       try {
-        // 新算计数
         calculateKeywordStats();
-        // 添加动画效果
         await new Promise(resolve => setTimeout(resolve, 500));
         message.success('Statistics updated');
       } catch (error) {
-        console.error('Failed to refresh metrics:', error);
         message.error('Failed to update statistics');
       } finally {
         refreshingMetrics.value = false;
       }
-      console.log('ArticleCreatePage - 刷新后的 pageStats：', articleData.value.pageStats);
     };
 
     const scrollToSection = (sectionId) => {
@@ -918,17 +908,9 @@ export default defineComponent({
         const targetSection = document.getElementById(sectionId);
         
         if (targetSection) {
-          const headerHeight = 64; // 部导航栏高度
+          const headerHeight = 64;
           const scrollContainer = document.querySelector('.editor-content');
           const rect = targetSection.getBoundingClientRect();
-          
-          // 添加日志用于调试
-          console.log('Scrolling to section:', {
-            sectionId,
-            targetTop: rect.top,
-            scrollTop: scrollContainer.scrollTop,
-            headerHeight
-          });
           
           const targetPosition = rect.top + scrollContainer.scrollTop - headerHeight - 20;
           
@@ -936,8 +918,6 @@ export default defineComponent({
             top: targetPosition,
             behavior: 'smooth'
           });
-        } else {
-          console.warn('Target section not found:', sectionId);
         }
       });
     };
@@ -1138,10 +1118,7 @@ export default defineComponent({
           }
         }
 
-        console.log('Available URLs:', availablePublishUrls.value);
-
       } catch (error) {
-        console.error('Failed to load domain info:', error);
         message.error('Failed to load publish URL options');
       }
     };
@@ -1518,6 +1495,25 @@ export default defineComponent({
       return `${category.category}`;
     };
 
+    // 修改必填字段验证
+    const requiredFields = computed(() => {
+      const fields = {
+        title: 'Page title',
+        description: 'Page description',
+        pageType: 'Type',
+        language: 'Language',
+        author: 'Author',
+        keywords: 'Keywords'
+      };
+      
+      // 只在编辑模式下添加 slug 验证
+      if (isEditMode.value) {
+        fields.slug = 'Slug';
+      }
+      
+      return fields;
+    });
+
     return {
       loading,
       saving,
@@ -1575,6 +1571,7 @@ export default defineComponent({
       lastAutoSaveTime,
       getPreviewPublishUrl,
       getCategoryHeader, // 添加到返回对象中
+      requiredFields,
     };
   }
 });

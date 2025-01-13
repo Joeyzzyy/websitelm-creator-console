@@ -283,7 +283,7 @@ export default {
 /* 基础布局样式 */
 .section-wrapper {
   display: grid;
-  grid-template-columns: 2fr 3fr;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
   min-height: 500px;
 }
@@ -355,8 +355,6 @@ export default {
   align-items: center;
   justify-content: center;
 }
-
-@import '../../../assets/styles/section-form.css';
 
 .arrow-flow {
   display: flex;

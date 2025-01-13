@@ -38,7 +38,9 @@
           <div class="metric-info">
             <span class="metric-label">Keywords Coverage</span>
             <span class="metric-value">{{ keywordsCoverage }}%</span>
-            <span class="metric-subtitle">{{ keywordsStats.keywords.length }} of {{ keywordsStats.genKeyword.length }}</span>
+            <span class="metric-subtitle">
+              {{ keywordsStats?.keywords?.length || 0 }} of {{ keywordsStats?.genKeyword?.length || 0 }}
+            </span>
           </div>
         </div>
 
@@ -176,29 +178,21 @@ export default defineComponent({
     const isCollapsed = ref(props.defaultCollapsed);
     const refreshing = ref(false);
 
-    // 在入口处打印完整的传入数据
-    console.log('FloatingStats 接收到的完整数据：', {
-      wordCount: props.keywordsStats.wordCount,
-      genKeyword: props.keywordsStats.genKeyword,
-      keywords: props.keywordsStats.keywords,
-      keywordStats: props.keywordsStats.keywordStats
-    });
-
-    // 打印关键词统计详情
-    console.log('关键词统计详情：');
-    props.keywordsStats.keywordStats?.forEach(stat => {
-      console.log(`${stat.keyword}: ${stat.wordCount}次, 密度${stat.density.toFixed(2)}%`);
-    });
-
-    // 计算关键词覆盖率
     const keywordsCoverage = computed(() => {
+      if (!props.keywordsStats?.genKeyword || !props.keywordsStats?.keywords) {
+        return 0;
+      }
+      
       const total = props.keywordsStats.genKeyword.length;
       const matched = props.keywordsStats.keywords.length;
       return total > 0 ? Math.round((matched / total) * 100) : 0;
     });
 
-    // 计算未使用的关键词
     const missingKeywords = computed(() => {
+      if (!props.keywordsStats?.genKeyword || !props.keywordsStats?.keywords) {
+        return [];
+      }
+      
       return props.keywordsStats.genKeyword.filter(
         keyword => !props.keywordsStats.keywords.includes(keyword)
       );
@@ -232,17 +226,11 @@ export default defineComponent({
       });
     };
 
-    // 添加 watch 来监控数据变化
+    // 修改 watch，移除 console.log
     watch(() => props.keywordsStats, (newStats) => {
-      console.log('数据更新 - 新的统计数据：', {
-        wordCount: newStats.wordCount,
-        genKeyword: newStats.genKeyword,
-        keywords: newStats.keywords,
-        keywordStats: newStats.keywordStats
-      });
+      // 移除 console.log
     }, { deep: true });
 
-    // 添加标题统计的计算属性
     const headingStats = computed(() => {
       const stats = {
         h1: 0,
@@ -253,14 +241,10 @@ export default defineComponent({
       };
 
       props.sections.forEach(section => {
-        const sectionType = section.componentName;  // 改用 componentName 替代 type
+        const sectionType = section.componentName;
         const sectionTags = SECTION_TAGS[sectionType] || {};
         
-        console.log('Processing section:', {
-          componentName: sectionType,
-          tags: sectionTags,
-          sectionData: section
-        });
+        // 移除 console.log
 
         // 检查 topContent
         if (section.topContent) {
@@ -303,29 +287,17 @@ export default defineComponent({
         });
       });
 
-      console.log('Final heading stats:', stats);
       return stats;
     });
 
-    // 添加按组件分类的标题统计
     const componentHeadingStats = computed(() => {
-      // 在入口处打印完整的传入数据
-      console.log('FloatingStats 接收到的完整数据：', {
-        sections: props.sections
-      });
-      
       const stats = {};
       
       props.sections.forEach(section => {
         const componentName = section.componentName;
         const sectionTags = SECTION_TAGS[componentName] || {};
         
-        // 打印每个 section 的信息
-        console.log('处理 section:', {
-          componentName,
-          tags: sectionTags,
-          sectionData: section
-        });
+        // 移除 console.log
 
         // 初始化该组件的统计
         if (!stats[componentName]) {
@@ -376,11 +348,25 @@ export default defineComponent({
         });
       });
 
-      // 打印最终统计结果
-      console.log('最终统计结果:', stats);
-      
-      // 修改过滤逻辑：直接返回 stats，因为已经有数据了
       return stats;
+    });
+
+    // 其他可能需要修改的计算属性
+    const keywordStats = computed(() => {
+      return props.keywordsStats?.keywordStats || [];
+    });
+
+    const genKeywords = computed(() => {
+      return props.keywordsStats?.genKeyword || [];
+    });
+
+    const wordCount = computed(() => {
+      return props.keywordsStats?.wordCount || 0;
+    });
+
+    // 如果有使用 keywords 的地方也需要添加空值检查
+    const keywords = computed(() => {
+      return props.keywordsStats?.keywords || [];
     });
 
     return {
@@ -393,6 +379,10 @@ export default defineComponent({
       formatDensity,
       headingStats,
       componentHeadingStats,
+      keywordStats,
+      genKeywords,
+      wordCount,
+      keywords,
     };
   }
 });

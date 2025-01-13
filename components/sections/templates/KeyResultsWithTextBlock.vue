@@ -97,15 +97,45 @@
                   </a-form-item>
 
                   <a-form-item label="Content Text">
+                    <div class="form-item-label">
+                      <div class="action-buttons">
+                        <!-- 移除了 add-image-btn -->
+                      </div>
+                    </div>
                     <div class="input-with-tag">
                       <span class="html-tag">{{ tags.contentText }}</span>
-                      <a-textarea
-                        v-model:value="item.contentText"
-                        :disabled="disabled"
-                        :rows="6"
-                        @change="handleChange"
-                        :style="{ minHeight: '240px' }"
-                      />
+                      <div class="rich-content-editor">
+                        <div class="editor-toolbar">
+                          <div class="toolbar-group">
+                            <a-tooltip title="Insert Image">
+                              <a-button 
+                                type="text"
+                                class="toolbar-btn"
+                                @click="handleAddImageClick(index)"
+                              >
+                                <picture-outlined />
+                              </a-button>
+                            </a-tooltip>
+                          </div>
+                        </div>
+                        <a-textarea
+                          v-model:value="item.contentText"
+                          :disabled="disabled"
+                          :rows="12"
+                          @change="handleChange"
+                          @input="(e) => handleTextareaEvent(e, index)"
+                          @click="(e) => handleTextareaEvent(e, index)"
+                          @select="(e) => handleTextareaEvent(e, index)"
+                          @keyup="(e) => handleTextareaEvent(e, index)"
+                          @mouseup="(e) => handleTextareaEvent(e, index)"
+                          class="content-textarea"
+                          :style="{ minHeight: '360px' }"
+                          :ref="el => textareaRefs[index] = el"
+                        />
+                        <div class="editor-footer">
+                          <span class="char-count">{{ item.contentText.length }} characters</span>
+                        </div>
+                      </div>
                     </div>
                   </a-form-item>
                 </a-form>
@@ -125,6 +155,21 @@
           <a-input 
             v-model:value="linkUrl"
             placeholder="Please enter URL"
+          />
+        </a-modal>
+
+        <!-- 添加图片库 Modal -->
+        <a-modal
+          v-model:visible="imageLibraryVisible"
+          title="Select Image"
+          width="800px"
+          @ok="handleImageSelect"
+          @cancel="handleImageLibraryCancel"
+        >
+          <image-library
+            v-if="imageLibraryVisible"
+            @select="onImageSelect"
+            @close="handleImageLibraryCancel"
           />
         </a-modal>
       </div>
@@ -153,7 +198,8 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import KeyResultsWithTextBlockPreview from './KeyResultsWithTextBlockPreview.vue'
 import themeConfig from '../../../assets/config/themeConfig'
-import { LinkOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { LinkOutlined, DeleteOutlined, PictureOutlined } from '@ant-design/icons-vue'
+import ImageLibrary from '../common/ImageLibrary.vue'
 
 export default {
   name: 'KeyResultsWithTextBlock',
@@ -161,7 +207,9 @@ export default {
   components: {
     LinkOutlined,
     DeleteOutlined,
-    KeyResultsWithTextBlockPreview
+    KeyResultsWithTextBlockPreview,
+    PictureOutlined,
+    ImageLibrary
   },
   computed: {
     tags() {
@@ -180,7 +228,14 @@ export default {
       selectedText: '',
       textLinks: [],
       currentField: null,
-      styles: themeConfig.normal
+      styles: themeConfig.normal,
+      imageLibraryVisible: false,
+      currentContentIndex: null,
+      cursorPositions: {},
+      currentTextareaIndex: null,
+      contentTextArea: [],
+      selectedImage: null,
+      textareaRefs: {},
     }
   },
   created() {
@@ -391,6 +446,127 @@ export default {
         contentText: ''
       })
       this.handleChange()
+    },
+
+    handleAddImageClick(index) {
+      this.currentContentIndex = index;
+      this.currentTextareaIndex = index;
+      
+      // 获取当前文本区域的光标位置
+      const position = this.cursorPositions[index] || 0;
+      console.log('当前保存的光标位置:', {
+        index,
+        position,
+        positions: this.cursorPositions
+      });
+      
+      this.imageLibraryVisible = true;
+    },
+
+    onImageSelect(image) {
+      this.selectedImage = image;
+    },
+
+    handleImageSelect() {
+      if (!this.selectedImage || this.currentContentIndex === null) return;
+
+      const content = this.localSection.rightContent[this.currentContentIndex];
+      if (!content) return;
+
+      // 使用存储的光标位置
+      const insertPosition = this.cursorPositions[this.currentContentIndex] || 0;
+      console.log('准备在位置插入图片:', {
+        index: this.currentContentIndex,
+        position: insertPosition,
+        savedPositions: this.cursorPositions
+      });
+
+      const imgTag = `\n<img src="${this.selectedImage.url}" alt="${this.selectedImage.name}" />\n`;
+      const currentText = content.contentText || '';
+
+      // 分割文本并插入图片
+      const beforeText = currentText.substring(0, insertPosition);
+      const afterText = currentText.substring(insertPosition);
+      
+      console.log('插入图片前文本状态:', {
+        totalLength: currentText.length,
+        insertPosition,
+        beforeTextEnd: beforeText.slice(-20),
+        afterTextStart: afterText.slice(0, 20)
+      });
+
+      // 更新内容
+      content.contentText = beforeText + imgTag + afterText;
+
+      // 更新光标位置
+      const newPosition = insertPosition + imgTag.length;
+      this.cursorPositions[this.currentContentIndex] = newPosition;
+
+      this.$nextTick(() => {
+        const textareaElement = this.textareaRefs[this.currentContentIndex];
+        if (textareaElement?.$el) {
+          const nativeTextarea = textareaElement.$el.querySelector('textarea');
+          if (nativeTextarea) {
+            nativeTextarea.focus();
+            nativeTextarea.setSelectionRange(newPosition, newPosition);
+          }
+        }
+      });
+
+      this.handleChange();
+      this.handleImageLibraryCancel();
+    },
+
+    handleImageLibraryCancel() {
+      this.imageLibraryVisible = false;
+      this.selectedImage = null;
+      this.currentContentIndex = null;
+      this.cursorPositions = {};
+      this.textareaRefs = {};
+    },
+
+    hasImageTags(text) {
+      return /<img[^>]+>/g.test(text);
+    },
+
+    extractImages(text) {
+      const imgRegex = /<img[^>]+src="([^"]+)"[^>]+alt="([^"]+)"[^>]*>/g;
+      const images = [];
+      let match;
+
+      while ((match = imgRegex.exec(text)) !== null) {
+        images.push({
+          fullTag: match[0],
+          src: match[1],
+          alt: match[2]
+        });
+      }
+
+      return images;
+    },
+
+    removeImage(contentIndex, imgTag) {
+      const content = this.localSection.rightContent[contentIndex];
+      content.contentText = content.contentText.replace(imgTag, '');
+      this.handleChange();
+    },
+
+    handleTextareaEvent(event, index) {
+      this.currentTextareaIndex = index;
+      this.updateCursorPosition(index, event);
+    },
+
+    // 更新光标位置的方法
+    updateCursorPosition(index, event) {
+      const textareaElement = event.target;
+      if (textareaElement) {
+        this.cursorPositions[index] = textareaElement.selectionStart;
+        console.log('更新光标位置:', {
+          index,
+          position: this.cursorPositions[index],
+          allPositions: this.cursorPositions
+        });
+      }
     }
   }
 }
@@ -401,7 +577,7 @@ export default {
 
 .section-wrapper {
   display: grid;
-  grid-template-columns: 2fr 3fr;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
   min-height: 500px;
 }
@@ -782,5 +958,160 @@ export default {
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 16px;
+}
+
+.add-image-btn {
+  background: linear-gradient(135deg, #1890ff, #1890ff);
+  border: none;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: white;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.add-image-btn:hover {
+  background: linear-gradient(135deg, #4338CA, #6D28D9);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.add-image-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.add-image-btn:hover {
+  color: #40a9ff;
+  background: rgba(24, 144, 255, 0.1);
+}
+
+:deep(.ant-modal-body) {
+  padding: 0;
+}
+
+.rich-content-editor {
+  width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.editor-toolbar {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.toolbar-btn {
+  padding: 6px;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.toolbar-btn:hover {
+  background: #e2e8f0;
+  color: #1890ff;
+}
+
+.toolbar-btn :deep(.anticon) {
+  font-size: 16px;
+}
+
+.content-textarea {
+  border: none !important;
+  padding: 16px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #1f2937;
+  resize: vertical;
+  background: #ffffff;
+}
+
+.content-textarea:focus {
+  box-shadow: none !important;
+}
+
+:deep(.content-textarea.ant-input) {
+  border: none;
+  border-radius: 0;
+}
+
+:deep(.content-textarea.ant-input:focus) {
+  border: none;
+  box-shadow: none;
+}
+
+.editor-footer {
+  padding: 8px 12px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.char-count {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* 优化图片占位符的显示 */
+.content-textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* 自定义滚动条样式 */
+.content-textarea::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content-textarea::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.content-textarea::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.content-textarea::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 图片占位符样式 */
+.image-placeholder {
+  background: #f1f5f9;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin: 4px 0;
+  color: #1f2937;
+  font-family: monospace;
 }
 </style> 
