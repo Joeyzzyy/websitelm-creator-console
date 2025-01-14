@@ -23,30 +23,6 @@
             </div>
           </div>
           
-          <!-- 如果有关键特性，可以列表展示 -->
-          <div v-if="currentStep.features" class="feature-list">
-            <div v-for="(feature, index) in currentStep.features" 
-                 :key="index" 
-                 class="feature-item"
-            >
-              <CheckOutlined class="feature-icon" />
-              <span>{{ feature }}</span>
-            </div>
-          </div>
-          
-          <!-- 视频预览框 -->
-          <div v-if="currentStep.videoUrl" class="video-preview">
-            <video 
-              :src="currentStep.videoUrl"
-              controls
-              preload="metadata"
-              class="preview-video"
-            >
-              Your browser does not support the video tag.
-            </video>
-          </div>
-          
-          <!-- 文档链接 -->
           <div class="resource-links">
             <a v-if="currentStep.docsLink" 
                :href="currentStep.docsLink" 
@@ -56,6 +32,19 @@
               <FileTextOutlined />
               Read Documentation
             </a>
+          </div>
+          
+          <div v-if="currentStep.features" class="feature-list">
+            <div class="feature-list-title">
+              What you'll learn in the documentation:
+            </div>
+            <div v-for="(feature, index) in currentStep.features" 
+                 :key="index" 
+                 class="feature-item"
+            >
+              <QuestionCircleOutlined class="feature-icon" />
+              <span>How to setup {{ feature }}</span>
+            </div>
           </div>
         </div>
         
@@ -77,13 +66,13 @@
 </template>
 
 <script>
-import { FileTextOutlined, BulbOutlined, CheckOutlined } from '@ant-design/icons-vue'
+import { FileTextOutlined, BulbOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
 
 export default {
   components: {
     FileTextOutlined,
     BulbOutlined,
-    CheckOutlined
+    QuestionCircleOutlined
   },
   name: 'OnboardingTour',
   data() {
@@ -156,7 +145,7 @@ export default {
     start() {
       this.visible = true
       this.currentStepIndex = 0
-      this.updatePosition()
+      this.navigateToStep(this.steps[0])
     },
     
     nextStep() {
@@ -164,14 +153,14 @@ export default {
         this.complete()
       } else {
         this.currentStepIndex++
-        this.updatePosition()
+        this.navigateToStep(this.currentStep)
       }
     },
     
     prevStep() {
       if (this.currentStepIndex > 0) {
         this.currentStepIndex--
-        this.updatePosition()
+        this.navigateToStep(this.currentStep)
       }
     },
     
@@ -282,6 +271,27 @@ export default {
         targetEl.style.boxShadow = '0 0 0 4px rgba(24, 144, 255, 0.2)'
         targetEl.style.zIndex = '1001'
       }
+    },
+    
+    navigateToStep(step) {
+      const routeMap = {
+        '[data-tour="dashboardpage"]': '/dashboard',
+        '[data-tour="assetspage"]': '/assets',
+        '[data-tour="keywordsplanningpage"]': '/keywords',
+        '[data-tour="taskmanagementpage"]': '/task-management',
+        '[data-tour="settingspage"]': '/settings'
+      }
+      
+      const route = routeMap[step.target]
+      if (route && this.$router.currentRoute.value.path !== route) {
+        this.$router.push(route).then(() => {
+          this.$nextTick(() => {
+            this.updatePosition()
+          })
+        })
+      } else {
+        this.updatePosition()
+      }
     }
   }
 }
@@ -323,13 +333,13 @@ export default {
 }
 
 .step-indicator {
-  font-size: 14px;
+  font-size: 13px;
   color: #1890ff;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .tour-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #1a1a1a;
 }
@@ -364,10 +374,7 @@ export default {
 }
 
 .resource-links {
-  margin-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  margin: 16px 0;
 }
 
 .resource-link {
@@ -382,60 +389,13 @@ export default {
 }
 
 .docs-link {
-  color: #1890ff;
-  background: rgba(24, 144, 255, 0.1);
+  background: #1890ff;
+  color: white;
+  font-weight: 500;
 }
 
 .docs-link:hover {
-  background: rgba(24, 144, 255, 0.15);
-  transform: translateX(4px);
-}
-
-/* 视频加载时的过渡效果 */
-.preview-video {
-  transition: opacity 0.3s ease;
-}
-
-.preview-video:not([readyState="4"]) {
-  opacity: 0.7;
-}
-
-/* 确保视频控件样式与整体设计一致 */
-.preview-video::-webkit-media-controls {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.preview-video::-webkit-media-controls-panel {
-  padding: 0 8px;
-}
-
-.video-preview {
-  margin: 16px 0;
-  border-radius: 8px;
-  overflow: hidden;
-  background: #000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-height: 225px;
-}
-
-.preview-video {
-  width: 100%;
-  height: 100%;
-  max-height: 225px;
-  object-fit: contain;
-}
-
-/* 箭头样式 */
-.arrow {
-  position: absolute;
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 8px;
-  border-color: transparent white transparent transparent;
-  top: 50%;
-  transform: translateY(-50%);
-  transition: all 0.3s ease;
+  background: #40a9ff;
 }
 
 /* 美化滚动条 */
@@ -475,24 +435,33 @@ export default {
 
 .content-text {
   flex: 1;
-  line-height: 1.6;
+  line-height: 1.5;
+  font-size: 14px;
 }
 
 .feature-list {
-  margin: 16px 0;
+  margin: 12px 0;
+}
+
+.feature-list-title {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
 }
 
 .feature-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  padding: 8px;
-  background: #f0f7ff;
+  gap: 6px;
+  margin-bottom: 6px;
+  padding: 6px 8px;
+  background: #f5f5f5;
   border-radius: 6px;
+  font-size: 13px;
 }
 
 .feature-icon {
-  color: #52c41a;
+  color: #1890ff;
+  font-size: 14px;
 }
 </style> 

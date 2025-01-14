@@ -141,12 +141,12 @@
       >
         <div class="tutorial-thumbnail">
           <div class="tech-overlay"></div>
-          <video-thumbnail :video-url="tutorial.videoUrl" />
-          <div class="duration">{{ tutorial.duration }}</div>
+          <img :src="tutorial.imageUrl" :alt="tutorial.title" class="thumbnail-image">
         </div>
         <div class="tutorial-info">
           <h4>{{ tutorial.title }}</h4>
           <p>{{ tutorial.description }}</p>
+          <div class="read-more">Read Article →</div>
         </div>
       </div>
     </div>
@@ -817,23 +817,26 @@ html, body, #app {
 /* 教程库样式 */
 .tutorial-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
   padding: 20px 0;
 }
 
 .tutorial-card {
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  background: white;
 }
 
 .tutorial-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(24, 144, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
   border-color: #1890ff;
 }
 
@@ -841,6 +844,7 @@ html, body, #app {
   position: relative;
   aspect-ratio: 16/9;
   background: #f5f5f5;
+  flex-shrink: 0;
 }
 
 .tech-overlay {
@@ -856,34 +860,48 @@ html, body, #app {
   z-index: 1;
 }
 
-.duration {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.75);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  z-index: 2;
-}
-
 .tutorial-info {
   padding: 16px;
-  background: white;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .tutorial-info h4 {
   margin: 0 0 8px;
   font-size: 16px;
   color: #1a1a1a;
+  font-weight: 500;
 }
 
 .tutorial-info p {
   margin: 0;
   font-size: 14px;
   color: #666;
-  line-height: 1.5;
+  line-height: 1.6;
+  flex-grow: 1;
+}
+
+.read-more {
+  margin-top: 12px;
+  color: #1890ff;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.tutorial-card:hover .read-more {
+  color: #40a9ff;
+  transform: translateX(4px);
+}
+
+/* 添加缩略图图片样式 */
+.thumbnail-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: relative;
+  z-index: 0;
 }
 </style>
 
@@ -899,6 +917,12 @@ import { createVNode } from 'vue'
 import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import OnboardingTour from './OnboardingTour.vue'
+
+// 导入PNG图片
+import onboardingImage from '../assets/images/tutorials/onboarding.png';
+import gscConnectionImage from '../assets/images/tutorials/gsc-connection.png';
+import domainVerificationImage from '../assets/images/tutorials/domain-verification.png';
+import assetManagementImage from '../assets/images/tutorials/asset-management.png';
 
 export default {
   name: 'Home',
@@ -954,12 +978,29 @@ export default {
       tutorialLibraryVisible: false,
       tutorials: [
         {
-          title: 'Dashboard Overview',
-          description: 'Learn how to use the dashboard to track your metrics',
-          videoUrl: 'https://example.com/dashboard-tutorial.mp4',
-          docsLink: '#/docs/dashboard'
+          title: 'How To Get Onboard',
+          description: 'A complete guide for new users to get started with WebsiteLM',
+          imageUrl: onboardingImage,
+          docsLink: 'https://websitelm.com/tutorials/get-onboard-with-websitelm'
         },
-        // ... 其他教程
+        {
+          title: 'Connect To Your Google Search Console',
+          description: 'Learn how to connect and integrate your Google Search Console',
+          imageUrl: gscConnectionImage,
+          docsLink: 'https://websitelm.com/tutorials/conntect-google-search-console'
+        },
+        {
+          title: 'Verify Your Domain',
+          description: 'Step-by-step guide to verify your domain and start the journey',
+          imageUrl: domainVerificationImage,
+          docsLink: 'https://websitelm.com/tutorials/verify-your-domain'
+        },
+        {
+          title: 'Manage Your Assets',
+          description: 'Learn how to effectively manage your assets for content generation',
+          imageUrl: assetManagementImage,
+          docsLink: 'https://websitelm.com/tutorials/manage-assets-future-content'
+        }
       ]
     };
   },
@@ -1081,6 +1122,7 @@ export default {
     // 播放选中的教程
     playTutorial(tutorial) {
       // 实现教程播放逻辑
+      window.open(tutorial.docsLink, '_blank'); // 打开文章链接
     }
   },
   watch: {
