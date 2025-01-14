@@ -14,7 +14,25 @@
         </div>
         
         <div class="tour-body">
-          <p>{{ currentStep.content }}</p>
+          <div class="content-wrapper">
+            <div class="content-icon">
+              <BulbOutlined />
+            </div>
+            <div class="content-text">
+              {{ currentStep.content }}
+            </div>
+          </div>
+          
+          <!-- 如果有关键特性，可以列表展示 -->
+          <div v-if="currentStep.features" class="feature-list">
+            <div v-for="(feature, index) in currentStep.features" 
+                 :key="index" 
+                 class="feature-item"
+            >
+              <CheckOutlined class="feature-icon" />
+              <span>{{ feature }}</span>
+            </div>
+          </div>
           
           <!-- 视频预览框 -->
           <div v-if="currentStep.videoUrl" class="video-preview">
@@ -59,11 +77,13 @@
 </template>
 
 <script>
-import { FileTextOutlined } from '@ant-design/icons-vue'
+import { FileTextOutlined, BulbOutlined, CheckOutlined } from '@ant-design/icons-vue'
 
 export default {
   components: {
-    FileTextOutlined
+    FileTextOutlined,
+    BulbOutlined,
+    CheckOutlined
   },
   name: 'OnboardingTour',
   data() {
@@ -72,44 +92,49 @@ export default {
       currentStepIndex: 0,
       steps: [
         {
-          title: 'Dashboard',
-          content: 'This is your data overview where you can view all important metrics and latest updates.',
+          title: 'Home',
+          content: 'This is the place to get your domain verified and connect your Google Search Console to WebsiteLM',
           target: '[data-tour="dashboardpage"]',
           placement: 'right',
           videoUrl: 'https://example.com/placeholder-dashboard.mp4',
-          docsLink: '#/placeholder-docs-dashboard'
+          docsLink: 'https://websitelm.com/tutorials/dashboard',
+          features: [
+            'Domain verification',
+            'Google Search Console integration',
+            'Dashboard overview'
+          ]
         },
         {
           title: 'Asset Management',
-          content: 'Manage and organize all your digital assets, including images and documents.',
+          content: 'This is the place to manage your assets, images, videos, internal link and more, all in one place and will be used for auto SEO page generation later.',
           target: '[data-tour="assetspage"]',
           placement: 'right',
           videoUrl: 'https://example.com/placeholder-assets.mp4',
-          docsLink: '#/placeholder-docs-assets'
+          docsLink: 'https://websitelm.com/tutorials/assets'
         },
         {
           title: 'Keyword Planning',
-          content: 'Use our powerful keyword planning tool to optimize your content strategy.',
+          content: 'We provide Keywords Difference Analysis service and Your Competitors\' Top Pages\' keywords ananlysis for all plans!',
           target: '[data-tour="keywordsplanningpage"]',
           placement: 'right',
           videoUrl: 'https://example.com/placeholder-keywords.mp4',
-          docsLink: '#/placeholder-docs-keywords'
+          docsLink: 'https://websitelm.com/tutorials/keywords'
         },
         {
           title: 'Task Management',
-          content: 'Create and manage your tasks, track project progress.',
+          content: 'Manage your SEO page generation tasks here, publishment, modification, or create a page from scratch!.',
           target: '[data-tour="taskmanagementpage"]',
           placement: 'right',
           videoUrl: 'https://example.com/placeholder-tasks.mp4',
-          docsLink: '#/placeholder-docs-tasks'
+          docsLink: 'https://websitelm.com/tutorials/tasks'
         },
         {
           title: 'Settings',
-          content: 'Customize your system preferences here. You can always revisit this guide through the button in the bottom left corner.',
+          content: 'Configure the sub-domain or sub-directory for your pages to be deployed.',
           target: '[data-tour="settingspage"]',
           placement: 'right',
           videoUrl: 'https://example.com/placeholder-settings.mp4',
-          docsLink: '#/placeholder-docs-settings'
+          docsLink: 'https://websitelm.com/tutorials/settings'
         }
       ]
     }
@@ -161,18 +186,22 @@ export default {
       if (!targetEl) return {}
 
       const rect = targetEl.getBoundingClientRect()
-      const cardWidth = 400  // 提示框宽度
-      const cardHeight = 400 // 预估提示框高度
-      const margin = 20     // 边距
+      const cardWidth = 400
+      const cardHeight = 400
+      const margin = 20
       const viewportWidth = window.innerWidth
       const viewportHeight = window.innerHeight
 
-      // 默认位置（右侧）
+      // 基础位置设置 - 调整垂直位置计算
       let position = {
         position: 'fixed',
         left: `${rect.right + margin}px`,
-        top: `${rect.top}px`,
-        transform: 'translateY(-50%)'
+        // 将弹窗垂直居中对齐目标元素，但确保不超出视口边界
+        top: `${Math.max(margin, Math.min(
+          rect.top + (rect.height - cardHeight) / 2,
+          viewportHeight - cardHeight - margin
+        ))}px`,
+        transform: 'none'
       }
 
       // 检查右侧空间
@@ -186,7 +215,7 @@ export default {
           if (rect.bottom + cardHeight + margin < viewportHeight) {
             position = {
               position: 'fixed',
-              left: `${rect.left}px`,
+              left: `${Math.max(margin, Math.min(rect.left, viewportWidth - cardWidth - margin))}px`,
               top: `${rect.bottom + margin}px`,
               transform: 'none'
             }
@@ -195,30 +224,11 @@ export default {
           else {
             position = {
               position: 'fixed',
-              left: `${rect.left}px`,
-              bottom: `${viewportHeight - rect.top + margin}px`,
+              left: `${Math.max(margin, Math.min(rect.left, viewportWidth - cardWidth - margin))}px`,
+              top: `${rect.top - cardHeight - margin}px`,
               transform: 'none'
             }
           }
-        }
-      }
-
-      // 检查垂直方向是否溢出
-      if (position.top) {
-        const topValue = parseInt(position.top)
-        const transformedTop = position.transform === 'translateY(-50%)' 
-          ? topValue - (cardHeight / 2) 
-          : topValue
-
-        // 如果顶部溢出
-        if (transformedTop < margin) {
-          position.top = `${margin}px`
-          position.transform = 'none'
-        }
-        // 如果底部溢出
-        else if (transformedTop + cardHeight > viewportHeight - margin) {
-          position.top = `${viewportHeight - cardHeight - margin}px`
-          position.transform = 'none'
         }
       }
 
@@ -291,20 +301,25 @@ export default {
 .onboarding-card {
   position: fixed;
   width: 400px;
+  max-height: calc(100vh - 40px);
   background: white;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .tour-content {
-  max-height: calc(100vh - 100px);
+  flex: 1;
   overflow-y: auto;
   padding: 20px;
+  min-height: 0;
 }
 
 .tour-header {
   margin-bottom: 16px;
+  flex-shrink: 0;
 }
 
 .step-indicator {
@@ -329,6 +344,11 @@ export default {
   display: flex;
   justify-content: space-between;
   gap: 12px;
+  padding: 16px 20px;
+  border-top: 1px solid #f0f0f0;
+  background: white;
+  flex-shrink: 0;
+  border-radius: 0 0 12px 12px;
 }
 
 /* 添加箭头指示器 */
@@ -395,13 +415,14 @@ export default {
   overflow: hidden;
   background: #000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-height: 225px;
 }
 
 .preview-video {
   width: 100%;
-  aspect-ratio: 16/9;
-  display: block;
-  object-fit: cover;
+  height: 100%;
+  max-height: 225px;
+  object-fit: contain;
 }
 
 /* 箭头样式 */
@@ -434,5 +455,44 @@ export default {
 
 .tour-content::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+.content-wrapper {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.content-icon {
+  color: #1890ff;
+  font-size: 20px;
+  padding-top: 2px;
+}
+
+.content-text {
+  flex: 1;
+  line-height: 1.6;
+}
+
+.feature-list {
+  margin: 16px 0;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px;
+  background: #f0f7ff;
+  border-radius: 6px;
+}
+
+.feature-icon {
+  color: #52c41a;
 }
 </style> 

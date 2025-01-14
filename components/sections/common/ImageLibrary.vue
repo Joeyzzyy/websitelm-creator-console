@@ -37,6 +37,17 @@
               </div>
             </a-col>
           </a-row>
+          
+          <div v-if="!loading" class="pagination-wrapper">
+            <a-pagination
+              v-model:current="currentPage"
+              :total="total"
+              :pageSize="pageSize"
+              show-size-changer
+              @change="handlePageChange"
+              @showSizeChange="handleSizeChange"
+            />
+          </div>
         </template>
         
         <div v-else class="empty-state">
@@ -132,7 +143,7 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { CheckOutlined, UploadOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import apiClient from '../../../api/api'
@@ -149,18 +160,31 @@ export default {
     const loading = ref(false)
     const assets = ref([])
     const selectedAsset = ref(null)
+    const currentPage = ref(1)
+    const pageSize = ref(8)
+    const total = ref(0)
 
     // 获取图片列表
     const fetchAssets = async () => {
       loading.value = true
       try {
         const customerId = localStorage.getItem('currentCustomerId')
-        const response = await apiClient.getMedia(customerId, 'image')
-        assets.value = response.data ? response.data.map(item => ({
-          id: item.mediaId,
-          name: item.mediaName,
-          url: item.mediaUrl
-        })) : []
+        const response = await apiClient.getMedia(
+          customerId, 
+          'image',
+          null, // categoryId
+          currentPage.value,
+          pageSize.value
+        )
+        
+        if (response.data) {
+          assets.value = response.data.map(item => ({
+            id: item.mediaId,
+            name: item.mediaName,
+            url: item.mediaUrl
+          }))
+          total.value = response.TotalCount
+        }
       } catch (error) {
         console.error('Failed to fetch images:', error)
       } finally {
@@ -179,8 +203,10 @@ export default {
       return !loading.value && assets.value.length === 0
     })
 
-    // 初始加载
-    fetchAssets()
+    // 使用 onMounted 确保组件挂载后执行初始化加载
+    onMounted(() => {
+      fetchAssets()
+    })
 
     // 添加上传相关的响应式变量
     const uploadModalVisible = ref(false)
@@ -288,6 +314,18 @@ export default {
       removeUpload()
     }
 
+    const handlePageChange = (page, size) => {
+      currentPage.value = page
+      pageSize.value = size
+      fetchAssets()
+    }
+
+    const handleSizeChange = (current, size) => {
+      currentPage.value = 1
+      pageSize.value = size
+      fetchAssets()
+    }
+
     return {
       loading,
       assets,
@@ -309,7 +347,12 @@ export default {
       handleFileDrop,
       removeUpload,
       handleUploadOk,
-      handleUploadCancel
+      handleUploadCancel,
+      currentPage,
+      pageSize,
+      total,
+      handlePageChange,
+      handleSizeChange
     }
   }
 }
@@ -464,5 +507,11 @@ export default {
 
 .media-form {
   margin-top: 16px;
+}
+
+.pagination-wrapper {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
 }
 </style> 

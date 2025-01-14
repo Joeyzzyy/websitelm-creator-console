@@ -373,24 +373,13 @@ export default {
     },
 
     removeLink(index) {
-      console.log('Removing link at index:', index);
-      console.log('Current textLinks:', JSON.stringify(this.textLinks));
-      
       const link = this.textLinks[index];
-      console.log('Link to remove:', link);
-      
       const content = this.localSection[link.field.type][link.field.index];
-      console.log('Content before replacement:', content[link.field.field]);
-      
       const linkRegex = new RegExp(`<a[^>]*>${link.text}</a>`);
       content[link.field.field] = content[link.field.field]
         .replace(linkRegex, link.text);
       
-      console.log('Content after replacement:', content[link.field.field]);
-      
       this.textLinks.splice(index, 1);
-      console.log('TextLinks after removal:', JSON.stringify(this.textLinks));
-      
       this.handleChange();
     },
 
@@ -419,7 +408,6 @@ export default {
     },
 
     getLinksByField(contentType, index, field) {
-      console.log('Getting links for:', {contentType, index, field});
       const filteredLinks = this.textLinks.map((link, idx) => ({
         ...link,
         globalIndex: idx
@@ -428,7 +416,6 @@ export default {
         link.field.index === index && 
         link.field.field === field
       );
-      console.log('Filtered links:', filteredLinks);
       return filteredLinks;
     },
 
@@ -452,15 +439,7 @@ export default {
     handleAddImageClick(index) {
       this.currentContentIndex = index;
       this.currentTextareaIndex = index;
-      
-      // 获取当前文本区域的光标位置
       const position = this.cursorPositions[index] || 0;
-      console.log('当前保存的光标位置:', {
-        index,
-        position,
-        positions: this.cursorPositions
-      });
-      
       this.imageLibraryVisible = true;
     },
 
@@ -469,37 +448,23 @@ export default {
     },
 
     handleImageSelect() {
-      if (!this.selectedImage || this.currentContentIndex === null) return;
+      if (!this.selectedImage || this.currentContentIndex === null) {
+        this.$message.warning('Please select an image first');
+        return;
+      }
 
       const content = this.localSection.rightContent[this.currentContentIndex];
       if (!content) return;
 
-      // 使用存储的光标位置
       const insertPosition = this.cursorPositions[this.currentContentIndex] || 0;
-      console.log('准备在位置插入图片:', {
-        index: this.currentContentIndex,
-        position: insertPosition,
-        savedPositions: this.cursorPositions
-      });
-
       const imgTag = `\n<img src="${this.selectedImage.url}" alt="${this.selectedImage.name}" />\n`;
       const currentText = content.contentText || '';
 
-      // 分割文本并插入图片
       const beforeText = currentText.substring(0, insertPosition);
       const afterText = currentText.substring(insertPosition);
       
-      console.log('插入图片前文本状态:', {
-        totalLength: currentText.length,
-        insertPosition,
-        beforeTextEnd: beforeText.slice(-20),
-        afterTextStart: afterText.slice(0, 20)
-      });
-
-      // 更新内容
       content.contentText = beforeText + imgTag + afterText;
 
-      // 更新光标位置
       const newPosition = insertPosition + imgTag.length;
       this.cursorPositions[this.currentContentIndex] = newPosition;
 
@@ -562,11 +527,6 @@ export default {
       const textareaElement = event.target;
       if (textareaElement) {
         this.cursorPositions[index] = textareaElement.selectionStart;
-        console.log('更新光标位置:', {
-          index,
-          position: this.cursorPositions[index],
-          allPositions: this.cursorPositions
-        });
       }
     }
   }

@@ -91,6 +91,66 @@
     ref="onboardingTour"
     @complete="handleOnboardingComplete"
   />
+
+  <!-- 添加选择模式的对话框 -->
+  <a-modal
+    v-model:visible="guideModeVisible"
+    title="Choose Guide Mode"
+    :footer="null"
+    class="guide-mode-modal"
+  >
+    <div class="guide-mode-options">
+      <div class="guide-mode-card" @click="startStepByStepTour">
+        <div class="mode-icon">
+          <svg viewBox="0 0 24 24" class="tech-icon">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" 
+                  fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <h3>Interactive Guide</h3>
+        <p>Step-by-step walkthrough of key features</p>
+      </div>
+      
+      <div class="guide-mode-card" @click="showTutorialLibrary">
+        <div class="mode-icon">
+          <svg viewBox="0 0 24 24" class="tech-icon">
+            <path d="M4 6h16M4 12h16M4 18h16" 
+                  fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+        </div>
+        <h3>Tutorial Library</h3>
+        <p>Browse and select specific features to learn</p>
+      </div>
+    </div>
+  </a-modal>
+
+  <!-- 添加教程库对话框 -->
+  <a-modal
+    v-model:visible="tutorialLibraryVisible"
+    title="Tutorial Library"
+    :footer="null"
+    class="tutorial-library-modal"
+    width="800px"
+  >
+    <div class="tutorial-grid">
+      <div 
+        v-for="(tutorial, index) in tutorials" 
+        :key="index"
+        class="tutorial-card"
+        @click="playTutorial(tutorial)"
+      >
+        <div class="tutorial-thumbnail">
+          <div class="tech-overlay"></div>
+          <video-thumbnail :video-url="tutorial.videoUrl" />
+          <div class="duration">{{ tutorial.duration }}</div>
+        </div>
+        <div class="tutorial-info">
+          <h4>{{ tutorial.title }}</h4>
+          <p>{{ tutorial.description }}</p>
+        </div>
+      </div>
+    </div>
+  </a-modal>
 </template>
 
 <style scoped>
@@ -702,6 +762,129 @@ html, body, #app {
     transform: translateX(100%) rotate(45deg);
   }
 }
+
+/* 选择模式对话框样式 */
+.guide-mode-modal {
+  :deep(.ant-modal-content) {
+    background: linear-gradient(165deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
+  }
+}
+
+.guide-mode-options {
+  display: flex;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.guide-mode-card {
+  flex: 1;
+  padding: 24px;
+  border-radius: 12px;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.guide-mode-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(24, 144, 255, 0.15);
+  border-color: #1890ff;
+}
+
+.mode-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 16px;
+  color: #1890ff;
+}
+
+.guide-mode-card h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: #1a1a1a;
+}
+
+.guide-mode-card p {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* 教程库样式 */
+.tutorial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.tutorial-card {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.tutorial-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(24, 144, 255, 0.15);
+  border-color: #1890ff;
+}
+
+.tutorial-thumbnail {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: #f5f5f5;
+}
+
+.tech-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    rgba(24, 144, 255, 0.05),
+    rgba(24, 144, 255, 0.1)
+  );
+  z-index: 1;
+}
+
+.duration {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 2;
+}
+
+.tutorial-info {
+  padding: 16px;
+  background: white;
+}
+
+.tutorial-info h4 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #1a1a1a;
+}
+
+.tutorial-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+}
 </style>
 
 <script>
@@ -767,6 +950,17 @@ export default {
       selectedUser: currentCustomerId,
       collapsed: localStorage.getItem('sidebarCollapsed') === 'true',
       currentCustomerEmail: currentCustomerEmail,
+      guideModeVisible: false,
+      tutorialLibraryVisible: false,
+      tutorials: [
+        {
+          title: 'Dashboard Overview',
+          description: 'Learn how to use the dashboard to track your metrics',
+          videoUrl: 'https://example.com/dashboard-tutorial.mp4',
+          docsLink: '#/docs/dashboard'
+        },
+        // ... 其他教程
+      ]
     };
   },
   computed: {
@@ -856,7 +1050,7 @@ export default {
     },
 
     startTour() {
-      this.$refs.onboardingTour.start()
+      this.guideModeVisible = true
     },
 
     handleOnboardingComplete() {
@@ -870,6 +1064,23 @@ export default {
           this.$refs.onboardingTour.start()
         })
       }
+    },
+
+    // 开始分步引导
+    startStepByStepTour() {
+      this.guideModeVisible = false
+      this.$refs.onboardingTour.start()
+    },
+
+    // 显示教程库
+    showTutorialLibrary() {
+      this.guideModeVisible = false
+      this.tutorialLibraryVisible = true
+    },
+
+    // 播放选中的教程
+    playTutorial(tutorial) {
+      // 实现教程播放逻辑
     }
   },
   watch: {
