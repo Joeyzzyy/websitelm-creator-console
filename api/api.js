@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { message } from 'ant-design-vue';
 
 // 创建一个 axios 实例
 const apiClient = axios.create({
@@ -1047,6 +1046,17 @@ const deletePageButtonLink = async (linkId) => {
   }
 };
 
+// 新增：获取分析状态的方法
+const getAnalysisStatus = async () => {
+  try {
+    const response = await apiClient.get('/planning/analysis-status');
+    return response.data;
+  } catch (error) {
+    console.error('获取分析状态失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1126,5 +1136,6 @@ export default {
   getPageButtonLinks,
   createPageButtonLink,
   updatePageButtonLink,
-  deletePageButtonLink
+  deletePageButtonLink,
+  getAnalysisStatus
 };
