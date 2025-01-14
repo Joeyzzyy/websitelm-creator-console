@@ -487,17 +487,38 @@
               </template>
               <template v-else>
                 <div class="verify-record-container">
-                  <div class="verify-record-row">
-                    <span class="verify-label">Host:</span>
-                    <a-typography-text code copyable>
-                      {{ verifyRecord?.host || '_' }}
-                    </a-typography-text>
+                  <div class="verify-record-title">
+                    <InfoCircleOutlined /> Please add the following TXT record to your DNS settings:
                   </div>
-                  <div class="verify-record-row">
-                    <span class="verify-label">Value:</span>
-                    <a-typography-text code copyable>
-                      {{ verifyRecord?.value || '_' }}
-                    </a-typography-text>
+                  <div class="verify-record-table">
+                    <div class="verify-record-row">
+                      <div class="verify-record-cell">
+                        <span class="verify-label">Type:</span>
+                        <a-typography-text>TXT</a-typography-text>
+                      </div>
+                    </div>
+                    <div class="verify-record-row">
+                      <div class="verify-record-cell">
+                        <span class="verify-label">Host:</span>
+                        <a-typography-text code copyable class="record-value">
+                          {{ verifyRecord?.host || '_' }}
+                        </a-typography-text>
+                      </div>
+                    </div>
+                    <div class="verify-record-row">
+                      <div class="verify-record-cell">
+                        <span class="verify-label">Value:</span>
+                        <a-typography-text code copyable class="record-value">
+                          {{ verifyRecord?.value || '_' }}
+                        </a-typography-text>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="verify-record-help">
+                    <ul>
+                      <li>DNS changes may take up to several minutes to propagate</li>
+                      <li>Make sure to copy the exact value without any modifications</li>
+                    </ul>
                   </div>
                   <a-button 
                     type="primary" 
@@ -1878,21 +1899,71 @@ export default defineComponent({
 
 .verify-record-container {
   background: #fafafa;
-  padding: 12px;
-  border-radius: 6px;
+  padding: 16px;
+  border-radius: 8px;
   margin-top: 12px;
+  width: 100%;
+}
+
+.verify-record-title {
+  color: #1890ff;
+  margin-bottom: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.verify-record-table {
+  background: white;
+  border: 1px solid #f0f0f0;
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 .verify-record-row {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
-.verify-label {
-  min-width: 50px;
+.verify-record-cell {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  width: 100%;
+  
+  .verify-label {
+    width: 80px;
+    color: #666;
+    font-weight: 500;
+  }
+  
+  .record-value {
+    flex: 1;
+    font-family: monospace;
+  }
+}
+
+.verify-record-help {
+  margin: 12px 0;
+  padding: 8px 12px;
+  background: #f0f7ff;
+  border-radius: 4px;
+  font-size: 12px;
   color: #666;
+  
+  ul {
+    margin: 0;
+    padding-left: 16px;
+    
+    li {
+      margin: 4px 0;
+    }
+  }
 }
 
 /* Add these new styles */
@@ -2223,12 +2294,12 @@ export default defineComponent({
 /* 添加一些辅助说明文字的样式 */
 .product-modal {
   .step-description {
-    color: #A78BFA;
+    color: #4096ff;  /* 改为蓝色 */
     font-size: 13px;
     margin: 0 0 8px;
     line-height: 1.5;
     padding: 6px 10px;
-    background: rgba(124, 58, 237, 0.04);
+    background: rgba(64, 150, 255, 0.04);  /* 改为浅蓝色背景 */
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -2241,7 +2312,7 @@ export default defineComponent({
   }
 
   .help-text {
-    color: #8B5CF6;
+    color: #1677ff;  /* 改为深蓝色 */
     font-size: 12px;
     margin-top: 4px;
     display: flex;
@@ -2264,7 +2335,7 @@ export default defineComponent({
       label {
         font-size: 14px;
         font-weight: 500;
-        background: linear-gradient(135deg, #4F46E5, #8B5CF6); /* 从靛蓝色到紫色的渐变 */
+        background: linear-gradient(135deg, #1677ff, #4096ff);  /* 改为蓝色渐变 */
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: bold;
@@ -2274,24 +2345,24 @@ export default defineComponent({
     .ant-input,
     .ant-input-group-addon {
       border-radius: 6px;
-      border: 1px solid rgba(124, 58, 237, 0.2);
+      border: 1px solid rgba(64, 150, 255, 0.2);  /* 改为蓝色边框 */
       background: rgba(255, 255, 255, 0.02);
       height: 36px;
       
       &:hover {
-        border-color: rgba(124, 58, 237, 0.4);
+        border-color: rgba(64, 150, 255, 0.4);
       }
       
       &:focus {
-        border-color: #7C3AED;
-        box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.1);
+        border-color: #1677ff;
+        box-shadow: 0 0 0 2px rgba(64, 150, 255, 0.1);
       }
     }
   }
 
   .competitors-section {
-    background: rgba(124, 58, 237, 0.02);
-    border: 1px solid rgba(124, 58, 237, 0.1);
+    background: rgba(64, 150, 255, 0.02);  /* 改为浅蓝色背景 */
+    border: 1px solid rgba(64, 150, 255, 0.1);  /* 改为蓝色边框 */
     border-radius: 8px;
     padding: 16px;
     
@@ -2303,19 +2374,19 @@ export default defineComponent({
         margin: 3px;
         padding: 3px 10px;
         border-radius: 4px;
-        background: rgba(124, 58, 237, 0.08);
-        border: 1px solid rgba(124, 58, 237, 0.15);
+        background: rgba(64, 150, 255, 0.08);  /* 改为浅蓝色背景 */
+        border: 1px solid rgba(64, 150, 255, 0.15);  /* 改为蓝色边框 */
       }
     }
   }
 
   :deep(.ant-btn-primary) {
     height: 36px;
-    background: #7C3AED;
+    background: #1677ff;  /* 改为蓝色 */
     border: none;
     
     &:hover {
-      background: #8B5CF6;
+      background: #4096ff;  /* 改为浅蓝色 */
     }
   }
 }
@@ -2325,10 +2396,10 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px; /* 减小字体大小 */
+  font-size: 16px;
   
   .beta-tag {
-    background: linear-gradient(135deg, #7C3AED, #8B5CF6);
+    background: linear-gradient(135deg, #1677ff, #4096ff);  /* 改为蓝色渐变 */
     color: white;
     padding: 2px 6px;
     border-radius: 4px;
@@ -2338,7 +2409,7 @@ export default defineComponent({
   }
   
   .title-text {
-    background: linear-gradient(135deg, #7C3AED, #8B5CF6);
+    background: linear-gradient(135deg, #1677ff, #4096ff);  /* 改为蓝色渐变 */
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 600;

@@ -18,22 +18,6 @@
             </a-spin>
           </template>
 
-          <!-- Waiting for Data Upload -->
-          <template v-if="analysisState === 'waiting'">
-            <div class="analysis-waiting">
-              <LoadingOutlined class="analysis-icon" spin />
-              <h2>Preparing for Analysis</h2>
-              <p>We are waiting for your keyword data to be uploaded.</p>
-              <p>This process will begin shortly.</p>
-              <a-progress 
-                :percent="30" 
-                status="active"
-                class="analysis-progress"
-              />
-              <p class="analysis-tip">The analysis will start automatically once data is ready.</p>
-            </div>
-          </template>
-
           <!-- Error State -->
           <template v-if="analysisState === 'error'">
             <div class="analysis-error">

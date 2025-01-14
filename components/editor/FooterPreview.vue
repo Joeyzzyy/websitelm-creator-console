@@ -46,7 +46,7 @@
             <component :is="getSocialIcon(type)" />
           </a>
         </div>
-        <p class="copyright">© {{ currentYear }} {{ data?.companyName || 'Company Name' }}. All rights reserved.</p>
+        <p class="copyright">{{ data?.copyright || `© ${currentYear} ${data?.companyName || 'Company Name'}. All rights reserved.` }}</p>
       </div>
     </div>
   </div>

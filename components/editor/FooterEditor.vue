@@ -33,6 +33,14 @@
                 placeholder="Enter company description"
               />
             </a-form-item>
+
+            <!-- 添加版权信息编辑 -->
+            <a-form-item label="Copyright Text">
+              <a-input
+                v-model:value="footerData.copyright"
+                placeholder="© 2025 Company Name. All rights reserved."
+              />
+            </a-form-item>
           </div>
 
           <!-- Newsletter设置 -->
@@ -176,7 +184,8 @@ const footerData = ref({
   description: props.initialData.description,
   features: props.initialData.features,
   socialMedia: props.initialData.socialMedia,
-  newsletter: props.initialData.newsletter
+  newsletter: props.initialData.newsletter,
+  copyright: props.initialData.copyright
 })
 
 watch(() => props.initialData, (newValue) => {

@@ -1520,6 +1520,22 @@ export default defineComponent({
       return fields;
     });
 
+    // 添加启动自动保存的逻辑
+    onMounted(() => {
+      // 只在编辑模式下启动自动保存
+      if (isEditMode.value) {
+        // 设置 5 分钟自动保存一次
+        autoSaveInterval.value = setInterval(autoSave, 1 * 60 * 1000);
+        
+        // 监听页面关闭事件
+        window.addEventListener('beforeunload', () => {
+          if (autoSaveInterval.value) {
+            clearInterval(autoSaveInterval.value);
+          }
+        });
+      }
+    });
+
     return {
       loading,
       saving,
