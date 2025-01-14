@@ -31,10 +31,6 @@
             <h3 class="text-lg font-semibold text-gray-900 group-hover:text-[#3374FF] transition-colors duration-200 line-clamp-2">
               {{ insight.title }}
             </h3>
-            
-            <p v-if="insight.description" class="mt-2 text-sm text-gray-600 line-clamp-2">
-              {{ insight.description }}
-            </p>
           </div>
         </a>
       </div>

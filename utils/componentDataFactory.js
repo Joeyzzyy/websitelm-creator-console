@@ -608,7 +608,6 @@ export const createCleanComponentData = (componentType) => {
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: 'AI Content Creation',
           tag: 'AI Technology',
-          description: 'The Future of AI-Powered Content Creation',
           title: 'The Future of AI-Powered Content Creation',
           targetUrl: 'https://www.google.com'
         },
@@ -616,7 +615,6 @@ export const createCleanComponentData = (componentType) => {
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: 'Marketing Strategy',
           tag: 'Digital Marketing',
-          description: 'Building Effective Digital Marketing Strategies',
           title: 'Building Effective Digital Marketing Strategies',
           targetUrl: 'https://www.google.com'
         },
@@ -624,7 +622,6 @@ export const createCleanComponentData = (componentType) => {
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: 'SEO Optimization',
           tag: 'SEO',
-          description: 'Advanced SEO Techniques for 2024',
           title: 'Advanced SEO Techniques for 2024',
           targetUrl: 'https://www.google.com'
         }

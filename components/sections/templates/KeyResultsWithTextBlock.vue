@@ -54,14 +54,6 @@
         <div class="right-content">
           <div class="content-header-with-button">
             <span>Feature Sections</span>
-            <a-button 
-              v-if="!disabled"
-              type="primary" 
-              class="add-content-btn"
-              @click="addContent"
-            >
-              Add Feature Section
-            </a-button>
           </div>
 
           <a-row :gutter="24">
@@ -142,6 +134,15 @@
               </div>
             </a-col>
           </a-row>
+
+          <a-button 
+            v-if="!disabled"
+            type="primary" 
+            class="add-content-btn bottom-add-btn"
+            @click="addContent"
+          >
+            Add Feature Section
+          </a-button>
         </div>
 
         <!-- 链接输入弹窗 -->
@@ -1113,5 +1114,10 @@ export default {
   margin: 4px 0;
   color: #1f2937;
   font-family: monospace;
+}
+
+.bottom-add-btn {
+  margin-top: 16px;
+  width: 100%;
 }
 </style> 
