@@ -447,28 +447,33 @@ export default {
     const loadVerifiedDomains = async () => {
       try {
         const projectId = VERCEL_CONFIG.PROJECT_ID;
+        // 1. 首先获取域名列表
         const response = await apiClient.getVercelDomainInfo(projectId);
         
-        // 确保 productInfo 已加载
-        if (!productInfo.value) {
-          await loadProductInfo();
-        }
-        
-        // 获取验证过的域名
-        const domains = response?.domains
-          ?.filter(domain => {
-            const isVerified = domain.verified || !domain.configDetails?.misconfigured;
-            const hasProductInfo = productInfo.value?.projectWebsite === domain.apexName && productInfo.value?.domainStatus;
-            return isVerified && hasProductInfo;
-          })
-          ?.map(domain => domain.name) || [];
+        // 2. 对于每个已验证的域名，获取其配置信息
+        const verifiedDomainsPromises = response?.domains
+          ?.filter(domain => domain.verified)
+          ?.map(async domain => {
+            try {
+              // 获取域名配置
+              const configResponse = await apiClient.getDomainConfig(domain.name);
+              // 只有配置正确的域名才返回
+              return !configResponse?.misconfigured ? domain.name : null;
+            } catch (error) {
+              console.error(`Failed to get config for domain ${domain.name}:`, error);
+              return null;
+            }
+          }) || [];
 
-        // 加载子文件夹
+        // 3. 等待所有配置检查完成
+        const verifiedDomainsList = (await Promise.all(verifiedDomainsPromises))
+          .filter(Boolean); // 移除 null 值
+
         await loadSubfolders();
         
-        // 合并域名和子文件夹路径
+        // 4. 合并验证过的域名和子文件夹
         verifiedDomains.value = [
-          ...domains,
+          ...verifiedDomainsList,
           ...(subfolders.value.map(subfolder => `${productInfo.value?.projectWebsite}/${subfolder}`))
         ];
       } catch (error) {

@@ -712,7 +712,6 @@ export default {
     const loadVercelDomainInfo = async () => {
       try {
         subdomainLoading.value = true;
-        const customerId = localStorage.getItem('currentCustomerId');
         const projectId = PROJECT_ID;
 
         const response = await apiClient.getVercelDomainInfo(projectId);

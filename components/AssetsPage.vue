@@ -55,89 +55,100 @@
         <!-- Media Asset Content -->
         <template v-if="activeTab === 'images' || activeTab === 'videos'">
           <a-spin :spinning="loading">
-          </a-spin>
-          <div class="assets-grid" v-if="!loading">
-            <template v-if="!showEmptyState">
-              <a-row :gutter="[16, 16]">
-                <a-col 
-                  v-for="asset in filteredAssets" 
-                  :key="asset.id" 
-                  :xs="24" 
-                  :sm="12" 
-                  :md="8" 
-                  :lg="6"
-                >
-                  <div class="asset-card">
-                    <div class="asset-preview" @click="previewAsset(asset)">
-                      <img 
-                        v-if="asset.type === 'image'" 
-                        :src="asset.url" 
-                        :alt="asset.name"
-                      >
-                      <video 
-                        v-else-if="asset.type === 'video'" 
-                        :src="asset.url" 
-                        controls
-                      ></video>
-                      <div class="asset-overlay">
-                        <eye-outlined class="preview-icon" />
-                      </div>
-                      <div class="asset-actions">
-                        <a-popconfirm
-                          title="Are you sure you want to delete this file?"
-                          ok-text="Delete"
-                          cancel-text="Cancel"
-                          @confirm="deleteAsset(asset)"
-                          ok-type="primary"
-                          :ok-button-props="{
-                            style: {
-                              background: 'linear-gradient(135deg, #1890ff, #3B82F6)',
-                              border: 'none'
-                            }
-                          }"
+            <div class="assets-grid" v-if="!loading">
+              <template v-if="!showEmptyState">
+                <a-row :gutter="[16, 16]">
+                  <a-col 
+                    v-for="asset in filteredAssets" 
+                    :key="asset.id" 
+                    :xs="24" 
+                    :sm="12" 
+                    :md="8" 
+                    :lg="6"
+                  >
+                    <div class="asset-card">
+                      <div class="asset-preview" @click="previewAsset(asset)">
+                        <img 
+                          v-if="asset.type === 'image'" 
+                          :src="asset.url" 
+                          :alt="asset.name"
                         >
-                          <a-button 
-                            type="link" 
-                            danger 
-                            class="delete-btn"
-                            @click.stop
+                        <video 
+                          v-else-if="asset.type === 'video'" 
+                          :src="asset.url" 
+                          controls
+                        ></video>
+                        <div class="asset-overlay">
+                          <eye-outlined class="preview-icon" />
+                        </div>
+                        <div class="asset-actions">
+                          <a-popconfirm
+                            title="Are you sure you want to delete this file?"
+                            ok-text="Delete"
+                            cancel-text="Cancel"
+                            @confirm="deleteAsset(asset)"
+                            ok-type="primary"
+                            :ok-button-props="{
+                              style: {
+                                background: 'linear-gradient(135deg, #1890ff, #3B82F6)',
+                                border: 'none'
+                              }
+                            }"
                           >
-                            <delete-outlined />
+                            <a-button 
+                              type="link" 
+                              danger 
+                              class="delete-btn"
+                              @click.stop
+                            >
+                              <delete-outlined />
+                            </a-button>
+                          </a-popconfirm>
+                        </div>
+                      </div>
+                      <div class="asset-info">
+                        <div class="asset-name-container">
+                          <h4 class="asset-name" :title="asset.name">{{ asset.name }}</h4>
+                          <a-button type="link" class="edit-btn" @click="startEditing(asset)">
+                            <edit-outlined />
                           </a-button>
-                        </a-popconfirm>
+                        </div>
+                        <p class="asset-description" :title="asset.description">
+                          {{ asset.description || 'No description' }}
+                        </p>
                       </div>
                     </div>
-                    <div class="asset-info">
-                      <div class="asset-name-container">
-                        <h4 class="asset-name" :title="asset.name">{{ asset.name }}</h4>
-                        <a-button type="link" class="edit-btn" @click="startEditing(asset)">
-                          <edit-outlined />
-                        </a-button>
-                      </div>
-                      <p class="asset-description" :title="asset.description">
-                        {{ asset.description || 'No description' }}
-                      </p>
-                    </div>
-                  </div>
-                </a-col>
-              </a-row>
-            </template>
-            
-            <div v-else-if="showEmptyState && activeTab !== 'links'" class="empty-state">
-              <h3 class="empty-state-title">Your creative canvas awaits! 🎨</h3>
-              <p class="empty-state-description">
-                Ready to bring your brand to life? Upload your first {{ activeTab === 'images' ? 'image' : 'video' }} and let's make something amazing together.
-              </p>
-              <a-button 
-                type="primary" 
-                class="upload-btn-empty" 
-                @click="showUploadModal"
-              >
-                <upload-outlined /> Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}
-              </a-button>
+                  </a-col>
+                </a-row>
+
+                <!-- 添加分页组件 -->
+                <div class="pagination-wrapper">
+                  <a-pagination
+                    v-model:current="currentPage"
+                    :total="total"
+                    :pageSize="pageSize"
+                    show-size-changer
+                    @change="handlePageChange"
+                    @showSizeChange="handleSizeChange"
+                  />
+                </div>
+              </template>
+              
+              <div v-else-if="showEmptyState && activeTab !== 'links'" class="empty-state">
+                <h3 class="empty-state-title">Your creative canvas awaits! 🎨</h3>
+                <p class="empty-state-description">
+                  Ready to bring your brand to life? Upload your first {{ activeTab === 'images' ? 'image' : 'video' }} and let's make something amazing together.
+                </p>
+                <a-button 
+                  type="primary" 
+                  class="upload-btn-empty" 
+                  @click="showUploadModal"
+                >
+                  <upload-outlined /> Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}
+                </a-button>
+              </div>
             </div>
-          </div>
-          
+          </a-spin>
         </template>
 
         <!-- Link Content -->
@@ -764,6 +775,12 @@ export default {
       router.push('/help-center')
     }
     
+    // 添加分页相关的响应式变量
+    const currentPage = ref(1)
+    const pageSize = ref(12)
+    const total = ref(0)
+    
+    // 修改 fetchAssets 方法支持分页
     const fetchAssets = async () => {
       loading.value = true
       try {
@@ -772,22 +789,28 @@ export default {
         const response = await apiClient.getMedia(
           customerId,
           mediaType,
-          selectedCategory.value === 'all' ? null : selectedCategory.value
+          selectedCategory.value === 'all' ? null : selectedCategory.value,
+          currentPage.value,
+          pageSize.value
         )
         
-        assets.value = response.data ? response.data.map(item => ({
-          id: item.mediaId,
-          type: item.mediaType,
-          name: item.mediaName,
-          url: item.mediaUrl,
-          categoryId: item.categoryId,
-          description: item.description,
-          categoryName: item.categoryName,
-          uploadTime: new Date().toISOString(),
-          size: 0,
-          suggestedUsage: '',
-          duration: item.mediaType === 'video' ? 0 : undefined
-        })) : []
+        if (response.data) {
+          assets.value = response.data.map(item => ({
+            id: item.mediaId,
+            type: item.mediaType,
+            name: item.mediaName,
+            url: item.mediaUrl,
+            categoryId: item.categoryId,
+            description: item.description,
+            categoryName: item.categoryName,
+            uploadTime: new Date().toISOString(),
+            size: 0,
+            suggestedUsage: '',
+            duration: item.mediaType === 'video' ? 0 : undefined
+          }))
+          // 修改这里：使用 TotalCount 而不是 totalCount
+          total.value = response.TotalCount || 0
+        }
       } catch (error) {
         console.error('Failed to fetch assets:', error)
         message.error('Failed to load assets')
@@ -796,16 +819,24 @@ export default {
       }
     }
 
-    // 监听标化时重新获取数据
-    watch(activeTab, async (newValue) => {
-      if (newValue === 'links') {
-        await fetchLinks()
-      } else if (newValue === 'button-links') {
-        await fetchButtonLinks() // 添加按钮链接的加载
-      } else if (newValue === 'header' || newValue === 'footer') {
-        await fetchLayoutData(newValue)
-      } else {
-        await fetchAssets()
+    // 添加分页处理方法
+    const handlePageChange = (page, size) => {
+      currentPage.value = page
+      pageSize.value = size
+      fetchAssets()
+    }
+
+    const handleSizeChange = (current, size) => {
+      currentPage.value = 1
+      pageSize.value = size
+      fetchAssets()
+    }
+
+    // 修改 watch 以在切换标签时重置分页
+    watch(activeTab, (newValue) => {
+      if (newValue === 'images' || newValue === 'videos') {
+        currentPage.value = 1 // 重置页码
+        fetchAssets()
       }
     })
 
@@ -1831,6 +1862,11 @@ export default {
       buttonLinkColumns,
       editButtonLink,
       deleteButtonLink,
+      currentPage,
+      pageSize,
+      total,
+      handlePageChange,
+      handleSizeChange,
     }
   }
 }
@@ -2984,5 +3020,13 @@ export default {
 
 .preview-header-content h4 {
   margin: 0;
+}
+
+/* 添加分页样式 */
+.pagination-wrapper {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 24px;
 }
 </style> 
