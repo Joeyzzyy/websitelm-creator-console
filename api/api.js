@@ -1057,6 +1057,17 @@ const getAnalysisStatus = async () => {
   }
 };
 
+// 新增：更新用户 onboarding status 的方法
+const updateOnboardingStatus = async (status) => {
+  try {
+    const response = await apiClient.put('/customer/onboarding', { status });
+    return response.data;
+  } catch (error) {
+    console.error('更新用户 onboarding status 失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1137,5 +1148,6 @@ export default {
   createPageButtonLink,
   updatePageButtonLink,
   deletePageButtonLink,
-  getAnalysisStatus
+  getAnalysisStatus,
+  updateOnboardingStatus
 };

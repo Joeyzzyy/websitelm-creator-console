@@ -72,16 +72,19 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue'
 import { FileTextOutlined, BulbOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
 import { tutorialConfig } from '../config/tutorials'
+import apiClient from '../api/api'
 
-export default {
+export default defineComponent({
+  name: 'OnboardingTour',
   components: {
     FileTextOutlined,
     BulbOutlined,
     QuestionCircleOutlined
   },
-  name: 'OnboardingTour',
+  
   data() {
     return {
       visible: false,
@@ -125,10 +128,25 @@ export default {
       }
     },
     
-    complete() {
-      this.visible = false
-      localStorage.setItem('onboardingCompleted', 'true')
-      this.$emit('complete')
+    async complete() {
+      try {
+        // 调用 API 更新 onboarding 状态
+        await apiClient.updateOnboardingStatus('completed')
+        
+        // 隐藏引导界面
+        this.visible = false
+        
+        // 触发完成事件
+        this.$emit('complete')
+        
+        // 导航到 dashboard 页面
+        if (this.$router.currentRoute.value.path !== '/dashboard') {
+          await this.$router.push('/dashboard')
+        }
+      } catch (error) {
+        console.error('完成引导流程时出错:', error)
+        this.$message.error('完成引导流程时出错，请稍后重试')
+      }
     },
     
     calculatePosition(step) {
@@ -255,7 +273,7 @@ export default {
       }
     }
   }
-}
+})
 </script>
 
 <style scoped>

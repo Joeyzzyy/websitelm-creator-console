@@ -82,7 +82,7 @@
     </a-layout-sider>
     <!-- 内容区域 -->
     <a-layout-content style="padding: 20px; overflow: auto;">
-      <router-view />
+      <router-view @open-guide-mode="startInteractiveGuide" />
     </a-layout-content>
   </a-layout>
 
@@ -1111,7 +1111,7 @@ export default {
     },
 
     startTour() {
-      this.guideModeVisible = true
+      this.guideModeVisible = true;
     },
 
     handleOnboardingComplete() {
@@ -1143,6 +1143,12 @@ export default {
     playTutorial(tutorial) {
       // 实现教程播放逻辑
       window.open(tutorial.docsLink, '_blank'); // 打开文章链接
+    },
+
+    // 新增直接开始交互式引导的方法
+    startInteractiveGuide() {
+      this.guideModeVisible = false; // 确保选择对话框是关闭的
+      this.startStepByStepTour(); // 直接开始交互式引导
     }
   },
   watch: {

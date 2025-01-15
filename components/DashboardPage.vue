@@ -4,13 +4,15 @@
     description="Manage your product and track your performance"
     icon="📊"
   >
+   
     <!-- Product info and statistics banner -->
     <div class="dashboard-content">
+        <!-- 添加测试按钮 -->
       <!-- Product Info Card -->
       <a-card class="info-card">
         <template #title>
           <div class="card-title">
-            <span>Product Information</span>
+            <span>🎯 Product Information</span>
             <a-space>
               <a-button 
                 type="link" 
@@ -129,23 +131,16 @@
         <a-col :span="16">
           <a-card class="sitemap-card">
             <template #title>
-              <div class="panel-header">
+              <div class="card-title">
                 <span>🗺️ Website Structure</span>
                 <a-space>
-                  <a-tag style="font-size: 12px" v-if="allPages?.length" color="blue">
-                    {{ allPages.length }} Pages
-                  </a-tag>
                   <a-button 
                     type="link" 
                     size="small"
-                    :disabled="!productInfo || loadingSitemap || !productInfo?.projectWebsite || !productInfo?.domainStatus"
                     @click="handleRefreshSitemap"
+                    :loading="loadingSitemap"
                   >
-                    <template v-if="loadingSitemap">Loading...</template>
-                    <template v-else-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
-                      Add your site to get sitemap automatically →
-                    </template>
-                    <template v-else>Refresh Sitemap</template>
+                    Refresh
                   </a-button>
                   <a-button
                     type="link"
@@ -291,14 +286,11 @@
         <a-col :span="24">
           <a-card>
             <template #title>
-              <div class="panel-header">
-                <span class="title-text">👥 Traffic</span>
-                <a-select
-                  v-if="isGscConnected && gscSites.length"
-                  v-model:value="selectedSiteUrl"
-                  style="width: 400px"
-                  placeholder="Select site"
-                  size="small"
+              <div class="card-title">
+                <span>📈 Traffic Analytics</span>
+                <a-select 
+                  v-model:value="selectedSiteUrl" 
+                  style="width: 200px"
                   @change="handleSiteChange"
                 >
                   <a-select-option 
@@ -388,285 +380,437 @@
         </a-col>
       </a-row>
     </div>
-  </page-layout>
 
-  <!-- Add onboarding modal -->
-  <a-modal
-    v-model:open="onboardingModalVisible"
-    :maskClosable="false"
-    :closable="!!formState.productId"
-    :width="800"
-    :footer="null"
-    :class="['product-modal']"
-  >
-    <template #title>
-      <div class="modal-title">
-        <template v-if="!formState.productId">
-          <div class="welcome-title">
-            <span class="beta-tag">BETA</span>
-            <span class="title-text">Welcome to WebsiteLM!</span>
-          </div>
-        </template>
-        <template v-else>
-          <span>✏️ Edit Product Information</span>
-        </template>
-      </div>
-    </template>
-
-    <a-form 
-      :model="formState" 
-      layout="vertical"
-      @finish="handleOnboardingFinish"
-      ref="formRef"
+    <!-- Add onboarding modal -->
+    <a-modal
+      v-model:open="onboardingModalVisible"
+      :maskClosable="false"
+      :closable="!!formState.productId"
+      :width="800"
+      :footer="null"
+      :class="['product-modal']"
     >
-      <!-- 基本信息 -->
-      <a-form-item 
-        label="Product Name" 
-        name="productName"
-        :rules="[{ required: true, message: 'Please enter product name' }]"
-      >
-        <p class="step-description">Enter the name of your existing product or service.</p>
-        <a-input 
-          v-model:value="formState.productName" 
-          placeholder="Enter your product name"
-          :maxLength="50"
-        />
-        <p class="help-text">This name will be used throughout your content generation.</p>
-      </a-form-item>
+      <template #title>
+        <div class="modal-title">
+          <template v-if="!formState.productId">
+            <div class="welcome-title">
+              <span class="beta-tag">BETA</span>
+              <span class="title-text">Welcome to WebsiteLM!</span>
+            </div>
+          </template>
+          <template v-else>
+            <span>✏️ Edit Product Information</span>
+          </template>
+        </div>
+      </template>
 
-      <!-- 网站信息和域名验证 -->
-      <a-form-item 
-        label="Official Website" 
-        name="website"
+      <a-form 
+        :model="formState" 
+        layout="vertical"
+        @finish="handleOnboardingFinish"
+        ref="formRef"
       >
-        <p class="step-description">Enter your product's website URL to help us better understand and promote your product.</p>
-        <a-input-group compact>
-          <span 
-            style="
-              display: inline-flex;
-              align-items: center;
-              padding: 0 11px;
-              width: 90px;
-              height: 32px;
-              color: rgba(0, 0, 0, 0.88);
-              background-color: rgb(245, 245, 245);
-              border: 1px solid #d9d9d9;
-              border-right: none;
-              border-radius: 6px 0 0 6px;
-            "
-          >
-            https://
-          </span>
+        <!-- 基本信息 -->
+        <a-form-item 
+          label="Product Name" 
+          name="productName"
+          :rules="[{ required: true, message: 'Please enter product name' }]"
+        >
+          <p class="step-description">Enter the name of your existing product or service.</p>
           <a-input 
-            v-model:value="formState.website" 
-            style="width: calc(100% - 90px); border-radius: 0 6px 6px 0;"
-            placeholder="example.com"
-            @change="handleWebsiteChange"
-            :disabled="verifying"
+            v-model:value="formState.productName" 
+            placeholder="Enter your product name"
+            :maxLength="50"
           />
-        </a-input-group>
-        <p class="help-text">Make sure to enter the main domain of your product (e.g. example.com).</p>
+          <p class="help-text">This name will be used throughout your content generation.</p>
+        </a-form-item>
 
-        <!-- 域名验证部分 -->
-        <template v-if="formState.productId">
-          <template v-if="(!productInfo.domainStatus || formState.website !== productInfo.projectWebsite?.replace('https://', '')) && formState.website">
-            <a-typography-text type="secondary" class="mt-3 d-block">
-              <InfoCircleOutlined /> Domain verification required for automatic sitemap and content fetching
-            </a-typography-text>
-            
-            <div class="mt-3">
-              <template v-if="!showVerifyRecord">
-                <a-button 
-                  type="primary" 
-                  @click="startVerify"
-                  :disabled="!formState.website"
-                  :loading="startVerifying"
+        <!-- 网站信息和域名验证 -->
+        <a-form-item 
+          label="Official Website" 
+          name="website"
+        >
+          <p class="step-description">Enter your product's website URL to help us better understand and promote your product.</p>
+          <a-input-group compact>
+            <span 
+              style="
+                display: inline-flex;
+                align-items: center;
+                padding: 0 11px;
+                width: 90px;
+                height: 32px;
+                color: rgba(0, 0, 0, 0.88);
+                background-color: rgb(245, 245, 245);
+                border: 1px solid #d9d9d9;
+                border-right: none;
+                border-radius: 6px 0 0 6px;
+              "
+            >
+              https://
+            </span>
+            <a-input 
+              v-model:value="formState.website" 
+              style="width: calc(100% - 90px); border-radius: 0 6px 6px 0;"
+              placeholder="example.com"
+              @change="handleWebsiteChange"
+              :disabled="verifying"
+            />
+          </a-input-group>
+          <p class="help-text">Make sure to enter the main domain of your product (e.g. example.com).</p>
+
+          <!-- 域名验证部分 -->
+          <template v-if="formState.productId">
+            <template v-if="(!productInfo.domainStatus || formState.website !== productInfo.projectWebsite?.replace('https://', '')) && formState.website">
+              <a-typography-text type="secondary" class="mt-3 d-block">
+                <InfoCircleOutlined /> Domain verification required for automatic sitemap and content fetching
+              </a-typography-text>
+              
+              <div class="mt-3">
+                <template v-if="!showVerifyRecord">
+                  <a-button 
+                    type="primary" 
+                    @click="startVerify"
+                    :disabled="!formState.website"
+                    :loading="startVerifying"
+                  >
+                    Start Verifying
+                  </a-button>
+                </template>
+                <template v-else>
+                  <div class="verify-record-container">
+                    <div class="verify-record-title">
+                      <InfoCircleOutlined /> Please add the following TXT record to your DNS settings:
+                    </div>
+                    <div class="verify-record-table">
+                      <div class="verify-record-row">
+                        <div class="verify-record-cell">
+                          <span class="verify-label">Type:</span>
+                          <a-typography-text>TXT</a-typography-text>
+                        </div>
+                      </div>
+                      <div class="verify-record-row">
+                        <div class="verify-record-cell">
+                          <span class="verify-label">Host:</span>
+                          <a-typography-text code copyable class="record-value">
+                            {{ verifyRecord?.host || '_' }}
+                          </a-typography-text>
+                        </div>
+                      </div>
+                      <div class="verify-record-row">
+                        <div class="verify-record-cell">
+                          <span class="verify-label">Value:</span>
+                          <a-typography-text code copyable class="record-value">
+                            {{ verifyRecord?.value || '_' }}
+                          </a-typography-text>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="verify-record-help">
+                      <ul>
+                        <li>DNS changes may take up to several minutes to propagate</li>
+                        <li>Make sure to copy the exact value without any modifications</li>
+                      </ul>
+                    </div>
+                    <a-button 
+                      type="primary" 
+                      @click="verifyNow"
+                      :loading="verifying"
+                      class="mt-3"
+                    >
+                      Verify Now
+                    </a-button>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <template v-else-if="productInfo.domainStatus && formState.website === productInfo.projectWebsite?.replace('https://', '')">
+              <a-tag color="success" class="mt-3">
+                <CheckCircleOutlined /> Domain Verified
+              </a-tag>
+            </template>
+          </template>
+        </a-form-item>
+
+        <!-- 竞品分析 -->
+        <a-form-item label="Competitors">
+          <p class="step-description">Add up to 4 main competitors to help us understand your market positioning.</p>
+          <div class="competitors-section">
+            <!-- 第一行: 添加的竞品标签 -->
+            <div class="competitors-tags">
+              <a-space wrap>
+                <a-tag 
+                  v-for="(comp, index) in formState.competitors" 
+                  :key="index"
+                  closable
+                  @close="removeCompetitor(index)"
+                  :color="['blue', 'green', 'orange', 'purple'][index % 4]"
                 >
-                  Start Verifying
+                  {{ comp.name }}
+                </a-tag>
+              </a-space>
+            </div>
+
+            <!-- 第二行: 输入框和添加按钮 -->
+            <div class="competitors-input">
+              <a-space>
+                <a-input
+                  v-model:value="newCompetitor.name"
+                  placeholder="Competitor name"
+                  style="width: 200px"
+                />
+                <a-input
+                  v-model:value="newCompetitor.url"
+                  placeholder="Website (e.g. example.com)"
+                  style="width: 200px"
+                />
+                <a-button 
+                  type="primary"
+                  @click="addCompetitor"
+                  :disabled="!newCompetitor.name || !newCompetitor.url"
+                >
+                  Add
+                </a-button>
+              </a-space>
+            </div>
+          </div>
+        </a-form-item>
+
+        <!-- 底部按钮 -->
+        <a-form-item>
+          <a-button 
+            type="primary" 
+            html-type="submit"
+            :loading="loading"
+            :disabled="!formState.productName"
+            block
+          >
+            {{ formState.productId ? 'Save Changes' : 'Start Using WebsiteLM' }}
+          </a-button>
+        </a-form-item>
+      </a-form>
+    </a-modal>
+
+    <!-- 添加 GSC 连接成功的 Modal -->
+    <a-modal
+      v-model:open="gscSuccessModalVisible"
+      :footer="null"
+      :maskClosable="false"
+      :closable="false"
+      class="gsc-success-modal"
+    >
+      <div class="success-content">
+        <div class="success-icon"></div>
+        <h3>Connected Successfully!</h3>
+        <p>Please close this window and refresh the page</p>
+      </div>
+    </a-modal>
+
+    <!-- 添加 Sitemap Modal -->
+    <a-modal
+      v-model:visible="sitemapModal.visible"
+      title="Submit URLs to Google Search Console"
+      width="800px"
+      @ok="handleSubmitUrls"
+      @cancel="closeSitemapModal"
+      :confirmLoading="submitLoading"
+      :okText="'Submit to Google'"
+      :cancelText="'Cancel'"
+    >
+      <div class="sitemap-preview">
+        <div class="preview-header">
+          <a-alert
+            message="Below are all published page URLs. Confirm to submit to Google Search Console"
+            type="info"
+            show-icon
+            style="margin-bottom: 16px"
+          />
+          <div class="url-count">
+            Found {{ publishedUrls.length }} published pages
+          </div>
+        </div>
+        
+        <a-list
+          :data-source="publishedUrls"
+          :bordered="true"
+          size="small"
+          class="url-list"
+        >
+          <template #renderItem="{ item }">
+            <a-list-item>
+              <div class="url-item">
+                <span class="url-text">{{ item }}</span>
+                <a-button 
+                  type="link" 
+                  size="small"
+                  @click="openPreview(item)"
+                >
+                  View
+                </a-button>
+              </div>
+            </a-list-item>
+          </template>
+        </a-list>
+      </div>
+    </a-modal>
+
+
+    
+    <a-modal
+      v-model:visible="successModalVisible"
+      title="Welcome to WebsiteLM!"
+      :footer="null"
+      :maskClosable="false"
+    >
+      <div class="success-content">
+        <div class="success-icon">🎉</div>
+        <p>Your product has been set up successfully. Here are the next steps:</p>
+        
+        <div class="todo-list">
+          <div class="todo-item">
+            <div class="todo-info">
+              <span class="todo-title">1. Verify Your Domain</span>
+              <span class="todo-desc">Enable automatic sitemap and content fetching</span>
+            </div>
+            <a-button type="primary" @click="handleVerifyDomain">
+              Start Verify
+            </a-button>
+          </div>
+
+          <div class="todo-item">
+            <div class="todo-info">
+              <span class="todo-title">2. Connect Google Search Console</span>
+              <span class="todo-desc">Track your website performance</span>
+            </div>
+            <a-button type="primary" @click="handleConnectGSC">
+              Connect Now
+            </a-button>
+          </div>
+
+          <div class="todo-item">
+            <div class="todo-info">
+              <span class="todo-title">3. Explore Features</span>
+              <span class="todo-desc">Learn about all available features</span>
+            </div>
+            <a-button type="primary" @click="handleExploreTour">
+              Start Tour
+            </a-button>
+          </div>
+        </div>
+
+        <div class="skip-action">
+          <a-button @click="handleSuccessModalClose">Skip for now</a-button>
+        </div>
+      </div>
+    </a-modal>
+
+    <!-- 在 template 最后添加，body 级别 -->
+    <transition name="panel">
+      <div class="setup-progress-panel" v-if="!allStepsCompleted">
+        <div class="panel-header">
+          <div class="panel-title">
+            <CheckCircleOutlined v-if="allStepsCompleted" />
+            <ClockCircleOutlined v-else />
+            Setup Progress
+          </div>
+          <div class="progress-status">
+            {{ completedSteps }}/3
+          </div>
+        </div>
+        
+        <div class="progress-steps">
+          <!-- Domain Verification -->
+          <div 
+            class="progress-step"
+            :class="{ 'completed': productInfo?.domainStatus }"
+          >
+            <div 
+              class="step-icon"
+              :class="productInfo?.domainStatus ? 'completed' : 'pending'"
+            >
+              <GlobalOutlined />
+            </div>
+            <div class="step-content">
+              <div class="step-title">Verify Domain</div>
+              <div class="step-desc">Enable automatic sitemap</div>
+            </div>
+            <div class="step-action">
+              <template v-if="!productInfo?.domainStatus">
+                <a-button 
+                  type="link" 
+                  size="small"
+                  @click="openEditWithBasicInfoToVerify"
+                  :loading="goStartVerifying"
+                >
+                  Start
                 </a-button>
               </template>
               <template v-else>
-                <div class="verify-record-container">
-                  <div class="verify-record-title">
-                    <InfoCircleOutlined /> Please add the following TXT record to your DNS settings:
-                  </div>
-                  <div class="verify-record-table">
-                    <div class="verify-record-row">
-                      <div class="verify-record-cell">
-                        <span class="verify-label">Type:</span>
-                        <a-typography-text>TXT</a-typography-text>
-                      </div>
-                    </div>
-                    <div class="verify-record-row">
-                      <div class="verify-record-cell">
-                        <span class="verify-label">Host:</span>
-                        <a-typography-text code copyable class="record-value">
-                          {{ verifyRecord?.host || '_' }}
-                        </a-typography-text>
-                      </div>
-                    </div>
-                    <div class="verify-record-row">
-                      <div class="verify-record-cell">
-                        <span class="verify-label">Value:</span>
-                        <a-typography-text code copyable class="record-value">
-                          {{ verifyRecord?.value || '_' }}
-                        </a-typography-text>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="verify-record-help">
-                    <ul>
-                      <li>DNS changes may take up to several minutes to propagate</li>
-                      <li>Make sure to copy the exact value without any modifications</li>
-                    </ul>
-                  </div>
-                  <a-button 
-                    type="primary" 
-                    @click="verifyNow"
-                    :loading="verifying"
-                    class="mt-3"
-                  >
-                    Verify Now
-                  </a-button>
-                </div>
+                <CheckCircleOutlined style="color: #52c41a" />
               </template>
             </div>
-          </template>
-          <template v-else-if="productInfo.domainStatus && formState.website === productInfo.projectWebsite?.replace('https://', '')">
-            <a-tag color="success" class="mt-3">
-              <CheckCircleOutlined /> Domain Verified
-            </a-tag>
-          </template>
-        </template>
-      </a-form-item>
-
-      <!-- 竞品分析 -->
-      <a-form-item label="Competitors">
-        <p class="step-description">Add up to 4 main competitors to help us understand your market positioning.</p>
-        <div class="competitors-section">
-          <!-- 第一行: 添加的竞品标签 -->
-          <div class="competitors-tags">
-            <a-space wrap>
-              <a-tag 
-                v-for="(comp, index) in formState.competitors" 
-                :key="index"
-                closable
-                @close="removeCompetitor(index)"
-                :color="['blue', 'green', 'orange', 'purple'][index % 4]"
-              >
-                {{ comp.name }}
-              </a-tag>
-            </a-space>
           </div>
 
-          <!-- 第二行: 输入框和添加按钮 -->
-          <div class="competitors-input">
-            <a-space>
-              <a-input
-                v-model:value="newCompetitor.name"
-                placeholder="Competitor name"
-                style="width: 200px"
-              />
-              <a-input
-                v-model:value="newCompetitor.url"
-                placeholder="Website (e.g. example.com)"
-                style="width: 200px"
-              />
-              <a-button 
-                type="primary"
-                @click="addCompetitor"
-                :disabled="!newCompetitor.name || !newCompetitor.url"
-              >
-                Add
-              </a-button>
-            </a-space>
-          </div>
-        </div>
-      </a-form-item>
-
-      <!-- 底部按钮 -->
-      <a-form-item>
-        <a-button 
-          type="primary" 
-          html-type="submit"
-          :loading="loading"
-          :disabled="!formState.productName"
-          block
-        >
-          {{ formState.productId ? 'Save Changes' : 'Start Using WebsiteLM' }}
-        </a-button>
-      </a-form-item>
-    </a-form>
-  </a-modal>
-
-  <!-- Add success modal component -->
-  <success-modal
-    v-model:open="successModalVisible"
-    @close="handleSuccessModalClose"
-  />
-
-  <!-- 添加 GSC 连接成功的 Modal -->
-  <a-modal
-    v-model:open="gscSuccessModalVisible"
-    :footer="null"
-    :maskClosable="false"
-    :closable="false"
-    class="gsc-success-modal"
-  >
-    <div class="success-content">
-      <div class="success-icon"></div>
-      <h3>Connected Successfully!</h3>
-      <p>Please close this window and refresh the page</p>
-    </div>
-  </a-modal>
-
-  <!-- 添加 Sitemap Modal -->
-  <a-modal
-    v-model:visible="sitemapModal.visible"
-    title="Submit URLs to Google Search Console"
-    width="800px"
-    @ok="handleSubmitUrls"
-    @cancel="closeSitemapModal"
-    :confirmLoading="submitLoading"
-    :okText="'Submit to Google'"
-    :cancelText="'Cancel'"
-  >
-    <div class="sitemap-preview">
-      <div class="preview-header">
-        <a-alert
-          message="Below are all published page URLs. Confirm to submit to Google Search Console"
-          type="info"
-          show-icon
-          style="margin-bottom: 16px"
-        />
-        <div class="url-count">
-          Found {{ publishedUrls.length }} published pages
-        </div>
-      </div>
-      
-      <a-list
-        :data-source="publishedUrls"
-        :bordered="true"
-        size="small"
-        class="url-list"
-      >
-        <template #renderItem="{ item }">
-          <a-list-item>
-            <div class="url-item">
-              <span class="url-text">{{ item }}</span>
+          <!-- GSC Connection -->
+          <div 
+            class="progress-step"
+            :class="{ 'completed': isGscConnected }"
+          >
+            <div 
+              class="step-icon"
+              :class="isGscConnected ? 'completed' : 'pending'"
+            >
+              <GoogleOutlined />
+            </div>
+            <div class="step-content">
+              <div class="step-title">Connect GSC</div>
+              <div class="step-desc">Track performance</div>
+            </div>
+            <div class="step-action">
               <a-button 
                 type="link" 
                 size="small"
-                @click="openPreview(item)"
+                @click="handleConnectGSC"
+                :disabled="!isDomainVerified"
+                v-if="!isGscConnected"
               >
-                View
+                Connect
               </a-button>
+              <CheckCircleOutlined v-else style="color: #52c41a" />
             </div>
-          </a-list-item>
-        </template>
-      </a-list>
-    </div>
-  </a-modal>
+          </div>
+
+          <!-- Feature Tour -->
+          <div 
+            class="progress-step"
+            :class="{ 'completed': productInfo?.onboarding }"  
+          >
+            <div 
+              class="step-icon"
+              :class="productInfo?.onboarding ? 'completed' : 'pending'"
+            >
+              <CompassOutlined />
+            </div>
+            <div class="step-content">
+              <div class="step-title">Take a Tour</div>
+              <div class="step-desc">Learn key features</div>
+            </div>
+            <div class="step-action">
+              <a-button 
+                type="link" 
+                size="small"
+                @click="handleExploreTour"
+                :disabled="!isGscConnected"
+                v-if="!productInfo?.onboarding"
+              >
+                Start
+              </a-button>
+              <CheckCircleOutlined v-else style="color: #52c41a" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </page-layout>
 </template>
 
 <script>
@@ -687,12 +831,17 @@ import {
   GlobalOutlined,
   InfoCircleOutlined,
   PlusOutlined,
-  CheckCircleOutlined
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  GoogleOutlined,
+  CompassOutlined,
+  ReloadOutlined,
+  QuestionCircleOutlined
 } from '@ant-design/icons-vue'
 import apiClient from '../api/api'
-import SuccessModal from './SuccessModal.vue'
 import { Modal, message } from 'ant-design-vue'
 import * as echarts from 'echarts' // 需要安装 echarts
+import { CheckCircleFilled } from '@ant-design/icons-vue'
 
 export default defineComponent({
   components: {
@@ -711,7 +860,12 @@ export default defineComponent({
     GlobalOutlined,
     CheckCircleOutlined,
     InfoCircleOutlined,
-    PlusOutlined
+    PlusOutlined,
+    ClockCircleOutlined,
+    GoogleOutlined,
+    CompassOutlined,
+    ReloadOutlined,
+    QuestionCircleOutlined
   },
   data() {
     return {
@@ -768,6 +922,8 @@ export default defineComponent({
       submitLoading: false,
       publishedUrls: [],
       pagesDashboard: null,
+      isDomainVerified: false,
+      hasTourCompleted: false // 修改初始值
     }
   },
   created() {
@@ -775,6 +931,9 @@ export default defineComponent({
     this.handleGscCallback()
     this.checkGscStatus()
     this.startGscStatusCheck()
+    
+    // 从 localStorage 或其他存储中获取功能导览状态
+    // this.hasTourCompleted = localStorage.getItem('tourCompleted') === 'true';
   },
   beforeUnmount() {
     if (this.gscCheckInterval) {
@@ -821,6 +980,37 @@ export default defineComponent({
         const [name, url] = item.split('|');
         return { name, url };
       });
+    },
+    completedSteps() {
+      let completed = 0;
+      
+      // 检查域名验证状态
+      if (this.productInfo?.domainStatus) {
+        completed++;
+      }
+      
+      // 检查 GSC 连接状态
+      if (this.isGscConnected) {
+        completed++;
+      }
+      
+      // 检查功能导览完成状态 - 修改这里
+      if (this.productInfo?.onboarding) {  // 改用 productInfo.onboarding 替代 hasTourCompleted
+        completed++;
+      }
+      
+      return completed;
+    },
+    
+    progressPercent() {
+      return Math.round((this.completedSteps / 3) * 100);
+    },
+    
+    allStepsCompleted() {
+      return this.completedSteps === 3;
+    },
+    isDomainVerified() {
+      return this.productInfo?.domainStatus || false;
     }
   },
   methods: {
@@ -923,30 +1113,11 @@ export default defineComponent({
       }
     },
     async handleOnboardingFinish() {
-      const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
-      const isDomainVerified = this.productInfo?.domainStatus;
-
-      // 检查域名是否被修改且之前已验证
-      if (isDomainVerified && this.formState.website !== currentDomain && this.formState.website) {
-        // 显示确认对话框
-        const confirmed = await new Promise(resolve => {
-          Modal.confirm({
-            title: 'Domain Change Confirmation',
-            content: 'Changing the domain will invalidate the existing knowledge base, images, videos, internal links, and subdomains. Do you want to proceed and verify the new domain?',
-            okText: 'Yes',
-            cancelText: 'No',
-            onOk: () => resolve(true),
-            onCancel: () => resolve(false),
-          });
-        });
-
-        if (!confirmed) {
-          return;
-        }
-      }
-
       this.loading = true;
       try {
+        console.log('开始处理 onboarding');
+        console.log('Form State:', this.formState);
+        
         const formData = {
           customerId: localStorage.getItem('currentCustomerId'),
           productName: this.formState.productName,
@@ -956,27 +1127,38 @@ export default defineComponent({
           ).join(','),
           website: this.formState.website || '',
           sitemap: '',
-          // 如果域名改变强制设置为未验证状态
-          domainStatus: this.formState.website !== currentDomain ? false : this.originalDomainStatus
+          domainStatus: this.formState.website !== (this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '') || '') 
+            ? false 
+            : this.originalDomainStatus
         };
 
         let response;
         if (this.formState.productId) {
+          console.log('Updating existing product');
           response = await apiClient.updateProduct(this.formState.productId, formData);
         } else {
+          console.log('Creating new product');
           response = await apiClient.createProduct(formData);
         }
 
-        // 如果域名改变，生成新的验证记录
-        if (this.formState.website !== currentDomain && this.formState.website) {
-          await this.generateNewVerificationRecord();
-        }
+        console.log('API Response:', response); // 检查API响应
 
         if (response?.code === 200) {
           if (!this.formState.productId) {
-            this.successModalVisible = true;
+            console.log('API 调用成功，准备显示 modal');
+            // 先重置其他状态
+            this.onboardingModalVisible = false;
+            await this.$nextTick();
+            
+            // 延迟显示 success modal
+            setTimeout(() => {
+              this.successModalVisible = true;
+              console.log('设置 successModalVisible:', this.successModalVisible);
+            }, 100);
+
             this.resetFormState();
           } else {
+            console.log('Updating existing product success');
             this.$notification.success({
               message: 'Product Updated',
               description: 'Product information has been updated successfully.'
@@ -984,17 +1166,12 @@ export default defineComponent({
           }
           
           this.onboardingModalVisible = false;
-          await this.loadProductInfo(); // 重新加载产品信息
+          await this.loadProductInfo();
         }
       } catch (error) {
-        console.error('操作失败:', error);
-        this.$notification.error({
-          message: this.formState.productId ? '更新失败' : '设置失败',
-          description: error.message || '保存产品信息失败。请重试。'
-        });
+        console.error('Error:', error);
       } finally {
         this.loading = false;
-        this.originalDomainStatus = null; // 重置原始状态
       }
     },
 
@@ -1123,7 +1300,8 @@ export default defineComponent({
       }
     },
     handleSuccessModalClose() {
-      this.successModalVisible = false
+      console.log('关闭 success modal');
+      this.successModalVisible = false;
     },
     addCompetitor() {
       if (this.newCompetitor.name && this.newCompetitor.url) {
@@ -1508,6 +1686,19 @@ export default defineComponent({
           // Reset to first step whenever modal is opened
           this.currentStep = 0;
         }
+      },
+      successModalVisible: {
+        handler(newVal) {
+          console.log('successModalVisible 变化:', newVal);
+        },
+        immediate: true
+      },
+      // 添加对 productInfo 的监听
+      'productInfo.onboarding': {
+        immediate: true,
+        handler(newVal) {
+          this.hasTourCompleted = !!newVal; // 将 onboarding 状态同步到 hasTourCompleted
+        }
       }
     },
     // 添加关闭弹窗的处理方法
@@ -1887,6 +2078,56 @@ export default defineComponent({
         const fullUrl = url.startsWith('http') ? url : `https://${url}`;
         window.open(fullUrl, '_blank');
       }
+    },
+    
+    // 处理验证域名
+    handleVerifyDomain() {
+      console.log('验证域名');
+      this.successModalVisible = false;
+      // 添加其他处理逻辑
+    },
+    
+    // 处理连接 GSC
+    handleConnectGSC() {
+      console.log('连接 GSC');
+      this.successModalVisible = false;
+      // 添加其他处理逻辑
+    },
+    
+    // 处理功能导览
+    handleExploreTour() {
+      this.successModalVisible = false;
+      this.openGuideModeDialog();
+    },
+    
+    // 关闭成功弹窗
+    handleSuccessModalClose() {
+      console.log('关闭 success modal');
+      this.successModalVisible = false;
+    },
+
+    // 添加测试方法
+    testShowModal() {
+      console.log('点击测试按钮');
+      this.successModalVisible = true;
+      console.log('当前 modal 状态:', this.successModalVisible);
+    },
+
+    openGuideModeDialog() {
+      // 通过事件触发父组件的方法
+      this.$emit('open-guide-mode');
+    }
+  },
+
+  // 如果使用组合式 API，也可以这样写：
+  emits: ['open-guide-mode'],
+  setup(props, { emit }) {
+    const openGuideModeDialog = () => {
+      emit('open-guide-mode');
+    }
+    
+    return {
+      openGuideModeDialog
     }
   }
 })
@@ -2313,12 +2554,12 @@ export default defineComponent({
 /* 添加一些辅助说明文字的样式 */
 .product-modal {
   .step-description {
-    color: #4096ff;  /* 改为蓝色 */
+    color: #666;  /* 改为灰色,区分于标题 */
     font-size: 13px;
     margin: 0 0 8px;
     line-height: 1.5;
-    padding: 6px 10px;
-    background: rgba(64, 150, 255, 0.04);  /* 改为浅蓝色背景 */
+    padding: 8px 12px;
+    background: #f5f5f5;  /* 改为浅灰色背景 */
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -2331,13 +2572,12 @@ export default defineComponent({
   }
 
   .help-text {
-    color: #1677ff;  /* 改为深蓝色 */
+    color: #8c8c8c;  /* 改为更浅的灰色 */
     font-size: 12px;
     margin-top: 4px;
     display: flex;
     align-items: center;
     gap: 4px;
-    opacity: 0.8;
     
     &::before {
       content: 'ℹ️';
@@ -2345,67 +2585,36 @@ export default defineComponent({
     }
   }
 
-  :deep(.ant-form-item) {
-    margin-bottom: 16px;
-    
-    .ant-form-item-label {
-      padding-bottom: 4px;
-      
-      label {
-        font-size: 14px;
-        font-weight: 500;
-        background: linear-gradient(135deg, #1677ff, #4096ff);  /* 改为蓝色渐变 */
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: bold;
-      }
-    }
-    
-    .ant-input,
+  /* 修复输入框组件高度不一致的问题 */
+  :deep(.ant-input-group) {
+    display: flex;
+    align-items: stretch; /* 确保子元素高度一致 */
+
     .ant-input-group-addon {
-      border-radius: 6px;
-      border: 1px solid rgba(64, 150, 255, 0.2);  /* 改为蓝色边框 */
-      background: rgba(255, 255, 255, 0.02);
-      height: 36px;
-      
-      &:hover {
-        border-color: rgba(64, 150, 255, 0.4);
-      }
-      
-      &:focus {
-        border-color: #1677ff;
-        box-shadow: 0 0 0 2px rgba(64, 150, 255, 0.1);
-      }
+      display: inline-flex;
+      align-items: center;
+      height: 32px; /* 统一高度为32px */
+      line-height: 32px;
+      background: #fafafa;
+      border: 1px solid #d9d9d9;
+      border-right: none;
+      border-radius: 6px 0 0 6px;
+      padding: 0 11px;
+    }
+
+    .ant-input {
+      height: 32px; /* 统一高度为32px */
+      line-height: 32px;
+      border-radius: 0 6px 6px 0;
     }
   }
 
-  .competitors-section {
-    background: rgba(64, 150, 255, 0.02);  /* 改为浅蓝色背景 */
-    border: 1px solid rgba(64, 150, 255, 0.1);  /* 改为蓝色边框 */
-    border-radius: 8px;
-    padding: 16px;
-    
-    .competitors-tags {
-      margin-bottom: 12px;
-      min-height: 28px;
-      
-      :deep(.ant-tag) {
-        margin: 3px;
-        padding: 3px 10px;
-        border-radius: 4px;
-        background: rgba(64, 150, 255, 0.08);  /* 改为浅蓝色背景 */
-        border: 1px solid rgba(64, 150, 255, 0.15);  /* 改为蓝色边框 */
-      }
-    }
-  }
-
-  :deep(.ant-btn-primary) {
-    height: 36px;
-    background: #1677ff;  /* 改为蓝色 */
-    border: none;
-    
-    &:hover {
-      background: #4096ff;  /* 改为浅蓝色 */
+  /* 表单标题使用更深的颜色 */
+  :deep(.ant-form-item-label) {
+    label {
+      color: #262626; /* 使用更深的颜色 */
+      font-weight: 500;
+      font-size: 14px;
     }
   }
 }
@@ -2453,5 +2662,266 @@ export default defineComponent({
   .help-text {
     margin-top: 4px;
   }
+}
+
+.success-content {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.success-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.todo-list {
+  margin: 24px 0;
+}
+
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 16px;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+}
+
+.todo-info {
+  text-align: left;
+}
+
+.todo-title {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.todo-desc {
+  display: block;
+  color: #666;
+  font-size: 14px;
+}
+
+.skip-action {
+  margin-top: 24px;
+}
+
+/* 修改浮动面板样式，添加发光效果 */
+.setup-progress-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 320px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12),
+              0 0 0 1px rgba(24, 144, 255, 0.1),
+              0 0 20px rgba(24, 144, 255, 0.2); /* 添加蓝色发光效果 */
+  padding: 16px;
+  z-index: 1000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: pulse 2s infinite; /* 添加脉冲动画 */
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(24, 144, 255, 0.2),
+                0 0 30px rgba(24, 144, 255, 0.3); /* 悬停时加强发光效果 */
+  }
+}
+
+/* 添加脉冲动画 */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12),
+                0 0 0 1px rgba(24, 144, 255, 0.1),
+                0 0 20px rgba(24, 144, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12),
+                0 0 0 1px rgba(24, 144, 255, 0.2),
+                0 0 30px rgba(24, 144, 255, 0.4);
+  }
+  100% {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12),
+                0 0 0 1px rgba(24, 144, 255, 0.1),
+                0 0 20px rgba(24, 144, 255, 0.2);
+  }
+}
+
+/* 给未完成的步骤添加闪光效果 */
+.progress-step:not(.completed) {
+  position: relative;
+  overflow: hidden;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.6),
+      transparent
+    );
+    animation: shine 3s infinite;
+  }
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  20% {
+    left: 200%;
+  }
+  100% {
+    left: 200%;
+  }
+}
+
+/* 优化步骤图标的发光效果 */
+.step-icon {
+  &.pending {
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #1890ff, #69c0ff);
+      opacity: 0.2;
+      z-index: -1;
+      animation: iconGlow 2s infinite;
+    }
+  }
+}
+
+@keyframes iconGlow {
+  0% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+}
+
+.panel-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.progress-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progress-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fafafa;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: #f0f7ff;
+  }
+  
+  &.completed {
+    background: #f6ffed;
+  }
+}
+
+.step-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  
+  &.completed {
+    color: #52c41a;
+    background: #f6ffed;
+  }
+  
+  &.pending {
+    color: #1890ff;
+    background: #e6f7ff;
+  }
+}
+
+.step-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 2px;
+}
+
+.step-desc {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.step-action {
+  margin-left: auto;
+}
+
+/* 添加进入和离开动画 */
+.panel-enter-active,
+.panel-leave-active {
+  transition: all 0.3s ease;
+}
+
+.panel-enter-from,
+.panel-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* 添加进度状态的样式 */
+.progress-status {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1890ff;
+  background: #e6f7ff;
+  padding: 4px 12px;
+  border-radius: 12px;
 }
 </style>
