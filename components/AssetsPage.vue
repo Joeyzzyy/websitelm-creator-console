@@ -671,18 +671,7 @@
     </template>
     
     <template v-else>
-      <a-spin :spinning="loading">
-        <div class="domain-notice">
-          <div class="notice-content" v-show="!loading">
-            <exclamation-circle-outlined class="notice-icon" />
-            <h2>No Site Configured</h2>
-            <p>Please configure your domain in settings to use the asset management features</p>
-            <a-button type="primary" @click="goToDashboard">
-              Configure Domain
-            </a-button>
-          </div>
-        </div>
-      </a-spin>
+      <no-site-configured />
     </template>
   </page-layout>
 </template>
@@ -706,6 +695,7 @@ import apiClient from '../api/api';
 import { useRouter } from 'vue-router';
 import HeaderTemplate from './sections/templates/HeaderTemplate.vue'
 import FooterTemplate from './sections/templates/FooterTemplate.vue'
+import NoSiteConfigured from './common/NoSiteConfigured.vue'
 
 export default {
   name: 'BrandAssetsPage',
@@ -722,6 +712,7 @@ export default {
     ExclamationCircleOutlined,
     HeaderTemplate,
     FooterTemplate,
+    NoSiteConfigured,
   },
   setup() {
     const router = useRouter();
@@ -1461,6 +1452,12 @@ export default {
     const initKnowledgeBase = async () => {
       try {
         loading.value = true;
+        
+        // 先检查域名是否已配置
+        if (!domainConfigured.value) {
+          return; // 如果域名未配置,直接返回
+        }
+        
         processingKnowledge.value = true;
         
         // 开始轮询状态
@@ -1470,7 +1467,7 @@ export default {
           
           // 如果状态不是 'end'，继续轮询
           if (status.currentStep !== 'end') {
-            setTimeout(pollStatus, 60000); // 每5秒轮询一次
+            setTimeout(pollStatus, 60000); // 每60秒轮询一次
           } else {
             // 状态为 'end' 时，获取知识库内容
             processingKnowledge.value = false;
@@ -1492,16 +1489,16 @@ export default {
       }
     };
 
-    // 修改watch
+    // 修改 watch,增加对 domainConfigured 的判断
     watch(
       () => activeTab.value,
       (newValue) => {
-        if (newValue === 'knowledge') {
-          initKnowledgeBase()
+        if (newValue === 'knowledge' && domainConfigured.value) {
+          initKnowledgeBase();
         }
       },
       { immediate: true }
-    )
+    );
 
     const selectArticle = (article) => {
       currentArticle.value = article
@@ -1873,51 +1870,6 @@ export default {
 </script>
 
 <style scoped>
-.domain-notice {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: calc(100vh - 200px);
-  background: #fff;
-  border-radius: 16px;
-}
-
-.notice-content {
-  text-align: center;
-  padding: 40px;
-}
-
-.notice-icon {
-  font-size: 48px;
-  color: #faad14;
-  margin-bottom: 24px;
-}
-
-.notice-content h2 {
-  font-size: 24px;
-  color: #1a1a1a;
-  margin-bottom: 16px;
-}
-
-.notice-content p {
-  font-size: 16px;
-  color: #666;
-  margin-bottom: 24px;
-}
-
-.notice-content .ant-btn {
-  background: linear-gradient(135deg, #60A5FA, #3B82F6);
-  border: none;
-  height: 40px;
-  padding: 0 32px;
-  font-size: 16px;
-  border-radius: 20px;
-}
-
-.notice-content .ant-btn:hover {
-  background: linear-gradient(135deg, #3B82F6, #2563EB);
-}
-
 .page-content {
   display: flex;
   gap: 24px;
@@ -2063,18 +2015,6 @@ export default {
   max-width: 400px;
   margin-bottom: 24px;
   line-height: 1.6;
-}
-
-.upload-btn-empty {
-  background: linear-gradient(135deg, #60A5FA, #3B82F6);
-  border: none;
-  padding: 0 24px;
-  border-radius: 20px;
-  font-size: 16px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-  height: 40px;
-  color: white;
 }
 
 @media (max-width: 768px) {

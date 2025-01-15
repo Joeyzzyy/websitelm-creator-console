@@ -705,7 +705,7 @@
 
     <!-- 在 template 最后添加，body 级别 -->
     <transition name="panel">
-      <div class="setup-progress-panel" v-if="!allStepsCompleted">
+      <div class="setup-progress-panel" v-if="shouldShowSetupPanel">
         <div class="panel-header">
           <div class="panel-title">
             <CheckCircleOutlined v-if="allStepsCompleted" />
@@ -982,23 +982,15 @@ export default defineComponent({
       });
     },
     completedSteps() {
+      // 如果产品信息还未加载完成,直接返回0
+      if (!this.productInfo) {
+        return 0;
+      }
+      
       let completed = 0;
-      
-      // 检查域名验证状态
-      if (this.productInfo?.domainStatus) {
-        completed++;
-      }
-      
-      // 检查 GSC 连接状态
-      if (this.isGscConnected) {
-        completed++;
-      }
-      
-      // 检查功能导览完成状态 - 修改这里
-      if (this.productInfo?.onboarding) {  // 改用 productInfo.onboarding 替代 hasTourCompleted
-        completed++;
-      }
-      
+      if (this.productInfo.domainStatus) completed++;
+      if (this.isGscConnected) completed++;
+      if (this.productInfo.onboarding) completed++;
       return completed;
     },
     
@@ -1011,6 +1003,15 @@ export default defineComponent({
     },
     isDomainVerified() {
       return this.productInfo?.domainStatus || false;
+    },
+    // 添加新的计算属性来控制面板显示
+    shouldShowSetupPanel() {
+      // 只有当产品信息加载完成且未完成所有步骤时才显示
+      return (
+        this.productInfo && 
+        !this.allStepsCompleted && 
+        !this.loading
+      );
     }
   },
   methods: {
