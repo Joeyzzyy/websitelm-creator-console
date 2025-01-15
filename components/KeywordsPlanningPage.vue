@@ -42,6 +42,19 @@
               </a-card>
             </div>
           </template>
+
+          <template v-if="analysisState === 'waiting'">
+            <div class="analysis-loading-state">
+              <a-card class="loading-card">
+                <div class="loading-content">
+                  <LoadingOutlined class="analysis-icon" spin />
+                  <h2>Preparing Your Analysis</h2>
+                  <p>Please wait while we prepare your keyword analysis...</p>
+                  <p class="analysis-tip">This may take a few moments to begin</p>
+                </div>
+              </a-card>
+            </div>
+          </template>
         </a-card>
       </div>
     </template>
@@ -1518,12 +1531,24 @@ export default defineComponent({
     const checkAnalysisStatus = async () => {
       try {
         const response = await api.getAnalysisStatus()
-        if (response?.data?.task) {
-          taskInfo.value = response.data.task[0]
+        if (response?.data) {
+          // Handle empty data array case
+          if (Array.isArray(response.data) && response.data.length === 0) {
+            analysisState.value = 'waiting'
+            return
+          }
           
-          if (taskInfo.value.status === 'finished') {
-            clearInterval(pollingInterval.value)
-            analysisStatus.value = 'completed'
+          // Fix: Correctly assign to taskInfo.value
+          const task = response.data[0]
+          if (task) {
+            taskInfo.value = task  // 修复：直接赋值给 taskInfo.value
+            
+            if (task.status === 'finished') {
+              clearInterval(pollingInterval.value)
+              analysisState.value = 'completed'
+            } else if (task.status === 'processing') {
+              analysisState.value = 'processing'
+            }
           }
         }
       } catch (error) {
@@ -1560,9 +1585,9 @@ export default defineComponent({
     // Computed property to determine what to display
     const analysisState = computed(() => {
       if (isLoading.value) return 'loading'
+      if (taskInfo.value?.status === 'processing') return 'processing'
+      if (taskInfo.value?.status === 'finished') return 'completed'
       if (!taskInfo.value) return 'waiting'
-      if (taskInfo.value.status === 'processing') return 'processing'
-      if (taskInfo.value.status === 'finished') return 'completed'
       return 'error'
     })
 
@@ -3484,7 +3509,8 @@ export default defineComponent({
 }
 
 .loading-content {
-  padding: 24px;
+  text-align: center;
+  padding: 32px;
 }
 
 .analysis-pending {
@@ -3493,9 +3519,9 @@ export default defineComponent({
 }
 
 .analysis-icon {
-  font-size: 48px;
+  font-size: 32px;
   color: #1890ff;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .analysis-progress {
@@ -3504,8 +3530,9 @@ export default defineComponent({
 }
 
 .analysis-tip {
-  color: #666;
-  margin-top: 16px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  margin-top: 8px;
 }
 
 h2 {

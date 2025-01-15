@@ -139,6 +139,9 @@
         class="tutorial-card"
         @click="playTutorial(tutorial)"
       >
+        <div class="tutorial-step-badge">
+          {{ tutorial.badge }}
+        </div>
         <div class="tutorial-thumbnail">
           <div class="tech-overlay"></div>
           <img :src="tutorial.imageUrl" :alt="tutorial.title" class="thumbnail-image">
@@ -146,7 +149,7 @@
         <div class="tutorial-info">
           <h4>{{ tutorial.title }}</h4>
           <p>{{ tutorial.description }}</p>
-          <div class="read-more">Read Article →</div>
+          <div class="read-more">Read Documentation →</div>
         </div>
       </div>
     </div>
@@ -820,6 +823,7 @@ html, body, #app {
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 16px;
   padding: 20px 0;
+  position: relative;
 }
 
 .tutorial-card {
@@ -832,6 +836,7 @@ html, body, #app {
   display: flex;
   flex-direction: column;
   background: white;
+  position: relative;
 }
 
 .tutorial-card:hover {
@@ -903,6 +908,36 @@ html, body, #app {
   position: relative;
   z-index: 0;
 }
+
+/* 教程卡片中添加步骤标记样式 */
+.tutorial-card {
+  /* ... 现有样式 ... */
+  position: relative;
+}
+
+.tutorial-step-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #1890ff, #096dd9);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
+}
+
+/* 为第一个教程添加特殊样式 */
+.tutorial-card:first-child {
+  border: 2px solid #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+}
+
+.tutorial-card:first-child .tutorial-step-badge {
+  background: linear-gradient(135deg, #52c41a, #389e0d);
+}
 </style>
 
 <script>
@@ -917,12 +952,14 @@ import { createVNode } from 'vue'
 import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import OnboardingTour from './OnboardingTour.vue'
+import { tutorialConfig } from '../config/tutorials'
 
 // 导入PNG图片
 import onboardingImage from '../assets/images/tutorials/onboarding.png';
 import gscConnectionImage from '../assets/images/tutorials/gsc-connection.png';
 import domainVerificationImage from '../assets/images/tutorials/domain-verification.png';
 import assetManagementImage from '../assets/images/tutorials/asset-management.png';
+import setUpDeploymentDomainImage from '../assets/images/tutorials/set-up-deployment-domain.png';
 
 export default {
   name: 'Home',
@@ -976,32 +1013,15 @@ export default {
       currentCustomerEmail: currentCustomerEmail,
       guideModeVisible: false,
       tutorialLibraryVisible: false,
-      tutorials: [
-        {
-          title: 'How To Get Onboard',
-          description: 'A complete guide for new users to get started with WebsiteLM',
-          imageUrl: onboardingImage,
-          docsLink: 'https://websitelm.com/tutorials/get-onboard-with-websitelm'
-        },
-        {
-          title: 'Connect To Your Google Search Console',
-          description: 'Learn how to connect and integrate your Google Search Console',
-          imageUrl: gscConnectionImage,
-          docsLink: 'https://websitelm.com/tutorials/conntect-google-search-console'
-        },
-        {
-          title: 'Verify Your Domain',
-          description: 'Step-by-step guide to verify your domain and start the journey',
-          imageUrl: domainVerificationImage,
-          docsLink: 'https://websitelm.com/tutorials/verify-your-domain'
-        },
-        {
-          title: 'Manage Your Assets',
-          description: 'Learn how to effectively manage your assets for content generation',
-          imageUrl: assetManagementImage,
-          docsLink: 'https://websitelm.com/tutorials/manage-assets-future-content'
-        }
-      ]
+      tutorials: Object.values(tutorialConfig).map((tutorial, index) => ({
+        step: index + 1,
+        title: tutorial.title,
+        description: tutorial.content,
+        imageUrl: tutorial.imageUrl,
+        docsLink: tutorial.docsLink,
+        badge: tutorial.badge,
+        features: tutorial.features
+      }))
     };
   },
   computed: {

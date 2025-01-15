@@ -43,7 +43,13 @@
                  class="feature-item"
             >
               <QuestionCircleOutlined class="feature-icon" />
-              <span>How to setup {{ feature }}</span>
+              <a 
+                :href="feature.link" 
+                target="_blank" 
+                class="feature-link"
+              >
+                How to setup {{ feature.title }}
+              </a>
             </div>
           </div>
         </div>
@@ -67,6 +73,7 @@
 
 <script>
 import { FileTextOutlined, BulbOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
+import { tutorialConfig } from '../config/tutorials'
 
 export default {
   components: {
@@ -79,53 +86,7 @@ export default {
     return {
       visible: false,
       currentStepIndex: 0,
-      steps: [
-        {
-          title: 'Home',
-          content: 'This is the place to get your domain verified and connect your Google Search Console to WebsiteLM',
-          target: '[data-tour="dashboardpage"]',
-          placement: 'right',
-          videoUrl: 'https://example.com/placeholder-dashboard.mp4',
-          docsLink: 'https://websitelm.com/tutorials/dashboard',
-          features: [
-            'Domain verification',
-            'Google Search Console integration',
-            'Dashboard overview'
-          ]
-        },
-        {
-          title: 'Asset Management',
-          content: 'This is the place to manage your assets, images, videos, internal link and more, all in one place and will be used for auto SEO page generation later.',
-          target: '[data-tour="assetspage"]',
-          placement: 'right',
-          videoUrl: 'https://example.com/placeholder-assets.mp4',
-          docsLink: 'https://websitelm.com/tutorials/assets'
-        },
-        {
-          title: 'Keyword Planning',
-          content: 'We provide Keywords Difference Analysis service and Your Competitors\' Top Pages\' keywords ananlysis for all plans!',
-          target: '[data-tour="keywordsplanningpage"]',
-          placement: 'right',
-          videoUrl: 'https://example.com/placeholder-keywords.mp4',
-          docsLink: 'https://websitelm.com/tutorials/keywords'
-        },
-        {
-          title: 'Task Management',
-          content: 'Manage your SEO page generation tasks here, publishment, modification, or create a page from scratch!.',
-          target: '[data-tour="taskmanagementpage"]',
-          placement: 'right',
-          videoUrl: 'https://example.com/placeholder-tasks.mp4',
-          docsLink: 'https://websitelm.com/tutorials/tasks'
-        },
-        {
-          title: 'Settings',
-          content: 'Configure the sub-domain or sub-directory for your pages to be deployed.',
-          target: '[data-tour="settingspage"]',
-          placement: 'right',
-          videoUrl: 'https://example.com/placeholder-settings.mp4',
-          docsLink: 'https://websitelm.com/tutorials/settings'
-        }
-      ]
+      steps: Object.values(tutorialConfig)
     }
   },
   
@@ -458,10 +419,27 @@ export default {
   background: #f5f5f5;
   border-radius: 6px;
   font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  background: #e6f7ff;
 }
 
 .feature-icon {
   color: #1890ff;
   font-size: 14px;
+}
+
+.feature-link {
+  color: #1890ff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.feature-link:hover {
+  color: #40a9ff;
+  text-decoration: underline;
 }
 </style> 

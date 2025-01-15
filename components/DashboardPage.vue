@@ -1207,15 +1207,34 @@ export default defineComponent({
         }];
       }
 
-      // 处理新的数据格式
-      return sitemapData.map(folder => ({
-        key: folder.name,
-        title: `${folder.name} (${folder.childNum})`,
-        children: folder.urls.map(url => ({
-          key: url,
-          title: new URL(url).pathname || '/'
-        }))
-      }));
+      return sitemapData.map(folder => {
+        // 处理 URLs，确保它们都是有效的 URL
+        const processedUrls = folder.urls.map(url => {
+          try {
+            // 如果 URL 不包含协议，添加 https://
+            const fullUrl = url.startsWith('http') ? url : `https://${url}`;
+            const urlObj = new URL(fullUrl);
+            return {
+              key: url, // 保持原始 URL 作为 key
+              title: urlObj.pathname || '/',
+              fullUrl: fullUrl // 添加完整 URL 用于访问
+            };
+          } catch (e) {
+            console.warn('Invalid URL:', url);
+            return {
+              key: url,
+              title: url,
+              fullUrl: url
+            };
+          }
+        });
+
+        return {
+          key: `folder_${folder.websiteId}`, // 使用 websiteId 作为文件夹的唯一标识
+          title: `${folder.name} (${folder.childNum})`,
+          children: processedUrls
+        };
+      });
     },
     async handleTreeSelect(selectedKeys, { node }) {
       if (!selectedKeys.length || !node?.key) return;
