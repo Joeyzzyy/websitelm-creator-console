@@ -5,54 +5,45 @@
     icon="🎯"
   >
     <!-- Analysis States -->
-    <template v-if="analysisState !== 'completed'">
+    <template v-if="analysisState !== 'finished'">
       <div class="analysis-loading-state">
         <a-card class="loading-card">
-          <!-- Initial Loading State -->
-          <template v-if="analysisState === 'loading'">
-            <a-spin size="large">
-              <div class="loading-content">
-                <h2>Checking Analysis Status</h2>
-                <p>Please wait while we check the status of your keyword analysis...</p>
+          <!-- Not Started State -->
+          <template v-if="analysisState === 'not_started'">
+            <div class="loading-content">
+              <LoadingOutlined class="analysis-icon" spin />
+              <h2>Preparing Analysis</h2>
+              <p>Collecting data from SEMrush and Ahrefs...</p>
+            </div>
+          </template>
+
+          <!-- Processing State -->
+          <template v-if="analysisState === 'processing'">
+            <div class="loading-content">
+              <LoadingOutlined class="analysis-icon" spin />
+              <h2>Analysis in Progress</h2>
+              
+              <!-- Show current tasks -->
+              <div v-for="task in currentTasks" :key="task.taskName" class="task-item">
+                <div class="task-header">
+                  <span>{{ task.taskName }}</span>
+                  <span>{{ task.status }}</span>
+                </div>
+                
+                <!-- Show progress if available -->
+                <template v-if="task.progress">
+                  <a-progress 
+                    :percent="getProgressPercent(task.progress)"
+                    :format="() => `${task.progress.current}/${task.progress.total}`"
+                  />
+                </template>
+                
+                <!-- Show timing info -->
+                <div class="task-timing">
+                  <span>Started: {{ formatTime(task.startTime) }}</span>
+                  <span v-if="task.endTime">Completed: {{ formatTime(task.endTime) }}</span>
+                </div>
               </div>
-            </a-spin>
-          </template>
-
-          <!-- Error State -->
-          <template v-if="analysisState === 'error'">
-            <div class="analysis-error">
-              <WarningOutlined class="error-icon" />
-              <h2>Analysis Error</h2>
-              <p>Something went wrong while analyzing your keywords.</p>
-              <a-button type="primary" @click="checkAnalysisStatus">
-                Retry Analysis
-              </a-button>
-            </div>
-          </template>
-
-          <template v-if="showLoadingState && analysisState === 'processing'">
-            <div class="analysis-loading-state">
-              <a-card class="loading-card">
-                <div class="loading-content">
-                  <LoadingOutlined class="analysis-icon" spin />
-                  <h2>Analyzing Your Keywords</h2>
-                  <p>We're processing your data to provide comprehensive insights.</p>
-                  <p class="analysis-tip">This may take a few moments...</p>
-                </div>
-              </a-card>
-            </div>
-          </template>
-
-          <template v-if="analysisState === 'waiting'">
-            <div class="analysis-loading-state">
-              <a-card class="loading-card">
-                <div class="loading-content">
-                  <LoadingOutlined class="analysis-icon" spin />
-                  <h2>Preparing Your Analysis</h2>
-                  <p>Please wait while we prepare your keyword analysis...</p>
-                  <p class="analysis-tip">This may take a few moments to begin</p>
-                </div>
-              </a-card>
             </div>
           </template>
         </a-card>
@@ -1531,24 +1522,10 @@ export default defineComponent({
     const checkAnalysisStatus = async () => {
       try {
         const response = await api.getAnalysisStatus()
-        if (response?.data) {
-          // Handle empty data array case
-          if (Array.isArray(response.data) && response.data.length === 0) {
-            analysisState.value = 'waiting'
-            return
-          }
-          
-          // Fix: Correctly assign to taskInfo.value
-          const task = response.data[0]
-          if (task) {
-            taskInfo.value = task  // 修复：直接赋值给 taskInfo.value
-            
-            if (task.status === 'finished') {
-              clearInterval(pollingInterval.value)
-              analysisState.value = 'completed'
-            } else if (task.status === 'processing') {
-              analysisState.value = 'processing'
-            }
+        if (response) {
+          taskInfo.value = response
+          if (response.analysisStatus === 'finished') {
+            clearInterval(pollingInterval.value)
           }
         }
       } catch (error) {
@@ -1585,10 +1562,7 @@ export default defineComponent({
     // Computed property to determine what to display
     const analysisState = computed(() => {
       if (isLoading.value) return 'loading'
-      if (taskInfo.value?.status === 'processing') return 'processing'
-      if (taskInfo.value?.status === 'finished') return 'completed'
-      if (!taskInfo.value) return 'waiting'
-      return 'error'
+      return taskInfo.value?.analysisStatus || 'not_started'
     })
 
     // 添加 showLoadingState 函数
@@ -1603,6 +1577,21 @@ export default defineComponent({
       
       return false
     })
+
+    // Add a computed property for current tasks
+    const currentTasks = computed(() => {
+      if (!taskInfo.value?.data || !Array.isArray(taskInfo.value.data)) return []
+      return taskInfo.value.data
+    })
+
+    const getProgressPercent = (progress) => {
+      if (!progress || !progress.total) return 0
+      return Math.round((progress.current / progress.total) * 100)
+    }
+
+    const formatTime = (timeString) => {
+      return new Date(timeString).toLocaleString()
+    }
 
     return {
       currentMode,
@@ -1671,7 +1660,10 @@ export default defineComponent({
       analysisStatus,
       isLoading,
       analysisState,
-      taskInfo
+      taskInfo,
+      currentTasks,
+      getProgressPercent,
+      formatTime
     }
   }
 })
@@ -3582,6 +3574,31 @@ p {
   font-size: 16px;
   line-height: 1.5;
   margin: 8px 0;
+}
+
+/* Add minimal required styles */
+.loading-content {
+  padding: 24px;
+  text-align: center;
+}
+
+.task-item {
+  margin: 16px 0;
+  text-align: left;
+}
+
+.task-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.task-timing {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-top: 4px;
 }
 </style>
 
