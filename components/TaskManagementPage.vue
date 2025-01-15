@@ -1,193 +1,200 @@
 <template>
   <page-layout title="Page Management" description="Manage your AI-generation pages here" icon="✨">
-    <a-spin :spinning="loading">
-      <div class="task-container">
-        <!-- Header -->
-        <div class="header">
-          <div class="header-left">
-            <div class="header-top">
-              <h3>Page List</h3>
-              <a-button type="link" :loading="loading" @click="handleRefresh">
-                <template #icon><ReloadOutlined /></template>
-                Refresh
-              </a-button>
-              <a-button 
-                type="link" 
-                size="small"
-                @click="collectPublishedUrls"
-                :disabled="!tasks.length"
-              >
-                Submit Sitemap
-              </a-button>
-              <a-button type="primary" @click="handleAddPage">
-                <template #icon><PlusOutlined /></template>
-                Manual Add Page
-              </a-button>
-            </div>
-            
-            <div class="header-bottom">
-              <span v-show="verifiedDomains.length === 0" class="domain-label">
-                No verified sub-domain available - <router-link to="/settings">click here to add sub-domain</router-link>
-              </span>
-              <span v-show="verifiedDomains.length > 0" class="domain-label">Pages could be published to:</span>
-              <div class="domain-tags">
-                <a-tag v-for="domain in verifiedDomains" :key="domain" color="success">
-                  {{ domain }}
-                </a-tag>
+    <!-- 添加域名未配置的提示 -->
+    <template v-if="!domainConfigured">
+      <no-site-configured />
+    </template>
+    
+    <template v-else>
+      <a-spin :spinning="loading">
+        <div class="task-container">
+          <!-- Header -->
+          <div class="header">
+            <div class="header-left">
+              <div class="header-top">
+                <h3>Page List</h3>
+                <a-button type="link" :loading="loading" @click="handleRefresh">
+                  <template #icon><ReloadOutlined /></template>
+                  Refresh
+                </a-button>
+                <a-button 
+                  type="link" 
+                  size="small"
+                  @click="collectPublishedUrls"
+                  :disabled="!tasks.length"
+                >
+                  Submit Sitemap
+                </a-button>
+                <a-button type="primary" @click="handleAddPage">
+                  <template #icon><PlusOutlined /></template>
+                  Manual Add Page
+                </a-button>
+              </div>
+              
+              <div class="header-bottom">
+                <span v-show="verifiedDomains.length === 0" class="domain-label">
+                  No verified sub-domain available - <router-link to="/settings">click here to add sub-domain</router-link>
+                </span>
+                <span v-show="verifiedDomains.length > 0" class="domain-label">Pages could be published to:</span>
+                <div class="domain-tags">
+                  <a-tag v-for="domain in verifiedDomains" :key="domain" color="success">
+                    {{ domain }}
+                  </a-tag>
+                </div>
               </div>
             </div>
+            <div class="header-right">
+              <a-input
+                v-model:value="searchQuery"
+                placeholder="Search by page title..."
+                class="search-input"
+                @input="handleSearch"
+              >
+                <template #prefix>
+                  <SearchOutlined />
+                </template>
+              </a-input>
+              <span class="task-count">Total Tasks: {{ filteredTasks.length }}</span>
+            </div>
           </div>
-          <div class="header-right">
-            <a-input
-              v-model:value="searchQuery"
-              placeholder="Search by page title..."
-              class="search-input"
-              @input="handleSearch"
+
+          <!-- Task List -->
+          <div class="task-list">
+            <!-- Empty State -->
+            <div v-if="!loading && !tasks.length" class="empty-state">
+              <h3>No Pages Available</h3>
+              <p>Go to "Keyword Planning" to start creating your first task</p>
+            </div>
+            
+            <a-table
+              v-if="!loading && tasks.length > 0"
+              :columns="columns"
+              :data-source="tasks"
+              :pagination="false"
+              :scroll="{ x: true }"
+              @change="handleTableChange"
             >
-              <template #prefix>
-                <SearchOutlined />
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.key === 'title'">
+                  <a 
+                    @click="handleTitleClick(record)" 
+                    class="title-link"
+                    :title="record.publishStatus === 'publish' ? getFullPublishUrl(record) : getPreviewUrl(record)"
+                  >
+                    {{ record.title }}
+                  </a>
+                  <a-tag 
+                    v-if="record.generatorStatus === 'processing'" 
+                    color="processing"
+                    class="generating-tag"
+                  >
+                    <span class="generating-text">Generation in progress</span>
+                    <span class="dot-animation">...</span>
+                  </a-tag>
+                  <a-tag
+                    v-if="record.generatorStatus === 'failed'"
+                    class="generating-tag failed-tag"
+                  >
+                    <span class="generating-text">Generation Failed</span>
+                  </a-tag>
+                </template>
+
+                <template v-if="column.key === 'pageType'">
+                  <span>{{ record.pageType || '-' }}</span>
+                </template>
+
+                <template v-if="column.key === 'wordCount'">
+                  <span>{{ record.numberOfWords || '-' }}</span>
+                </template>
+
+                <template v-if="column.key === 'lang'">
+                  <span>{{ record.lang.toUpperCase() }}</span>
+                </template>
+
+                <template v-if="column.key === 'author'">
+                  <span>{{ record.author || '-' }}</span>
+                </template>
+
+                <template v-if="column.key === 'createdAt'">
+                  <span>{{ record.createdAt }}</span>
+                </template>
+
+                <template v-if="column.key === 'updatedAt'">
+                  <span>{{ record.updatedAt }}</span>
+                </template>
+
+                <template v-if="column.key === 'status'">
+                  <a-tag :color="getStatusColor(record.publishStatus)" style="white-space: nowrap; width: 100%;">
+                    {{ getStatusLabel(record.publishStatus) }}
+                  </a-tag>
+                </template>
+
+                <template v-if="column.key === 'hasEmpty'">
+                  <a-tag :color="record.hasEmpty ? 'warning' : 'success'" style="width: fit-content">
+                    {{ record.hasEmpty ? 'Has Empty Fields' : 'No Empty Fields' }}
+                  </a-tag>
+                </template>
+
+                <template v-if="column.key === 'actions'">
+                  <a-dropdown>
+                    <a-button size="small" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0;">
+                      <template #icon><EllipsisOutlined /></template>
+                    </a-button>
+                    <template #overlay>
+                      <a-menu>
+                        <template v-if="record.generatorStatus !== 'failed'">
+                          <a-menu-item 
+                            key="edit" 
+                            @click="handleEdit(record)"
+                            :disabled="record.generatorStatus === 'processing'"
+                          >
+                            Edit
+                          </a-menu-item>
+                          <a-menu-item 
+                            key="preview" 
+                            @click="handlePreview(record)"
+                            :disabled="record.generatorStatus === 'processing'"
+                          >
+                            Preview
+                          </a-menu-item>
+                          <a-menu-item 
+                            key="publish"
+                            @click="handlePublish(record)"
+                            :disabled="record.generatorStatus === 'processing'"
+                          >
+                            {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
+                          </a-menu-item>
+                        </template>
+                        <a-menu-item 
+                          key="delete"
+                          @click="handleDelete(record)"
+                          :disabled="record.generatorStatus === 'processing'"
+                          danger
+                        >
+                          Delete
+                        </a-menu-item>
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
+                </template>
               </template>
-            </a-input>
-            <span class="task-count">Total Tasks: {{ filteredTasks.length }}</span>
+            </a-table>
+          </div>
+
+          <!-- 保留外部分页组件 -->
+          <div class="pagination-wrapper" v-if="!loading && tasks.length > 0">
+            <a-pagination
+              v-model:current="pagination.current"
+              :total="pagination.total"
+              :pageSize="pagination.pageSize"
+              show-size-changer
+              :show-total="(total) => `Total ${total} items`"
+              @change="handlePageChange"
+            />
           </div>
         </div>
-
-        <!-- Task List -->
-        <div class="task-list">
-          <!-- Empty State -->
-          <div v-if="!loading && !tasks.length" class="empty-state">
-            <h3>No Pages Available</h3>
-            <p>Go to "Keyword Planning" to start creating your first task</p>
-          </div>
-          
-          <a-table
-            v-if="!loading && tasks.length > 0"
-            :columns="columns"
-            :data-source="tasks"
-            :pagination="false"
-            :scroll="{ x: true }"
-            @change="handleTableChange"
-          >
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.key === 'title'">
-                <a 
-                  @click="handleTitleClick(record)" 
-                  class="title-link"
-                  :title="record.publishStatus === 'publish' ? getFullPublishUrl(record) : getPreviewUrl(record)"
-                >
-                  {{ record.title }}
-                </a>
-                <a-tag 
-                  v-if="record.generatorStatus === 'processing'" 
-                  color="processing"
-                  class="generating-tag"
-                >
-                  <span class="generating-text">Generation in progress</span>
-                  <span class="dot-animation">...</span>
-                </a-tag>
-                <a-tag
-                  v-if="record.generatorStatus === 'failed'"
-                  class="generating-tag failed-tag"
-                >
-                  <span class="generating-text">Generation Failed</span>
-                </a-tag>
-              </template>
-
-              <template v-if="column.key === 'pageType'">
-                <span>{{ record.pageType || '-' }}</span>
-              </template>
-
-              <template v-if="column.key === 'wordCount'">
-                <span>{{ record.numberOfWords || '-' }}</span>
-              </template>
-
-              <template v-if="column.key === 'lang'">
-                <span>{{ record.lang.toUpperCase() }}</span>
-              </template>
-
-              <template v-if="column.key === 'author'">
-                <span>{{ record.author || '-' }}</span>
-              </template>
-
-              <template v-if="column.key === 'createdAt'">
-                <span>{{ record.createdAt }}</span>
-              </template>
-
-              <template v-if="column.key === 'updatedAt'">
-                <span>{{ record.updatedAt }}</span>
-              </template>
-
-              <template v-if="column.key === 'status'">
-                <a-tag :color="getStatusColor(record.publishStatus)" style="white-space: nowrap; width: 100%;">
-                  {{ getStatusLabel(record.publishStatus) }}
-                </a-tag>
-              </template>
-
-              <template v-if="column.key === 'hasEmpty'">
-                <a-tag :color="record.hasEmpty ? 'warning' : 'success'" style="width: fit-content">
-                  {{ record.hasEmpty ? 'Has Empty Fields' : 'No Empty Fields' }}
-                </a-tag>
-              </template>
-
-              <template v-if="column.key === 'actions'">
-                <a-dropdown>
-                  <a-button size="small" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0;">
-                    <template #icon><EllipsisOutlined /></template>
-                  </a-button>
-                  <template #overlay>
-                    <a-menu>
-                      <template v-if="record.generatorStatus !== 'failed'">
-                        <a-menu-item 
-                          key="edit" 
-                          @click="handleEdit(record)"
-                          :disabled="record.generatorStatus === 'processing'"
-                        >
-                          Edit
-                        </a-menu-item>
-                        <a-menu-item 
-                          key="preview" 
-                          @click="handlePreview(record)"
-                          :disabled="record.generatorStatus === 'processing'"
-                        >
-                          Preview
-                        </a-menu-item>
-                        <a-menu-item 
-                          key="publish"
-                          @click="handlePublish(record)"
-                          :disabled="record.generatorStatus === 'processing'"
-                        >
-                          {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
-                        </a-menu-item>
-                      </template>
-                      <a-menu-item 
-                        key="delete"
-                        @click="handleDelete(record)"
-                        :disabled="record.generatorStatus === 'processing'"
-                        danger
-                      >
-                        Delete
-                      </a-menu-item>
-                    </a-menu>
-                  </template>
-                </a-dropdown>
-              </template>
-            </template>
-          </a-table>
-        </div>
-
-        <!-- 保留外部分页组件 -->
-        <div class="pagination-wrapper" v-if="!loading && tasks.length > 0">
-          <a-pagination
-            v-model:current="pagination.current"
-            :total="pagination.total"
-            :pageSize="pagination.pageSize"
-            show-size-changer
-            :show-total="(total) => `Total ${total} items`"
-            @change="handlePageChange"
-          />
-        </div>
-      </div>
-    </a-spin>
+      </a-spin>
+    </template>
 
     <!-- Confirmation Modal -->
     <a-modal
@@ -293,6 +300,7 @@ import PageLayout from './layout/PageLayout.vue'
 import apiClient from '../api/api'
 import config from '../config/settings'
 import { VERCEL_CONFIG } from '../config/vercelConfig'
+import NoSiteConfigured from './common/NoSiteConfigured.vue'
 
 export default {
   name: 'TaskManagementPage',
@@ -309,7 +317,8 @@ export default {
     PlusOutlined,
     EyeOutlined,
     EllipsisOutlined,
-    GlobalOutlined
+    GlobalOutlined,
+    NoSiteConfigured
   },
 
   setup() {
@@ -337,6 +346,8 @@ export default {
     const loadingProgress = ref(0)
     
     const productInfo = ref(null)
+    
+    const domainConfigured = ref(false)
     
     // 添加计算属性于过滤任务
     const filteredTasks = computed(() => {
@@ -420,16 +431,17 @@ export default {
     const loadProductInfo = async () => {
       try {
         const response = await apiClient.getProductsByCustomerId()
-        
         if (response?.code === 200) {
           productInfo.value = response.data
+          // 检查域名配置状态
+          domainConfigured.value = !!(productInfo.value?.projectWebsite && productInfo.value?.domainStatus)
         } else {
-          message.error('Failed to load product information')
           productInfo.value = {}
+          domainConfigured.value = false
         }
       } catch (error) {
-        message.error('Failed to load product information: ' + (error.message || 'Unknown error'))
         productInfo.value = {}
+        domainConfigured.value = false
       }
     }
 
@@ -930,9 +942,12 @@ export default {
     };
 
     onMounted(async () => {
-      fetchTasks()
       await loadProductInfo()
-      await loadVerifiedDomains()
+      // 只有在域名已配置的情况下才执行其他操作
+      if (domainConfigured.value) {
+        fetchTasks()
+        await loadVerifiedDomains()
+      }
       isMounted.value = true
     })
 
@@ -980,6 +995,7 @@ export default {
       openPreview,
       handleTitleClick,
       getPreviewUrl,
+      domainConfigured
     }
   }
 }

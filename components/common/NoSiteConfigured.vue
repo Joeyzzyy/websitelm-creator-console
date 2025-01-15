@@ -50,7 +50,7 @@ export default {
 }
 
 .notice-icon {
-  font-size: 48px;
+  font-size: 48px !important;
   color: #faad14;
   margin-bottom: 24px;
 }
