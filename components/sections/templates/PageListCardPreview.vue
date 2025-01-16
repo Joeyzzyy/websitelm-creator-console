@@ -14,6 +14,8 @@
         <a v-for="(insight, index) in insights" 
            :key="index" 
            :href="insight.targetUrl"
+           target="_blank"
+           rel="noopener noreferrer"
            class="group flex flex-col bg-white rounded-lg border border-gray-200 hover:border-[#3374FF]/20 hover:shadow-lg transition-all duration-200 h-[280px]">
           <div class="relative w-full h-36">
             <img :src="insight.imageUrl"
