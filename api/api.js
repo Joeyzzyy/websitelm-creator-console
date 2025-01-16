@@ -1097,6 +1097,19 @@ const getPlanningKeywords = async (params = {}) => {
   }
 };
 
+// 新增：生成意图和TDK及大纲的方法
+const generatePlanningComposite = async (keywordIds) => {
+  try {
+    const response = await apiClient.post('/planning/composite-generator', {
+      keywordIds: keywordIds
+    });
+    return response.data;
+  } catch (error) {
+    console.error('生成意图和TDK及大纲失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1180,5 +1193,6 @@ export default {
   getAnalysisStatus,
   updateOnboardingStatus,
   getKeywordAnalysisOverview,
-  getPlanningKeywords
+  getPlanningKeywords,
+  generatePlanningComposite
 };

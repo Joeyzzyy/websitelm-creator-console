@@ -160,7 +160,7 @@
                     <a-button 
                       type="primary" 
                       @click="nextStep"
-                      :disabled="false"
+                      :disabled="!canProceedToNext"
                     >
                       {{ currentStep === 1 ? 'Generate' : 'Next' }}
                       <RightOutlined />
@@ -794,6 +794,10 @@ export default defineComponent({
       weak: 0  
     })
 
+    const canProceedToNext = computed(() => {
+      return selectedKeywords.value.length > 0;
+    });
+
     const clearSelection = () => {
       selectedKeywords.value = []
       recommendedKeywords.value.forEach(k => k.selected = false)
@@ -1108,10 +1112,13 @@ export default defineComponent({
     };
 
     const currentStep = ref(0)
-    
     const nextStep = () => {
+      if (!canProceedToNext.value) {
+        message.warning('Please select at least one keyword');
+        return;
+      }
       if (currentStep.value < 1) {
-        currentStep.value++
+        currentStep.value++;
       }
     }
 
@@ -1272,122 +1279,24 @@ export default defineComponent({
       return contentPlans.value.filter(plan => plan.selected).length
     })
 
-    // Add new methods
     const generateContentPlan = async () => {
-      isGenerating.value = true
+      isGenerating.value = true;
       try {
-        const mockPlans = [
-          {
-            intent: {
-              name: "Commercial Investigation",
-              color: "blue",
-              description: "Users are researching cloud storage solutions with intent to purchase"
-            },
-            pageType: {
-              name: "Product Comparison",
-              color: "cyan",
-              description: "Detailed comparison of different solutions"
-            },
-            tdk: {
-              title: "Best Cloud Storage Solutions 2024: Expert Comparison & Reviews",
-              description: "Compare top cloud storage providers. In-depth analysis of security, pricing, and features. Find the perfect storage solution for your needs.",
-              keywords: ["cloud storage", "storage solutions", "cloud comparison", "secure storage"]
-            },
-            outline: [
-              {
-                title: "1. Introduction to Cloud Storage Solutions",
-                keywords: ["cloud storage basics", "storage types"],
-                points: [
-                  "Definition of cloud storage and its importance",
-                  "Key benefits for businesses and individuals",
-                  "Overview of different types of cloud storage"
-                ]
-              },
-              {
-                title: "2. Key Features Comparison",
-                keywords: ["storage features", "security features"],
-                points: [
-                  "Storage capacity and pricing plans",
-                  "Security and encryption features",
-                  "File sharing and collaboration tools",
-                  "Integration capabilities"
-                ]
-              },
-              {
-                title: "3. Performance Analysis",
-                keywords: ["upload speed", "download speed"],
-                points: [
-                  "Upload and download speeds",
-                  "File syncing efficiency",
-                  "Mobile app performance"
-                ]
-              }
-            ]
-          },
-          {
-            intent: {
-              name: "Technical Research",
-              color: "purple",
-              description: "Users seeking detailed technical information about cloud storage implementation"
-            },
-            pageType: {
-              name: "Technical Guide",
-              color: "green",
-              description: "In-depth technical documentation"
-            },
-            tdk: {
-              title: "Cloud Storage Security Guide: Implementation & Best Practices",
-              description: "Learn about cloud storage security, encryption methods, and implementation best practices. Expert guide for IT professionals.",
-              keywords: ["cloud security", "encryption", "security implementation", "data protection"]
-            },
-            outline: [
-              {
-                title: "1. Cloud Storage Security Fundamentals",
-                keywords: ["security basics", "encryption types"],
-                points: [
-                  "Basic security concepts in cloud storage",
-                  "Types of encryption methods",
-                  "Security compliance standards"
-                ]
-              },
-              {
-                title: "2. Implementation Strategies",
-                keywords: ["security setup", "configuration"],
-                points: [
-                  "Setting up secure cloud storage",
-                  "Access control configuration",
-                  "Multi-factor authentication setup",
-                  "Backup and recovery planning"
-                ]
-              },
-              {
-                title: "3. Best Practices & Recommendations",
-                keywords: ["security practices", "risk management"],
-                points: [
-                  "Security best practices",
-                  "Risk assessment and management",
-                  "Regular security audits",
-                  "Employee training guidelines"
-                ]
-              }
-            ]
-          }
-        ]
-
-        // Simulate API response
-        setTimeout(() => {
-          contentPlans.value = mockPlans.map(plan => ({
-            ...plan,
-            selected: false
-          }))
-          hasGenerated.value = true
-          isGenerating.value = false
-        }, 2000) // Add 2s delay to simulate API call
-
+        // 从选中的关键词中提取 keywordId
+        const keywordIds = selectedKeywords.value.map(k => k.id);
+        
+        // 调用 API 生成内容计划,传入 keywordIds
+        const response = await api.generatePlanningComposite(keywordIds);
+        
+        if (response?.data) {
+          contentPlans.value = response.data;
+          hasGenerated.value = true;
+        }
       } catch (error) {
-        console.error('Failed to generate content plan:', error)
-        message.error('Failed to generate content plan')
-        isGenerating.value = false
+        console.error('生成内容计划失败:', error);
+        message.error('生成内容计划失败，请重试');
+      } finally {
+        isGenerating.value = false;
       }
     }
 
@@ -1462,7 +1371,8 @@ export default defineComponent({
       selectedPlansCount,
       generateContentPlan,
       handlePlanSelect,
-      confirmSelectedPlans
+      confirmSelectedPlans,
+      canProceedToNext
     }
   }
 })
@@ -1508,7 +1418,6 @@ export default defineComponent({
 }
 
 .mode-selector-card {
-  margin-bottom: 16px;
   background: #fafafa;
   
   :deep(.ant-card-body) {
@@ -1694,11 +1603,6 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-}
-
-.mode-selector-card {
-  margin-bottom: 24px;
-  background: #fafafa;
 }
 
 .header-actions {

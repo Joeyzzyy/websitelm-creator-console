@@ -4,24 +4,24 @@ import { componentValidationRules } from '../config/componentValidationRules';
 export const createCleanComponentData = (componentType) => {
   const defaultValues = {
     TitleSection: {
-      title: 'Enter your title',
-      subTitle: 'Enter your subtitle',
+      title: '[DEMO] Enter Title Here',
+      subTitle: '[DEMO] Enter Subtitle Here',
       bottomContent: {
-        author: 'Author Name',
+        author: '[SAMPLE] Author Name',
         publishDate: new Date().toISOString().split('T')[0]
       }
     },
       
     TitleSectionWithImage: {
-      title: 'Enter your title',
-      subTitle: 'Enter your subtitle',
+      title: '[DEMO] Enter Title Here',
+      subTitle: '[DEMO] Enter Subtitle Here',
       leftContent: {
-        author: 'Author Name',
+        author: '[SAMPLE] Author Name',
         publishDate: new Date().toISOString().split('T')[0]
       },
       rightContent: {
         imageUrl: '/assets/images/placeholder.png',
-        imageAlt: 'Default Image'
+        imageAlt: '[SAMPLE] Image Description'
       }
     },
     
@@ -115,26 +115,26 @@ export const createCleanComponentData = (componentType) => {
     HowItWorksWithBlocks: {
       leftContent: {
         icon: '🚀',
-        title: 'How Our AI Works',
-        subTitle: 'Transform your content into engaging videos with three simple steps',
-        buttonText: 'Start Creating',
+        title: '[DEMO] How It Works',
+        subTitle: '[SAMPLE] Enter your process description here',
+        buttonText: '[DEMO] Start Now',
         buttonLink: '#'
       },
       rightContent: [
         {
           icon: '📝',
-          contentTitle: 'Input Content',
-          content: 'Simply paste your text or upload your script to begin the creation process'
+          contentTitle: '[DEMO] Step 1',
+          content: '[SAMPLE] Description of step 1'
         },
         {
           icon: '🎨',
-          contentTitle: 'AI Processing',
-          content: 'Our AI analyzes your content and generates matching visuals and animations'
+          contentTitle: '[DEMO] Step 2',
+          content: '[SAMPLE] Description of step 2'
         },
         {
           icon: '🌐',
-          contentTitle: 'Global Export',
-          content: 'Export your video in multiple languages with auto-generated voiceovers'
+          contentTitle: '[DEMO] Step 3',
+          content: '[SAMPLE] Description of step 3'
         }
       ]
     },
@@ -191,8 +191,16 @@ export const createCleanComponentData = (componentType) => {
     },
 
     UserReviewsWithMovingCards: {
-        title: 'See What Our Customers Say',
+        title: '[DEMO] Customer Reviews',
         bottomContent: [
+          {
+            name: "[SAMPLE] John Smith",
+            position: "[SAMPLE] Position - Company",
+            avatarUrl: '/assets/images/placeholder.png',
+            avatarAlt: "[SAMPLE] User avatar",
+            title: "[DEMO] Review Title",
+            content: "[SAMPLE] Enter your customer review content here"
+          },
           {
             name: "David Miller",
             position: "Innovation Director - FutureCorp",
@@ -294,68 +302,73 @@ export const createCleanComponentData = (componentType) => {
     },
 
     WhyChooseUsWithStory: {
-      title: 'Why Choose Us With Story',
-      description: 'Display founder story and detailed product/service introduction',
+      title: '[DEMO] Why Choose Us Story',
+      description: '[SAMPLE] Display founder story and company introduction',
       leftContent: {
         avatarUrl: '/assets/images/placeholder.png',
-        avatarAlt: 'Michael Zhang',
-        name: 'Michael Zhang',
-        title: 'Founder & CEO',
-        introduction: 'As a serial entrepreneur and AI technology expert, Michael has over 15 years of experience in the tech industry. Before founding our company, he held technical leadership positions at several renowned tech companies. He firmly believes that AI technology will revolutionize content creation and is dedicated to building the best AI creation tools to help more creators realize their ideas.'
+        avatarAlt: '[SAMPLE] Founder Photo',
+        name: '[SAMPLE] John Smith',
+        title: '[SAMPLE] Founder & CEO',
+        introduction: '[SAMPLE] Brief introduction about the founder\'s background and expertise in the industry. Include key achievements and vision.'
       },
       rightContent: [
         {
-          contentTitle: 'From Engineer to Entrepreneur',
-          contentText: 'After graduating from MIT with a Computer Science degree in 2008, I immediately immersed myself in Natural Language Processing research. During my 8 years in Silicon Valley, I witnessed the rapid development of AI technology firsthand and participated in several groundbreaking projects. This experience gave me a deep understanding of AI\'s transformative potential.\n\nIn 2016, I made the decision to start my own venture. I saw tremendous opportunities in the emerging AI applications market. In our early days, we focused on providing AI solutions for enterprises, building a solid foundation of industry experience and technical expertise.'
+          contentTitle: '[DEMO] Our Beginning',
+          contentText: '[SAMPLE] In 2018, our founder identified a critical gap in the market. After experiencing firsthand the challenges of traditional solutions, we embarked on a mission to revolutionize the industry. Starting with just a small team of dedicated innovators, we developed our first prototype in a modest office space, fueled by our passion for creating meaningful change.'
         },
         {
-          contentTitle: 'Discovering Real Market Needs',
-          contentText: 'While serving our enterprise clients, we identified content creation as a universal pain point. Whether it was e-commerce platforms or media organizations, they all struggled with low content production efficiency and inconsistent quality. This realization led us to develop our first AI content generation tool.\n\nThe market response exceeded our expectations. Our early users reported significant improvements in their content creation workflow, with some achieving up to 300% increase in productivity. This validation encouraged us to further invest in AI content creation technology.'
+          contentTitle: '[DEMO] Market Discovery',
+          contentText: '[SAMPLE] Through extensive market research and countless conversations with potential users, we discovered that businesses were struggling with inefficient processes and outdated technologies. This insight led us to develop our core technology platform, incorporating cutting-edge AI and machine learning capabilities. Early adopters quickly validated our approach, providing valuable feedback that helped shape our solution.'
         },
         {
-          contentTitle: 'Building the Future of Content Creation',
-          contentText: 'Today, our AI platform serves over 100,000 users worldwide, from individual creators to Fortune 500 companies. We\'ve expanded our capabilities beyond basic content generation to include advanced features like multilingual support, style customization, and SEO optimization.\n\nWhat sets us apart is our deep understanding of both AI technology and content creation needs. Our team includes not just AI researchers and engineers, but also experienced content creators and marketing professionals. This diverse expertise allows us to build tools that are not only technologically advanced but also practical and user-friendly.'
+          contentTitle: '[DEMO] Current Success',
+          contentText: '[SAMPLE] Today, we serve over 1,000 enterprise clients globally, with a team of 200+ dedicated professionals. Our platform processes millions of transactions daily, helping businesses achieve unprecedented efficiency gains. We\'ve been recognized by leading industry analysts and have won multiple innovation awards. But what truly drives us is the transformative impact we continue to have on our clients\' businesses.'
         },
         {
-          contentTitle: 'Our Vision and Commitment',
-          contentText: 'Looking ahead, we remain committed to pushing the boundaries of AI content creation. We\'re investing heavily in R&D to develop next-generation features like real-time collaboration tools and advanced personalization capabilities.\n\nWe believe that AI should augment human creativity, not replace it. Our goal is to empower creators with tools that handle the routine aspects of content creation, allowing them to focus on strategy and creativity. We\'re excited about the future and invite you to join us in shaping the future of content creation.'
-        },
-        {
-          contentTitle: 'Join Our Growing Community',
-          contentText: 'Our platform is more than just a tool - it\'s a community of forward-thinking creators and businesses. We regularly host webinars, workshops, and user meetups to share best practices and gather feedback.\n\nWe\'re proud of the impact we\'ve had so far, but we\'re even more excited about what\'s ahead. Whether you\'re a solo creator or part of a large organization, we\'re here to help you achieve your content creation goals more efficiently and effectively.'
+          contentTitle: '[DEMO] Future Vision',
+          contentText: '[SAMPLE] Looking ahead, we\'re committed to pushing the boundaries of innovation. Our R&D team is actively developing next-generation features that will further revolutionize how businesses operate. We believe in creating technology that not only solves today\'s challenges but anticipates tomorrow\'s needs.'
         }
       ]
     },
 
     FeaturesTabbed: {
-      title: 'Writing Features Kit',
-      description: 'Our AI-driven features include content detection, plagiarism checking, and automatic citation, helping you submit works with transparency and originality.',
+      title: '[DEMO] Product Features',
+      description: '[SAMPLE] Overview of our main product features and capabilities',
       bottomContent: [
         {
-          tabName: 'Authentic authorship',
-          title: 'Verify authentic authorship',
-          description: 'Ensure academic integrity with our authentication tools',
+          tabName: '[DEMO] Feature 1',
+          title: '[DEMO] Feature 1 Title',
+          description: '[SAMPLE] Description of feature 1 benefits',
           imageUrl: '/assets/images/placeholder.png',
-          imageAlt: 'Authentic authorship',
-          buttonText: 'Get Started Now',
+          imageAlt: '[SAMPLE] Feature 1 illustration',
+          buttonText: '[DEMO] Learn More',
           buttonLink: '#'
         },
         {
-          tabName: 'Cite AI use',
-          title: 'Make it easy to disclose your AI use',
-          description: 'Our transparency features make it easy to acknowledge when you\'ve used AI',
+          tabName: '[DEMO] Feature 2',
+          title: '[DEMO] Feature 2 Title',
+          description: '[SAMPLE] Description of feature 2 benefits',
           imageUrl: '/assets/images/placeholder.png',
-          imageAlt: 'Cite AI use',
-          buttonText: 'Get Started Now',
+          imageAlt: '[SAMPLE] Feature 2 illustration',
+          buttonText: '[DEMO] Learn More',
           buttonLink: '#'
         },
         {
-          tabName: 'AI checker',
-          title: 'AI checker',
-          description: 'Our AI checker helps you detect AI-generated content',
+          tabName: '[DEMO] Feature 3',
+          title: '[DEMO] Feature 3 Title',
+          description: '[SAMPLE] Description of feature 3 benefits',
           imageUrl: '/assets/images/placeholder.png',
-          imageAlt: 'AI checker',
-          buttonText: 'Get Started Now',
+          imageAlt: '[SAMPLE] Feature 3 illustration',
+          buttonText: '[DEMO] Learn More',
+          buttonLink: '#'
+        },
+        {
+          tabName: '[DEMO] Feature 4',
+          title: '[DEMO] Feature 4 Title',
+          description: '[SAMPLE] Description of feature 4 benefits',
+          imageUrl: '/assets/images/placeholder.png',
+          imageAlt: '[SAMPLE] Feature 4 illustration',
+          buttonText: '[DEMO] Learn More',
           buttonLink: '#'
         }
       ]
@@ -363,33 +376,33 @@ export const createCleanComponentData = (componentType) => {
 
     MeetOurTeam: {
       topContent: {
-        subtitle: 'Our Team',
-        title: 'Creating the Future with Industry Experts',
-        description: 'Our team consists of professionals from diverse backgrounds, dedicated to providing the highest quality services and solutions for our clients.'
+        subtitle: '[DEMO] Our Team',
+        title: '[DEMO] Meet Our Industry Experts',
+        description: '[SAMPLE] Brief introduction about our team and their expertise'
       },
       bottomContent: [
         {
-          name: 'Michael Zhang',
-          title: 'Chief Executive Officer',
-          description: '15 years of experience in the tech industry, having held leadership positions at several renowned technology companies. Focused on AI innovation and business applications.',
+          name: '[SAMPLE] John Smith',
+          title: '[SAMPLE] Chief Executive Officer',
+          description: '[SAMPLE] 15+ years of industry experience. Expert in business strategy and innovation.',
           avatarUrl: '/assets/images/placeholder.png',
-          avatarAlt: 'Michael Zhang',
+          avatarAlt: '[SAMPLE] CEO Photo',
           socials: []
         },
         {
-          name: 'Sarah Li',
-          title: 'Product Director',
-          description: '10 years of product management experience, specializing in user experience design and product strategy. Led teams in developing multiple successful enterprise products.',
+          name: '[SAMPLE] Sarah Johnson',
+          title: '[SAMPLE] Product Director',
+          description: '[SAMPLE] 10+ years in product management. Specialized in user experience design.',
           avatarUrl: '/assets/images/placeholder.png',
-          avatarAlt: 'Sarah Li',
+          avatarAlt: '[SAMPLE] Product Director Photo',
           socials: []
         },
         {
-          name: 'David Wang',
-          title: 'Technical Director',
-          description: 'Focused on AI and machine learning, with extensive experience in technical architecture design. Dedicated to transforming cutting-edge technology into practical solutions.',
+          name: '[SAMPLE] David Brown',
+          title: '[SAMPLE] Technical Director',
+          description: '[SAMPLE] Expert in AI and machine learning. Leading technical innovation.',
           avatarUrl: '/assets/images/placeholder.png',
-          avatarAlt: 'David Wang',
+          avatarAlt: '[SAMPLE] Tech Director Photo',
           socials: []
         }
       ]
@@ -397,75 +410,37 @@ export const createCleanComponentData = (componentType) => {
 
     JobList: {
       topContent: {
-        title: 'Join Our Team',
-        description: 'Start Your Next Career Chapter With Us'
+        title: '[DEMO] Career Opportunities',
+        description: '[SAMPLE] Explore our open positions'
       },
       bottomContent: [
         {
-          position: 'Senior Frontend Engineer',
-          type: 'Full-time',
-          location: 'San Francisco',
-          salary: '$120k-160k',
-          tags: ['React', 'Vue', 'TypeScript'],
+          position: '[DEMO] Job Title 1',
+          type: '[SAMPLE] Full-time',
+          location: '[SAMPLE] City, Country',
+          salary: '[SAMPLE] $XXk-$XXXk',
+          tags: ['[SAMPLE] Skill 1', '[SAMPLE] Skill 2', '[SAMPLE] Skill 3'],
           responsibilities: [
-            'Lead frontend development of core products',
-            'Optimize frontend architecture and performance',
-            'Participate in technical design and review'
+            '[SAMPLE] Key responsibility 1',
+            '[SAMPLE] Key responsibility 2',
+            '[SAMPLE] Key responsibility 3'
           ],
           requirements: [
-            '5+ years of frontend development experience',
-            'Expert in React or Vue framework',
-            'Strong teamwork and communication skills'
+            '[SAMPLE] Required qualification 1',
+            '[SAMPLE] Required qualification 2',
+            '[SAMPLE] Required qualification 3'
           ],
-          buttonText: 'Apply Now',
-          buttonLink: '#'
-        },
-        {
-          position: 'Product Manager',
-          type: 'Full-time',
-          location: 'New York',
-          salary: '$100k-140k',
-          tags: ['Product Design', 'User Research', 'Data Analysis'],
-          responsibilities: [
-            'Drive product strategy and feature design',
-            'Conduct user research and requirement analysis',
-            'Coordinate with development team to drive project progress'
-          ],
-          requirements: [
-            '3+ years of product management experience',
-            'Excellent communication and coordination skills',
-            'Strong analytical and problem-solving abilities'
-          ],
-          buttonText: 'Apply Now',
-          buttonLink: '#'
-        },
-        {
-          position: 'AI Research Engineer',
-          type: 'Full-time',
-          location: 'Boston',
-          salary: '$130k-180k',
-          tags: ['Machine Learning', 'Python', 'Deep Learning'],
-          responsibilities: [
-            'Develop and implement AI algorithms',
-            'Research and apply latest AI technologies',
-            'Collaborate with cross-functional teams'
-          ],
-          requirements: [
-            'MS/PhD in Computer Science or related field',
-            'Strong background in machine learning',
-            'Experience with deep learning frameworks'
-          ],
-          buttonText: 'Apply Now',
+          buttonText: '[DEMO] Apply Now',
           buttonLink: '#'
         }
       ]
     },
 
     CallToActionWithEmailInput: {
-      title: 'Unlock Explosive Traffic with AI-Generated Landing Pages & Blog Posts.',
-      buttonText: "Get Started Now",
+      title: '[DEMO] Your Main Call to Action Headline',
+      buttonText: "[DEMO] Get Started",
       bottomContent: {
-        inputPlaceholder: "Enter your email",
+        inputPlaceholder: "[SAMPLE] Enter your email"
       }
     },
 
@@ -473,32 +448,32 @@ export const createCleanComponentData = (componentType) => {
       leftContent: [
         {
           percentage: 90,
-          description: 'Reduction in video production time compared to traditional methods',
+          description: '[SAMPLE] Achievement metric description 1',
           display: true
         },
         {
           percentage: 40,
-          description: 'Languages supported for automatic localization and voiceover generation',
+          description: '[SAMPLE] Achievement metric description 2',
           display: true
         },
         {
           percentage: 70,
-          description: 'Average cost savings for businesses switching to AI-powered video creation',
+          description: '[SAMPLE] Achievement metric description 3',
           display: true
         }
       ],
       rightContent: [
         {
-          contentTitle: 'The Power of AI in Video Production',
-          contentText: 'AI technology has revolutionized the way we create and distribute video content. With advanced algorithms and machine learning capabilities, what once took days or weeks can now be accomplished in minutes. Our cutting-edge AI system analyzes your content requirements, automatically selects appropriate visuals, generates professional transitions, and ensures perfect timing for each scene. This breakthrough technology not only saves time but also maintains consistent quality across all your video productions.'
+          contentTitle: '[DEMO] Main Feature 1',
+          contentText: '[SAMPLE] Our AI-driven solution significantly enhances your workflow efficiency. Through intelligent automation technology, tasks that previously took hours can now be completed in minutes. According to customer feedback, teams save 60-80% of their time on average, allowing them to focus on more creative and strategic initiatives. This breakthrough in productivity has transformed how our clients approach their daily operations.'
         },
         {
-          contentTitle: 'AI-Driven Localization',
-          contentText: 'Our AI-powered localization process is dramatically faster than manual translation and voiceover recording methods. With our advanced AI system, you can localize your videos in multiple languages in a fraction of the time it would take to do it manually.'
+          contentTitle: '[DEMO] Main Feature 2',
+          contentText: '[SAMPLE] Leveraging advanced machine learning algorithms, our platform continuously learns and optimizes workflows. The system automatically analyzes user behavior patterns, identifies efficiency bottlenecks, and provides personalized improvement recommendations. This data-driven approach has helped over 1,000 businesses achieve remarkable operational improvements, with many reporting a 200% increase in productivity within the first month.'
         },
         {
-          contentTitle: 'AI-Powered Video Creation',
-          contentText: 'Our AI-powered video creation tool allows you to generate professional videos in minutes. With our advanced AI system, you can create videos in a variety of styles and formats, from corporate presentations to social media content.'
+          contentTitle: '[DEMO] Main Feature 3',
+          contentText: '[SAMPLE] We offer comprehensive integration solutions that seamlessly connect with your existing systems. Whether you\'re using CRM, ERP, or other enterprise software, our platform adapts to your needs. Our enterprise-grade security ensures data protection while maintaining high performance. With 24/7 technical support and regular updates, we ensure your business operations run smoothly and efficiently.'
         }
       ]
     },
@@ -507,39 +482,39 @@ export const createCleanComponentData = (componentType) => {
       leftContent: [
         {
           icon: '🎥',
-          contentTitle: 'AI Video Creation',
-          content: 'Generate professional videos automatically'
+          contentTitle: '[DEMO] Feature 1',
+          content: '[SAMPLE] Description of feature 1'
         },
         {
           icon: '🌍',
-          contentTitle: 'Global Reach',
-          content: 'Support for 40+ languages'
+          contentTitle: '[DEMO] Feature 2',
+          content: '[SAMPLE] Description of feature 2'
         },
         {
           icon: '⚡',
-          contentTitle: 'Fast Processing',
-          content: 'Complete videos in minutes'
+          contentTitle: '[DEMO] Feature 3',
+          content: '[SAMPLE] Description of feature 3'
         },
         {
           icon: '💰',
-          contentTitle: 'Cost Effective',
-          content: 'Save up to 90% on video production'
+          contentTitle: '[DEMO] Feature 4',
+          content: '[SAMPLE] Description of feature 4'
         }
       ],
       rightContent: {
         icon: '🚀',
-        title: 'Ready to Transform Your Video Marketing?',
-        subTitle: 'Join thousands of businesses using websitelm AI',
-        buttonText: 'Start Free Trial',
+        title: '[DEMO] Main Call to Action',
+        subTitle: '[SAMPLE] Engaging subtitle for your call to action',
+        buttonText: '[DEMO] Start Now',
         buttonLink: '#'
       }
     },
 
     CallToAction: {
-      title: 'Unlock Explosive Traffic with AI-Generated Landing Pages & Blog Posts.',
-      subTitle: 'Join thousands of businesses using websitelm AI',
+      title: '[DEMO] Your Main Call to Action',
+      subTitle: '[SAMPLE] Supporting text for your call to action',
       bottomContent: {
-        buttonText: "Get Started Now",
+        buttonText: "[DEMO] Get Started",
         buttonLink: "#"
       }
     },
@@ -548,20 +523,20 @@ export const createCleanComponentData = (componentType) => {
       leftContent: [
         {
           percentage: 95,
-          description: 'Customer Satisfaction Score, based on over 10,000 user feedbacks'
+          description: '[SAMPLE] Achievement metric 1 description'
         },
         {
           percentage: 80,
-          description: 'Average marketing efficiency improvement compared to traditional video production methods'
+          description: '[SAMPLE] Achievement metric 2 description'
         },
         {
           percentage: 70,
-          description: 'Investment return ratio in the first month'
+          description: '[SAMPLE] Achievement metric 3 description'
         }
       ],
       rightContent: {
         imageUrl: '/assets/images/placeholder.png',
-        imageAlt: 'Placeholder',
+        imageAlt: '[SAMPLE] Results Illustration',
       }
     },
 
@@ -569,61 +544,61 @@ export const createCleanComponentData = (componentType) => {
       bottomContent: [
         {
           competitorLogo: '/assets/images/placeholder.png',
-          competitorLogoAlt: 'Traditional Video Production',
-          competitorName: 'Traditional Video Production',
+          competitorLogoAlt: '[SAMPLE] Competitor 1',
+          competitorName: '[DEMO] Traditional Method',
           percentage: 85,
-          metric: 'Cost Reduction',
-          description: 'Businesses using websitelm AI report significant cost savings compared to traditional video production methods, with faster turnaround times.',
-          buttonText: 'Read Case Study',
+          metric: '[DEMO] Efficiency Gain',
+          description: '[SAMPLE] Description of improvement compared to traditional methods',
+          buttonText: '[DEMO] View Details',
           buttonLink: '#'
         },
         {
           competitorLogo: '/assets/images/placeholder.png',
-          competitorLogoAlt: 'Manual Localization',
-          competitorName: 'Manual Localization',
+          competitorLogoAlt: '[SAMPLE] Competitor 2',
+          competitorName: '[DEMO] Manual Process',
           percentage: 90,
-          metric: 'Time Saved',
-          description: 'Our AI-powered localization process is dramatically faster than manual translation and voiceover recording methods.',
-          buttonText: 'Read Case Study',
+          metric: '[DEMO] Time Saved',
+          description: '[SAMPLE] Description of time savings compared to manual process',
+          buttonText: '[DEMO] View Details',
           buttonLink: '#'
         },
         {
           competitorLogo: '/assets/images/placeholder.png',
-          competitorLogoAlt: 'Basic Video Tools',
-          competitorName: 'Basic Video Tools',
+          competitorLogoAlt: '[SAMPLE] Competitor 3',
+          competitorName: '[DEMO] Basic Tools',
           percentage: 73,
-          metric: 'Higher Engagement',
-          description: 'Videos created with websitelm AI show significantly higher viewer engagement rates compared to basic video creation tools.',
-          buttonText: 'Read Case Study',
+          metric: '[DEMO] Performance Boost',
+          description: '[SAMPLE] Description of performance improvements over basic tools',
+          buttonText: '[DEMO] View Details',
           buttonLink: '#'
         }
       ]
     },
 
     PageListCard: {
-      title: 'Card List',
-      subTitle: 'Checkout our recommendaion',
+      title: '[DEMO] Card List',
+      subTitle: '[DEMO] Featured Content',
       bottomContent: [
         {
           imageUrl: '/assets/images/placeholder.png',
-          imageAlt: 'AI Content Creation',
-          tag: 'AI Technology',
-          title: 'The Future of AI-Powered Content Creation',
-          targetUrl: 'https://www.google.com'
+          imageAlt: '[SAMPLE] Content Image 1',
+          tag: '[SAMPLE] Category 1',
+          title: '[DEMO] Sample Article Title 1',
+          targetUrl: '#'
         },
         {
           imageUrl: '/assets/images/placeholder.png',
-          imageAlt: 'Marketing Strategy',
-          tag: 'Digital Marketing',
-          title: 'Building Effective Digital Marketing Strategies',
-          targetUrl: 'https://www.google.com'
+          imageAlt: '[SAMPLE] Content Image 2',
+          tag: '[SAMPLE] Category 2',
+          title: '[DEMO] Sample Article Title 2',
+          targetUrl: '#'
         },
         {
           imageUrl: '/assets/images/placeholder.png',
-          imageAlt: 'SEO Optimization',
-          tag: 'SEO',
-          title: 'Advanced SEO Techniques for 2024',
-          targetUrl: 'https://www.google.com'
+          imageAlt: '[SAMPLE] Content Image 3',
+          tag: '[SAMPLE] Category 3',
+          title: '[DEMO] Sample Article Title 3',
+          targetUrl: '#'
         }
       ]
     }
