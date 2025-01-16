@@ -4,677 +4,676 @@
     description="Manage your assets, including images, videos, internal links and other"
     icon="🎨"
   >
-  <a-spin :spinning="loading">
-    <!-- Domain not configured notice -->
-    <template v-if="domainConfigured">
-      <a-tabs 
-      class="main-tabs"
-      v-model:activeKey="activeTab"
-    >
-      <template #rightExtra>
-        <a-button 
-          v-if="activeTab === 'images' || activeTab === 'videos'" 
-          type="primary" 
-          class="ai-analyze-btn" 
-          @click="showUploadModal"
-        >
-          <span class="btn-content">
-            <span>Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}</span>
-            <upload-outlined />
-          </span>
-        </a-button>
-        <a-button 
-          v-else-if="activeTab === 'links' || activeTab === 'button-links'"
-          type="primary"
-          class="ai-analyze-btn" 
-          @click="showAddLinkModal"
-        >
-          <span class="btn-content">
-            <span>Add {{ activeTab === 'links' ? 'Link' : 'Button Link' }}</span>
-            <plus-outlined />
-          </span>
-        </a-button>
-      </template>
+    <a-spin :spinning="loading">
+      <template v-if="domainConfigured">
+        <a-tabs 
+        class="main-tabs"
+        v-model:activeKey="activeTab"
+      >
+        <template #rightExtra>
+          <a-button 
+            v-if="activeTab === 'images' || activeTab === 'videos'" 
+            type="primary" 
+            class="ai-analyze-btn" 
+            @click="showUploadModal"
+          >
+            <span class="btn-content">
+              <span>Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}</span>
+              <upload-outlined />
+            </span>
+          </a-button>
+          <a-button 
+            v-else-if="activeTab === 'links' || activeTab === 'button-links'"
+            type="primary"
+            class="ai-analyze-btn" 
+            @click="showAddLinkModal"
+          >
+            <span class="btn-content">
+              <span>Add {{ activeTab === 'links' ? 'Link' : 'Button Link' }}</span>
+              <plus-outlined />
+            </span>
+          </a-button>
+        </template>
 
-      <a-tab-pane key="knowledge" tab="Knowledge Base" />
-      <a-tab-pane key="images" tab="Images" />
-      <a-tab-pane key="videos" tab="Videos" />
-      <a-tab-pane key="links" tab="Internal Links" />
-      <a-tab-pane key="button-links" tab="Button Links" />
-      <a-tab-pane key="header" tab="Header" />
-      <a-tab-pane key="footer" tab="Footer" />
-    </a-tabs>
+        <a-tab-pane key="knowledge" tab="Knowledge Base" />
+        <a-tab-pane key="images" tab="Images" />
+        <a-tab-pane key="videos" tab="Videos" />
+        <a-tab-pane key="links" tab="Internal Links" />
+        <a-tab-pane key="button-links" tab="Button Links" />
+        <a-tab-pane key="header" tab="Header" />
+        <a-tab-pane key="footer" tab="Footer" />
+      </a-tabs>
 
-    <div class="page-content">
-      <div class="assets-content">
-        <div class="controls-header">
-          <div class="controls-right">
-            <slot name="controls"></slot>
-          </div>
-        </div>
-
-        <!-- Media Asset Content -->
-        <template v-if="activeTab === 'images' || activeTab === 'videos'">
-          <a-spin :spinning="loading">
-            <div class="assets-grid" v-if="!loading">
-              <template v-if="!showEmptyState">
-                <a-row :gutter="[16, 16]">
-                  <a-col 
-                    v-for="asset in filteredAssets" 
-                    :key="asset.id" 
-                    :xs="24" 
-                    :sm="12" 
-                    :md="8" 
-                    :lg="6"
-                  >
-                    <div class="asset-card">
-                      <div class="asset-preview" @click="previewAsset(asset)">
-                        <img 
-                          v-if="asset.type === 'image'" 
-                          :src="asset.url" 
-                          :alt="asset.name"
-                        >
-                        <video 
-                          v-else-if="asset.type === 'video'" 
-                          :src="asset.url" 
-                          controls
-                        ></video>
-                        <div class="asset-overlay">
-                          <eye-outlined class="preview-icon" />
-                        </div>
-                        <div class="asset-actions">
-                          <a-popconfirm
-                            title="Are you sure you want to delete this file?"
-                            ok-text="Delete"
-                            cancel-text="Cancel"
-                            @confirm="deleteAsset(asset)"
-                            ok-type="primary"
-                            :ok-button-props="{
-                              style: {
-                                background: 'linear-gradient(135deg, #1890ff, #3B82F6)',
-                                border: 'none'
-                              }
-                            }"
-                          >
-                            <a-button 
-                              type="link" 
-                              danger 
-                              class="delete-btn"
-                              @click.stop
-                            >
-                              <delete-outlined />
-                            </a-button>
-                          </a-popconfirm>
-                        </div>
-                      </div>
-                      <div class="asset-info">
-                        <div class="asset-name-container">
-                          <h4 class="asset-name" :title="asset.name">{{ asset.name }}</h4>
-                          <a-button type="link" class="edit-btn" @click="startEditing(asset)">
-                            <edit-outlined />
-                          </a-button>
-                        </div>
-                        <p class="asset-description" :title="asset.description">
-                          {{ asset.description || 'No description' }}
-                        </p>
-                      </div>
-                    </div>
-                  </a-col>
-                </a-row>
-
-                <!-- 添加分页组件 -->
-                <div class="pagination-wrapper">
-                  <a-pagination
-                    v-model:current="currentPage"
-                    :total="total"
-                    :pageSize="pageSize"
-                    show-size-changer
-                    @change="handlePageChange"
-                    @showSizeChange="handleSizeChange"
-                  />
-                </div>
-              </template>
-              
-              <div v-else-if="showEmptyState && activeTab !== 'links'" class="empty-state">
-                <h3 class="empty-state-title">Your creative canvas awaits! 🎨</h3>
-                <p class="empty-state-description">
-                  Ready to bring your brand to life? Upload your first {{ activeTab === 'images' ? 'image' : 'video' }} and let's make something amazing together.
-                </p>
-                <a-button 
-                  type="primary" 
-                  class="upload-btn-empty" 
-                  @click="showUploadModal"
-                >
-                  <upload-outlined /> Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}
-                </a-button>
-              </div>
+      <div class="page-content">
+        <div class="assets-content">
+          <div class="controls-header">
+            <div class="controls-right">
+              <slot name="controls"></slot>
             </div>
-          </a-spin>
-        </template>
-
-        <!-- Link Content -->
-        <template v-else-if="activeTab === 'links'">
-          <a-spin :spinning="linksLoading">
-            <template v-if="!linksLoading">
-              <!-- 添加空状态显示 -->
-              <div v-if="internalLinks.length === 0" class="empty-state">
-                <h3 class="empty-state-title">No Internal Links Found 🔗</h3>
-                <p class="empty-state-description">
-                  Start adding internal links to improve your site's navigation and SEO.
-                </p>
-                <a-button 
-                  type="primary" 
-                  class="upload-btn-empty" 
-                  @click="showAddLinkModal"
-                >
-                  <plus-outlined /> Add First Link
-                </a-button>
-              </div>
-              
-              <!-- 现有的表格组件 -->
-              <a-table
-                v-else
-                :columns="linkColumns" 
-                :dataSource="internalLinks" 
-                :pagination="{ 
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showTotal: (total) => `Total ${total} items`
-                }"
-                :rowKey="record => record.id"
-              >
-                <template #bodyCell="{ column, record }">
-                  <template v-if="column.key === 'operation'">
-                    <a-space>
-                      <a-button type="link" @click="editLink(record)">
-                        <edit-outlined />
-                      </a-button>
-                      <a-popconfirm
-                        title="Are you sure you want to delete this link?"
-                        @confirm="deleteLink(record)"
-                        ok-text="Delete"
-                        cancel-text="Cancel"
-                      >
-                        <a-button type="link" danger>
-                          <delete-outlined />
-                        </a-button>
-                      </a-popconfirm>
-                    </a-space>
-                  </template>
-                  <template v-if="column.key === 'link'">
-                    <a :href="record.link" target="_blank">{{ record.link }}</a>
-                  </template>
-                </template>
-              </a-table>
-            </template>
-          </a-spin>
-        </template>
-
-        <!-- Knowledge Tab Content -->
-        <template v-else-if="activeTab === 'knowledge'">
-          <a-spin :spinning="loading">
-          </a-spin>
-          <div class="traffic-light-descriptions" v-if="!loading">
-            <p><span class="status-dot status-green"></span> Green: No human intervention needed.</p>
-            <p><span class="status-dot status-yellow"></span> Yellow: Requires review.</p>
-            <p><span class="status-dot status-red"></span> Red: Needs human supplementation.</p>
           </div>
-          <div class="assets-content">
-            <div class="assets-grid" v-if="!loading">
-              <div class="main-content">
-                <!-- Knowledge Base Status Alert -->
-                <a-alert
-                  type="info"
-                  class="knowledge-alert"
-                >
-                  <template #description>
-                    <div class="alert-content" v-if="processingKnowledge">
-                      <div class="kb-status-header">
-                        <div class="status-message">
-                          <p>
-                            Knowledge base processing: 
-                            <span class="highlight yellow">
-                              {{ knowledgeStatus === 'fetch' ? 'Fetching data' : 
-                                 knowledgeStatus === 'process' ? 'Processing content' : 
-                                 knowledgeStatus === 'analyze' ? 'Analyzing content' : 
-                                 knowledgeStatus === 'vector2' ? 'Vectorizing content' : 
-                                 'Initializing...' }}
-                            </span>
-                            (Estimated time: {{ knowledgeTime }}s)
+
+          <!-- Media Asset Content -->
+          <template v-if="activeTab === 'images' || activeTab === 'videos'">
+            <a-spin :spinning="loading">
+              <div class="assets-grid" v-if="!loading">
+                <template v-if="!showEmptyState">
+                  <a-row :gutter="[16, 16]">
+                    <a-col 
+                      v-for="asset in filteredAssets" 
+                      :key="asset.id" 
+                      :xs="24" 
+                      :sm="12" 
+                      :md="8" 
+                      :lg="6"
+                    >
+                      <div class="asset-card">
+                        <div class="asset-preview" @click="previewAsset(asset)">
+                          <img 
+                            v-if="asset.type === 'image'" 
+                            :src="asset.url" 
+                            :alt="asset.name"
+                          >
+                          <video 
+                            v-else-if="asset.type === 'video'" 
+                            :src="asset.url" 
+                            controls
+                          ></video>
+                          <div class="asset-overlay">
+                            <eye-outlined class="preview-icon" />
+                          </div>
+                          <div class="asset-actions">
+                            <a-popconfirm
+                              title="Are you sure you want to delete this file?"
+                              ok-text="Delete"
+                              cancel-text="Cancel"
+                              @confirm="deleteAsset(asset)"
+                              ok-type="primary"
+                              :ok-button-props="{
+                                style: {
+                                  background: 'linear-gradient(135deg, #1890ff, #3B82F6)',
+                                  border: 'none'
+                                }
+                              }"
+                            >
+                              <a-button 
+                                type="link" 
+                                danger 
+                                class="delete-btn"
+                                @click.stop
+                              >
+                                <delete-outlined />
+                              </a-button>
+                            </a-popconfirm>
+                          </div>
+                        </div>
+                        <div class="asset-info">
+                          <div class="asset-name-container">
+                            <h4 class="asset-name" :title="asset.name">{{ asset.name }}</h4>
+                            <a-button type="link" class="edit-btn" @click="startEditing(asset)">
+                              <edit-outlined />
+                            </a-button>
+                          </div>
+                          <p class="asset-description" :title="asset.description">
+                            {{ asset.description || 'No description' }}
                           </p>
                         </div>
                       </div>
-                    </div>
-                  </template>
-                </a-alert>
+                    </a-col>
+                  </a-row>
 
-                <!-- Knowledge Base Content -->
-                <template v-if="!processingKnowledge">
-                  <!-- Breadcrumb Navigation -->
-                  <div class="breadcrumb" v-if="currentArticle">
-                    <span @click="clearCurrentArticle">Knowledge Base</span>
-                    <span class="separator">/</span>
-                    <span>{{ currentArticle.label }}</span>
-                    <span class="separator">/</span>
-                    <span class="current">{{ currentArticle.title }}</span>
+                  <!-- 添加分页组件 -->
+                  <div class="pagination-wrapper">
+                    <a-pagination
+                      v-model:current="currentPage"
+                      :total="total"
+                      :pageSize="pageSize"
+                      show-size-changer
+                      @change="handlePageChange"
+                      @showSizeChange="handleSizeChange"
+                    />
                   </div>
+                </template>
+                
+                <div v-else-if="showEmptyState && activeTab !== 'links'" class="empty-state">
+                  <h3 class="empty-state-title">Your creative canvas awaits! 🎨</h3>
+                  <p class="empty-state-description">
+                    Ready to bring your brand to life? Upload your first {{ activeTab === 'images' ? 'image' : 'video' }} and let's make something amazing together.
+                  </p>
+                  <a-button 
+                    type="primary" 
+                    class="upload-btn-empty" 
+                    @click="showUploadModal"
+                  >
+                    <upload-outlined /> Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}
+                  </a-button>
+                </div>
+              </div>
+            </a-spin>
+          </template>
 
-                  <!-- Category Grid -->
-                  <div class="grid-container" v-if="!currentArticle">
-                    <div 
-                      v-for="(articles, label) in groupedArticles" 
-                      :key="label"
-                      class="category-card"
-                    >
-                      <div class="category-header">
-                        <h2>{{ label }}</h2>
-                        <span class="article-count">{{ articles.length }} articles</span>
-                      </div>
-                      <div class="category-stats">
-                        <span class="stat-item">
-                          <span class="status-dot status-green"></span>
-                          {{ getCategoryStats(articles).green }}
-                        </span>
-                        <span class="stat-item">
-                          <span class="status-dot status-yellow"></span>
-                          {{ getCategoryStats(articles).yellow }}
-                        </span>
-                        <span class="stat-item">
-                          <span class="status-dot status-red"></span>
-                          {{ getCategoryStats(articles).red }}
-                        </span>
-                      </div>
-                      <div class="article-list">
-                        <div 
-                          v-for="article in articles" 
-                          :key="article.title"
-                          class="article-item"
-                          @click="selectArticle(article)"
+          <!-- Link Content -->
+          <template v-else-if="activeTab === 'links'">
+            <a-spin :spinning="linksLoading">
+              <template v-if="!linksLoading">
+                <!-- 添加空状态显示 -->
+                <div v-if="internalLinks.length === 0" class="empty-state">
+                  <h3 class="empty-state-title">No Internal Links Found 🔗</h3>
+                  <p class="empty-state-description">
+                    Start adding internal links to improve your site's navigation and SEO.
+                  </p>
+                  <a-button 
+                    type="primary" 
+                    class="upload-btn-empty" 
+                    @click="showAddLinkModal"
+                  >
+                    <plus-outlined /> Add First Link
+                  </a-button>
+                </div>
+                
+                <!-- 现有的表格组件 -->
+                <a-table
+                  v-else
+                  :columns="linkColumns" 
+                  :dataSource="internalLinks" 
+                  :pagination="{ 
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showTotal: (total) => `Total ${total} items`
+                  }"
+                  :rowKey="record => record.id"
+                >
+                  <template #bodyCell="{ column, record }">
+                    <template v-if="column.key === 'operation'">
+                      <a-space>
+                        <a-button type="link" @click="editLink(record)">
+                          <edit-outlined />
+                        </a-button>
+                        <a-popconfirm
+                          title="Are you sure you want to delete this link?"
+                          @confirm="deleteLink(record)"
+                          ok-text="Delete"
+                          cancel-text="Cancel"
                         >
-                          <span 
-                            class="status-dot" 
-                            :class="{
-                              'status-green': article.quality === 'A',
-                              'status-yellow': article.quality === 'B',
-                              'status-red': article.quality === 'C'
-                            }"
-                          ></span>
-                          {{ article.title }}
+                          <a-button type="link" danger>
+                            <delete-outlined />
+                          </a-button>
+                        </a-popconfirm>
+                      </a-space>
+                    </template>
+                    <template v-if="column.key === 'link'">
+                      <a :href="record.link" target="_blank">{{ record.link }}</a>
+                    </template>
+                  </template>
+                </a-table>
+              </template>
+            </a-spin>
+          </template>
+
+          <!-- Knowledge Tab Content -->
+          <template v-else-if="activeTab === 'knowledge'">
+            <a-spin :spinning="loading">
+            </a-spin>
+            <div class="traffic-light-descriptions" v-if="!loading">
+              <p><span class="status-dot status-green"></span> Green: No human intervention needed.</p>
+              <p><span class="status-dot status-yellow"></span> Yellow: Requires review.</p>
+              <p><span class="status-dot status-red"></span> Red: Needs human supplementation.</p>
+            </div>
+            <div class="assets-content">
+              <div class="assets-grid" v-if="!loading">
+                <div class="main-content">
+                  <!-- Knowledge Base Status Alert -->
+                  <a-alert
+                    type="info"
+                    class="knowledge-alert"
+                  >
+                    <template #description>
+                      <div class="alert-content" v-if="processingKnowledge">
+                        <div class="kb-status-header">
+                          <div class="status-message">
+                            <p>
+                              Knowledge base processing: 
+                              <span class="highlight yellow">
+                                {{ knowledgeStatus === 'fetch' ? 'Fetching data' : 
+                                  knowledgeStatus === 'process' ? 'Processing content' : 
+                                  knowledgeStatus === 'analyze' ? 'Analyzing content' : 
+                                  knowledgeStatus === 'vector2' ? 'Vectorizing content' : 
+                                  'Initializing...' }}
+                              </span>
+                              (Estimated time: {{ knowledgeTime }}s)
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </a-alert>
+
+                  <!-- Knowledge Base Content -->
+                  <template v-if="!processingKnowledge">
+                    <!-- Breadcrumb Navigation -->
+                    <div class="breadcrumb" v-if="currentArticle">
+                      <span @click="clearCurrentArticle">Knowledge Base</span>
+                      <span class="separator">/</span>
+                      <span>{{ currentArticle.label }}</span>
+                      <span class="separator">/</span>
+                      <span class="current">{{ currentArticle.title }}</span>
+                    </div>
+
+                    <!-- Category Grid -->
+                    <div class="grid-container" v-if="!currentArticle">
+                      <div 
+                        v-for="(articles, label) in groupedArticles" 
+                        :key="label"
+                        class="category-card"
+                      >
+                        <div class="category-header">
+                          <h2>{{ label }}</h2>
+                          <span class="article-count">{{ articles.length }} articles</span>
+                        </div>
+                        <div class="category-stats">
+                          <span class="stat-item">
+                            <span class="status-dot status-green"></span>
+                            {{ getCategoryStats(articles).green }}
+                          </span>
+                          <span class="stat-item">
+                            <span class="status-dot status-yellow"></span>
+                            {{ getCategoryStats(articles).yellow }}
+                          </span>
+                          <span class="stat-item">
+                            <span class="status-dot status-red"></span>
+                            {{ getCategoryStats(articles).red }}
+                          </span>
+                        </div>
+                        <div class="article-list">
+                          <div 
+                            v-for="article in articles" 
+                            :key="article.title"
+                            class="article-item"
+                            @click="selectArticle(article)"
+                          >
+                            <span 
+                              class="status-dot" 
+                              :class="{
+                                'status-green': article.quality === 'A',
+                                'status-yellow': article.quality === 'B',
+                                'status-red': article.quality === 'C'
+                              }"
+                            ></span>
+                            {{ article.title }}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <!-- Article Detail View -->
-                  <div v-else class="article-detail">
-                    <div class="article-actions">
-                      <a-button 
-                        type="primary"
-                        :loading="saving"
-                        @click="saveArticle"
-                      >
-                        Save Changes
-                      </a-button>
-                    </div>
-                    <h1 class="article-title">{{ currentArticle.title }}</h1>
-                    <a-textarea
-                      v-model:value="editableContent"
-                      :rows="20"
-                      class="article-editor"
-                      :bordered="false"
-                      placeholder="Enter article content..."
-                    />
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <!-- Header Section -->
-        <template v-else-if="activeTab === 'header'">
-          <div class="header-footer-content">
-            <a-spin :spinning="headerLoading">
-              <div v-if="!headerLoading" class="settings-section">
-                <div class="preview-section">
-                  <div class="preview-header">
-                    <div class="preview-header-content">
-                      <h4>Header Preview</h4>
-                    </div>
-                  </div>
-                  <div class="preview-container">
-                    <HeaderTemplate 
-                      :initialData="headerConfig"
-                      :layoutId="layoutId || ''"
-                    />
-                  </div>
-                </div>
-              </div>
-            </a-spin>
-          </div>
-        </template>
-
-        <!-- Footer Section -->
-        <template v-else-if="activeTab === 'footer'">
-          <div class="header-footer-content">
-            <a-spin :spinning="footerLoading">
-              <div v-if="!footerLoading" class="settings-section">
-                <div class="preview-section">
-                  <div class="preview-header">
-                    <div class="preview-header-content">
-                      <h4>Footer Preview</h4>
-                    </div>
-                  </div>
-                  <div class="preview-container">
-                    <FooterTemplate 
-                      :initial-data="footerConfig"
-                      :layoutId="layoutId || ''"
-                    />
-                  </div>
-                </div>
-              </div>
-            </a-spin>
-          </div>
-        </template>
-
-        <!-- Button Links Content -->
-        <template v-else-if="activeTab === 'button-links'">
-          <a-spin :spinning="buttonLinksLoading">
-            <template v-if="!buttonLinksLoading">
-              <!-- Empty state display -->
-              <div v-if="buttonLinks.length === 0" class="empty-state">
-                <h3 class="empty-state-title">No Button Links Found 🔗</h3>
-                <p class="empty-state-description">
-                  Start adding button links to enhance your site's call-to-actions.
-                </p>
-                <a-button 
-                  type="primary" 
-                  class="upload-btn-empty" 
-                  @click="showAddLinkModal"
-                >
-                  <plus-outlined /> Add First Button Link
-                </a-button>
-              </div>
-              
-              <!-- Button links table -->
-              <a-table
-                v-else
-                :columns="buttonLinkColumns" 
-                :dataSource="buttonLinks" 
-                :pagination="{ 
-                  pageSize: 10,
-                  showSizeChanger: true,
-                  showTotal: (total) => `Total ${total} items`
-                }"
-                :rowKey="record => record.id"
-              >
-                <template #bodyCell="{ column, record }">
-                  <template v-if="column.key === 'operation'">
-                    <a-space>
-                      <a-button type="link" @click="editButtonLink(record)">
-                        <edit-outlined />
-                      </a-button>
-                      <a-popconfirm
-                        title="Are you sure you want to delete this button link?"
-                        @confirm="() => deleteButtonLink(record)"
-                        ok-text="Delete"
-                        cancel-text="Cancel"
-                      >
-                        <a-button type="link" danger>
-                          <delete-outlined />
+                    <!-- Article Detail View -->
+                    <div v-else class="article-detail">
+                      <div class="article-actions">
+                        <a-button 
+                          type="primary"
+                          :loading="saving"
+                          @click="saveArticle"
+                        >
+                          Save Changes
                         </a-button>
-                      </a-popconfirm>
-                    </a-space>
+                      </div>
+                      <h1 class="article-title">{{ currentArticle.title }}</h1>
+                      <a-textarea
+                        v-model:value="editableContent"
+                        :rows="20"
+                        class="article-editor"
+                        :bordered="false"
+                        placeholder="Enter article content..."
+                      />
+                    </div>
                   </template>
-                  <template v-if="column.key === 'link'">
-                    <a :href="record.link" target="_blank">{{ record.link }}</a>
-                  </template>
-                </template>
-              </a-table>
-            </template>
-          </a-spin>
-        </template>
-      </div>
-    </div>
-    <!-- Preview Modal -->
-    <a-modal
-      v-model:open="previewVisible"  
-      :footer="null"
-      width="800px"
-      class="preview-modal"
-      @cancel="closePreview"
-      :closable="false"
-    >
-      <img 
-        v-if="selectedAsset?.type === 'image'"
-        :src="selectedAsset?.url"
-        class="preview-image"
-        alt="Preview"
-      >
-      <video
-        v-else-if="selectedAsset?.type === 'video'"
-        :src="selectedAsset?.url"
-        controls
-        class="preview-video"
-      ></video>
-    </a-modal>
-
-    <!-- Upload Modal -->
-    <a-modal
-      v-model:open="uploadModalVisible"
-      :title="`Upload ${activeTab === 'images' ? 'Images' : 'Videos'}`"
-      @ok="handleUploadOk"
-      @cancel="handleUploadCancel"
-      :okButtonProps="{ 
-        disabled: !uploadFile || !isMediaFormValid,
-        loading: uploading
-      }"
-    >
-      <div class="upload-container">
-        <div v-if="!uploadFile" class="upload-area" @click="triggerFileInput">
-          <upload-outlined class="upload-icon" />
-          <p>Click or drag file to upload</p>
-          <p class="upload-hint">
-            {{ activeTab === 'images' ? 'Supports JPG, PNG, WebP formats' : 'Supports MP4 format' }}
-          </p>
-        </div>
-        
-        <template v-else>
-          <div class="preview-container">
-            <div class="preview-wrapper">
-              <img
-                v-if="activeTab === 'images' && uploadFile"
-                :src="previewUrl"
-                class="upload-preview"
-              />
-              <video
-                v-if="activeTab === 'videos' && uploadFile"
-                :src="previewUrl"
-                controls
-                class="upload-preview"
-              ></video>
+                </div>
+              </div>
             </div>
-          </div>
+          </template>
 
-          <!-- Add form for name and description -->
-          <a-form
-            :model="mediaForm"
-            :rules="mediaFormRules"
-            ref="mediaFormRef"
-            layout="vertical"
-            class="media-form"
-          >
-            <a-form-item 
-              name="mediaName" 
-              label="Name"
-              :validateTrigger="['blur', 'change']"
-            >
-              <a-input 
-                v-model:value="mediaForm.mediaName" 
-                placeholder="Enter file name"
-                :maxLength="50"
-              />
-            </a-form-item>
-            
-            <a-form-item 
-              name="description" 
-              label="Description"
-            >
-              <a-textarea 
-                v-model:value="mediaForm.description" 
-                placeholder="Enter description (optional)"
-                :maxLength="200"
-                :rows="3"
-              />
-            </a-form-item>
-          </a-form>
+          <!-- Header Section -->
+          <template v-else-if="activeTab === 'header'">
+            <div class="header-footer-content">
+              <a-spin :spinning="headerLoading">
+                <div v-if="!headerLoading" class="settings-section">
+                  <div class="preview-section">
+                    <div class="preview-header">
+                      <div class="preview-header-content">
+                        <h4>Header Preview</h4>
+                      </div>
+                    </div>
+                    <div class="preview-container">
+                      <HeaderTemplate 
+                        :initialData="headerConfig"
+                        :layoutId="layoutId || ''"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </a-spin>
+            </div>
+          </template>
 
-          <div class="preview-actions">
-            <a-button type="primary" danger @click="removeUpload">
-              <delete-outlined /> Remove
-            </a-button>
-          </div>
-        </template>
-        
-        <input
-          type="file"
-          ref="fileInput"
-          :accept="activeTab === 'images' ? 'image/*' : 'video/mp4'"
-          style="display: none"
-          @change="handleFileChange"
-        />
+          <!-- Footer Section -->
+          <template v-else-if="activeTab === 'footer'">
+            <div class="header-footer-content">
+              <a-spin :spinning="footerLoading">
+                <div v-if="!footerLoading" class="settings-section">
+                  <div class="preview-section">
+                    <div class="preview-header">
+                      <div class="preview-header-content">
+                        <h4>Footer Preview</h4>
+                      </div>
+                    </div>
+                    <div class="preview-container">
+                      <FooterTemplate 
+                        :initial-data="footerConfig"
+                        :layoutId="layoutId || ''"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </a-spin>
+            </div>
+          </template>
+
+          <!-- Button Links Content -->
+          <template v-else-if="activeTab === 'button-links'">
+            <a-spin :spinning="buttonLinksLoading">
+              <template v-if="!buttonLinksLoading">
+                <!-- Empty state display -->
+                <div v-if="buttonLinks.length === 0" class="empty-state">
+                  <h3 class="empty-state-title">No Button Links Found 🔗</h3>
+                  <p class="empty-state-description">
+                    Start adding button links to enhance your site's call-to-actions.
+                  </p>
+                  <a-button 
+                    type="primary" 
+                    class="upload-btn-empty" 
+                    @click="showAddLinkModal"
+                  >
+                    <plus-outlined /> Add First Button Link
+                  </a-button>
+                </div>
+                
+                <!-- Button links table -->
+                <a-table
+                  v-else
+                  :columns="buttonLinkColumns" 
+                  :dataSource="buttonLinks" 
+                  :pagination="{ 
+                    pageSize: 10,
+                    showSizeChanger: true,
+                    showTotal: (total) => `Total ${total} items`
+                  }"
+                  :rowKey="record => record.id"
+                >
+                  <template #bodyCell="{ column, record }">
+                    <template v-if="column.key === 'operation'">
+                      <a-space>
+                        <a-button type="link" @click="editButtonLink(record)">
+                          <edit-outlined />
+                        </a-button>
+                        <a-popconfirm
+                          title="Are you sure you want to delete this button link?"
+                          @confirm="() => deleteButtonLink(record)"
+                          ok-text="Delete"
+                          cancel-text="Cancel"
+                        >
+                          <a-button type="link" danger>
+                            <delete-outlined />
+                          </a-button>
+                        </a-popconfirm>
+                      </a-space>
+                    </template>
+                    <template v-if="column.key === 'link'">
+                      <a :href="record.link" target="_blank">{{ record.link }}</a>
+                    </template>
+                  </template>
+                </a-table>
+              </template>
+            </a-spin>
+          </template>
+        </div>
       </div>
-    </a-modal>
-
-    <!-- Add Link Modal -->
-    <a-modal
-      v-model:open="linkModalVisible"
-      :title="(activeTab === 'button-links' ? 'Button ' : 'Internal ') + (editingLink || editingButtonLink ? 'Edit' : 'Add') + ' Link'"
-      @ok="handleLinkModalOk" 
-      @cancel="handleLinkModalCancel"
-      :okButtonProps="{ 
-        disabled: !isLinkFormValid,
-        loading: linkSubmitting
-      }"
-    >
-      <a-form
-        :model="linkForm"
-        :rules="linkFormRules"
-        ref="linkFormRef"
-        layout="vertical"
+      <!-- Preview Modal -->
+      <a-modal
+        v-model:open="previewVisible"  
+        :footer="null"
+        width="800px"
+        class="preview-modal"
+        @cancel="closePreview"
+        :closable="false"
       >
-        <!-- Name field -->
-        <a-form-item 
-          name="name" 
-          label="Name"
-          :validateTrigger="['blur', 'change']"
+        <img 
+          v-if="selectedAsset?.type === 'image'"
+          :src="selectedAsset?.url"
+          class="preview-image"
+          alt="Preview"
         >
-          <a-input 
-            v-model:value="linkForm.name" 
-            placeholder="Enter link name"
-            :maxLength="50"
-          />
-        </a-form-item>
-        
-        <!-- Link URL field -->
-        <a-form-item 
-          name="link" 
-          label="Link URL"
-          :validateTrigger="['blur', 'change']"
-        >
-          <a-input 
-            v-model:value="linkForm.link" 
-            placeholder="Enter link URL"
-            :maxLength="200"
-          />
-        </a-form-item>
-        
-        <!-- Description field -->
-        <a-form-item 
-          name="description" 
-          label="Description"
-          :validateTrigger="['blur', 'change']"
-        >
-          <a-textarea 
-            v-model:value="linkForm.description" 
-            placeholder="Enter link description"
-            :maxLength="500"
-            :rows="3"
-          />
-        </a-form-item>
-        
-        <!-- Category field - only show for internal links -->
-        <a-form-item 
-          v-if="activeTab === 'links'"
-          name="category" 
-          label="Category"
-          :validateTrigger="['blur', 'change']"
-        >
-          <a-select
-            v-model:value="linkForm.category"
-            placeholder="Select category"
-          >
-            <a-select-option 
-              v-for="category in linkCategories" 
-              :key="category" 
-              :value="category"
+        <video
+          v-else-if="selectedAsset?.type === 'video'"
+          :src="selectedAsset?.url"
+          controls
+          class="preview-video"
+        ></video>
+      </a-modal>
+
+      <!-- Upload Modal -->
+      <a-modal
+        v-model:open="uploadModalVisible"
+        :title="`Upload ${activeTab === 'images' ? 'Images' : 'Videos'}`"
+        @ok="handleUploadOk"
+        @cancel="handleUploadCancel"
+        :okButtonProps="{ 
+          disabled: !uploadFile || !isMediaFormValid,
+          loading: uploading
+        }"
+      >
+        <div class="upload-container">
+          <div v-if="!uploadFile" class="upload-area" @click="triggerFileInput">
+            <upload-outlined class="upload-icon" />
+            <p>Click or drag file to upload</p>
+            <p class="upload-hint">
+              {{ activeTab === 'images' ? 'Supports JPG, PNG, WebP formats' : 'Supports MP4 format' }}
+            </p>
+          </div>
+          
+          <template v-else>
+            <div class="preview-container">
+              <div class="preview-wrapper">
+                <img
+                  v-if="activeTab === 'images' && uploadFile"
+                  :src="previewUrl"
+                  class="upload-preview"
+                />
+                <video
+                  v-if="activeTab === 'videos' && uploadFile"
+                  :src="previewUrl"
+                  controls
+                  class="upload-preview"
+                ></video>
+              </div>
+            </div>
+
+            <!-- Add form for name and description -->
+            <a-form
+              :model="mediaForm"
+              :rules="mediaFormRules"
+              ref="mediaFormRef"
+              layout="vertical"
+              class="media-form"
             >
-              {{ category }}
-            </a-select-option>
-          </a-select>
-        </a-form-item>
-      </a-form>
-    </a-modal>
+              <a-form-item 
+                name="mediaName" 
+                label="Name"
+                :validateTrigger="['blur', 'change']"
+              >
+                <a-input 
+                  v-model:value="mediaForm.mediaName" 
+                  placeholder="Enter file name"
+                  :maxLength="50"
+                />
+              </a-form-item>
+              
+              <a-form-item 
+                name="description" 
+                label="Description"
+              >
+                <a-textarea 
+                  v-model:value="mediaForm.description" 
+                  placeholder="Enter description (optional)"
+                  :maxLength="200"
+                  :rows="3"
+                />
+              </a-form-item>
+            </a-form>
 
-    <!-- Add Edit Modal -->
-    <a-modal
-      v-model:open="editModalVisible"
-      title="Edit Asset"
-      @ok="handleEditOk"
-      @cancel="handleEditCancel"
-      :okButtonProps="{ 
-        disabled: !isEditFormValid,
-        loading: editSubmitting
-      }"
-    >
-      <a-form
-        :model="editForm"
-        :rules="mediaFormRules"
-        ref="editFormRef"
-        layout="vertical"
-        class="media-form"
+            <div class="preview-actions">
+              <a-button type="primary" danger @click="removeUpload">
+                <delete-outlined /> Remove
+              </a-button>
+            </div>
+          </template>
+          
+          <input
+            type="file"
+            ref="fileInput"
+            :accept="activeTab === 'images' ? 'image/*' : 'video/mp4'"
+            style="display: none"
+            @change="handleFileChange"
+          />
+        </div>
+      </a-modal>
+
+      <!-- Add Link Modal -->
+      <a-modal
+        v-model:open="linkModalVisible"
+        :title="(activeTab === 'button-links' ? 'Button ' : 'Internal ') + (editingLink || editingButtonLink ? 'Edit' : 'Add') + ' Link'"
+        @ok="handleLinkModalOk" 
+        @cancel="handleLinkModalCancel"
+        :okButtonProps="{ 
+          disabled: !isLinkFormValid,
+          loading: linkSubmitting
+        }"
       >
-        <a-form-item 
-          name="mediaName" 
-          label="Name"
-          :validateTrigger="['blur', 'change']"
+        <a-form
+          :model="linkForm"
+          :rules="linkFormRules"
+          ref="linkFormRef"
+          layout="vertical"
         >
-          <a-input 
-            v-model:value="editForm.mediaName" 
-            placeholder="Enter file name"
-            :maxLength="50"
-          />
-        </a-form-item>
-        
-        <a-form-item 
-          name="description" 
-          label="Description"
+          <!-- Name field -->
+          <a-form-item 
+            name="name" 
+            label="Name"
+            :validateTrigger="['blur', 'change']"
+          >
+            <a-input 
+              v-model:value="linkForm.name" 
+              placeholder="Enter link name"
+              :maxLength="50"
+            />
+          </a-form-item>
+          
+          <!-- Link URL field -->
+          <a-form-item 
+            name="link" 
+            label="Link URL"
+            :validateTrigger="['blur', 'change']"
+          >
+            <a-input 
+              v-model:value="linkForm.link" 
+              placeholder="Enter link URL"
+              :maxLength="200"
+            />
+          </a-form-item>
+          
+          <!-- Description field -->
+          <a-form-item 
+            name="description" 
+            label="Description"
+            :validateTrigger="['blur', 'change']"
+          >
+            <a-textarea 
+              v-model:value="linkForm.description" 
+              placeholder="Enter link description"
+              :maxLength="500"
+              :rows="3"
+            />
+          </a-form-item>
+          
+          <!-- Category field - only show for internal links -->
+          <a-form-item 
+            v-if="activeTab === 'links'"
+            name="category" 
+            label="Category"
+            :validateTrigger="['blur', 'change']"
+          >
+            <a-select
+              v-model:value="linkForm.category"
+              placeholder="Select category"
+            >
+              <a-select-option 
+                v-for="category in linkCategories" 
+                :key="category" 
+                :value="category"
+              >
+                {{ category }}
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-form>
+      </a-modal>
+
+      <!-- Add Edit Modal -->
+      <a-modal
+        v-model:open="editModalVisible"
+        title="Edit Asset"
+        @ok="handleEditOk"
+        @cancel="handleEditCancel"
+        :okButtonProps="{ 
+          disabled: !isEditFormValid,
+          loading: editSubmitting
+        }"
+      >
+        <a-form
+          :model="editForm"
+          :rules="mediaFormRules"
+          ref="editFormRef"
+          layout="vertical"
+          class="media-form"
         >
-          <a-textarea 
-            v-model:value="editForm.description" 
-            placeholder="Enter description (optional)"
-            :maxLength="200"
-            :rows="3"
-          />
-        </a-form-item>
-      </a-form>
-    </a-modal>
-    </template>
-    
-    <template v-else>
-      <no-site-configured />
-    </template>
-  </a-spin>
+          <a-form-item 
+            name="mediaName" 
+            label="Name"
+            :validateTrigger="['blur', 'change']"
+          >
+            <a-input 
+              v-model:value="editForm.mediaName" 
+              placeholder="Enter file name"
+              :maxLength="50"
+            />
+          </a-form-item>
+          
+          <a-form-item 
+            name="description" 
+            label="Description"
+          >
+            <a-textarea 
+              v-model:value="editForm.description" 
+              placeholder="Enter description (optional)"
+              :maxLength="200"
+              :rows="3"
+            />
+          </a-form-item>
+        </a-form>
+      </a-modal>
+      </template>
+      
+      <template v-else>
+        <no-site-configured />
+      </template>
+    </a-spin>
   </page-layout>
 </template>
 

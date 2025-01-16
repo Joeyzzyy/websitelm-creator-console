@@ -4,808 +4,806 @@
     description="Plan and generate content strategically"
     icon="🎯"
   >
-    
-    <!-- Domain Not Configured Notice -->
-    <template v-if="!domainConfigured">
-      <no-site-configured />
-    </template>
+    <a-spin :spinning="loading">
+      <template v-if="domainConfigured">
+        <template v-if="analysisState !== 'finished'">
+          <div class="analysis-loading-state">
+            <a-card class="loading-card">
+              <!-- Not Started State -->
+              <template v-if="analysisState === 'not_started'">
+                <div class="loading-content">
+                  <LoadingOutlined class="analysis-icon" spin />
+                  <h2>Preparing Analysis</h2>
+                  <p>Collecting data from SEMrush and Ahrefs...</p>
+                </div>
+              </template>
 
-    <!-- Main Content (Only shown when domain is configured) -->
-    <template v-else>
-      <!-- Analysis States -->
-      <template v-if="analysisState !== 'finished'">
-        <div class="analysis-loading-state">
-          <a-card class="loading-card">
-            <!-- Not Started State -->
-            <template v-if="analysisState === 'not_started'">
-              <div class="loading-content">
-                <LoadingOutlined class="analysis-icon" spin />
-                <h2>Preparing Analysis</h2>
-                <p>Collecting data from SEMrush and Ahrefs...</p>
-              </div>
-            </template>
-
-            <!-- Processing State -->
-            <template v-if="analysisState === 'processing'">
-              <div class="loading-content">
-                <LoadingOutlined class="analysis-icon" spin />
-                <h2>Analysis in Progress</h2>
-                
-                <!-- Show current tasks -->
-                <div v-for="task in currentTasks" :key="task.taskName" class="task-item">
-                  <div class="task-header">
-                    <span>{{ task.taskName }}</span>
-                    <span>{{ task.status }}</span>
-                  </div>
+              <!-- Processing State -->
+              <template v-if="analysisState === 'processing'">
+                <div class="loading-content">
+                  <LoadingOutlined class="analysis-icon" spin />
+                  <h2>Analysis in Progress</h2>
                   
-                  <!-- Show progress if available -->
-                  <template v-if="task.progress">
-                    <a-progress 
-                      :percent="getProgressPercent(task.progress)"
-                      :format="() => `${task.progress.current}/${task.progress.total}`"
-                    />
-                  </template>
-                  
-                  <!-- Show timing info -->
-                  <div class="task-timing">
-                    <span>Started: {{ formatTime(task.startTime) }}</span>
-                    <span v-if="task.endTime">Completed: {{ formatTime(task.endTime) }}</span>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </a-card>
-        </div>
-      </template>
-
-      <template v-else>
-        <a-card class="workflow-card">
-          <div class="steps-container">
-            <a-steps :current="currentStep" direction="horizontal" class="compact-steps">
-              <a-step>
-                <template #title>
-                  <span class="step-title">1. Select Keywords</span>
-                </template>
-                <template #description>
-                  <span class="step-desc">Choose keywords from different modes</span>
-                </template>
-              </a-step>
-              <a-step>
-                <template #title>
-                  <span class="step-title">2. Generate Topic Title and Outline</span>
-                </template>
-                <template #description>
-                  <span class="step-desc">Create and optimize content structure</span>
-                </template>
-              </a-step>
-            </a-steps>
-          </div>
-        </a-card>
-
-        <!-- Main Content Area -->
-        <div class="main-content">
-          <!-- Left Panel: Keyword Selection -->
-          <div class="left-panel" :class="{ 'panel-hidden': currentStep > 0 }">
-            <!-- Mode Selector -->
-            <a-card class="mode-selector-card">
-              <div class="mode-selector-wrapper">
-                <a-radio-group v-model:value="currentMode" button-style="solid" size="large">
-                  <a-radio-button value="beginner">
-                    <template #icon><UserOutlined /></template>
-                    Beginner
-                  </a-radio-button>
-                  <a-radio-button value="expert">
-                    <template #icon><ExperimentOutlined /></template>
-                    Expert
-                  </a-radio-button>
-                </a-radio-group>
-                
-                <!-- Mode Selector moved here -->
-                <div class="header-actions">
-                  <a-button 
-                    v-if="currentStep > 0" 
-                    @click="previousStep"
-                  >
-                    <LeftOutlined /> Previous
-                  </a-button>
-                  <a-button 
-                    type="primary" 
-                    @click="nextStep"
-                    :disabled="false"
-                  >
-                    {{ currentStep === 1 ? 'Generate' : 'Next' }}
-                    <RightOutlined />
-                  </a-button>
-                </div>
-              </div>
-            </a-card>
-
-            <!-- Analytics Overview -->
-            <a-card class="analytics-card" :bordered="false">
-              <template v-if="currentMode === 'beginner'">
-                <div class="analysis-steps-container">
-                  <!-- 第一步：分析概况 -->
-                  <div class="analysis-step-horizontal">
-                    <div class="step-badge">
-                      <SearchOutlined class="step-icon" />
-                      <div class="step-number">1</div>
+                  <!-- Show current tasks -->
+                  <div v-for="task in currentTasks" :key="task.taskName" class="task-item">
+                    <div class="task-header">
+                      <span>{{ task.taskName }}</span>
+                      <span>{{ task.status }}</span>
                     </div>
-                    <div class="step-content">
-                      <div class="step-title">Analysis Overview</div>
-                      <div class="step-subtitle">We've completed a comprehensive keyword analysis</div>
-                      <a-row :gutter="[16, 16]">
-                        <a-col :span="12">
-                          <div class="stat-item">
-                            <div class="stat-label">We've analyzed</div>
-                            <div class="stat-value compact">{{ overviewData.totalKeywordsAnalyzed }} keywords</div>
-                          </div>
-                        </a-col>
-                        <a-col :span="12">
-                          <div class="stat-item">
-                            <div class="stat-label">Compared your site with</div>
-                            <div class="stat-value compact">{{ overviewData.totalTopPagesAnalyzed }} top pages from your competitors</div>
-                          </div>
-                        </a-col>
-                      </a-row>
+                    
+                    <!-- Show progress if available -->
+                    <template v-if="task.progress">
+                      <a-progress 
+                        :percent="getProgressPercent(task.progress)"
+                        :format="() => `${task.progress.current}/${task.progress.total}`"
+                      />
+                    </template>
+                    
+                    <!-- Show timing info -->
+                    <div class="task-timing">
+                      <span>Started: {{ formatTime(task.startTime) }}</span>
+                      <span v-if="task.endTime">Completed: {{ formatTime(task.endTime) }}</span>
                     </div>
-                  </div>
-
-                  <!-- 第二步：发现的问题 -->
-                  <div class="analysis-step-horizontal">
-                    <div class="step-badge">
-                      <BulbOutlined class="step-icon" />
-                      <div class="step-number">2</div>
-                    </div>
-                    <div class="step-content">
-                      <div class="step-title">What We Found</div>
-                      <div class="step-subtitle">Here's what our analysis revealed about your keyword coverage</div>
-                      <div class="difference-tags">
-                        <a-tag color="red">
-                          {{overviewData.absence}} keywords you're missing
-                        </a-tag>
-                        <!-- <a-tag color="orange">
-                          {{overviewData.weak}} keywords need improvement
-                        </a-tag> -->
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- 第三步：建议行动 -->
-                  <div class="analysis-step-horizontal">
-                    <div class="step-badge">
-                      <ThunderboltOutlined class="step-icon" />
-                      <div class="step-number">3</div>
-                    </div>
-                    <div class="step-content">
-                      <div class="step-title">Recommended Actions</div>
-                      <div class="step-subtitle">We've prioritized keywords based on potential impact and effort</div>
-                      <div class="step-description">
-                        <CheckCircleOutlined class="action-icon" /> Review and select keywords below
-                        <ArrowRightOutlined class="arrow-icon" /> Focus on P0 (Quick Wins) first
-                        <ArrowRightOutlined class="arrow-icon" /> Then move to higher effort opportunities
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- 添加新的引导部分 -->
-                <div class="next-step-guide">
-                  <div class="guide-content">
-                    <ArrowDownOutlined class="guide-arrow" />
-                    <div class="guide-text">
-                      <div class="guide-title">Ready to get started?</div>
-                      <div class="guide-description">Review our recommended keywords below and select the ones you want to target</div>
-                    </div>
-                  </div>
-                  <div class="guide-decorative-arrows">
-                    <div class="decorative-arrow"></div>
-                    <div class="decorative-arrow"></div>
-                    <div class="decorative-arrow"></div>
                   </div>
                 </div>
               </template>
-              <!-- expert 模式下不显示任何内容 -->
             </a-card>
+          </div>
+        </template>
 
-            <!-- Selection Status -->
-            <a-card 
-              v-if="selectedKeywords.length"
-              class="selection-card"
-              :bordered="false"
-            >
-              <a-space direction="vertical" style="width: 100%">
-                <div class="selection-header">
-                  <span class="selection-count">
-                    {{ selectedKeywords.length }} keywords selected
-                  </span>
-                  <a-space>
-                    <a-button type="link" @click="clearSelection">
-                      Clear All
+        <template v-else>
+          <a-card class="workflow-card">
+            <div class="steps-container">
+              <a-steps :current="currentStep" direction="horizontal" class="compact-steps">
+                <a-step>
+                  <template #title>
+                    <span class="step-title">1. Select Keywords</span>
+                  </template>
+                  <template #description>
+                    <span class="step-desc">Choose keywords from different modes</span>
+                  </template>
+                </a-step>
+                <a-step>
+                  <template #title>
+                    <span class="step-title">2. Generate Topic Title and Outline</span>
+                  </template>
+                  <template #description>
+                    <span class="step-desc">Create and optimize content structure</span>
+                  </template>
+                </a-step>
+              </a-steps>
+            </div>
+          </a-card>
+
+          <!-- Main Content Area -->
+          <div class="main-content">
+            <!-- Left Panel: Keyword Selection -->
+            <div class="left-panel" :class="{ 'panel-hidden': currentStep > 0 }">
+              <!-- Mode Selector -->
+              <a-card class="mode-selector-card">
+                <div class="mode-selector-wrapper">
+                  <a-radio-group v-model:value="currentMode" button-style="solid" size="large">
+                    <a-radio-button value="beginner">
+                      <template #icon><UserOutlined /></template>
+                      Beginner
+                    </a-radio-button>
+                    <a-radio-button value="expert">
+                      <template #icon><ExperimentOutlined /></template>
+                      Expert
+                    </a-radio-button>
+                  </a-radio-group>
+                  
+                  <!-- Mode Selector moved here -->
+                  <div class="header-actions">
+                    <a-button 
+                      v-if="currentStep > 0" 
+                      @click="previousStep"
+                    >
+                      <LeftOutlined /> Previous
                     </a-button>
                     <a-button 
-                      v-if="selectedKeywords.length"
-                      @click="showSelectedKeywords"
-                    >View Selected ({{ selectedKeywords.length }})
-                    </a-button>
-                  </a-space>
-                </div>
-                <a-divider style="margin: 12px 0" />
-                <!-- Selected keywords list -->
-              </a-space>
-            </a-card>
-
-            <!-- Keyword Selection Component -->
-            <div v-if="currentMode === 'beginner'" class="beginner-mode">
-              <!-- 选中状态提示 -->
-              <a-alert
-                v-if="selectedKeywords.length === 0"
-                message="Selected Keywords: 0"
-                type="info"
-                class="selection-alert"
-              />
-
-              <!-- 新手友好区域 - 两列布局 -->
-              <a-row :gutter="[24, 24]" class="beginner-content">
-                <!-- System Recommendations 列 -->
-                <a-col :span="12">
-                  <a-card title="Keywords From Comparison" class="beginner-card">
-                    <p class="recommendation-text">We analyzed and prioritized keywords by opportunity:</p>
-                    <a-tabs 
-                      v-model:activeKey="currentPriority"
-                      @change="handleTabChange"
+                      type="primary" 
+                      @click="nextStep"
+                      :disabled="false"
                     >
-                      <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
-                        <div class="priority-description">{{ priority.description }}</div>
-                        <a-list
-                          :data-source="getKeywordsByPriority(recommendedKeywords, priority.level)"
-                          size="small"
-                          class="keywords-list"
-                        >
-                          <template #renderItem="{ item }">
-                            <a-list-item>
-                              <div class="keyword-item">
-                                <a-space align="start" class="keyword-header">
-                                  <a-checkbox 
-                                    v-model:checked="item.selected"
-                                    @change="(checked) => handleKeywordSelect(item, checked)"
-                                  >
-                                    "{{ item.keyword }}"
-                                  </a-checkbox>
-                                  <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
-                                  <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                                  <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                                  <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
-                                </a-space>
-                                
-                                <!-- 添加推荐理由显示 -->
-                                <div class="keyword-reason" v-if="item.reason">
-                                  <BulbOutlined />
-                                  <div class="reason-content">
-                                    <span class="reason-highlight">Reason: </span>
-                                    <span class="reason-value">{{ item.reason }}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </a-list-item>
-                          </template>
-                        </a-list>
-                        <!-- 添加分页器 -->
-                        <div class="pagination-wrapper">
-                          <a-pagination
-                            v-model:current="recommendedPagination.current"
-                            :total="recommendedPagination.total"
-                            :pageSize="recommendedPagination.pageSize"
-                            :show-total="(total) => `Total ${total} items`"
-                            @change="(page, pageSize) => handleComparisonPaginationChange(priority.level, page, pageSize)"
-                          />
-                        </div>
-                      </a-tab-pane>
-                    </a-tabs>
-                  </a-card>
-                </a-col>
-
-                <!-- Top Pages Optimization Tips 列 -->
-                <a-col :span="12">
-                  <a-card title="Keywords From Top Pages Optimization" class="optimization-card">
-                    <p class="recommendation-text">Optimization opportunities by priority:</p>
-                    
-                    <a-tabs 
-                      v-model:activeKey="currentPagePriority"
-                      @change="handlePageTabChange"
-                      class="compact-tabs"
-                      >
-                      <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
-                        <div class="priority-description">{{ priority.description }}</div>
-                        <a-list
-                          :data-source="getKeywordsByPriority(pageKeywords, priority.level)"
-                          size="small"
-                          class="keywords-list"
-                        >
-                          <template #renderItem="{ item }">
-                            <a-list-item>
-                              <div class="keyword-item">
-                                <a-space align="start" class="keyword-header">
-                                  <a-checkbox 
-                                    v-model:checked="item.selected"
-                                    @change="(checked) => handleKeywordSelect(item, checked)"
-                                  >
-                                    "{{ item.keyword }}"
-                                  </a-checkbox>
-                                  <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
-                                  <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                                  <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                                  <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
-                                </a-space>
-                                <!-- 添加 reasoning 显示 -->
-                                <div class="keyword-reason" v-if="item.reason">
-                                  <BulbOutlined />
-                                  <div class="reason-content">
-                                    <span class="reason-highlight">Reason: </span>
-                                    <span class="reason-value">{{ item.reason }}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </a-list-item>
-                          </template>
-                        </a-list>
-                        <div class="pagination-wrapper">
-                          <a-pagination
-                            v-model:current="pagePagination.current"
-                            :total="pagePagination.total"
-                            :pageSize="pagePagination.pageSize"
-                            :show-total="(total) => `Total ${total} items`"
-                            @change="(page, pageSize) => handleTopPagesPaginationChange(priority.level, page, pageSize)"
-                          />
-                        </div>
-                      </a-tab-pane>
-                    </a-tabs>
-                  </a-card>
-                </a-col>
-              </a-row>
-            </div>
-
-            <!-- 在 expert 模式下的内容 -->
-            <template v-else>
-              <!-- A. 高级筛选器 -->
-              <a-card class="filter-card" :bordered="false">
-                <div class="advanced-filters">
-                  <!-- 将所有控件靠左对齐 -->
-                  <div class="filter-header">
-                    <a-space>
-                      <a-select
-                        v-model:value="currentPreset"
-                        style="width: 200px"
-                        placeholder="Select saved filter"
-                        @change="handlePresetChange"
-                      >
-                        <a-select-option v-for="preset in savedPresets" :key="preset.id" :value="preset.id">
-                          {{ preset.name }}
-                        </a-select-option>
-                      </a-select>
-                      
-                      <a-button type="primary" @click="addFilter">
-                        Add Filter
-                      </a-button>
-                      <a-button @click="clearFilters">Clear All</a-button>
-                      <a-button @click="showSaveModal">Save as Preset</a-button>
-                    </a-space>
-                  </div>
-
-                  <!-- 筛选条件网格布局 -->
-                  <div class="filter-rows">
-                    <div class="filter-row">
-                      <template v-for="(filter, index) in filters" :key="index">
-                        <!-- 添加 & 符号 -->
-                        <span v-if="index > 0" class="filter-connector">&</span>
-                        
-                        <div class="filter-item">
-                          <a-select 
-                            v-model:value="filter.field" 
-                            class="ant-select-field"
-                            @change="() => handleFieldChange(index)"
-                          >
-                            <a-select-option value="kd">KD</a-select-option>
-                            <a-select-option value="volume">Volume</a-select-option>
-                            <a-select-option value="cpc">CPC</a-select-option>
-                            <a-select-option value="coverage">Coverage</a-select-option>
-                            <a-select-option value="relevance">Relevance</a-select-option>
-                            <a-select-option value="krs">KRS</a-select-option>
-                            <a-select-option value="source">Source</a-select-option>
-                          </a-select>
-                          
-                          <template v-if="filter.field === 'source'">
-                            <a-select
-                              v-model:value="filter.value"
-                              class="source-value-selector"
-                            >
-                              <a-select-option value="difference">From Difference</a-select-option>
-                              <a-select-option value="competitor">From Competitor</a-select-option>
-                            </a-select>
-                          </template>
-                          <template v-else>
-                            <a-select 
-                              v-model:value="filter.operator" 
-                              class="ant-select-operator"
-                            >
-                              <a-select-option value="<"><</a-select-option>
-                              <a-select-option value="<=">≤</a-select-option>
-                              <a-select-option value=">">></a-select-option>
-                              <a-select-option value=">=">≥</a-select-option>
-                              <a-select-option value="==">=</a-select-option>
-                              <a-select-option value="!=">≠</a-select-option>
-                            </a-select>
-                            <a-input-number 
-                              v-model:value="filter.value" 
-                              class="ant-input-value"
-                            />
-                          </template>
-
-                          <a-button 
-                            type="text" 
-                            danger
-                            @click="removeFilter(index)"
-                          >
-                            <DeleteOutlined />
-                          </a-button>
-                        </div>
-                      </template>
-                    </div>
+                      {{ currentStep === 1 ? 'Generate' : 'Next' }}
+                      <RightOutlined />
+                    </a-button>
                   </div>
                 </div>
               </a-card>
 
-              <!-- B. 详细差异 & Top Pages 表格 -->
-              <a-card class="table-card" :bordered="false">
-                <div class="table-wrapper">
-                  <a-table
-                    :data-source="filteredKeywords"
-                    :columns="columns"
-                    :row-selection="rowSelection"
-                    :pagination="pagination"
-                    :scroll="{ x: 'max-content' }"
-                    @change="handleTableChange"
-                  >
-                    <template #expandedRowRender="{ record }">
-                      <div class="expanded-row">
-                        <!-- 对应页面部分 -->
-                        <div class="expanded-section">
-                          <div class="section-header">
-                            <LinkOutlined class="section-icon" />
-                            <span class="section-title">Corresponding Pages</span>
-                          </div>
-                          <div class="section-content">
-                            <div class="page-list">
-                              <a-tag 
-                                v-for="page in record.pages" 
-                                :key="page.url"
-                                class="page-tag"
-                              >
-                                <LinkOutlined class="page-icon" />
-                                {{ page.url }}
-                              </a-tag>
+              <!-- Analytics Overview -->
+              <a-card class="analytics-card" :bordered="false">
+                <template v-if="currentMode === 'beginner'">
+                  <div class="analysis-steps-container">
+                    <!-- 第一步：分析概况 -->
+                    <div class="analysis-step-horizontal">
+                      <div class="step-badge">
+                        <SearchOutlined class="step-icon" />
+                        <div class="step-number">1</div>
+                      </div>
+                      <div class="step-content">
+                        <div class="step-title">Analysis Overview</div>
+                        <div class="step-subtitle">We've completed a comprehensive keyword analysis</div>
+                        <a-row :gutter="[16, 16]">
+                          <a-col :span="12">
+                            <div class="stat-item">
+                              <div class="stat-label">We've analyzed</div>
+                              <div class="stat-value compact">{{ overviewData.totalKeywordsAnalyzed }} keywords</div>
                             </div>
-                          </div>
-                        </div>
+                          </a-col>
+                          <a-col :span="12">
+                            <div class="stat-item">
+                              <div class="stat-label">Compared your site with</div>
+                              <div class="stat-value compact">{{ overviewData.totalTopPagesAnalyzed }} top pages from your competitors</div>
+                            </div>
+                          </a-col>
+                        </a-row>
+                      </div>
+                    </div>
 
-                        <!-- 竞争对手排名对比部分 -->
-                        <div class="expanded-section">
-                          <div class="section-header">
-                            <LineChartOutlined class="section-icon" />
-                            <span class="section-title">Competitor Ranking Comparison</span>
-                          </div>
-                          <div class="section-content">
-                            <a-table
-                              :data-source="record.competitors"
-                              :columns="competitorColumns"
-                              :pagination="false"
-                              size="small"
-                              class="competitor-table"
-                            >
-                              <template #bodyCell="{ column, text }">
-                                <template v-if="column.dataIndex === 'rank'">
-                                  <span class="rank-cell">
-                                    <TrophyOutlined class="rank-icon" />
-                                    <span :class="['rank-number', getRankClass(text)]">#{{ text }}</span>
-                                  </span>
-                                </template>
-                                <template v-else-if="column.dataIndex === 'url'">
-                                  <a :href="text" target="_blank" class="url-link">
-                                    {{ text }}
-                                    <ExportOutlined class="url-icon" />
-                                  </a>
-                                </template>
-                                <template v-else>
-                                  {{ text }}
-                                </template>
-                              </template>
-                            </a-table>
-                          </div>
+                    <!-- 第二步：发现的问题 -->
+                    <div class="analysis-step-horizontal">
+                      <div class="step-badge">
+                        <BulbOutlined class="step-icon" />
+                        <div class="step-number">2</div>
+                      </div>
+                      <div class="step-content">
+                        <div class="step-title">What We Found</div>
+                        <div class="step-subtitle">Here's what our analysis revealed about your keyword coverage</div>
+                        <div class="difference-tags">
+                          <a-tag color="red">
+                            {{overviewData.absence}} keywords you're missing
+                          </a-tag>
+                          <!-- <a-tag color="orange">
+                            {{overviewData.weak}} keywords need improvement
+                          </a-tag> -->
                         </div>
                       </div>
-                    </template>
-                  </a-table>
-                </div>
-              </a-card>
-            </template>
-          </div>
+                    </div>
 
-          <!-- 步骤二的内容区域 -->
-          <div v-show="currentStep > 0">
-            <!-- 顶部操作栏 -->
-            <div class="step-actions">
-              <a-space>
-                <a-button @click="previousStep">
-                  <LeftOutlined /> Previous
-                </a-button>
-                <a-button 
-                  v-if="hasGenerated"
-                  type="primary"
-                  :loading="isGenerating"
-                  :disabled="!selectedKeywords.length"
-                  @click="generateContent"
-                >
-                  <ThunderboltOutlined /> Regenerate Content Plan
-                </a-button>
-              </a-space>
-            </div>
+                    <!-- 第三步：建议行动 -->
+                    <div class="analysis-step-horizontal">
+                      <div class="step-badge">
+                        <ThunderboltOutlined class="step-icon" />
+                        <div class="step-number">3</div>
+                      </div>
+                      <div class="step-content">
+                        <div class="step-title">Recommended Actions</div>
+                        <div class="step-subtitle">We've prioritized keywords based on potential impact and effort</div>
+                        <div class="step-description">
+                          <CheckCircleOutlined class="action-icon" /> Review and select keywords below
+                          <ArrowRightOutlined class="arrow-icon" /> Focus on P0 (Quick Wins) first
+                          <ArrowRightOutlined class="arrow-icon" /> Then move to higher effort opportunities
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-            <!-- 内容区域 -->
-            <div class="workspace-layout">
-              <!-- 左侧已选关键词列表 -->
-              <a-card 
-                class="selected-keywords-card"
-                :bordered="false"
-              >
-                <template #title>
-                  <div class="card-title">
-                    <CheckCircleOutlined /> Selected Keywords
-                    <a-tag>{{ selectedKeywords.length }} keywords</a-tag>
+                  <!-- 添加新的引导部分 -->
+                  <div class="next-step-guide">
+                    <div class="guide-content">
+                      <ArrowDownOutlined class="guide-arrow" />
+                      <div class="guide-text">
+                        <div class="guide-title">Ready to get started?</div>
+                        <div class="guide-description">Review our recommended keywords below and select the ones you want to target</div>
+                      </div>
+                    </div>
+                    <div class="guide-decorative-arrows">
+                      <div class="decorative-arrow"></div>
+                      <div class="decorative-arrow"></div>
+                      <div class="decorative-arrow"></div>
+                    </div>
                   </div>
                 </template>
-
-                <a-list
-                  :data-source="selectedKeywords"
-                  size="small"
-                  class="selected-keywords-list"
-                >
-                  <template #renderItem="{ item }">
-                    <a-list-item>
-                      <div class="selected-keyword-item">
-                        <div class="keyword-text">"{{ item.keyword }}"</div>
-                        <div class="keyword-metrics">
-                          <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
-                          <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                          <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                        </div>
-                      </div>
-                    </a-list-item>
-                  </template>
-                </a-list>
+                <!-- expert 模式下不显示任何内容 -->
               </a-card>
 
-              <!-- 添加纵向导航 -->
-              <div class="vertical-nav">
-                <a-anchor :affix="false" :bounds="50" :items="anchorItems" />
+              <!-- Selection Status -->
+              <a-card 
+                v-if="selectedKeywords.length"
+                class="selection-card"
+                :bordered="false"
+              >
+                <a-space direction="vertical" style="width: 100%">
+                  <div class="selection-header">
+                    <span class="selection-count">
+                      {{ selectedKeywords.length }} keywords selected
+                    </span>
+                    <a-space>
+                      <a-button type="link" @click="clearSelection">
+                        Clear All
+                      </a-button>
+                      <a-button 
+                        v-if="selectedKeywords.length"
+                        @click="showSelectedKeywords"
+                      >View Selected ({{ selectedKeywords.length }})
+                      </a-button>
+                    </a-space>
+                  </div>
+                  <a-divider style="margin: 12px 0" />
+                  <!-- Selected keywords list -->
+                </a-space>
+              </a-card>
+
+              <!-- Keyword Selection Component -->
+              <div v-if="currentMode === 'beginner'" class="beginner-mode">
+                <!-- 选中状态提示 -->
+                <a-alert
+                  v-if="selectedKeywords.length === 0"
+                  message="Selected Keywords: 0"
+                  type="info"
+                  class="selection-alert"
+                />
+
+                <!-- 新手友好区域 - 两列布局 -->
+                <a-row :gutter="[24, 24]" class="beginner-content">
+                  <!-- System Recommendations 列 -->
+                  <a-col :span="12">
+                    <a-card title="Keywords From Comparison" class="beginner-card">
+                      <p class="recommendation-text">We analyzed and prioritized keywords by opportunity:</p>
+                      <a-tabs 
+                        v-model:activeKey="currentPriority"
+                        @change="handleTabChange"
+                      >
+                        <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
+                          <div class="priority-description">{{ priority.description }}</div>
+                          <a-list
+                            :data-source="getKeywordsByPriority(recommendedKeywords, priority.level)"
+                            size="small"
+                            class="keywords-list"
+                          >
+                            <template #renderItem="{ item }">
+                              <a-list-item>
+                                <div class="keyword-item">
+                                  <a-space align="start" class="keyword-header">
+                                    <a-checkbox 
+                                      v-model:checked="item.selected"
+                                      @change="(checked) => handleKeywordSelect(item, checked)"
+                                    >
+                                      "{{ item.keyword }}"
+                                    </a-checkbox>
+                                    <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
+                                    <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                                    <a-tag color="purple">Vol={{ item.volume }}</a-tag>
+                                    <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
+                                  </a-space>
+                                  
+                                  <!-- 添加推荐理由显示 -->
+                                  <div class="keyword-reason" v-if="item.reason">
+                                    <BulbOutlined />
+                                    <div class="reason-content">
+                                      <span class="reason-highlight">Reason: </span>
+                                      <span class="reason-value">{{ item.reason }}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </a-list-item>
+                            </template>
+                          </a-list>
+                          <!-- 添加分页器 -->
+                          <div class="pagination-wrapper">
+                            <a-pagination
+                              v-model:current="recommendedPagination.current"
+                              :total="recommendedPagination.total"
+                              :pageSize="recommendedPagination.pageSize"
+                              :show-total="(total) => `Total ${total} items`"
+                              @change="(page, pageSize) => handleComparisonPaginationChange(priority.level, page, pageSize)"
+                            />
+                          </div>
+                        </a-tab-pane>
+                      </a-tabs>
+                    </a-card>
+                  </a-col>
+
+                  <!-- Top Pages Optimization Tips 列 -->
+                  <a-col :span="12">
+                    <a-card title="Keywords From Top Pages Optimization" class="optimization-card">
+                      <p class="recommendation-text">Optimization opportunities by priority:</p>
+                      
+                      <a-tabs 
+                        v-model:activeKey="currentPagePriority"
+                        @change="handlePageTabChange"
+                        class="compact-tabs"
+                        >
+                        <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
+                          <div class="priority-description">{{ priority.description }}</div>
+                          <a-list
+                            :data-source="getKeywordsByPriority(pageKeywords, priority.level)"
+                            size="small"
+                            class="keywords-list"
+                          >
+                            <template #renderItem="{ item }">
+                              <a-list-item>
+                                <div class="keyword-item">
+                                  <a-space align="start" class="keyword-header">
+                                    <a-checkbox 
+                                      v-model:checked="item.selected"
+                                      @change="(checked) => handleKeywordSelect(item, checked)"
+                                    >
+                                      "{{ item.keyword }}"
+                                    </a-checkbox>
+                                    <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
+                                    <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                                    <a-tag color="purple">Vol={{ item.volume }}</a-tag>
+                                    <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
+                                  </a-space>
+                                  <!-- 添加 reasoning 显示 -->
+                                  <div class="keyword-reason" v-if="item.reason">
+                                    <BulbOutlined />
+                                    <div class="reason-content">
+                                      <span class="reason-highlight">Reason: </span>
+                                      <span class="reason-value">{{ item.reason }}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </a-list-item>
+                            </template>
+                          </a-list>
+                          <div class="pagination-wrapper">
+                            <a-pagination
+                              v-model:current="pagePagination.current"
+                              :total="pagePagination.total"
+                              :pageSize="pagePagination.pageSize"
+                              :show-total="(total) => `Total ${total} items`"
+                              @change="(page, pageSize) => handleTopPagesPaginationChange(priority.level, page, pageSize)"
+                            />
+                          </div>
+                        </a-tab-pane>
+                      </a-tabs>
+                    </a-card>
+                  </a-col>
+                </a-row>
               </div>
 
-              <!-- 右侧生成内容区域 -->
-              <div class="generation-flow">
-                <!-- 添加引导按钮 -->
-                <div v-if="!hasGenerated" class="empty-state">
-                  <div class="empty-content">
-                    <ThunderboltOutlined class="empty-icon" />
-                    <div class="empty-title">Ready to create your content plan?</div>
-                    <div class="empty-description">
-                      Generate a strategic content plan based on your {{ selectedKeywords.length }} selected keywords
-                    </div>
-                    <a-button 
-                      type="primary"
-                      size="large"
-                      :loading="isGenerating"
-                      :disabled="!selectedKeywords.length"
-                      @click="generateContent"
-                    >
-                      <ThunderboltOutlined /> Generate Content Plan
-                    </a-button>
-                  </div>
-                </div>
-
-                <!-- 现有的内容卡片 -->
-                <template v-else>
-                  <!-- 2. Topic 建议 -->
-                  <a-card v-if="suggestedTopics.length" id="suggested-topics" class="result-card">
-                    <template #title>
-                      <div class="card-title">
-                        <CompassOutlined /> Content Strategy & Topics
-                      </div>
-                    </template>
-                    
-                    <div class="content-topics-list">
-                      <div v-for="topic in suggestedTopics" :key="topic.id" class="content-topic-card">
-                        <a-checkbox 
-                          v-model:checked="topic.selected"
-                          @change="(checked) => handleTopicSelect(topic, checked)"
+              <!-- 在 expert 模式下的内容 -->
+              <template v-else>
+                <!-- A. 高级筛选器 -->
+                <a-card class="filter-card" :bordered="false">
+                  <div class="advanced-filters">
+                    <!-- 将所有控件靠左对齐 -->
+                    <div class="filter-header">
+                      <a-space>
+                        <a-select
+                          v-model:value="currentPreset"
+                          style="width: 200px"
+                          placeholder="Select saved filter"
+                          @change="handlePresetChange"
                         >
-                          <div class="content-topic-header">
-                            <div class="content-topic-title">{{ topic.main }}</div>
-                            <div class="content-topic-tags">
-                              <a-tag :color="topic.pageType.color">{{ topic.pageType.name }}</a-tag>
-                              <a-tag :color="topic.intent.color">{{ topic.intent.name }}</a-tag>
-                            </div>
-                          </div>
+                          <a-select-option v-for="preset in savedPresets" :key="preset.id" :value="preset.id">
+                            {{ preset.name }}
+                          </a-select-option>
+                        </a-select>
+                        
+                        <a-button type="primary" @click="addFilter">
+                          Add Filter
+                        </a-button>
+                        <a-button @click="clearFilters">Clear All</a-button>
+                        <a-button @click="showSaveModal">Save as Preset</a-button>
+                      </a-space>
+                    </div>
+
+                    <!-- 筛选条件网格布局 -->
+                    <div class="filter-rows">
+                      <div class="filter-row">
+                        <template v-for="(filter, index) in filters" :key="index">
+                          <!-- 添加 & 符号 -->
+                          <span v-if="index > 0" class="filter-connector">&</span>
                           
-                          <div class="content-topic-body">
-                            <div class="content-topic-section">
-                              <div class="content-section-label">User Intent</div>
-                              <div class="content-section-text">{{ topic.intent.description }}</div>
+                          <div class="filter-item">
+                            <a-select 
+                              v-model:value="filter.field" 
+                              class="ant-select-field"
+                              @change="() => handleFieldChange(index)"
+                            >
+                              <a-select-option value="kd">KD</a-select-option>
+                              <a-select-option value="volume">Volume</a-select-option>
+                              <a-select-option value="cpc">CPC</a-select-option>
+                              <a-select-option value="coverage">Coverage</a-select-option>
+                              <a-select-option value="relevance">Relevance</a-select-option>
+                              <a-select-option value="krs">KRS</a-select-option>
+                              <a-select-option value="source">Source</a-select-option>
+                            </a-select>
+                            
+                            <template v-if="filter.field === 'source'">
+                              <a-select
+                                v-model:value="filter.value"
+                                class="source-value-selector"
+                              >
+                                <a-select-option value="difference">From Difference</a-select-option>
+                                <a-select-option value="competitor">From Competitor</a-select-option>
+                              </a-select>
+                            </template>
+                            <template v-else>
+                              <a-select 
+                                v-model:value="filter.operator" 
+                                class="ant-select-operator"
+                              >
+                                <a-select-option value="<"><</a-select-option>
+                                <a-select-option value="<=">≤</a-select-option>
+                                <a-select-option value=">">></a-select-option>
+                                <a-select-option value=">=">≥</a-select-option>
+                                <a-select-option value="==">=</a-select-option>
+                                <a-select-option value="!=">≠</a-select-option>
+                              </a-select>
+                              <a-input-number 
+                                v-model:value="filter.value" 
+                                class="ant-input-value"
+                              />
+                            </template>
+
+                            <a-button 
+                              type="text" 
+                              danger
+                              @click="removeFilter(index)"
+                            >
+                              <DeleteOutlined />
+                            </a-button>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                </a-card>
+
+                <!-- B. 详细差异 & Top Pages 表格 -->
+                <a-card class="table-card" :bordered="false">
+                  <div class="table-wrapper">
+                    <a-table
+                      :data-source="filteredKeywords"
+                      :columns="columns"
+                      :row-selection="rowSelection"
+                      :pagination="pagination"
+                      :scroll="{ x: 'max-content' }"
+                      @change="handleTableChange"
+                    >
+                      <template #expandedRowRender="{ record }">
+                        <div class="expanded-row">
+                          <!-- 对应页面部分 -->
+                          <div class="expanded-section">
+                            <div class="section-header">
+                              <LinkOutlined class="section-icon" />
+                              <span class="section-title">Corresponding Pages</span>
                             </div>
-                            <div class="content-topic-section">
-                              <div class="content-section-label">Problem Solved</div>
-                              <div class="content-section-text">{{ topic.problemSolved }}</div>
-                            </div>
-                            <div class="content-topic-section">
-                              <div class="content-section-label">Related Keywords</div>
-                              <div class="content-keyword-tags">
-                                <a-tag v-for="kw in topic.targetKeywords" :key="kw" color="blue">
-                                  {{ kw }}
+                            <div class="section-content">
+                              <div class="page-list">
+                                <a-tag 
+                                  v-for="page in record.pages" 
+                                  :key="page.url"
+                                  class="page-tag"
+                                >
+                                  <LinkOutlined class="page-icon" />
+                                  {{ page.url }}
                                 </a-tag>
                               </div>
                             </div>
                           </div>
-                        </a-checkbox>
-                      </div>
+
+                          <!-- 竞争对手排名对比部分 -->
+                          <div class="expanded-section">
+                            <div class="section-header">
+                              <LineChartOutlined class="section-icon" />
+                              <span class="section-title">Competitor Ranking Comparison</span>
+                            </div>
+                            <div class="section-content">
+                              <a-table
+                                :data-source="record.competitors"
+                                :columns="competitorColumns"
+                                :pagination="false"
+                                size="small"
+                                class="competitor-table"
+                              >
+                                <template #bodyCell="{ column, text }">
+                                  <template v-if="column.dataIndex === 'rank'">
+                                    <span class="rank-cell">
+                                      <TrophyOutlined class="rank-icon" />
+                                      <span :class="['rank-number', getRankClass(text)]">#{{ text }}</span>
+                                    </span>
+                                  </template>
+                                  <template v-else-if="column.dataIndex === 'url'">
+                                    <a :href="text" target="_blank" class="url-link">
+                                      {{ text }}
+                                      <ExportOutlined class="url-icon" />
+                                    </a>
+                                  </template>
+                                  <template v-else>
+                                    {{ text }}
+                                  </template>
+                                </template>
+                              </a-table>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                    </a-table>
+                  </div>
+                </a-card>
+              </template>
+            </div>
+
+            <!-- 步骤二的内容区域 -->
+            <div v-show="currentStep > 0">
+              <!-- 顶部操作栏 -->
+              <div class="step-actions">
+                <a-space>
+                  <a-button @click="previousStep">
+                    <LeftOutlined /> Previous
+                  </a-button>
+                  <a-button 
+                    v-if="hasGenerated"
+                    type="primary"
+                    :loading="isGenerating"
+                    :disabled="!selectedKeywords.length"
+                    @click="generateContent"
+                  >
+                    <ThunderboltOutlined /> Regenerate Content Plan
+                  </a-button>
+                </a-space>
+              </div>
+
+              <!-- 内容区域 -->
+              <div class="workspace-layout">
+                <!-- 左侧已选关键词列表 -->
+                <a-card 
+                  class="selected-keywords-card"
+                  :bordered="false"
+                >
+                  <template #title>
+                    <div class="card-title">
+                      <CheckCircleOutlined /> Selected Keywords
+                      <a-tag>{{ selectedKeywords.length }} keywords</a-tag>
                     </div>
-                    
-                    <!-- 添加确认按钮 -->
-                    <div class="action-footer">
+                  </template>
+
+                  <a-list
+                    :data-source="selectedKeywords"
+                    size="small"
+                    class="selected-keywords-list"
+                  >
+                    <template #renderItem="{ item }">
+                      <a-list-item>
+                        <div class="selected-keyword-item">
+                          <div class="keyword-text">"{{ item.keyword }}"</div>
+                          <div class="keyword-metrics">
+                            <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
+                            <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                            <a-tag color="purple">Vol={{ item.volume }}</a-tag>
+                          </div>
+                        </div>
+                      </a-list-item>
+                    </template>
+                  </a-list>
+                </a-card>
+
+                <!-- 添加纵向导航 -->
+                <div class="vertical-nav">
+                  <a-anchor :affix="false" :bounds="50" :items="anchorItems" />
+                </div>
+
+                <!-- 右侧生成内容区域 -->
+                <div class="generation-flow">
+                  <!-- 添加引导按钮 -->
+                  <div v-if="!hasGenerated" class="empty-state">
+                    <div class="empty-content">
+                      <ThunderboltOutlined class="empty-icon" />
+                      <div class="empty-title">Ready to create your content plan?</div>
+                      <div class="empty-description">
+                        Generate a strategic content plan based on your {{ selectedKeywords.length }} selected keywords
+                      </div>
                       <a-button 
                         type="primary"
-                        :disabled="!selectedTopicsCount"
-                        :loading="isGeneratingTitles"
-                        @click="confirmTopics"
+                        size="large"
+                        :loading="isGenerating"
+                        :disabled="!selectedKeywords.length"
+                        @click="generateContent"
                       >
-                        Generate Titles <RightOutlined v-if="!isGeneratingTitles" />
+                        <ThunderboltOutlined /> Generate Content Plan
                       </a-button>
                     </div>
-                  </a-card>
+                  </div>
 
-                  <!-- 3. Title 建议 -->
-                  <a-card v-if="suggestedTitles.length" id="suggested-titles" class="result-card">
-                    <template #title>
-                      <div class="card-title">
-                        <FileTextOutlined /> Suggested TDK
-                      </div>
-                    </template>
-                    
-                    <div class="tdk-list">
-                      <div v-for="tdk in suggestedTitles" :key="tdk.id" class="tdk-item">
-                        <a-checkbox 
-                          v-model:checked="tdk.selected"
-                          @change="(checked) => handleTitleSelect(tdk, checked)"
-                        >
-                          <div class="tdk-content">
-                            <div class="tdk-main">
-                              <div class="tdk-section">
-                                <div class="tdk-label">Title</div>
-                                <div class="tdk-text">{{ tdk.title }}</div>
+                  <!-- 现有的内容卡片 -->
+                  <template v-else>
+                    <!-- 2. Topic 建议 -->
+                    <a-card v-if="suggestedTopics.length" id="suggested-topics" class="result-card">
+                      <template #title>
+                        <div class="card-title">
+                          <CompassOutlined /> Content Strategy & Topics
+                        </div>
+                      </template>
+                      
+                      <div class="content-topics-list">
+                        <div v-for="topic in suggestedTopics" :key="topic.id" class="content-topic-card">
+                          <a-checkbox 
+                            v-model:checked="topic.selected"
+                            @change="(checked) => handleTopicSelect(topic, checked)"
+                          >
+                            <div class="content-topic-header">
+                              <div class="content-topic-title">{{ topic.main }}</div>
+                              <div class="content-topic-tags">
+                                <a-tag :color="topic.pageType.color">{{ topic.pageType.name }}</a-tag>
+                                <a-tag :color="topic.intent.color">{{ topic.intent.name }}</a-tag>
                               </div>
-                              <div class="tdk-section">
-                                <div class="tdk-label">Description</div>
-                                <div class="tdk-text">{{ tdk.description }}</div>
+                            </div>
+                            
+                            <div class="content-topic-body">
+                              <div class="content-topic-section">
+                                <div class="content-section-label">User Intent</div>
+                                <div class="content-section-text">{{ topic.intent.description }}</div>
                               </div>
-                              <div class="tdk-section">
-                                <div class="tdk-label">Keywords</div>
-                                <div class="tdk-keywords">
-                                  <a-tag v-for="kw in tdk.keywords" :key="kw" color="blue">{{ kw }}</a-tag>
+                              <div class="content-topic-section">
+                                <div class="content-section-label">Problem Solved</div>
+                                <div class="content-section-text">{{ topic.problemSolved }}</div>
+                              </div>
+                              <div class="content-topic-section">
+                                <div class="content-section-label">Related Keywords</div>
+                                <div class="content-keyword-tags">
+                                  <a-tag v-for="kw in topic.targetKeywords" :key="kw" color="blue">
+                                    {{ kw }}
+                                  </a-tag>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        </a-checkbox>
-                      </div>
-                    </div>
-
-                    <!-- 添加操作按钮区域 -->
-                    <div class="action-footer">
-                      <a-button 
-                        type="primary"
-                        :disabled="!selectedTitlesCount"
-                        :loading="isGeneratingOutline"
-                        @click="confirmTitles"
-                      >
-                        Generate Outline <RightOutlined v-if="!isGeneratingOutline" />
-                      </a-button>
-                    </div>
-                  </a-card>
-
-                  <!-- 4. Outline -->
-                  <a-card v-if="generatedOutline" id="content-outline" class="result-card">
-                    <template #title>
-                      <div class="card-title">
-                        <OrderedListOutlined /> Content Outline
-                      </div>
-                    </template>
-                    
-                    <div class="outline-content">
-                      <div v-for="(section, index) in generatedOutline" :key="index" class="outline-section">
-                        <div class="section-header">
-                          <div class="section-title">{{ section.title }}</div>
-                          <div class="section-keywords">
-                            <a-tag v-for="keyword in section.keywords" :key="keyword" color="blue">
-                              {{ keyword }}
-                            </a-tag>
-                          </div>
-                        </div>
-                        <div class="section-points">
-                          <div v-for="(point, pIndex) in section.points" :key="pIndex" class="point-item">
-                            • {{ point }}
-                          </div>
+                          </a-checkbox>
                         </div>
                       </div>
-                    </div>
-                  </a-card>
-                </template>
+                      
+                      <!-- 添加确认按钮 -->
+                      <div class="action-footer">
+                        <a-button 
+                          type="primary"
+                          :disabled="!selectedTopicsCount"
+                          :loading="isGeneratingTitles"
+                          @click="confirmTopics"
+                        >
+                          Generate Titles <RightOutlined v-if="!isGeneratingTitles" />
+                        </a-button>
+                      </div>
+                    </a-card>
+
+                    <!-- 3. Title 建议 -->
+                    <a-card v-if="suggestedTitles.length" id="suggested-titles" class="result-card">
+                      <template #title>
+                        <div class="card-title">
+                          <FileTextOutlined /> Suggested TDK
+                        </div>
+                      </template>
+                      
+                      <div class="tdk-list">
+                        <div v-for="tdk in suggestedTitles" :key="tdk.id" class="tdk-item">
+                          <a-checkbox 
+                            v-model:checked="tdk.selected"
+                            @change="(checked) => handleTitleSelect(tdk, checked)"
+                          >
+                            <div class="tdk-content">
+                              <div class="tdk-main">
+                                <div class="tdk-section">
+                                  <div class="tdk-label">Title</div>
+                                  <div class="tdk-text">{{ tdk.title }}</div>
+                                </div>
+                                <div class="tdk-section">
+                                  <div class="tdk-label">Description</div>
+                                  <div class="tdk-text">{{ tdk.description }}</div>
+                                </div>
+                                <div class="tdk-section">
+                                  <div class="tdk-label">Keywords</div>
+                                  <div class="tdk-keywords">
+                                    <a-tag v-for="kw in tdk.keywords" :key="kw" color="blue">{{ kw }}</a-tag>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </a-checkbox>
+                        </div>
+                      </div>
+
+                      <!-- 添加操作按钮区域 -->
+                      <div class="action-footer">
+                        <a-button 
+                          type="primary"
+                          :disabled="!selectedTitlesCount"
+                          :loading="isGeneratingOutline"
+                          @click="confirmTitles"
+                        >
+                          Generate Outline <RightOutlined v-if="!isGeneratingOutline" />
+                        </a-button>
+                      </div>
+                    </a-card>
+
+                    <!-- 4. Outline -->
+                    <a-card v-if="generatedOutline" id="content-outline" class="result-card">
+                      <template #title>
+                        <div class="card-title">
+                          <OrderedListOutlined /> Content Outline
+                        </div>
+                      </template>
+                      
+                      <div class="outline-content">
+                        <div v-for="(section, index) in generatedOutline" :key="index" class="outline-section">
+                          <div class="section-header">
+                            <div class="section-title">{{ section.title }}</div>
+                            <div class="section-keywords">
+                              <a-tag v-for="keyword in section.keywords" :key="keyword" color="blue">
+                                {{ keyword }}
+                              </a-tag>
+                            </div>
+                          </div>
+                          <div class="section-points">
+                            <div v-for="(point, pIndex) in section.points" :key="pIndex" class="point-item">
+                              • {{ point }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </a-card>
+                  </template>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- 添加保存配置的模态框 -->
-        <a-modal
-          v-model:open="saveModalVisible"
-          title="Save Filter Preset"
-          @ok="saveCurrentPreset"
-        >
-          <a-input v-model:value="newPresetName" placeholder="Enter preset name" />
-        </a-modal>
-
-        <!-- Add modal for selected keywords -->
-        <a-modal
-          v-model:open="showSelectedModal"
-          title="Selected Keywords"
-          width="800px"
-          @cancel="handleModalClose"
-        >
-          <a-list
-            :data-source="selectedKeywords"
-            class="selected-keywords-list"
+          <!-- 添加保存配置的模态框 -->
+          <a-modal
+            v-model:open="saveModalVisible"
+            title="Save Filter Preset"
+            @ok="saveCurrentPreset"
           >
-            <template #header>
-              <div class="list-header">
-                <span>Total Selected: {{ selectedKeywords.length }} keywords</span>
-              </div>
-            </template>
-            
-            <template #renderItem="{ item }">
-              <a-list-item>
-                <div class="selected-keyword-item">
-                  <div class="keyword-main">
-                    <span class="keyword-text">"{{ item.keyword }}"</span>
-                    <div class="keyword-metrics">
-                      <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
-                      <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                      <a-tag color="purple">Volume={{ item.volume }}</a-tag>
-                      <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
-                    </div>
-                  </div>
-                  <div class="keyword-reason">
-                    <BulbOutlined />
-                    <div class="reason-content">
-                      <span class="reason-highlight">High potential: </span>
-                      <span class="reason-value">{{ item.reason }}</span>
-                    </div>
-                  </div>
+            <a-input v-model:value="newPresetName" placeholder="Enter preset name" />
+          </a-modal>
+
+          <!-- Add modal for selected keywords -->
+          <a-modal
+            v-model:open="showSelectedModal"
+            title="Selected Keywords"
+            width="800px"
+            @cancel="handleModalClose"
+          >
+            <a-list
+              :data-source="selectedKeywords"
+              class="selected-keywords-list"
+            >
+              <template #header>
+                <div class="list-header">
+                  <span>Total Selected: {{ selectedKeywords.length }} keywords</span>
                 </div>
-              </a-list-item>
+              </template>
+              
+              <template #renderItem="{ item }">
+                <a-list-item>
+                  <div class="selected-keyword-item">
+                    <div class="keyword-main">
+                      <span class="keyword-text">"{{ item.keyword }}"</span>
+                      <div class="keyword-metrics">
+                        <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
+                        <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                        <a-tag color="purple">Volume={{ item.volume }}</a-tag>
+                        <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
+                      </div>
+                    </div>
+                    <div class="keyword-reason">
+                      <BulbOutlined />
+                      <div class="reason-content">
+                        <span class="reason-highlight">High potential: </span>
+                        <span class="reason-value">{{ item.reason }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </a-list-item>
+              </template>
+            </a-list>
+            
+            <template #footer>
+              <a-button @click="handleModalClose">Close</a-button>
             </template>
-          </a-list>
-          
-          <template #footer>
-            <a-button @click="handleModalClose">Close</a-button>
-          </template>
-        </a-modal>
+          </a-modal>
+        </template>
       </template>
-    </template>
+
+      <template v-else>
+        <no-site-configured/>
+      </template>
+    </a-spin>
   </page-layout>
 </template>
 
@@ -866,14 +864,15 @@ export default defineComponent({
     const selectedKeywords = ref([])
     const isGeneratingTitles = ref(false) 
     const isGeneratingOutline = ref(false) 
+    const loading = ref(true) 
     
     const columns = computed(() => tableColumns)
     
     const overviewData = ref({
       totalKeywordsAnalyzed: 0,
       totalTopPagesAnalyzed: 0,
-      absence: 0,  // 添加 absence 字段
-      weak: 0      // 保留 weak 字段以备后用
+      absence: 0,  
+      weak: 0  
     })
 
     const currentModeComponent = computed(() => {
@@ -981,6 +980,7 @@ export default defineComponent({
 
     // 1. 修改 fetchKeywords 方法，确保正确发送 level 参数
     const fetchKeywords = async (source, level, page = 1, limit = 10) => {
+      loading.value = true
       try {
         console.log('Fetching keywords with params:', { source, level, page, limit })
         const response = await api.getPlanningKeywords({
@@ -1002,20 +1002,11 @@ export default defineComponent({
         }
       } catch (error) {
         console.error('获取关键词失败:', error)
+      } finally {
+        loading.value = false
       }
     }
 
-    // 添加 Top Pages tab 切换处理
-    const handlePageTabChange = (activeKey) => {
-      console.log('Page Tab changed to:', activeKey)
-      const priority = priorities.find(p => p.level === activeKey)
-      if (priority) {
-        pagePagination.value.current = 1
-        fetchKeywords('top_page_keywords', priority.level, 1, pagePagination.value.pageSize)
-      }
-    }
-
-    // 修改函数名称以区分两个不同来源的分页处理
     const handleComparisonPaginationChange = (priority, page, pageSize) => {
       console.log('Comparison Pagination change:', { priority, page, pageSize })
       recommendedPagination.value.current = page
@@ -1567,30 +1558,13 @@ export default defineComponent({
       }
     ])
 
-    // 监听 filters 的变化，自动应用筛选
-    watch(
-      () => filters.value,
-      () => {
-        applyFiltersImmediately();
-      },
-      { deep: true }
-    );
-
-    const applyFiltersImmediately = () => {
-      // 在这里实现筛选逻辑
-      // ... 筛选实现代码 ...
-    };
-
-    // Add new reactive variables
     const analysisStatus = ref(null)
-    const isLoading = ref(true)
     const pollingInterval = ref(null)
     const taskInfo = ref(null)
 
-    // 修改 checkAnalysisStatus 函数
     const checkAnalysisStatus = async () => {
       if (!domainConfigured.value) {
-        isLoading.value = false;
+        loading.value = false;
         return;
       }
 
@@ -1617,13 +1591,11 @@ export default defineComponent({
         console.error('Failed to check analysis status:', error)
         message.error('Failed to check analysis status')
       } finally {
-        isLoading.value = false
+        loading.value = false
       }
     }
 
-    // 修改 startPolling 函数
     const startPolling = () => {
-      // 如果域名未配置,不启动轮询
       if (!domainConfigured.value) {
         return;
       }
@@ -1656,13 +1628,13 @@ export default defineComponent({
 
     // Computed property to determine what to display
     const analysisState = computed(() => {
-      if (isLoading.value) return 'loading'
+      if (loading.value) return 'loading'
       return taskInfo.value?.analysisStatus || 'not_started'
     })
 
     // 添加 showLoadingState 函数
     const showLoadingState = computed(() => {
-      if (isLoading.value) {
+      if (loading.value) {
         return true
       }
       
@@ -1693,12 +1665,15 @@ export default defineComponent({
 
     // 检查域名配置状态
     const checkDomainStatus = async () => {
+      loading.value = true
       try {
         const response = await api.getProductsByCustomerId()
         domainConfigured.value = response.data?.domainStatus || false
       } catch (error) {
         console.error('Failed to fetch product info:', error)
         domainConfigured.value = false
+      } finally {
+        loading.value = false
       }
     }
 
@@ -1806,7 +1781,7 @@ export default defineComponent({
       clearFilters,
       showLoadingState,
       analysisStatus,
-      isLoading,
+      loading,
       analysisState,
       taskInfo,
       currentTasks,
@@ -3876,6 +3851,29 @@ p {
 .step-desc {
   color: rgba(0, 0, 0, 0.45);
   font-size: 13px;
+}
+
+/* 添加以下样式 */
+:deep(.ant-spin) {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+:deep(.ant-spin-nested-loading) {
+  height: 100%;
+}
+
+:deep(.ant-spin-container) {
+  height: 100%;
+}
+
+:deep(.ant-spin-spinning) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 </style>
 
