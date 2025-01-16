@@ -86,7 +86,6 @@
                       </a-radio-button>
                     </a-radio-group>
                     
-                    <!-- 添加问号图标 -->
                     <a-popover
                       placement="rightTop"
                       trigger="click"
@@ -492,15 +491,29 @@
             </div>
 
             <!-- 步骤二的内容区域 -->
-            <div v-show="currentStep > 0">
-              <!-- 顶部操作栏 -->
-              <div class="step-actions">
-                <a-space>
-                  <a-button @click="previousStep">
-                    <LeftOutlined /> Previous
-                  </a-button>
-                </a-space>
-              </div>
+            <div v-show="currentStep > 0" class="step-two-content">
+              <!-- 修改 mode-selector-card 的内容 -->
+              <a-card class="mode-selector-card">
+                <div class="mode-selector-wrapper">
+                  <div class="step-title">
+                    Check Page Intent, TDK and Outline
+                  </div>
+                  <div class="header-actions">
+                    <a-button @click="previousStep">
+                      <LeftOutlined /> Previous
+                    </a-button>
+                    <a-button 
+                      v-if="hasGenerated"
+                      type="primary"
+                      :disabled="!selectedPlansCount"
+                      :loading="isGenerating"
+                      @click="confirmSelectedPlans"
+                    >
+                      Confirm Selected Plans <RightOutlined v-if="!isGenerating" />
+                    </a-button>
+                  </div>
+                </div>
+              </a-card>
 
               <!-- 内容区域 -->
               <div class="workspace-layout">
@@ -535,130 +548,171 @@
                     </template>
                   </a-list>
                 </a-card>
-                <div class="generation-flow">
-                  <!-- Add guide button -->
-                  <div v-if="!hasGenerated" class="empty-state">
-                    <div class="empty-content">
-                      <ThunderboltOutlined class="empty-icon" />
-                      <div class="empty-title">Ready to create your content plan?</div>
-                      <div class="empty-description">
-                        Generate a complete content plan based on your {{ selectedKeywords.length }} selected keywords
-                      </div>
-                      <a-button 
-                        type="primary"
-                        size="large"
-                        :loading="isGenerating"
-                        :disabled="!selectedKeywords.length"
-                        @click="generateContentPlan"
+                <!-- Add guide button -->
+                <div v-if="!hasGenerated" class="empty-state">
+                  <div class="empty-content">
+                    <ThunderboltOutlined class="empty-icon" />
+                    <div class="empty-title">Ready to create your content plan?</div>
+                    <div class="empty-description">
+                      Generate a complete content plan based on your {{ selectedKeywords.length }} selected keywords
+                    </div>
+                    <a-button 
+                      type="primary"
+                      size="large"
+                      :loading="isGenerating"
+                      :disabled="!selectedKeywords.length"
+                      @click="generateContentPlan"
+                    >
+                      <ThunderboltOutlined /> Generate Content Plan
+                    </a-button>
+                  </div>
+                </div>
+                <!-- Update content display cards -->
+                <template v-else>
+                  <div class="plan-section">
+                    <div class="section-title">
+                      <OrderedListOutlined /> Content Plans
+                    </div>
+                    <div class="content-plans-grid">
+                      <a-card 
+                        v-for="plan in contentPlans" 
+                        :key="plan.outlineId"
+                        class="plan-card"
+                        :bordered="true"
+                        hoverable
                       >
-                        <ThunderboltOutlined /> Generate Content Plan
-                      </a-button>
+                        <template #extra>
+                          <a-checkbox 
+                            :checked="plan.selected"
+                            @change="(e) => handlePlanSelect(plan, e.target.checked)"
+                            @click.stop
+                          />
+                        </template>
+                        
+                        <!-- 卡片主体内容 -->
+                        <div class="card-content" @click="showPlanDetails(plan)">
+                          <h3 class="plan-title">{{ plan.title }}</h3>
+                          <p class="plan-description">{{ plan.description }}</p>
+                          <div class="plan-meta">
+                            <div class="meta-item">
+                              <FileTextOutlined />
+                              {{ plan.outline.length }} Sections
+                            </div>
+                            <div class="meta-item">
+                              <ClockCircleOutlined />
+                              {{ getTotalWordCount(plan) }} Words
+                            </div>
+                          </div>
+                          <div class="plan-tags">
+                            <a-tag v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
+                              :key="keyword"
+                              color="blue"
+                            >
+                              {{ keyword }}
+                            </a-tag>
+                            <a-tag v-if="plan.keywords.split(', ').length > 3" color="default">
+                              +{{ plan.keywords.split(', ').length - 3 }}
+                            </a-tag>
+                          </div>
+                        </div>
+                      </a-card>
                     </div>
                   </div>
 
-                  <!-- Update content display cards -->
-                  <template v-else>
-                    <a-card v-for="(plan, index) in contentPlans" 
-                      :key="index"
-                      class="content-plan-card"
-                    >
-                      <template #title>
-                        <div class="plan-header">
-                          <a-checkbox
-                            v-model:checked="plan.selected"
-                            @change="(checked) => handlePlanSelect(plan, checked)"
-                          >
-                            <span class="plan-title">Plan {{ index + 1 }}</span>
-                          </a-checkbox>
-                        </div>
-                      </template>
-
-                      <!-- User Intent Section -->
-                      <div class="plan-section">
-                        <div class="section-title">
-                          <CompassOutlined /> User Intent
-                        </div>
-                        <div class="intent-content">
-                          <div class="intent-tags">
-                            <a-tag :color="plan.intent.color">{{ plan.intent.name }}</a-tag>
-                            <a-tag :color="plan.pageType.color">{{ plan.pageType.name }}</a-tag>
+                  <!-- 添加右侧抽屉 -->
+                  <a-drawer
+                    :visible="drawerVisible"
+                    :width="600"
+                    placement="right"
+                    @close="closeDrawer"
+                    :title="selectedPlan?.title || 'Content Plan Details'"
+                  >
+                    <template v-if="selectedPlan">
+                      <!-- Intent Section -->
+                      <section class="drawer-section">
+                        <h4 class="section-title">
+                          <CompassOutlined /> User Intent & Problem
+                        </h4>
+                        <div class="section-content">
+                          <div class="content-item">
+                            <strong>Intent:</strong> {{ selectedPlan.userIntent }}
                           </div>
-                          <div class="intent-description">{{ plan.intent.description }}</div>
+                          <div class="content-item">
+                            <strong>Problem Solved:</strong> {{ selectedPlan.problemSolved }}
+                          </div>
+                          <div class="content-tags">
+                            <a-tag v-for="keyword in selectedPlan.relatedKeywords.split(', ')" 
+                              :key="keyword"
+                              color="blue"
+                            >
+                              {{ keyword }}
+                            </a-tag>
+                          </div>
                         </div>
-                      </div>
+                      </section>
 
                       <!-- TDK Section -->
-                      <div class="plan-section">
-                        <div class="section-title">
-                          <FileTextOutlined /> TDK
-                        </div>
-                        <div class="tdk-content">
-                          <div class="tdk-item">
-                            <div class="tdk-label">Title</div>
-                            <div class="tdk-text">{{ plan.tdk.title }}</div>
+                      <section class="drawer-section">
+                        <h4 class="section-title">
+                          <FileTextOutlined /> Title, Description & Keywords
+                        </h4>
+                        <div class="section-content">
+                          <div class="content-item">
+                            <div class="item-label">Title</div>
+                            <div class="item-text">{{ selectedPlan.title }}</div>
                           </div>
-                          <div class="tdk-item">
-                            <div class="tdk-label">Description</div>
-                            <div class="tdk-text">{{ plan.tdk.description }}</div>
+                          <div class="content-item">
+                            <div class="item-label">Description</div>
+                            <div class="item-text">{{ selectedPlan.description }}</div>
                           </div>
-                          <div class="tdk-item">
-                            <div class="tdk-label">Keywords</div>
-                            <div class="tdk-keywords">
-                              <a-tag v-for="kw in plan.tdk.keywords" :key="kw" color="blue">
-                                {{ kw }}
+                          <div class="content-item">
+                            <div class="item-label">Keywords</div>
+                            <div class="content-tags">
+                              <a-tag v-for="keyword in selectedPlan.keywords.split(', ')" 
+                                :key="keyword"
+                                color="green"
+                              >
+                                {{ keyword }}
                               </a-tag>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </section>
 
                       <!-- Outline Section -->
-                      <div class="plan-section">
-                        <div class="section-title">
+                      <section class="drawer-section">
+                        <h4 class="section-title">
                           <OrderedListOutlined /> Content Outline
-                        </div>
-                        <div class="outline-content">
-                          <div v-for="(section, sIndex) in plan.outline" 
-                            :key="sIndex" 
-                            class="outline-section"
+                        </h4>
+                        <div class="section-content">
+                          <div v-for="section in selectedPlan.outline" 
+                            :key="section.sequence" 
+                            class="outline-item"
                           >
-                            <div class="section-header">
-                              <div class="section-title">{{ section.title }}</div>
-                              <div class="section-keywords">
-                                <a-tag v-for="keyword in section.keywords" 
-                                  :key="keyword" 
-                                  color="blue"
-                                >
-                                  {{ keyword }}
-                                </a-tag>
+                            <div class="outline-header">
+                              <div class="outline-title">
+                                Section {{ section.sequence }}: {{ section.sectionTitle }}
+                              </div>
+                              <div class="outline-meta">
+                                {{ section.wordCount }} words
                               </div>
                             </div>
-                            <div class="section-points">
-                              <div v-for="(point, pIndex) in section.points" 
-                                :key="pIndex" 
-                                class="point-item"
-                              >
-                                • {{ point }}
-                              </div>
+                            <div class="outline-keywords">
+                              <template v-if="section.keywordsUsageRequirements">
+                                <a-tag v-for="(count, keyword) in section.keywordsUsageRequirements" 
+                                  :key="keyword"
+                                  color="blue"
+                                >
+                                  {{ keyword }} ({{ count }})
+                                </a-tag>
+                              </template>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </a-card>
-
-                    <!-- Action buttons -->
-                    <div class="action-footer">
-                      <a-button 
-                        type="primary"
-                        :disabled="!selectedPlansCount"
-                        :loading="isGenerating"
-                        @click="confirmSelectedPlans"
-                      >
-                        Confirm Selected Plans <RightOutlined v-if="!isGenerating" />
-                      </a-button>
-                    </div>
-                  </template>
-                </div>
+                      </section>
+                    </template>
+                  </a-drawer>
+                </template>
               </div>
             </div>
           </div>
@@ -745,7 +799,8 @@ import {
   ExportOutlined,
   LoadingOutlined,
   WarningOutlined,
-  QuestionCircleOutlined
+  QuestionCircleOutlined,
+  ClockCircleOutlined
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -776,7 +831,8 @@ export default defineComponent({
     ExportOutlined,
     LoadingOutlined,
     WarningOutlined,
-    NoSiteConfigured
+    NoSiteConfigured,
+    ClockCircleOutlined
   },
   setup() {
     const currentMode = ref('beginner')
@@ -1282,14 +1338,15 @@ export default defineComponent({
     const generateContentPlan = async () => {
       isGenerating.value = true;
       try {
-        // 从选中的关键词中提取 keywordId
         const keywordIds = selectedKeywords.value.map(k => k.id);
-        
-        // 调用 API 生成内容计划,传入 keywordIds
         const response = await api.generatePlanningComposite(keywordIds);
         
         if (response?.data) {
-          contentPlans.value = response.data;
+          // 为每个计划添加 selected 属性
+          contentPlans.value = response.data.map(plan => ({
+            ...plan,
+            selected: false
+          }));
           hasGenerated.value = true;
         }
       } catch (error) {
@@ -1311,6 +1368,27 @@ export default defineComponent({
         console.log('Selected plans:', selectedPlans)
         message.success('Content plans confirmed')
       }
+    }
+
+    // 添加新的响应式变量
+    const drawerVisible = ref(false)
+    const selectedPlan = ref(null)
+
+    // 添加新的方法
+    const showPlanDetails = (plan) => {
+      selectedPlan.value = plan
+      drawerVisible.value = true
+    }
+
+    const closeDrawer = () => {
+      drawerVisible.value = false
+      selectedPlan.value = null
+    }
+
+    const getTotalWordCount = (plan) => {
+      return plan.outline.reduce((total, section) => {
+        return total + Number(section.wordCount)
+      }, 0)
     }
 
     return {
@@ -1372,7 +1450,12 @@ export default defineComponent({
       generateContentPlan,
       handlePlanSelect,
       confirmSelectedPlans,
-      canProceedToNext
+      canProceedToNext,
+      drawerVisible,
+      selectedPlan,
+      showPlanDetails,
+      closeDrawer,
+      getTotalWordCount
     }
   }
 })
@@ -1418,10 +1501,35 @@ export default defineComponent({
 }
 
 .mode-selector-card {
-  background: #fafafa;
+  margin-bottom: 16px;
   
   :deep(.ant-card-body) {
-    padding: 12px 16px;
+    padding: 16px 24px;
+  }
+}
+
+.mode-selector-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.step-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  
+  .ant-btn {
+    height: 32px;
+    
+    .anticon {
+      font-size: 14px;
+    }
   }
 }
 
@@ -1494,10 +1602,6 @@ export default defineComponent({
   flex-wrap: wrap;
 }
 
-.selection-alert {
-  margin-bottom: 16px;
-}
-
 .beginner-card,
 .optimization-card {
   height: 100%;
@@ -1535,20 +1639,6 @@ export default defineComponent({
   justify-content: space-between;
   align-items: center;
   width: 100%;
-}
-
-.header-actions {
-  display: flex;
-  gap: 8px;
-  
-  .ant-btn {
-    height: 32px;
-    padding: 0 12px;
-    
-    .anticon {
-      font-size: 14px;
-    }
-  }
 }
 
 .stat-item {
@@ -2582,17 +2672,9 @@ export default defineComponent({
 .workspace-layout {
   display: flex;
   gap: 24px;
-  height: calc(100vh - 200px);
+  height: calc(100vh - 200px); /* 确保占满剩余高度 */
+  overflow: hidden; /* 防止溢出 */
 }
-
-.generation-flow {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  min-width: 0;
-}
-
 /* 添加纵向导航样式 */
 .vertical-nav {
   position: sticky;
@@ -2640,29 +2722,9 @@ export default defineComponent({
 .workspace-layout {
   display: flex;
   gap: 24px;
-  height: calc(100vh - 200px);
+  height: calc(100vh - 200px); /* 确保占满剩余高度 */
+  overflow: hidden; /* 防止溢出 */
 }
-
-.generation-flow {
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 16px;
-  scroll-behavior: smooth;
-  
-  &::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: #e8e8e8;
-    border-radius: 3px;
-    
-    &:hover {
-      background: #d9d9d9;
-    }
-  }
-}
-
 /* 确保结果卡片有足够的下边距 */
 .result-card {
   margin-bottom: 24px;
@@ -2983,11 +3045,7 @@ export default defineComponent({
 }
 
 .action-footer {
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
-  display: flex;
-  justify-content: flex-end;
+  display: none;
 }
 
 .tdk-list {
@@ -3098,14 +3156,6 @@ export default defineComponent({
   color: rgba(0, 0, 0, 0.85);
   line-height: 1.6;
   padding-left: 8px;
-}
-
-/* 修改生成流程容器的样式 */
-.generation-flow {
-  flex: 1;
-  padding: 0 24px 24px; /* 添加左右和底部内边距 */
-  overflow-y: auto;
-  max-height: calc(100vh - 200px); /* 设置最大高度，确保可滚动 */
 }
 
 /* 确保工作区布局有足够的空间 */
@@ -3384,6 +3434,7 @@ p {
 
 .plan-section {
   margin-bottom: 24px;
+  width: 100%;
 }
 
 .section-title {
@@ -3561,6 +3612,280 @@ p {
   display: inline-flex;
   align-items: center;
   height: 32px;
+}
+
+/* 添加新的样式 */
+.content-plans {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.plan-card {
+  background: #fff;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.plan-section {
+  margin-bottom: 24px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-meta {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-top: 4px;
+}
+
+/* 网格布局样式 */
+.content-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 改为 280px */
+  gap: 24px; /* 增加间距到 24px 使布局更加宽松 */
+  padding: 16px 0;
+  width: 100%;
+  height: 100%; /* 确保网格占满容器 */
+}
+
+.plan-card {
+  height: 100%;
+  
+  :deep(.ant-card-body) {
+    padding: 16px;
+  }
+  
+  :deep(.ant-card-extra) {
+    padding: 16px 16px 0 0;
+  }
+}
+
+.card-content {
+  cursor: pointer;
+}
+
+.plan-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.plan-description {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  margin-bottom: 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.plan-meta {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  
+  .anticon {
+    font-size: 14px;
+  }
+}
+
+.plan-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 抽屉内容样式 */
+.drawer-section {
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f0f0f0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .anticon {
+    color: #1890ff;
+  }
+}
+
+.section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.content-item {
+  .item-label {
+    font-size: 13px;
+    color: rgba(0, 0, 0, 0.45);
+    margin-bottom: 4px;
+  }
+  
+  .item-text {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.85);
+    line-height: 1.5;
+  }
+}
+
+.content-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.outline-item {
+  padding: 12px;
+  background: #fafafa;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.outline-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.outline-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.outline-meta {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.outline-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* 修改布局相关样式 */
+.workspace-layout {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  min-height: calc(100vh - 180px); /* 减去头部和其他固定元素的高度 */
+}
+
+.selected-keywords-card {
+  width: 320px; /* 固定宽度 */
+  flex-shrink: 0; /* 防止压缩 */
+}
+
+.content-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+/* 添加新的样式 */
+.step-two-content {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.workspace-layout {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  min-height: 0; /* 修改这里，允许内容自适应 */
+}
+
+.main-content {
+  display: flex;
+  width: 100%;
+  position: relative;
+}
+
+.left-panel {
+  flex: 1;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.panel-hidden {
+  display: none;
+}
+
+/* 确保 mode-selector-card 样式正确 */
+.mode-selector-card {
+  margin-bottom: 16px;
+  
+  :deep(.ant-card-body) {
+    padding: 16px;
+  }
+}
+
+.mode-selector-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.mode-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.help-icon {
+  color: #8c8c8c;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.3s;
+  
+  &:hover {
+    color: #1890ff;
+  }
 }
 </style>
 

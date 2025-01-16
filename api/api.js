@@ -1100,7 +1100,7 @@ const getPlanningKeywords = async (params = {}) => {
 // 新增：生成意图和TDK及大纲的方法
 const generatePlanningComposite = async (keywordIds) => {
   try {
-    const response = await apiClient.post('/planning/composite-generator', {
+    const response = await apiClient.get('/planning/outline', {
       keywordIds: keywordIds
     });
     return response.data;
