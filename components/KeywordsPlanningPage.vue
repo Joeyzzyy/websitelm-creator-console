@@ -59,16 +59,10 @@
                   <template #title>
                     <span class="step-title">1. Select Keywords</span>
                   </template>
-                  <template #description>
-                    <span class="step-desc">Choose keywords from different modes</span>
-                  </template>
                 </a-step>
                 <a-step>
                   <template #title>
-                    <span class="step-title">2. Generate Topic Title and Outline</span>
-                  </template>
-                  <template #description>
-                    <span class="step-desc">Create and optimize content structure</span>
+                    <span class="step-title">2. Check Page Intent, TDK and Outline And Start Generating！</span>
                   </template>
                 </a-step>
               </a-steps>
@@ -530,15 +524,6 @@
                   <a-button @click="previousStep">
                     <LeftOutlined /> Previous
                   </a-button>
-                  <a-button 
-                    v-if="hasGenerated"
-                    type="primary"
-                    :loading="isGenerating"
-                    :disabled="!selectedKeywords.length"
-                    @click="generateContent"
-                  >
-                    <ThunderboltOutlined /> Regenerate Content Plan
-                  </a-button>
                 </a-space>
               </div>
 
@@ -575,168 +560,128 @@
                     </template>
                   </a-list>
                 </a-card>
-
-                <!-- 添加纵向导航 -->
-                <div class="vertical-nav">
-                  <a-anchor :affix="false" :bounds="50" :items="anchorItems" />
-                </div>
-
-                <!-- 右侧生成内容区域 -->
                 <div class="generation-flow">
-                  <!-- 添加引导按钮 -->
+                  <!-- Add guide button -->
                   <div v-if="!hasGenerated" class="empty-state">
                     <div class="empty-content">
                       <ThunderboltOutlined class="empty-icon" />
                       <div class="empty-title">Ready to create your content plan?</div>
                       <div class="empty-description">
-                        Generate a strategic content plan based on your {{ selectedKeywords.length }} selected keywords
+                        Generate a complete content plan based on your {{ selectedKeywords.length }} selected keywords
                       </div>
                       <a-button 
                         type="primary"
                         size="large"
                         :loading="isGenerating"
                         :disabled="!selectedKeywords.length"
-                        @click="generateContent"
+                        @click="generateContentPlan"
                       >
                         <ThunderboltOutlined /> Generate Content Plan
                       </a-button>
                     </div>
                   </div>
 
-                  <!-- 现有的内容卡片 -->
+                  <!-- Update content display cards -->
                   <template v-else>
-                    <!-- 2. Topic 建议 -->
-                    <a-card v-if="suggestedTopics.length" id="suggested-topics" class="result-card">
+                    <a-card v-for="(plan, index) in contentPlans" 
+                      :key="index"
+                      class="content-plan-card"
+                    >
                       <template #title>
-                        <div class="card-title">
-                          <CompassOutlined /> Content Strategy & Topics
-                        </div>
-                      </template>
-                      
-                      <div class="content-topics-list">
-                        <div v-for="topic in suggestedTopics" :key="topic.id" class="content-topic-card">
-                          <a-checkbox 
-                            v-model:checked="topic.selected"
-                            @change="(checked) => handleTopicSelect(topic, checked)"
+                        <div class="plan-header">
+                          <a-checkbox
+                            v-model:checked="plan.selected"
+                            @change="(checked) => handlePlanSelect(plan, checked)"
                           >
-                            <div class="content-topic-header">
-                              <div class="content-topic-title">{{ topic.main }}</div>
-                              <div class="content-topic-tags">
-                                <a-tag :color="topic.pageType.color">{{ topic.pageType.name }}</a-tag>
-                                <a-tag :color="topic.intent.color">{{ topic.intent.name }}</a-tag>
-                              </div>
-                            </div>
-                            
-                            <div class="content-topic-body">
-                              <div class="content-topic-section">
-                                <div class="content-section-label">User Intent</div>
-                                <div class="content-section-text">{{ topic.intent.description }}</div>
-                              </div>
-                              <div class="content-topic-section">
-                                <div class="content-section-label">Problem Solved</div>
-                                <div class="content-section-text">{{ topic.problemSolved }}</div>
-                              </div>
-                              <div class="content-topic-section">
-                                <div class="content-section-label">Related Keywords</div>
-                                <div class="content-keyword-tags">
-                                  <a-tag v-for="kw in topic.targetKeywords" :key="kw" color="blue">
-                                    {{ kw }}
-                                  </a-tag>
-                                </div>
-                              </div>
-                            </div>
+                            <span class="plan-title">Plan {{ index + 1 }}</span>
                           </a-checkbox>
                         </div>
-                      </div>
-                      
-                      <!-- 添加确认按钮 -->
-                      <div class="action-footer">
-                        <a-button 
-                          type="primary"
-                          :disabled="!selectedTopicsCount"
-                          :loading="isGeneratingTitles"
-                          @click="confirmTopics"
-                        >
-                          Generate Titles <RightOutlined v-if="!isGeneratingTitles" />
-                        </a-button>
-                      </div>
-                    </a-card>
-
-                    <!-- 3. Title 建议 -->
-                    <a-card v-if="suggestedTitles.length" id="suggested-titles" class="result-card">
-                      <template #title>
-                        <div class="card-title">
-                          <FileTextOutlined /> Suggested TDK
-                        </div>
                       </template>
-                      
-                      <div class="tdk-list">
-                        <div v-for="tdk in suggestedTitles" :key="tdk.id" class="tdk-item">
-                          <a-checkbox 
-                            v-model:checked="tdk.selected"
-                            @change="(checked) => handleTitleSelect(tdk, checked)"
-                          >
-                            <div class="tdk-content">
-                              <div class="tdk-main">
-                                <div class="tdk-section">
-                                  <div class="tdk-label">Title</div>
-                                  <div class="tdk-text">{{ tdk.title }}</div>
-                                </div>
-                                <div class="tdk-section">
-                                  <div class="tdk-label">Description</div>
-                                  <div class="tdk-text">{{ tdk.description }}</div>
-                                </div>
-                                <div class="tdk-section">
-                                  <div class="tdk-label">Keywords</div>
-                                  <div class="tdk-keywords">
-                                    <a-tag v-for="kw in tdk.keywords" :key="kw" color="blue">{{ kw }}</a-tag>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </a-checkbox>
+
+                      <!-- User Intent Section -->
+                      <div class="plan-section">
+                        <div class="section-title">
+                          <CompassOutlined /> User Intent
+                        </div>
+                        <div class="intent-content">
+                          <div class="intent-tags">
+                            <a-tag :color="plan.intent.color">{{ plan.intent.name }}</a-tag>
+                            <a-tag :color="plan.pageType.color">{{ plan.pageType.name }}</a-tag>
+                          </div>
+                          <div class="intent-description">{{ plan.intent.description }}</div>
                         </div>
                       </div>
 
-                      <!-- 添加操作按钮区域 -->
-                      <div class="action-footer">
-                        <a-button 
-                          type="primary"
-                          :disabled="!selectedTitlesCount"
-                          :loading="isGeneratingOutline"
-                          @click="confirmTitles"
-                        >
-                          Generate Outline <RightOutlined v-if="!isGeneratingOutline" />
-                        </a-button>
-                      </div>
-                    </a-card>
-
-                    <!-- 4. Outline -->
-                    <a-card v-if="generatedOutline" id="content-outline" class="result-card">
-                      <template #title>
-                        <div class="card-title">
-                          <OrderedListOutlined /> Content Outline
+                      <!-- TDK Section -->
+                      <div class="plan-section">
+                        <div class="section-title">
+                          <FileTextOutlined /> TDK
                         </div>
-                      </template>
-                      
-                      <div class="outline-content">
-                        <div v-for="(section, index) in generatedOutline" :key="index" class="outline-section">
-                          <div class="section-header">
-                            <div class="section-title">{{ section.title }}</div>
-                            <div class="section-keywords">
-                              <a-tag v-for="keyword in section.keywords" :key="keyword" color="blue">
-                                {{ keyword }}
+                        <div class="tdk-content">
+                          <div class="tdk-item">
+                            <div class="tdk-label">Title</div>
+                            <div class="tdk-text">{{ plan.tdk.title }}</div>
+                          </div>
+                          <div class="tdk-item">
+                            <div class="tdk-label">Description</div>
+                            <div class="tdk-text">{{ plan.tdk.description }}</div>
+                          </div>
+                          <div class="tdk-item">
+                            <div class="tdk-label">Keywords</div>
+                            <div class="tdk-keywords">
+                              <a-tag v-for="kw in plan.tdk.keywords" :key="kw" color="blue">
+                                {{ kw }}
                               </a-tag>
                             </div>
                           </div>
-                          <div class="section-points">
-                            <div v-for="(point, pIndex) in section.points" :key="pIndex" class="point-item">
-                              • {{ point }}
+                        </div>
+                      </div>
+
+                      <!-- Outline Section -->
+                      <div class="plan-section">
+                        <div class="section-title">
+                          <OrderedListOutlined /> Content Outline
+                        </div>
+                        <div class="outline-content">
+                          <div v-for="(section, sIndex) in plan.outline" 
+                            :key="sIndex" 
+                            class="outline-section"
+                          >
+                            <div class="section-header">
+                              <div class="section-title">{{ section.title }}</div>
+                              <div class="section-keywords">
+                                <a-tag v-for="keyword in section.keywords" 
+                                  :key="keyword" 
+                                  color="blue"
+                                >
+                                  {{ keyword }}
+                                </a-tag>
+                              </div>
+                            </div>
+                            <div class="section-points">
+                              <div v-for="(point, pIndex) in section.points" 
+                                :key="pIndex" 
+                                class="point-item"
+                              >
+                                • {{ point }}
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </a-card>
+
+                    <!-- Action buttons -->
+                    <div class="action-footer">
+                      <a-button 
+                        type="primary"
+                        :disabled="!selectedPlansCount"
+                        :loading="isGenerating"
+                        @click="confirmSelectedPlans"
+                      >
+                        Confirm Selected Plans <RightOutlined v-if="!isGenerating" />
+                      </a-button>
+                    </div>
                   </template>
                 </div>
               </div>
@@ -810,7 +755,6 @@
 <script>
 import { defineComponent, ref, computed, h, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
-import BeginnerMode from './BeginnerMode.vue'
 import { 
   DeleteOutlined,
   PlusOutlined,
@@ -842,7 +786,6 @@ export default defineComponent({
   name: 'KeywordsPlanningPage',
   components: {
     PageLayout,
-    BeginnerMode,
     DeleteOutlined,
     PlusOutlined,
     SaveOutlined,
@@ -875,23 +818,6 @@ export default defineComponent({
       weak: 0  
     })
 
-    const currentModeComponent = computed(() => {
-      const modes = {
-        beginner: 'BeginnerMode',
-        expert: 'ExpertMode'
-      }
-      return modes[currentMode.value]
-    })
-
-    const getCategoryPercent = (category) => {
-      const total = Object.values(overviewData.value.categories).reduce((a, b) => a + b, 0)
-      return Math.round((overviewData.value.categories[category] / total) * 100)
-    }
-
-    const viewSelected = () => {
-      // Implement view selected keywords logic
-    }
-
     const clearSelection = () => {
       selectedKeywords.value = []
       recommendedKeywords.value.forEach(k => k.selected = false)
@@ -904,14 +830,6 @@ export default defineComponent({
       ourTopPages: 30,
       competitorPages: 50
     })
-
-    const categories = ref([
-      { name: 'Missing', count: 200, color: 'red' },
-      { name: 'Weak', count: 150, color: 'orange' },
-      { name: 'Strong', count: 80, color: 'green' },
-      { name: 'Common', count: 300, color: 'blue' },
-      { name: 'Unique', color: 'purple' }
-    ])
 
     // 修改 priorities 数组,level 改为 1-5
     const priorities = [
@@ -1021,67 +939,78 @@ export default defineComponent({
       fetchKeywords('top_page_keywords', priority, page, pageSize)
     }
 
-    // 2. 确保组件挂载时获取初始数据
-    onMounted(() => {
-      console.log('组件挂载，开始获取数据')
-      // 默认获取 level 1 (P0) 的数据
-      fetchKeywords('keywords', '1', 1, recommendedPagination.value.pageSize)
-      fetchKeywords('top_page_keywords', '1', 1, pagePagination.value.pageSize)
+    // 将原来分散的 onMounted 逻辑合并到一个地方
+    onMounted(async () => {
+      // 1. 检查域名配置状态
+      await checkDomainStatus()
+
+      // 2. 如果域名已配置,执行后续初始化
+      if (domainConfigured.value) {
+        // 检查分析状态
+        await checkAnalysisStatus()
+        
+        // 启动轮询(如果需要)
+        if (analysisState.value !== 'finished') {
+          pollingInterval.value = setInterval(checkAnalysisStatus, 5000)
+        }
+
+        // 获取关键词数据
+        await Promise.all([
+          fetchKeywords('keywords', '1', 1, recommendedPagination.value.pageSize),
+          fetchKeywords('top_page_keywords', '1', 1, pagePagination.value.pageSize)
+        ])
+
+        // 初始化已选关键词
+        initializeSelectedKeywords()
+      }
+
+      // 最后关闭加载状态
+      loading.value = false
     })
 
-    // 3. 添加监听器来观察数据变化
-    watch(recommendedKeywords, (newVal) => {
-      console.log('recommendedKeywords变化:', newVal)
-    }, { deep: true })
-
-    // 4. 修改分页处理方法，添加 priority 参数
-    const handleRecommendedPaginationChange = (priority, page, pageSize) => {
-      console.log('Pagination change:', { priority, page, pageSize }) // 添加日志
-      recommendedPagination.value.current = page
-      recommendedPagination.value.pageSize = pageSize
-      fetchKeywords('keywords', priority, page, pageSize)
-    }
-
-    const handlePagePaginationChange = (page, pageSize) => {
-      pagePagination.value.current = page
-      pagePagination.value.pageSize = pageSize
-      fetchKeywords('top_page_keywords', page, pageSize)
-    }
-
-    const topPages = ref([
-      {
-        url: '/blog/cloud-storage-guide',
-        description: 'Missing Keywords: 5',
-        keywords: [
-          {
-            id: 1,
-            text: 'cloud storage solutions',
-            kd: 35,
-            volume: 1200,
-            selected: false
-          },
-          {
-            id: 2,
-            text: 'best cloud storage',
-            kd: 45,
-            volume: 2500,
-            selected: false
-          }
-        ]
-      },
-      {
-        url: '/product/backup-solution',
-        description: 'Weak Keywords: 7',
-      },
-      {
-        url: '/landing/cloud-security',
-        description: 'Expandable Long-tail: 3',
+    // 确保在组件卸载时清理轮询
+    onUnmounted(() => {
+      if (pollingInterval.value) {
+        clearInterval(pollingInterval.value)
       }
-    ])
+    })
 
-    // 修改 handleKeywordSelect 方法
+    // 合并所有的 watch 逻辑
+    watch(
+      // 监听多个数据源
+      [
+        () => recommendedKeywords.value,
+        () => pageKeywords.value,
+        () => selectedKeywords.value
+      ],
+      ([newRecommendedKeywords, newPageKeywords, newSelectedKeywords], [oldRecommendedKeywords, oldPageKeywords, oldSelectedKeywords]) => {
+        // 1. 处理推荐关键词变化
+        if (newRecommendedKeywords !== oldRecommendedKeywords) {
+          console.log('recommendedKeywords变化:', newRecommendedKeywords)
+          // 只同步选中的关键词到 selectedKeywords
+          const selectedOnes = newRecommendedKeywords.filter(k => k.selected)
+          selectedKeywords.value = [
+            ...selectedKeywords.value.filter(k => !newRecommendedKeywords.find(nk => nk.keyword === k.keyword)),
+            ...selectedOnes
+          ]
+        }
+
+        // 2. 处理页面关键词变化
+        if (newPageKeywords !== oldPageKeywords) {
+          // 只同步选中的关键词到 selectedKeywords
+          const selectedOnes = newPageKeywords.filter(k => k.selected)
+          selectedKeywords.value = [
+            ...selectedKeywords.value.filter(k => !newPageKeywords.find(nk => nk.keyword === k.keyword)),
+            ...selectedOnes
+          ]
+        }
+      },
+      {
+        deep: true // 深度监听对象变化
+      }
+    )
+
     const handleKeywordSelect = (keyword, isSelected) => {
-      // 更新 selectedKeywords
       if (isSelected) {
         if (!selectedKeywords.value.find(k => k.keyword === keyword.keyword)) {
           selectedKeywords.value.push({
@@ -1095,33 +1024,6 @@ export default defineComponent({
         )
       }
     }
-
-    // 分别监听两个数据源
-    watch(
-      () => recommendedKeywords.value,
-      (newKeywords) => {
-        // 只同步选中的关键词到 selectedKeywords
-        const selectedOnes = newKeywords.filter(k => k.selected)
-        selectedKeywords.value = [
-          ...selectedKeywords.value.filter(k => !newKeywords.find(nk => nk.keyword === k.keyword)),
-          ...selectedOnes
-        ]
-      },
-      { deep: true }
-    )
-
-    watch(
-      () => pageKeywords.value,
-      (newKeywords) => {
-        // 只同步选中的关键词到 selectedKeywords
-        const selectedOnes = newKeywords.filter(k => k.selected)
-        selectedKeywords.value = [
-          ...selectedKeywords.value.filter(k => !newKeywords.find(nk => nk.keyword === k.keyword)),
-          ...selectedOnes
-        ]
-      },
-      { deep: true }
-    )
 
     const getKeywordsByPriority = (keywords, priority) => {
       if (!keywords || !keywords.length) return []
@@ -1162,39 +1064,9 @@ export default defineComponent({
       filters.value.splice(index, 1);
     };
 
-    const handleFieldChange = (index) => {
-      const filter = filters.value[index];
-      if (filter.field === 'source') {
-        filter.operator = '==';
-        filter.value = 'difference';
-      } else {
-        // 原有的处理逻辑
-        switch (filter.field) {
-          case 'cpc':
-            filter.value = 0.2;
-            break;
-          case 'relevance':
-            filter.value = 3;
-            break;
-          case 'krs':
-            filter.value = 50;
-            break;
-          default:
-            filter.value = 50;
-        }
-      }
-    };
-
     const clearFilters = () => {
-      // 完全清空所有筛选条件
       filters.value = [];
-
-      // 清除已保存的预设选择
       currentPreset.value = null;
-    };
-
-    const saveFilterConfig = () => {
-      // TODO: 实现保存配置逻辑
     };
 
     const selectedRowKeys = ref([]);
@@ -1221,18 +1093,6 @@ export default defineComponent({
 
     const handleTableChange = (pagination, filters, sorter) => {
       console.log('Table change:', pagination, filters, sorter);
-    };
-
-    const handlePageClick = (record) => {
-      console.log('Clicked page:', record);
-    };
-
-    const handleEdit = (record) => {
-      console.log('Edit:', record);
-    };
-
-    const handleDelete = (record) => {
-      console.log('Delete:', record);
     };
 
     const currentPreset = ref(null);
@@ -1298,218 +1158,6 @@ export default defineComponent({
     }
 
     const isGenerating = ref(false)
-    const contentPlan = ref(null)
-    const suggestedTopics = ref([])
-    const suggestedTitles = ref([])
-    const generatedOutline = ref(null)
-    const selectedTopic = ref(null)
-    const selectedTitle = ref(null)
-
-    const scrollToElement = (elementId) => {
-      const element = document.getElementById(elementId)
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
-    }
-
-    // 监听内容生成完成后，滚动到主题建议
-    watch(contentPlan, (newValue) => {
-      if (newValue) {
-        setTimeout(() => {
-          scrollToElement('suggested-topics')
-        }, 100)
-      }
-    })
-
-    // 修改数据结构
-    const selectedTopics = ref([])
-    const selectedTitles = ref([])
-
-    // 处理 topic 选择
-    const handleTopicSelect = (topic, checked) => {
-      if (checked) {
-        selectedTopics.value.push(topic.id)
-      } else {
-        selectedTopics.value = selectedTopics.value.filter(id => id !== topic.id)
-      }
-    }
-
-    // 处理 title 选择
-    const handleTitleSelect = (tdk, checked) => {
-      if (checked) {
-        selectedTitles.value.push(tdk.id)
-      } else {
-        selectedTitles.value = selectedTitles.value.filter(id => id !== tdk.id)
-      }
-    }
-
-    // 添加确认处理方法
-    const confirmTopics = async () => {
-      if (selectedTopicsCount.value) {
-        isGeneratingTitles.value = true
-        try {
-          await generateTitles() // 直接调用生成标题的方法
-          await nextTick()
-          scrollToElement('suggested-titles')
-        } catch (error) {
-          console.error('Error generating titles:', error)
-          message.error('Failed to generate titles')
-        } finally {
-          isGeneratingTitles.value = false
-        }
-      }
-    }
-
-    const confirmTitles = async () => {
-      if (selectedTitlesCount.value) {
-        isGeneratingOutline.value = true
-        try {
-          // 生成新的大纲
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          generatedOutline.value = [
-            {
-              title: '1. Introduction to Cloud Storage',
-              keywords: ['cloud storage', 'digital storage'],
-              points: [
-                'What is cloud storage?',
-                'Why businesses need cloud storage solutions',
-                'Key benefits of cloud storage'
-              ]
-            },
-            {
-              title: '2. Types of Cloud Storage Solutions',
-              keywords: ['storage solutions', 'enterprise storage'],
-              points: [
-                'Personal cloud storage',
-                'Business cloud storage',
-                'Enterprise cloud storage solutions'
-              ]
-            }
-          ]
-          
-          await nextTick()
-          scrollToElement('content-outline')
-        } catch (error) {
-          console.error('Error generating outline:', error)
-          message.error('Failed to generate outline')
-        } finally {
-          isGeneratingOutline.value = false
-        }
-      }
-    }
-
-    // 修改生成内容的方法
-    const generateContent = async () => {
-      console.log('Before generation - layout height:', document.querySelector('.content-wrapper')?.offsetHeight)
-      console.log('Before generation - section-card height:', document.querySelector('.section-card')?.offsetHeight)
-      
-      isGenerating.value = true
-      try {
-        await generateTopics()
-        hasGenerated.value = true
-        
-        await nextTick()
-        
-        console.log('After generation - layout height:', document.querySelector('.content-wrapper')?.offsetHeight)
-        console.log('After generation - section-card height:', document.querySelector('.section-card')?.offsetHeight)
-        // 检查生成后的 DOM 变化
-        console.log('Content Strategy container:', document.querySelector('.content-strategy-container'))
-      } catch (error) {
-        console.error('Generation error:', error)
-      } finally {
-        isGenerating.value = false
-      }
-    }
-
-    const generateTopics = async () => {
-      // 模拟 API 调用
-      suggestedTopics.value = [
-        {
-          id: 1,
-          main: 'Cloud Storage Solutions Comparison Guide',
-          selected: false,
-          pageType: {
-            name: 'Informational',
-            color: 'blue',
-            description: 'Comprehensive guide page'
-          },
-          intent: {
-            name: 'Research',
-            color: 'purple',
-            description: 'Users are comparing different cloud storage solutions to make an informed decision'
-          },
-          problemSolved: 'Helps users understand and compare different cloud storage options to choose the best solution for their needs',
-          targetKeywords: [
-            'cloud storage comparison',
-            'best cloud storage solutions',
-            'cloud storage providers'
-          ]
-        },
-        {
-          id: 2,
-          main: 'Enterprise Cloud Storage Security Guide',
-          selected: false,
-          pageType: {
-            name: 'Commercial',
-            color: 'green',
-            description: 'Product feature page'
-          },
-          intent: {
-            name: 'Solution Awareness',
-            color: 'orange',
-            description: 'Users are seeking secure enterprise storage solutions'
-          },
-          problemSolved: 'Addresses enterprise concerns about cloud storage security and compliance requirements',
-          targetKeywords: [
-            'enterprise cloud storage',
-            'secure cloud storage',
-            'cloud storage security'
-          ]
-        }
-      ]
-    }
-
-    const generateTitles = async () => {
-      try {
-        // 模拟 API 调用生成标题建议
-        suggestedTitles.value = [
-          {
-            id: 1,
-            title: 'Cloud Storage Solutions in 2024: The Ultimate Guide',
-            description: 'Comprehensive guide to cloud storage solutions. Compare features, pricing, and security options to find the best cloud storage for your needs.',
-            keywords: ['cloud storage', 'storage solutions', 'cloud comparison'],
-            selected: false,
-            metrics: {
-              ctr: 4.5,
-              seoScore: 92
-            }
-          },
-          {
-            id: 2,
-            title: 'Best Cloud Storage Solutions: A Complete Guide for Businesses',
-            description: 'Expert analysis of enterprise cloud storage solutions. Learn about security features, compliance requirements, and integration options.',
-            keywords: ['business cloud storage', 'enterprise solutions', 'secure storage'],
-            selected: false,
-            metrics: {
-              ctr: 4.2,
-              seoScore: 89
-            }
-          }
-        ]
-      } catch (error) {
-        console.error('Error generating titles:', error)
-        message.error('Failed to generate TDK suggestions')
-      }
-    }
-
-    // 添加计算属性来处理选中状态
-    const selectedTopicsCount = computed(() => {
-      return suggestedTopics.value.filter(topic => topic.selected).length
-    })
-
-    const selectedTitlesCount = computed(() => {
-      return suggestedTitles.value.filter(title => title.selected).length
-    })
 
     // 添加生成状态追踪
     const hasGenerated = ref(false)
@@ -1535,28 +1183,6 @@ export default defineComponent({
 
     // 在组件创建时立即执行初始化
     initializeSelectedKeywords()
-
-    // 添加 anchorItems 数据
-    const anchorItems = computed(() => [
-      {
-        key: 'suggested-topics',
-        href: '#suggested-topics',
-        title: 'Suggested Topics',
-        class: !suggestedTopics.value.length ? 'nav-disabled' : ''
-      },
-      {
-        key: 'suggested-titles',
-        href: '#suggested-titles',
-        title: 'Suggested TDK',
-        class: !suggestedTitles.value.length ? 'nav-disabled' : ''
-      },
-      {
-        key: 'content-outline',
-        href: '#content-outline',
-        title: 'Content Outline',
-        class: !generatedOutline.value ? 'nav-disabled' : ''
-      }
-    ])
 
     const analysisStatus = ref(null)
     const pollingInterval = ref(null)
@@ -1595,54 +1221,10 @@ export default defineComponent({
       }
     }
 
-    const startPolling = () => {
-      if (!domainConfigured.value) {
-        return;
-      }
-
-      // Clear any existing interval
-      if (pollingInterval.value) {
-        clearInterval(pollingInterval.value)
-      }
-      
-      // Start polling every 30 seconds
-      pollingInterval.value = setInterval(checkAnalysisStatus, 30000)
-    }
-
-    // 修改 onMounted 钩子
-    onMounted(async () => {
-      await checkDomainStatus()
-      // 只有在域名已配置的情况下才检查分析状态和启动轮询
-      if (domainConfigured.value) {
-        checkAnalysisStatus()
-        startPolling()
-      }
-    })
-
-    // Clean up interval on component unmount
-    onUnmounted(() => {
-      if (pollingInterval.value) {
-        clearInterval(pollingInterval.value)
-      }
-    })
-
     // Computed property to determine what to display
     const analysisState = computed(() => {
       if (loading.value) return 'loading'
       return taskInfo.value?.analysisStatus || 'not_started'
-    })
-
-    // 添加 showLoadingState 函数
-    const showLoadingState = computed(() => {
-      if (loading.value) {
-        return true
-      }
-      
-      if (analysisState.value === 'processing') {
-        return true
-      }
-      
-      return false
     })
 
     // Add a computed property for current tasks
@@ -1677,16 +1259,6 @@ export default defineComponent({
       }
     }
 
-    // 导航到设置页面
-    const goToDashboard = () => {
-      router.push('/dashboard')
-    }
-
-    // 导航到帮助中心
-    const goToHelpCenter = () => {
-      router.push('/help-center')
-    }
-
     // 修改状态判断方法
     const getKeywordStatus = (item) => {
       // 根据grade判断状态
@@ -1716,16 +1288,152 @@ export default defineComponent({
       }
     }
 
+    // Add new refs
+    const contentPlans = ref([])
+
+    // Add new computed property
+    const selectedPlansCount = computed(() => {
+      return contentPlans.value.filter(plan => plan.selected).length
+    })
+
+    // Add new methods
+    const generateContentPlan = async () => {
+      isGenerating.value = true
+      try {
+        const mockPlans = [
+          {
+            intent: {
+              name: "Commercial Investigation",
+              color: "blue",
+              description: "Users are researching cloud storage solutions with intent to purchase"
+            },
+            pageType: {
+              name: "Product Comparison",
+              color: "cyan",
+              description: "Detailed comparison of different solutions"
+            },
+            tdk: {
+              title: "Best Cloud Storage Solutions 2024: Expert Comparison & Reviews",
+              description: "Compare top cloud storage providers. In-depth analysis of security, pricing, and features. Find the perfect storage solution for your needs.",
+              keywords: ["cloud storage", "storage solutions", "cloud comparison", "secure storage"]
+            },
+            outline: [
+              {
+                title: "1. Introduction to Cloud Storage Solutions",
+                keywords: ["cloud storage basics", "storage types"],
+                points: [
+                  "Definition of cloud storage and its importance",
+                  "Key benefits for businesses and individuals",
+                  "Overview of different types of cloud storage"
+                ]
+              },
+              {
+                title: "2. Key Features Comparison",
+                keywords: ["storage features", "security features"],
+                points: [
+                  "Storage capacity and pricing plans",
+                  "Security and encryption features",
+                  "File sharing and collaboration tools",
+                  "Integration capabilities"
+                ]
+              },
+              {
+                title: "3. Performance Analysis",
+                keywords: ["upload speed", "download speed"],
+                points: [
+                  "Upload and download speeds",
+                  "File syncing efficiency",
+                  "Mobile app performance"
+                ]
+              }
+            ]
+          },
+          {
+            intent: {
+              name: "Technical Research",
+              color: "purple",
+              description: "Users seeking detailed technical information about cloud storage implementation"
+            },
+            pageType: {
+              name: "Technical Guide",
+              color: "green",
+              description: "In-depth technical documentation"
+            },
+            tdk: {
+              title: "Cloud Storage Security Guide: Implementation & Best Practices",
+              description: "Learn about cloud storage security, encryption methods, and implementation best practices. Expert guide for IT professionals.",
+              keywords: ["cloud security", "encryption", "security implementation", "data protection"]
+            },
+            outline: [
+              {
+                title: "1. Cloud Storage Security Fundamentals",
+                keywords: ["security basics", "encryption types"],
+                points: [
+                  "Basic security concepts in cloud storage",
+                  "Types of encryption methods",
+                  "Security compliance standards"
+                ]
+              },
+              {
+                title: "2. Implementation Strategies",
+                keywords: ["security setup", "configuration"],
+                points: [
+                  "Setting up secure cloud storage",
+                  "Access control configuration",
+                  "Multi-factor authentication setup",
+                  "Backup and recovery planning"
+                ]
+              },
+              {
+                title: "3. Best Practices & Recommendations",
+                keywords: ["security practices", "risk management"],
+                points: [
+                  "Security best practices",
+                  "Risk assessment and management",
+                  "Regular security audits",
+                  "Employee training guidelines"
+                ]
+              }
+            ]
+          }
+        ]
+
+        // Simulate API response
+        setTimeout(() => {
+          contentPlans.value = mockPlans.map(plan => ({
+            ...plan,
+            selected: false
+          }))
+          hasGenerated.value = true
+          isGenerating.value = false
+        }, 2000) // Add 2s delay to simulate API call
+
+      } catch (error) {
+        console.error('Failed to generate content plan:', error)
+        message.error('Failed to generate content plan')
+        isGenerating.value = false
+      }
+    }
+
+    const handlePlanSelect = (plan, checked) => {
+      plan.selected = checked
+    }
+
+    const confirmSelectedPlans = async () => {
+      const selectedPlans = contentPlans.value.filter(plan => plan.selected)
+      if (selectedPlans.length) {
+        // Handle selected plans confirmation
+        console.log('Selected plans:', selectedPlans)
+        message.success('Content plans confirmed')
+      }
+    }
+
     return {
       currentMode,
       selectedKeywords,
       overviewData,
-      currentModeComponent,
-      getCategoryPercent,
-      viewSelected,
       clearSelection,
       overviewStats: ref(overviewStats),
-      categories: ref(categories),
       priorities,
       recommendedKeywords,  // 确保在 return 中暴露
       pageKeywords: ref(pageKeywords),
@@ -1735,9 +1443,6 @@ export default defineComponent({
       rowSelection,
       pagination,
       handleTableChange,
-      handlePageClick,
-      handleEdit,
-      handleDelete,
       currentPreset,
       saveModalVisible,
       newPresetName,
@@ -1753,33 +1458,16 @@ export default defineComponent({
       handleModalClose,
       getKeywordsByPriority,
       isGenerating,
-      contentPlan,
-      suggestedTopics,
-      suggestedTitles,
-      generatedOutline,
-      selectedTopic,
-      selectedTitle,
-      generateContent,
-      selectedTopicsCount,
-      selectedTitlesCount,
-      handleTopicSelect,
-      handleTitleSelect,
-      confirmTopics,  // 确保这些方法被返回
-      confirmTitles,
-      scrollToElement,
       isGeneratingTitles,
       isGeneratingOutline,
       hasGenerated,
-      generateTitles,
       filteredKeywords,
       getRankClass,
       handleKeywordSelect,
       addFilter,
       removeFilter,
       filters,
-      anchorItems,
       clearFilters,
-      showLoadingState,
       analysisStatus,
       loading,
       analysisState,
@@ -1788,14 +1476,17 @@ export default defineComponent({
       getProgressPercent,
       formatTime,
       domainConfigured,
-      goToDashboard,
-      goToHelpCenter,
       recommendedPagination,
       pagePagination,
       handleComparisonPaginationChange,
       handleTopPagesPaginationChange,
       currentPriority,
-      handleTabChange
+      handleTabChange,
+      contentPlans,
+      selectedPlansCount,
+      generateContentPlan,
+      handlePlanSelect,
+      confirmSelectedPlans
     }
   }
 })
@@ -1808,10 +1499,6 @@ export default defineComponent({
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-  
-  :deep(.ant-card-body) {
-    padding: 8px 24px;
-  }
 }
 
 .horizontal-steps {
@@ -2873,6 +2560,40 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 24px;
+  flex: 1; /* 添加这行以确保容器占满剩余空间 */
+}
+
+/* 添加空状态的样式 */
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px; /* 设置最小高度确保在内容少时也能居中 */
+  padding: 48px;
+}
+
+.empty-content {
+  text-align: center;
+  max-width: 480px; /* 限制内容最大宽度 */
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: #1890ff;
+  margin-bottom: 24px;
+}
+
+.empty-title {
+  font-size: 24px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 16px;
+}
+
+.empty-description {
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 32px;
 }
 
 .result-card {
@@ -3874,6 +3595,92 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+/* Add new styles */
+.content-plan-card {
+  margin-bottom: 24px;
+}
+
+.plan-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.plan-title {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.plan-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.intent-content,
+.tdk-content,
+.outline-content {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.intent-tags {
+  margin-bottom: 8px;
+}
+
+.intent-description {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.tdk-item {
+  margin-bottom: 12px;
+}
+
+.tdk-label {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 4px;
+}
+
+.tdk-text {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.outline-section {
+  margin-bottom: 16px;
+}
+
+.section-header {
+  margin-bottom: 8px;
+}
+
+.section-keywords {
+  margin-top: 4px;
+}
+
+.point-item {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-bottom: 4px;
+}
+
+.action-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
 }
 </style>
 
