@@ -52,22 +52,20 @@
         </template>
 
         <template v-else>
-          <a-card class="workflow-card">
-            <div class="steps-container">
-              <a-steps :current="currentStep" direction="horizontal" class="compact-steps">
-                <a-step>
-                  <template #title>
-                    <span class="step-title">1. Select Keywords</span>
-                  </template>
-                </a-step>
-                <a-step>
-                  <template #title>
-                    <span class="step-title">2. Check Page Intent, TDK and Outline And Start Generating！</span>
-                  </template>
-                </a-step>
-              </a-steps>
-            </div>
-          </a-card>
+          <div class="steps-wrapper">
+            <a-steps :current="currentStep" direction="horizontal">
+              <a-step>
+                <template #title>
+                  <span class="step-title">Select Keywords</span>
+                </template>
+              </a-step>
+              <a-step>
+                <template #title>
+                  <span class="step-title">Check Page Intent, TDK and Outline And Start Generating！</span>
+                </template>
+              </a-step>
+            </a-steps>
+          </div>
 
           <!-- Main Content Area -->
           <div class="main-content">
@@ -76,18 +74,82 @@
               <!-- Mode Selector -->
               <a-card class="mode-selector-card">
                 <div class="mode-selector-wrapper">
-                  <a-radio-group v-model:value="currentMode" button-style="solid" size="large">
-                    <a-radio-button value="beginner">
-                      <template #icon><UserOutlined /></template>
-                      Beginner
-                    </a-radio-button>
-                    <a-radio-button value="expert">
-                      <template #icon><ExperimentOutlined /></template>
-                      Expert
-                    </a-radio-button>
-                  </a-radio-group>
-                  
-                  <!-- Mode Selector moved here -->
+                  <div class="mode-controls">
+                    <a-radio-group v-model:value="currentMode" button-style="solid" size="large">
+                      <a-radio-button value="beginner">
+                        <template #icon><UserOutlined /></template>
+                        Beginner
+                      </a-radio-button>
+                      <a-radio-button value="expert">
+                        <template #icon><ExperimentOutlined /></template>
+                        Expert
+                      </a-radio-button>
+                    </a-radio-group>
+                    
+                    <!-- 添加问号图标 -->
+                    <a-popover
+                      placement="rightTop"
+                      trigger="click"
+                      :overlayStyle="{ maxWidth: '400px' }"
+                    >
+                      <template #content>
+                        <div class="analysis-overview-popover">
+                          <div class="overview-section">
+                            <div class="section-title">
+                              <span class="number">1</span>
+                              Analysis Overview
+                            </div>
+                            <p class="section-desc">We've completed a comprehensive keyword analysis</p>
+                            <div class="stats-row">
+                              <div class="stat-item">
+                                <div class="stat-label">We've analyzed</div>
+                                <div class="stat-value">{{ overviewData.totalKeywordsAnalyzed }} keywords</div>
+                              </div>
+                              <div class="stat-item">
+                                <div class="stat-label">Compared your site with</div>
+                                <div class="stat-value">{{ overviewData.totalTopPagesAnalyzed }} top pages</div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="overview-section">
+                            <div class="section-title">
+                              <span class="number">2</span>
+                              What We Found
+                            </div>
+                            <p class="section-desc">Here's what our analysis revealed about your keyword coverage</p>
+                            <div class="findings-tags">
+                              <a-tag color="red">{{overviewData.absence}} keywords you're missing</a-tag>
+                            </div>
+                          </div>
+                          
+                          <div class="overview-section">
+                            <div class="section-title">
+                              <span class="number">3</span>
+                              Recommended Actions
+                            </div>
+                            <p class="section-desc">We've prioritized keywords based on potential impact and effort</p>
+                            <div class="action-steps">
+                              <div class="step-item">
+                                <CheckCircleOutlined />
+                                <span>Review and select keywords below</span>
+                              </div>
+                              <div class="step-item">
+                                <ArrowRightOutlined />
+                                <span>Focus on P0 (Quick Wins) first</span>
+                              </div>
+                              <div class="step-item">
+                                <ArrowRightOutlined />
+                                <span>Then move to higher effort opportunities</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </template>
+                      <QuestionCircleOutlined class="help-icon" />
+                    </a-popover>
+                  </div>
+
                   <div class="header-actions">
                     <a-button 
                       v-if="currentStep > 0" 
@@ -105,93 +167,6 @@
                     </a-button>
                   </div>
                 </div>
-              </a-card>
-
-              <!-- Analytics Overview -->
-              <a-card class="analytics-card" :bordered="false">
-                <template v-if="currentMode === 'beginner'">
-                  <div class="analysis-steps-container">
-                    <!-- 第一步：分析概况 -->
-                    <div class="analysis-step-horizontal">
-                      <div class="step-badge">
-                        <SearchOutlined class="step-icon" />
-                        <div class="step-number">1</div>
-                      </div>
-                      <div class="step-content">
-                        <div class="step-title">Analysis Overview</div>
-                        <div class="step-subtitle">We've completed a comprehensive keyword analysis</div>
-                        <a-row :gutter="[16, 16]">
-                          <a-col :span="12">
-                            <div class="stat-item">
-                              <div class="stat-label">We've analyzed</div>
-                              <div class="stat-value compact">{{ overviewData.totalKeywordsAnalyzed }} keywords</div>
-                            </div>
-                          </a-col>
-                          <a-col :span="12">
-                            <div class="stat-item">
-                              <div class="stat-label">Compared your site with</div>
-                              <div class="stat-value compact">{{ overviewData.totalTopPagesAnalyzed }} top pages from your competitors</div>
-                            </div>
-                          </a-col>
-                        </a-row>
-                      </div>
-                    </div>
-
-                    <!-- 第二步：发现的问题 -->
-                    <div class="analysis-step-horizontal">
-                      <div class="step-badge">
-                        <BulbOutlined class="step-icon" />
-                        <div class="step-number">2</div>
-                      </div>
-                      <div class="step-content">
-                        <div class="step-title">What We Found</div>
-                        <div class="step-subtitle">Here's what our analysis revealed about your keyword coverage</div>
-                        <div class="difference-tags">
-                          <a-tag color="red">
-                            {{overviewData.absence}} keywords you're missing
-                          </a-tag>
-                          <!-- <a-tag color="orange">
-                            {{overviewData.weak}} keywords need improvement
-                          </a-tag> -->
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- 第三步：建议行动 -->
-                    <div class="analysis-step-horizontal">
-                      <div class="step-badge">
-                        <ThunderboltOutlined class="step-icon" />
-                        <div class="step-number">3</div>
-                      </div>
-                      <div class="step-content">
-                        <div class="step-title">Recommended Actions</div>
-                        <div class="step-subtitle">We've prioritized keywords based on potential impact and effort</div>
-                        <div class="step-description">
-                          <CheckCircleOutlined class="action-icon" /> Review and select keywords below
-                          <ArrowRightOutlined class="arrow-icon" /> Focus on P0 (Quick Wins) first
-                          <ArrowRightOutlined class="arrow-icon" /> Then move to higher effort opportunities
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- 添加新的引导部分 -->
-                  <div class="next-step-guide">
-                    <div class="guide-content">
-                      <ArrowDownOutlined class="guide-arrow" />
-                      <div class="guide-text">
-                        <div class="guide-title">Ready to get started?</div>
-                        <div class="guide-description">Review our recommended keywords below and select the ones you want to target</div>
-                      </div>
-                    </div>
-                    <div class="guide-decorative-arrows">
-                      <div class="decorative-arrow"></div>
-                      <div class="decorative-arrow"></div>
-                      <div class="decorative-arrow"></div>
-                    </div>
-                  </div>
-                </template>
-                <!-- expert 模式下不显示任何内容 -->
               </a-card>
 
               <!-- Selection Status -->
@@ -769,7 +744,8 @@ import {
   TrophyOutlined,
   ExportOutlined,
   LoadingOutlined,
-  WarningOutlined
+  WarningOutlined,
+  QuestionCircleOutlined
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -1493,18 +1469,6 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.workflow-card {
-  margin-bottom: 16px;
-  background: #fafafa;
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.horizontal-steps {
-  padding: 0;
-}
-
 :deep(.ant-steps-horizontal) {
   display: flex;
   width: 100%;
@@ -2060,36 +2024,6 @@ export default defineComponent({
 .strong {
   background-color: #52c41a;
   color: white;
-}
-
-.analysis-steps-container {
-  display: flex;
-  gap: 16px;
-  align-items: stretch;
-  margin-bottom: 0;
-}
-
-.analysis-step-horizontal {
-  flex: 1;
-  display: flex;
-  gap: 8px;
-  padding: 12px;
-  background: #fafafa;
-  border-radius: 8px;
-  min-width: 0;
-  position: relative;
-
-  &:not(:last-child)::after {
-    content: '';
-    position: absolute;
-    right: -12px;
-    top: 50%;
-    transform: translateY(-50%) rotate(45deg);
-    width: 8px;
-    height: 8px;
-    border-top: 2px solid #1890ff;
-    border-right: 2px solid #1890ff;
-  }
 }
 
 .step-badge {
@@ -3681,6 +3615,139 @@ p {
   display: flex;
   justify-content: flex-end;
   margin-top: 24px;
+}
+
+.mode-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.help-icon {
+  color: #8c8c8c;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.3s;
+  
+  &:hover {
+    color: #1890ff;
+  }
+}
+
+.analysis-overview-popover {
+  max-width: 400px;
+  padding: 8px;
+}
+
+.overview-section {
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  
+  .number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background: #1890ff;
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+  }
+}
+
+.section-desc {
+  color: #595959;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 16px;
+}
+
+.stat-item {
+  .stat-label {
+    font-size: 12px;
+    color: #8c8c8c;
+  }
+  
+  .stat-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: #262626;
+  }
+}
+
+.findings-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  
+  .step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #595959;
+    
+    .anticon {
+      color: #1890ff;
+    }
+  }
+}
+
+.steps-wrapper {
+  padding: 16px 24px;
+  background: #fff;
+  
+  :deep(.ant-steps) {
+    .ant-steps-item {
+      /* 确保步骤项垂直居中对齐 */
+      display: flex;
+      align-items: center;
+      
+      /* 步骤标题样式 */
+      .ant-steps-item-title {
+        font-size: 15px;
+        line-height: 32px;
+      }
+      
+      /* 当前步骤的样式 */
+      &.ant-steps-item-process {
+        .ant-steps-item-title {
+          color: #1890ff;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+.step-title {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
 }
 </style>
 
