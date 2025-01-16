@@ -105,27 +105,49 @@
           <!-- 按钮设置 -->
           <div class="content-section">
             <h3 class="section-title">Buttons</h3>
-            <a-form-item label="Primary Button Text">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.buttonText }}</span>
-                <a-input
-                  v-model:value="localSection.bottomContent.buttonText"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
+            
+            <!-- 修改按钮显示控制 -->
+            <a-form-item label="Show Primary Button">
+              <a-switch
+                v-model:checked="localSection.bottomContent.showButton"
+                :disabled="disabled"
+                @change="handleChange"
+              />
             </a-form-item>
 
-            <a-form-item label="CTA Button Text">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.ctaButtonText }}</span>
-                <a-input
-                  v-model:value="localSection.bottomContent.ctaButtonText"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
+            <a-form-item label="Show Secondary Button">
+              <a-switch
+                v-model:checked="localSection.bottomContent.showCtaButton"
+                :disabled="disabled"
+                @change="handleChange"
+              />
             </a-form-item>
+
+            <template v-if="localSection.bottomContent.showButton">
+              <a-form-item label="Primary Button Text">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.buttonText }}</span>
+                  <a-input
+                    v-model:value="localSection.bottomContent.buttonText"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+            </template>
+
+            <template v-if="localSection.bottomContent.showCtaButton">
+              <a-form-item label="Secondary Button Text">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.ctaButtonText }}</span>
+                  <a-input
+                    v-model:value="localSection.bottomContent.ctaButtonText"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+            </template>
           </div>
         </a-form>
       </div>
@@ -177,7 +199,9 @@ export default {
           callToActionEngagementTop: '',
           callToActionEngagementBottom: '',
           buttonText: '',
-          ctaButtonText: ''
+          ctaButtonText: '',
+          showButton: true,
+          showCtaButton: true
         },
         ...JSON.parse(JSON.stringify(this.section))
       },
@@ -225,7 +249,7 @@ export default {
   background: white;
   display: flex;
   flex-direction: column;
-  max-height: 1000px;
+  max-height: 1200px;
   position: relative;
 }
 

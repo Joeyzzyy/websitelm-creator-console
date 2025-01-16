@@ -29,14 +29,18 @@
         <p class="text-lg text-gray-700 mb-8">{{ section.bottomContent.callToActionEngagementBottom }}</p>
       </div>
 
-      <div class="flex justify-center items-center space-x-6">
+      <div 
+        class="flex justify-center items-center space-x-6"
+      >
         <button 
+          v-if="section.bottomContent.showButton"
           class="px-8 py-3 rounded-3xl text-lg font-semibold transition-all duration-200 border-2 border-[#3374FF] text-[#3374FF] hover:bg-[#3374FF] hover:text-white"
           @click="handleRedirect"
         >
           {{ section.bottomContent.buttonText }}
         </button>
         <button 
+          v-if="section.bottomContent.showCtaButton"
           class="px-8 py-3 rounded-3xl text-lg font-semibold transition-all duration-200 bg-[#3374FF] text-white hover:bg-[#2861E5] hover:scale-105"
           @click="handleRedirect"
         >

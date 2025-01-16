@@ -40,6 +40,14 @@
               </div>
             </a-form-item>
     
+            <a-form-item label="Show Button">
+              <a-switch
+                v-model:checked="localSection.topContent.showButton"
+                :disabled="disabled"
+                @change="handleChange"
+              />
+            </a-form-item>
+    
             <a-form-item label="Button Link">
               <div class="input-with-tag">
                 <span class="html-tag">{{ tags.buttonLink }}</span>
@@ -60,6 +68,14 @@
                   @change="handleChange"
                 />
               </div>
+            </a-form-item>
+
+            <a-form-item label="Show CTA Button">
+              <a-switch
+                v-model:checked="localSection.topContent.showCtaButton"
+                :disabled="disabled"
+                @change="handleChange"
+              />
             </a-form-item>
 
             <a-form-item label="CTA Button Link">
@@ -147,8 +163,10 @@
             subTitle: '',
             buttonText: '',
             buttonLink: '#',
+            showButton: true,
             ctaButtonText: '',
-            ctaButtonLink: '#'
+            ctaButtonLink: '#',
+            showCtaButton: true
           }
         },
         styles: themeConfig.normal,
@@ -167,8 +185,10 @@
               subTitle: '',
               buttonText: '',
               buttonLink: '#',
+              showButton: true,
               ctaButtonText: '',
-              ctaButtonLink: '#'
+              ctaButtonLink: '#',
+              showCtaButton: true
             }
           }
         },

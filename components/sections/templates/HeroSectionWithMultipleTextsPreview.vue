@@ -27,6 +27,7 @@
 
         <div class="pt-8 flex justify-center gap-4">
           <button 
+            v-if="section.topContent.showButton"
             @click="handleButtonClick('demo')"
             class="px-8 py-3 rounded-3xl text-lg font-semibold transition-all duration-200 border-2 border-[#3374FF] text-[#3374FF] hover:bg-[#3374FF] hover:text-white hover:scale-105"
           >
@@ -34,6 +35,7 @@
           </button>
           
           <button 
+            v-if="section.topContent.showCtaButton"
             @click="handleButtonClick('getStarted')"
             class="px-8 py-3 rounded-3xl text-lg font-semibold transition-all duration-200 bg-[#3374FF] text-white hover:bg-[#2861E5] hover:scale-105"
           >

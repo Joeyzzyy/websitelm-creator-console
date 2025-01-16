@@ -42,7 +42,9 @@ export const createCleanComponentData = (componentType) => {
         buttonText: 'Start Free Trial',
         buttonLink: '#',
         ctaButtonText: 'Contact Sales',
-        ctaButtonLink: '#'
+        ctaButtonLink: '#',
+        showButton: true,
+        showCtaButton: true
       }
     },
     
@@ -297,7 +299,9 @@ export const createCleanComponentData = (componentType) => {
         callToActionEngagementTop: 'Start transforming your website today—effortlessly build, optimize, and maintain content that drives results.',
         callToActionEngagementBottom: 'Join thousands of users already maximizing their website\'s potential with WebsiteLM.',
         buttonText: "Get Started Now",
-        ctaButtonText: "Book a Demo"
+        ctaButtonText: "Book a Demo",
+        showButton: true,
+        showCtaButton: true
       },
     },
 
