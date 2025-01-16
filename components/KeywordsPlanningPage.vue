@@ -2490,13 +2490,6 @@ export default defineComponent({
   color: #595959;
 }
 
-.generation-flow {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  flex: 1; /* 添加这行以确保容器占满剩余空间 */
-}
-
 /* 添加空状态的样式 */
 .empty-state {
   display: flex;
@@ -2522,12 +2515,6 @@ export default defineComponent({
   font-weight: 500;
   color: rgba(0, 0, 0, 0.85);
   margin-bottom: 16px;
-}
-
-.empty-description {
-  font-size: 16px;
-  color: rgba(0, 0, 0, 0.45);
-  margin-bottom: 32px;
 }
 
 .result-card {
@@ -2640,12 +2627,6 @@ export default defineComponent({
   }
 }
 
-.workspace-layout {
-  display: flex;
-  gap: 24px;
-  height: calc(100vh - 200px);
-}
-
 .selected-keywords-card {
   width: 320px;
   flex-shrink: 0;
@@ -2694,28 +2675,10 @@ export default defineComponent({
   min-width: 0; 
 }
 
-.step-actions {
-  margin-bottom: 24px;
-  padding: 16px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
 .workspace-layout {
   display: flex;
   gap: 24px;
   height: calc(100vh - 200px);
-}
-
-.selected-keywords-card {
-  width: 320px;
-  flex-shrink: 0;
-  height: fit-content;
-  
-  :deep(.ant-card-body) {
-    padding: 0;
-    max-height: calc(100vh - 280px);
-    overflow-y: auto;
-  }
 }
 
 .generation-flow {
@@ -2822,41 +2785,14 @@ export default defineComponent({
   }
 }
 
-.action-footer {
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
-  display: flex;
-  justify-content: flex-end;
-}
-
 .topic-list,
 .title-list {
   margin-bottom: 0; /* 移除底部边距，因为现在有了 action-footer */
 }
 
-.empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 400px;
-}
-
-.empty-content {
-  text-align: center;
-  max-width: 400px;
-}
-
 .empty-icon {
   font-size: 48px;
   margin-bottom: 24px;
-}
-
-.empty-title {
-  font-size: 24px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 16px;
 }
 
 .empty-description {
@@ -3531,11 +3467,6 @@ p {
   justify-content: center;
 }
 
-/* Add new styles */
-.content-plan-card {
-  margin-bottom: 24px;
-}
-
 .plan-header {
   display: flex;
   align-items: center;
@@ -3720,28 +3651,6 @@ p {
 .steps-wrapper {
   padding: 16px 24px;
   background: #fff;
-  
-  :deep(.ant-steps) {
-    .ant-steps-item {
-      /* 确保步骤项垂直居中对齐 */
-      display: flex;
-      align-items: center;
-      
-      /* 步骤标题样式 */
-      .ant-steps-item-title {
-        font-size: 15px;
-        line-height: 32px;
-      }
-      
-      /* 当前步骤的样式 */
-      &.ant-steps-item-process {
-        .ant-steps-item-title {
-          color: #1890ff;
-          font-weight: 500;
-        }
-      }
-    }
-  }
 }
 
 .step-title {
