@@ -4,6 +4,7 @@
     description="Plan and generate content strategically"
     icon="🎯"
   >
+    
     <!-- Domain Not Configured Notice -->
     <template v-if="!domainConfigured">
       <no-site-configured />
@@ -57,15 +58,26 @@
         </div>
       </template>
 
-      <!-- Main Content (Only shown when analysis is completed) -->
       <template v-else>
-        <!-- Original content here -->
         <a-card class="workflow-card">
-          <!-- Workflow Steps -->
           <div class="steps-container">
-            <a-steps :current="currentStep" direction="horizontal" class="horizontal-steps">
-              <a-step title="Select Keywords" description="Choose keywords from different modes" />
-              <a-step title="Generate Topic Title and Outline" description="Create and optimize content structure" />
+            <a-steps :current="currentStep" direction="horizontal" class="compact-steps">
+              <a-step>
+                <template #title>
+                  <span class="step-title">1. Select Keywords</span>
+                </template>
+                <template #description>
+                  <span class="step-desc">Choose keywords from different modes</span>
+                </template>
+              </a-step>
+              <a-step>
+                <template #title>
+                  <span class="step-title">2. Generate Topic Title and Outline</span>
+                </template>
+                <template #description>
+                  <span class="step-desc">Create and optimize content structure</span>
+                </template>
+              </a-step>
             </a-steps>
           </div>
         </a-card>
@@ -125,13 +137,13 @@
                         <a-col :span="12">
                           <div class="stat-item">
                             <div class="stat-label">We've analyzed</div>
-                            <div class="stat-value compact">2,500 keywords</div>
+                            <div class="stat-value compact">{{ overviewData.totalKeywordsAnalyzed }} keywords</div>
                           </div>
                         </a-col>
                         <a-col :span="12">
                           <div class="stat-item">
                             <div class="stat-label">Compared your site with</div>
-                            <div class="stat-value compact">50 top pages from your competitors</div>
+                            <div class="stat-value compact">{{ overviewData.totalTopPagesAnalyzed }} top pages from your competitors</div>
                           </div>
                         </a-col>
                       </a-row>
@@ -149,14 +161,11 @@
                       <div class="step-subtitle">Here's what our analysis revealed about your keyword coverage</div>
                       <div class="difference-tags">
                         <a-tag color="red">
-                          <InfoCircleOutlined /> 200 keywords you're missing
+                          {{overviewData.absence}} keywords you're missing
                         </a-tag>
-                        <a-tag color="orange">
-                          <WarningOutlined /> 150 keywords need improvement
-                        </a-tag>
-                        <a-tag color="green">
-                          <CheckCircleOutlined /> 80 keywords performing well
-                        </a-tag>
+                        <!-- <a-tag color="orange">
+                          {{overviewData.weak}} keywords need improvement
+                        </a-tag> -->
                       </div>
                     </div>
                   </div>
@@ -241,8 +250,10 @@
                 <a-col :span="12">
                   <a-card title="Keywords From Comparison" class="beginner-card">
                     <p class="recommendation-text">We analyzed and prioritized keywords by opportunity:</p>
-                    
-                    <a-tabs>
+                    <a-tabs 
+                      v-model:activeKey="currentPriority"
+                      @change="handleTabChange"
+                    >
                       <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
                         <div class="priority-description">{{ priority.description }}</div>
                         <a-list
@@ -260,26 +271,34 @@
                                   >
                                     "{{ item.keyword }}"
                                   </a-checkbox>
-                                  <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
+                                  <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
                                   <a-tag color="cyan">KD={{ item.kd }}</a-tag>
                                   <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                                  <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
+                                  <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
                                 </a-space>
-                                <div class="keyword-reason">
+                                
+                                <!-- 添加推荐理由显示 -->
+                                <div class="keyword-reason" v-if="item.reason">
                                   <BulbOutlined />
                                   <div class="reason-content">
-                                    <span class="reason-highlight">High potential: </span>
-                                    <span class="reason-detail">Low competition (</span>
-                                    <span class="reason-value">KD=35</span>
-                                    <span class="reason-detail">) with </span>
-                                    <span class="reason-value">high search volume</span>
-                                    <span class="reason-detail">. Your competitors rank well for this term.</span>
+                                    <span class="reason-highlight">Reason: </span>
+                                    <span class="reason-value">{{ item.reason }}</span>
                                   </div>
                                 </div>
                               </div>
                             </a-list-item>
                           </template>
                         </a-list>
+                        <!-- 添加分页器 -->
+                        <div class="pagination-wrapper">
+                          <a-pagination
+                            v-model:current="recommendedPagination.current"
+                            :total="recommendedPagination.total"
+                            :pageSize="recommendedPagination.pageSize"
+                            :show-total="(total) => `Total ${total} items`"
+                            @change="(page, pageSize) => handleComparisonPaginationChange(priority.level, page, pageSize)"
+                          />
+                        </div>
                       </a-tab-pane>
                     </a-tabs>
                   </a-card>
@@ -290,7 +309,11 @@
                   <a-card title="Keywords From Top Pages Optimization" class="optimization-card">
                     <p class="recommendation-text">Optimization opportunities by priority:</p>
                     
-                    <a-tabs v-if="pageKeywords && pageKeywords.length">
+                    <a-tabs 
+                      v-model:activeKey="currentPagePriority"
+                      @change="handlePageTabChange"
+                      class="compact-tabs"
+                      >
                       <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
                         <div class="priority-description">{{ priority.description }}</div>
                         <a-list
@@ -308,19 +331,32 @@
                                   >
                                     "{{ item.keyword }}"
                                   </a-checkbox>
-                                  <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
+                                  <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
                                   <a-tag color="cyan">KD={{ item.kd }}</a-tag>
                                   <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                                  <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
+                                  <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
                                 </a-space>
-                                <div class="keyword-reason">
+                                <!-- 添加 reasoning 显示 -->
+                                <div class="keyword-reason" v-if="item.reason">
                                   <BulbOutlined />
-                                  <span class="reason-text">{{ item.pageReason }}</span>
+                                  <div class="reason-content">
+                                    <span class="reason-highlight">Reason: </span>
+                                    <span class="reason-value">{{ item.reason }}</span>
+                                  </div>
                                 </div>
                               </div>
                             </a-list-item>
                           </template>
                         </a-list>
+                        <div class="pagination-wrapper">
+                          <a-pagination
+                            v-model:current="pagePagination.current"
+                            :total="pagePagination.total"
+                            :pageSize="pagePagination.pageSize"
+                            :show-total="(total) => `Total ${total} items`"
+                            @change="(page, pageSize) => handleTopPagesPaginationChange(priority.level, page, pageSize)"
+                          />
+                        </div>
                       </a-tab-pane>
                     </a-tabs>
                   </a-card>
@@ -781,7 +817,6 @@ import {
   DeleteOutlined,
   PlusOutlined,
   SaveOutlined,
-  // ... 其他已使用的图标
   EyeOutlined,
   BulbOutlined,
   CompassOutlined,
@@ -835,15 +870,10 @@ export default defineComponent({
     const columns = computed(() => tableColumns)
     
     const overviewData = ref({
-      totalKeywords: 1234,
-      keywordsChange: 15,
-      ourTopPages: 45,
-      competitorTopPages: 67,
-      categories: {
-        missing: 234,
-        weak: 345,
-        strong: 655
-      }
+      totalKeywordsAnalyzed: 0,
+      totalTopPagesAnalyzed: 0,
+      absence: 0,  // 添加 absence 字段
+      weak: 0      // 保留 weak 字段以备后用
     })
 
     const currentModeComponent = computed(() => {
@@ -884,122 +914,148 @@ export default defineComponent({
       { name: 'Unique', color: 'purple' }
     ])
 
+    // 修改 priorities 数组,level 改为 1-5
     const priorities = [
       {
-        level: 'P0',
-        label: 'P0 - Quick Wins',
+        level: '1',
+        label: 'P1 - Quick Wins', // 改为 P1
         color: '#f50',
         description: 'High impact, low effort opportunities'
       },
       {
-        level: 'P1',
-        label: 'P1 - High Priority',
-        color: '#fa8c16',
+        level: '2',
+        label: 'P2 - High Priority', // 改为 P2
+        color: '#fa8c16', 
         description: 'Important terms with good potential'
       },
       {
-        level: 'P2',
-        label: 'P2 - Medium Priority',
+        level: '3',
+        label: 'P3 - Medium Priority', // 改为 P3
         color: '#1890ff',
         description: 'Valuable but requires more effort'
       },
       {
-        level: 'P3',
-        label: 'P3 - Low Priority',
+        level: '4',
+        label: 'P4 - Low Priority', // 改为 P4
         color: '#52c41a',
         description: 'Long-term opportunities'
       },
       {
-        level: 'P4',
-        label: 'P4 - Monitor',
+        level: '5',
+        label: 'P5 - Monitor', // 改为 P5
         color: '#722ed1',
         description: 'Keep an eye on these terms'
       }
     ]
 
-    // 将导入的数据转换为响应式
-    const recommendedKeywords = ref(importedRecommendedKeywords)
+    const recommendedKeywords = ref([])
+    const pageKeywords = ref([])
+    const recommendedPagination = ref({
+      current: 1,
+      pageSize: 10,
+      total: 0
+    })
+    const pagePagination = ref({
+      current: 1,
+      pageSize: 10,
+      total: 0
+    })
 
-    const pageKeywords = ref([
-      // P0 优先级关键词
-      {
-        keyword: 'cloud storage solutions',
-        kd: 35,
-        volume: 1200,
-        krs: 85,
-        status: { text: 'Missing', color: 'red' },
+    // 修改数据转换方法
+    const transformKeywordData = (item) => {
+      return {
+        id: item.keywordId,
+        keyword: item.keyword,
         selected: false,
-        priority: 'P0',
-        pageReason: 'aiseo.ai\'s page "aiseo.ai/cloud-guide" ranks #15. High potential for quick improvement.'
-      },
-      {
-        keyword: 'business cloud storage',
-        kd: 42,
-        volume: 1800,
-        status: { text: 'Weak', color: 'orange' },
-        selected: false,
-        priority: 'P0',
-        pageReason: 'surferseo.com\'s page "surferseo.com/business-solutions" ranks #8. Close to first page.'
-      },
-      // P1 优先级关键词
-      {
-        keyword: 'cloud backup services',
-        kd: 38,
-        volume: 1400,
-        status: { text: 'Missing', color: 'red' },
-        selected: false,
-        priority: 'P1',
-        pageReason: 'Perfect fit for your "/services" page. Currently not targeting this term.'
-      },
-      {
-        keyword: 'cloud storage security',
-        kd: 45,
-        volume: 2000,
-        status: { text: 'Weak', color: 'orange' },
-        selected: false,
-        priority: 'P1',
-        pageReason: 'Your "/security" page needs optimization for this key term.'
-      },
-      // P2 优先级关键词
-      {
-        keyword: 'cloud file sharing',
-        kd: 50,
-        volume: 1600,
-        status: { text: 'Missing', color: 'red' },
-        selected: false,
-        priority: 'P2',
-        pageReason: 'Good opportunity for your "/features" page to target this term.'
-      },
-      {
-        keyword: 'enterprise backup solutions',
-        kd: 48,
-        volume: 900,
-        status: { text: 'Weak', color: 'orange' },
-        selected: false,
-        priority: 'P2',
-        pageReason: 'Your "/enterprise" page could rank better for this term.'
-      },
-      // P3 优先级关键词
-      {
-        keyword: 'cloud storage reviews',
-        kd: 35,
-        volume: 800,
-        status: { text: 'Missing', color: 'red' },
-        selected: false,
-        priority: 'P3',
-        pageReason: 'Consider creating a dedicated review comparison page.'
-      },
-      // P4 优先级关键词
-      {
-        keyword: 'cloud backup pricing',
-        kd: 30,
-        volume: 500,
-        status: { text: 'Weak', color: 'orange' },
-        selected: false,
-        priority: 'P4',
-        pageReason: 'Your "/pricing" page could better target this commercial term.'
+        krs: Number(item.krsScore).toFixed(2), // 使用 krsScore 字段，保留两位小数
+        kd: item.kd, // 直接使用 kd 字段
+        volume: item.volume, // 直接使用 volume 字段
+        cpc: Number(item.cpc).toFixed(2), // 添加 cpc 字段，保留两位小数
+        status: getKeywordStatus(item),
+        grade: item.grade,
+        reason: item.reasoning || 'No specific reason provided', // 使用 reasoning 字段，如果为空则提供默认值
+        pages: [], // 页面信息
+        competitors: [] // 竞争对手信息
       }
-    ])
+    }
+
+    // 1. 修改 fetchKeywords 方法，确保正确发送 level 参数
+    const fetchKeywords = async (source, level, page = 1, limit = 10) => {
+      try {
+        console.log('Fetching keywords with params:', { source, level, page, limit })
+        const response = await api.getPlanningKeywords({
+          source,
+          level,
+          page,
+          limit
+        })
+        
+        if (response?.data) {
+          const transformedData = response.data.map(transformKeywordData)
+          if (source === 'keywords') {
+            recommendedKeywords.value = transformedData
+            recommendedPagination.value.total = response.totalCount
+          } else if (source === 'top_page_keywords') {
+            pageKeywords.value = transformedData
+            pagePagination.value.total = response.totalCount
+          }
+        }
+      } catch (error) {
+        console.error('获取关键词失败:', error)
+      }
+    }
+
+    // 添加 Top Pages tab 切换处理
+    const handlePageTabChange = (activeKey) => {
+      console.log('Page Tab changed to:', activeKey)
+      const priority = priorities.find(p => p.level === activeKey)
+      if (priority) {
+        pagePagination.value.current = 1
+        fetchKeywords('top_page_keywords', priority.level, 1, pagePagination.value.pageSize)
+      }
+    }
+
+    // 修改函数名称以区分两个不同来源的分页处理
+    const handleComparisonPaginationChange = (priority, page, pageSize) => {
+      console.log('Comparison Pagination change:', { priority, page, pageSize })
+      recommendedPagination.value.current = page
+      recommendedPagination.value.pageSize = pageSize
+      fetchKeywords('keywords', priority, page, pageSize)
+    }
+
+    const handleTopPagesPaginationChange = (priority, page, pageSize) => {
+      console.log('Top Pages Pagination change:', { priority, page, pageSize })
+      pagePagination.value.current = page
+      pagePagination.value.pageSize = pageSize
+      fetchKeywords('top_page_keywords', priority, page, pageSize)
+    }
+
+    // 2. 确保组件挂载时获取初始数据
+    onMounted(() => {
+      console.log('组件挂载，开始获取数据')
+      // 默认获取 level 1 (P0) 的数据
+      fetchKeywords('keywords', '1', 1, recommendedPagination.value.pageSize)
+      fetchKeywords('top_page_keywords', '1', 1, pagePagination.value.pageSize)
+    })
+
+    // 3. 添加监听器来观察数据变化
+    watch(recommendedKeywords, (newVal) => {
+      console.log('recommendedKeywords变化:', newVal)
+    }, { deep: true })
+
+    // 4. 修改分页处理方法，添加 priority 参数
+    const handleRecommendedPaginationChange = (priority, page, pageSize) => {
+      console.log('Pagination change:', { priority, page, pageSize }) // 添加日志
+      recommendedPagination.value.current = page
+      recommendedPagination.value.pageSize = pageSize
+      fetchKeywords('keywords', priority, page, pageSize)
+    }
+
+    const handlePagePaginationChange = (page, pageSize) => {
+      pagePagination.value.current = page
+      pagePagination.value.pageSize = pageSize
+      fetchKeywords('top_page_keywords', page, pageSize)
+    }
 
     const topPages = ref([
       {
@@ -1076,19 +1132,20 @@ export default defineComponent({
       { deep: true }
     )
 
-    // 添加计算属性来获取所有页面关键词的总数
-    const getTotalPageKeywords = computed(() => {
-      return topPages.value.reduce((total, page) => {
-        return total + (page.keywords?.length || 0)
-      }, 0)
-    })
-
-    // 按优先级过滤关键词的方法
     const getKeywordsByPriority = (keywords, priority) => {
       if (!keywords || !keywords.length) return []
-      return keywords.value ? 
-        keywords.value.filter(k => k.priority === priority) : 
-        keywords.filter(k => k.priority === priority)
+      
+      // 将priority等级映射到grade
+      const priorityToGrade = {
+        '1': '1', // P0
+        '2': '2', // P1
+        '3': '3', // P2
+        '4': '4', // P3
+        '5': '5'  // P4
+      }
+      
+      const grade = priorityToGrade[priority]
+      return keywords.filter(k => k.grade === grade)
     }
 
     // 在 expert 模式下的内容
@@ -1532,7 +1589,6 @@ export default defineComponent({
 
     // 修改 checkAnalysisStatus 函数
     const checkAnalysisStatus = async () => {
-      // 如果域名未配置,直接返回
       if (!domainConfigured.value) {
         isLoading.value = false;
         return;
@@ -1544,6 +1600,17 @@ export default defineComponent({
           taskInfo.value = response
           if (response.analysisStatus === 'finished') {
             clearInterval(pollingInterval.value)
+            // 获取概览数据
+            const overview = await api.getKeywordAnalysisOverview()
+            if (overview?.data) {
+              // 正确映射 API 返回的数据结构
+              overviewData.value = {
+                totalKeywordsAnalyzed: overview.data.totalKeywordsAnalyzed,
+                totalTopPagesAnalyzed: overview.data.totalTopPagesAnalyzed,
+                absence: overview.data.keywordsGroup.absence,  // 从 keywordsGroup 中获取 absence
+                weak: overview.data.keywordsGroup.weak || 0    // 如果 API 返回了 weak 数据
+              }
+            }
           }
         }
       } catch (error) {
@@ -1645,6 +1712,35 @@ export default defineComponent({
       router.push('/help-center')
     }
 
+    // 修改状态判断方法
+    const getKeywordStatus = (item) => {
+      // 根据grade判断状态
+      const gradeMap = {
+        '1': { text: 'Quick Win Choose', color: 'red' },
+        '2': { text: 'High Priority', color: 'orange' },
+        '3': { text: 'Medium Priority', color: 'blue' },
+        '4': { text: 'Low Priority', color: 'cyan' },
+        '5': { text: 'Monitor', color: 'purple' }
+      }
+      
+      return gradeMap[item.grade] || { text: 'Unknown', color: 'default' }
+    }
+
+    // 添加响应式变量存储当前选中的 priority
+    const currentPriority = ref('1') // 默认选中 P0
+
+    // 添加 tab 切换处理函数
+    const handleTabChange = (activeKey) => {
+      console.log('Tab changed to:', activeKey)
+      const priority = priorities.find(p => p.level === activeKey)
+      if (priority) {
+        // 重置分页到第一页
+        recommendedPagination.value.current = 1
+        // 重新获取数据
+        fetchKeywords('keywords', priority.level, 1, recommendedPagination.value.pageSize)
+      }
+    }
+
     return {
       currentMode,
       selectedKeywords,
@@ -1718,7 +1814,13 @@ export default defineComponent({
       formatTime,
       domainConfigured,
       goToDashboard,
-      goToHelpCenter
+      goToHelpCenter,
+      recommendedPagination,
+      pagePagination,
+      handleComparisonPaginationChange,
+      handleTopPagesPaginationChange,
+      currentPriority,
+      handleTabChange
     }
   }
 })
@@ -3345,14 +3447,17 @@ export default defineComponent({
 }
 
 .competitor-table {
+  :deep(.ant-table-body) {
+    min-height: 400px;  /* 设置最小高度 */
+  }
+  
   :deep(.ant-table-thead > tr > th) {
     background: #fafafa;
-    font-size: 13px;
-    padding: 8px 16px;
+    padding: 12px 16px;
   }
   
   :deep(.ant-table-tbody > tr > td) {
-    padding: 8px 16px;
+    padding: 12px 16px;
   }
 }
 
@@ -3674,6 +3779,103 @@ p {
 
 :deep(.ant-result-subtitle) {
   color: #6b7280;
+}
+
+.pagination-wrapper {
+  margin-top: 16px;
+  text-align: right;
+}
+
+/* 添加表格容器高度样式 */
+.keywords-table-container {
+  height: 600px; /* 设置一个固定高度 */
+  
+  :deep(.ant-table-wrapper) {
+    height: 100%;
+  }
+  
+  :deep(.ant-spin-nested-loading),
+  :deep(.ant-spin-container),
+  :deep(.ant-table) {
+    height: 100%;
+  }
+  
+  :deep(.ant-table-container) {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  :deep(.ant-table-body) {
+    flex: 1;
+    overflow: auto;
+  }
+}
+
+/* 确保分页器在表格底部 */
+.pagination-wrapper {
+  margin-top: 16px;
+  text-align: right;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+.workflow-card {
+  margin-bottom: 16px;
+}
+
+.steps-container {
+  padding: 8px 0;
+}
+
+:deep(.compact-steps) {
+  min-height: auto;
+}
+
+:deep(.compact-steps .ant-steps-item) {
+  padding-inline-start: 8px;
+  min-height: auto;
+}
+
+:deep(.compact-steps .ant-steps-item-container) {
+  display: flex;
+  align-items: center;
+}
+
+:deep(.compact-steps .ant-steps-item-content) {
+  display: flex;
+  align-items: center;
+  min-height: auto;
+}
+
+:deep(.compact-steps .ant-steps-item-title) {
+  line-height: 24px;
+  margin-right: 8px;
+  padding-right: 8px;
+}
+
+:deep(.compact-steps .ant-steps-item-title::after) {
+  top: 12px;
+}
+
+:deep(.compact-steps .ant-steps-item-description) {
+  margin-top: 0;
+  padding-bottom: 0;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+:deep(.compact-steps .ant-steps-item-icon) {
+  margin-top: 0;
+}
+
+.step-title {
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.step-desc {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
 }
 </style>
 

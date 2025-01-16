@@ -4,6 +4,7 @@
     description="Manage your assets, including images, videos, internal links and other"
     icon="🎨"
   >
+  <a-spin :spinning="loading">
     <!-- Domain not configured notice -->
     <template v-if="domainConfigured">
       <a-tabs 
@@ -673,6 +674,7 @@
     <template v-else>
       <no-site-configured />
     </template>
+  </a-spin>
   </page-layout>
 </template>
 
@@ -741,24 +743,21 @@ export default {
       router.push('/dashboard');
     };
 
-    // 删除其他 onMounted 钩子，合并到一个统一的 onMounted 中
+    // onMounted 只负责初始化 knowledge base
     onMounted(async () => {
-      // 检查域名配置状态
-      await checkDomainStatus();
-      
-      // 如果域名已配置，根据当前标签加载相应数据
-      if (domainConfigured.value) {
-        if (activeTab.value === 'header') {
-          await fetchLayoutData('header');
-        } else if (activeTab.value === 'footer') {
-          await fetchLayoutData('footer');
-        } else if (activeTab.value === 'links') {
-          await fetchLinks();
-        } else if (activeTab.value === 'button-links') {
-          await fetchButtonLinks(); // 添加按钮链接的初始加载
-        } else {
-          await fetchAssets();
+      try {
+        loading.value = true;
+        // 检查域名配置状态
+        await checkDomainStatus();
+        
+        // 如果域名已配置，优先加载 knowledge base
+        if (domainConfigured.value) {
+          await initKnowledgeBase();
         }
+      } catch (error) {
+        console.error('Failed to initialize:', error);
+      } finally {
+        loading.value = false;
       }
     });
 
@@ -823,13 +822,39 @@ export default {
       fetchAssets()
     }
 
-    // 修改 watch 以在切换标签时重置分页
-    watch(activeTab, (newValue) => {
-      if (newValue === 'images' || newValue === 'videos') {
-        currentPage.value = 1 // 重置页码
-        fetchAssets()
+    // watch 负责处理标签切换时的数据加载
+    watch(activeTab, async (newValue) => {
+      if (!domainConfigured.value) return;
+      
+      loading.value = true;
+      try {
+        switch (newValue) {
+          case 'images':
+          case 'videos':
+            await fetchAssets();
+            break;
+          case 'links':
+            await fetchLinks();
+            break;
+          case 'button-links':
+            await fetchButtonLinks();
+            break;
+          case 'header':
+            await fetchLayoutData('header');
+            break;
+          case 'footer':
+            await fetchLayoutData('footer');
+            break;
+          // knowledge base 的数据已经在 onMounted 中加载，这里不需要重复加载
+          case 'knowledge':
+            break;
+        }
+      } catch (error) {
+        console.error(`Failed to fetch data for ${newValue} tab:`, error);
+      } finally {
+        loading.value = false;
       }
-    })
+    });
 
     const previewVisible = ref(false)
     const selectedAsset = ref(null)
@@ -1488,17 +1513,6 @@ export default {
         loading.value = false;
       }
     };
-
-    // 修改 watch,增加对 domainConfigured 的判断
-    watch(
-      () => activeTab.value,
-      (newValue) => {
-        if (newValue === 'knowledge' && domainConfigured.value) {
-          initKnowledgeBase();
-        }
-      },
-      { immediate: true }
-    );
 
     const selectArticle = (article) => {
       currentArticle.value = article

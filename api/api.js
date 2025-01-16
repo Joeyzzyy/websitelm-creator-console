@@ -862,7 +862,7 @@ const getSitemapUrls = async (params) => {
 // 新增：更新页面布局的方法
 const updatePageLayout = async (pageLayoutId, layoutData) => {
   try {
-    const response = await apiClient.put(`/page/layout/${pageLayoutId}`, layoutData);
+    const response = await apiClient.put(`/pages/layout/${pageLayoutId}`, layoutData);
     return response.data;
   } catch (error) {
     console.error('更新页面布局失败:', error);
@@ -874,7 +874,7 @@ const updatePageLayout = async (pageLayoutId, layoutData) => {
 const getPageLayout = async (params) => {
   try {
     const { pageLayoutId, pageId } = params;
-    const response = await apiClient.get('/page/layout', {
+    const response = await apiClient.get('/pages/layout', {
       params: {
         ...(pageLayoutId && { pageLayoutId }),
         ...(pageId && { pageId })
@@ -1068,6 +1068,35 @@ const updateOnboardingStatus = async (status) => {
   }
 };
 
+// 新增：获取关键词概览分析的方法
+const getKeywordAnalysisOverview = async () => {
+  try {
+    const response = await apiClient.post('/planning/analysis-overview');
+    return response.data;
+  } catch (error) {
+    console.error('获取关键词概览分析失败:', error);
+    return null;
+  }
+};
+
+// 新增：获取关键词列表的方法
+const getPlanningKeywords = async (params = {}) => {
+  try {
+    const queryParams = {
+      source: params.source,
+      level: params.level,
+      ...(params.page && { page: params.page }),
+      ...(params.limit && { limit: params.limit })
+    };
+    
+    const response = await apiClient.get('/planning/keywords', { params: queryParams });
+    return response.data;
+  } catch (error) {
+    console.error('获取关键词列表失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1149,5 +1178,7 @@ export default {
   updatePageButtonLink,
   deletePageButtonLink,
   getAnalysisStatus,
-  updateOnboardingStatus
+  updateOnboardingStatus,
+  getKeywordAnalysisOverview,
+  getPlanningKeywords
 };
