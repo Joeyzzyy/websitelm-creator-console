@@ -487,14 +487,6 @@
                     class="selected-keywords-card"
                     :bordered="false"
                   >
-                    <template #title>
-                      <div class="card-title">
-                        <CheckCircleOutlined /> Selected Keywords
-                        <a-tag>{{ selectedKeywords.length }} keywords</a-tag>
-                      </div>
-                    </template>
-
-                    <!-- Add generate button here -->
                     <div class="generate-button-wrapper">
                       <a-button 
                         type="primary"
@@ -503,11 +495,10 @@
                         :disabled="totalSelectedKeywords === 0"
                         @click="generateContentPlan"
                       >
-                        <ThunderboltOutlined /> Generate Content Recommendation 
+                        <ThunderboltOutlined /> Generate Content Plan
                       </a-button>
                     </div>
 
-                    <!-- 修改列表部分，复用弹窗的实现 -->
                     <template v-if="isLoadingSelectedKeywords">
                       <div class="loading-container">
                         <a-spin />
@@ -517,6 +508,7 @@
                       <a-tabs
                         v-model:activeKey="selectedKeywordsTab"
                         class="selected-keywords-tabs"
+                        size="small"
                       >
                         <a-tab-pane
                           v-for="tab in modalTabs"
@@ -524,40 +516,75 @@
                           :tab="tab.label"
                         >
                           <div class="list-header">
-                            <span>Total Selected: {{ selectedKeywordsData[tab.key].length }} keywords</span>
+                            <span class="total-count">{{ selectedKeywordsData[tab.key].length }} keywords</span>
                           </div>
                           
                           <a-list
                             :data-source="selectedKeywordsData[tab.key]"
                             class="selected-keywords-list"
+                            size="small"
                           >
                             <template #renderItem="{ item }">
-                              <a-list-item>
+                              <a-list-item class="compact-list-item">
                                 <div class="selected-keyword-item">
-                                  <div class="keyword-main">
-                                    <div class="keyword-header">
-                                      <span class="keyword-text">"{{ item.keyword }}"</span>
-                                      <a-button 
-                                        type="link" 
-                                        danger
-                                        size="small"
-                                        @click="handleRemoveKeyword(item)"
-                                      >
-                                        Remove from list
-                                      </a-button>
+                                  <a-tooltip 
+                                    v-if="item.reason" 
+                                    :title="item.reason"
+                                    placement="right"
+                                  >
+                                    <div class="keyword-main">
+                                      <div class="keyword-content">
+                                        <div class="keyword-header">
+                                          <span class="keyword-text" :title="item.keyword">"{{ item.keyword }}"</span>
+                                          <a-button 
+                                            type="link" 
+                                            danger
+                                            size="small"
+                                            class="remove-btn"
+                                            @click="handleRemoveKeyword(item)"
+                                          >
+                                            <DeleteOutlined />
+                                          </a-button>
+                                        </div>
+                                        <div class="keyword-metrics">
+                                          <a-tooltip title="Keyword Ranking Score">
+                                            <a-tag class="metric-tag">KRS {{ item.krs }}</a-tag>
+                                          </a-tooltip>
+                                          <a-tooltip title="Keyword Difficulty">
+                                            <a-tag class="metric-tag" color="cyan">KD {{ item.kd }}</a-tag>
+                                          </a-tooltip>
+                                          <a-tooltip title="Search Volume">
+                                            <a-tag class="metric-tag" color="purple">Vol {{ item.volume }}</a-tag>
+                                          </a-tooltip>
+                                        </div>
+                                      </div>
                                     </div>
-                                    <div class="keyword-metrics">
-                                      <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
-                                      <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                                      <a-tag color="purple">Volume={{ item.volume }}</a-tag>
-                                      <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
-                                    </div>
-                                  </div>
-                                  <div class="keyword-reason" v-if="item.reason">
-                                    <BulbOutlined />
-                                    <div class="reason-content">
-                                      <span class="reason-highlight">Reason: </span>
-                                      <span class="reason-value">{{ item.reason }}</span>
+                                  </a-tooltip>
+                                  <div v-else class="keyword-main">
+                                    <div class="keyword-content">
+                                      <div class="keyword-header">
+                                        <span class="keyword-text" :title="item.keyword">"{{ item.keyword }}"</span>
+                                        <a-button 
+                                          type="link" 
+                                          danger
+                                          size="small"
+                                          class="remove-btn"
+                                          @click="handleRemoveKeyword(item)"
+                                        >
+                                          <DeleteOutlined />
+                                        </a-button>
+                                      </div>
+                                      <div class="keyword-metrics">
+                                        <a-tooltip title="Keyword Ranking Score">
+                                          <a-tag class="metric-tag">KRS {{ item.krs }}</a-tag>
+                                        </a-tooltip>
+                                        <a-tooltip title="Keyword Difficulty">
+                                          <a-tag class="metric-tag" color="cyan">KD {{ item.kd }}</a-tag>
+                                        </a-tooltip>
+                                        <a-tooltip title="Search Volume">
+                                          <a-tag class="metric-tag" color="purple">Vol {{ item.volume }}</a-tag>
+                                        </a-tooltip>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -581,11 +608,62 @@
                   <!-- Update content display cards -->
                   <template v-else>
                     <div class="plan-section">
+                      <!-- Update task progress section -->
+                      <div class="task-progress-section">
+                        <a-alert
+                          :type="outlineGenerationStatus === 'failed' ? 'error' : 'info'"
+                          class="task-alert"
+                        >
+                          <template #icon>
+                            <LoadingOutlined v-if="outlineGenerationStatus === 'processing'" spin />
+                            <WarningOutlined v-else-if="outlineGenerationStatus === 'failed'" />
+                            <CheckCircleOutlined v-else />
+                          </template>
+                          <template #message>
+                            <div class="task-progress-content">
+                              <template v-if="outlineGenerationStatus && outlineGenerationStatus !== 'finished'">
+                                <div class="task-info">
+                                  <span class="task-status">
+                                    {{ getTaskStatusText(outlineGenerationStatus) }}
+                                  </span>
+                                  <span v-if="taskStartTime" class="task-timing">
+                                    Started: {{ formatTime(taskStartTime) }}
+                                    <template v-if="taskEndTime">
+                                      | Completed: {{ formatTime(taskEndTime) }}
+                                    </template>
+                                  </span>
+                                </div>
+                                <div v-if="taskDescription" class="task-description">
+                                  {{ taskDescription }}
+                                </div>
+                              </template>
+                              <template v-else>
+                                <div class="task-info">
+                                  <span class="task-status">
+                                    ✨ Everything is ready! You can start exploring your content plans below.
+                                  </span>
+                                </div>
+                              </template>
+                            </div>
+                          </template>
+                        </a-alert>
+                      </div>
+
                       <a-tabs 
                         v-model:activeKey="contentPlanTab" 
                         class="content-plan-tabs"
                         @change="handleContentPlanTabChange"
                       >
+                        <template #rightExtra>
+                          <a-button 
+                            type="text" 
+                            danger
+                            :disabled="!contentPlans.length"
+                            @click="confirmClearAllOutlines"
+                          >
+                            Clear All
+                          </a-button>
+                        </template>
                         <!-- All Outlines Tab -->
                         <a-tab-pane key="all" tab="All Outlines">
                           <div class="tab-content-wrapper">
@@ -603,15 +681,26 @@
                                   :bordered="false"
                                 >
                                   <template #extra>
-                                    <a-button 
-                                      type="text"
-                                      @click.stop="handleFavorite(plan)"
-                                    >
-                                      <template #icon>
-                                        <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
-                                        <HeartOutlined v-else />
-                                      </template>
-                                    </a-button>
+                                    <a-space>
+                                      <a-button 
+                                        type="text"
+                                        @click.stop="handleFavorite(plan)"
+                                      >
+                                        <template #icon>
+                                          <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
+                                          <HeartOutlined v-else />
+                                        </template>
+                                      </a-button>
+                                      <a-button
+                                        type="text"
+                                        danger
+                                        @click.stop="handleDeleteOutline(plan)"
+                                      >
+                                        <template #icon>
+                                          <DeleteOutlined />
+                                        </template>
+                                      </a-button>
+                                    </a-space>
                                   </template>
                                   
                                   <div class="card-content" @click="showPlanDetails(plan)">
@@ -680,15 +769,26 @@
                                 :bordered="false"
                               >
                                 <template #extra>
-                                  <a-button 
-                                    type="text"
-                                    @click.stop="handleFavorite(plan)"
-                                  >
-                                    <template #icon>
-                                      <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
-                                      <HeartOutlined v-else />
-                                    </template>
-                                  </a-button>
+                                  <a-space>
+                                    <a-button 
+                                      type="text"
+                                      @click.stop="handleFavorite(plan)"
+                                    >
+                                      <template #icon>
+                                        <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
+                                        <HeartOutlined v-else />
+                                      </template>
+                                    </a-button>
+                                    <a-button
+                                      type="text"
+                                      danger
+                                      @click.stop="handleDeleteOutline(plan)"
+                                    >
+                                      <template #icon>
+                                        <DeleteOutlined />
+                                      </template>
+                                    </a-button>
+                                  </a-space>
                                 </template>
                                 
                                 <div class="card-content" @click="showPlanDetails(plan)">
@@ -958,7 +1058,8 @@ import {
   ClockCircleOutlined,
   SearchOutlined,
   HeartOutlined,
-  HeartFilled
+  HeartFilled,
+  InfoCircleOutlined
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -970,6 +1071,7 @@ import { message } from 'ant-design-vue'
 import api from '../api/api'
 import { useRouter } from 'vue-router'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
+import { Modal } from 'ant-design-vue'
 
 export default defineComponent({
   name: 'KeywordsPlanningPage',
@@ -993,7 +1095,8 @@ export default defineComponent({
     ClockCircleOutlined,
     SearchOutlined,
     HeartOutlined,
-    HeartFilled
+    HeartFilled,
+    InfoCircleOutlined
   },
   setup() {
     const currentMode = ref('beginner')
@@ -1001,7 +1104,9 @@ export default defineComponent({
     const isGeneratingTitles = ref(false) 
     const isGeneratingOutline = ref(false) 
     const loading = ref(true) 
-    
+    const taskStartTime = ref(null)
+    const taskEndTime = ref(null)
+    const taskDescription = ref(null)
     const columns = computed(() => tableColumns)
     
     const overviewData = ref({
@@ -1545,26 +1650,46 @@ export default defineComponent({
     })
 
     const generateContentPlan = async () => {
+      if (totalSelectedKeywords.value === 0) {
+        message.warning('Please select at least one keyword');
+        return;
+      }
+
       isGenerating.value = true;
       try {
-        const keywordIds = selectedKeywords.value.map(k => k.id);
-        const response = await api.generatePlanningComposite(keywordIds);
+        // Get IDs of all selected keywords from both sources
+        const selectedIds = [
+          ...selectedKeywordsData.value.comparison.map(k => k.id),
+          ...selectedKeywordsData.value.top_pages.map(k => k.id)
+        ];
+
+        // Call API to generate content plan
+        const response = await api.generatePlanningComposite(selectedIds);
         
         if (response?.data) {
-          // 为每个计划添加 selected 属性
+          // Update content plans list
           contentPlans.value = response.data.map(plan => ({
             ...plan,
-            selected: false
+            selected: false,
+            favorited: plan.status === 'selected'
           }));
+          
           hasGenerated.value = true;
+          message.success('Content plan generated successfully');
+          
+          // Auto switch to "All Outlines" tab
+          contentPlanTab.value = 'all';
+          
+          // Reset pagination
+          contentPlansPagination.value.current = 1;
         }
       } catch (error) {
-        console.error('生成内容计划失败:', error);
-        message.error('生成内容计划失败，请重试');
+        console.error('Failed to generate content plan:', error);
+        message.error('Failed to generate content plan. Please try again.');
       } finally {
         isGenerating.value = false;
       }
-    }
+    };
 
     const handlePlanSelect = (plan, checked) => {
       plan.selected = checked
@@ -1622,18 +1747,19 @@ export default defineComponent({
       }
     })
 
-    // 修改 checkOutlineGenerationStatus 方法，返回 response
     const checkOutlineGenerationStatus = async () => {
       try {
         const response = await api.getAnalysisStatus('composite_generator')
         
         if (response?.code === 200 && response?.data) {
           outlineGenerationStatus.value = response.data.status
+          taskStartTime.value = response.data.startTime
+          taskEndTime.value = response.data.endTime
+          taskDescription.value = formatTaskDescription(response.data.description)
           
           if (response.data.status === 'finished') {
             clearInterval(pollingInterval.value)
             hasGenerated.value = true
-            // 当状态为 finished 时，获取最新的 outlines
             await fetchContentPlans()
           }
         } else {
@@ -1844,6 +1970,103 @@ export default defineComponent({
              selectedKeywordsData.value.top_pages.length
     })
 
+    const handleDeleteOutline = async (plan) => {
+      try {
+        // Show confirmation modal
+        const confirmed = await new Promise(resolve => {
+          Modal.confirm({
+            title: 'Delete Outline',
+            content: 'Are you sure you want to delete this outline? This action cannot be undone.',
+            okText: 'Delete',
+            cancelText: 'Cancel',
+            okType: 'danger',
+            onOk: () => resolve(true),
+            onCancel: () => resolve(false),
+          });
+        });
+
+        if (confirmed) {
+          await api.deletePlanningOutline(plan.outlineId);
+          message.success('Outline deleted successfully');
+          // Refresh the outlines list
+          await fetchContentPlans();
+        }
+      } catch (error) {
+        console.error('Failed to delete outline:', error);
+        message.error('Failed to delete outline');
+      }
+    };
+
+    // Add new refs and methods in setup
+    const taskProgress = ref(null)
+    const taskMessage = ref('')
+
+    const getTaskStatusText = (status) => {
+      const statusMap = {
+        'processing': '🚀 AI is crafting your content plans...',
+        'failed': '❌ Oops! Content plan generation failed',
+        'not_started': '⏳ Getting ready to create your content plans',
+        'finished': '✨ Content plans are ready!'
+      }
+      return statusMap[status] || 'Unknown Status'
+    }
+
+    const formatTaskDescription = (description) => {
+      if (description?.includes('composite_generator')) {
+        return "Our AI is analyzing your keywords and creating personalized content recommendations. This usually takes 1-2 minutes."
+      }
+      return description
+    }
+
+    const getProgressStatus = (status) => {
+      const statusMap = {
+        'processing': 'active',
+        'failed': 'exception',
+        'finished': 'success',
+        'not_started': 'normal'
+      }
+      return statusMap[status] || 'normal'
+    }
+
+    const clearAllOutlines = async () => {
+      try {
+        isLoadingOutlines.value = true
+        
+        // Delete outlines one by one in current page
+        for (const plan of contentPlans.value) {
+          await api.deletePlanningOutline(plan.outlineId)
+        }
+        
+        message.success('All outlines have been cleared')
+        
+        // Refresh the content plans list
+        await fetchContentPlans()
+      } catch (error) {
+        console.error('Failed to clear outlines:', error)
+        message.error('Failed to clear outlines. Please try again.')
+      } finally {
+        isLoadingOutlines.value = false
+      }
+    }
+
+    const confirmClearAllOutlines = () => {
+      Modal.confirm({
+        title: 'Clear All Outlines',
+        content: 'Are you sure you want to delete all outlines? This action cannot be undone.',
+        okText: 'Yes, Clear All',
+        cancelText: 'Cancel',
+        okType: 'danger',
+        async onOk() {
+          await clearAllOutlines()
+        },
+        okButtonProps: {
+          danger: true
+        },
+        centered: true,
+        maskClosable: false
+      })
+    }
+
     return {
       showSelectedKeywords,
       currentMode,
@@ -1930,6 +2153,16 @@ export default defineComponent({
       isLoadingSelectedKeywords,
       handleRemoveKeyword,
       totalSelectedKeywords,
+      handleDeleteOutline,
+      taskProgress,
+      taskMessage,
+      getTaskStatusText,
+      getProgressStatus,
+      taskStartTime,
+      taskEndTime,
+      taskDescription,
+      formatTaskDescription,
+      confirmClearAllOutlines,
     }
   }
 })
@@ -2813,57 +3046,57 @@ export default defineComponent({
 .selected-keyword-item {
   width: 100%;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 8px;
 }
 
 .keyword-main {
+  flex: 1;
+  min-width: 0;
+  cursor: help; /* Add cursor hint for items with tooltip */
+}
+
+.keyword-content {
   display: flex;
   flex-direction: column;
+  gap: 4px;
+}
+
+.keyword-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 8px;
 }
 
 .keyword-text {
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 500;
-  color: #262626;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .keyword-metrics {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 4px;
 }
 
-.keyword-reason {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 8px 12px;
-  background: rgba(24, 144, 255, 0.04);
-  border-left: 3px solid #1890ff;
-  border-radius: 0 4px 4px 0;
-  
-  .anticon {
-    color: #1890ff;
-    font-size: 16px;
-    margin-top: 2px;
-  }
+.metric-tag {
+  margin: 0;
+  font-size: 11px;
+  line-height: 16px;
+  padding: 0 4px;
 }
 
-.reason-content {
-  font-size: 14px;
-  line-height: 1.6;
+.remove-btn {
+  padding: 0;
+  height: auto;
+  min-width: 24px;
 }
 
-.reason-highlight {
-  color: #1890ff;
-  font-weight: 600;
-}
-
-.reason-value {
-  color: #595959;
-}
+/* Remove the old reason-related styles */
 
 /* 添加空状态的样式 */
 .empty-state {
@@ -4614,6 +4847,196 @@ p {
   align-items: center;
   padding: 24px;
 }
+
+/* Add new styles */
+.task-progress-section {
+  margin-bottom: 16px;
+}
+
+.task-alert {
+  border-radius: 4px;
+}
+
+.task-progress-content {
+  width: 100%;
+}
+
+.task-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 24px; /* Add minimum height for consistent alignment */
+}
+
+.task-status {
+  font-weight: 500;
+}
+
+.task-timing {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.task-description {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-top: 4px;
+}
+
+:deep(.ant-alert-message) {
+  flex: 1;
+}
+
+/* Add these new styles */
+:deep(.ant-alert) {
+  display: flex;
+  align-items: center;
+}
+
+:deep(.ant-alert-message) {
+  margin: 0; /* Remove default margin */
+  display: flex;
+  align-items: center;
+}
+
+:deep(.ant-alert-icon) {
+  display: flex;
+  align-items: center;
+  margin-top: 0; /* Remove default margin */
+}
+
+/* Add new styles */
+:deep(.ant-tabs-extra-content) {
+  margin-left: 16px;
+}
+
+:deep(.ant-btn-text.ant-btn-dangerous) {
+  &:hover {
+    background-color: #fff1f0;
+  }
+  
+  &:disabled {
+    color: rgba(0, 0, 0, 0.25);
+    background: transparent;
+    
+    &:hover {
+      background: transparent;
+    }
+  }
+}
+
+.selected-keywords-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.keyword-count {
+  margin-left: auto;
+  font-size: 12px;
+}
+
+.generate-button-wrapper {
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.selected-keywords-tabs {
+  flex: 1;
+  overflow: auto;
+}
+
+.list-header {
+  padding: 4px 8px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.compact-list-item {
+  padding: 8px !important;
+}
+
+.selected-keyword-item {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.keyword-main {
+  flex: 1;
+  min-width: 0; /* Enable text truncation */
+}
+
+.keyword-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.keyword-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.keyword-text {
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.remove-btn {
+  padding: 0;
+  height: auto;
+  min-width: 24px;
+}
+
+.keyword-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.metric-tag {
+  margin: 0;
+  font-size: 11px;
+  line-height: 16px;
+  padding: 0 4px;
+}
+
+.keyword-reason {
+  flex-shrink: 0;
+}
+
+.reason-icon {
+  color: #1890ff;
+  font-size: 14px;
+  cursor: help;
+}
+
+:deep(.ant-list-item) {
+  border-bottom: 1px solid #f0f0f0 !important;
+}
+
+:deep(.ant-tabs-small > .ant-tabs-nav .ant-tabs-tab) {
+  padding: 4px 8px;
+}
+
+:deep(.ant-list-split .ant-list-item:last-child) {
+  border-bottom: none !important;
+}
 </style>
+
 
 

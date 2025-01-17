@@ -1184,6 +1184,17 @@ const cancelPlanningKeywords = async (keywordIds) => {
   }
 };
 
+// 新增：删除outline的方法
+const deletePlanningOutline = async (outlineId) => {
+  try {
+    const response = await apiClient.delete(`/planning/outline/${outlineId}`);
+    return response.data;
+  } catch (error) {
+    console.error('删除outline失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1273,5 +1284,6 @@ export default {
   selectPlanningOutlines,
   cancelPlanningOutlines,
   selectPlanningKeywords,
-  cancelPlanningKeywords
+  cancelPlanningKeywords,
+  deletePlanningOutline
 };
