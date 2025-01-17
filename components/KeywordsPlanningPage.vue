@@ -57,7 +57,6 @@
             <a-tab-pane key="0">
               <template #tab>
                 <span class="tab-title">
-                  <SearchOutlined />
                   Select Keywords
                 </span>
               </template>
@@ -142,23 +141,6 @@
                           </template>
                           <QuestionCircleOutlined class="help-icon" />
                         </a-popover>
-                      </div>
-
-                      <div class="header-actions">
-                        <a-button 
-                          v-if="currentStep > 0" 
-                          @click="previousStep"
-                        >
-                          <LeftOutlined /> Previous
-                        </a-button>
-                        <a-button 
-                          type="primary" 
-                          @click="nextStep"
-                          :disabled="!canProceedToNext"
-                        >
-                          {{ currentStep === '1' ? 'Generate' : 'Next' }}
-                          <RightOutlined />
-                        </a-button>
                       </div>
                     </div>
                   </a-card>
@@ -490,36 +472,12 @@
             <a-tab-pane key="1">
               <template #tab>
                 <span class="tab-title">
-                  <FileTextOutlined />
                   Check Page Intent & Outline
                 </span>
               </template>
               
               <!-- 第二步内容 -->
               <div class="step-two-content">
-                <!-- 修改 mode-selector-card 的内容 -->
-                <a-card class="mode-selector-card">
-                  <div class="mode-selector-wrapper">
-                    <div class="step-title">
-                      Check Page Intent, TDK and Outline
-                    </div>
-                    <div class="header-actions">
-                      <a-button @click="previousStep">
-                        <LeftOutlined /> Previous
-                      </a-button>
-                      <a-button 
-                        v-if="hasGenerated"
-                        type="primary"
-                        :disabled="!selectedPlansCount"
-                        :loading="isGenerating"
-                        @click="confirmSelectedPlans"
-                      >
-                        Confirm Selected Plans <RightOutlined v-if="!isGenerating" />
-                      </a-button>
-                    </div>
-                  </div>
-                </a-card>
-
                 <!-- 内容区域 -->
                 <div class="workspace-layout">
                   <!-- 左侧已选关键词列表 -->
@@ -575,66 +533,173 @@
                   <!-- Update content display cards -->
                   <template v-else>
                     <div class="plan-section">
-                      <div class="section-title">
-                        <OrderedListOutlined /> Content Plans
-                      </div>
-                      <div class="content-plans-grid">
-                        <a-card 
-                          v-for="plan in contentPlans" 
-                          :key="plan.outlineId"
-                          class="plan-card"
-                          :bordered="true"
-                          hoverable
-                        >
-                          <template #extra>
-                            <a-checkbox 
-                              :checked="plan.selected"
-                              @change="(e) => handlePlanSelect(plan, e.target.checked)"
-                              @click.stop
-                            />
-                          </template>
-                          
-                          <!-- 卡片主体内容 -->
-                          <div class="card-content" @click="showPlanDetails(plan)">
-                            <h3 class="plan-title">{{ plan.title }}</h3>
-                            <p class="plan-description">{{ plan.description }}</p>
-                            <div class="plan-meta">
-                              <div class="meta-item">
-                                <FileTextOutlined />
-                                {{ plan.outline.length }} Sections
-                              </div>
-                              <div class="meta-item">
-                                <ClockCircleOutlined />
-                                {{ getTotalWordCount(plan) }} Words
-                              </div>
+                      <a-tabs 
+                        v-model:activeKey="contentPlanTab" 
+                        class="content-plan-tabs"
+                        @change="handleContentPlanTabChange"
+                      >
+                        <!-- All Outlines Tab -->
+                        <a-tab-pane key="all" tab="All Outlines">
+                          <div class="tab-content-wrapper">
+                            <div class="content-plans-grid">
+                              <template v-if="isLoadingOutlines">
+                                <div class="content-plans-loading">
+                                  <LoadingOutlined style="font-size: 24px; color: #1890ff;" spin />
+                                </div>
+                              </template>
+                              <template v-else>
+                                <a-card 
+                                  v-for="plan in contentPlans" 
+                                  :key="plan.outlineId"
+                                  class="plan-card"
+                                  @click="showPlanDetails(plan)"
+                                  :bordered="false"
+                                >
+                                  <template #extra>
+                                    <a-button 
+                                      type="text"
+                                      @click.stop="handleFavorite(plan)"
+                                      :disabled="plan.favorited"
+                                    >
+                                      <template #icon>
+                                        <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
+                                        <HeartOutlined v-else />
+                                      </template>
+                                    </a-button>
+                                  </template>
+                                  
+                                  <div class="card-content">
+                                    <h3 class="plan-title">{{ plan.title }}</h3>
+                                    <p class="plan-description">{{ plan.description }}</p>
+                                    
+                                    <div class="plan-metrics">
+                                      <div class="metric-item">
+                                        <span class="metric-label">Word Count</span>
+                                        <span class="metric-value">{{ getTotalWordCount(plan) }}</span>
+                                      </div>
+                                      <div class="metric-item">
+                                        <span class="metric-label">Sections</span>
+                                        <span class="metric-value">{{ plan.outline.length }}</span>
+                                      </div>
+                                    </div>
+
+                                    <div class="plan-keywords">
+                                      <a-tag 
+                                        v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
+                                        :key="keyword"
+                                        color="blue"
+                                      >
+                                        {{ keyword }}
+                                      </a-tag>
+                                      <a-tag v-if="plan.keywords.split(', ').length > 3">
+                                        +{{ plan.keywords.split(', ').length - 3 }} more
+                                      </a-tag>
+                                    </div>
+
+                                    <div class="plan-actions">
+                                      <a-button 
+                                        type="primary" 
+                                        @click="showPlanDetails(plan)"
+                                      >
+                                        View Details
+                                      </a-button>
+                                    </div>
+                                  </div>
+                                </a-card>
+                              </template>
                             </div>
-                            <div class="plan-tags">
-                              <a-tag v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
-                                :key="keyword"
-                                color="blue"
-                              >
-                                {{ keyword }}
-                              </a-tag>
-                              <a-tag v-if="plan.keywords.split(', ').length > 3" color="default">
-                                +{{ plan.keywords.split(', ').length - 3 }}
-                              </a-tag>
+                            <div class="pagination-container">
+                              <a-pagination
+                                v-model:current="contentPlansPagination.current"
+                                :total="contentPlansPagination.total"
+                                :pageSize="contentPlansPagination.pageSize"
+                                @change="handleContentPlansPaginationChange"
+                                show-size-changer
+                                show-quick-jumper
+                                :pageSizeOptions="['12', '24', '36', '48']"
+                                :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
+                              />
                             </div>
                           </div>
-                        </a-card>
-                      </div>
-                      <!-- 确保分页组件在正确的位置 -->
-                      <div class="pagination-wrapper">
-                        <a-pagination
-                          v-model:current="contentPlansPagination.current"
-                          :total="contentPlansPagination.total"
-                          :pageSize="contentPlansPagination.pageSize"
-                          @change="handleContentPlansPaginationChange"
-                          show-size-changer
-                          show-quick-jumper
-                          :pageSizeOptions="['12', '24', '36', '48']"
-                          :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
-                        />
-                      </div>
+                        </a-tab-pane>
+
+                        <!-- Selected Outlines Tab -->
+                        <a-tab-pane key="selected" tab="Selected Outlines">
+                          <div class="tab-content-wrapper">
+                            <div class="content-plans-grid">
+                              <a-card 
+                                v-for="plan in contentPlans.filter(p => p.favorited)" 
+                                :key="plan.outlineId"
+                                class="plan-card"
+                                :bordered="false"
+                              >
+                                <template #extra>
+                                  <a-button 
+                                    type="text"
+                                    @click="handleFavorite(plan)"
+                                    :disabled="plan.favorited"
+                                  >
+                                    <template #icon>
+                                      <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
+                                      <HeartOutlined v-else />
+                                    </template>
+                                  </a-button>
+                                </template>
+                                
+                                <div class="card-content">
+                                  <h3 class="plan-title">{{ plan.title }}</h3>
+                                  <p class="plan-description">{{ plan.description }}</p>
+                                  
+                                  <div class="plan-metrics">
+                                    <div class="metric-item">
+                                      <span class="metric-label">Word Count</span>
+                                      <span class="metric-value">{{ getTotalWordCount(plan) }}</span>
+                                    </div>
+                                    <div class="metric-item">
+                                      <span class="metric-label">Sections</span>
+                                      <span class="metric-value">{{ plan.outline.length }}</span>
+                                    </div>
+                                  </div>
+
+                                  <div class="plan-keywords">
+                                    <a-tag 
+                                      v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
+                                      :key="keyword"
+                                      color="blue"
+                                    >
+                                      {{ keyword }}
+                                    </a-tag>
+                                    <a-tag v-if="plan.keywords.split(', ').length > 3">
+                                      +{{ plan.keywords.split(', ').length - 3 }} more
+                                    </a-tag>
+                                  </div>
+
+                                  <div class="plan-actions">
+                                    <a-button 
+                                      type="primary" 
+                                      @click="showPlanDetails(plan)"
+                                    >
+                                      View Details
+                                    </a-button>
+                                  </div>
+                                </div>
+                              </a-card>
+                            </div>
+                            <div class="pagination-container">
+                              <a-pagination
+                                v-model:current="contentPlansPagination.current"
+                                :total="contentPlansPagination.total"
+                                :pageSize="contentPlansPagination.pageSize"
+                                @change="handleContentPlansPaginationChange"
+                                show-size-changer
+                                show-quick-jumper
+                                :pageSizeOptions="['12', '24', '36', '48']"
+                                :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
+                              />
+                            </div>
+                          </div>
+                        </a-tab-pane>
+                      </a-tabs>
                     </div>
 
                     <!-- 添加右侧抽屉 -->
@@ -820,7 +885,9 @@ import {
   WarningOutlined,
   QuestionCircleOutlined,
   ClockCircleOutlined,
-  SearchOutlined
+  SearchOutlined,
+  HeartOutlined,
+  HeartFilled
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -853,7 +920,9 @@ export default defineComponent({
     WarningOutlined,
     NoSiteConfigured,
     ClockCircleOutlined,
-    SearchOutlined
+    SearchOutlined,
+    HeartOutlined,
+    HeartFilled
   },
   setup() {
     const currentMode = ref('beginner')
@@ -1195,21 +1264,8 @@ export default defineComponent({
         return
       }
       
-      if (currentStep.value < '1') {  // 修改这里的比较
-        // 重置第二步相关的状态
-        contentPlans.value = []
-        hasGenerated.value = false
-        isGenerating.value = false
-        
-        // 进入第二步时检查生成状态
-        await checkOutlineGenerationStatus()
-        
-        // 如果有正在进行的任务,启动轮询
-        if (outlineGenerationStatus.value && outlineGenerationStatus.value !== 'finished') {
-          pollingInterval.value = setInterval(checkOutlineGenerationStatus, 5000)
-        }
-        
-        currentStep.value = '1'  // 修改这里为字符串
+      if (currentStep.value < '1') {
+        currentStep.value = '1'
       }
     }
 
@@ -1426,6 +1482,29 @@ export default defineComponent({
       }, 0)
     }
 
+    // 修改 watch，添加对 tab 切换的处理
+    watch(currentStep, async (newStep) => {
+      if (newStep === '0') {
+        // 切换到 Select Keywords tab，重新加载关键词数据
+        await Promise.all([
+          fetchKeywords('keywords', currentPriority.value, 1, recommendedPagination.value.pageSize),
+          fetchKeywords('top_page_keywords', currentPriority.value, 1, pagePagination.value.pageSize)
+        ])
+      } else if (newStep === '1') {
+        // 重置第二步相关的状态
+        contentPlans.value = []
+        hasGenerated.value = false
+        isGenerating.value = false
+        
+        // 移除重复的 fetchContentPlans 调用，只在 status 未完成时才调用
+        const statusResponse = await checkOutlineGenerationStatus()
+        if (!statusResponse?.data || statusResponse.data.status !== 'finished') {
+          await fetchContentPlans()
+        }
+      }
+    })
+
+    // 修改 checkOutlineGenerationStatus 方法，返回 response
     const checkOutlineGenerationStatus = async () => {
       try {
         const response = await api.getAnalysisStatus('composite_generator')
@@ -1435,22 +1514,27 @@ export default defineComponent({
           
           if (response.data.status === 'finished') {
             clearInterval(pollingInterval.value)
+            hasGenerated.value = true
+            // 当状态为 finished 时，获取最新的 outlines
             await fetchContentPlans()
           }
         } else {
           message.error('获取大纲生成状态失败')
         }
+        return response
       } catch (error) {
         console.error('Failed to check outline generation status:', error)
         message.error('检查大纲生成状态失败')
+        return null
       }
     }
 
     // 获取内容计划的方法
     const fetchContentPlans = async () => {
+      isLoadingOutlines.value = true
       try {
         const outlinesResponse = await api.getPlanningOutlines({
-          status: '',
+          status: contentPlanTab.value === 'selected' ? 'selected' : '',
           page: contentPlansPagination.value.current,
           limit: contentPlansPagination.value.pageSize
         })
@@ -1458,9 +1542,9 @@ export default defineComponent({
         if (outlinesResponse?.data) {
           contentPlans.value = outlinesResponse.data.map(plan => ({
             ...plan,
-            selected: false
+            selected: false,
+            favorited: plan.status === 'selected'
           }))
-          // 使用 totalCount 作为分页的 total
           contentPlansPagination.value.total = outlinesResponse.totalCount || 0
           hasGenerated.value = true
         } else {
@@ -1469,6 +1553,8 @@ export default defineComponent({
       } catch (error) {
         console.error('Failed to fetch content plans:', error)
         message.error('获取内容计划失败')
+      } finally {
+        isLoadingOutlines.value = false
       }
     }
 
@@ -1487,6 +1573,33 @@ export default defineComponent({
       pageSize: 12,
       total: 0
     })
+
+    // 添加相关的方法
+    const handleFavorite = async (plan) => {
+      try {
+        await api.selectPlanningOutlines([plan.outlineId])
+        plan.favorited = true
+        message.success('Successfully favorited')
+      } catch (error) {
+        console.error('Failed to favorite outline:', error)
+        message.error('Failed to favorite')
+      }
+    }
+
+    // 添加 contentPlanTab 的定义
+    const contentPlanTab = ref('all')
+
+    // 添加 tab 切换处理方法
+    const handleContentPlanTabChange = (activeKey) => {
+      contentPlanTab.value = activeKey
+      // 重置分页
+      contentPlansPagination.value.current = 1
+      // 重新获取数据
+      fetchContentPlans()
+    }
+
+    // 添加loading状态
+    const isLoadingOutlines = ref(false)
 
     return {
       currentMode,
@@ -1557,6 +1670,10 @@ export default defineComponent({
       outlineGenerationStatus,
       contentPlansPagination,
       handleContentPlansPaginationChange,
+      handleFavorite,
+      contentPlanTab,
+      handleContentPlanTabChange,
+      isLoadingOutlines,
     }
   }
 })
@@ -1583,24 +1700,6 @@ export default defineComponent({
   }
 }
 
-.main-content {
-  display: flex;
-  gap: 24px;
-}
-
-.left-panel {
-  flex: 1;
-  transition: all 0.3s ease;
-}
-
-.panel-hidden {
-  display: none;
-}
-
-.right-panel {
-  flex: 1;
-}
-
 .mode-selector-card {
   margin-bottom: 16px;
   
@@ -1613,25 +1712,6 @@ export default defineComponent({
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.step-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-.header-actions {
-  display: flex;
-  gap: 12px;
-  
-  .ant-btn {
-    height: 32px;
-    
-    .anticon {
-      font-size: 14px;
-    }
-  }
 }
 
 .analytics-card,
@@ -1678,29 +1758,6 @@ export default defineComponent({
 :deep(.ant-statistic-content) {
   font-size: 24px;
   font-weight: 600;
-}
-
-.beginner-mode {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding-bottom: 24px;
-}
-
-.overview-section {
-  margin-bottom: 16px;
-}
-
-.pages-comparison {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.category-tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
 }
 
 .beginner-card,
@@ -1796,11 +1853,6 @@ export default defineComponent({
   gap: 16px;
 }
 
-.header-actions {
-  display: flex;
-  gap: 12px;
-}
-
 .stat-value.compact {
   font-size: 16px;
   font-weight: 500;
@@ -1889,13 +1941,6 @@ export default defineComponent({
 
 .step-content {
   flex: 1;
-}
-
-.step-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 4px;
 }
 
 .step-subtitle {
@@ -2153,12 +2198,6 @@ export default defineComponent({
   min-width: 0;
 }
 
-.step-title {
-  font-size: 13px;
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-
 .step-subtitle {
   font-size: 12px;
   margin-bottom: 6px;
@@ -2352,21 +2391,6 @@ export default defineComponent({
     }
   }
 }
-
-.header-actions {
-  display: flex;
-  gap: 8px;
-  
-  .ant-btn {
-    height: 32px;
-    padding: 0 12px;
-    
-    .anticon {
-      font-size: 14px;
-    }
-  }
-}
-
 .expert-mode-container {
   display: flex;
   flex-direction: column;
@@ -2883,18 +2907,6 @@ export default defineComponent({
   background: linear-gradient(135deg, #1890ff, #3B82F6);
   border: none;
 }
-
-@keyframes iconPulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(0.9);
-  }
-}
-
 .content-topics-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -2916,7 +2928,6 @@ export default defineComponent({
 }
 
 .content-topic-header {
-  padding: 0 0 16px 0; /* 修改头部内边距 */
   border-bottom: 1px solid #f0f0f0;
   margin-bottom: 16px; /* 添加底部外边距 */
 }
@@ -3083,27 +3094,6 @@ export default defineComponent({
 .page-icon {
   font-size: 12px;
   color: #1890ff;
-}
-
-.competitor-table {
-  :deep(.ant-table-body) {
-    min-height: 400px;  /* 设置最小高度 */
-  }
-  
-  :deep(.ant-table-thead > tr > th) {
-    background: #fafafa;
-    padding: 12px 16px;
-  }
-  
-  :deep(.ant-table-tbody > tr > td) {
-    padding: 12px 16px;
-  }
-}
-
-.rank-cell {
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .rank-icon {
@@ -3494,11 +3484,6 @@ p {
   margin-top: 0;
 }
 
-.step-title {
-  font-weight: 500;
-  margin-right: 8px;
-}
-
 .step-desc {
   color: rgba(0, 0, 0, 0.45);
   font-size: 13px;
@@ -3542,17 +3527,6 @@ p {
   margin-bottom: 24px;
   width: 100%;
 }
-
-.section-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .intent-content,
 .tdk-content,
 .outline-content {
@@ -3631,36 +3605,6 @@ p {
   padding: 8px;
 }
 
-.overview-section {
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
-  
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  
-  .number {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    background: #1890ff;
-    color: white;
-    border-radius: 50%;
-    font-size: 12px;
-  }
-}
-
 .section-desc {
   color: #595959;
   font-size: 13px;
@@ -3714,12 +3658,6 @@ p {
   background: #fff;
 }
 
-.step-title {
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-}
-
 /* 添加新的样式 */
 .content-plans {
   display: flex;
@@ -3754,75 +3692,125 @@ p {
 /* 网格布局样式 */
 .content-plans-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* 改为 280px */
-  gap: 24px; /* 增加间距到 24px 使布局更加宽松 */
-  padding: 16px 0;
-  width: 100%;
-  height: 100%; /* 确保网格占满容器 */
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* 减小卡片宽度 */
+  gap: 16px; /* 减小卡片间距 */
+  padding: 16px;
 }
 
 .plan-card {
-  height: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
   
   :deep(.ant-card-body) {
-    padding: 16px;
+    padding: 12px; /* 减小内边距 */
   }
   
-  :deep(.ant-card-extra) {
-    padding: 16px 16px 0 0;
+  .card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* 减小内容间距 */
   }
-}
-
-.card-content {
-  cursor: pointer;
-}
-
-.plan-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 8px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.plan-description {
-  color: rgba(0, 0, 0, 0.45);
-  font-size: 14px;
-  margin-bottom: 16px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.plan-meta {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: rgba(0, 0, 0, 0.45);
-  font-size: 13px;
   
-  .anticon {
-    font-size: 14px;
+  /* 修改标题样式 */
+  .plan-title {
+    font-size: 14px; /* 减小标题字体 */
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.85);
+    margin-bottom: 4px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* 修改描述样式 */
+  .plan-description {
+    font-size: 12px; /* 减小描述字体 */
+    color: rgba(0, 0, 0, 0.65);
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  /* 修改指标样式 */
+  .plan-metrics {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 8px;
+    
+    .metric-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      
+      .metric-label {
+        font-size: 11px; /* 减小标签字体 */
+        color: rgba(0, 0, 0, 0.45);
+      }
+      
+      .metric-value {
+        font-size: 13px; /* 减小数值字体 */
+        font-weight: 500;
+        color: rgba(0, 0, 0, 0.85);
+      }
+    }
+  }
+  
+  /* 修改关键词标签样式 */
+  .plan-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+    
+    :deep(.ant-tag) {
+      font-size: 11px; /* 减小标签字体 */
+      padding: 0 6px;
+      margin: 0;
+      line-height: 18px;
+    }
+  }
+  
+  /* 修改操作按钮样式 */
+  .plan-actions {
+    margin-top: auto;
+    
+    .ant-btn {
+      font-size: 12px; /* 减小按钮字体 */
+      height: 28px; /* 减小按钮高度 */
+      padding: 0 12px;
+    }
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 }
 
-.plan-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+/* 修改分页容器样式 */
+.pagination-container {
+  padding: 16px;
+  text-align: center;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+  
+  :deep(.ant-pagination) {
+    font-size: 12px; /* 减小分页字体 */
+    
+    .ant-pagination-item,
+    .ant-pagination-prev,
+    .ant-pagination-next {
+      min-width: 28px; /* 减小分页按钮大小 */
+      height: 28px;
+      line-height: 26px;
+    }
+  }
 }
 
-/* 抽屉内容样式 */
 .drawer-section {
   margin-bottom: 24px;
   padding-bottom: 24px;
@@ -3832,21 +3820,6 @@ p {
     border-bottom: none;
   }
 }
-
-.section-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  
-  .anticon {
-    color: #1890ff;
-  }
-}
-
 .section-content {
   display: flex;
   flex-direction: column;
@@ -3923,8 +3896,8 @@ p {
 
 .content-plans-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
   width: 100%;
 }
 
@@ -3945,23 +3918,6 @@ p {
   min-height: 0; /* 修改这里，允许内容自适应 */
 }
 
-.main-content {
-  display: flex;
-  width: 100%;
-  position: relative;
-}
-
-.left-panel {
-  flex: 1;
-  width: 100%;
-  transition: all 0.3s ease;
-}
-
-.panel-hidden {
-  display: none;
-}
-
-/* 确保 mode-selector-card 样式正确 */
 .mode-selector-card {
   margin-bottom: 16px;
   
@@ -4030,10 +3986,6 @@ p {
 
 /* 添加 tab 相关样式 */
 .planning-tabs {
-  :deep(.ant-tabs-nav) {
-    margin-bottom: 24px;
-  }
-
   :deep(.ant-tabs-tab) {
     padding: 12px 24px;
     
@@ -4053,6 +4005,274 @@ p {
 /* 移除原有的 steps 相关样式 */
 .steps-wrapper {
   display: none;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.favorite-icon {
+  font-size: 16px;
+  color: #d9d9d9;
+  cursor: pointer;
+  transition: all 0.3s;
+  
+  &:hover {
+    color: #ff4d4f;
+    transform: scale(1.1);
+  }
+  
+  &.favorited {
+    color: #ff4d4f;
+  }
+}
+
+.plan-card {
+  position: relative;
+  
+  :deep(.ant-card-extra) {
+    margin-left: 0;
+  }
+}
+
+/* Update existing styles */
+.content-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* Reduced from previous value */
+  gap: 16px;
+  margin-bottom: 24px; /* Add margin for pagination */
+}
+
+.plan-card {
+  height: auto;
+  
+  :deep(.ant-card-body) {
+    padding: 12px;
+  }
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-title {
+  font-size: 14px; /* Reduced from previous value */
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.plan-description {
+  font-size: 12px; /* Reduced from previous value */
+  color: rgba(0, 0, 0, 0.65);
+  margin: 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.plan-meta {
+  display: flex;
+  gap: 16px;
+  
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+    
+    .anticon {
+      font-size: 12px;
+    }
+  }
+}
+
+.plan-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  
+  :deep(.ant-tag) {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.4;
+    padding: 0 4px;
+  }
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+/* 添加分页容器样式 */
+.pagination-wrapper {
+  margin-top: 24px;
+  padding: 16px 0;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+  
+  :deep(.ant-pagination) {
+    text-align: center;
+    
+    .ant-pagination-options {
+      margin-left: 16px;
+    }
+  }
+}
+
+.content-plans-grid {
+  min-height: 200px; /* 确保网格区域有最小高度 */
+}
+
+/* 保留之前的样式并添加新的样式 */
+.plan-section {
+  height: 100%;
+}
+
+.content-plan-tabs {
+  height: 100%;
+  
+  :deep(.ant-tabs-content) {
+    height: 100%;
+  }
+  
+  :deep(.ant-tabs-tabpane) {
+    height: 100%;
+  }
+}
+
+.tab-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 300px);
+  min-height: 500px;
+}
+
+.content-plans-grid {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  background: #f0f2f5;
+}
+
+.pagination-container {
+  padding: 16px;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.plan-card {
+  height: 100%;
+  background: #fff;
+  transition: all 0.3s;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  :deep(.ant-card-body) {
+    height: 100%;
+    padding: 20px;
+  }
+}
+
+.card-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.plan-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin: 0;
+}
+
+.plan-description {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.plan-metrics {
+  display: flex;
+  gap: 24px;
+  padding: 12px 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.metric-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.plan-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.plan-actions {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 添加loading状态的样式 */
+.content-plans-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  position: relative;
+}
+
+.loading-container {
+  text-align: center;
+}
+
+.loading-text {
+  margin-top: 16px;
+  color: rgba(0, 0, 0, 0.45);
 }
 </style>
 

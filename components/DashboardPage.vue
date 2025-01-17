@@ -12,7 +12,7 @@
         size="middle"
         @click="showTutorial"
       >
-        <QuestionCircleOutlined /> Learn how to use
+       What can i do with Dashboard?
       </a-button>
     </template>
 

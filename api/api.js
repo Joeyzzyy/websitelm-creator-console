@@ -1131,6 +1131,19 @@ const getPlanningOutlines = async (params = {}) => {
   }
 };
 
+// 新增：选择需要生成的outline的方法
+const selectPlanningOutlines = async (outlineIds) => {
+  try {
+    const response = await apiClient.post('/planning/outline/selected', {
+      outlineIds: outlineIds
+    });
+    return response.data;
+  } catch (error) {
+    console.error('选择outline失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1216,5 +1229,6 @@ export default {
   getKeywordAnalysisOverview,
   getPlanningKeywords,
   generatePlanningComposite,
-  getPlanningOutlines
+  getPlanningOutlines,
+  selectPlanningOutlines
 };
