@@ -202,18 +202,31 @@
                                 <template #renderItem="{ item }">
                                   <a-list-item>
                                     <div class="keyword-item">
-                                      <a-space align="start" class="keyword-header">
-                                        <a-checkbox 
-                                          v-model:checked="item.selected"
-                                          @change="(checked) => handleKeywordSelect(item, checked)"
+                                      <div class="keyword-header">
+                                        <div class="keyword-info">
+                                          <a-checkbox 
+                                            v-model:checked="item.selected"
+                                            @change="(checked) => handleKeywordSelect(item, checked)"
+                                          >
+                                            "{{ item.keyword }}"
+                                          </a-checkbox>
+                                          <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
+                                          <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                                          <a-tag color="purple">Vol={{ item.volume }}</a-tag>
+                                          <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
+                                        </div>
+                                        <!-- Move favorite button to the right -->
+                                        <a-button 
+                                          type="text"
+                                          @click.stop="handleKeywordFavorite(item)"
+                                          class="favorite-btn"
                                         >
-                                          "{{ item.keyword }}"
-                                        </a-checkbox>
-                                        <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
-                                        <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                                        <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                                        <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
-                                      </a-space>
+                                          <template #icon>
+                                            <HeartFilled v-if="item.favorited" style="color: #ff4d4f;" />
+                                            <HeartOutlined v-else />
+                                          </template>
+                                        </a-button>
+                                      </div>
                                       
                                       <!-- 添加推荐理由显示 -->
                                       <div class="keyword-reason" v-if="item.reason">
@@ -262,18 +275,31 @@
                                 <template #renderItem="{ item }">
                                   <a-list-item>
                                     <div class="keyword-item">
-                                      <a-space align="start" class="keyword-header">
-                                        <a-checkbox 
-                                          v-model:checked="item.selected"
-                                          @change="(checked) => handleKeywordSelect(item, checked)"
+                                      <div class="keyword-header">
+                                        <div class="keyword-info">
+                                          <a-checkbox 
+                                            v-model:checked="item.selected"
+                                            @change="(checked) => handleKeywordSelect(item, checked)"
+                                          >
+                                            "{{ item.keyword }}"
+                                          </a-checkbox>
+                                          <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
+                                          <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                                          <a-tag color="purple">Vol={{ item.volume }}</a-tag>
+                                          <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
+                                        </div>
+                                        <!-- Move favorite button to the right -->
+                                        <a-button 
+                                          type="text"
+                                          @click.stop="handleKeywordFavorite(item)"
+                                          class="favorite-btn"
                                         >
-                                          "{{ item.keyword }}"
-                                        </a-checkbox>
-                                        <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
-                                        <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                                        <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                                        <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
-                                      </a-space>
+                                          <template #icon>
+                                            <HeartFilled v-if="item.favorited" style="color: #ff4d4f;" />
+                                            <HeartOutlined v-else />
+                                          </template>
+                                        </a-button>
+                                      </div>
                                       <!-- 添加 reasoning 显示 -->
                                       <div class="keyword-reason" v-if="item.reason">
                                         <BulbOutlined />
@@ -492,6 +518,19 @@
                       </div>
                     </template>
 
+                    <!-- Add generate button here -->
+                    <div class="generate-button-wrapper">
+                      <a-button 
+                        type="primary"
+                        size="small"
+                        :loading="isGenerating"
+                        :disabled="!selectedKeywords.length"
+                        @click="generateContentPlan"
+                      >
+                        <ThunderboltOutlined /> Generate Content Recommendation 
+                      </a-button>
+                    </div>
+
                     <a-list
                       :data-source="selectedKeywords"
                       size="small"
@@ -519,15 +558,6 @@
                       <div class="empty-description">
                         Generate a complete content plan based on your {{ selectedKeywords.length }} selected keywords
                       </div>
-                      <a-button 
-                        type="primary"
-                        size="large"
-                        :loading="isGenerating"
-                        :disabled="!selectedKeywords.length"
-                        @click="generateContentPlan"
-                      >
-                        <ThunderboltOutlined /> Generate Content Plan
-                      </a-button>
                     </div>
                   </div>
                   <!-- Update content display cards -->
@@ -552,14 +582,12 @@
                                   v-for="plan in contentPlans" 
                                   :key="plan.outlineId"
                                   class="plan-card"
-                                  @click="showPlanDetails(plan)"
                                   :bordered="false"
                                 >
                                   <template #extra>
                                     <a-button 
                                       type="text"
                                       @click.stop="handleFavorite(plan)"
-                                      :disabled="plan.favorited"
                                     >
                                       <template #icon>
                                         <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
@@ -568,7 +596,7 @@
                                     </a-button>
                                   </template>
                                   
-                                  <div class="card-content">
+                                  <div class="card-content" @click="showPlanDetails(plan)">
                                     <h3 class="plan-title">{{ plan.title }}</h3>
                                     <p class="plan-description">{{ plan.description }}</p>
                                     
@@ -636,8 +664,7 @@
                                 <template #extra>
                                   <a-button 
                                     type="text"
-                                    @click="handleFavorite(plan)"
-                                    :disabled="plan.favorited"
+                                    @click.stop="handleFavorite(plan)"
                                   >
                                     <template #icon>
                                       <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
@@ -646,7 +673,7 @@
                                   </a-button>
                                 </template>
                                 
-                                <div class="card-content">
+                                <div class="card-content" @click="showPlanDetails(plan)">
                                   <h3 class="plan-title">{{ plan.title }}</h3>
                                   <p class="plan-description">{{ plan.description }}</p>
                                   
@@ -1010,6 +1037,7 @@ export default defineComponent({
         id: item.keywordId,
         keyword: item.keyword,
         selected: false,
+        favorited: item.status === 'selected', // 添加favorited字段
         krs: Number(item.krsScore).toFixed(2), // 使用 krsScore 字段，保留两位小数
         kd: item.kd, // 直接使用 kd 字段
         volume: item.volume, // 直接使用 volume 字段
@@ -1575,16 +1603,24 @@ export default defineComponent({
     })
 
     // 添加相关的方法
-    const handleFavorite = async (plan) => {
+    const handleFavorite = async (plan, event) => {
       try {
-        await api.selectPlanningOutlines([plan.outlineId])
-        plan.favorited = true
-        message.success('Successfully favorited')
+        if (plan.favorited) {
+          // Cancel favorite
+          await api.cancelPlanningOutlines([plan.outlineId]);
+          plan.favorited = false;
+          message.success('Removed from favorites');
+        } else {
+          // Add to favorites
+          await api.selectPlanningOutlines([plan.outlineId]);
+          plan.favorited = true;
+          message.success('Added to favorites');
+        }
       } catch (error) {
-        console.error('Failed to favorite outline:', error)
-        message.error('Failed to favorite')
+        console.error('Favorite operation failed:', error);
+        message.error('Operation failed');
       }
-    }
+    };
 
     // 添加 contentPlanTab 的定义
     const contentPlanTab = ref('all')
@@ -1600,6 +1636,26 @@ export default defineComponent({
 
     // 添加loading状态
     const isLoadingOutlines = ref(false)
+
+    // 添加收藏/取消收藏关键词的方法
+    const handleKeywordFavorite = async (keyword) => {
+      try {
+        if (keyword.favorited) {
+          // 取消收藏
+          await api.cancelPlanningKeywords([keyword.id]);
+          keyword.favorited = false;
+          message.success('Removed from favorites');
+        } else {
+          // 添加收藏
+          await api.selectPlanningKeywords([keyword.id]);
+          keyword.favorited = true;
+          message.success('Added to favorites');
+        }
+      } catch (error) {
+        console.error('收藏操作失败:', error);
+        message.error('操作失败');
+      }
+    };
 
     return {
       currentMode,
@@ -1674,6 +1730,7 @@ export default defineComponent({
       contentPlanTab,
       handleContentPlanTabChange,
       isLoadingOutlines,
+      handleKeywordFavorite,
     }
   }
 })
@@ -4273,6 +4330,45 @@ p {
 .loading-text {
   margin-top: 16px;
   color: rgba(0, 0, 0, 0.45);
+}
+
+/* Add new styles */
+.generate-button-wrapper {
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* 添加收藏按钮样式 */
+.keyword-header .ant-btn-text {
+  padding: 0 4px;
+}
+
+.keyword-header .ant-btn-text:hover {
+  background: transparent;
+}
+
+/* Update keyword header styles */
+.keyword-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.keyword-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.favorite-btn {
+  padding: 4px 8px;
+  margin-left: 8px;
+}
+
+.favorite-btn:hover {
+  background: transparent;
 }
 </style>
 

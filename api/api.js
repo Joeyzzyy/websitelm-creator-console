@@ -1144,6 +1144,45 @@ const selectPlanningOutlines = async (outlineIds) => {
   }
 };
 
+// 新增：取消选中outline的方法
+const cancelPlanningOutlines = async (outlineIds) => {
+  try {
+    const response = await apiClient.post('/planning/outline/cancel', {
+      outlineIds: outlineIds
+    });
+    return response.data;
+  } catch (error) {
+    console.error('取消选中outline失败:', error);
+    return null;
+  }
+};
+
+// 新增：选择关键词的方法
+const selectPlanningKeywords = async (keywordIds) => {
+  try {
+    const response = await apiClient.post('/planning/keywords/selected', {
+      keywordIds: keywordIds
+    });
+    return response.data;
+  } catch (error) {
+    console.error('选择关键词失败:', error);
+    return null;
+  }
+};
+
+// 新增：取消选中关键词的方法
+const cancelPlanningKeywords = async (keywordIds) => {
+  try {
+    const response = await apiClient.post('/planning/keywords/cancel', {
+      keywordIds: keywordIds
+    });
+    return response.data;
+  } catch (error) {
+    console.error('取消选中关键词失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1230,5 +1269,8 @@ export default {
   getPlanningKeywords,
   generatePlanningComposite,
   getPlanningOutlines,
-  selectPlanningOutlines
+  selectPlanningOutlines,
+  cancelPlanningOutlines,
+  selectPlanningKeywords,
+  cancelPlanningKeywords
 };
