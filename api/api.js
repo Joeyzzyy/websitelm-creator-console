@@ -1047,9 +1047,13 @@ const deletePageButtonLink = async (linkId) => {
 };
 
 // 新增：获取分析状态的方法
-const getAnalysisStatus = async () => {
+const getAnalysisStatus = async (type) => {
   try {
-    const response = await apiClient.get('/planning/analysis-status');
+    const response = await apiClient.get('/planning/analysis-status', {
+      params: {
+        taskName: type 
+      }
+    });
     return response.data;
   } catch (error) {
     console.error('获取分析状态失败:', error);
@@ -1100,12 +1104,29 @@ const getPlanningKeywords = async (params = {}) => {
 // 新增：生成意图和TDK及大纲的方法
 const generatePlanningComposite = async (keywordIds) => {
   try {
-    const response = await apiClient.get('/planning/outline', {
+    const response = await apiClient.post('/planning/composite-generator', {
       keywordIds: keywordIds
     });
     return response.data;
   } catch (error) {
     console.error('生成意图和TDK及大纲失败:', error);
+    return null;
+  }
+};
+
+// 新增：获取用户outline列表的方法
+const getPlanningOutlines = async (params = {}) => {
+  try {
+    const queryParams = {
+      ...(params.status && { status: params.status }),
+      ...(params.page && { page: params.page }),
+      ...(params.limit && { limit: params.limit })
+    };
+    
+    const response = await apiClient.get('/planning/outline', { params: queryParams });
+    return response.data;
+  } catch (error) {
+    console.error('获取用户outline列表失败:', error);
     return null;
   }
 };
@@ -1194,5 +1215,6 @@ export default {
   updateOnboardingStatus,
   getKeywordAnalysisOverview,
   getPlanningKeywords,
-  generatePlanningComposite
+  generatePlanningComposite,
+  getPlanningOutlines
 };

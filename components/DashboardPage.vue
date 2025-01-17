@@ -4,10 +4,28 @@
     description="Manage your product and track your performance"
     icon="📊"
   >
-   
-    <!-- Product info and statistics banner -->
+    <!-- Make sure the slot name matches exactly -->
+    <template #title-extra>
+      <a-button 
+        class="tutorial-trigger"
+        type="text"
+        size="middle"
+        @click="showTutorial"
+      >
+        <QuestionCircleOutlined /> Learn how to use
+      </a-button>
+    </template>
+
+    <!-- Tutorial component -->
+    <ModuleTutorial
+      v-model:visible="tutorialVisible"
+      :steps="dashboardTutorial.steps"
+      @complete="onTutorialComplete"
+    />
+    
+    <!-- Rest of the content -->
     <div class="dashboard-content">
-        <!-- 添加测试按钮 -->
+      <!-- Add test button -->
       <!-- Product Info Card -->
       <a-card class="info-card">
         <template #title>
@@ -127,7 +145,7 @@
 
       <!-- Sitemap and Pages Row -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
-        <!-- Sitemap Panel - 占据 2/3 宽度 -->
+        <!-- Sitemap Panel - occupies 2/3 width -->
         <a-col :span="16">
           <a-card class="sitemap-card">
             <template #title>
@@ -226,7 +244,7 @@
           </a-card>
         </a-col>
 
-        <!-- Pages Card - 占据 1/3 宽度 -->
+        <!-- Pages Card - occupies 1/3 width -->
         <a-col :span="8">
           <a-card class="pages-card">
             <template #title>
@@ -282,9 +300,9 @@
 
       <!-- Metrics Cards -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
-        <!-- Traffic 卡片 - 占满一行 -->
+        <!-- Traffic card - occupies full width -->
         <a-col :span="24">
-          <a-card>
+          <a-card class="analytics-card">
             <template #title>
               <div class="card-title">
                 <span>📈 Traffic Analytics</span>
@@ -303,60 +321,62 @@
                 </a-select>
               </div>
             </template>
-            <!-- 未连接 GSC 时显示提示 -->
-            <div v-if="!isGscConnected" class="not-connected-notice">
-              <a-empty>
-                <a-button 
-                  type="primary" 
-                  @click="connectGSC"
-                >
-                  Connect Google Search Console
-                </a-button>
-              </a-empty>
+            <div class="traffic-analytics-content">
+              <!-- Notice when not connected to GSC -->
+              <div v-if="!isGscConnected" class="not-connected-notice">
+                <a-empty>
+                  <a-button 
+                    type="primary" 
+                    @click="connectGSC"
+                  >
+                    Connect Google Search Console
+                  </a-button>
+                </a-empty>
+              </div>
+              <!-- Data content -->
+              <a-row v-else :gutter="[16, 8]">
+                <a-col :span="8">
+                  <a-statistic 
+                    title="Impressions" 
+                    :value="gscAnalytics?.impressions ?? 'No data'"
+                    :precision="0"
+                    :value-style="{ fontSize: '16px' }"
+                    :title-style="{ fontSize: '12px' }"
+                  >
+                    <template #suffix>
+                      <a-tag size="small" color="success" v-if="gscAnalytics?.impressionsChange">
+                        <span style="font-size: 12px">↑ {{ gscAnalytics.impressionsChange }}%</span>
+                      </a-tag>
+                    </template>
+                  </a-statistic>
+                </a-col>
+                <a-col :span="8">
+                  <a-statistic 
+                    title="Clicks" 
+                    :value="gscAnalytics?.clicks ?? 'No data'"
+                    :precision="0"
+                    :value-style="{ fontSize: '16px' }"
+                    :title-style="{ fontSize: '12px' }"
+                  >
+                    <template #suffix>
+                      <a-tag size="small" color="success" v-if="gscAnalytics?.clicksChange">
+                        <span style="font-size: 12px">↑ {{ gscAnalytics.clicksChange }}%</span>
+                      </a-tag>
+                    </template>
+                  </a-statistic>
+                </a-col>
+              </a-row>
             </div>
-            <!-- 数据内容 -->
-            <a-row v-else :gutter="[16, 8]">
-              <a-col :span="8">
-                <a-statistic 
-                  title="Impressions" 
-                  :value="gscAnalytics?.impressions ?? 'No data'"
-                  :precision="0"
-                  :value-style="{ fontSize: '16px' }"
-                  :title-style="{ fontSize: '12px' }"
-                >
-                  <template #suffix>
-                    <a-tag size="small" color="success" v-if="gscAnalytics?.impressionsChange">
-                      <span style="font-size: 12px">↑ {{ gscAnalytics.impressionsChange }}%</span>
-                    </a-tag>
-                  </template>
-                </a-statistic>
-              </a-col>
-              <a-col :span="8">
-                <a-statistic 
-                  title="Clicks" 
-                  :value="gscAnalytics?.clicks ?? 'No data'"
-                  :precision="0"
-                  :value-style="{ fontSize: '16px' }"
-                  :title-style="{ fontSize: '12px' }"
-                >
-                  <template #suffix>
-                    <a-tag size="small" color="success" v-if="gscAnalytics?.clicksChange">
-                      <span style="font-size: 12px">↑ {{ gscAnalytics.clicksChange }}%</span>
-                    </a-tag>
-                  </template>
-                </a-statistic>
-              </a-col>
-            </a-row>
           </a-card>
         </a-col>
 
-        <!-- 图表卡片 -->
+        <!-- Chart card -->
         <a-col :span="24">
           <a-card>
             <template #title>
               <span>📈 Traffic Analytics (Last 15 Days)</span>
             </template>
-            <!-- 未连接 GSC 时显示提示 -->
+            <!-- Notice when not connected to GSC -->
             <div v-if="!isGscConnected" class="traffic-analytics">
               <a-empty class="centered-empty-state">
                 <a-button 
@@ -367,14 +387,14 @@
                 </a-button>
               </a-empty>
             </div>
-            <!-- 添加无数据状态 -->
+            <!-- No data state -->
             <div v-else-if="!gscAnalytics?.dailyData?.length" class="traffic-analytics">
               <a-empty 
                 description="No data available" 
                 class="centered-empty-state"
               />
             </div>
-            <!-- 数据加载完成后显示图表 -->
+            <!-- Chart when data is loaded -->
             <div v-else ref="chartRef" style="height: 500px; width: 100%;"></div>
           </a-card>
         </a-col>
@@ -410,7 +430,7 @@
         @finish="handleOnboardingFinish"
         ref="formRef"
       >
-        <!-- 基本信息 -->
+        <!-- Basic info -->
         <a-form-item 
           label="Product Name" 
           name="productName"
@@ -425,7 +445,7 @@
           <p class="help-text">This name will be used throughout your content generation.</p>
         </a-form-item>
 
-        <!-- 网站信息和域名验证 -->
+        <!-- Website info and domain verification -->
         <a-form-item 
           label="Official Website" 
           name="website"
@@ -458,7 +478,7 @@
           </a-input-group>
           <p class="help-text">Make sure to enter the main domain of your product (e.g. example.com).</p>
 
-          <!-- 域名验证部分 -->
+          <!-- Domain verification section -->
           <template v-if="formState.productId">
             <template v-if="(!productInfo.domainStatus || formState.website !== productInfo.projectWebsite?.replace('https://', '')) && formState.website">
               <a-typography-text type="secondary" class="mt-3 d-block">
@@ -531,11 +551,11 @@
           </template>
         </a-form-item>
 
-        <!-- 竞品分析 -->
+        <!-- Competitor analysis -->
         <a-form-item label="Competitors">
           <p class="step-description">Add up to 4 main competitors to help us understand your market positioning.</p>
           <div class="competitors-section">
-            <!-- 第一行: 添加的竞品标签 -->
+            <!-- Row 1: Added competitors tags -->
             <div class="competitors-tags">
               <a-space wrap>
                 <a-tag 
@@ -550,7 +570,7 @@
               </a-space>
             </div>
 
-            <!-- 第二行: 输入框和添加按钮 -->
+            <!-- Row 2: Input fields and add button -->
             <div class="competitors-input">
               <a-space>
                 <a-input
@@ -575,7 +595,7 @@
           </div>
         </a-form-item>
 
-        <!-- 底部按钮 -->
+        <!-- Bottom buttons -->
         <a-form-item>
           <a-button 
             type="primary" 
@@ -590,7 +610,7 @@
       </a-form>
     </a-modal>
 
-    <!-- 添加 GSC 连接成功的 Modal -->
+    <!-- Add GSC connection success modal -->
     <a-modal
       v-model:open="gscSuccessModalVisible"
       :footer="null"
@@ -605,7 +625,7 @@
       </div>
     </a-modal>
 
-    <!-- 添加 Sitemap Modal -->
+    <!-- Add Sitemap modal -->
     <a-modal
       v-model:visible="sitemapModal.visible"
       title="Submit URLs to Google Search Console"
@@ -840,8 +860,9 @@ import {
 } from '@ant-design/icons-vue'
 import apiClient from '../api/api'
 import { Modal, message } from 'ant-design-vue'
-import * as echarts from 'echarts' // 需要安装 echarts
-import { CheckCircleFilled } from '@ant-design/icons-vue'
+import * as echarts from 'echarts'
+import ModuleTutorial from '../components/common/ModuleTutorial.vue'
+import { dashboardTutorial } from '../config/tutorials/dashboard'
 
 export default defineComponent({
   components: {
@@ -865,7 +886,8 @@ export default defineComponent({
     GoogleOutlined,
     CompassOutlined,
     ReloadOutlined,
-    QuestionCircleOutlined
+    QuestionCircleOutlined,
+    ModuleTutorial
   },
   data() {
     return {
@@ -923,7 +945,9 @@ export default defineComponent({
       publishedUrls: [],
       pagesDashboard: null,
       isDomainVerified: false,
-      hasTourCompleted: false // 修改初始值
+      hasTourCompleted: false, // 修改初始值
+      tutorialVisible: false,
+      dashboardTutorial: dashboardTutorial, // 添加到 data 中
     }
   },
   created() {
@@ -2117,6 +2141,14 @@ export default defineComponent({
     openGuideModeDialog() {
       // 通过事件触发父组件的方法
       this.$emit('open-guide-mode');
+    },
+
+    showTutorial() {
+      this.tutorialVisible = true;
+    },
+
+    onTutorialComplete() {
+      message.success('Tutorial completed! Click the tutorial button in the title bar to view it again.');
     }
   },
 
@@ -2924,5 +2956,67 @@ export default defineComponent({
   background: #e6f7ff;
   padding: 4px 12px;
   border-radius: 12px;
+}
+
+/* 教程按钮样式 */
+.tutorial-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1890ff;
+  padding: 0;
+  height: auto;
+  transition: all 0.3s ease;
+  text-shadow: 0 0 1px rgba(24, 144, 255, 0.1);
+  position: relative;
+  
+  /* 柔和的发光动画 */
+  animation: glow 3s ease-in-out infinite alternate;
+  
+  &:hover {
+    color: #40a9ff;
+    background: transparent;
+    text-shadow: 0 0 6px rgba(24, 144, 255, 0.3);
+    
+    :deep(.anticon) {
+      transform: rotate(12deg);
+      filter: drop-shadow(0 0 4px rgba(24, 144, 255, 0.2));
+    }
+  }
+  
+  :deep(.anticon) {
+    font-size: 16px;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 2px rgba(24, 144, 255, 0.2));
+  }
+}
+
+/* 柔和的发光动画 */
+@keyframes glow {
+  from {
+    text-shadow: 0 0 1px rgba(24, 144, 255, 0.1),
+                 0 0 2px rgba(24, 144, 255, 0.1);
+  }
+  to {
+    text-shadow: 0 0 2px rgba(24, 144, 255, 0.2),
+                 0 0 4px rgba(24, 144, 255, 0.2);
+  }
+}
+
+.analytics-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.3s;
+
+  &:hover {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.traffic-analytics-content {
+  padding: 24px;
 }
 </style>

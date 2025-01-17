@@ -35,12 +35,36 @@
           </a-button>
         </template>
 
-        <a-tab-pane key="knowledge" tab="Knowledge Base" />
-        <a-tab-pane key="images" tab="Images" />
-        <a-tab-pane key="videos" tab="Videos" />
-        <a-tab-pane key="links" tab="Internal Links" />
-        <a-tab-pane key="button-links" tab="Button Links" />
-        <a-tab-pane key="header" tab="Header" />
+        <a-tab-pane key="knowledge">
+          <template #tab>
+            <span class="knowledge-tab">Knowledge Base</span>
+          </template>
+        </a-tab-pane>
+        <a-tab-pane key="images">
+          <template #tab>
+            <span class="images-tab">Images</span>
+          </template>
+        </a-tab-pane>
+        <a-tab-pane key="videos">
+          <template #tab>
+            <span class="videos-tab">Videos</span>
+          </template>
+        </a-tab-pane>
+        <a-tab-pane key="links">
+          <template #tab>
+            <span class="links-tab">Internal Links</span>
+          </template>
+        </a-tab-pane>
+        <a-tab-pane key="button-links">
+          <template #tab>
+            <span class="button-links-tab">Button Links</span>
+          </template>
+        </a-tab-pane>
+        <a-tab-pane key="header" tab="Header">
+          <template #tab>
+            <span class="header-tab">Header</span>
+          </template>
+        </a-tab-pane>
         <a-tab-pane key="footer" tab="Footer" />
       </a-tabs>
 
@@ -689,7 +713,8 @@ import {
   FolderOutlined, 
   LinkOutlined,
   SettingOutlined,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
+  QuestionCircleOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import apiClient from '../api/api';
@@ -714,6 +739,7 @@ export default {
     HeaderTemplate,
     FooterTemplate,
     NoSiteConfigured,
+    QuestionCircleOutlined,
   },
   setup() {
     const router = useRouter();
@@ -2981,5 +3007,95 @@ export default {
   display: flex;
   justify-content: center;
   padding-bottom: 24px;
+}
+
+/* 添加教程按钮样式 */
+.tutorial-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1890ff;
+  padding: 0;
+  height: auto;
+  transition: all 0.3s ease;
+  text-shadow: 0 0 1px rgba(24, 144, 255, 0.1);
+  position: relative;
+  
+  /* 柔和的发光动画 */
+  animation: glow 3s ease-in-out infinite alternate;
+  
+  &:hover {
+    color: #40a9ff;
+    background: transparent;
+    text-shadow: 0 0 6px rgba(24, 144, 255, 0.3);
+    
+    :deep(.anticon) {
+      transform: rotate(12deg);
+      filter: drop-shadow(0 0 4px rgba(24, 144, 255, 0.2));
+    }
+  }
+  
+  :deep(.anticon) {
+    font-size: 16px;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 2px rgba(24, 144, 255, 0.2));
+  }
+}
+
+/* 柔和的发光动画 */
+@keyframes glow {
+  from {
+    text-shadow: 0 0 1px rgba(24, 144, 255, 0.1),
+                 0 0 2px rgba(24, 144, 255, 0.1);
+  }
+  to {
+    text-shadow: 0 0 2px rgba(24, 144, 255, 0.2),
+                 0 0 4px rgba(24, 144, 255, 0.2);
+  }
+}
+
+/* 修改层级控制样式 */
+.main-tabs {
+  position: relative;
+  z-index: 1;
+}
+
+.main-tabs :deep(.ant-tabs-nav) {
+  position: relative;
+  z-index: 1;
+}
+
+.main-tabs :deep(.ant-tabs-nav-list) {
+  position: relative;
+  z-index: 1;
+}
+
+.main-tabs :deep(.ant-tabs-nav-list .ant-tabs-tab) {  
+  position: relative;
+  z-index: 10001;  /* 确保标签在遮罩层之上 */
+}
+
+/* 关键是这个！当元素被教程高亮时的样式 */
+:deep(.ant-tabs-nav-list .ant-tabs-tab.tutorial-highlight) {  
+  z-index: 10002;  /* 高亮时确保在遮罩层之上 */
+  background: white;  /* 确保背景是白色 */
+  position: relative;
+}
+
+/* 其他元素保持在遮罩层之下 */
+.category-card,
+.assets-grid,
+.pagination-wrapper {
+  position: relative;
+  z-index: 1;
+}
+
+/* 这才是关键！确保 tutorial-highlight 类的样式能正确应用 */
+:deep(.tutorial-highlight) {
+  position: relative;
+  z-index: 10002;
+  background: white;
 }
 </style> 

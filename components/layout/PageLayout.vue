@@ -1,6 +1,6 @@
 <template>
-  <a-layout style="min-height: 100vh; overflow: hidden;">
-    <a-layout-content style="padding: 0 12px 12px;">
+  <a-layout style="min-height: 100vh; overflow: visible;">
+    <a-layout-content style="padding: 0 12px 12px; overflow: visible;">
       <!-- 页面头部 -->
       <div class="page-header">
         <div class="header-content">
@@ -8,7 +8,10 @@
             <h2>
               <span class="gradient-text">{{ title }}</span>
               <span class="sparkle-icon">{{ icon }}</span>
-              <p class="page-description">{{ description }}</p>
+              <div class="description-row">
+                <p class="page-description">{{ description }}</p>
+                <slot name="title-extra"></slot>
+              </div>
             </h2>
           </div>
           <!-- 可选的右侧内容插槽 -->
@@ -31,6 +34,9 @@
         </div>
       </div>
     </a-layout-content>
+
+    <!-- 添加新的插槽用于渲染 ModuleTutorial -->
+    <slot name="tutorial"></slot>
   </a-layout>
 </template>
 
@@ -81,6 +87,7 @@ export default {
 }
 
 .page-description {
+  margin: 0;
   color: #6B7280;
   font-size: 12px;
 }
@@ -91,7 +98,7 @@ export default {
   position: relative;
   height: calc(100vh - 110px);
   max-width: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* 白色卡片区域 */
@@ -104,14 +111,14 @@ export default {
   flex-direction: column;
   position: relative;
   max-width: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* 可滚动的内容区域 */
 .scrollable-content {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: visible;
   width: 100%;
 }
 
@@ -151,5 +158,11 @@ export default {
   .a-layout-content {
     padding: 0 16px 16px;
   }
+}
+
+.description-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 </style> 
