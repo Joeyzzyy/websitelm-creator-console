@@ -2489,13 +2489,19 @@ export default defineComponent({
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 400px; /* 设置最小高度确保在内容少时也能居中 */
+  min-height: 400px;
   padding: 48px;
+  flex: 1; /* 添加这行 */
+  width: 100%; /* 添加这行 */
+  background: #fff; /* 添加背景色 */
+  border-radius: 8px; /* 添加圆角 */
+  margin-left: 24px; /* 与左侧列表保持一致的间距 */
 }
 
 .empty-content {
   text-align: center;
-  max-width: 480px; /* 限制内容最大宽度 */
+  max-width: 480px;
+  width: 100%; /* 添加这行 */
 }
 
 .empty-icon {
@@ -3286,7 +3292,6 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 300px);
 }
 
 :deep(.ant-result) {
