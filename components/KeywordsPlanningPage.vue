@@ -142,47 +142,23 @@
                           <QuestionCircleOutlined class="help-icon" />
                         </a-popover>
                       </div>
-                    </div>
-                  </a-card>
 
-                  <!-- Selection Status -->
-                  <a-card 
-                    v-if="selectedKeywords.length"
-                    class="selection-card"
-                    :bordered="false"
-                  >
-                    <a-space direction="vertical" style="width: 100%">
-                      <div class="selection-header">
-                        <span class="selection-count">
-                          {{ selectedKeywords.length }} keywords selected
-                        </span>
+                      <!-- 将选择状态卡片移到这里 -->
+                      <div class="selection-status">
                         <a-space>
-                          <a-button type="link" @click="clearSelection">
-                            Clear All
-                          </a-button>
                           <a-button 
-                            v-if="selectedKeywords.length"
                             @click="showSelectedKeywords"
-                          >View Selected ({{ selectedKeywords.length }})
+                          >View Selected
                           </a-button>
                         </a-space>
                       </div>
-                      <a-divider style="margin: 12px 0" />
-                      <!-- Selected keywords list -->
-                    </a-space>
+                    </div>
                   </a-card>
+
+      
 
                   <!-- Keyword Selection Component -->
                   <div v-if="currentMode === 'beginner'" class="beginner-mode">
-                    <!-- 选中状态提示 -->
-                    <a-alert
-                      v-if="selectedKeywords.length === 0"
-                      message="Selected Keywords: 0"
-                      type="info"
-                      class="selection-alert"
-                    />
-
-                    <!-- 新手友好区域 - 两列布局 -->
                     <a-row :gutter="[24, 24]" class="beginner-content">
                       <!-- System Recommendations 列 -->
                       <a-col :span="12">
@@ -844,39 +820,65 @@
             width="800px"
             @cancel="handleModalClose"
           >
-            <a-list
-              :data-source="selectedKeywords"
-              class="selected-keywords-list"
-            >
-              <template #header>
-                <div class="list-header">
-                  <span>Total Selected: {{ selectedKeywords.length }} keywords</span>
-                </div>
-              </template>
-              
-              <template #renderItem="{ item }">
-                <a-list-item>
-                  <div class="selected-keyword-item">
-                    <div class="keyword-main">
-                      <span class="keyword-text">"{{ item.keyword }}"</span>
-                      <div class="keyword-metrics">
-                        <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
-                        <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                        <a-tag color="purple">Volume={{ item.volume }}</a-tag>
-                        <a-tag :color="item.status.color">{{ item.status.text }}</a-tag>
-                      </div>
-                    </div>
-                    <div class="keyword-reason">
-                      <BulbOutlined />
-                      <div class="reason-content">
-                        <span class="reason-highlight">High potential: </span>
-                        <span class="reason-value">{{ item.reason }}</span>
-                      </div>
-                    </div>
+            <template v-if="isLoadingModalKeywords">
+              <div class="loading-container">
+                <a-spin />
+              </div>
+            </template>
+            <template v-else>
+              <a-tabs
+                v-model:activeKey="currentModalTab"
+                @change="handleModalTabChange"
+              >
+                <a-tab-pane
+                  v-for="tab in modalTabs"
+                  :key="tab.key"
+                  :tab="tab.label"
+                >
+                  <div class="list-header">
+                    <span>Total Selected: {{ modalKeywords[tab.key].length }} keywords</span>
                   </div>
-                </a-list-item>
-              </template>
-            </a-list>
+                  
+                  <a-list
+                    :data-source="modalKeywords[tab.key]"
+                    class="selected-keywords-list"
+                  >
+                    <template #renderItem="{ item }">
+                      <a-list-item>
+                        <div class="selected-keyword-item">
+                          <div class="keyword-main">
+                            <div class="keyword-header">
+                              <span class="keyword-text">"{{ item.keyword }}"</span>
+                              <a-button 
+                                type="link" 
+                                danger
+                                size="small"
+                                @click="handleCancelSelection(item)"
+                              >
+                                Remove from list
+                              </a-button>
+                            </div>
+                            <div class="keyword-metrics">
+                              <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
+                              <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                              <a-tag color="purple">Volume={{ item.volume }}</a-tag>
+                              <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
+                            </div>
+                          </div>
+                          <div class="keyword-reason" v-if="item.reason">
+                            <BulbOutlined />
+                            <div class="reason-content">
+                              <span class="reason-highlight">Reason: </span>
+                              <span class="reason-value">{{ item.reason }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </a-list-item>
+                    </template>
+                  </a-list>
+                </a-tab-pane>
+              </a-tabs>
+            </template>
             
             <template #footer>
               <a-button @click="handleModalClose">Close</a-button>
@@ -1059,7 +1061,8 @@ export default defineComponent({
           source,
           level,
           page,
-          limit
+          limit,
+          status: '' // 默认获取所有关键词
         })
         
         if (response?.data) {
@@ -1306,9 +1309,46 @@ export default defineComponent({
     // Modal control
     const showSelectedModal = ref(false)
 
-    // Methods
-    const showSelectedKeywords = () => {
-      showSelectedModal.value = true
+    // 修改数据结构
+    const modalTabs = ref([
+      { key: 'comparison', label: 'From Comparison' },
+      { key: 'top_pages', label: 'From Top Pages' }
+    ])
+    const currentModalTab = ref('comparison')
+    const modalKeywords = ref({
+      comparison: [],
+      top_pages: []
+    })
+
+    // 修改 fetchSelectedKeywords 方法
+    const fetchSelectedKeywords = async () => {
+      isLoadingModalKeywords.value = true
+      try {
+        const [keywordsResponse, pageKeywordsResponse] = await Promise.all([
+          api.getPlanningKeywords({
+            source: 'keywords',
+            status: 'selected',
+            page: 1,
+            limit: 100
+          }),
+          api.getPlanningKeywords({
+            source: 'top_page_keywords',
+            status: 'selected',
+            page: 1,
+            limit: 100
+          })
+        ])
+        
+        modalKeywords.value = {
+          comparison: (keywordsResponse?.data || []).map(transformKeywordData),
+          top_pages: (pageKeywordsResponse?.data || []).map(transformKeywordData)
+        }
+      } catch (error) {
+        console.error('获取已选关键词失败:', error)
+        message.error('获取已选关键词失败')
+      } finally {
+        isLoadingModalKeywords.value = false
+      }
     }
 
     const handleModalClose = () => {
@@ -1657,7 +1697,36 @@ export default defineComponent({
       }
     };
 
+    // 添加 tab 切换处理方法
+    const handleModalTabChange = (activeKey) => {
+      currentModalTab.value = activeKey
+    }
+
+    // 添加 showSelectedKeywords 方法
+    const showSelectedKeywords = async () => {
+      showSelectedModal.value = true
+      await fetchSelectedKeywords()
+    }
+
+    // 添加 loading 状态变量
+    const isLoadingModalKeywords = ref(false)
+
+    // 添加取消选择方法
+    const handleCancelSelection = async (keyword) => {
+      try {
+        await api.cancelPlanningKeywords([keyword.id])
+        // 从列表中移除该关键词
+        const sourceType = currentModalTab.value
+        modalKeywords.value[sourceType] = modalKeywords.value[sourceType].filter(k => k.id !== keyword.id)
+        message.success('关键词已取消选择')
+      } catch (error) {
+        console.error('取消选择失败:', error)
+        message.error('取消选择失败')
+      }
+    }
+
     return {
+      showSelectedKeywords,
       currentMode,
       selectedKeywords,
       overviewData,
@@ -1731,6 +1800,12 @@ export default defineComponent({
       handleContentPlanTabChange,
       isLoadingOutlines,
       handleKeywordFavorite,
+      modalKeywords,
+      isLoadingModalKeywords,
+      modalTabs,
+      currentModalTab,
+      handleModalTabChange,
+      handleCancelSelection,
     }
   }
 })
@@ -4369,6 +4444,31 @@ p {
 
 .favorite-btn:hover {
   background: transparent;
+}
+
+/* 添加新的样式 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+
+.keyword-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.selected-keyword-item {
+  width: 100%;
+}
+
+:deep(.ant-btn-link.ant-btn-dangerous) {
+  padding: 0 8px;
+  height: 24px;
+  line-height: 24px;
 }
 </style>
 

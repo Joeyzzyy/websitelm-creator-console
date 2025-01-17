@@ -1089,6 +1089,7 @@ const getPlanningKeywords = async (params = {}) => {
     const queryParams = {
       source: params.source,
       level: params.level,
+      ...(params.status && { status: params.status }),
       ...(params.page && { page: params.page }),
       ...(params.limit && { limit: params.limit })
     };
