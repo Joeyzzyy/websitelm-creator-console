@@ -500,31 +500,73 @@
                         type="primary"
                         size="small"
                         :loading="isGenerating"
-                        :disabled="!selectedKeywords.length"
+                        :disabled="totalSelectedKeywords === 0"
                         @click="generateContentPlan"
                       >
                         <ThunderboltOutlined /> Generate Content Recommendation 
                       </a-button>
                     </div>
 
-                    <a-list
-                      :data-source="selectedKeywords"
-                      size="small"
-                      class="selected-keywords-list"
-                    >
-                      <template #renderItem="{ item }">
-                        <a-list-item>
-                          <div class="selected-keyword-item">
-                            <div class="keyword-text">"{{ item.keyword }}"</div>
-                            <div class="keyword-metrics">
-                              <a-tag class="krs-tag">KRS={{ item.krs || 65 }}</a-tag>
-                              <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                              <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                            </div>
+                    <!-- 修改列表部分，复用弹窗的实现 -->
+                    <template v-if="isLoadingSelectedKeywords">
+                      <div class="loading-container">
+                        <a-spin />
+                      </div>
+                    </template>
+                    <template v-else>
+                      <a-tabs
+                        v-model:activeKey="selectedKeywordsTab"
+                        class="selected-keywords-tabs"
+                      >
+                        <a-tab-pane
+                          v-for="tab in modalTabs"
+                          :key="tab.key"
+                          :tab="tab.label"
+                        >
+                          <div class="list-header">
+                            <span>Total Selected: {{ selectedKeywordsData[tab.key].length }} keywords</span>
                           </div>
-                        </a-list-item>
-                      </template>
-                    </a-list>
+                          
+                          <a-list
+                            :data-source="selectedKeywordsData[tab.key]"
+                            class="selected-keywords-list"
+                          >
+                            <template #renderItem="{ item }">
+                              <a-list-item>
+                                <div class="selected-keyword-item">
+                                  <div class="keyword-main">
+                                    <div class="keyword-header">
+                                      <span class="keyword-text">"{{ item.keyword }}"</span>
+                                      <a-button 
+                                        type="link" 
+                                        danger
+                                        size="small"
+                                        @click="handleRemoveKeyword(item)"
+                                      >
+                                        Remove from list
+                                      </a-button>
+                                    </div>
+                                    <div class="keyword-metrics">
+                                      <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
+                                      <a-tag color="cyan">KD={{ item.kd }}</a-tag>
+                                      <a-tag color="purple">Volume={{ item.volume }}</a-tag>
+                                      <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
+                                    </div>
+                                  </div>
+                                  <div class="keyword-reason" v-if="item.reason">
+                                    <BulbOutlined />
+                                    <div class="reason-content">
+                                      <span class="reason-highlight">Reason: </span>
+                                      <span class="reason-value">{{ item.reason }}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </a-list-item>
+                            </template>
+                          </a-list>
+                        </a-tab-pane>
+                      </a-tabs>
+                    </template>
                   </a-card>
                   <!-- Add guide button -->
                   <div v-if="!hasGenerated" class="empty-state">
@@ -1054,7 +1096,6 @@ export default defineComponent({
 
     // 1. 修改 fetchKeywords 方法，确保正确发送 level 参数
     const fetchKeywords = async (source, level, page = 1, limit = 10) => {
-      loading.value = true
       try {
         console.log('Fetching keywords with params:', { source, level, page, limit })
         const response = await api.getPlanningKeywords({
@@ -1078,6 +1119,7 @@ export default defineComponent({
       } catch (error) {
         console.error('获取关键词失败:', error)
       } finally {
+        // 所有数据加载完成后，关闭 loading
         loading.value = false
       }
     }
@@ -1098,31 +1140,31 @@ export default defineComponent({
 
     // 将原来分散的 onMounted 逻辑合并到一个地方
     onMounted(async () => {
-      // 1. 检查域名配置状态
-      await checkDomainStatus()
+      loading.value = true
+      try {
+        // 1. 检查域名配置状态
+        await checkDomainStatus()
 
-      // 2. 如果域名已配置,执行后续初始化
-      if (domainConfigured.value) {
-        // 检查分析状态
-        await checkAnalysisStatus()
-        
-        // 启动轮询(如果需要)
-        if (analysisState.value !== 'finished') {
-          pollingInterval.value = setInterval(checkAnalysisStatus, 5000)
+        // 2. 如果域名已配置,执行后续初始化
+        if (domainConfigured.value) {
+          // 检查分析状态
+          await checkAnalysisStatus()
+          
+          // 启动轮询(如果需要)
+          if (analysisState.value !== 'finished') {
+            pollingInterval.value = setInterval(checkAnalysisStatus, 5000)
+          }
+
+          // 初始化已选关键词
+          initializeSelectedKeywords()
         }
-
-        // 获取关键词数据
-        await Promise.all([
-          fetchKeywords('keywords', '1', 1, recommendedPagination.value.pageSize),
-          fetchKeywords('top_page_keywords', '1', 1, pagePagination.value.pageSize)
-        ])
-
-        // 初始化已选关键词
-        initializeSelectedKeywords()
+      } catch (error) {
+        console.error('Initialization failed:', error)
+        message.error('Failed to initialize the page')
+      } finally {
+        // 移除这里的 loading.value = false，
+        // 让它在 checkAnalysisStatus 中处理
       }
-
-      // 最后关闭加载状态
-      loading.value = false
     })
 
     // 确保在组件卸载时清理轮询
@@ -1409,13 +1451,21 @@ export default defineComponent({
                 weak: overview.data.keywordsGroup.weak || 0
               }
             }
+            // 分析完成后，加载关键词数据
+            await Promise.all([
+              fetchKeywords('keywords', currentPriority.value, 1, recommendedPagination.value.pageSize),
+              fetchKeywords('top_page_keywords', currentPriority.value, 1, pagePagination.value.pageSize)
+            ])
           }
         }
       } catch (error) {
         console.error('Failed to check analysis status:', error)
         message.error('Failed to check analysis status')
       } finally {
-        loading.value = false
+        // 只有在所有数据都加载完成后，才关闭 loading
+        if (taskInfo.value?.analysisStatus !== 'finished') {
+          loading.value = false
+        }
       }
     }
 
@@ -1725,6 +1775,75 @@ export default defineComponent({
       }
     }
 
+    // 添加新的响应式变量
+    const selectedKeywordsTab = ref('comparison')
+    const selectedKeywordsData = ref({
+      comparison: [],
+      top_pages: []
+    })
+    const isLoadingSelectedKeywords = ref(false)
+
+    // 修改 watch 以同步数据
+    watch(currentStep, async (newStep) => {
+      if (newStep === '1') {
+        // 当切换到 outline tab 时，加载已选关键词
+        await fetchSelectedKeywordsData()
+      }
+    })
+
+    // 添加获取已选关键词的方法
+    const fetchSelectedKeywordsData = async () => {
+      isLoadingSelectedKeywords.value = true
+      try {
+        const [keywordsResponse, pageKeywordsResponse] = await Promise.all([
+          api.getPlanningKeywords({
+            source: 'keywords',
+            status: 'selected',
+            page: 1,
+            limit: 100
+          }),
+          api.getPlanningKeywords({
+            source: 'top_page_keywords',
+            status: 'selected',
+            page: 1,
+            limit: 100
+          })
+        ])
+        
+        selectedKeywordsData.value = {
+          comparison: (keywordsResponse?.data || []).map(transformKeywordData),
+          top_pages: (pageKeywordsResponse?.data || []).map(transformKeywordData)
+        }
+      } catch (error) {
+        console.error('获取已选关键词失败:', error)
+        message.error('获取已选关键词失败')
+      } finally {
+        isLoadingSelectedKeywords.value = false
+      }
+    }
+
+    // 新的移除关键词方法
+    const handleRemoveKeyword = async (keyword) => {
+      try {
+        await api.cancelPlanningKeywords([keyword.id])
+        // 从两个列表中移除该关键词
+        const sourceType = selectedKeywordsTab.value
+        selectedKeywordsData.value[sourceType] = selectedKeywordsData.value[sourceType].filter(k => k.id !== keyword.id)
+        // 同时更新 selectedKeywords
+        selectedKeywords.value = selectedKeywords.value.filter(k => k.id !== keyword.id)
+        message.success('关键词已移除')
+      } catch (error) {
+        console.error('移除关键词失败:', error)
+        message.error('移除关键词失败')
+      }
+    }
+
+    // 添加计算属性来获取所有已选关键词的总数
+    const totalSelectedKeywords = computed(() => {
+      return selectedKeywordsData.value.comparison.length + 
+             selectedKeywordsData.value.top_pages.length
+    })
+
     return {
       showSelectedKeywords,
       currentMode,
@@ -1806,6 +1925,11 @@ export default defineComponent({
       currentModalTab,
       handleModalTabChange,
       handleCancelSelection,
+      selectedKeywordsTab,
+      selectedKeywordsData,
+      isLoadingSelectedKeywords,
+      handleRemoveKeyword,
+      totalSelectedKeywords,
     }
   }
 })
@@ -4469,6 +4593,26 @@ p {
   padding: 0 8px;
   height: 24px;
   line-height: 24px;
+}
+
+/* 添加新的样式 */
+.selected-keywords-tabs {
+  :deep(.ant-tabs-nav) {
+    margin-bottom: 8px;
+    padding: 0 16px;
+  }
+  
+  :deep(.ant-tabs-tab) {
+    padding: 8px 0;
+    font-size: 13px;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
 }
 </style>
 
