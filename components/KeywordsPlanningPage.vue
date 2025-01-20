@@ -179,7 +179,19 @@
                                 :pagination="recommendedPagination"
                                 @change="(page) => handleComparisonPaginationChange(priority.level, page.current, page.pageSize)"
                                 size="small"
-                              />
+                              >
+                                <template #actions="{ record }">
+                                  <a-button 
+                                    type="text"
+                                    @click="handleKeywordFavorite(record)"
+                                  >
+                                    <template #icon>
+                                      <HeartFilled v-if="record.favorited" style="color: #ff4d4f;" />
+                                      <HeartOutlined v-else />
+                                    </template>
+                                  </a-button>
+                                </template>
+                              </a-table>
                             </a-tab-pane>
                           </a-tabs>
                         </a-card>
@@ -208,7 +220,19 @@
                                 :pagination="pagePagination"
                                 @change="(page) => handleTopPagesPaginationChange(priority.level, page.current, page.pageSize)"
                                 size="small"
-                              />
+                              >
+                                <template #actions="{ record }">
+                                  <a-button 
+                                    type="text"
+                                    @click="handleKeywordFavorite(record)"
+                                  >
+                                    <template #icon>
+                                      <HeartFilled v-if="record.favorited" style="color: #ff4d4f;" />
+                                      <HeartOutlined v-else />
+                                    </template>
+                                  </a-button>
+                                </template>
+                              </a-table>
                             </a-tab-pane>
                           </a-tabs>
                         </a-card>
@@ -404,104 +428,55 @@
                       </div>
                     </template>
                     <template v-else>
-                      <!-- 改为水平布局 -->
-                      <div class="keywords-sections">
-                        <!-- From Comparison Section -->
-                        <div class="keywords-section">
-                          <div class="section-header">
-                            <h4>From Comparison</h4>
-                            <span class="total-count">{{ selectedKeywordsData.comparison.length }} keywords</span>
-                          </div>
-                          
-                          <a-row :gutter="[16, 16]">
-                            <a-col 
-                              :span="12" 
-                              v-for="item in selectedKeywordsData.comparison" 
-                              :key="item.id"
+                      <a-row :gutter="16">
+                        <a-col :span="12">
+                          <div class="table-section">
+                            <div class="table-title">Selected from Comparison ({{ selectedKeywordsData.comparison.length }})</div>
+                            <a-table
+                              :data-source="selectedKeywordsData.comparison"
+                              :columns="comparisonColumns"
+                              :pagination="{ pageSize: 5, size: 'small' }"
+                              size="small"
+                              class="compact-table"
                             >
-                              <div class="selected-keyword-item">
-                                <a-tooltip v-if="item.reason" :title="item.reason">
-                                  <div class="keyword-main">
-                                    <div class="keyword-content">
-                                      <div class="keyword-header">
-                                        <span class="keyword-text" :title="item.keyword">"{{ item.keyword }}"</span>
-                                        <a-button 
-                                          type="link" 
-                                          danger
-                                          size="small"
-                                          class="remove-btn"
-                                          @click="handleRemoveKeyword(item)"
-                                        >
-                                          <DeleteOutlined />
-                                        </a-button>
-                                      </div>
-                                      <div class="keyword-metrics">
-                                        <a-tooltip title="Keyword Ranking Score">
-                                          <a-tag class="metric-tag">KRS {{ item.krs }}</a-tag>
-                                        </a-tooltip>
-                                        <a-tooltip title="Keyword Difficulty">
-                                          <a-tag class="metric-tag" color="cyan">KD {{ item.kd }}</a-tag>
-                                        </a-tooltip>
-                                        <a-tooltip title="Search Volume">
-                                          <a-tag class="metric-tag" color="purple">Vol {{ item.volume }}</a-tag>
-                                        </a-tooltip>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </a-tooltip>
-                              </div>
-                            </a-col>
-                          </a-row>
-                        </div>
-
-                        <!-- From Top Pages Section -->
-                        <div class="keywords-section">
-                          <div class="section-header">
-                            <h4>From Top Pages</h4>
-                            <span class="total-count">{{ selectedKeywordsData.top_pages.length }} keywords</span>
+                              <template #actions="{ record }">
+                                <a-button 
+                                  type="text"
+                                  @click="handleRemoveKeyword(record)"
+                                >
+                                  <template #icon>
+                                    <DeleteOutlined style="color: #ff4d4f;" />
+                                  </template>
+                                </a-button>
+                              </template>
+                            </a-table>
                           </div>
-                          
-                          <a-row :gutter="[16, 16]">
-                            <a-col 
-                              :span="12" 
-                              v-for="item in selectedKeywordsData.top_pages" 
-                              :key="item.id"
+                        </a-col>
+                        
+                        <a-col :span="12">
+                          <div class="table-section">
+                            <div class="table-title">Selected from Top Pages ({{ selectedKeywordsData.top_pages.length }})</div>
+                            <a-table
+                              :data-source="selectedKeywordsData.top_pages"
+                              :columns="comparisonColumns"
+                              :pagination="{ pageSize: 5, size: 'small' }"
+                              size="small"
+                              class="compact-table"
                             >
-                              <div class="selected-keyword-item">
-                                <a-tooltip v-if="item.reason" :title="item.reason">
-                                  <div class="keyword-main">
-                                    <div class="keyword-content">
-                                      <div class="keyword-header">
-                                        <span class="keyword-text" :title="item.keyword">"{{ item.keyword }}"</span>
-                                        <a-button 
-                                          type="link" 
-                                          danger
-                                          size="small"
-                                          class="remove-btn"
-                                          @click="handleRemoveKeyword(item)"
-                                        >
-                                          <DeleteOutlined />
-                                        </a-button>
-                                      </div>
-                                      <div class="keyword-metrics">
-                                        <a-tooltip title="Keyword Ranking Score">
-                                          <a-tag class="metric-tag">KRS {{ item.krs }}</a-tag>
-                                        </a-tooltip>
-                                        <a-tooltip title="Keyword Difficulty">
-                                          <a-tag class="metric-tag" color="cyan">KD {{ item.kd }}</a-tag>
-                                        </a-tooltip>
-                                        <a-tooltip title="Search Volume">
-                                          <a-tag class="metric-tag" color="purple">Vol {{ item.volume }}</a-tag>
-                                        </a-tooltip>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </a-tooltip>
-                              </div>
-                            </a-col>
-                          </a-row>
-                        </div>
-                      </div>
+                              <template #actions="{ record }">
+                                <a-button 
+                                  type="text"
+                                  @click="handleRemoveKeyword(record)"
+                                >
+                                  <template #icon>
+                                    <DeleteOutlined style="color: #ff4d4f;" />
+                                  </template>
+                                </a-button>
+                              </template>
+                            </a-table>
+                          </div>
+                        </a-col>
+                      </a-row>
                     </template>
                   </a-card>
                   
@@ -925,7 +900,7 @@
             <a-input v-model:value="newPresetName" placeholder="Enter preset name" />
           </a-modal>
 
-          <!-- Add modal for selected keywords -->
+          <!-- 修改 modal 内容部分 -->
           <a-modal
             v-model:open="showSelectedModal"
             title="Selected Keywords"
@@ -945,49 +920,25 @@
                 <a-tab-pane
                   v-for="tab in modalTabs"
                   :key="tab.key"
-                  :tab="tab.label"
+                  :tab="`${tab.label} (${modalKeywords[tab.key].length})`"
                 >
-                  <div class="list-header">
-                    <span>Total Selected: {{ modalKeywords[tab.key].length }} keywords</span>
-                  </div>
-                  
-                  <a-list
+                  <a-table
                     :data-source="modalKeywords[tab.key]"
-                    class="selected-keywords-list"
+                    :columns="comparisonColumns"
+                    :pagination="{ pageSize: 10 }"
+                    size="small"
                   >
-                    <template #renderItem="{ item }">
-                      <a-list-item>
-                        <div class="selected-keyword-item">
-                          <div class="keyword-main">
-                            <div class="keyword-header">
-                              <span class="keyword-text">"{{ item.keyword }}"</span>
-                              <a-button 
-                                type="link" 
-                                danger
-                                size="small"
-                                @click="handleCancelSelection(item)"
-                              >
-                                Remove from list
-                              </a-button>
-                            </div>
-                            <div class="keyword-metrics">
-                              <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
-                              <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                              <a-tag color="purple">Volume={{ item.volume }}</a-tag>
-                              <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
-                            </div>
-                          </div>
-                          <div class="keyword-reason" v-if="item.reason">
-                            <BulbOutlined />
-                            <div class="reason-content">
-                              <span class="reason-highlight">Reason: </span>
-                              <span class="reason-value">{{ item.reason }}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </a-list-item>
+                    <template #actions="{ record }">
+                      <a-button 
+                        type="text"
+                        @click="handleCancelSelection(record)"
+                      >
+                        <template #icon>
+                          <HeartFilled style="color: #ff4d4f;" />
+                        </template>
+                      </a-button>
                     </template>
-                  </a-list>
+                  </a-table>
                 </a-tab-pane>
               </a-tabs>
             </template>
@@ -1199,7 +1150,8 @@ export default defineComponent({
         grade: item.grade,
         reason: item.reasoning || 'No specific reason provided',
         pages: [],
-        competitors: []
+        competitors: [],
+        favorited: item.status === 'selected',
       }
     }
 
@@ -2123,16 +2075,50 @@ export default defineComponent({
         return
       }
 
-      try {
-        generationProgressVisible.value = true
-        isGeneratingPages.value = true
-        generationProgress.value = 0
-        generationStatus.value = 'active'
-        generationCompleted.value = false
-        generationFailed.value = false
+      // Add confirmation dialog
+      const confirmed = await new Promise(resolve => {
+        Modal.confirm({
+          title: 'Start Page Generation',
+          content: h('div', {}, [
+            h('p', 'You are about to generate pages for the following outlines:'),
+            h('ul', { style: 'margin-top: 8px; padding-left: 20px;' }, 
+              selectedOutlines.map(outline => 
+                h('li', { style: 'margin-bottom: 4px;' }, [
+                  outline.title,
+                  h('span', { style: 'color: #8c8c8c; margin-left: 8px;' }, 
+                    `(${outline.pageType})`
+                  )
+                ])
+              )
+            ),
+            h('p', { style: 'margin-top: 12px; color: #ff4d4f;' }, 
+              'This action cannot be undone. Are you sure you want to continue?'
+            )
+          ]),
+          okText: 'Generate Pages',
+          cancelText: 'Cancel',
+          width: 520,
+          okButtonProps: {
+            type: 'primary',
+            danger: false
+          },
+          onOk: () => resolve(true),
+          onCancel: () => resolve(false),
+        });
+      });
 
-        const total = selectedOutlines.length
-        let completed = 0
+      if (!confirmed) return;
+
+      try {
+        generationProgressVisible.value = true;
+        isGeneratingPages.value = true;
+        generationProgress.value = 0;
+        generationStatus.value = 'active';
+        generationCompleted.value = false;
+        generationFailed.value = false;
+
+        const total = selectedOutlines.length;
+        let completed = 0;
 
         for (const outline of selectedOutlines) {
           try {
@@ -2141,7 +2127,7 @@ export default defineComponent({
             
             await api.createAIPage(outline.outlineId)
             
-            completed++
+            completed++;
             generationProgress.value = Math.floor((completed / total) * 100)
           } catch (error) {
             console.error('Failed to generate page:', error)
@@ -2149,18 +2135,18 @@ export default defineComponent({
           }
         }
 
-        generationCompleted.value = true
-        isGeneratingPages.value = false
-        generationStatus.value = 'success'
-        generationStatusText.value = 'All pages generated successfully!'
-        generationDetails.value = `Successfully generated ${completed}/${total} pages`
+        generationCompleted.value = true;
+        isGeneratingPages.value = false;
+        generationStatus.value = 'success';
+        generationStatusText.value = 'All pages generated successfully!';
+        generationDetails.value = `Successfully generated ${completed}/${total} pages`;
 
         setTimeout(() => {
-          generationProgressVisible.value = false
-          generationProgress.value = 0
-          generationCompleted.value = false
-          generationFailed.value = false
-        }, 3000)
+          generationProgressVisible.value = false;
+          generationProgress.value = 0;
+          generationCompleted.value = false;
+          generationFailed.value = false;
+        }, 3000);
 
       } catch (error) {
         console.error('Page generation process failed:', error)
@@ -2209,59 +2195,38 @@ export default defineComponent({
       plan.selected = checked
     }
 
-    // Add table columns definition
+    // 在 setup 函数内部定义 comparisonColumns
     const comparisonColumns = [
       {
         title: 'Keyword',
         dataIndex: 'keyword',
         key: 'keyword',
-        width: '30%',
-        render: (text, record) => {
-          return h('div', { class: 'keyword-cell' }, [
-            h('a-checkbox', {
-              checked: record.selected,
-              onChange: (e) => handleKeywordSelect(record, e.target.checked)
-            }),
-            h('span', { class: 'keyword-text' }, text)
-          ])
-        }
+        width: '30%'
       },
       {
         title: 'KRS',
         dataIndex: 'krs',
         key: 'krs',
-        width: '15%',
-        sorter: (a, b) => a.krs - b.krs
+        width: '20%'
       },
       {
         title: 'KD',
         dataIndex: 'kd',
         key: 'kd',
-        width: '15%',
-        sorter: (a, b) => a.kd - b.kd
+        width: '20%'
       },
       {
         title: 'Volume',
         dataIndex: 'volume',
         key: 'volume',
-        width: '15%',
-        sorter: (a, b) => a.volume - b.volume
+        width: '20%'
       },
       {
         title: 'Actions',
         key: 'actions',
-        width: '15%',
-        render: (_, record) => {
-          return h('div', { class: 'action-buttons' }, [
-            h('a-button', {
-              type: 'text',
-              onClick: () => handleKeywordFavorite(record)
-            }, [
-              h(record.favorited ? HeartFilled : HeartOutlined, {
-                style: { color: record.favorited ? '#ff4d4f' : undefined }
-              })
-            ])
-          ])
+        width: '10%',
+        slots: {
+          customRender: 'actions'
         }
       }
     ]
@@ -2453,63 +2418,31 @@ export default defineComponent({
   color: rgba(0, 0, 0, 0.65);
 }
 
-/* Keyword selection area */
-.keywords-sections {
-  display: flex;
-  gap: 24px;
-}
-
-.keywords-section {
-  flex: 1;
-  background: #fafafa;
-  padding: 16px;
-  border-radius: 8px;
-}
-
 .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  padding: 16px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+  border-radius: 8px 8px 0 0;
 }
 
-.section-header h4 {
-  font-size: 14px;
-  margin: 0;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-.section-header .total-count {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-/* Selected keyword item */
-.selected-keyword-item {
-  width: 100%;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  background: white;
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #f0f0f0;
-  margin-bottom: 8px;
-}
-
-.selected-keyword-item:last-child {
-  margin-bottom: 0;
-}
-
-.keyword-main {
+.keywords-content {
   flex: 1;
-  min-width: 0;
+  overflow-y: auto; /* 添加垂直滚动 */
+  padding: 16px;
 }
 
-.keyword-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+/* 美化滚动条 */
+.keywords-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.keywords-content::-webkit-scrollbar-thumb {
+  background-color: #d9d9d9;
+  border-radius: 3px;
+}
+
+.keywords-content::-webkit-scrollbar-track {
+  background-color: #f0f0f0;
 }
 
 .keyword-header {
@@ -2531,19 +2464,6 @@ export default defineComponent({
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-}
-
-.metric-tag {
-  margin: 0;
-  font-size: 11px;
-  line-height: 16px;
-  padding: 0 4px;
-}
-
-.remove-btn {
-  padding: 0;
-  height: auto;
-  min-width: 24px;
 }
 
 /* Task progress area */
@@ -2640,12 +2560,6 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 16px; /* Increase gap between components */
-}
-
-.reason-icon {
-  color: #faad14;
-  font-size: 16px;
-  cursor: help;
 }
 /* Ensure tags and icons are vertically aligned */
 :deep(.ant-tag) {
@@ -2812,19 +2726,6 @@ export default defineComponent({
   overflow-y: auto;
 }
 
-/* 调整卡片样式 */
-.beginner-card,
-.optimization-card {
-  height: 100%;
-}
-
-.beginner-card :deep(.ant-card-body),
-.optimization-card :deep(.ant-card-body) {
-  height: calc(100% - 57px); /* 减去卡片标题的高度 */
-  padding: 0;
-}
-
-/* Drawer Styles */
 .content-plan-drawer :deep(.ant-drawer-header) {
   padding: 16px 24px;
   border-bottom: 1px solid #f0f0f0;
@@ -3001,6 +2902,176 @@ export default defineComponent({
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.selected-keywords-card :deep(.ant-card-body) {
+  padding: 0;
+}
+
+.selected-keywords-card :deep(.ant-tabs-nav) {
+  margin: 0;
+  padding: 0 16px;
+}
+
+.selected-keywords-card :deep(.ant-table-pagination) {
+  margin: 16px;
+}
+
+/* 调整表格内边距 */
+.selected-keywords-card :deep(.ant-table-wrapper) {
+  padding: 0 16px;
+}
+
+/* 调整表格行高 */
+.selected-keywords-card :deep(.ant-table-small) .ant-table-thead > tr > th,
+.selected-keywords-card :deep(.ant-table-small) .ant-table-tbody > tr > td {
+  padding: 8px 16px;
+}
+
+.selected-keywords-card :deep(.ant-card-body) {
+  padding: 0;
+}
+
+.selected-keywords-card :deep(.ant-tabs-nav) {
+  margin: 0;
+  padding: 8px 16px 0;
+}
+
+.selected-keywords-card :deep(.ant-table-pagination) {
+  margin: 8px 16px;
+}
+
+/* 调整表格内边距 */
+.selected-keywords-card :deep(.ant-table-wrapper) {
+  padding: 0 16px;
+}
+
+/* 进一步缩小表格行高和内边距 */
+.selected-keywords-card :deep(.compact-table) {
+  /* 调整表头 */
+  .ant-table-thead > tr > th {
+    padding: 4px 8px;
+    font-size: 13px;
+  }
+  
+  /* 调整表格内容 */
+  .ant-table-tbody > tr > td {
+    padding: 2px 8px;
+    font-size: 13px;
+  }
+  
+  /* 调整行高 */
+  .ant-table-tbody > tr {
+    height: 32px;
+  }
+  
+  /* 调整分页器样式 */
+  .ant-pagination {
+    font-size: 12px;
+    
+    .ant-pagination-item {
+      min-width: 24px;
+      height: 24px;
+      line-height: 22px;
+    }
+    
+    .ant-select-selector {
+      height: 24px !important;
+      
+      .ant-select-selection-item {
+        line-height: 22px;
+      }
+    }
+  }
+}
+
+/* 优化按钮样式 */
+.selected-keywords-card :deep(.ant-btn-text) {
+  padding: 0 4px;
+  height: 24px;
+  line-height: 24px;
+}
+
+.selected-keywords-card :deep(.ant-card-body) {
+  padding: 16px;
+}
+
+.table-section {
+  background: #fafafa;
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.table-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  padding: 0 8px;
+  color: #1f1f1f;
+}
+
+/* 调整表格样式 */
+.selected-keywords-card :deep(.compact-table) {
+  /* 调整表头 */
+  .ant-table-thead > tr > th {
+    padding: 4px 8px;
+    font-size: 13px;
+    background: #f5f5f5;
+  }
+  
+  /* 调整表格内容 */
+  .ant-table-tbody > tr > td {
+    padding: 2px 8px;
+    font-size: 13px;
+  }
+  
+  /* 调整行高 */
+  .ant-table-tbody > tr {
+    height: 32px;
+  }
+  
+  /* 调整分页器样式 */
+  .ant-pagination {
+    font-size: 12px;
+    margin: 8px 0 0 0;
+    
+    .ant-pagination-item {
+      min-width: 24px;
+      height: 24px;
+      line-height: 22px;
+    }
+    
+    .ant-select-selector {
+      height: 24px !important;
+      
+      .ant-select-selection-item {
+        line-height: 22px;
+      }
+    }
+  }
+}
+
+/* 优化按钮样式 */
+.selected-keywords-card :deep(.ant-btn-text) {
+  padding: 0 4px;
+  height: 24px;
+  line-height: 24px;
+}
+
+/* 移除表格外边框 */
+.selected-keywords-card :deep(.ant-table) {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* 移除 priority-tabs 的左右内边距 */
+:deep(.priority-tabs .ant-tabs-nav) {
+  padding: 0;
+}
+
+/* 如果需要调整 tab 内容的样式 */
+:deep(.priority-tabs .ant-tabs-tab) {
+  padding: 8px 12px;  /* 可以根据需要调整内部的内边距 */
 }
 </style>
 
