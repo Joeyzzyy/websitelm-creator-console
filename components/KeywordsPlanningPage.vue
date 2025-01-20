@@ -242,166 +242,13 @@
 
                   <!-- Content in expert mode -->
                   <template v-else>
-                    <!-- Advanced Filters -->
-                    <a-card class="filter-card" :bordered="false">
-                      <div class="advanced-filters">
-                        <!-- Align all controls to the left -->
-                        <div class="filter-header">
-                          <a-space>
-                            <a-select
-                              v-model:value="currentPreset"
-                              style="width: 200px"
-                              placeholder="Select saved filter"
-                              @change="handlePresetChange"
-                            >
-                              <a-select-option v-for="preset in savedPresets" :key="preset.id" :value="preset.id">
-                                {{ preset.name }}
-                              </a-select-option>
-                            </a-select>
-                            
-                            <a-button type="primary" @click="addFilter">
-                              Add Filter
-                            </a-button>
-                            <a-button @click="clearFilters">Clear All</a-button>
-                            <a-button @click="showSaveModal">Save as Preset</a-button>
-                          </a-space>
-                        </div>
-
-                        <!-- 筛选条件网格布局 -->
-                        <div class="filter-rows">
-                          <div class="filter-row">
-                            <template v-for="(filter, index) in filters" :key="index">
-                              <!-- 添加 & 符号 -->
-                              <span v-if="index > 0" class="filter-connector">&</span>
-                              
-                              <div class="filter-item">
-                                <a-select 
-                                  v-model:value="filter.field" 
-                                  class="ant-select-field"
-                                  @change="() => handleFieldChange(index)"
-                                >
-                                  <a-select-option value="kd">KD</a-select-option>
-                                  <a-select-option value="volume">Volume</a-select-option>
-                                  <a-select-option value="cpc">CPC</a-select-option>
-                                  <a-select-option value="coverage">Coverage</a-select-option>
-                                  <a-select-option value="relevance">Relevance</a-select-option>
-                                  <a-select-option value="krs">KRS</a-select-option>
-                                  <a-select-option value="source">Source</a-select-option>
-                                </a-select>
-                                
-                                <template v-if="filter.field === 'source'">
-                                  <a-select
-                                    v-model:value="filter.value"
-                                    class="source-value-selector"
-                                  >
-                                    <a-select-option value="difference">From Difference</a-select-option>
-                                    <a-select-option value="competitor">From Competitor</a-select-option>
-                                  </a-select>
-                                </template>
-                                <template v-else>
-                                  <a-select 
-                                    v-model:value="filter.operator" 
-                                    class="ant-select-operator"
-                                  >
-                                    <a-select-option value="<"><</a-select-option>
-                                    <a-select-option value="<=">≤</a-select-option>
-                                    <a-select-option value=">">></a-select-option>
-                                    <a-select-option value=">=">≥</a-select-option>
-                                    <a-select-option value="==">=</a-select-option>
-                                    <a-select-option value="!=">≠</a-select-option>
-                                  </a-select>
-                                  <a-input-number 
-                                    v-model:value="filter.value" 
-                                    class="ant-input-value"
-                                  />
-                                </template>
-
-                                <a-button 
-                                  type="text" 
-                                  danger
-                                  @click="removeFilter(index)"
-                                >
-                                  <DeleteOutlined />
-                                </a-button>
-                              </div>
-                            </template>
-                          </div>
-                        </div>
-                      </div>
-                    </a-card>
-
-                    <!-- Detailed Difference & Top Pages Table -->
-                    <a-card class="table-card" :bordered="false">
-                      <div class="table-wrapper">
-                        <a-table
-                          :data-source="filteredKeywords"
-                          :columns="columns"
-                          :row-selection="rowSelection"
-                          :pagination="pagination"
-                          :scroll="{ x: 'max-content' }"
-                          @change="handleTableChange"
-                        >
-                          <template #expandedRowRender="{ record }">
-                            <div class="expanded-row">
-                              <!-- Corresponding Pages Section -->
-                              <div class="expanded-section">
-                                <div class="section-header">
-                                  <LinkOutlined class="section-icon" />
-                                  <span class="section-title">Corresponding Pages</span>
-                                </div>
-                                <div class="section-content">
-                                  <div class="page-list">
-                                    <a-tag 
-                                      v-for="page in record.pages" 
-                                      :key="page.url"
-                                      class="page-tag"
-                                    >
-                                      <LinkOutlined class="page-icon" />
-                                      {{ page.url }}
-                                    </a-tag>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <!-- Competitor Ranking Comparison Section -->
-                              <div class="expanded-section">
-                                <div class="section-header">
-                                  <LineChartOutlined class="section-icon" />
-                                  <span class="section-title">Competitor Ranking Comparison</span>
-                                </div>
-                                <div class="section-content">
-                                  <a-table
-                                    :data-source="record.competitors"
-                                    :columns="competitorColumns"
-                                    :pagination="false"
-                                    size="small"
-                                    class="competitor-table"
-                                  >
-                                    <template #bodyCell="{ column, text }">
-                                      <template v-if="column.dataIndex === 'rank'">
-                                        <span class="rank-cell">
-                                          <TrophyOutlined class="rank-icon" />
-                                          <span :class="['rank-number', getRankClass(text)]">#{{ text }}</span>
-                                        </span>
-                                      </template>
-                                      <template v-else-if="column.dataIndex === 'url'">
-                                        <a :href="text" target="_blank" class="url-link">
-                                          {{ text }}
-                                          <ExportOutlined class="url-icon" />
-                                        </a>
-                                      </template>
-                                      <template v-else>
-                                        {{ text }}
-                                      </template>
-                                    </template>
-                                  </a-table>
-                                </div>
-                              </div>
-                            </div>
-                          </template>
-                        </a-table>
-                      </div>
-                    </a-card>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; text-align: center;">
+                      <h2 style="font-size: 24px; color: #1890ff; margin-bottom: 16px;">Expert Mode - Coming Soon</h2>
+                      <p style="font-size: 16px; color: rgba(0, 0, 0, 0.45);">
+                        We're working on something special for our advanced users.
+                        <br>Stay tuned for powerful expert features!
+                      </p>
+                    </div>
                   </template>
                 </div>
               </div>
@@ -515,19 +362,8 @@
                               <div class="task-info">
                                 <!-- 将按钮和状态文本分开，改为垂直布局 -->
                                 <div class="generate-section">
-                                  <a-button 
-                                    type="primary"
-                                    size="large"
-                                    :loading="isGenerating"
-                                    :disabled="totalSelectedKeywords === 0"
-                                    @click="generateContentPlan"
-                                    class="generate-btn"
-                                  >
-                                    <ThunderboltOutlined /> Generate Content Plan
-                                  </a-button>
-                                  
                                   <div class="task-status">
-                                    ✨ Everything is ready! You can start exploring your content plans below.
+                                    ✨ Everything is ready! You can start page generation with your content plans below.
                                   </div>
                                 </div>
                               </div>
@@ -544,17 +380,41 @@
                     >
                       <template #rightExtra>
                         <a-space>
-                          <!-- Add publish button -->
+                          <!-- Generate Content Plan button - 使用蓝色系 -->
+                          <a-button 
+                            type="primary"
+                            :loading="isGenerating"
+                            :disabled="totalSelectedKeywords === 0"
+                            @click="generateContentPlan"
+                            style="background: linear-gradient(to right, #1890ff, #40a9ff); 
+                                   border: none; 
+                                   font-weight: 500;
+                                   height: 40px;
+                                   padding: 0 24px;
+                                   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);"
+                            :class="{ 'hover-effect': !disabled }"
+                          >
+                            <template #icon>
+                              <ThunderboltOutlined />
+                            </template>
+                            Generate Content Plan
+                          </a-button>
+
                           <a-button 
                             type="primary"
                             :disabled="!contentPlans.length"
                             @click="handlePublishOutlines"
+                            style="background: linear-gradient(to right, #52c41a, #73d13d); 
+                                   border: none; 
+                                   font-weight: 500;
+                                   height: 40px;
+                                   padding: 0 24px;
+                                   box-shadow: 0 2px 8px rgba(82, 196, 26, 0.35);"
+                            :class="{ 'hover-effect': !disabled }"
                           >
-                            <template #icon>
-                              <CloudUploadOutlined />
-                            </template>
                             Start Page generation
                           </a-button>
+
                           <!-- Existing buttons -->
                           <a-button 
                             type="text"
@@ -833,7 +693,7 @@
                             <div class="item-value description-value">{{ selectedPlan.description }}</div>
                           </div>
                           <div class="content-item">
-                            <div class="item-label">Target Keywords</div>
+                            <div class="item-label">Keywords</div>
                             <div class="tags-wrapper keywords-tags">
                               <a-tag 
                                 v-for="keyword in selectedPlan.keywords.split(', ')" 
@@ -2201,25 +2061,31 @@ export default defineComponent({
         title: 'Keyword',
         dataIndex: 'keyword',
         key: 'keyword',
-        width: '30%'
+        width: '25%'  // 调整宽度以适应新列
       },
       {
         title: 'KRS',
         dataIndex: 'krs',
         key: 'krs',
-        width: '20%'
+        width: '15%'
       },
       {
         title: 'KD',
         dataIndex: 'kd',
         key: 'kd',
-        width: '20%'
+        width: '15%'
       },
       {
         title: 'Volume',
         dataIndex: 'volume',
         key: 'volume',
-        width: '20%'
+        width: '15%'
+      },
+      {
+        title: 'Related Outlines',
+        key: 'relatedOutlines',
+        width: '20%',
+        customRender: () => '-'  // 默认显示 '-'
       },
       {
         title: 'Actions',
@@ -3072,6 +2938,26 @@ export default defineComponent({
 /* 如果需要调整 tab 内容的样式 */
 :deep(.priority-tabs .ant-tabs-tab) {
   padding: 8px 12px;  /* 可以根据需要调整内部的内边距 */
+}
+
+/* Add new styles for the button hover effect */
+.hover-effect:hover {
+  background: linear-gradient(to right, #40a9ff, #69c0ff) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.45) !important;
+}
+
+.hover-effect:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.35) !important;
+}
+
+/* Ensure disabled state also looks appropriate */
+.ant-btn[disabled] {
+  background: #f5f5f5 !important;
+  border: 1px solid #d9d9d9 !important;
+  box-shadow: none !important;
+  color: rgba(0, 0, 0, 0.25) !important;
 }
 </style>
 
