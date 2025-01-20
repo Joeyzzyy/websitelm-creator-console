@@ -2254,7 +2254,7 @@ export default defineComponent({
   border-radius: 8px;
   transition: all 0.3s;
   cursor: pointer;
-  height: auto;
+  height: 100%;  /* 确保所有卡片高度一致 */
 }
 
 .plan-card:hover {
@@ -2263,25 +2263,45 @@ export default defineComponent({
 }
 
 .plan-card :deep(.ant-card-body) {
-  padding: 12px;
+  padding: 16px;  /* 统一内边距 */
+  height: 100%;  /* 确保卡片内容区域填充满 */
+  display: flex;
+  flex-direction: column;
 }
 
 .card-content {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  height: 100%;  /* 确保内容填充整个卡片 */
 }
 
 .plan-title {
   font-size: 14px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 8px;
+  margin: 0;  /* 移除默认边距 */
+  line-height: 1.4;
+  height: 40px;  /* 设置固定高度，约等于两行文字 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;  /* 限制为2行 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .plan-description {
   font-size: 12px;
   color: rgba(0, 0, 0, 0.65);
+  line-height: 1.5;
+  height: 54px;  /* 3行文字的高度：12px * 1.5 * 3 = 54px */
+  margin: 8px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;  /* 限制为3行 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;  /* 确保长单词也能正常换行 */
 }
 
 .section-header {
@@ -2958,6 +2978,37 @@ export default defineComponent({
   border: 1px solid #d9d9d9 !important;
   box-shadow: none !important;
   color: rgba(0, 0, 0, 0.25) !important;
+}
+
+/* 调整指标样式 */
+.plan-metrics {
+  display: flex;
+  gap: 16px;
+  margin: 8px 0;
+}
+
+.metric-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);  /* 更浅的颜色 */
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.metric-label :deep(.anticon) {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);  /* 图标也使用相同的浅色 */
+}
+
+.metric-value {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.65);  /* 数值使用稍深一点的颜色，保持可读性 */
 }
 </style>
 
