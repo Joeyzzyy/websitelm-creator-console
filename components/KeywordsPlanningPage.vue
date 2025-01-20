@@ -272,7 +272,7 @@
                         <a-collapse v-model:activeKey="activeCollapseKeys">
                           <a-collapse-panel 
                             key="comparison" 
-                            :header="'Selected from Comparison (' + selectedKeywordsData.comparison.length + ')'"
+                            :header="'Keywords selected from Comparison (' + selectedKeywordsData.comparison.length + ')'"
                           >
                             <a-table
                               :data-source="selectedKeywordsData.comparison"
@@ -303,7 +303,7 @@
                         <a-collapse v-model:activeKey="activeCollapseKeys">
                           <a-collapse-panel 
                             key="top_pages" 
-                            :header="'Selected from Top Pages (' + selectedKeywordsData.top_pages.length + ')'"
+                            :header="'Keywords selected from Top Pages (' + selectedKeywordsData.top_pages.length + ')'"
                           >
                             <a-table
                               :data-source="selectedKeywordsData.top_pages"

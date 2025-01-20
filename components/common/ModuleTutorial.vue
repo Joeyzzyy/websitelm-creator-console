@@ -104,8 +104,9 @@ export default {
 
       const rect = targetEl.getBoundingClientRect();
       const cardWidth = 320;
-      const cardHeight = 200;
-      const margin = 20;
+      const cardHeight = 220;
+      const margin = 16;
+      const offset = 5;
 
       // Get viewport dimensions
       const viewportWidth = this.windowWidth;
@@ -118,20 +119,20 @@ export default {
       // Calculate positions for all sides
       const positions = {
         right: {
-          left: rect.right + margin,
-          top: rect.top + (rect.height - cardHeight) / 2
+          left: rect.right + margin - offset,
+          top: Math.max(margin, rect.top + rect.height/2 - cardHeight/2)
         },
         left: {
-          left: rect.left - cardWidth - margin,
-          top: rect.top + (rect.height - cardHeight) / 2
+          left: rect.left - cardWidth - margin + offset,
+          top: Math.max(margin, rect.top + rect.height/2 - cardHeight/2)
         },
         top: {
           left: rect.left + (rect.width - cardWidth) / 2,
-          top: rect.top - cardHeight - margin
+          top: rect.top - cardHeight - margin/2 + offset
         },
         bottom: {
           left: rect.left + (rect.width - cardWidth) / 2,
-          top: rect.bottom + margin
+          top: rect.bottom + margin/2 - offset
         }
       };
 
@@ -375,8 +376,5 @@ export default {
 :global(.tutorial-highlight) {
   position: relative;
   z-index: 10001;
-  outline: 2px solid rgba(24, 144, 255, 0.4) !important;
-  outline-offset: 4px;
-  border-radius: 8px;
 }
 </style> 
