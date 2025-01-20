@@ -80,6 +80,14 @@
                           </a-radio-button>
                         </a-radio-group>
                         
+                        <!-- 将按钮移到这里并改为 primary 类型 -->
+                        <a-button 
+                          type="primary"
+                          @click="showSelectedKeywords"
+                        >
+                          View Selected
+                        </a-button>
+                        
                         <a-popover
                           placement="rightTop"
                           trigger="click"
@@ -142,161 +150,65 @@
                           <QuestionCircleOutlined class="help-icon" />
                         </a-popover>
                       </div>
-
-                      <!-- 将选择状态卡片移到这里 -->
-                      <div class="selection-status">
-                        <a-space>
-                          <a-button 
-                            @click="showSelectedKeywords"
-                          >View Selected
-                          </a-button>
-                        </a-space>
-                      </div>
                     </div>
                   </a-card>
-
-      
 
                   <!-- Keyword Selection Component -->
                   <div v-if="currentMode === 'beginner'" class="beginner-mode">
                     <a-row :gutter="[24, 24]" class="beginner-content">
-                      <!-- System Recommendations 列 -->
+                      <!-- Keywords From Comparison Table -->
                       <a-col :span="12">
-                        <a-card title="Keywords From Comparison" class="beginner-card">
-                          <p class="recommendation-text">We analyzed and prioritized keywords by opportunity:</p>
+                        <a-card title="Keywords From Comparison" class="keyword-table-card">
                           <a-tabs 
                             v-model:activeKey="currentPriority"
                             @change="handleTabChange"
+                            class="priority-tabs"
+                            tabPosition="left"
                           >
-                            <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
-                              <div class="priority-description">{{ priority.description }}</div>
-                              <a-list
-                                :data-source="getKeywordsByPriority(recommendedKeywords, priority.level)"
+                            <a-tab-pane v-for="priority in priorities" :key="priority.level">
+                              <template #tab>
+                                <div class="priority-tab">
+                                  <div class="priority-indicator" :style="{ backgroundColor: priority.color }"></div>
+                                  <span>{{ priority.label }}</span>
+                                </div>
+                              </template>
+                              
+                              <a-table
+                                :dataSource="getKeywordsByPriority(recommendedKeywords, priority.level)"
+                                :columns="comparisonColumns"
+                                :pagination="recommendedPagination"
+                                @change="(page) => handleComparisonPaginationChange(priority.level, page.current, page.pageSize)"
                                 size="small"
-                                class="keywords-list"
-                              >
-                                <template #renderItem="{ item }">
-                                  <a-list-item>
-                                    <div class="keyword-item">
-                                      <div class="keyword-header">
-                                        <div class="keyword-info">
-                                          <a-checkbox 
-                                            v-model:checked="item.selected"
-                                            @change="(checked) => handleKeywordSelect(item, checked)"
-                                          >
-                                            "{{ item.keyword }}"
-                                          </a-checkbox>
-                                          <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
-                                          <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                                          <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                                          <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
-                                        </div>
-                                        <!-- Move favorite button to the right -->
-                                        <a-button 
-                                          type="text"
-                                          @click.stop="handleKeywordFavorite(item)"
-                                          class="favorite-btn"
-                                        >
-                                          <template #icon>
-                                            <HeartFilled v-if="item.favorited" style="color: #ff4d4f;" />
-                                            <HeartOutlined v-else />
-                                          </template>
-                                        </a-button>
-                                      </div>
-                                      
-                                      <!-- 添加推荐理由显示 -->
-                                      <div class="keyword-reason" v-if="item.reason">
-                                        <BulbOutlined />
-                                        <div class="reason-content">
-                                          <span class="reason-highlight">Reason: </span>
-                                          <span class="reason-value">{{ item.reason }}</span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </a-list-item>
-                                </template>
-                              </a-list>
-                              <!-- 添加分页器 -->
-                              <div class="pagination-wrapper">
-                                <a-pagination
-                                  v-model:current="recommendedPagination.current"
-                                  :total="recommendedPagination.total"
-                                  :pageSize="recommendedPagination.pageSize"
-                                  :show-total="(total) => `Total ${total} items`"
-                                  @change="(page, pageSize) => handleComparisonPaginationChange(priority.level, page, pageSize)"
-                                />
-                              </div>
+                              />
                             </a-tab-pane>
                           </a-tabs>
                         </a-card>
                       </a-col>
 
-                      <!-- Top Pages Optimization Tips 列 -->
+                      <!-- Keywords From Top Pages Table -->
                       <a-col :span="12">
-                        <a-card title="Keywords From Top Pages Optimization" class="optimization-card">
-                          <p class="recommendation-text">Optimization opportunities by priority:</p>
-                          
+                        <a-card title="Keywords From Top Pages" class="keyword-table-card">
                           <a-tabs 
                             v-model:activeKey="currentPagePriority"
                             @change="handlePageTabChange"
-                            class="compact-tabs"
-                            >
-                            <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
-                              <div class="priority-description">{{ priority.description }}</div>
-                              <a-list
-                                :data-source="getKeywordsByPriority(pageKeywords, priority.level)"
+                            class="priority-tabs"
+                            tabPosition="left"
+                          >
+                            <a-tab-pane v-for="priority in priorities" :key="priority.level">
+                              <template #tab>
+                                <div class="priority-tab">
+                                  <div class="priority-indicator" :style="{ backgroundColor: priority.color }"></div>
+                                  <span>{{ priority.label }}</span>
+                                </div>
+                              </template>
+                              
+                              <a-table
+                                :dataSource="getKeywordsByPriority(pageKeywords, priority.level)"
+                                :columns="comparisonColumns"
+                                :pagination="pagePagination"
+                                @change="(page) => handleTopPagesPaginationChange(priority.level, page.current, page.pageSize)"
                                 size="small"
-                                class="keywords-list"
-                              >
-                                <template #renderItem="{ item }">
-                                  <a-list-item>
-                                    <div class="keyword-item">
-                                      <div class="keyword-header">
-                                        <div class="keyword-info">
-                                          <a-checkbox 
-                                            v-model:checked="item.selected"
-                                            @change="(checked) => handleKeywordSelect(item, checked)"
-                                          >
-                                            "{{ item.keyword }}"
-                                          </a-checkbox>
-                                          <a-tag class="krs-tag">KRS={{ item.krs }}</a-tag>
-                                          <a-tag color="cyan">KD={{ item.kd }}</a-tag>
-                                          <a-tag color="purple">Vol={{ item.volume }}</a-tag>
-                                          <a-tag :color="item.status?.color">{{ item.status?.text }}</a-tag>
-                                        </div>
-                                        <!-- Move favorite button to the right -->
-                                        <a-button 
-                                          type="text"
-                                          @click.stop="handleKeywordFavorite(item)"
-                                          class="favorite-btn"
-                                        >
-                                          <template #icon>
-                                            <HeartFilled v-if="item.favorited" style="color: #ff4d4f;" />
-                                            <HeartOutlined v-else />
-                                          </template>
-                                        </a-button>
-                                      </div>
-                                      <!-- 添加 reasoning 显示 -->
-                                      <div class="keyword-reason" v-if="item.reason">
-                                        <BulbOutlined />
-                                        <div class="reason-content">
-                                          <span class="reason-highlight">Reason: </span>
-                                          <span class="reason-value">{{ item.reason }}</span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </a-list-item>
-                                </template>
-                              </a-list>
-                              <div class="pagination-wrapper">
-                                <a-pagination
-                                  v-model:current="pagePagination.current"
-                                  :total="pagePagination.total"
-                                  :pageSize="pagePagination.pageSize"
-                                  :show-total="(total) => `Total ${total} items`"
-                                  @change="(page, pageSize) => handleTopPagesPaginationChange(priority.level, page, pageSize)"
-                                />
-                              </div>
+                              />
                             </a-tab-pane>
                           </a-tabs>
                         </a-card>
@@ -304,12 +216,12 @@
                     </a-row>
                   </div>
 
-                  <!-- 在 expert 模式下的内容 -->
+                  <!-- Content in expert mode -->
                   <template v-else>
-                    <!-- A. 高级筛选器 -->
+                    <!-- Advanced Filters -->
                     <a-card class="filter-card" :bordered="false">
                       <div class="advanced-filters">
-                        <!-- 将所有控件靠左对齐 -->
+                        <!-- Align all controls to the left -->
                         <div class="filter-header">
                           <a-space>
                             <a-select
@@ -394,7 +306,7 @@
                       </div>
                     </a-card>
 
-                    <!-- B. 详细差异 & Top Pages 表格 -->
+                    <!-- Detailed Difference & Top Pages Table -->
                     <a-card class="table-card" :bordered="false">
                       <div class="table-wrapper">
                         <a-table
@@ -407,7 +319,7 @@
                         >
                           <template #expandedRowRender="{ record }">
                             <div class="expanded-row">
-                              <!-- 对应页面部分 -->
+                              <!-- Corresponding Pages Section -->
                               <div class="expanded-section">
                                 <div class="section-header">
                                   <LinkOutlined class="section-icon" />
@@ -427,7 +339,7 @@
                                 </div>
                               </div>
 
-                              <!-- 竞争对手排名对比部分 -->
+                              <!-- Competitor Ranking Comparison Section -->
                               <div class="expanded-section">
                                 <div class="section-header">
                                   <LineChartOutlined class="section-icon" />
@@ -478,89 +390,38 @@
                 </span>
               </template>
               
-              <!-- 第二步内容 -->
+              <!-- 修改第二步内容的布局结构 -->
               <div class="step-two-content">
-                <!-- 内容区域 -->
                 <div class="workspace-layout">
-                  <!-- 左侧已选关键词列表 -->
+                  <!-- 关键词列表卡片 -->
                   <a-card 
                     class="selected-keywords-card"
                     :bordered="false"
                   >
-                    <div class="generate-button-wrapper">
-                      <a-button 
-                        type="primary"
-                        size="small"
-                        :loading="isGenerating"
-                        :disabled="totalSelectedKeywords === 0"
-                        @click="generateContentPlan"
-                      >
-                        <ThunderboltOutlined /> Generate Content Plan
-                      </a-button>
-                    </div>
-
                     <template v-if="isLoadingSelectedKeywords">
                       <div class="loading-container">
                         <a-spin />
                       </div>
                     </template>
                     <template v-else>
-                      <a-tabs
-                        v-model:activeKey="selectedKeywordsTab"
-                        class="selected-keywords-tabs"
-                        size="small"
-                      >
-                        <a-tab-pane
-                          v-for="tab in modalTabs"
-                          :key="tab.key"
-                          :tab="tab.label"
-                        >
-                          <div class="list-header">
-                            <span class="total-count">{{ selectedKeywordsData[tab.key].length }} keywords</span>
+                      <!-- 改为水平布局 -->
+                      <div class="keywords-sections">
+                        <!-- From Comparison Section -->
+                        <div class="keywords-section">
+                          <div class="section-header">
+                            <h4>From Comparison</h4>
+                            <span class="total-count">{{ selectedKeywordsData.comparison.length }} keywords</span>
                           </div>
                           
-                          <a-list
-                            :data-source="selectedKeywordsData[tab.key]"
-                            class="selected-keywords-list"
-                            size="small"
-                          >
-                            <template #renderItem="{ item }">
-                              <a-list-item class="compact-list-item">
-                                <div class="selected-keyword-item">
-                                  <a-tooltip 
-                                    v-if="item.reason" 
-                                    :title="item.reason"
-                                    placement="right"
-                                  >
-                                    <div class="keyword-main">
-                                      <div class="keyword-content">
-                                        <div class="keyword-header">
-                                          <span class="keyword-text" :title="item.keyword">"{{ item.keyword }}"</span>
-                                          <a-button 
-                                            type="link" 
-                                            danger
-                                            size="small"
-                                            class="remove-btn"
-                                            @click="handleRemoveKeyword(item)"
-                                          >
-                                            <DeleteOutlined />
-                                          </a-button>
-                                        </div>
-                                        <div class="keyword-metrics">
-                                          <a-tooltip title="Keyword Ranking Score">
-                                            <a-tag class="metric-tag">KRS {{ item.krs }}</a-tag>
-                                          </a-tooltip>
-                                          <a-tooltip title="Keyword Difficulty">
-                                            <a-tag class="metric-tag" color="cyan">KD {{ item.kd }}</a-tag>
-                                          </a-tooltip>
-                                          <a-tooltip title="Search Volume">
-                                            <a-tag class="metric-tag" color="purple">Vol {{ item.volume }}</a-tag>
-                                          </a-tooltip>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </a-tooltip>
-                                  <div v-else class="keyword-main">
+                          <a-row :gutter="[16, 16]">
+                            <a-col 
+                              :span="12" 
+                              v-for="item in selectedKeywordsData.comparison" 
+                              :key="item.id"
+                            >
+                              <div class="selected-keyword-item">
+                                <a-tooltip v-if="item.reason" :title="item.reason">
+                                  <div class="keyword-main">
                                     <div class="keyword-content">
                                       <div class="keyword-header">
                                         <span class="keyword-text" :title="item.keyword">"{{ item.keyword }}"</span>
@@ -587,74 +448,147 @@
                                       </div>
                                     </div>
                                   </div>
-                                </div>
-                              </a-list-item>
-                            </template>
-                          </a-list>
-                        </a-tab-pane>
-                      </a-tabs>
+                                </a-tooltip>
+                              </div>
+                            </a-col>
+                          </a-row>
+                        </div>
+
+                        <!-- From Top Pages Section -->
+                        <div class="keywords-section">
+                          <div class="section-header">
+                            <h4>From Top Pages</h4>
+                            <span class="total-count">{{ selectedKeywordsData.top_pages.length }} keywords</span>
+                          </div>
+                          
+                          <a-row :gutter="[16, 16]">
+                            <a-col 
+                              :span="12" 
+                              v-for="item in selectedKeywordsData.top_pages" 
+                              :key="item.id"
+                            >
+                              <div class="selected-keyword-item">
+                                <a-tooltip v-if="item.reason" :title="item.reason">
+                                  <div class="keyword-main">
+                                    <div class="keyword-content">
+                                      <div class="keyword-header">
+                                        <span class="keyword-text" :title="item.keyword">"{{ item.keyword }}"</span>
+                                        <a-button 
+                                          type="link" 
+                                          danger
+                                          size="small"
+                                          class="remove-btn"
+                                          @click="handleRemoveKeyword(item)"
+                                        >
+                                          <DeleteOutlined />
+                                        </a-button>
+                                      </div>
+                                      <div class="keyword-metrics">
+                                        <a-tooltip title="Keyword Ranking Score">
+                                          <a-tag class="metric-tag">KRS {{ item.krs }}</a-tag>
+                                        </a-tooltip>
+                                        <a-tooltip title="Keyword Difficulty">
+                                          <a-tag class="metric-tag" color="cyan">KD {{ item.kd }}</a-tag>
+                                        </a-tooltip>
+                                        <a-tooltip title="Search Volume">
+                                          <a-tag class="metric-tag" color="purple">Vol {{ item.volume }}</a-tag>
+                                        </a-tooltip>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </a-tooltip>
+                              </div>
+                            </a-col>
+                          </a-row>
+                        </div>
+                      </div>
                     </template>
                   </a-card>
-                  <!-- Add guide button -->
-                  <div v-if="!hasGenerated" class="empty-state">
-                    <div class="empty-content">
-                      <ThunderboltOutlined class="empty-icon" />
-                      <div class="empty-title">Ready to create your content plan?</div>
-                      <div class="empty-description">
-                        Generate a complete content plan based on your {{ selectedKeywords.length }} selected keywords
-                      </div>
-                    </div>
-                  </div>
-                  <!-- Update content display cards -->
-                  <template v-else>
-                    <div class="plan-section">
-                      <!-- Update task progress section -->
-                      <div class="task-progress-section">
-                        <a-alert
-                          :type="outlineGenerationStatus === 'failed' ? 'error' : 'info'"
-                          class="task-alert"
-                        >
-                          <template #icon>
-                            <LoadingOutlined v-if="outlineGenerationStatus === 'processing'" spin />
-                            <WarningOutlined v-else-if="outlineGenerationStatus === 'failed'" />
-                            <CheckCircleOutlined v-else />
-                          </template>
-                          <template #message>
-                            <div class="task-progress-content">
-                              <template v-if="outlineGenerationStatus && outlineGenerationStatus !== 'finished'">
-                                <div class="task-info">
-                                  <span class="task-status">
-                                    {{ getTaskStatusText(outlineGenerationStatus) }}
-                                  </span>
-                                  <span v-if="taskStartTime" class="task-timing">
-                                    Started: {{ formatTime(taskStartTime) }}
-                                    <template v-if="taskEndTime">
-                                      | Completed: {{ formatTime(taskEndTime) }}
-                                    </template>
-                                  </span>
-                                </div>
-                                <div v-if="taskDescription" class="task-description">
-                                  {{ taskDescription }}
-                                </div>
-                              </template>
-                              <template v-else>
-                                <div class="task-info">
-                                  <span class="task-status">
-                                    ✨ Everything is ready! You can start exploring your content plans below.
-                                  </span>
-                                </div>
-                              </template>
-                            </div>
-                          </template>
-                        </a-alert>
-                      </div>
-
-                      <a-tabs 
-                        v-model:activeKey="contentPlanTab" 
-                        class="content-plan-tabs"
-                        @change="handleContentPlanTabChange"
+                  
+                  <!-- Outline 内容部分 -->
+                  <div class="plan-section">
+                    <!-- Update task progress section -->
+                    <div class="task-progress-section">
+                      <a-alert
+                        :type="outlineGenerationStatus === 'failed' ? 'error' : 'info'"
+                        class="task-alert"
                       >
-                        <template #rightExtra>
+                        <template #icon>
+                          <LoadingOutlined v-if="outlineGenerationStatus === 'processing'" spin />
+                          <WarningOutlined v-else-if="outlineGenerationStatus === 'failed'" />
+                          <CheckCircleOutlined v-else />
+                        </template>
+                        <template #message>
+                          <div class="task-progress-content">
+                            <template v-if="outlineGenerationStatus && outlineGenerationStatus !== 'finished'">
+                              <div class="task-info">
+                                <span class="task-status">
+                                  {{ getTaskStatusText(outlineGenerationStatus) }}
+                                </span>
+                                <span v-if="taskStartTime" class="task-timing">
+                                  Started: {{ formatTime(taskStartTime) }}
+                                  <template v-if="taskEndTime">
+                                    | Completed: {{ formatTime(taskEndTime) }}
+                                  </template>
+                                </span>
+                              </div>
+                              <div v-if="taskDescription" class="task-description">
+                                {{ taskDescription }}
+                              </div>
+                            </template>
+                            <template v-else>
+                              <div class="task-info">
+                                <!-- 将按钮和状态文本分开，改为垂直布局 -->
+                                <div class="generate-section">
+                                  <a-button 
+                                    type="primary"
+                                    size="large"
+                                    :loading="isGenerating"
+                                    :disabled="totalSelectedKeywords === 0"
+                                    @click="generateContentPlan"
+                                    class="generate-btn"
+                                  >
+                                    <ThunderboltOutlined /> Generate Content Plan
+                                  </a-button>
+                                  
+                                  <div class="task-status">
+                                    ✨ Everything is ready! You can start exploring your content plans below.
+                                  </div>
+                                </div>
+                              </div>
+                            </template>
+                          </div>
+                        </template>
+                      </a-alert>
+                    </div>
+
+                    <a-tabs 
+                      v-model:activeKey="contentPlanTab" 
+                      class="content-plan-tabs"
+                      @change="handleContentPlanTabChange"
+                    >
+                      <template #rightExtra>
+                        <a-space>
+                          <!-- Add publish button -->
+                          <a-button 
+                            type="primary"
+                            :disabled="!contentPlans.length"
+                            @click="handlePublishOutlines"
+                          >
+                            <template #icon>
+                              <CloudUploadOutlined />
+                            </template>
+                            Start Page generation
+                          </a-button>
+                          <!-- Existing buttons -->
+                          <a-button 
+                            type="text"
+                            :disabled="!contentPlans.length"
+                            @click="refreshContentPlans"
+                            :loading="isRefreshing"
+                          >
+                            Refresh
+                          </a-button>
                           <a-button 
                             type="text" 
                             danger
@@ -663,133 +597,62 @@
                           >
                             Clear All
                           </a-button>
-                        </template>
-                        <!-- All Outlines Tab -->
-                        <a-tab-pane key="all" tab="All Outlines">
-                          <div class="tab-content-wrapper">
-                            <div class="content-plans-grid">
-                              <template v-if="isLoadingOutlines">
-                                <div class="content-plans-loading">
-                                  <LoadingOutlined style="font-size: 24px; color: #1890ff;" spin />
-                                </div>
-                              </template>
-                              <template v-else>
-                                <a-card 
-                                  v-for="plan in contentPlans" 
-                                  :key="plan.outlineId"
-                                  class="plan-card"
-                                  :bordered="false"
-                                >
-                                  <template #extra>
-                                    <a-space>
-                                      <a-button 
-                                        type="text"
-                                        @click.stop="handleFavorite(plan)"
-                                      >
-                                        <template #icon>
-                                          <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
-                                          <HeartOutlined v-else />
-                                        </template>
-                                      </a-button>
-                                      <a-button
-                                        type="text"
-                                        danger
-                                        @click.stop="handleDeleteOutline(plan)"
-                                      >
-                                        <template #icon>
-                                          <DeleteOutlined />
-                                        </template>
-                                      </a-button>
-                                    </a-space>
-                                  </template>
-                                  
-                                  <div class="card-content" @click="showPlanDetails(plan)">
-                                    <h3 class="plan-title">{{ plan.title }}</h3>
-                                    <p class="plan-description">{{ plan.description }}</p>
-                                    
-                                    <div class="plan-metrics">
-                                      <div class="metric-item">
-                                        <span class="metric-label">Word Count</span>
-                                        <span class="metric-value">{{ getTotalWordCount(plan) }}</span>
-                                      </div>
-                                      <div class="metric-item">
-                                        <span class="metric-label">Sections</span>
-                                        <span class="metric-value">{{ plan.outline.length }}</span>
-                                      </div>
-                                    </div>
-
-                                    <div class="plan-keywords">
-                                      <a-tag 
-                                        v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
-                                        :key="keyword"
-                                        color="blue"
-                                      >
-                                        {{ keyword }}
-                                      </a-tag>
-                                      <a-tag v-if="plan.keywords.split(', ').length > 3">
-                                        +{{ plan.keywords.split(', ').length - 3 }} more
-                                      </a-tag>
-                                    </div>
-
-                                    <div class="plan-actions">
-                                      <a-button 
-                                        type="primary" 
-                                        @click="showPlanDetails(plan)"
-                                      >
-                                        View Details
-                                      </a-button>
-                                    </div>
-                                  </div>
-                                </a-card>
-                              </template>
-                            </div>
-                            <div class="pagination-container">
-                              <a-pagination
-                                v-model:current="contentPlansPagination.current"
-                                :total="contentPlansPagination.total"
-                                :pageSize="contentPlansPagination.pageSize"
-                                @change="handleContentPlansPaginationChange"
-                                show-size-changer
-                                show-quick-jumper
-                                :pageSizeOptions="['12', '24', '36', '48']"
-                                :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
-                              />
-                            </div>
+                        </a-space>
+                      </template>
+                      <!-- All Outlines Tab -->
+                      <a-tab-pane key="all" tab="All Outlines">
+                        <div class="tab-content-wrapper">
+                          <div class="outlines-header">
+                            <a-checkbox 
+                              :checked="allOutlinesSelected"
+                              :indeterminate="someOutlinesSelected"
+                              @change="handleSelectAllOutlines"
+                            >
+                              Select All Outlines
+                            </a-checkbox>
+                            <span class="selected-count" v-if="selectedOutlinesCount > 0">
+                              ({{ selectedOutlinesCount }} selected)
+                            </span>
                           </div>
-                        </a-tab-pane>
-
-                        <!-- Selected Outlines Tab -->
-                        <a-tab-pane key="selected" tab="Selected Outlines">
-                          <div class="tab-content-wrapper">
-                            <div class="content-plans-grid">
+                          <div class="content-plans-grid">
+                            <template v-if="isLoadingOutlines">
+                              <div class="content-plans-loading">
+                                <LoadingOutlined style="font-size: 24px; color: #1890ff;" spin />
+                              </div>
+                            </template>
+                            <template v-else>
                               <a-card 
-                                v-for="plan in contentPlans.filter(p => p.favorited)" 
+                                v-for="plan in contentPlans" 
                                 :key="plan.outlineId"
                                 class="plan-card"
-                                :bordered="false"
                               >
-                                <template #extra>
-                                  <a-space>
-                                    <a-button 
-                                      type="text"
-                                      @click.stop="handleFavorite(plan)"
-                                    >
-                                      <template #icon>
-                                        <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
-                                        <HeartOutlined v-else />
-                                      </template>
-                                    </a-button>
-                                    <a-button
-                                      type="text"
-                                      danger
-                                      @click.stop="handleDeleteOutline(plan)"
-                                    >
-                                      <template #icon>
-                                        <DeleteOutlined />
-                                      </template>
-                                    </a-button>
-                                  </a-space>
-                                </template>
+                                <div class="card-header">
+                                  <div class="card-header-left">
+                                    <a-checkbox
+                                      :checked="plan.selected"
+                                      @change="(e) => handleOutlineSelect(plan, e.target.checked)"
+                                    />
+                                    <!-- 添加类型标签 -->
+                                    <a-tag :color="getTypeColor(plan.pageType)">
+                                      {{ plan.pageType }}
+                                    </a-tag>
+                                  </div>
+                                  <div class="card-actions">
+                                    <HeartOutlined
+                                      v-if="!plan.favorited"
+                                      @click="handleFavorite(plan, $event)"
+                                    />
+                                    <HeartFilled
+                                      v-else
+                                      style="color: #ff4d4f"
+                                      @click="handleFavorite(plan, $event)"
+                                    />
+                                    <DeleteOutlined
+                                      @click="handleDeleteOutline(plan)"
+                                      style="color: #ff4d4f; margin-left: 8px"
+                                    />
+                                  </div>
+                                </div>
                                 
                                 <div class="card-content" @click="showPlanDetails(plan)">
                                   <h3 class="plan-title">{{ plan.title }}</h3>
@@ -797,11 +660,15 @@
                                   
                                   <div class="plan-metrics">
                                     <div class="metric-item">
-                                      <span class="metric-label">Word Count</span>
-                                      <span class="metric-value">{{ getTotalWordCount(plan) }}</span>
+                                      <span class="metric-label">
+                                        <FileTextOutlined /> Word Count
+                                      </span>
+                                      <span class="metric-value">{{ getTotalWordCount(plan).toLocaleString() }}</span>
                                     </div>
                                     <div class="metric-item">
-                                      <span class="metric-label">Sections</span>
+                                      <span class="metric-label">
+                                        <OrderedListOutlined /> Sections
+                                      </span>
                                       <span class="metric-value">{{ plan.outline.length }}</span>
                                     </div>
                                   </div>
@@ -829,47 +696,143 @@
                                   </div>
                                 </div>
                               </a-card>
-                            </div>
-                            <div class="pagination-container">
-                              <a-pagination
-                                v-model:current="contentPlansPagination.current"
-                                :total="contentPlansPagination.total"
-                                :pageSize="contentPlansPagination.pageSize"
-                                @change="handleContentPlansPaginationChange"
-                                show-size-changer
-                                show-quick-jumper
-                                :pageSizeOptions="['12', '24', '36', '48']"
-                                :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
-                              />
-                            </div>
+                            </template>
                           </div>
-                        </a-tab-pane>
-                      </a-tabs>
-                    </div>
+                          <div class="pagination-container">
+                            <a-pagination
+                              v-model:current="contentPlansPagination.current"
+                              :total="contentPlansPagination.total"
+                              :pageSize="contentPlansPagination.pageSize"
+                              @change="handleContentPlansPaginationChange"
+                              show-size-changer
+                              show-quick-jumper
+                              :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
+                            />
+                          </div>
+                        </div>
+                      </a-tab-pane>
 
-                    <!-- 添加右侧抽屉 -->
-                    <a-drawer
-                      :visible="drawerVisible"
-                      :width="600"
-                      placement="right"
-                      @close="closeDrawer"
-                      :title="selectedPlan?.title || 'Content Plan Details'"
-                    >
-                      <template v-if="selectedPlan">
-                        <!-- Intent Section -->
-                        <section class="drawer-section">
-                          <h4 class="section-title">
-                            <CompassOutlined /> User Intent & Problem
-                          </h4>
-                          <div class="section-content">
-                            <div class="content-item">
-                              <strong>Intent:</strong> {{ selectedPlan.userIntent }}
-                            </div>
-                            <div class="content-item">
-                              <strong>Problem Solved:</strong> {{ selectedPlan.problemSolved }}
-                            </div>
-                            <div class="content-tags">
-                              <a-tag v-for="keyword in selectedPlan.relatedKeywords.split(', ')" 
+                      <!-- Selected Outlines Tab -->
+                      <a-tab-pane key="selected" tab="Selected Outlines">
+                        <div class="tab-content-wrapper">
+                          <div class="content-plans-grid">
+                            <a-card 
+                              v-for="plan in contentPlans.filter(p => p.favorited)" 
+                              :key="plan.outlineId"
+                              class="plan-card"
+                              :bordered="false"
+                            >
+                              <template #extra>
+                                <a-space>
+                                  <a-button 
+                                    type="text"
+                                    @click.stop="handleFavorite(plan)"
+                                  >
+                                    <template #icon>
+                                      <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
+                                      <HeartOutlined v-else />
+                                    </template>
+                                  </a-button>
+                                  <a-button
+                                    type="text"
+                                    danger
+                                    @click.stop="handleDeleteOutline(plan)"
+                                  >
+                                    <template #icon>
+                                      <DeleteOutlined />
+                                    </template>
+                                  </a-button>
+                                </a-space>
+                              </template>
+                              
+                              <div class="card-content" @click="showPlanDetails(plan)">
+                                <h3 class="plan-title">{{ plan.title }}</h3>
+                                <p class="plan-description">{{ plan.description }}</p>
+                                
+                                <div class="plan-metrics">
+                                  <div class="metric-item">
+                                    <span class="metric-label">
+                                      <FileTextOutlined /> Word Count
+                                    </span>
+                                    <span class="metric-value">{{ getTotalWordCount(plan).toLocaleString() }}</span>
+                                  </div>
+                                  <div class="metric-item">
+                                    <span class="metric-label">
+                                      <OrderedListOutlined /> Sections
+                                    </span>
+                                    <span class="metric-value">{{ plan.outline.length }}</span>
+                                  </div>
+                                </div>
+
+                                <div class="plan-keywords">
+                                  <a-tag 
+                                    v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
+                                    :key="keyword"
+                                    color="blue"
+                                  >
+                                    {{ keyword }}
+                                  </a-tag>
+                                  <a-tag v-if="plan.keywords.split(', ').length > 3">
+                                    +{{ plan.keywords.split(', ').length - 3 }} more
+                                  </a-tag>
+                                </div>
+
+                                <div class="plan-actions">
+                                  <a-button 
+                                    type="primary" 
+                                    @click="showPlanDetails(plan)"
+                                  >
+                                    View Details
+                                  </a-button>
+                                </div>
+                              </div>
+                            </a-card>
+                          </div>
+                          <div class="pagination-container">
+                            <a-pagination
+                              v-model:current="contentPlansPagination.current"
+                              :total="contentPlansPagination.total"
+                              :pageSize="contentPlansPagination.pageSize"
+                              @change="handleContentPlansPaginationChange"
+                              show-size-changer
+                              show-quick-jumper
+                              :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
+                            />
+                          </div>
+                        </div>
+                      </a-tab-pane>
+                    </a-tabs>
+                  </div>
+
+                  <!-- 添加右侧抽屉 -->
+                  <a-drawer
+                    :visible="drawerVisible"
+                    :width="600"
+                    placement="right"
+                    @close="closeDrawer"
+                    :title="selectedPlan?.title || 'Content Plan Details'"
+                    class="content-plan-drawer"
+                  >
+                    <template v-if="selectedPlan">
+                      <!-- Intent Section -->
+                      <section class="drawer-section">
+                        <h4 class="section-title">
+                          <CompassOutlined /> Intent & Value
+                        </h4>
+                        <div class="section-content">
+                          <div class="content-item">
+                            <div class="item-label">User Intent</div>
+                            <div class="item-value intent-value">{{ selectedPlan.userIntent }}</div>
+                          </div>
+                          <div class="content-item">
+                            <div class="item-label">Problem Solved</div>
+                            <div class="item-value problem-value">{{ selectedPlan.problemSolved }}</div>
+                          </div>
+                          <div class="content-tags">
+                            <div class="tags-label">Related Keywords:</div>
+                            <div class="tags-wrapper">
+                              <a-tag 
+                                v-for="keyword in selectedPlan.relatedKeywords.split(', ')" 
                                 :key="keyword"
                                 color="blue"
                               >
@@ -877,70 +840,77 @@
                               </a-tag>
                             </div>
                           </div>
-                        </section>
+                        </div>
+                      </section>
 
-                        <!-- TDK Section -->
-                        <section class="drawer-section">
-                          <h4 class="section-title">
-                            <FileTextOutlined /> Title, Description & Keywords
-                          </h4>
-                          <div class="section-content">
-                            <div class="content-item">
-                              <div class="item-label">Title</div>
-                              <div class="item-text">{{ selectedPlan.title }}</div>
+                      <!-- TDK Section -->
+                      <section class="drawer-section">
+                        <h4 class="section-title">
+                          <FileTextOutlined /> Page Metadata
+                        </h4>
+                        <div class="section-content">
+                          <div class="content-item">
+                            <div class="item-label">Title</div>
+                            <div class="item-value title-value">{{ selectedPlan.title }}</div>
+                          </div>
+                          <div class="content-item">
+                            <div class="item-label">Description</div>
+                            <div class="item-value description-value">{{ selectedPlan.description }}</div>
+                          </div>
+                          <div class="content-item">
+                            <div class="item-label">Target Keywords</div>
+                            <div class="tags-wrapper keywords-tags">
+                              <a-tag 
+                                v-for="keyword in selectedPlan.keywords.split(', ')" 
+                                :key="keyword"
+                                color="green"
+                              >
+                                {{ keyword }}
+                              </a-tag>
                             </div>
-                            <div class="content-item">
-                              <div class="item-label">Description</div>
-                              <div class="item-text">{{ selectedPlan.description }}</div>
+                          </div>
+                        </div>
+                      </section>
+
+                      <!-- Outline Section -->
+                      <section class="drawer-section">
+                        <h4 class="section-title">
+                          <OrderedListOutlined /> Content Outline
+                        </h4>
+                        <div class="section-content">
+                          <div 
+                            v-for="section in selectedPlan.outline" 
+                            :key="section.sequence" 
+                            class="outline-item"
+                          >
+                            <div class="outline-header">
+                              <div class="sequence-badge">{{ section.sequence }}</div>
+                              <div class="outline-info">
+                                <div class="outline-title">{{ section.sectionTitle }}</div>
+                                <div class="outline-meta">
+                                  <span class="word-count">
+                                    <FileTextOutlined /> {{ section.wordCount.toLocaleString() }} words
+                                  </span>
+                                </div>
+                              </div>
                             </div>
-                            <div class="content-item">
-                              <div class="item-label">Keywords</div>
-                              <div class="content-tags">
-                                <a-tag v-for="keyword in selectedPlan.keywords.split(', ')" 
+                            <div class="outline-keywords" v-if="section.keywordsUsageRequirements">
+                              <div class="keywords-label">Keywords to Include:</div>
+                              <div class="keywords-list">
+                                <a-tag 
+                                  v-for="(count, keyword) in section.keywordsUsageRequirements" 
                                   :key="keyword"
-                                  color="green"
+                                  color="blue"
                                 >
-                                  {{ keyword }}
+                                  {{ keyword }} ({{ count }}×)
                                 </a-tag>
                               </div>
                             </div>
                           </div>
-                        </section>
-
-                        <!-- Outline Section -->
-                        <section class="drawer-section">
-                          <h4 class="section-title">
-                            <OrderedListOutlined /> Content Outline
-                          </h4>
-                          <div class="section-content">
-                            <div v-for="section in selectedPlan.outline" 
-                              :key="section.sequence" 
-                              class="outline-item"
-                            >
-                              <div class="outline-header">
-                                <div class="outline-title">
-                                  Section {{ section.sequence }}: {{ section.sectionTitle }}
-                                </div>
-                                <div class="outline-meta">
-                                  {{ section.wordCount }} words
-                                </div>
-                              </div>
-                              <div class="outline-keywords">
-                                <template v-if="section.keywordsUsageRequirements">
-                                  <a-tag v-for="(count, keyword) in section.keywordsUsageRequirements" 
-                                    :key="keyword"
-                                    color="blue"
-                                  >
-                                    {{ keyword }} ({{ count }})
-                                  </a-tag>
-                                </template>
-                              </div>
-                            </div>
-                          </div>
-                        </section>
-                      </template>
-                    </a-drawer>
-                  </template>
+                        </div>
+                      </section>
+                    </template>
+                  </a-drawer>
                 </div>
               </div>
             </a-tab-pane>
@@ -1023,7 +993,17 @@
             </template>
             
             <template #footer>
-              <a-button @click="handleModalClose">Close</a-button>
+              <div class="modal-footer">
+                <a-space>
+                  <a-button 
+                    type="primary"
+                    @click="proceedToContentPlan"
+                  >
+                    Proceed to Content Plan
+                  </a-button>
+                  <a-button @click="handleModalClose">Close</a-button>
+                </a-space>
+              </div>
             </template>
           </a-modal>
         </template>
@@ -1033,6 +1013,32 @@
         <no-site-configured/>
       </template>
     </a-spin>
+
+    <!-- 添加进度弹窗 -->
+    <a-modal
+      v-model:open="generationProgressVisible"
+      title="Generating Pages"
+      :closable="false"
+      :maskClosable="false"
+      :footer="null"
+      width="400px"
+    >
+      <div class="generation-progress">
+        <div class="progress-status">
+          <LoadingOutlined v-if="isGeneratingPages" spin />
+          <CheckCircleOutlined v-else-if="generationCompleted" style="color: #52c41a" />
+          <CloseCircleOutlined v-else-if="generationFailed" style="color: #ff4d4f" />
+          <span class="status-text">{{ generationStatusText }}</span>
+        </div>
+        <a-progress 
+          :percent="generationProgress" 
+          :status="generationStatus"
+        />
+        <div class="progress-details">
+          {{ generationDetails }}
+        </div>
+      </div>
+    </a-modal>
   </page-layout>
 </template>
 
@@ -1059,7 +1065,10 @@ import {
   SearchOutlined,
   HeartOutlined,
   HeartFilled,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  ReloadOutlined, // Add this import
+  CloudUploadOutlined,
+  CloseCircleOutlined,
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -1096,7 +1105,10 @@ export default defineComponent({
     SearchOutlined,
     HeartOutlined,
     HeartFilled,
-    InfoCircleOutlined
+    InfoCircleOutlined,
+    ReloadOutlined,
+    CloudUploadOutlined,
+    CloseCircleOutlined,
   },
   setup() {
     const currentMode = ref('beginner')
@@ -1126,44 +1138,37 @@ export default defineComponent({
       pageKeywords.value.forEach(k => k.selected = false)
     }
 
-    // 添加新的数据结构
     const overviewStats = ref({
       totalKeywords: 2500,
       ourTopPages: 30,
       competitorPages: 50
     })
 
-    // 修改 priorities 数组,level 改为 1-5
     const priorities = [
       {
         level: '1',
-        label: 'P1 - Quick Wins', // 改为 P1
-        color: '#f50',
-        description: 'High impact, low effort opportunities'
+        label: 'P1 - Quick Wins',
+        color: '#f50'
       },
       {
         level: '2',
-        label: 'P2 - High Priority', // 改为 P2
-        color: '#fa8c16', 
-        description: 'Important terms with good potential'
+        label: 'P2 - High Priority',
+        color: '#fa8c16' 
       },
       {
         level: '3',
-        label: 'P3 - Medium Priority', // 改为 P3
-        color: '#1890ff',
-        description: 'Valuable but requires more effort'
+        label: 'P3 - Medium Priority',
+        color: '#1890ff'
       },
       {
         level: '4',
-        label: 'P4 - Low Priority', // 改为 P4
-        color: '#52c41a',
-        description: 'Long-term opportunities'
+        label: 'P4 - Low Priority',
+        color: '#52c41a'
       },
       {
         level: '5',
-        label: 'P5 - Monitor', // 改为 P5
-        color: '#722ed1',
-        description: 'Keep an eye on these terms'
+        label: 'P5 - Monitor',
+        color: '#722ed1'
       }
     ]
 
@@ -1180,26 +1185,24 @@ export default defineComponent({
       total: 0
     })
 
-    // 修改数据转换方法
     const transformKeywordData = (item) => {
       return {
         id: item.keywordId,
         keyword: item.keyword,
         selected: false,
-        favorited: item.status === 'selected', // 添加favorited字段
-        krs: Number(item.krsScore).toFixed(2), // 使用 krsScore 字段，保留两位小数
-        kd: item.kd, // 直接使用 kd 字段
-        volume: item.volume, // 直接使用 volume 字段
-        cpc: Number(item.cpc).toFixed(2), // 添加 cpc 字段，保留两位小数
+        favorited: item.status === 'selected',
+        krs: Number(item.krsScore).toFixed(2),
+        kd: item.kd,
+        volume: item.volume,
+        cpc: Number(item.cpc).toFixed(2),
         status: getKeywordStatus(item),
         grade: item.grade,
-        reason: item.reasoning || 'No specific reason provided', // 使用 reasoning 字段，如果为空则提供默认值
-        pages: [], // 页面信息
-        competitors: [] // 竞争对手信息
+        reason: item.reasoning || 'No specific reason provided',
+        pages: [],
+        competitors: []
       }
     }
 
-    // 1. 修改 fetchKeywords 方法，确保正确发送 level 参数
     const fetchKeywords = async (source, level, page = 1, limit = 10) => {
       try {
         console.log('Fetching keywords with params:', { source, level, page, limit })
@@ -1208,7 +1211,7 @@ export default defineComponent({
           level,
           page,
           limit,
-          status: '' // 默认获取所有关键词
+          status: ''
         })
         
         if (response?.data) {
@@ -1222,9 +1225,8 @@ export default defineComponent({
           }
         }
       } catch (error) {
-        console.error('获取关键词失败:', error)
+        console.error('Failed to get keywords:', error)
       } finally {
-        // 所有数据加载完成后，关闭 loading
         loading.value = false
       }
     }
@@ -1243,55 +1245,41 @@ export default defineComponent({
       fetchKeywords('top_page_keywords', priority, page, pageSize)
     }
 
-    // 将原来分散的 onMounted 逻辑合并到一个地方
     onMounted(async () => {
       loading.value = true
       try {
-        // 1. 检查域名配置状态
         await checkDomainStatus()
 
-        // 2. 如果域名已配置,执行后续初始化
         if (domainConfigured.value) {
-          // 检查分析状态
           await checkAnalysisStatus()
           
-          // 启动轮询(如果需要)
           if (analysisState.value !== 'finished') {
             pollingInterval.value = setInterval(checkAnalysisStatus, 5000)
           }
 
-          // 初始化已选关键词
           initializeSelectedKeywords()
         }
       } catch (error) {
         console.error('Initialization failed:', error)
         message.error('Failed to initialize the page')
-      } finally {
-        // 移除这里的 loading.value = false，
-        // 让它在 checkAnalysisStatus 中处理
       }
     })
 
-    // 确保在组件卸载时清理轮询
     onUnmounted(() => {
       if (pollingInterval.value) {
         clearInterval(pollingInterval.value)
       }
     })
 
-    // 合并所有的 watch 逻辑
     watch(
-      // 监听多个数据源
       [
         () => recommendedKeywords.value,
         () => pageKeywords.value,
         () => selectedKeywords.value
       ],
       ([newRecommendedKeywords, newPageKeywords, newSelectedKeywords], [oldRecommendedKeywords, oldPageKeywords, oldSelectedKeywords]) => {
-        // 1. 处理推荐关键词变化
         if (newRecommendedKeywords !== oldRecommendedKeywords) {
-          console.log('recommendedKeywords变化:', newRecommendedKeywords)
-          // 只同步选中的关键词到 selectedKeywords
+          console.log('recommendedKeywords changed:', newRecommendedKeywords)
           const selectedOnes = newRecommendedKeywords.filter(k => k.selected)
           selectedKeywords.value = [
             ...selectedKeywords.value.filter(k => !newRecommendedKeywords.find(nk => nk.keyword === k.keyword)),
@@ -1299,9 +1287,7 @@ export default defineComponent({
           ]
         }
 
-        // 2. 处理页面关键词变化
         if (newPageKeywords !== oldPageKeywords) {
-          // 只同步选中的关键词到 selectedKeywords
           const selectedOnes = newPageKeywords.filter(k => k.selected)
           selectedKeywords.value = [
             ...selectedKeywords.value.filter(k => !newPageKeywords.find(nk => nk.keyword === k.keyword)),
@@ -1310,7 +1296,7 @@ export default defineComponent({
         }
       },
       {
-        deep: true // 深度监听对象变化
+        deep: true
       }
     )
 
@@ -1332,20 +1318,18 @@ export default defineComponent({
     const getKeywordsByPriority = (keywords, priority) => {
       if (!keywords || !keywords.length) return []
       
-      // 将priority等级映射到grade
       const priorityToGrade = {
-        '1': '1', // P0
-        '2': '2', // P1
-        '3': '3', // P2
-        '4': '4', // P3
-        '5': '5'  // P4
+        '1': '1',
+        '2': '2',
+        '3': '3',
+        '4': '4',
+        '5': '5'
       }
       
       const grade = priorityToGrade[priority]
       return keywords.filter(k => k.grade === grade)
     }
 
-    // 在 expert 模式下的内容
     const filters = ref([
       {
         field: 'kd',
@@ -1359,12 +1343,11 @@ export default defineComponent({
         field: 'kd',
         operator: '<',
         value: 50,
-        id: Date.now() // 添加唯一ID以帮助Vue追踪数组变化
+        id: Date.now()
       });
     };
 
     const removeFilter = (index) => {
-      // 直接删除指定索引的筛选条件，不需要检查数量
       filters.value.splice(index, 1);
     };
 
@@ -1388,7 +1371,6 @@ export default defineComponent({
     };
 
     const pagination = {
-      pageSizeOptions: ['10', '20', '30', '40'],
       pageSize: 10,
       showSizeChanger: true,
       showQuickJumper: true,
@@ -1438,7 +1420,7 @@ export default defineComponent({
     const currentStep = ref('0')
     const nextStep = async () => {
       if (!canProceedToNext.value) {
-        message.warning('请至少选择一个关键词')
+        message.warning('Please select at least one keyword')
         return
       }
       
@@ -1448,15 +1430,13 @@ export default defineComponent({
     }
 
     const previousStep = () => {
-      if (currentStep.value > '0') {  // 修改这里的比较
-        currentStep.value = '0'  // 修改这里为字符串
+      if (currentStep.value > '0') {
+        currentStep.value = '0'
       }
     }
 
-    // Modal control
     const showSelectedModal = ref(false)
 
-    // 修改数据结构
     const modalTabs = ref([
       { key: 'comparison', label: 'From Comparison' },
       { key: 'top_pages', label: 'From Top Pages' }
@@ -1467,7 +1447,6 @@ export default defineComponent({
       top_pages: []
     })
 
-    // 修改 fetchSelectedKeywords 方法
     const fetchSelectedKeywords = async () => {
       isLoadingModalKeywords.value = true
       try {
@@ -1491,8 +1470,8 @@ export default defineComponent({
           top_pages: (pageKeywordsResponse?.data || []).map(transformKeywordData)
         }
       } catch (error) {
-        console.error('获取已选关键词失败:', error)
-        message.error('获取已选关键词失败')
+        console.error('Failed to get selected keywords:', error)
+        message.error('Failed to get selected keywords')
       } finally {
         isLoadingModalKeywords.value = false
       }
@@ -1504,20 +1483,16 @@ export default defineComponent({
 
     const isGenerating = ref(false)
 
-    // 添加生成状态追踪
     const hasGenerated = ref(false)
 
-    // 修改 filteredKeywords 的定义
     const filteredKeywords = ref(tableData)
 
-    // 添加新的方法
     const getRankClass = (rank) => {
       if (rank <= 3) return 'top-3'
       if (rank <= 10) return 'top-10'
       return 'others'
     }
 
-    // 添加初始化函数来同步已选中的关键词
     const initializeSelectedKeywords = () => {
       const preSelectedKeywords = recommendedKeywords.value.filter(k => k.selected)
       selectedKeywords.value = preSelectedKeywords.map(k => ({
@@ -1526,14 +1501,12 @@ export default defineComponent({
       }))
     }
 
-    // 在组件创建时立即执行初始化
     initializeSelectedKeywords()
 
     const analysisStatus = ref(null)
     const pollingInterval = ref(null)
     const taskInfo = ref(null)
 
-    // 修改: 检查关键词分析状态的方法
     const checkAnalysisStatus = async () => {
       if (!domainConfigured.value) {
         loading.value = false;
@@ -1546,7 +1519,6 @@ export default defineComponent({
           taskInfo.value = response
           if (response.analysisStatus === 'finished') {
             clearInterval(pollingInterval.value)
-            // 获取概览数据
             const overview = await api.getKeywordAnalysisOverview()
             if (overview?.data) {
               overviewData.value = {
@@ -1556,7 +1528,6 @@ export default defineComponent({
                 weak: overview.data.keywordsGroup.weak || 0
               }
             }
-            // 分析完成后，加载关键词数据
             await Promise.all([
               fetchKeywords('keywords', currentPriority.value, 1, recommendedPagination.value.pageSize),
               fetchKeywords('top_page_keywords', currentPriority.value, 1, pagePagination.value.pageSize)
@@ -1567,20 +1538,17 @@ export default defineComponent({
         console.error('Failed to check analysis status:', error)
         message.error('Failed to check analysis status')
       } finally {
-        // 只有在所有数据都加载完成后，才关闭 loading
         if (taskInfo.value?.analysisStatus !== 'finished') {
           loading.value = false
         }
       }
     }
 
-    // Computed property to determine what to display
     const analysisState = computed(() => {
       if (loading.value) return 'loading'
       return taskInfo.value?.analysisStatus || 'not_started'
     })
 
-    // Add a computed property for current tasks
     const currentTasks = computed(() => {
       if (!taskInfo.value?.data || !Array.isArray(taskInfo.value.data)) return []
       return taskInfo.value.data
@@ -1598,7 +1566,6 @@ export default defineComponent({
     const domainConfigured = ref(false)
     const router = useRouter()
 
-    // 检查域名配置状态
     const checkDomainStatus = async () => {
       loading.value = true
       try {
@@ -1612,9 +1579,7 @@ export default defineComponent({
       }
     }
 
-    // 修改状态判断方法
     const getKeywordStatus = (item) => {
-      // 根据grade判断状态
       const gradeMap = {
         '1': { text: 'Quick Win Choose', color: 'red' },
         '2': { text: 'High Priority', color: 'orange' },
@@ -1626,25 +1591,29 @@ export default defineComponent({
       return gradeMap[item.grade] || { text: 'Unknown', color: 'default' }
     }
 
-    // 添加响应式变量存储当前选中的 priority
-    const currentPriority = ref('1') // 默认选中 P0
+    const currentPriority = ref('1')
+    const currentPagePriority = ref('1')  // 添加这个变量
 
-    // 添加 tab 切换处理函数
     const handleTabChange = (activeKey) => {
       console.log('Tab changed to:', activeKey)
       const priority = priorities.find(p => p.level === activeKey)
       if (priority) {
-        // 重置分页到第一页
         recommendedPagination.value.current = 1
-        // 重新获取数据
         fetchKeywords('keywords', priority.level, 1, recommendedPagination.value.pageSize)
       }
     }
 
-    // Add new refs
+    const handlePageTabChange = (activeKey) => {
+      console.log('Page tab changed to:', activeKey)
+      const priority = priorities.find(p => p.level === activeKey)
+      if (priority) {
+        pagePagination.value.current = 1
+        fetchKeywords('top_page_keywords', priority.level, 1, pagePagination.value.pageSize)
+      }
+    }
+
     const contentPlans = ref([])
 
-    // Add new computed property
     const selectedPlansCount = computed(() => {
       return contentPlans.value.filter(plan => plan.selected).length
     })
@@ -1655,41 +1624,79 @@ export default defineComponent({
         return;
       }
 
+      const confirmed = await new Promise(resolve => {
+        Modal.confirm({
+          title: 'Generate Content Plan',
+          content: `Are you sure you want to generate a content plan using the currently selected ${totalSelectedKeywords.value} keywords?`,
+          okText: 'Confirm',
+          cancelText: 'Cancel',
+          onOk: () => resolve(true),
+          onCancel: () => resolve(false),
+        });
+      });
+
+      if (!confirmed) return;
+
       isGenerating.value = true;
       try {
-        // Get IDs of all selected keywords from both sources
         const selectedIds = [
           ...selectedKeywordsData.value.comparison.map(k => k.id),
           ...selectedKeywordsData.value.top_pages.map(k => k.id)
         ];
 
-        // Call API to generate content plan
-        const response = await api.generatePlanningComposite(selectedIds);
+        console.log('Submitting generation request...');
+        await api.generatePlanningComposite(selectedIds);
         
-        if (response?.data) {
-          // Update content plans list
-          contentPlans.value = response.data.map(plan => ({
-            ...plan,
-            selected: false,
-            favorited: plan.status === 'selected'
-          }));
-          
-          hasGenerated.value = true;
-          message.success('Content plan generated successfully');
-          
-          // Auto switch to "All Outlines" tab
-          contentPlanTab.value = 'all';
-          
-          // Reset pagination
-          contentPlansPagination.value.current = 1;
+        message.success('Content plan generation request submitted');
+        console.log('Generation request successful, waiting before status check...');
+        
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        console.log('Checking initial status...');
+        const statusResponse = await checkOutlineGenerationStatus();
+        console.log('Status response:', statusResponse);
+        
+        if (!statusResponse?.data || statusResponse.data.status !== 'finished') {
+          console.log('Starting polling...');
+          startPolling();
         }
       } catch (error) {
         console.error('Failed to generate content plan:', error);
-        message.error('Failed to generate content plan. Please try again.');
+        message.error('Failed to generate content plan, please try again');
       } finally {
         isGenerating.value = false;
       }
     };
+
+    const startPolling = () => {
+      // 先清除已存在的轮询
+      if (pollingInterval.value) {
+        clearInterval(pollingInterval.value)
+      }
+      
+      pollingInterval.value = setInterval(async () => {
+        const response = await checkOutlineGenerationStatus()
+        
+        // 如果状态是完成或失败，停止轮询
+        if (response?.data?.status === 'finished' || response?.data?.status === 'failed') {
+          clearInterval(pollingInterval.value)
+          pollingInterval.value = null // 重置轮询变量
+          
+          if (response?.data?.status === 'finished') {
+            await fetchContentPlans()
+            hasGenerated.value = true
+          } else {
+            message.error('Content plan generation failed')
+          }
+        }
+      }, 5000) // 增加轮询间隔到 5 秒
+    }
+
+    onUnmounted(() => {
+      if (pollingInterval.value) {
+        clearInterval(pollingInterval.value);
+      }
+    });
 
     const handlePlanSelect = (plan, checked) => {
       plan.selected = checked
@@ -1698,17 +1705,14 @@ export default defineComponent({
     const confirmSelectedPlans = async () => {
       const selectedPlans = contentPlans.value.filter(plan => plan.selected)
       if (selectedPlans.length) {
-        // Handle selected plans confirmation
         console.log('Selected plans:', selectedPlans)
         message.success('Content plans confirmed')
       }
     }
 
-    // 添加新的响应式变量
     const drawerVisible = ref(false)
     const selectedPlan = ref(null)
 
-    // 添加新的方法
     const showPlanDetails = (plan) => {
       selectedPlan.value = plan
       drawerVisible.value = true
@@ -1725,27 +1729,40 @@ export default defineComponent({
       }, 0)
     }
 
-    // 修改 watch，添加对 tab 切换的处理
     watch(currentStep, async (newStep) => {
       if (newStep === '0') {
-        // 切换到 Select Keywords tab，重新加载关键词数据
         await Promise.all([
           fetchKeywords('keywords', currentPriority.value, 1, recommendedPagination.value.pageSize),
           fetchKeywords('top_page_keywords', currentPriority.value, 1, pagePagination.value.pageSize)
         ])
       } else if (newStep === '1') {
-        // 重置第二步相关的状态
         contentPlans.value = []
         hasGenerated.value = false
         isGenerating.value = false
         
-        // 移除重复的 fetchContentPlans 调用，只在 status 未完成时才调用
-        const statusResponse = await checkOutlineGenerationStatus()
-        if (!statusResponse?.data || statusResponse.data.status !== 'finished') {
-          await fetchContentPlans()
-        }
+        // 检查生成状态并启动轮询
+        await checkAndStartPolling()
       }
     })
+
+    // 修改 checkAndStartPolling 方法
+    const checkAndStartPolling = async () => {
+      // 如果已经在轮询中，不重复启动
+      if (pollingInterval.value) return
+      
+      try {
+        const statusResponse = await checkOutlineGenerationStatus()
+        
+        if (!statusResponse?.data || statusResponse.data.status === 'processing') {
+          startPolling()
+        } else if (statusResponse.data.status === 'finished') {
+          await fetchContentPlans()
+        }
+      } catch (error) {
+        console.error('Failed to check outline status:', error)
+        message.error('Failed to check outline status')
+      }
+    }
 
     const checkOutlineGenerationStatus = async () => {
       try {
@@ -1761,20 +1778,23 @@ export default defineComponent({
             clearInterval(pollingInterval.value)
             hasGenerated.value = true
             await fetchContentPlans()
+          } else if (response.data.status === 'failed') {
+            clearInterval(pollingInterval.value)
+            message.error('Content plan generation failed')
           }
-        } else {
-          message.error('获取大纲生成状态失败')
         }
         return response
       } catch (error) {
         console.error('Failed to check outline generation status:', error)
-        message.error('检查大纲生成状态失败')
+        message.error('Failed to get outline generation status')
         return null
       }
     }
 
-    // 获取内容计划的方法
     const fetchContentPlans = async () => {
+      // 如果正在加载，不重复请求
+      if (isLoadingOutlines.value) return
+      
       isLoadingOutlines.value = true
       try {
         const outlinesResponse = await api.getPlanningOutlines({
@@ -1791,25 +1811,21 @@ export default defineComponent({
           }))
           contentPlansPagination.value.total = outlinesResponse.totalCount || 0
           hasGenerated.value = true
-        } else {
-          message.error('获取大纲列表失败')
         }
       } catch (error) {
         console.error('Failed to fetch content plans:', error)
-        message.error('获取内容计划失败')
+        message.error('Failed to get content plans')
       } finally {
         isLoadingOutlines.value = false
       }
     }
 
-    // 新增: 处理分页变化的方法
     const handleContentPlansPaginationChange = async (page, pageSize) => {
       contentPlansPagination.value.current = page
       contentPlansPagination.value.pageSize = pageSize
       await fetchContentPlans()
     }
 
-    // 添加 outlineGenerationStatus 的定义
     const outlineGenerationStatus = ref(null)
 
     const contentPlansPagination = ref({
@@ -1818,19 +1834,19 @@ export default defineComponent({
       total: 0
     })
 
-    // 添加相关的方法
+    // Add new methods
     const handleFavorite = async (plan, event) => {
       try {
         if (plan.favorited) {
           // Cancel favorite
           await api.cancelPlanningOutlines([plan.outlineId]);
           plan.favorited = false;
-          message.success('Removed from favorites');
+          message.success('Removed from selection');
         } else {
           // Add to favorites
           await api.selectPlanningOutlines([plan.outlineId]);
           plan.favorited = true;
-          message.success('Added to favorites');
+          message.success('Added to selection');
         }
       } catch (error) {
         console.error('Favorite operation failed:', error);
@@ -1838,70 +1854,70 @@ export default defineComponent({
       }
     };
 
-    // 添加 contentPlanTab 的定义
+    // Add contentPlanTab definition
     const contentPlanTab = ref('all')
 
-    // 添加 tab 切换处理方法
-    const handleContentPlanTabChange = (activeKey) => {
+    // Add tab switch handling method
+    const handleContentPlanTabChange = async (activeKey) => {
       contentPlanTab.value = activeKey
       // 重置分页
       contentPlansPagination.value.current = 1
-      // 重新获取数据
-      fetchContentPlans()
+      // 获取数据并检查状态
+      await fetchContentPlans()
     }
 
-    // 添加loading状态
+    // Add loading state
     const isLoadingOutlines = ref(false)
 
-    // 添加收藏/取消收藏关键词的方法
+    // Add favorite/unfavorite keyword method
     const handleKeywordFavorite = async (keyword) => {
       try {
         if (keyword.favorited) {
-          // 取消收藏
+          // Unfavorite
           await api.cancelPlanningKeywords([keyword.id]);
           keyword.favorited = false;
-          message.success('Removed from favorites');
+          message.success('Removed from selection');
         } else {
-          // 添加收藏
+          // Favorite
           await api.selectPlanningKeywords([keyword.id]);
           keyword.favorited = true;
-          message.success('Added to favorites');
+          message.success('Added to selection');
         }
       } catch (error) {
-        console.error('收藏操作失败:', error);
-        message.error('操作失败');
+        console.error('Favorite operation failed:', error);
+        message.error('Operation failed');
       }
     };
 
-    // 添加 tab 切换处理方法
+    // Add tab switch handling method
     const handleModalTabChange = (activeKey) => {
       currentModalTab.value = activeKey
     }
 
-    // 添加 showSelectedKeywords 方法
+    // Add showSelectedKeywords method
     const showSelectedKeywords = async () => {
       showSelectedModal.value = true
       await fetchSelectedKeywords()
     }
 
-    // 添加 loading 状态变量
+    // Add loading state variable
     const isLoadingModalKeywords = ref(false)
 
-    // 添加取消选择方法
+    // Add cancel selection method
     const handleCancelSelection = async (keyword) => {
       try {
         await api.cancelPlanningKeywords([keyword.id])
-        // 从列表中移除该关键词
+        // Remove keyword from list
         const sourceType = currentModalTab.value
         modalKeywords.value[sourceType] = modalKeywords.value[sourceType].filter(k => k.id !== keyword.id)
-        message.success('关键词已取消选择')
+        message.success('Keyword deselected')
       } catch (error) {
-        console.error('取消选择失败:', error)
-        message.error('取消选择失败')
+        console.error('Failed to deselect keyword:', error)
+        message.error('Failed to deselect keyword')
       }
     }
 
-    // 添加新的响应式变量
+    // Add new reactive variables
     const selectedKeywordsTab = ref('comparison')
     const selectedKeywordsData = ref({
       comparison: [],
@@ -1909,15 +1925,15 @@ export default defineComponent({
     })
     const isLoadingSelectedKeywords = ref(false)
 
-    // 修改 watch 以同步数据
+    // Modify watch to sync data
     watch(currentStep, async (newStep) => {
       if (newStep === '1') {
-        // 当切换到 outline tab 时，加载已选关键词
+        // When switching to outline tab, load selected keywords
         await fetchSelectedKeywordsData()
       }
     })
 
-    // 添加获取已选关键词的方法
+    // Add get selected keywords method
     const fetchSelectedKeywordsData = async () => {
       isLoadingSelectedKeywords.value = true
       try {
@@ -1941,30 +1957,30 @@ export default defineComponent({
           top_pages: (pageKeywordsResponse?.data || []).map(transformKeywordData)
         }
       } catch (error) {
-        console.error('获取已选关键词失败:', error)
-        message.error('获取已选关键词失败')
+        console.error('Failed to get selected keywords:', error)
+        message.error('Failed to get selected keywords')
       } finally {
         isLoadingSelectedKeywords.value = false
       }
     }
 
-    // 新的移除关键词方法
+    // New remove keyword method
     const handleRemoveKeyword = async (keyword) => {
       try {
         await api.cancelPlanningKeywords([keyword.id])
-        // 从两个列表中移除该关键词
+        // Remove keyword from both lists
         const sourceType = selectedKeywordsTab.value
         selectedKeywordsData.value[sourceType] = selectedKeywordsData.value[sourceType].filter(k => k.id !== keyword.id)
-        // 同时更新 selectedKeywords
+        // Also update selectedKeywords
         selectedKeywords.value = selectedKeywords.value.filter(k => k.id !== keyword.id)
-        message.success('关键词已移除')
+        message.success('Keyword removed')
       } catch (error) {
-        console.error('移除关键词失败:', error)
-        message.error('移除关键词失败')
+        console.error('Failed to remove keyword:', error)
+        message.error('Failed to remove keyword')
       }
     }
 
-    // 添加计算属性来获取所有已选关键词的总数
+    // Add computed property to get total number of selected keywords
     const totalSelectedKeywords = computed(() => {
       return selectedKeywordsData.value.comparison.length + 
              selectedKeywordsData.value.top_pages.length
@@ -2067,6 +2083,199 @@ export default defineComponent({
       })
     }
 
+    // Add new ref for refresh loading state
+    const isRefreshing = ref(false)
+
+    // Modify refresh method
+    const refreshContentPlans = async () => {
+      isRefreshing.value = true
+      try {
+        // First check the generation status
+        const statusResponse = await checkOutlineGenerationStatus()
+        
+        // If still processing, start polling
+        if (statusResponse?.data?.status === 'processing') {
+          startPolling()
+        } else {
+          // If not processing, just fetch the content plans
+          await fetchContentPlans()
+        }
+        
+        message.success('Content plans refreshed')
+      } catch (error) {
+        console.error('Failed to refresh content plans:', error)
+        message.error('Failed to refresh content plans')
+      } finally {
+        isRefreshing.value = false
+      }
+    }
+
+    // Add jump method
+    const proceedToContentPlan = () => {
+      handleModalClose(); // Close the modal first
+      currentStep.value = '1'; // Switch to outline tab
+    };
+
+    const handlePublishOutlines = async () => {
+      const selectedOutlines = contentPlans.value.filter(plan => plan.selected)
+      if (!selectedOutlines.length) {
+        message.warning('Please select at least one outline')
+        return
+      }
+
+      try {
+        generationProgressVisible.value = true
+        isGeneratingPages.value = true
+        generationProgress.value = 0
+        generationStatus.value = 'active'
+        generationCompleted.value = false
+        generationFailed.value = false
+
+        const total = selectedOutlines.length
+        let completed = 0
+
+        for (const outline of selectedOutlines) {
+          try {
+            generationStatusText.value = `Generating page (${completed + 1}/${total})`
+            generationDetails.value = `Processing: "${outline.title}"`
+            
+            await api.createAIPage(outline.outlineId)
+            
+            completed++
+            generationProgress.value = Math.floor((completed / total) * 100)
+          } catch (error) {
+            console.error('Failed to generate page:', error)
+            message.error(`Failed to generate page: ${outline.title}`)
+          }
+        }
+
+        generationCompleted.value = true
+        isGeneratingPages.value = false
+        generationStatus.value = 'success'
+        generationStatusText.value = 'All pages generated successfully!'
+        generationDetails.value = `Successfully generated ${completed}/${total} pages`
+
+        setTimeout(() => {
+          generationProgressVisible.value = false
+          generationProgress.value = 0
+          generationCompleted.value = false
+          generationFailed.value = false
+        }, 3000)
+
+      } catch (error) {
+        console.error('Page generation process failed:', error)
+        generationFailed.value = true
+        isGeneratingPages.value = false
+        generationStatus.value = 'exception'
+        generationStatusText.value = 'Generation process failed'
+        generationDetails.value = error.message || 'Unknown error'
+      }
+    }
+
+    // Add new reactive variables
+    const generationProgressVisible = ref(false)
+    const generationProgress = ref(0)
+    const generationStatus = ref('active')
+    const generationStatusText = ref('Preparing to generate pages...')
+    const generationDetails = ref('')
+    const isGeneratingPages = ref(false)
+    const generationCompleted = ref(false)
+    const generationFailed = ref(false)
+
+    // Add new reactive variables
+    const allOutlinesSelected = computed(() => {
+      return contentPlans.value.length > 0 && 
+             contentPlans.value.every(plan => plan.selected)
+    })
+
+    const someOutlinesSelected = computed(() => {
+      return contentPlans.value.some(plan => plan.selected) && 
+             !allOutlinesSelected.value
+    })
+
+    const selectedOutlinesCount = computed(() => {
+      return contentPlans.value.filter(plan => plan.selected).length
+    })
+
+    // Add new methods
+    const handleSelectAllOutlines = (e) => {
+      const checked = e.target.checked
+      contentPlans.value.forEach(plan => {
+        plan.selected = checked
+      })
+    }
+
+    const handleOutlineSelect = (plan, checked) => {
+      plan.selected = checked
+    }
+
+    // Add table columns definition
+    const comparisonColumns = [
+      {
+        title: 'Keyword',
+        dataIndex: 'keyword',
+        key: 'keyword',
+        width: '30%',
+        render: (text, record) => {
+          return h('div', { class: 'keyword-cell' }, [
+            h('a-checkbox', {
+              checked: record.selected,
+              onChange: (e) => handleKeywordSelect(record, e.target.checked)
+            }),
+            h('span', { class: 'keyword-text' }, text)
+          ])
+        }
+      },
+      {
+        title: 'KRS',
+        dataIndex: 'krs',
+        key: 'krs',
+        width: '15%',
+        sorter: (a, b) => a.krs - b.krs
+      },
+      {
+        title: 'KD',
+        dataIndex: 'kd',
+        key: 'kd',
+        width: '15%',
+        sorter: (a, b) => a.kd - b.kd
+      },
+      {
+        title: 'Volume',
+        dataIndex: 'volume',
+        key: 'volume',
+        width: '15%',
+        sorter: (a, b) => a.volume - b.volume
+      },
+      {
+        title: 'Actions',
+        key: 'actions',
+        width: '15%',
+        render: (_, record) => {
+          return h('div', { class: 'action-buttons' }, [
+            h('a-button', {
+              type: 'text',
+              onClick: () => handleKeywordFavorite(record)
+            }, [
+              h(record.favorited ? HeartFilled : HeartOutlined, {
+                style: { color: record.favorited ? '#ff4d4f' : undefined }
+              })
+            ])
+          ])
+        }
+      }
+    ]
+
+    // 在 setup 函数中添加
+    const getTypeColor = (type) => {
+      const typeColors = {
+        'Blog': 'blue',
+        'Landing Page': 'green',
+        // 可以添加更多类型的颜色映射
+      }
+      return typeColors[type] || 'default'
+    }
+
     return {
       showSelectedKeywords,
       currentMode,
@@ -2075,7 +2284,7 @@ export default defineComponent({
       clearSelection,
       overviewStats: ref(overviewStats),
       priorities,
-      recommendedKeywords,  // 确保在 return 中暴露
+      recommendedKeywords,  // Ensure exposed in return
       pageKeywords: ref(pageKeywords),
       savedPresets: ref(savedPresets),
       columns,
@@ -2163,897 +2372,138 @@ export default defineComponent({
       taskDescription,
       formatTaskDescription,
       confirmClearAllOutlines,
+      pollingInterval, // If needed in template
+      refreshContentPlans,
+      isRefreshing,
+      proceedToContentPlan,
+      handlePublishOutlines,
+      generationProgressVisible,
+      generationProgress,
+      generationStatus,
+      generationStatusText,
+      generationDetails,
+      isGeneratingPages,
+      generationCompleted,
+      generationFailed,
+      allOutlinesSelected,
+      someOutlinesSelected,
+      selectedOutlinesCount,
+      handleSelectAllOutlines,
+      handleOutlineSelect,
+      currentPagePriority,
+      handlePageTabChange,
+      comparisonColumns,
+      getTypeColor,
     }
   }
 })
 </script>
 
 <style scoped>
-:deep(.ant-steps-horizontal) {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  
-  .ant-steps-item-title {
-    font-size: 14px;
-    line-height: 20px;
-  }
-  
-  .ant-steps-item-description {
-    font-size: 12px;
-    line-height: 16px;
-  }
-  
-  .ant-steps-icon {
-    font-size: 14px;
-  }
-}
-
-.mode-selector-card {
-  margin-bottom: 16px;
-  
-  :deep(.ant-card-body) {
-    padding: 16px 24px;
-  }
-}
-
-.mode-selector-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.analytics-card,
-.selection-card,
-.workspace-card {
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: #1f1f1f;
-}
-
-.highlight-statistic {
-  padding: 16px;
-  background: #f8f8f8;
-  border-radius: 8px;
-}
-
-.selection-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.selection-count {
-  font-size: 14px;
-  color: #595959;
-}
-
-:deep(.ant-card-head) {
-  min-height: 48px;
-}
-
-:deep(.ant-card-head-title) {
-  padding: 12px 0;
-}
-
-:deep(.ant-statistic-title) {
-  color: #595959;
-}
-
-:deep(.ant-statistic-content) {
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.beginner-card,
-.optimization-card {
-  height: 100%;
-  margin-bottom: 24px;
-}
-
-.keywords-list {
-  margin: 16px 0;
-  min-height: 200px;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  margin-top: auto;
-  justify-content: flex-end;
-}
-
-.page-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.page-url {
-  color: #1890ff;
-}
-
-.page-stats {
-  font-size: 12px;
-  color: #666;
-}
-
-.analytics-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stat-label {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.65);
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.85);
-  line-height: 1.2;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.comparison-divider {
-  margin: 0 8px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.analytics-card {
-  :deep(.ant-card-body) {
-    padding: 12px 24px;
-  }
-}
-
-.stat-item {
-  gap: 4px;
-}
-
-.page-keywords {
-  margin-top: 8px;
-  padding: 8px;
-  background: #fafafa;
-  border-radius: 4px;
-}
-
-.page-item {
-  gap: 8px;
-}
-
-.mode-selector-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-value.compact {
-  font-size: 16px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  line-height: 1.2;
-}
-
-.keyword-differences {
-  padding: 0 8px;
-}
-
-.difference-label {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 12px;
-  font-weight: 500;
-}
-
-.difference-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  
-  :deep(.ant-tag) {
-    margin-right: 0;
-    font-size: 13px;
-    padding: 4px 8px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    
-    .anticon {
-      font-size: 14px;
-    }
-  }
-}
-
-.analytics-card {
-  :deep(.ant-card-body) {
-    padding: 16px;
-  }
-}
-
-.analysis-step {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  padding: 8px 0;
-  position: relative;
-}
-
-.step-badge {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
-}
-
-.step-icon {
-  color: white;
-  font-size: 18px;
-}
-
-.step-number {
-  position: absolute;
-  right: -4px;
-  bottom: -4px;
-  width: 18px;
-  height: 18px;
-  border-radius: 9px;
-  background-color: #fff;
-  border: 2px solid #1890ff;
-  color: #1890ff;
-  font-size: 12px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.step-content {
-  flex: 1;
-}
-
-.step-subtitle {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.65);
-  margin-bottom: 12px;
-}
-
-.step-description {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: rgba(0, 0, 0, 0.65);
-  font-size: 14px;
-  
-  .action-icon {
-    color: #52c41a;
-  }
-  
-  .arrow-icon {
-    color: #1890ff;
-  }
-}
-
-.difference-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
-  
-  :deep(.ant-tag) {
-    margin-right: 0;
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 13px;
-  }
-}
-
-.stat-value.compact {
-  font-size: 16px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  line-height: 1.2;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.keyword-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-}
-
-.keyword-header {
-  width: 100%;
-}
-
-.keyword-reason {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-left: 24px;
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: rgba(24, 144, 255, 0.04);
-  border-left: 3px solid #1890ff;
-  border-radius: 0 4px 4px 0;
-  
-  .anticon {
-    color: #1890ff;
-    font-size: 16px;
-    margin-top: 2px;
-  }
-}
-
-.reason-content {
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.reason-highlight {
-  color: #1890ff;
-  font-weight: 600;
-}
-
-.reason-value {
-  color: #595959;
-}
-
-.priority-section {
-  margin-bottom: 24px;
-}
-
-.priority-header {
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.priority-description {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.65);
-  margin-bottom: 16px;
-}
-
-.keywords-list {
-  margin-top: 8px;
-}
-
-:deep(.ant-tabs-tab) {
-  padding: 8px 16px;
-}
-
-:deep(.ant-tabs-tab-btn) {
-  font-size: 13px;
-}
-
-:deep(.ant-tabs-tab[data-node-key="P0"]) {
-  color: #f50;
-}
-
-:deep(.ant-tabs-tab[data-node-key="P1"]) {
-  color: #fa8c16;
-}
-
-:deep(.ant-tabs-tab[data-node-key="P2"]) {
-  color: #1890ff;
-}
-
-:deep(.ant-tabs-tab[data-node-key="P3"]) {
-  color: #52c41a;
-}
-
-:deep(.ant-tabs-tab[data-node-key="P4"]) {
-  color: #722ed1;
-}
-
-.analysis-flow {
+/* Workspace layout */
+.workspace-layout {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  height: 100%;
+  width: 100%;
+  overflow: visible; /* Changed to visible */
 }
 
-.flow-step {
+/* Content plans area */
+.content-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.plan-card {
+  background: #fff;
+  border-radius: 8px;
+  transition: all 0.3s;
+  cursor: pointer;
+  height: auto;
+}
+
+.plan-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.plan-card :deep(.ant-card-body) {
+  padding: 12px;
+}
+
+.card-content {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 8px;
 }
 
-.flow-number {
-  width: 24px;
-  height: 24px;
-  border-radius: 12px;
-  background-color: #1890ff;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.flow-content {
-  flex: 1;
-}
-
-.flow-title {
+.plan-title {
   font-size: 14px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.85);
   margin-bottom: 8px;
 }
 
-.flow-stats {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.highlight {
-  font-weight: 600;
-  color: #1890ff;
-}
-
-.divider {
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.flow-arrow {
-  font-size: 16px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.flow-hint {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.65);
-}
-
-.gap-tag {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 13px;
-}
-
-.missing {
-  background-color: #ff4d4f;
-  color: white;
-}
-
-.weak {
-  background-color: #faad14;
-  color: white;
-}
-
-.strong {
-  background-color: #52c41a;
-  color: white;
-}
-
-.step-badge {
-  position: relative;
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #1890ff 0%, #096dd9 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-bottom: 0;
-
-  .step-icon {
-    font-size: 14px;
-  }
-
-  .step-number {
-    position: absolute;
-    right: -3px;
-    bottom: -3px;
-    width: 16px;
-    height: 16px;
-    border-radius: 8px;
-    font-size: 11px;
-  }
-}
-
-.step-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.step-subtitle {
+.plan-description {
   font-size: 12px;
-  margin-bottom: 6px;
   color: rgba(0, 0, 0, 0.65);
 }
 
-.stat-item {
-  margin-top: 4px;
-  
-  .stat-label {
-    font-size: 12px;
-    line-height: 1.2;
-  }
-  
-  .stat-value.compact {
-    font-size: 13px;
-    line-height: 1.2;
-  }
-}
-
-.difference-tags {
+/* Keyword selection area */
+.keywords-sections {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
-
-  :deep(.ant-tag) {
-    font-size: 12px;
-    padding: 2px 6px;
-    margin: 0;
-    line-height: 1.2;
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-
-    .anticon {
-      font-size: 12px;
-    }
-  }
-}
-
-.step-description {
-  font-size: 12px;
-  line-height: 1.3;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  
-  .action-icon,
-  .arrow-icon {
-    font-size: 12px;
-  }
-}
-
-.next-step-guide {
-  text-align: center;
-  padding: 32px 0;
-  position: relative;
-  background: linear-gradient(180deg, rgba(24,144,255,0.08) 0%, rgba(24,144,255,0) 100%);
-}
-
-.guide-content {
-  display: inline-flex;
-  align-items: center;
-  gap: 16px;
-  padding: 16px 32px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
-  position: relative;
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(24, 144, 255, 0.2);
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(24, 144, 255, 0.15);
-  }
-}
-
-.guide-arrow {
-  font-size: 24px;
-  color: #1890ff;
-  animation: floatArrow 2s ease-in-out infinite;
-}
-
-.guide-text {
-  text-align: left;
-}
-
-.guide-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: #1890ff;
-  margin-bottom: 4px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  &::after {
-    content: '';
-    width: 4px;
-    height: 4px;
-    background: #1890ff;
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-}
-
-.guide-description {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.65);
-  position: relative;
-}
-
-@keyframes floatArrow {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(8px);
-  }
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(2);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-.guide-decorative-arrows {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -20px;
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-
-.decorative-arrow {
-  width: 2px;
-  height: 16px;
-  background: #1890ff;
-  opacity: 0.3;
-  animation: fadeInOut 1.5s infinite;
-
-  &:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-  &:nth-child(3) {
-    animation-delay: 0.4s;
-  }
-}
-
-@keyframes fadeInOut {
-  0% {
-    transform: scaleY(0.4);
-    opacity: 0.2;
-  }
-  50% {
-    transform: scaleY(1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scaleY(0.4);
-    opacity: 0.2;
-  }
-}
-
-:deep(.ant-radio-group) {
-  display: flex;
-  
-  .ant-radio-button-wrapper {
-    height: 32px;
-    padding: 0 16px;
-    line-height: 30px;
-    
-    .anticon {
-      font-size: 14px;
-      margin-right: 4px;
-    }
-  }
-}
-.expert-mode-container {
-  display: flex;
-  flex-direction: column;
   gap: 24px;
 }
 
-.expert-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 16px;
+.keywords-section {
+  flex: 1;
   background: #fafafa;
+  padding: 16px;
   border-radius: 8px;
 }
 
-.expert-actions {
+.section-header {
   display: flex;
-  justify-content: flex-end;
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
-}
-
-:deep(.ant-table-thead > tr > th) {
-  background: #fafafa;
-  font-weight: 500;
-}
-
-:deep(.ant-table-tbody > tr > td) {
-  padding: 12px 16px;
-}
-
-.filter-card {
-  :deep(.ant-card-body) {
-    padding: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-}
-
-.advanced-filters {
-  display: flex;
-  flex-direction: column;
-  gap: 16px; /* 减小内部间距 */
-}
-
-.filter-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 8px; /* 减小筛选条件之间的间距 */
-}
-
-.filter-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 16px;
 }
 
-.filter-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.filter-connector {
-  margin: 0 8px;
-  color: rgba(0, 0, 0, 0.45);
-  font-weight: 500;
-}
-
-.ant-select-field {
-  width: 120px;  /* 减小宽度 */
-}
-
-.ant-select-operator {
-  width: 50px;  /* 减小宽度 */
-}
-
-.ant-input-value {
-  width: 80px;  /* 减小宽度 */
-}
-
-.source-value-selector {
-  width: 140px;  /* 减小宽度 */
-}
-
-.filter-actions {
-  margin: 16px 0;
-  
-  .ant-btn {
-    height: 32px;
-    
-    &:hover {
-      color: #1890ff;
-      border-color: #1890ff;
-    }
-  }
-}
-
-.filter-operations {
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
-  
-  .ant-space {
-    width: 100%;
-    justify-content: flex-end;
-  }
-}
-
-.source-value-selector {
-  width: 220px;
-}
-
-:deep(.ant-select-operator .ant-select-selection-item) {
-  text-align: center;
-  padding: 0;
-}
-
-.beginner-content {
-  margin-bottom: 24px;
-}
-
-.a-row:last-child {
-  margin-bottom: 0;
-}
-
-/* 添加 KRS 标签的呼吸效果 */
-.krs-tag {
-  background: linear-gradient(135deg, #1890ff, #722ed1);
-  border: none;
-  color: white;
-  font-weight: 500;
-  animation: gradientBreath 3s ease-in-out infinite;
-}
-
-@keyframes gradientBreath {
-  0%, 100% {
-    background: linear-gradient(135deg, #1890ff, #722ed1);
-    opacity: 1;
-  }
-  50% {
-    background: linear-gradient(135deg, #40a9ff, #9254de);
-    opacity: 0.8;
-  }
-}
-
-/* 覆盖 ant-design-vue 的默认标签样式 */
-:deep(.krs-tag.ant-tag) {
-  border: none;
-  padding: 2px 8px;
-}
-
-.selected-keywords-list {
-  max-height: 600px;
-  overflow-y: auto;
-}
-
-.list-header {
+.section-header h4 {
   font-size: 14px;
-  color: #8c8c8c;
-  padding: 8px 0;
+  margin: 0;
+  color: rgba(0, 0, 0, 0.85);
 }
 
+.section-header .total-count {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* Selected keyword item */
 .selected-keyword-item {
   width: 100%;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
+  background: white;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #f0f0f0;
+  margin-bottom: 8px;
+}
+
+.selected-keyword-item:last-child {
+  margin-bottom: 0;
 }
 
 .keyword-main {
   flex: 1;
   min-width: 0;
-  cursor: help; /* Add cursor hint for items with tooltip */
 }
 
 .keyword-content {
@@ -3096,1780 +2546,16 @@ export default defineComponent({
   min-width: 24px;
 }
 
-/* Remove the old reason-related styles */
-
-/* 添加空状态的样式 */
-.empty-state {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-  padding: 48px;
-  flex: 1; /* 添加这行 */
-  width: 100%; /* 添加这行 */
-  background: #fff; /* 添加背景色 */
-  border-radius: 8px; /* 添加圆角 */
-  margin-left: 24px; /* 与左侧列表保持一致的间距 */
-}
-
-.empty-content {
-  text-align: center;
-  max-width: 480px;
-  width: 100%; /* 添加这行 */
-}
-
-.empty-icon {
-  font-size: 48px;
-  color: #1890ff;
-  margin-bottom: 24px;
-}
-
-.empty-title {
-  font-size: 24px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 16px;
-}
-
-.result-card {
-  background: #fff;
-  border-radius: 8px;
-  
-  :deep(.ant-card-head) {
-    min-height: 48px;
-    padding: 0 16px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-}
-
-.card-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  
-  .anticon {
-    color: #1890ff;
-  }
-}
-
-.topic-list,
-.title-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.topic-item,
-.title-item {
-  padding: 16px;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  transition: all 0.3s;
-  
-  &:hover {
-    background: #fafafa;
-  }
-  
-  :deep(.ant-checkbox-wrapper) {
-    width: 100%;
-    
-    .ant-checkbox {
-      top: 2px;
-    }
-  }
-}
-
-.topic-content,
-.title-content {
-  margin-left: 8px;
-}
-
-.topic-main,
-.title-main {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 4px;
-}
-
-.topic-reason {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.title-metrics {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.outline-section {
-  margin-bottom: 20px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.section-header {
-  margin-bottom: 12px;
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 8px;
-}
-
-.section-keywords {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.point-item {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.65);
-  margin-bottom: 8px;
-  padding-left: 8px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.selected-keywords-card {
-  width: 320px;
-  flex-shrink: 0;
-  height: fit-content;
-  
-  :deep(.ant-card-body) {
-    padding: 0;
-    max-height: calc(100vh - 280px);
-    overflow-y: auto;
-  }
-}
-
-.selected-keywords-list {
-  :deep(.ant-list-item) {
-    padding: 12px 16px;
-    border-bottom: 1px solid #f0f0f0;
-    
-    &:last-child {
-      border-bottom: none;
-    }
-  }
-}
-
-.selected-keyword-item {
-  width: 100%;
-  
-  .keyword-text {
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.85);
-    margin-bottom: 8px;
-  }
-  
-  .keyword-metrics {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    
-    .ant-tag {
-      margin-right: 0;
-    }
-  }
-}
-
-.workspace-card {
-  flex: 1;
-  min-width: 0; 
-}
-
-.workspace-layout {
-  display: flex;
-  gap: 24px;
-  height: calc(100vh - 200px); /* 确保占满剩余高度 */
-  overflow: hidden; /* 防止溢出 */
-}
-/* 添加纵向导航样式 */
-.vertical-nav {
-  position: sticky;
-  top: 24px;
-  height: fit-content;
-  padding: 16px 0;
-  margin: 0 16px;
-  border-left: 1px solid #f0f0f0;
-  
-  :deep(.ant-anchor) {
-    padding-left: 0;
-    
-    &::before {
-      display: none;
-    }
-    
-    .ant-anchor-link {
-      padding: 4px 0 4px 16px;
-      
-      .ant-anchor-link-title {
-        color: rgba(0, 0, 0, 0.45);
-        font-size: 13px;
-        transition: all 0.3s;
-        
-        &:hover {
-          color: #1890ff;
-        }
-      }
-      
-      &-active {
-        background: rgba(24, 144, 255, 0.04);
-        border-left: 2px solid #1890ff;
-        margin-left: -1px;
-        
-        .ant-anchor-link-title {
-          color: #1890ff;
-          font-weight: 500;
-        }
-      }
-    }
-  }
-}
-
-/* 修改工作区布局样式 */
-.workspace-layout {
-  display: flex;
-  gap: 24px;
-  height: calc(100vh - 200px); /* 确保占满剩余高度 */
-  overflow: hidden; /* 防止溢出 */
-}
-/* 确保结果卡片有足够的下边距 */
-.result-card {
-  margin-bottom: 24px;
-  scroll-margin-top: 24px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.vertical-nav {
-  :deep(.nav-disabled) {
-    cursor: not-allowed;
-    opacity: 0.5;
-    
-    .ant-anchor-link-title {
-      color: rgba(0, 0, 0, 0.25) !important;
-      pointer-events: none;
-    }
-    
-    &:hover {
-      background: none;
-    }
-  }
-}
-
-.topic-list,
-.title-list {
-  margin-bottom: 0; /* 移除底部边距，因为现在有了 action-footer */
-}
-
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: 24px;
-}
-
-.empty-description {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.45);
-  margin-bottom: 24px;
-}
-
-.empty-actions {
-  display: flex;
-  justify-content: center;
-}
-
-.configure-btn {
-  background: linear-gradient(135deg, #1890ff, #3B82F6);
-  border: none;
-}
-.content-topics-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 16px;
-  padding: 16px; /* 添加整体列表的内边距 */
-}
-
-.content-topic-card {
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  padding: 20px; /* 添加卡片的内边距 */
-  
-  &:hover {
-    border-color: #1890ff;
-    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
-  }
-}
-
-.content-topic-header {
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 16px; /* 添加底部外边距 */
-}
-
-.content-topic-title {
-  font-size: 15px;
-  font-weight: 500;
-  color: #262626;
-  margin-bottom: 8px;
-}
-
-.content-topic-tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.content-topic-body {
-  padding: 0; /* 重置body内边距,因为已经有卡片内边距 */
-}
-
-.content-topic-section {
-  margin-bottom: 16px; /* 增加section间距 */
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.content-section-label {
-  font-size: 13px;
-  color: #8c8c8c;
-  margin-bottom: 4px;
-}
-
-.content-section-text {
-  font-size: 14px;
-  color: #595959;
-  line-height: 1.5;
-}
-
-.content-keyword-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.tdk-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 16px;
-}
-
-.tdk-item {
-  background: #fff;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  padding: 20px;
-  
-  &:hover {
-    border-color: #1890ff;
-    box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
-  }
-}
-
-.tdk-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.tdk-section {
-  margin-bottom: 12px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.tdk-label {
-  font-size: 13px;
-  color: #8c8c8c;
-  margin-bottom: 4px;
-}
-
-.tdk-text {
-  font-size: 14px;
-  color: #262626;
-  line-height: 1.5;
-}
-
-.tdk-keywords {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.tdk-metrics {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-/* 添加新的样式 */
-.expanded-row {
-  display: flex;
-  gap: 32px;
-  padding: 16px 24px;
-  background: #fafafa;
-}
-
-.expanded-section {
-  flex: 1;
-  background: #fff;
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.section-icon {
-  color: #1890ff;
-  font-size: 16px;
-}
-
-.section-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-.page-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.page-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px;
-  background: #f5f5f5;
-  border: 1px solid #e8e8e8;
-  border-radius: 4px;
-  transition: all 0.3s;
-  
-  &:hover {
-    background: #e6f7ff;
-    border-color: #91d5ff;
-  }
-}
-
-.page-icon {
-  font-size: 12px;
-  color: #1890ff;
-}
-
-.rank-icon {
-  font-size: 14px;
-  color: #faad14;
-}
-
-.rank-number {
-  font-weight: 500;
-  
-  &.top-3 {
-    color: #52c41a;
-  }
-  
-  &.top-10 {
-    color: #1890ff;
-  }
-  
-  &.others {
-    color: rgba(0, 0, 0, 0.65);
-  }
-}
-
-.url-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  color: #1890ff;
-  transition: all 0.3s;
-  
-  &:hover {
-    color: #40a9ff;
-    
-    .url-icon {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-}
-
-.url-icon {
-  font-size: 12px;
-  opacity: 0;
-  transform: translateX(-4px);
-  transition: all 0.3s;
-}
-
-.action-footer {
-  display: none;
-}
-
-.tdk-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.tdk-item {
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 16px;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: #f0f7ff;
-  }
-}
-
-.tdk-content {
-  margin-left: 24px;
-}
-
-.tdk-section {
-  margin-bottom: 12px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.tdk-label {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
-  margin-bottom: 4px;
-}
-
-.tdk-text {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.85);
-  line-height: 1.5;
-}
-
-.tdk-keywords {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-/* 修改结果卡片的样式 */
-.result-card {
-  margin-bottom: 24px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-  
-  :deep(.ant-card-body) {
-    padding: 24px;
-  }
-}
-
-/* 大纲内容样式 */
-.outline-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding-bottom: 16px; /* 添加底部内边距 */
-}
-
-.outline-section {
-  background: #fafafa;
-  border-radius: 8px;
-  padding: 16px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.section-header {
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 8px;
-}
-
-.section-keywords {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.section-points {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.point-item {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.85);
-  line-height: 1.6;
-  padding-left: 8px;
-}
-
-/* 确保工作区布局有足够的空间 */
-.workspace-layout {
-  display: flex;
-  gap: 24px;
-  min-height: calc(100vh - 240px);
-  padding-bottom: 24px; /* 添加底部内边距 */
-}
-
-/* Add new styles */
-.analysis-loading-state {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-  width: 100%;
-}
-
-.loading-card {
-  max-width: 600px;
-  width: 100%;
-  text-align: center;
-}
-
-.loading-content {
-  text-align: center;
-  padding: 32px;
-}
-
-.analysis-pending {
-  padding: 40px 24px;
-  text-align: center;
-}
-
-.analysis-icon {
-  font-size: 32px;
-  color: #1890ff;
-  margin-bottom: 16px;
-}
-
-.analysis-progress {
-  max-width: 400px;
-  margin: 24px auto;
-}
-
-.analysis-tip {
-  color: rgba(0, 0, 0, 0.45);
-  font-size: 14px;
-  margin-top: 8px;
-}
-
-h2 {
-  margin: 16px 0;
-  color: #262626;
-  font-size: 24px;
-}
-
-p {
-  color: #595959;
-  font-size: 16px;
-  line-height: 1.5;
-  margin: 8px 0;
-}
-
-.analysis-waiting,
-.analysis-processing,
-.analysis-error {
-  padding: 40px 24px;
-  text-align: center;
-}
-
-.error-icon {
-  font-size: 48px;
-  color: #ff4d4f;
-  margin-bottom: 24px;
-}
-
-.analysis-progress {
-  max-width: 400px;
-  margin: 24px auto;
-}
-
-.analysis-tip {
-  color: #666;
-  margin-top: 16px;
-}
-
-h2 {
-  margin: 16px 0;
-  color: #262626;
-  font-size: 24px;
-}
-
-p {
-  color: #595959;
-  font-size: 16px;
-  line-height: 1.5;
-  margin: 8px 0;
-}
-
-/* Add minimal required styles */
-.loading-content {
-  padding: 24px;
-  text-align: center;
-}
-
-.task-item {
-  margin: 16px 0;
-  text-align: left;
-}
-
-.task-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.task-timing {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
-  margin-top: 4px;
-}
-
-.empty-state {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-:deep(.ant-result) {
-  padding: 48px 32px;
-}
-
-:deep(.ant-result-title) {
-  color: #1a1a1a;
-}
-
-:deep(.ant-result-subtitle) {
-  color: #6b7280;
-}
-
-.pagination-wrapper {
-  margin-top: 16px;
-  text-align: right;
-}
-
-/* 添加表格容器高度样式 */
-.keywords-table-container {
-  height: 600px; /* 设置一个固定高度 */
-  
-  :deep(.ant-table-wrapper) {
-    height: 100%;
-  }
-  
-  :deep(.ant-spin-nested-loading),
-  :deep(.ant-spin-container),
-  :deep(.ant-table) {
-    height: 100%;
-  }
-  
-  :deep(.ant-table-container) {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  :deep(.ant-table-body) {
-    flex: 1;
-    overflow: auto;
-  }
-}
-
-/* 确保分页器在表格底部 */
-.pagination-wrapper {
-  margin-top: 16px;
-  text-align: right;
-  border-top: 1px solid #f0f0f0;
-  padding-top: 16px;
-}
-
-.workflow-card {
-  margin-bottom: 16px;
-}
-
-.steps-container {
-  padding: 8px 0;
-}
-
-:deep(.compact-steps) {
-  min-height: auto;
-}
-
-:deep(.compact-steps .ant-steps-item) {
-  padding-inline-start: 8px;
-  min-height: auto;
-}
-
-:deep(.compact-steps .ant-steps-item-container) {
-  display: flex;
-  align-items: center;
-}
-
-:deep(.compact-steps .ant-steps-item-content) {
-  display: flex;
-  align-items: center;
-  min-height: auto;
-}
-
-:deep(.compact-steps .ant-steps-item-title) {
-  line-height: 24px;
-  margin-right: 8px;
-  padding-right: 8px;
-}
-
-:deep(.compact-steps .ant-steps-item-title::after) {
-  top: 12px;
-}
-
-:deep(.compact-steps .ant-steps-item-description) {
-  margin-top: 0;
-  padding-bottom: 0;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-:deep(.compact-steps .ant-steps-item-icon) {
-  margin-top: 0;
-}
-
-.step-desc {
-  color: rgba(0, 0, 0, 0.45);
-  font-size: 13px;
-}
-
-/* 添加以下样式 */
-:deep(.ant-spin) {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-}
-
-:deep(.ant-spin-nested-loading) {
-  height: 100%;
-}
-
-:deep(.ant-spin-container) {
-  height: 100%;
-}
-
-:deep(.ant-spin-spinning) {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.plan-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.plan-title {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.plan-section {
-  margin-bottom: 24px;
-  width: 100%;
-}
-.intent-content,
-.tdk-content,
-.outline-content {
-  padding: 16px;
-  background: #fafafa;
-  border-radius: 8px;
-}
-
-.intent-tags {
-  margin-bottom: 8px;
-}
-
-.intent-description {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.65);
-}
-
-.tdk-item {
-  margin-bottom: 12px;
-}
-
-.tdk-label {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
-  margin-bottom: 4px;
-}
-
-.tdk-text {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-.outline-section {
-  margin-bottom: 16px;
-}
-
-.section-header {
-  margin-bottom: 8px;
-}
-
-.section-keywords {
-  margin-top: 4px;
-}
-
-.point-item {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.65);
-  margin-bottom: 4px;
-}
-
-.action-footer {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 24px;
-}
-
-.mode-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.help-icon {
-  color: #8c8c8c;
-  font-size: 16px;
-  cursor: pointer;
-  transition: color 0.3s;
-  
-  &:hover {
-    color: #1890ff;
-  }
-}
-
-.analysis-overview-popover {
-  max-width: 400px;
-  padding: 8px;
-}
-
-.section-desc {
-  color: #595959;
-  font-size: 13px;
-  margin-bottom: 12px;
-}
-
-.stats-row {
-  display: flex;
-  gap: 16px;
-}
-
-.stat-item {
-  .stat-label {
-    font-size: 12px;
-    color: #8c8c8c;
-  }
-  
-  .stat-value {
-    font-size: 14px;
-    font-weight: 500;
-    color: #262626;
-  }
-}
-
-.findings-tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.action-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  
-  .step-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: #595959;
-    
-    .anticon {
-      color: #1890ff;
-    }
-  }
-}
-
-.steps-wrapper {
-  padding: 16px 24px;
-  background: #fff;
-}
-
-/* 添加新的样式 */
-.content-plans {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.plan-card {
-  background: #fff;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.plan-section {
-  margin-bottom: 24px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.section-meta {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.45);
-  margin-top: 4px;
-}
-
-/* 网格布局样式 */
-.content-plans-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* 减小卡片宽度 */
-  gap: 16px; /* 减小卡片间距 */
-  padding: 16px;
-}
-
-.plan-card {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  
-  :deep(.ant-card-body) {
-    padding: 12px; /* 减小内边距 */
-  }
-  
-  .card-content {
-    display: flex;
-    flex-direction: column;
-    gap: 8px; /* 减小内容间距 */
-  }
-  
-  /* 修改标题样式 */
-  .plan-title {
-    font-size: 14px; /* 减小标题字体 */
-    font-weight: 500;
-    color: rgba(0, 0, 0, 0.85);
-    margin-bottom: 4px;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  
-  /* 修改描述样式 */
-  .plan-description {
-    font-size: 12px; /* 减小描述字体 */
-    color: rgba(0, 0, 0, 0.65);
-    margin-bottom: 8px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  
-  /* 修改指标样式 */
-  .plan-metrics {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 8px;
-    
-    .metric-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      
-      .metric-label {
-        font-size: 11px; /* 减小标签字体 */
-        color: rgba(0, 0, 0, 0.45);
-      }
-      
-      .metric-value {
-        font-size: 13px; /* 减小数值字体 */
-        font-weight: 500;
-        color: rgba(0, 0, 0, 0.85);
-      }
-    }
-  }
-  
-  /* 修改关键词标签样式 */
-  .plan-keywords {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-bottom: 8px;
-    
-    :deep(.ant-tag) {
-      font-size: 11px; /* 减小标签字体 */
-      padding: 0 6px;
-      margin: 0;
-      line-height: 18px;
-    }
-  }
-  
-  /* 修改操作按钮样式 */
-  .plan-actions {
-    margin-top: auto;
-    
-    .ant-btn {
-      font-size: 12px; /* 减小按钮字体 */
-      height: 28px; /* 减小按钮高度 */
-      padding: 0 12px;
-    }
-  }
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-}
-
-/* 修改分页容器样式 */
-.pagination-container {
-  padding: 16px;
-  text-align: center;
-  background: #fff;
-  border-top: 1px solid #f0f0f0;
-  
-  :deep(.ant-pagination) {
-    font-size: 12px; /* 减小分页字体 */
-    
-    .ant-pagination-item,
-    .ant-pagination-prev,
-    .ant-pagination-next {
-      min-width: 28px; /* 减小分页按钮大小 */
-      height: 28px;
-      line-height: 26px;
-    }
-  }
-}
-
-.drawer-section {
-  margin-bottom: 24px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid #f0f0f0;
-  
-  &:last-child {
-    border-bottom: none;
-  }
-}
-.section-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.content-item {
-  .item-label {
-    font-size: 13px;
-    color: rgba(0, 0, 0, 0.45);
-    margin-bottom: 4px;
-  }
-  
-  .item-text {
-    font-size: 14px;
-    color: rgba(0, 0, 0, 0.85);
-    line-height: 1.5;
-  }
-}
-
-.content-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.outline-item {
-  padding: 12px;
-  background: #fafafa;
-  border-radius: 6px;
-  margin-bottom: 12px;
-  
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.outline-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.outline-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-.outline-meta {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.outline-keywords {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-/* 修改布局相关样式 */
-.workspace-layout {
-  display: flex;
-  gap: 24px;
-  width: 100%;
-  min-height: calc(100vh - 180px); /* 减去头部和其他固定元素的高度 */
-}
-
-.selected-keywords-card {
-  width: 320px; /* 固定宽度 */
-  flex-shrink: 0; /* 防止压缩 */
-}
-
-.content-plans-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-  width: 100%;
-}
-
-/* 添加新的样式 */
-.step-two-content {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.workspace-layout {
-  flex: 1;
-  width: 100%;
-  display: flex;
-  gap: 24px;
-  padding: 24px;
-  min-height: 0; /* 修改这里，允许内容自适应 */
-}
-
-.mode-selector-card {
-  margin-bottom: 16px;
-  
-  :deep(.ant-card-body) {
-    padding: 16px;
-  }
-}
-
-.mode-selector-wrapper {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-}
-
-.mode-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.help-icon {
-  color: #8c8c8c;
-  font-size: 16px;
-  cursor: pointer;
-  transition: color 0.3s;
-  
-  &:hover {
-    color: #1890ff;
-  }
-}
-
-.pagination-wrapper {
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
-}
-
-.content-plans-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.pagination-wrapper {
-  margin-top: 24px;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  padding: 16px 0;
-}
-
-.content-plans-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.plan-section {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-/* 添加 tab 相关样式 */
-.planning-tabs {
-  :deep(.ant-tabs-tab) {
-    padding: 12px 24px;
-    
-    .tab-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      
-      .anticon {
-        font-size: 16px;
-      }
-    }
-  }
-}
-
-/* 移除原有的 steps 相关样式 */
-.steps-wrapper {
-  display: none;
-}
-
-.card-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.favorite-icon {
-  font-size: 16px;
-  color: #d9d9d9;
-  cursor: pointer;
-  transition: all 0.3s;
-  
-  &:hover {
-    color: #ff4d4f;
-    transform: scale(1.1);
-  }
-  
-  &.favorited {
-    color: #ff4d4f;
-  }
-}
-
-.plan-card {
-  position: relative;
-  
-  :deep(.ant-card-extra) {
-    margin-left: 0;
-  }
-}
-
-/* Update existing styles */
-.content-plans-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* Reduced from previous value */
-  gap: 16px;
-  margin-bottom: 24px; /* Add margin for pagination */
-}
-
-.plan-card {
-  height: auto;
-  
-  :deep(.ant-card-body) {
-    padding: 12px;
-  }
-}
-
-.card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.plan-title {
-  font-size: 14px; /* Reduced from previous value */
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin: 0;
-  line-height: 1.4;
-}
-
-.plan-description {
-  font-size: 12px; /* Reduced from previous value */
-  color: rgba(0, 0, 0, 0.65);
-  margin: 0;
-  line-height: 1.5;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.plan-meta {
-  display: flex;
-  gap: 16px;
-  
-  .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    color: rgba(0, 0, 0, 0.45);
-    
-    .anticon {
-      font-size: 12px;
-    }
-  }
-}
-
-.plan-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  
-  :deep(.ant-tag) {
-    margin: 0;
-    font-size: 12px;
-    line-height: 1.4;
-    padding: 0 4px;
-  }
-}
-
-.pagination-wrapper {
-  display: flex;
-  justify-content: center;
-  padding: 16px 0;
-}
-
-/* 添加分页容器样式 */
-.pagination-wrapper {
-  margin-top: 24px;
-  padding: 16px 0;
-  background: #fff;
-  border-top: 1px solid #f0f0f0;
-  
-  :deep(.ant-pagination) {
-    text-align: center;
-    
-    .ant-pagination-options {
-      margin-left: 16px;
-    }
-  }
-}
-
-.content-plans-grid {
-  min-height: 200px; /* 确保网格区域有最小高度 */
-}
-
-/* 保留之前的样式并添加新的样式 */
-.plan-section {
-  height: 100%;
-}
-
-.content-plan-tabs {
-  height: 100%;
-  
-  :deep(.ant-tabs-content) {
-    height: 100%;
-  }
-  
-  :deep(.ant-tabs-tabpane) {
-    height: 100%;
-  }
-}
-
-.tab-content-wrapper {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 300px);
-  min-height: 500px;
-}
-
-.content-plans-grid {
-  flex: 1;
-  overflow-y: auto;
-  padding: 24px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
-  background: #f0f2f5;
-}
-
-.pagination-container {
-  padding: 16px;
-  background: #fff;
-  border-top: 1px solid #f0f0f0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-shrink: 0;
-}
-
-.plan-card {
-  height: 100%;
-  background: #fff;
-  transition: all 0.3s;
-  
-  &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  
-  :deep(.ant-card-body) {
-    height: 100%;
-    padding: 20px;
-  }
-}
-
-.card-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.plan-title {
-  font-size: 16px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin: 0;
-}
-
-.plan-description {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.65);
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.plan-metrics {
-  display: flex;
-  gap: 24px;
-  padding: 12px 0;
-  border-top: 1px solid #f0f0f0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.metric-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.metric-label {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.metric-value {
-  font-size: 16px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-.plan-keywords {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: auto;
-}
-
-.plan-actions {
-  margin-top: auto;
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* 添加loading状态的样式 */
-.content-plans-loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  min-height: 400px;
-  position: relative;
-}
-
-.loading-container {
-  text-align: center;
-}
-
-.loading-text {
-  margin-top: 16px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-/* Add new styles */
-.generate-button-wrapper {
-  margin-bottom: 16px;
-  text-align: center;
-}
-
-/* 添加收藏按钮样式 */
-.keyword-header .ant-btn-text {
-  padding: 0 4px;
-}
-
-.keyword-header .ant-btn-text:hover {
-  background: transparent;
-}
-
-/* Update keyword header styles */
-.keyword-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.keyword-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-}
-
-.favorite-btn {
-  padding: 4px 8px;
-  margin-left: 8px;
-}
-
-.favorite-btn:hover {
-  background: transparent;
-}
-
-/* 添加新的样式 */
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
-}
-
-.keyword-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.selected-keyword-item {
-  width: 100%;
-}
-
-:deep(.ant-btn-link.ant-btn-dangerous) {
-  padding: 0 8px;
-  height: 24px;
-  line-height: 24px;
-}
-
-/* 添加新的样式 */
-.selected-keywords-tabs {
-  :deep(.ant-tabs-nav) {
-    margin-bottom: 8px;
-    padding: 0 16px;
-  }
-  
-  :deep(.ant-tabs-tab) {
-    padding: 8px 0;
-    font-size: 13px;
-  }
-}
-
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 24px;
-}
-
-/* Add new styles */
+/* Task progress area */
 .task-progress-section {
   margin-bottom: 16px;
-}
-
-.task-alert {
-  border-radius: 4px;
-}
-
-.task-progress-content {
-  width: 100%;
 }
 
 .task-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 24px; /* Add minimum height for consistent alignment */
-}
-
-.task-status {
-  font-weight: 500;
+  min-height: 24px;
 }
 
 .task-timing {
@@ -4882,19 +2568,25 @@ p {
   color: rgba(0, 0, 0, 0.65);
   margin-top: 4px;
 }
-
-:deep(.ant-alert-message) {
-  flex: 1;
+/* Ant Design component styles override */
+:deep(.ant-tabs-nav) {
+  margin-bottom: 8px;
+  padding: 0 16px;
 }
 
-/* Add these new styles */
+:deep(.ant-tabs-tab) {
+  padding: 8px 0;
+  font-size: 13px;
+}
+
 :deep(.ant-alert) {
   display: flex;
   align-items: center;
+  margin: 0;
 }
 
 :deep(.ant-alert-message) {
-  margin: 0; /* Remove default margin */
+  margin: 0;
   display: flex;
   align-items: center;
 }
@@ -4902,139 +2594,413 @@ p {
 :deep(.ant-alert-icon) {
   display: flex;
   align-items: center;
-  margin-top: 0; /* Remove default margin */
-}
-
-/* Add new styles */
-:deep(.ant-tabs-extra-content) {
-  margin-left: 16px;
-}
-
-:deep(.ant-btn-text.ant-btn-dangerous) {
-  &:hover {
-    background-color: #fff1f0;
-  }
-  
-  &:disabled {
-    color: rgba(0, 0, 0, 0.25);
-    background: transparent;
-    
-    &:hover {
-      background: transparent;
-    }
-  }
-}
-
-.selected-keywords-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.card-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.keyword-count {
-  margin-left: auto;
-  font-size: 12px;
-}
-
-.generate-button-wrapper {
-  margin-bottom: 12px;
-  text-align: center;
-}
-
-.selected-keywords-tabs {
-  flex: 1;
-  overflow: auto;
-}
-
-.list-header {
-  padding: 4px 8px;
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
-}
-
-.compact-list-item {
-  padding: 8px !important;
-}
-
-.selected-keyword-item {
-  width: 100%;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.keyword-main {
-  flex: 1;
-  min-width: 0; /* Enable text truncation */
-}
-
-.keyword-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.keyword-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.keyword-text {
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.remove-btn {
-  padding: 0;
-  height: auto;
-  min-width: 24px;
-}
-
-.keyword-metrics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.metric-tag {
-  margin: 0;
-  font-size: 11px;
-  line-height: 16px;
-  padding: 0 4px;
-}
-
-.keyword-reason {
-  flex-shrink: 0;
-}
-
-.reason-icon {
-  color: #1890ff;
-  font-size: 14px;
-  cursor: help;
+  margin-top: 0;
 }
 
 :deep(.ant-list-item) {
   border-bottom: 1px solid #f0f0f0 !important;
 }
 
-:deep(.ant-tabs-small > .ant-tabs-nav .ant-tabs-tab) {
-  padding: 4px 8px;
+:deep(.ant-list-item:last-child) {
+  border-bottom: none !important;
 }
 
-:deep(.ant-list-split .ant-list-item:last-child) {
-  border-bottom: none !important;
+/* Add styles for step two content container */
+.step-two-content {
+  flex: 1;
+  overflow-y: auto;
+  height: calc(100vh - 250px); /* Adjust height calculation */
+}
+
+/* Adjust pagination container position */
+.pagination-container {
+  background: white;
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+  margin-top: auto; /* Keep pagination at the bottom of the content */
+}
+
+/* Ensure plan area can display content fully */
+.plan-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Allow content area to shrink */
+}
+
+/* Ensure tab content area can scroll properly */
+.tab-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Allow content area to shrink */
+}
+
+/* Adjust mode-controls style to fit new layout */
+.mode-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* Increase gap between components */
+}
+
+.reason-icon {
+  color: #faad14;
+  font-size: 16px;
+  cursor: help;
+}
+/* Ensure tags and icons are vertically aligned */
+:deep(.ant-tag) {
+  margin-right: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Optimize keyword item layout */
+.keyword-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+
+/* Ensure checkbox text doesn't wrap */
+:deep(.ant-checkbox-wrapper) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Add footer styles */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Add prominent button styles */
+.generate-btn {
+  background: linear-gradient(to right, #1890ff, #40a9ff);
+  border: none;
+  font-weight: 500;
+  height: 40px;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);
+  transition: all 0.3s ease;
+}
+
+.generate-btn:hover {
+  background: linear-gradient(to right, #40a9ff, #69c0ff);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.45);
+}
+
+.generate-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.35);
+}
+
+/* Ensure disabled state also has appropriate styles */
+.generate-btn[disabled] {
+  background: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  box-shadow: none;
+  color: rgba(0, 0, 0, 0.25);
+}
+
+/* Adjust task status text style */
+.task-status {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+/* Add new layout container styles */
+.generate-section {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* 调整状态文本样式 */
+.task-status {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.65);
+  margin-left: 4px; /* 添加少许左边距 */
+}
+
+/* 添加新的样式 */
+.generation-progress {
+  padding: 20px 0;
+}
+
+.progress-status {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-text {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.progress-details {
+  margin-top: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+}
+
+/* Add new styles */
+.outlines-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.selected-count {
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 调整类型标签样式 */
+.card-header-left :deep(.ant-tag) {
+  margin: 0;
+  text-transform: capitalize;
+  font-size: 12px;
+  line-height: 20px;
+  height: 22px;
+  padding: 0 8px;
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+}
+
+/* 优先级标签样式 */
+.priority-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.priority-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+/* 调整列表容器样式 */
+.keywords-list {
+  height: calc(100% - 40px); /* 减去标题和分页的高度 */
+  overflow-y: auto;
+}
+
+/* 调整卡片样式 */
+.beginner-card,
+.optimization-card {
+  height: 100%;
+}
+
+.beginner-card :deep(.ant-card-body),
+.optimization-card :deep(.ant-card-body) {
+  height: calc(100% - 57px); /* 减去卡片标题的高度 */
+  padding: 0;
+}
+
+/* Drawer Styles */
+.content-plan-drawer :deep(.ant-drawer-header) {
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.content-plan-drawer :deep(.ant-drawer-title) {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.drawer-section {
+  margin-bottom: 24px;
+}
+
+.drawer-section:last-child {
+ 
+  border-bottom: none;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 16px;
+}
+
+.section-title :deep(.anticon) {
+  color: #1890ff;
+  font-size: 16px;
+}
+
+.section-content {
+  padding: 0 4px;
+}
+
+.content-item {
+  margin-bottom: 16px;
+}
+
+.content-item:last-child {
+  margin-bottom: 0;
+}
+
+.item-label {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 8px;
+}
+
+.item-value {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.intent-value,
+.problem-value {
+  background: #fafafa;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #f0f0f0;
+}
+
+.title-value {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.description-value {
+  background: #fafafa;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #f0f0f0;
+}
+
+.content-tags,
+.outline-keywords {
+  margin-top: 16px;
+}
+
+.tags-label,
+.keywords-label {
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 8px;
+}
+
+.tags-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tags-wrapper :deep(.ant-tag) {
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.outline-item {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  border: 1px solid #f0f0f0;
+}
+
+.outline-item:last-child {
+  margin-bottom: 0;
+}
+
+.outline-header {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.sequence-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: #1890ff;
+  color: white;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.outline-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.outline-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  margin-bottom: 4px;
+  line-height: 1.5;
+}
+
+.outline-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.word-count {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.word-count :deep(.anticon) {
+  font-size: 12px;
+}
+
+.outline-keywords {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #e8e8e8;
+}
+
+.keywords-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 </style>
 

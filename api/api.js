@@ -932,22 +932,11 @@ const submitSite = async (customerId, siteURL) => {
   }
 };
 
-// 新增：AI生成页面内容的方法
-const createAIPage = async (pageData) => {
+// 修改：AI生成页面内容的方法
+const createAIPage = async (outlineId) => {
   try {
     const response = await apiClient.post('/ai/pages', {
-      pageType: pageData.pageType,
-      author: pageData.author,
-      coverImage: pageData.coverImage,
-      customerId: pageData.customerId,
-      description: pageData.description,
-      language: pageData.language,
-      numberOfWords: pageData.numberOfWords,
-      publishURL: pageData.publishURL,
-      relatedKeyword: pageData.relatedKeyword,
-      subTitle: pageData.subTitle,
-      title: pageData.title,
-      topic: pageData.topic
+      outlineId: outlineId
     });
     return response.data;
   } catch (error) {
