@@ -265,20 +265,15 @@
               <div class="step-two-content">
                 <div class="workspace-layout">
                   <!-- 关键词列表卡片 -->
-                  <a-card 
-                    class="selected-keywords-card"
-                    :bordered="false"
-                  >
-                    <template v-if="isLoadingSelectedKeywords">
-                      <div class="loading-container">
-                        <a-spin />
-                      </div>
-                    </template>
-                    <template v-else>
-                      <a-row :gutter="16">
-                        <a-col :span="12">
-                          <div class="table-section">
-                            <div class="table-title">Selected from Comparison ({{ selectedKeywordsData.comparison.length }})</div>
+                  <div class="keywords-section">
+                    <div class="keywords-column">
+                      <!-- Comparison Keywords -->
+                      <a-card class="keywords-card">
+                        <a-collapse v-model:activeKey="activeCollapseKeys">
+                          <a-collapse-panel 
+                            key="comparison" 
+                            :header="'Selected from Comparison (' + selectedKeywordsData.comparison.length + ')'"
+                          >
                             <a-table
                               :data-source="selectedKeywordsData.comparison"
                               :columns="comparisonColumns"
@@ -297,12 +292,19 @@
                                 </a-button>
                               </template>
                             </a-table>
-                          </div>
-                        </a-col>
-                        
-                        <a-col :span="12">
-                          <div class="table-section">
-                            <div class="table-title">Selected from Top Pages ({{ selectedKeywordsData.top_pages.length }})</div>
+                          </a-collapse-panel>
+                        </a-collapse>
+                      </a-card>
+                    </div>
+
+                    <div class="keywords-column">
+                      <!-- Top Pages Keywords -->
+                      <a-card class="keywords-card">
+                        <a-collapse v-model:activeKey="activeCollapseKeys">
+                          <a-collapse-panel 
+                            key="top_pages" 
+                            :header="'Selected from Top Pages (' + selectedKeywordsData.top_pages.length + ')'"
+                          >
                             <a-table
                               :data-source="selectedKeywordsData.top_pages"
                               :columns="comparisonColumns"
@@ -321,12 +323,12 @@
                                 </a-button>
                               </template>
                             </a-table>
-                          </div>
-                        </a-col>
-                      </a-row>
-                    </template>
-                  </a-card>
-                  
+                          </a-collapse-panel>
+                        </a-collapse>
+                      </a-card>
+                    </div>
+                  </div>
+
                   <!-- Outline 内容部分 -->
                   <div class="plan-section">
                     <!-- Update task progress section -->
@@ -2107,6 +2109,8 @@ export default defineComponent({
       return typeColors[type] || 'default'
     }
 
+    const activeCollapseKeys = ref([]) // 修改为空数组，使折叠面板默认收起
+
     return {
       showSelectedKeywords,
       currentMode,
@@ -2225,6 +2229,7 @@ export default defineComponent({
       handlePageTabChange,
       comparisonColumns,
       getTypeColor,
+      activeCollapseKeys,
     }
   }
 })
@@ -3009,6 +3014,79 @@ export default defineComponent({
 .metric-value {
   font-size: 12px;
   color: rgba(0, 0, 0, 0.65);  /* 数值使用稍深一点的颜色，保持可读性 */
+}
+
+/* 添加折叠面板相关样式 */
+.selected-keywords-card {
+  margin-bottom: 24px;
+}
+
+.selected-keywords-card :deep(.ant-collapse) {
+  border: none;
+  background: transparent;
+}
+
+.selected-keywords-card :deep(.ant-collapse-header) {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  padding: 12px 16px;
+}
+
+.selected-keywords-card :deep(.ant-collapse-content) {
+  border-top: 1px solid #f0f0f0;
+}
+
+.selected-keywords-card :deep(.ant-collapse-content-box) {
+  padding: 16px;
+}
+
+.compact-table :deep(.ant-table-thead > tr > th) {
+  padding: 8px 16px;
+}
+
+.compact-table :deep(.ant-table-tbody > tr > td) {
+  padding: 8px 16px;
+}
+
+.keywords-section {
+  display: flex;
+  gap: 24px;
+}
+
+.keywords-column {
+  flex: 1;
+  min-width: 0; /* 防止flex子项溢出 */
+}
+
+.keywords-card {
+  height: 100%;
+}
+
+.keywords-card :deep(.ant-collapse) {
+  border: none;
+  background: transparent;
+}
+
+.keywords-card :deep(.ant-collapse-header) {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.85);
+  padding: 12px 16px;
+}
+
+.keywords-card :deep(.ant-collapse-content) {
+  border-top: 1px solid #f0f0f0;
+}
+
+.keywords-card :deep(.ant-collapse-content-box) {
+  padding: 16px;
+}
+
+.compact-table :deep(.ant-table-thead > tr > th) {
+  padding: 8px 16px;
+}
+
+.compact-table :deep(.ant-table-tbody > tr > td) {
+  padding: 8px 16px;
 }
 </style>
 
