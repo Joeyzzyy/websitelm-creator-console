@@ -4,7 +4,7 @@
       v-model:collapsed="collapsed"
       :width="180"
       :collapsed-width="80"
-      style="background: linear-gradient(165deg, #1a1f35 0%, #131b2e 100%); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);"
+      style="background: linear-gradient(165deg, #111827 0%, #1F2937 100%); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);"
     >
       <!-- 添加折叠按钮 -->
       <div class="collapse-trigger" @click="toggleCollapse">
@@ -170,12 +170,15 @@ html, body, #app {
 .user-profile-section {
   text-align: center;
   padding: 32px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent);
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
 }
 
 /* 菜单部分 */
@@ -191,40 +194,37 @@ html, body, #app {
 }
 
 :deep(.ant-menu-item) {
-  height: 48px;
-  line-height: 48px;
-  margin: 12px 0;
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
   border-radius: 12px;
-  transition: all 0.3s ease;
-  color: #4A4875;
-  font-size: 12px;
+  margin: 8px 0;
+  border-left: 3px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .menu-icon {
   font-size: 18px;
   margin-right: 8px;
+  opacity: 0.95;
 }
 
 :deep(.ant-menu) {
   background: transparent;
 }
 
-:deep(.ant-menu-item) {
-  background: rgba(255, 255, 255, 0.03);
-  color: rgba(255, 255, 255, 0.85);
-  border-radius: 12px;
-  margin: 8px 0;
-}
-
 :deep(.ant-menu-item:hover) {
-  background: rgba(255, 255, 255, 0.08) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
   color: #fff !important;
+  border-left-color: rgba(24, 144, 255, 0.5);
 }
 
 .nav-item--active {
-  background: linear-gradient(135deg, #1677ff 0%, #1890ff 100%) !important;
-  color: white !important;
-  box-shadow: 0 4px 15px rgba(22, 119, 255, 0.3);
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.15) 0%, rgba(24, 144, 255, 0.05) 100%) !important;
+  color: #1890ff !important;
+  border-left-color: #1890ff !important;
+  box-shadow: 0 4px 15px rgba(24, 144, 255, 0.1);
 }
 
 :deep(.ant-btn-primary:hover) {
@@ -248,7 +248,7 @@ html, body, #app {
   right: -12px;
   top: 32px;
   z-index: 10;
-  background: white;
+  background: rgba(255, 255, 255, 0.03);
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -258,10 +258,13 @@ html, body, #app {
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
   transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
 }
 
 .collapse-trigger:hover {
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .collapse-icon-btn {
@@ -524,7 +527,11 @@ html, body, #app {
   left: 0;
   right: 0;
   padding: 16px;
-  background: linear-gradient(to bottom, rgba(26, 31, 53, 0), #1a1f35);
+  background: linear-gradient(to bottom, 
+    rgba(17, 24, 39, 0) 0%,
+    rgba(17, 24, 39, 0.95) 50%,
+    #111827 100%
+  );
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -542,12 +549,25 @@ html, body, #app {
   align-items: center;
   gap: 8px;
   font-size: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.bottom-action-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
 }
 
 /* 添加分隔线 */
 .bottom-divider {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0.02),
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.02)
+  );
   margin: 8px 0;
 }
 
@@ -560,8 +580,11 @@ html, body, #app {
 .user-profile-section {
   text-align: center;
   padding: 32px 24px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), transparent);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.01) 100%
+  );
   position: relative;
 }
 
@@ -581,17 +604,19 @@ html, body, #app {
   color: #fff;
   margin-top: 4px;
   padding: 8px 16px;
-  background: rgba(22, 119, 255, 0.15);
+  background: rgba(24, 144, 255, 0.1);
   border-radius: 20px;
   display: inline-block;
   transition: all 0.3s ease;
   animation: slideUp 0.5s ease;
+  border: 1px solid rgba(24, 144, 255, 0.2);
+  backdrop-filter: blur(8px);
 }
 
 .user-name-display:hover {
   transform: translateY(-2px);
-  background: rgba(22, 119, 255, 0.15);
-  box-shadow: 0 4px 12px rgba(22, 119, 255, 0.1);
+  background: rgba(24, 144, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
 }
 
 /* 添加动画效果 */
