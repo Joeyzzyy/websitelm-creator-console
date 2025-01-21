@@ -1002,9 +1002,9 @@ export default {
     return {
       mainNavItems: [
         { title: 'Home', view: 'DashboardPage' },
-        { title: 'Assets', view: 'AssetsPage' },
         { title: 'Planner', view: 'KeywordsPlanningPage' },
         { title: 'Tasks', view: 'TaskManagementPage' },
+        { title: 'Assets', view: 'AssetsPage' },
         { title: 'Settings', view: 'SettingsPage' },
       ],
       currentView: this.getViewFromRoute(),

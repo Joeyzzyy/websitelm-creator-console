@@ -143,6 +143,47 @@
         </template>
       </a-card>
 
+      <!-- Quick Access Panel -->
+      <a-card class="quick-access-panel">
+        <template #title>
+          <span>⚡ Quick Access</span>
+        </template>
+        <div class="quick-links">
+          <router-link to="/keywords" class="quick-link-item">
+            <div class="quick-link-icon">
+              <CalendarOutlined />
+            </div>
+            <div class="quick-link-content">
+              <div class="quick-link-title">Planner</div>
+              <div class="quick-link-desc">Plan and manage your content</div>
+            </div>
+            <RightOutlined class="quick-link-arrow" />
+          </router-link>
+
+          <router-link to="/task-management" class="quick-link-item">
+            <div class="quick-link-icon">
+              <CheckSquareOutlined />
+            </div>
+            <div class="quick-link-content">
+              <div class="quick-link-title">Tasks</div>
+              <div class="quick-link-desc">View and manage tasks</div>
+            </div>
+            <RightOutlined class="quick-link-arrow" />
+          </router-link>
+
+          <router-link to="/assets" class="quick-link-item">
+            <div class="quick-link-icon">
+              <AppstoreOutlined />
+            </div>
+            <div class="quick-link-content">
+              <div class="quick-link-title">Assets</div>
+              <div class="quick-link-desc">Manage your digital assets</div>
+            </div>
+            <RightOutlined class="quick-link-arrow" />
+          </router-link>
+        </div>
+      </a-card>
+
       <!-- Sitemap and Pages Row -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
         <!-- Sitemap Panel - occupies 2/3 width -->
@@ -195,7 +236,7 @@
                 <div class="sitemap-content">
                   <a-tree
                     :tree-data="sitemapData"
-                    :default-expanded-keys="['root']"
+                    :default-expanded-keys="expandedKeys"
                     class="sitemap-tree"
                     @select="handleTreeSelect"
                   >
@@ -856,7 +897,10 @@ import {
   GoogleOutlined,
   CompassOutlined,
   ReloadOutlined,
-  QuestionCircleOutlined
+  QuestionCircleOutlined,
+  RightOutlined,
+  CheckSquareOutlined,
+  AppstoreOutlined,
 } from '@ant-design/icons-vue'
 import apiClient from '../api/api'
 import { Modal, message } from 'ant-design-vue'
@@ -887,7 +931,10 @@ export default defineComponent({
     CompassOutlined,
     ReloadOutlined,
     QuestionCircleOutlined,
-    ModuleTutorial
+    ModuleTutorial,
+    RightOutlined,
+    CheckSquareOutlined,
+    AppstoreOutlined,
   },
   data() {
     return {
@@ -948,6 +995,7 @@ export default defineComponent({
       hasTourCompleted: false, // 修改初始值
       tutorialVisible: false,
       dashboardTutorial: dashboardTutorial, // 添加到 data 中
+      expandedKeys: [], // 添加新的数据属性
     }
   },
   created() {
@@ -1410,34 +1458,34 @@ export default defineComponent({
         }];
       }
 
-      return sitemapData.map(folder => {
-        // 处理 URLs，确保它们都是有效的 URL
+      // 收集所有节点的 key
+      const keys = [];
+      
+      const processedData = sitemapData.map(folder => {
+        const folderKey = `folder_${folder.websiteId}`;
+        keys.push(folderKey); // 添加文件夹 key
+        
         const processedUrls = folder.urls.map(url => {
-          try {
-            // 如果 URL 不包含协议，添加 https://
-            const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-            const urlObj = new URL(fullUrl);
-            return {
-              key: url, // 保持原始 URL 作为 key
-              title: urlObj.pathname || '/',
-              fullUrl: fullUrl // 添加完整 URL 用于访问
-            };
-          } catch (e) {
-            console.warn('Invalid URL:', url);
-            return {
-              key: url,
-              title: url,
-              fullUrl: url
-            };
-          }
+          const urlKey = url;
+          keys.push(urlKey); // 添加 URL key
+          return {
+            key: urlKey,
+            title: new URL(url.startsWith('http') ? url : `https://${url}`).pathname || '/',
+            fullUrl: url.startsWith('http') ? url : `https://${url}`
+          };
         });
 
         return {
-          key: `folder_${folder.websiteId}`, // 使用 websiteId 作为文件夹的唯一标识
+          key: folderKey,
           title: `${folder.name} (${folder.childNum})`,
           children: processedUrls
         };
       });
+
+      // 更新展开的 keys
+      this.expandedKeys = keys;
+      
+      return processedData;
     },
     async handleTreeSelect(selectedKeys, { node }) {
       if (!selectedKeys.length || !node?.key) return;
@@ -3018,5 +3066,77 @@ export default defineComponent({
 
 .traffic-analytics-content {
   padding: 24px;
+}
+
+/* Quick Access Panel Styles */
+.quick-access-panel {
+  margin-bottom: 16px;
+}
+
+.quick-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.quick-link-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+  border: 1px solid transparent;
+  
+  &:hover {
+    background: #f0f7ff;
+    border-color: #91caff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+}
+
+.quick-link-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border-radius: 8px;
+  margin-right: 16px;
+  font-size: 20px;
+  color: #1890ff;
+  box-shadow: 0 2px 4px rgba(24,144,255,0.1);
+}
+
+.quick-link-content {
+  flex: 1;
+}
+
+.quick-link-title {
+  font-weight: 500;
+  font-size: 16px;
+  margin-bottom: 4px;
+  color: #262626;
+}
+
+.quick-link-desc {
+  font-size: 12px;
+  color: #666;
+}
+
+.quick-link-arrow {
+  color: #bfbfbf;
+  font-size: 14px;
+  margin-left: 8px;
+  transition: transform 0.3s ease;
+}
+
+.quick-link-item:hover .quick-link-arrow {
+  transform: translateX(4px);
+  color: #1890ff;
 }
 </style>
