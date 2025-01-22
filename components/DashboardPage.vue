@@ -1636,7 +1636,7 @@ export default defineComponent({
         const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.checkGscAuth(customerId)
         
-        console.log('GSC Status:', response) // 添加日志
+        console.log('GSC Status:', response)
         
         if (response?.code === 1201) {
           this.isGscConnected = false
@@ -1645,14 +1645,13 @@ export default defineComponent({
           return
         }
         
+        // 只更新连接状态
         this.isGscConnected = response?.code === 200
         
-        if (this.isGscConnected) {
+        // 仅在首次连接成功时加载数据
+        if (this.isGscConnected && !this.gscSites.length) {
           await this.loadGscData()
           await this.loadGscAnalytics()
-        } else {
-          this.gscSites = []
-          this.gscAnalytics = null
         }
       } catch (error) {
         console.error('Failed to check GSC status:', error)
