@@ -146,41 +146,77 @@
       <!-- Quick Access Panel -->
       <a-card class="quick-access-panel">
         <template #title>
-          <span>⚡ Quick Access</span>
+          <span>⚡ Smart Recommendations</span>
         </template>
         <div class="quick-links">
-          <router-link to="/keywords" class="quick-link-item">
+          <div class="quick-link-item">
             <div class="quick-link-icon">
               <CalendarOutlined />
             </div>
             <div class="quick-link-content">
-              <div class="quick-link-title">Planner</div>
-              <div class="quick-link-desc">Plan and manage your content</div>
+              <div class="quick-link-header">
+                <div class="quick-link-title">Keywords Planner</div>
+                <a-tag color="success" v-if="productInfo?.domainStatus">
+                  {{ pagesDashboard?.keywordOpportunities || 3 }} Opportunities
+                </a-tag>
+              </div>
+              <div class="quick-link-desc">
+                Based on your product analysis, we've identified high-potential traffic opportunities and crafted a customized keyword strategy.
+              </div>
+              <div class="quick-link-action">
+                <router-link to="/keywords" class="action-link">
+                  View Recommendations
+                  <RightOutlined />
+                </router-link>
+              </div>
             </div>
-            <RightOutlined class="quick-link-arrow" />
-          </router-link>
+          </div>
 
-          <router-link to="/task-management" class="quick-link-item">
+          <div class="quick-link-item">
             <div class="quick-link-icon">
               <CheckSquareOutlined />
             </div>
             <div class="quick-link-content">
-              <div class="quick-link-title">Tasks</div>
-              <div class="quick-link-desc">View and manage tasks</div>
+              <div class="quick-link-header">
+                <div class="quick-link-title">Content Tasks</div>
+                <a-tag color="warning" v-if="productInfo?.domainStatus">
+                  {{ pagesDashboard?.pendingTasks || 2 }} Pending
+                </a-tag>
+              </div>
+              <div class="quick-link-desc">
+                We've analyzed your site's indexing status and identified content gaps. Let's create a strategic publishing plan.
+              </div>
+              <div class="quick-link-action">
+                <router-link to="/task-management" class="action-link">
+                  View Tasks
+                  <RightOutlined />
+                </router-link>
+              </div>
             </div>
-            <RightOutlined class="quick-link-arrow" />
-          </router-link>
+          </div>
 
-          <router-link to="/assets" class="quick-link-item">
+          <div class="quick-link-item">
             <div class="quick-link-icon">
               <AppstoreOutlined />
             </div>
             <div class="quick-link-content">
-              <div class="quick-link-title">Assets</div>
-              <div class="quick-link-desc">Manage your digital assets</div>
+              <div class="quick-link-header">
+                <div class="quick-link-title">Brand Assets</div>
+                <a-tag color="processing" v-if="productInfo?.domainStatus">
+                  {{ pagesDashboard?.missingAssets || 4 }} Recommended
+                </a-tag>
+              </div>
+              <div class="quick-link-desc">
+                Enhance your content quality with comprehensive brand assets. We've prepared suggestions based on your site analysis.
+              </div>
+              <div class="quick-link-action">
+                <router-link to="/assets" class="action-link">
+                  Manage Assets
+                  <RightOutlined />
+                </router-link>
+              </div>
             </div>
-            <RightOutlined class="quick-link-arrow" />
-          </router-link>
+          </div>
         </div>
       </a-card>
 
@@ -417,9 +453,13 @@
             <template #title>
               <span>📈 Traffic Analytics (Last 15 Days)</span>
             </template>
-            <!-- Notice when not connected to GSC -->
-            <div v-if="!isGscConnected" class="traffic-analytics">
+            
+            <template v-if="!isGscConnected">
+              <!-- GSC not connected state -->
               <a-empty class="centered-empty-state">
+                <template #description>
+                  <span>Connect Google Search Console to view analytics</span>
+                </template>
                 <a-button 
                   type="primary" 
                   @click="connectGSC"
@@ -427,16 +467,22 @@
                   Connect Google Search Console
                 </a-button>
               </a-empty>
-            </div>
-            <!-- No data state -->
-            <div v-else-if="!gscAnalytics?.dailyData?.length" class="traffic-analytics">
+            </template>
+            
+            <template v-else-if="!gscAnalytics?.dailyData?.length">
+              <!-- No data state -->
               <a-empty 
                 description="No data available" 
                 class="centered-empty-state"
               />
-            </div>
-            <!-- Chart when data is loaded -->
-            <div v-else ref="chartRef" style="height: 500px; width: 100%;"></div>
+            </template>
+            
+            <template v-else>
+              <!-- Chart container -->
+              <div class="chart-wrapper">
+                <div id="trafficChart" ref="chartRef" class="chart-container"></div>
+              </div>
+            </template>
           </a-card>
         </a-col>
       </a-row>
@@ -1018,13 +1064,13 @@ export default defineComponent({
     const pagesTable = ref(null)
     const productModalVisible = ref(false)
     const chartRef = ref(null)
-    let chart = null
+    const chartInstance = ref(null)
     
     const initChart = () => {
-      if (chart) {
-        chart.dispose()
+      if (chartInstance.value) {
+        chartInstance.value.dispose()
       }
-      chart = echarts.init(chartRef.value)
+      chartInstance.value = echarts.init(chartRef.value)
     }
     
     onMounted(() => {
@@ -1042,7 +1088,9 @@ export default defineComponent({
       isComponentMounted,
       pagesTable,
       productModalVisible,
-      chartRef
+      chartRef,
+      chartInstance,
+      initChart
     }
   },
   computed: {
@@ -1772,6 +1820,16 @@ export default defineComponent({
         handler(newVal) {
           this.hasTourCompleted = !!newVal; // 将 onboarding 状态同步到 hasTourCompleted
         }
+      },
+      'gscAnalytics.dailyData': {
+        handler(newVal) {
+          if (newVal?.length) {
+            this.$nextTick(() => {
+              this.initOrUpdateChart();
+            });
+          }
+        },
+        deep: true
       }
     },
     // 添加关闭弹窗的处理方法
@@ -1794,33 +1852,76 @@ export default defineComponent({
 
       try {
         const customerId = localStorage.getItem('currentCustomerId');
-        // 使用选中的 siteUrl
         const siteUrl = this.selectedSiteUrl;
         
         const response = await apiClient.getGscAnalytics(
           customerId,
           siteUrl
         );
-        
-        if (response?.code === 200 && response.data) {
-          const analyticsData = this.processGscAnalytics(response.data);
-          this.gscAnalytics = analyticsData;
+
+        if (response?.code === 200) {
+          this.gscAnalytics = response.data ? this.processGscAnalytics(response.data) : null;
           
-          // 确保图表更新
-          this.$nextTick(() => {
-            this.updateChart(); // 更新图表
-          });
+          // 等待下一个 tick，确保 DOM 已更新
+          await this.$nextTick();
+          
+          // 更新图表
+          this.initOrUpdateChart();
         }
       } catch (error) {
         console.error('Failed to load GSC analytics:', error);
+        // 发生错误时清除图表
+        if (this.chartInstance) {
+          this.chartInstance.clear();
+        }
       }
     },
 
-    // 添加处理方法
+    async initOrUpdateChart() {
+      try {
+        // 确保有容器元素
+        const chartContainer = document.getElementById('trafficChart');
+        if (!chartContainer) {
+          console.log('Chart container not found');
+          return;
+        }
+
+        // 销毁现有实例
+        if (this.chartInstance) {
+          this.chartInstance.dispose();
+          this.chartInstance = null;
+        }
+
+        // 创建新实例
+        this.chartInstance = echarts.init(chartContainer);
+        console.log('New chart instance created:', this.chartInstance);
+
+        // 如果有数据，立即更新图表
+        if (this.gscAnalytics?.dailyData?.length) {
+          await this.$nextTick();
+          this.updateChart();
+        }
+
+        // 添加窗口大小变化监听
+        window.addEventListener('resize', () => {
+          if (this.chartInstance) {
+            this.chartInstance.resize();
+          }
+        });
+
+      } catch (error) {
+        console.error('Failed to initialize/update chart:', error);
+      }
+    },
+
     processGscAnalytics(data) {
       if (!Array.isArray(data) || data.length === 0) {
+        console.warn('Invalid or empty analytics data');
         return null;
       }
+
+      // 添加日志以检查数据
+      console.log('Raw analytics data:', data);
 
       // 按日期排序
       data.sort((a, b) => new Date(a.keys[1]) - new Date(b.keys[1]));
@@ -1828,43 +1929,35 @@ export default defineComponent({
       // 提取每日数据
       const dailyData = data.map(item => ({
         date: item.keys[1],
-        impressions: item.impressions || 0,
-        clicks: item.clicks || 0,
-        ctr: item.ctr || 0
+        impressions: Number(item.impressions) || 0,
+        clicks: Number(item.clicks) || 0,
+        ctr: Number(item.ctr) || 0,
+        position: Number(item.position) || 0
       }));
 
-      // 计算总量和环比（保持原逻辑）
+      // 添加日志以检查处理后的数据
+      console.log('Processed daily data:', dailyData);
+
+      // 计算总量
       const totals = {
-        impressions: 0,
-        clicks: 0,
+        impressions: data.reduce((sum, item) => sum + (item.impressions || 0), 0),
+        clicks: data.reduce((sum, item) => sum + (item.clicks || 0), 0),
         ctr: 0
       };
 
-      const halfLength = Math.floor(data.length / 2);
-      const firstHalf = {
-        impressions: 0,
-        clicks: 0
-      };
-      const secondHalf = {
-        impressions: 0,
-        clicks: 0
-      };
-
-      data.forEach((item, index) => {
-        totals.impressions += item.impressions || 0;
-        totals.clicks += item.clicks || 0;
-
-        if (index < halfLength) {
-          firstHalf.impressions += item.impressions || 0;
-          firstHalf.clicks += item.clicks || 0;
-        } else {
-          secondHalf.impressions += item.impressions || 0;
-          secondHalf.clicks += item.clicks || 0;
-        }
-      });
-
       totals.ctr = totals.clicks > 0 ? 
         ((totals.clicks / totals.impressions) * 100).toFixed(2) : 0;
+
+      // 计算环比
+      const halfLength = Math.floor(data.length / 2);
+      const firstHalf = {
+        impressions: data.slice(0, halfLength).reduce((sum, item) => sum + (item.impressions || 0), 0),
+        clicks: data.slice(0, halfLength).reduce((sum, item) => sum + (item.clicks || 0), 0)
+      };
+      const secondHalf = {
+        impressions: data.slice(halfLength).reduce((sum, item) => sum + (item.impressions || 0), 0),
+        clicks: data.slice(halfLength).reduce((sum, item) => sum + (item.clicks || 0), 0)
+      };
 
       const impressionsChange = firstHalf.impressions > 0 ?
         (((secondHalf.impressions - firstHalf.impressions) / firstHalf.impressions) * 100).toFixed(1) : 0;
@@ -1872,147 +1965,129 @@ export default defineComponent({
       const clicksChange = firstHalf.clicks > 0 ?
         (((secondHalf.clicks - firstHalf.clicks) / firstHalf.clicks) * 100).toFixed(1) : 0;
 
+      console.log('Processed analytics data:', {
+        dailyData,
+        totals,
+        changes: { impressionsChange, clicksChange }
+      });
+
       return {
         impressions: totals.impressions,
         clicks: totals.clicks,
         ctr: totals.ctr,
         impressionsChange: impressionsChange > 0 ? impressionsChange : null,
         clicksChange: clicksChange > 0 ? clicksChange : null,
-        dailyData // 添加每日数据
+        dailyData
       };
     },
 
-    // 添加图表新方法
     updateChart() {
-      if (!this.chart || !this.gscAnalytics?.dailyData) {
-        console.log('No chart or no data available')
-        return
+      if (!this.chartInstance || !this.gscAnalytics?.dailyData?.length) {
+        console.warn('Cannot update chart: missing instance or data');
+        return;
       }
 
-      const data = this.gscAnalytics.dailyData
-      const maxValue = Math.max(
-        ...data.map(item => item.impressions),
-        ...data.map(item => item.clicks)
-      )
-      const yAxisMax = Math.ceil(maxValue * 1.1)
+      console.log('Updating chart with data:', this.gscAnalytics.dailyData);
 
+      const data = this.gscAnalytics.dailyData;
+      
       const option = {
+        grid: {
+          top: 50,
+          right: 30,
+          bottom: 50,
+          left: 60
+        },
         tooltip: {
-          trigger: 'item',
+          trigger: 'axis',
           formatter: function(params) {
-            return `${params.seriesName}: ${params.value}`
+            const date = params[0].axisValue;
+            const impressions = params.find(p => p.seriesName === 'Impressions')?.value || 0;
+            const clicks = params.find(p => p.seriesName === 'Clicks')?.value || 0;
+            const ctr = clicks > 0 ? ((clicks / impressions) * 100).toFixed(1) : 0;
+            return `${date}<br/>
+                    Impressions: ${impressions}<br/>
+                    Clicks: ${clicks}<br/>
+                    CTR: ${ctr}%`;
           }
         },
         legend: {
           data: ['Impressions', 'Clicks'],
-          selected: {
-            'Impressions': true,
-            'Clicks': true
-          },
-          top: 10,
-          left: 'center',
-          icon: 'circle',
-          selectedMode: false  // 禁用图例点击交互
-        },
-        grid: {
-          left: 60,
-          right: 60,
-          bottom: 100,
-          top: 50,
-          containLabel: true,
-          height: 450
+          top: 10
         },
         xAxis: {
           type: 'category',
           data: data.map(item => item.date),
           axisLabel: {
-            rotate: 45,
-            formatter: function(value) {
-              const dayData = data.find(item => item.date === value)
-              if (!dayData) return value
-              return [
-                `${value}`,
-                `{ctrStyle|CTR: ${(dayData.ctr * 100).toFixed(1)}%}`
-              ].join('\n')
-            },
-            rich: {
-              ctrStyle: {
-                color: '#1890ff',     // 改用蓝色
-                fontWeight: 'bold',
-                fontSize: 12
-              }
-            }
+            rotate: 45
           }
         },
-        yAxis: {
-          type: 'value',
-          name: 'Impressions & Clicks',
-          min: 0,
-          max: yAxisMax,
-          axisLine: { show: true },
-          axisLabel: { formatter: '{value}' },
-          splitLine: {
-            show: true,
-            lineStyle: { type: 'dashed' }
+        yAxis: [
+          {
+            type: 'value',
+            name: 'Count',
+            position: 'left'
           }
-        },
+        ],
         series: [
           {
             name: 'Impressions',
             type: 'line',
             data: data.map(item => item.impressions),
-            color: '#1890ff',
-            symbol: 'circle',
-            symbolSize: 6,
-            lineStyle: { width: 2 }
+            smooth: true,
+            itemStyle: {
+              color: '#1890ff'
+            }
           },
           {
             name: 'Clicks',
             type: 'line',
             data: data.map(item => item.clicks),
-            color: '#52c41a',
-            symbol: 'circle',
-            symbolSize: 6,
-            lineStyle: { width: 2 }
+            smooth: true,
+            itemStyle: {
+              color: '#52c41a'
+            }
           }
         ]
-      }
+      };
 
-      this.chart.setOption(option, { notMerge: true })
-    },
-
-    // 监听口小变化，调整图表大小
-    '$window.innerWidth'() {
-      if (this.chart) {
-        this.chart.resize();
-      }
-    },
-
-    initChart() {
-      if (this.chart) {
-        this.chart.dispose()
-      }
-      if (this.chartRef) {
-        this.chart = echarts.init(this.chartRef)
-        this.updateChart() // 始化后立即更新数据
+      try {
+        console.log('Setting chart option');
+        this.chartInstance.setOption(option);
+        console.log('Chart option set successfully');
+      } catch (error) {
+        console.error('Failed to update chart:', error);
       }
     },
 
     mounted() {
-      this.initChart()
-      window.addEventListener('resize', this.handleResize)
+      // 在组件挂载后初始化图表
+      this.$nextTick(() => {
+        this.initOrUpdateChart();
+        // 添加 resize 事件监听
+        window.addEventListener('resize', this.handleResize);
+      });
     },
 
     beforeUnmount() {
-      window.removeEventListener('resize', this.handleResize)
-      if (this.chart) {
-        this.chart.dispose()
+      // 清理图表实例
+      if (this.chartInstance) {
+        this.chartInstance.dispose();
+        this.chartInstance = null;
+      }
+      
+      // 移除 resize 事件监听
+      window.removeEventListener('resize', this.handleResize);
+      
+      // 清理 GSC 检查间隔
+      if (this.gscCheckInterval) {
+        clearInterval(this.gscCheckInterval);
       }
     },
 
     handleResize() {
-      if (this.chart) {
-        this.chart.resize()
+      if (this.chartInstance) {
+        this.chartInstance.resize()
       }
     },
 
@@ -2047,48 +2122,16 @@ export default defineComponent({
       }
     },
 
-    async handleSiteChange(siteUrl) {
-      this.selectedSiteUrl = siteUrl;
-      try {
-        const customerId = localStorage.getItem('currentCustomerId');
-        const response = await apiClient.getGscAnalytics(
-          customerId,
-          siteUrl
-        );
-        
-        if (response?.code === 200) {
-          if (!response.data || response.data.length === 0) {
-            // 如果数据为空，设置为 null 或默认值
-            this.gscAnalytics = {
-              impressions: 'No data',
-              clicks: 'No data',
-              ctr: 'No data',
-              impressionsChange: null,
-              clicksChange: null,
-              dailyData: []
-            };
-          } else {
-            // 有数据时正常处理
-            this.gscAnalytics = this.processGscAnalytics(response.data);
-          }
-          
-          // 确保图表更新
-          this.$nextTick(() => {
-            this.updateChart();
-          });
-        }
-      } catch (error) {
-        console.error('Failed to load GSC analytics:', error);
-        // 在错误时显示 No data
-        this.gscAnalytics = {
-          impressions: 'No data',
-          clicks: 'No data',
-          ctr: 'No data',
-          impressionsChange: null,
-          clicksChange: null,
-          dailyData: []
-        };
+    async handleSiteChange(value) {
+      console.log('Site changed to:', value);
+      this.selectedSiteUrl = value;
+      
+      // 加载新数据前先清空图表
+      if (this.chartInstance) {
+        this.chartInstance.clear();
       }
+      
+      await this.loadGscAnalytics();
     },
 
     async collectPublishedUrls() {
@@ -2391,11 +2434,16 @@ export default defineComponent({
 
 /* 图表卡片样式 */
 .traffic-analytics {
+  width: 100%;
+  height: 400px;
+  position: relative;
+  margin: 20px 0;
+}
+
+.chart-container {
+  width: 100%;
   height: 100%;
-  min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  min-height: 400px; /* 添加最小高度 */
 }
 
 /* Sitemap 面板样式 */
@@ -2511,11 +2559,10 @@ export default defineComponent({
 
 /* 添加新的样式 */
 .centered-empty-state {
+  height: 400px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 300px;  /* 设置最小高度确保有足够空间居中 */
 }
 
 /* 确保父容器也支持flex布局 */
@@ -3070,73 +3117,189 @@ export default defineComponent({
 
 /* Quick Access Panel Styles */
 .quick-access-panel {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
+  border: none !important;
+  background: linear-gradient(135deg, #38bdf8 0%, #a5b4fc 100%) !important; /* 更浅的天蓝到淡紫渐变 */
+  box-shadow: 0 12px 36px rgba(56, 189, 248, 0.12) !important;
+  border-radius: 16px !important;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(125, 211, 252, 0.12), transparent 60%),
+                radial-gradient(circle at bottom left, rgba(165, 180, 252, 0.12), transparent 60%);
+    pointer-events: none;
+  }
+
+  :deep(.ant-card-head) {
+    padding: 20px 24px;
+    background: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .ant-card-head-title {
+      span {
+        font-size: 22px;
+        font-weight: 600;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+    }
+  }
+
+  :deep(.ant-card-body) {
+    background: transparent;
+    padding: 24px;
+  }
 }
 
 .quick-links {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+  position: relative;
+  z-index: 1;
 }
 
 .quick-link-item {
   display: flex;
-  align-items: center;
-  padding: 16px;
-  background: #fafafa;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  color: inherit;
-  border: 1px solid transparent;
+  align-items: flex-start;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.12);
+  position: relative;
+  
+  /* 加大手指尺寸，调整位置和透明度 */
+  &::after {
+    content: '👈';
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 22px; /* 加大字号 */
+    animation: bounce 2s infinite;
+    opacity: 0.85; /* 提高不透明度 */
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12)); /* 加强阴影 */
+  }
   
   &:hover {
-    background: #f0f7ff;
-    border-color: #91caff;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    background: white;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(2, 132, 199, 0.18);
+    border-color: white;
+
+    &::after {
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .quick-link-icon {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%);
+      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);
+    }
+  }
+}
+
+/* 添加弹跳动画 */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
   }
 }
 
 .quick-link-icon {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  border-radius: 8px;
+  margin-right: 16px;
+  font-size: 16px;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: white;
-  border-radius: 8px;
-  margin-right: 16px;
-  font-size: 20px;
-  color: #1890ff;
-  box-shadow: 0 2px 4px rgba(24,144,255,0.1);
-}
-
-.quick-link-content {
-  flex: 1;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.15);
 }
 
 .quick-link-title {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 16px;
-  margin-bottom: 4px;
-  color: #262626;
+  color: #1e293b;
+  margin: 0;
 }
 
 .quick-link-desc {
-  font-size: 12px;
-  color: #666;
-}
-
-.quick-link-arrow {
-  color: #bfbfbf;
   font-size: 14px;
-  margin-left: 8px;
-  transition: transform 0.3s ease;
+  color: #475569;
+  line-height: 1.6;
+  margin: 8px 0;
+  opacity: 0.9;
 }
 
-.quick-link-item:hover .quick-link-arrow {
-  transform: translateX(4px);
-  color: #1890ff;
+.quick-link-action {
+  margin-top: 12px;
+
+  .action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #0ea5e9;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+
+    .anticon {
+      font-size: 12px;
+      transition: transform 0.3s ease;
+    }
+
+    &:hover {
+      color: #38bdf8;
+      gap: 8px;
+      .anticon {
+        transform: translateX(4px);
+      }
+    }
+  }
+}
+
+.chart-wrapper {
+  width: 100%;
+  height: 400px;
+  position: relative;
+}
+
+.chart-container {
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+}
+
+.centered-empty-state {
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 </style>
