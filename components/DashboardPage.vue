@@ -904,7 +904,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, onUnmounted, watch } from 'vue'
+import { defineComponent, ref, onMounted, onUnmounted } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
 import { 
   CopyOutlined, 
@@ -963,6 +963,7 @@ export default defineComponent({
     RightOutlined,
     CheckSquareOutlined,
     AppstoreOutlined,
+    ModuleTutorial,
   },
   data() {
     return {
@@ -1143,7 +1144,7 @@ export default defineComponent({
           this.showVerifyRecord = true;
         }
       } catch (error) {
-        console.error('检查域名验证状态失败:', error);
+        console.error('Failed to check domain verification status:', error);
         this.showVerifyRecord = false;
         this.verifyRecord = null;
       } finally {
@@ -1195,12 +1196,12 @@ export default defineComponent({
           // Handle error response code
           this.$notification.error({
             message: 'Failed to Load Product',
-            description: 'Unable to load product information. Please try again later.'
+            description: 'An error occurred while loading product information. Please try again later.'
           });
           this.productInfo = {} // 修改这里: 从 null 改为空对象
         }
       } catch (error) {
-        console.error('Failed to load product information:', error)
+        console.error('Failed to load product information:', error);
         this.$notification.error({
           message: 'Failed to Load Product',
           description: 'An error occurred while loading product information. Please try again later.'
@@ -2217,11 +2218,13 @@ export default defineComponent({
     },
 
     showTutorial() {
+      console.log('显示教程...', this.dashboardTutorial); // 添加日志以检查数据
       this.tutorialVisible = true;
     },
 
     onTutorialComplete() {
-      message.success('Tutorial completed! Click the tutorial button in the title bar to view it again.');
+      console.log('教程完成');
+      this.$message.success('Dashboard tutorial completed!');
     }
   },
 

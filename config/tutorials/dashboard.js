@@ -4,25 +4,37 @@ export const dashboardTutorial = {
       target: '.info-card',
       title: 'Product Information',
       content: 'Here you can view and manage basic product information, including product name, official website and other core details. You can also add competitor products for comparative analysis.',
-      position: 'right'
+      position: 'right',
+      offset: {
+        y: -60
+      }
     },
     {
-      target: '.sitemap-card',
-      title: 'Site Structure',
-      content: 'This shows the complete page structure of your website. You can:\n- Automatically fetch sitemap\n- View all pages\n- Submit pages to search engines',
-      position: 'left'
+      target: '.quick-access-panel',
+      title: 'Smart Recommendations',
+      content: 'Get personalized recommendations for:\n- Keywords Planning\n- Content Tasks\n- Brand Assets\nBased on your product and website analysis.',
+      position: 'left',
+      offset: {
+        y: -60
+      }
     },
     {
-      target: '.pages-card',
-      title: 'Page Statistics',
-      content: 'Quickly view your page data:\n- Number of generated pages\n- Number of published pages\n- Number of indexed pages',
-      position: 'left'
+      target: '.ant-collapse-item:nth-child(1)',
+      title: 'Website Structure & Pages',
+      content: 'Click to expand this panel to:\n- View complete website structure\n- Auto-fetch sitemap\n- Check page statistics\n- Submit pages to search engines',
+      position: 'right',
+      offset: {
+        y: -60
+      }
     },
     {
-      target: '.traffic-analytics-content',
+      target: '.ant-collapse-item:nth-child(2)',
       title: 'Traffic Analytics',
-      content: 'Monitor your website traffic and performance metrics here.',
-      position: 'top'
+      content: 'Click to expand this panel to:\n- Monitor website traffic\n- Track impressions and clicks\n- Analyze traffic trends',
+      position: 'right',
+      offset: {
+        y: -60
+      }
     }
   ]
 }; 

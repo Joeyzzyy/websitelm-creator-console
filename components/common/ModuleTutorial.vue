@@ -103,40 +103,36 @@ export default {
       if (!targetEl) return {};
 
       const rect = targetEl.getBoundingClientRect();
-      const cardWidth = 320;
-      const cardHeight = 220;
+      const cardWidth = 280;
+      const cardHeight = 240;
       const margin = 16;
-      const offset = 5;
+      const offset = step.offset || { x: 0, y: 0 };
 
       // Get viewport dimensions
       const viewportWidth = this.windowWidth;
       const viewportHeight = this.windowHeight;
 
-      // Find all visible modals, dropdowns, and other floating elements
-      const floatingElements = document.querySelectorAll('.ant-modal, .ant-dropdown, .ant-select-dropdown:not(.ant-select-dropdown-hidden)');
-      const avoidAreas = Array.from(floatingElements).map(el => el.getBoundingClientRect());
-
-      // Calculate positions for all sides
+      // Calculate positions with additional offset to avoid overlap
       const positions = {
         right: {
-          left: rect.right + margin - offset,
-          top: Math.max(margin, rect.top + rect.height/2 - cardHeight/2)
+          left: rect.right + margin + 20 - (offset.x || 0),
+          top: rect.top - (cardHeight / 2) + (offset.y || 0) // 将卡片垂直居中对齐
         },
         left: {
-          left: rect.left - cardWidth - margin + offset,
-          top: Math.max(margin, rect.top + rect.height/2 - cardHeight/2)
+          left: rect.left - cardWidth - margin - 20 + (offset.x || 0),
+          top: rect.top - (cardHeight / 2) + (offset.y || 0) // 将卡片垂直居中对齐
         },
         top: {
-          left: rect.left + (rect.width - cardWidth) / 2,
-          top: rect.top - cardHeight - margin/2 + offset
+          left: rect.left + (rect.width - cardWidth) / 2 + (offset.x || 0),
+          top: Math.max(margin, rect.top - cardHeight - margin - 20) + (offset.y || 0) // 确保顶部有足够空间
         },
         bottom: {
-          left: rect.left + (rect.width - cardWidth) / 2,
-          top: rect.bottom + margin/2 - offset
+          left: rect.left + (rect.width - cardWidth) / 2 + (offset.x || 0),
+          top: rect.bottom + margin + 50 + (offset.y || 0)
         }
       };
 
-      // Check each position for overlap with floating elements
+      // Select the position with the highest score
       const positionScores = Object.entries(positions).map(([position, coords]) => {
         let score = 0;
         const cardRect = {
@@ -152,15 +148,13 @@ export default {
         if (cardRect.top < margin) score -= 1;
         if (cardRect.bottom > viewportHeight - margin) score -= 1;
 
-        // Check overlap with floating elements
-        avoidAreas.forEach(area => {
-          if (this.isOverlapping(cardRect, area)) {
-            score -= 2;
-          }
-        });
-
         // Prefer the specified position
         if (position === step.position) score += 0.5;
+
+        // Add extra score for positions that keep the card fully visible
+        if (cardRect.top >= margin && cardRect.bottom <= viewportHeight - margin) {
+          score += 1;
+        }
 
         return { position, coords, score };
       });
@@ -174,7 +168,7 @@ export default {
 
       // Final boundary check
       left = Math.max(margin, Math.min(left, viewportWidth - cardWidth - margin));
-      top = Math.max(margin, Math.min(top, viewportHeight - cardHeight - margin));
+      top = Math.max(margin + 20, Math.min(top, viewportHeight - cardHeight - margin)); // 增加顶部边距
 
       return {
         left: `${left}px`,
@@ -310,10 +304,10 @@ export default {
 
 .tutorial-card {
   position: fixed;
-  width: 320px;
+  width: 280px;
   background: white;
   border-radius: 12px;
-  padding: 20px;
+  padding: 20px 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
   z-index: 10002;
@@ -321,11 +315,12 @@ export default {
 
 .close-button {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 16px;
+  right: 16px;
   cursor: pointer;
   color: #999;
   transition: color 0.3s;
+  z-index: 2;
 }
 
 .close-button:hover {
@@ -333,9 +328,11 @@ export default {
 }
 
 .step-indicator {
-  margin-bottom: 16px;
+  margin: 0 0 12px;
   color: #1890ff;
-  font-size: 14px;
+  font-size: 13px;
+  position: relative;
+  z-index: 1;
 }
 
 .current-step {
@@ -347,23 +344,24 @@ export default {
 }
 
 .tutorial-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   color: #1a1a1a;
 }
 
 .tutorial-description {
   color: #666;
-  line-height: 1.6;
-  margin-bottom: 20px;
+  line-height: 1.5;
+  margin-bottom: 16px;
+  font-size: 13px;
 }
 
 .tutorial-controls {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: 20px;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 :deep(.ant-btn) {
