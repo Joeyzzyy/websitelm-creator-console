@@ -325,7 +325,7 @@
         <a-col :span="8">
           <a-card class="pages-card">
             <template #title>
-              <span>📄 Pages</span>
+              <span>📄 Pages Overview</span>
             </template>
             <a-row :gutter="[16, 16]">
               <a-col :span="24">
@@ -377,81 +377,58 @@
 
       <!-- Metrics Cards -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
-        <!-- Traffic card - occupies full width -->
-        <a-col :span="24">
-          <a-card class="analytics-card">
-            <template #title>
-              <div class="card-title">
-                <span>📈 Traffic Analytics</span>
-                <a-select 
-                  v-model:value="selectedSiteUrl" 
-                  style="width: 200px"
-                  @change="handleSiteChange"
-                >
-                  <a-select-option 
-                    v-for="site in gscSites" 
-                    :key="site.siteUrl" 
-                    :value="site.siteUrl"
-                  >
-                    {{ site.siteUrl }}
-                  </a-select-option>
-                </a-select>
-              </div>
-            </template>
-            <div class="traffic-analytics-content">
-              <!-- Notice when not connected to GSC -->
-              <div v-if="!isGscConnected" class="not-connected-notice">
-                <a-empty>
-                  <a-button 
-                    type="primary" 
-                    @click="connectGSC"
-                  >
-                    Connect Google Search Console
-                  </a-button>
-                </a-empty>
-              </div>
-              <!-- Data content -->
-              <a-row v-else :gutter="[16, 8]">
-                <a-col :span="8">
-                  <a-statistic 
-                    title="Impressions" 
-                    :value="gscAnalytics?.impressions ?? 'No data'"
-                    :precision="0"
-                    :value-style="{ fontSize: '16px' }"
-                    :title-style="{ fontSize: '12px' }"
-                  >
-                    <template #suffix>
-                      <a-tag size="small" color="success" v-if="gscAnalytics?.impressionsChange">
-                        <span style="font-size: 12px">↑ {{ gscAnalytics.impressionsChange }}%</span>
-                      </a-tag>
-                    </template>
-                  </a-statistic>
-                </a-col>
-                <a-col :span="8">
-                  <a-statistic 
-                    title="Clicks" 
-                    :value="gscAnalytics?.clicks ?? 'No data'"
-                    :precision="0"
-                    :value-style="{ fontSize: '16px' }"
-                    :title-style="{ fontSize: '12px' }"
-                  >
-                    <template #suffix>
-                      <a-tag size="small" color="success" v-if="gscAnalytics?.clicksChange">
-                        <span style="font-size: 12px">↑ {{ gscAnalytics.clicksChange }}%</span>
-                      </a-tag>
-                    </template>
-                  </a-statistic>
-                </a-col>
-              </a-row>
-            </div>
-          </a-card>
-        </a-col>
-
-        <!-- Chart card -->
+        <!-- Chart card - occupies full width -->
         <a-col :span="24">
           <a-card>
             <template #title>
-              <span>📈 Traffic Analytics (Last 15 Days)</span>
+              <div class="card-title">
+                <a-space>
+                  <span>📈 Traffic Analytics (Last 15 Days)</span>
+                  <!-- Add statistics inline -->
+                  <template v-if="isGscConnected && gscAnalytics">
+                    <div class="inline-stats">
+                      <a-statistic 
+                        title="Impressions" 
+                        :value="gscAnalytics?.impressions ?? 'No impressions or clicks data'"
+                        :precision="0"
+                        class="compact-stat inline-stat"
+                      >
+                        <template #suffix>
+                          <a-tag size="small" color="success" v-if="gscAnalytics?.impressionsChange">
+                            ↑ {{ gscAnalytics.impressionsChange }}%
+                          </a-tag>
+                        </template>
+                      </a-statistic>
+                      <a-divider type="vertical" style="margin: 0 16px; height: 24px" />
+                      <a-statistic 
+                        title="Clicks" 
+                        :value="gscAnalytics?.clicks ?? 'No impressions or clicks data'"
+                        :precision="0"
+                        class="compact-stat inline-stat"
+                      >
+                        <template #suffix>
+                          <a-tag size="small" color="success" v-if="gscAnalytics?.clicksChange">
+                            ↑ {{ gscAnalytics.clicksChange }}%
+                          </a-tag>
+                        </template>
+                      </a-statistic>
+                    </div>
+                  </template>
+                  <a-select 
+                    v-model:value="selectedSiteUrl" 
+                    style="width: 200px"
+                    @change="handleSiteChange"
+                  >
+                    <a-select-option 
+                      v-for="site in gscSites" 
+                      :key="site.siteUrl" 
+                      :value="site.siteUrl"
+                    >
+                      {{ site.siteUrl }}
+                    </a-select-option>
+                  </a-select>
+                </a-space>
+              </div>
             </template>
             
             <template v-if="!isGscConnected">
@@ -977,7 +954,6 @@ export default defineComponent({
     CompassOutlined,
     ReloadOutlined,
     QuestionCircleOutlined,
-    ModuleTutorial,
     RightOutlined,
     CheckSquareOutlined,
     AppstoreOutlined,
@@ -1859,17 +1835,14 @@ export default defineComponent({
         );
 
         if (response?.code === 200) {
-          this.gscAnalytics = response.data ? this.processGscAnalytics(response.data) : null;
+          // 不管有没有数据，都调用 processGscAnalytics
+          this.gscAnalytics = this.processGscAnalytics(response.data || []);
           
-          // 等待下一个 tick，确保 DOM 已更新
           await this.$nextTick();
-          
-          // 更新图表
           this.initOrUpdateChart();
         }
       } catch (error) {
         console.error('Failed to load GSC analytics:', error);
-        // 发生错误时清除图表
         if (this.chartInstance) {
           this.chartInstance.clear();
         }
@@ -1916,7 +1889,11 @@ export default defineComponent({
     processGscAnalytics(data) {
       if (!Array.isArray(data) || data.length === 0) {
         console.warn('Invalid or empty analytics data');
-        return null;
+        return {
+          impressions: 'No impressions or clicks data',
+          clicks: 'No impressions or clicks data',
+          dailyData: []
+        };
       }
 
       // 添加日志以检查数据
@@ -3295,6 +3272,75 @@ export default defineComponent({
     .ant-card-head-title {
       color: white;
     }
+  }
+}
+
+.inline-stats {
+  display: flex;
+  align-items: center;
+}
+
+:deep(.inline-stat) {
+  display: flex;
+  align-items: center;
+  background: none;  /* 确保没有背景 */
+  padding: 0;  /* 移除内边距 */
+  
+  .ant-statistic-title {
+    margin: 0;
+    margin-right: 8px;
+    font-size: 13px;
+    color: #666;
+  }
+  
+  .ant-statistic-content {
+    margin: 0;
+    font-size: 13px;
+    background: none;  /* 确保没有背景 */
+    
+    .ant-statistic-content-value {
+      font-size: 13px;
+    }
+  }
+  
+  .ant-tag {
+    font-size: 12px;
+    line-height: 16px;
+    height: 16px;
+    padding: 0 4px;
+  }
+}
+
+:deep(.ant-divider-vertical) {
+  border-left: 1px solid #f0f0f0;
+}
+
+:deep(.ant-divider-vertical) {
+  height: 40px;
+  margin: 0;
+}
+
+/* 移除所有背景相关样式 */
+.compact-stat {
+  background: none;
+  padding: 0;
+  
+  :deep(.ant-statistic-title) {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 0;
+    background: none;
+  }
+
+  :deep(.ant-statistic-content) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #262626;
+    line-height: 1;
+    white-space: nowrap;
+    background: none;
   }
 }
 </style>
