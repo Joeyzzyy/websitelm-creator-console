@@ -146,7 +146,7 @@
       <!-- Quick Access Panel -->
       <a-card class="quick-access-panel">
         <template #title>
-          <span>⚡ Smart Recommendations</span>
+          <span style="color: white;">⚡ Smart Recommendations</span>
         </template>
         <div class="quick-links">
           <div class="quick-link-item">
@@ -2349,7 +2349,6 @@ export default defineComponent({
   }
 }
 
-/* Add these new styles */
 .ant-row .ant-card {
   height: 100%;  /* Make all cards in the row full height */
 }
@@ -2364,7 +2363,6 @@ export default defineComponent({
   text-align: center;
 }
 
-/* 修改 descriptions 组件的样式，移除所有底部间距 */
 :deep(.ant-descriptions-item) {
   align-items: center !important;
   padding-bottom: 0 !important;  /* 移除底部 padding */
@@ -2445,7 +2443,6 @@ export default defineComponent({
   min-height: 400px; /* 添加最小高度 */
 }
 
-/* Sitemap 面板样式 */
 .sitemap-card {
   height: 100%;
   
@@ -2458,10 +2455,9 @@ export default defineComponent({
   
   :deep(.ant-card-body) {
     padding: 24px !important;
-    height: calc(100% - 76px); /* 减去头部高度 */
+    height: calc(100% - 76px); 
     overflow-y: auto;
     
-    /* 自定义滚动条 */
     &::-webkit-scrollbar {
       width: 8px;
     }
@@ -3042,7 +3038,6 @@ export default defineComponent({
   transform: translateY(20px);
 }
 
-/* 添加进度状态的样式 */
 .progress-status {
   font-size: 14px;
   font-weight: 600;
@@ -3052,7 +3047,6 @@ export default defineComponent({
   border-radius: 12px;
 }
 
-/* 教程按钮样式 */
 .tutorial-trigger {
   display: inline-flex;
   align-items: center;
@@ -3087,7 +3081,6 @@ export default defineComponent({
   }
 }
 
-/* 柔和的发光动画 */
 @keyframes glow {
   from {
     text-shadow: 0 0 1px rgba(24, 144, 255, 0.1),
@@ -3118,8 +3111,9 @@ export default defineComponent({
 .quick-access-panel {
   margin-bottom: 24px;
   border: none !important;
-  background: linear-gradient(135deg, #38bdf8 0%, #a5b4fc 100%) !important; /* 更浅的天蓝到淡紫渐变 */
-  box-shadow: 0 12px 36px rgba(56, 189, 248, 0.12) !important;
+  /* 使用更高级的渐变配色，从深邃的靛蓝过渡到神秘的紫色 */
+  background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%) !important;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3) !important;
   border-radius: 16px !important;
   position: relative;
   overflow: hidden;
@@ -3131,22 +3125,25 @@ export default defineComponent({
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at top right, rgba(125, 211, 252, 0.12), transparent 60%),
-                radial-gradient(circle at bottom left, rgba(165, 180, 252, 0.12), transparent 60%);
+    /* 添加更精致的光晕效果 */
+    background: 
+      radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 50%),
+      radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.15), transparent 50%),
+      radial-gradient(circle at center, rgba(59, 130, 246, 0.1), transparent 40%);
     pointer-events: none;
   }
 
   :deep(.ant-card-head) {
     padding: 20px 24px;
     background: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
     .ant-card-head-title {
       span {
         font-size: 22px;
         font-weight: 600;
-        color: white;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: rgba(255, 255, 255, 0.95);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         display: flex;
         align-items: center;
         gap: 12px;
@@ -3157,6 +3154,13 @@ export default defineComponent({
   :deep(.ant-card-body) {
     background: transparent;
     padding: 24px;
+  }
+
+  :deep(.ant-card-head-title) {
+    /* 修改: 使用白色系的颜色 */
+    color: rgba(255, 255, 255, 0.95) !important;
+    /* 添加: 文字阴影提高可读性 */
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -3172,52 +3176,30 @@ export default defineComponent({
   display: flex;
   align-items: flex-start;
   padding: 24px;
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(8px);
+  /* 使用更高级的半透明背景 */
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
   border-radius: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 4px 20px rgba(2, 132, 199, 0.12);
-  position: relative;
-  
-  /* 加大手指尺寸，调整位置和透明度 */
-  &::after {
-    content: '👈';
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    font-size: 22px; /* 加大字号 */
-    animation: bounce 2s infinite;
-    opacity: 0.85; /* 提高不透明度 */
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.12)); /* 加强阴影 */
-  }
+  /* 更细腻的边框效果 */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
   
   &:hover {
-    background: white;
+    background: rgba(255, 255, 255, 0.05);
     transform: translateY(-3px);
-    box-shadow: 0 12px 28px rgba(2, 132, 199, 0.18);
-    border-color: white;
-
-    &::after {
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 
+      0 12px 28px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
 
     .quick-link-icon {
       transform: scale(1.05);
-      background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%);
-      box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);
+      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+      box-shadow: 
+        0 8px 20px rgba(79, 70, 229, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
     }
-  }
-}
-
-/* 添加弹跳动画 */
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
   }
 }
 
@@ -3227,31 +3209,33 @@ export default defineComponent({
   height: 36px;
   min-width: 36px;
   min-height: 36px;
-  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  /* 更高级的图标渐变 */
+  background: linear-gradient(135deg, #4F46E5 0%, #6D28D9 100%);
   border-radius: 8px;
   margin-right: 16px;
   font-size: 16px;
-  color: white;
+  color: rgba(255, 255, 255, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 16px rgba(14, 165, 233, 0.15);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.25);
 }
 
 .quick-link-title {
   font-weight: 600;
   font-size: 16px;
-  color: #1e293b;
+  /* 更柔和的文字颜色 */
+  color: rgba(255, 255, 255, 0.95);
   margin: 0;
 }
 
 .quick-link-desc {
   font-size: 14px;
-  color: #475569;
+  /* 更柔和的描述文字颜色 */
+  color: rgba(255, 255, 255, 0.7);
   line-height: 1.6;
   margin: 8px 0;
-  opacity: 0.9;
 }
 
 .quick-link-action {
@@ -3261,9 +3245,10 @@ export default defineComponent({
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    color: #0ea5e9;
+    /* 更明亮的操作链接颜色 */
+    color: #818CF8;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 500;
     text-decoration: none;
     transition: all 0.3s ease;
 
@@ -3273,7 +3258,7 @@ export default defineComponent({
     }
 
     &:hover {
-      color: #38bdf8;
+      color: #A5B4FC;
       gap: 8px;
       .anticon {
         transform: translateX(4px);
@@ -3300,5 +3285,16 @@ export default defineComponent({
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.quick-access-panel {
+  :deep(.ant-card-head) {
+    background: linear-gradient(135deg, #1677ff, #4096ff);
+    border-radius: 8px 8px 0 0;
+    
+    .ant-card-head-title {
+      color: white;
+    }
+  }
 }
 </style>
