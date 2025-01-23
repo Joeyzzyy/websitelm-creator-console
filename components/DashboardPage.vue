@@ -222,245 +222,251 @@
 
       <!-- Sitemap and Pages Row -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
-        <!-- Sitemap Panel - occupies 2/3 width -->
-        <a-col :span="16">
-          <a-card class="sitemap-card">
-            <template #title>
-              <div class="card-title">
-                <span>🗺️ Website Structure</span>
-                <a-space>
-                  <a-button 
-                    type="link" 
-                    size="small"
-                    @click="handleRefreshSitemap"
-                    :loading="loadingSitemap"
-                  >
-                    Refresh
-                  </a-button>
-                  <a-button
-                    type="link"
-                    size="small"
-                    @click="collectPublishedUrls"
-                    :disabled="!productInfo?.productId"
-                  >
-                    Submit Sitemap
-                  </a-button>
-                </a-space>
-              </div>
-            </template>
-
-            <!-- Loading skeleton -->
-            <template v-if="loadingSitemap">
-              <a-skeleton active :paragraph="{ rows: 2 }" />
-            </template>
-
-            <!-- Content -->
-            <template v-else>
-              <template v-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
-                <a-empty 
-                  description="Add and verify your site to get sitemap automatically"
-                  class="centered-empty-state"
-                >
-                  <template #extra>
-                    <a-button type="primary" @click="openEditWithBasicInfoToVerify">
-                      Add Your Site
-                    </a-button>
-                  </template>
-                </a-empty>
-              </template>
-              <template v-else-if="sitemapData?.length">
-                <div class="sitemap-content">
-                  <a-tree
-                    :tree-data="sitemapData"
-                    :default-expanded-keys="expandedKeys"
-                    class="sitemap-tree"
-                    @select="handleTreeSelect"
-                  >
-                    <template #title="{ title, key }">
-                      <div class="tree-node-title">
-                        <span>{{ title }}</span>
+        <a-col :span="24">
+          <a-collapse v-model:activeKey="activeCollapseKeys">
+            <!-- Website Structure -->
+            <a-collapse-panel key="sitemap" header="Website Structure & Page Overview">
+              <a-row :gutter="[16, 16]">
+                <!-- Sitemap Panel - occupies 2/3 width -->
+                <a-col :span="16">
+                  <a-card class="sitemap-card">
+                    <template #title>
+                      <div class="card-title">
+                        <span>🗺️ Website Structure</span>
                         <a-space>
+                          <a-button 
+                            type="link" 
+                            size="small"
+                            @click="handleRefreshSitemap"
+                            :loading="loadingSitemap"
+                          >
+                            Refresh
+                          </a-button>
                           <a-button
-                            v-if="!key.includes('folder_')"
-                            :href="getVisitUrl(key)"
-                            target="_blank"
-                            class="visit-link"
-                            @click.stop
                             type="link"
                             size="small"
+                            @click="collectPublishedUrls"
+                            :disabled="!productInfo?.productId"
                           >
-                            <GlobalOutlined /> Visit
+                            Submit Sitemap
                           </a-button>
-                          <a-spin v-if="loadingUrls[key]" size="small" />
-                          <template v-if="nodeUrls[key]">
-                            <a-button
-                              v-for="url in nodeUrls[key]"
-                              :key="url"
-                              :href="url"
-                              target="_blank"
-                              type="link"
-                              size="small"
-                              class="url-link"
-                            >
-                              <LinkOutlined />
-                            </a-button>
-                          </template>
                         </a-space>
                       </div>
                     </template>
-                  </a-tree>
-                </div>
-              </template>
-              <template v-else>
-                <a-empty 
-                  description="No pages found" 
-                  class="centered-empty-state"
-                />
-              </template>
-            </template>
-          </a-card>
-        </a-col>
 
-        <!-- Pages Card - occupies 1/3 width -->
-        <a-col :span="8">
-          <a-card class="pages-card">
-            <template #title>
-              <span>📄 Pages Overview</span>
-            </template>
-            <a-row :gutter="[16, 16]">
-              <a-col :span="24">
-                <a-statistic 
-                  title="Generated" 
-                  :value="pagesDashboard?.generatorCount || 0"
-                  :value-style="{ fontSize: '16px' }"
-                  :title-style="{ fontSize: '12px' }"
-                >
-                  <template #suffix>
-                    <a-tag size="small" color="success" v-if="pagesDashboard?.generatedChange">
-                      <span style="font-size: 12px">↑ {{ pagesDashboard.generatedChange }}%</span>
-                    </a-tag>
-                  </template>
-                </a-statistic>
-              </a-col>
-              <a-col :span="24">
-                <a-statistic 
-                  title="Published" 
-                  :value="pagesDashboard?.publishCount || 0"
-                  :value-style="{ fontSize: '16px' }"
-                  :title-style="{ fontSize: '12px' }"
-                >
-                  <template #suffix v-if="pagesDashboard?.publishCount === 0">
-                    <a-tag size="small">
-                      <span style="font-size: 12px">Not published</span>
-                    </a-tag>
-                  </template>
-                </a-statistic>
-              </a-col>
-              <a-col :span="24">
-                <a-statistic 
-                  title="Indexed Pages Published By WebsiteLM" 
-                  :value="pagesDashboard?.indexedCount || 0"
-                  :value-style="{ fontSize: '16px' }"
-                  :title-style="{ fontSize: '12px' }"
-                >
-                  <template #suffix v-if="pagesDashboard?.indexedCount === 0">
-                    <a-tag size="small">
-                      <span style="font-size: 12px">Not indexed</span>
-                    </a-tag>
-                  </template>
-                </a-statistic>
-              </a-col>
-            </a-row>
-          </a-card>
-        </a-col>
-      </a-row>
+                    <!-- Loading skeleton -->
+                    <template v-if="loadingSitemap">
+                      <a-skeleton active :paragraph="{ rows: 2 }" />
+                    </template>
 
-      <!-- Metrics Cards -->
-      <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
-        <!-- Chart card - occupies full width -->
-        <a-col :span="24">
-          <a-card>
-            <template #title>
-              <div class="card-title">
-                <a-space>
-                  <span>📈 Traffic Analytics (Last 15 Days)</span>
-                  <!-- Add statistics inline -->
-                  <template v-if="isGscConnected && gscAnalytics">
-                    <div class="inline-stats">
-                      <a-statistic 
-                        title="Impressions" 
-                        :value="gscAnalytics?.impressions ?? 'No impressions or clicks data'"
-                        :precision="0"
-                        class="compact-stat inline-stat"
+                    <!-- Content -->
+                    <template v-else>
+                      <template v-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
+                        <a-empty 
+                          description="Add and verify your site to get sitemap automatically"
+                          class="centered-empty-state"
+                        >
+                          <template #extra>
+                            <a-button type="primary" @click="openEditWithBasicInfoToVerify">
+                              Add Your Site
+                            </a-button>
+                          </template>
+                        </a-empty>
+                      </template>
+                      <template v-else-if="sitemapData?.length">
+                        <div class="sitemap-content">
+                          <a-tree
+                            :tree-data="sitemapData"
+                            :default-expanded-keys="expandedKeys"
+                            class="sitemap-tree"
+                            @select="handleTreeSelect"
+                          >
+                            <template #title="{ title, key }">
+                              <div class="tree-node-title">
+                                <span>{{ title }}</span>
+                                <a-space>
+                                  <a-button
+                                    v-if="!key.includes('folder_')"
+                                    :href="getVisitUrl(key)"
+                                    target="_blank"
+                                    class="visit-link"
+                                    @click.stop
+                                    type="link"
+                                    size="small"
+                                  >
+                                    <GlobalOutlined /> Visit
+                                  </a-button>
+                                  <a-spin v-if="loadingUrls[key]" size="small" />
+                                  <template v-if="nodeUrls[key]">
+                                    <a-button
+                                      v-for="url in nodeUrls[key]"
+                                      :key="url"
+                                      :href="url"
+                                      target="_blank"
+                                      type="link"
+                                      size="small"
+                                      class="url-link"
+                                    >
+                                      <LinkOutlined />
+                                    </a-button>
+                                  </template>
+                                </a-space>
+                              </div>
+                            </template>
+                          </a-tree>
+                        </div>
+                      </template>
+                      <template v-else>
+                        <a-empty 
+                          description="No pages found" 
+                          class="centered-empty-state"
+                        />
+                      </template>
+                    </template>
+                  </a-card>
+                </a-col>
+
+                <!-- Pages Card - occupies 1/3 width -->
+                <a-col :span="8">
+                  <a-card class="pages-card">
+                    <template #title>
+                      <span>📄 Pages Overview</span>
+                    </template>
+                    <a-row :gutter="[16, 16]">
+                      <a-col :span="24">
+                        <a-statistic 
+                          title="Generated" 
+                          :value="pagesDashboard?.generatorCount || 0"
+                          :value-style="{ fontSize: '16px' }"
+                          :title-style="{ fontSize: '12px' }"
+                        >
+                          <template #suffix>
+                            <a-tag size="small" color="success" v-if="pagesDashboard?.generatedChange">
+                              <span style="font-size: 12px">↑ {{ pagesDashboard.generatedChange }}%</span>
+                            </a-tag>
+                          </template>
+                        </a-statistic>
+                      </a-col>
+                      <a-col :span="24">
+                        <a-statistic 
+                          title="Published" 
+                          :value="pagesDashboard?.publishCount || 0"
+                          :value-style="{ fontSize: '16px' }"
+                          :title-style="{ fontSize: '12px' }"
+                        >
+                          <template #suffix v-if="pagesDashboard?.publishCount === 0">
+                            <a-tag size="small">
+                              <span style="font-size: 12px">Not published</span>
+                            </a-tag>
+                          </template>
+                        </a-statistic>
+                      </a-col>
+                      <a-col :span="24">
+                        <a-statistic 
+                          title="Indexed Pages Published By WebsiteLM" 
+                          :value="pagesDashboard?.indexedCount || 0"
+                          :value-style="{ fontSize: '16px' }"
+                          :title-style="{ fontSize: '12px' }"
+                        >
+                          <template #suffix v-if="pagesDashboard?.indexedCount === 0">
+                            <a-tag size="small">
+                              <span style="font-size: 12px">Not indexed</span>
+                            </a-tag>
+                          </template>
+                        </a-statistic>
+                      </a-col>
+                    </a-row>
+                  </a-card>
+                </a-col>
+              </a-row>
+            </a-collapse-panel>
+
+            <!-- Traffic Analytics -->
+            <a-collapse-panel key="analytics" header="📈 Traffic Analytics (Last 15 Days)">
+              <a-card>
+                <template #title>
+                  <div class="card-title">
+                    <a-space>
+                      <span>📈 Traffic Analytics (Last 15 Days)</span>
+                      <!-- Add statistics inline -->
+                      <template v-if="isGscConnected && gscAnalytics">
+                        <div class="inline-stats">
+                          <a-statistic 
+                            title="Impressions" 
+                            :value="gscAnalytics?.impressions ?? 'No impressions or clicks data'"
+                            :precision="0"
+                            class="compact-stat inline-stat"
+                          >
+                            <template #suffix>
+                              <a-tag size="small" color="success" v-if="gscAnalytics?.impressionsChange">
+                                ↑ {{ gscAnalytics.impressionsChange }}%
+                              </a-tag>
+                            </template>
+                          </a-statistic>
+                          <a-divider type="vertical" style="margin: 0 16px; height: 24px" />
+                          <a-statistic 
+                            title="Clicks" 
+                            :value="gscAnalytics?.clicks ?? 'No impressions or clicks data'"
+                            :precision="0"
+                            class="compact-stat inline-stat"
+                          >
+                            <template #suffix>
+                              <a-tag size="small" color="success" v-if="gscAnalytics?.clicksChange">
+                                ↑ {{ gscAnalytics.clicksChange }}%
+                              </a-tag>
+                            </template>
+                          </a-statistic>
+                        </div>
+                      </template>
+                      <a-select 
+                        v-model:value="selectedSiteUrl" 
+                        style="width: 200px"
+                        @change="handleSiteChange"
                       >
-                        <template #suffix>
-                          <a-tag size="small" color="success" v-if="gscAnalytics?.impressionsChange">
-                            ↑ {{ gscAnalytics.impressionsChange }}%
-                          </a-tag>
-                        </template>
-                      </a-statistic>
-                      <a-divider type="vertical" style="margin: 0 16px; height: 24px" />
-                      <a-statistic 
-                        title="Clicks" 
-                        :value="gscAnalytics?.clicks ?? 'No impressions or clicks data'"
-                        :precision="0"
-                        class="compact-stat inline-stat"
-                      >
-                        <template #suffix>
-                          <a-tag size="small" color="success" v-if="gscAnalytics?.clicksChange">
-                            ↑ {{ gscAnalytics.clicksChange }}%
-                          </a-tag>
-                        </template>
-                      </a-statistic>
-                    </div>
-                  </template>
-                  <a-select 
-                    v-model:value="selectedSiteUrl" 
-                    style="width: 200px"
-                    @change="handleSiteChange"
-                  >
-                    <a-select-option 
-                      v-for="site in gscSites" 
-                      :key="site.siteUrl" 
-                      :value="site.siteUrl"
-                    >
-                      {{ site.siteUrl }}
-                    </a-select-option>
-                  </a-select>
-                </a-space>
-              </div>
-            </template>
-            
-            <template v-if="!isGscConnected">
-              <!-- GSC not connected state -->
-              <a-empty class="centered-empty-state">
-                <template #description>
-                  <span>Connect Google Search Console to view analytics</span>
+                        <a-select-option 
+                          v-for="site in gscSites" 
+                          :key="site.siteUrl" 
+                          :value="site.siteUrl"
+                        >
+                          {{ site.siteUrl }}
+                        </a-select-option>
+                      </a-select>
+                    </a-space>
+                  </div>
                 </template>
-                <a-button 
-                  type="primary" 
-                  @click="connectGSC"
-                >
-                  Connect Google Search Console
-                </a-button>
-              </a-empty>
-            </template>
-            
-            <template v-else-if="!gscAnalytics?.dailyData?.length">
-              <!-- No data state -->
-              <a-empty 
-                description="No data available" 
-                class="centered-empty-state"
-              />
-            </template>
-            
-            <template v-else>
-              <!-- Chart container -->
-              <div class="chart-wrapper">
-                <div id="trafficChart" ref="chartRef" class="chart-container"></div>
-              </div>
-            </template>
-          </a-card>
+                
+                <template v-if="!isGscConnected">
+                  <!-- GSC not connected state -->
+                  <a-empty class="centered-empty-state">
+                    <template #description>
+                      <span>Connect Google Search Console to view analytics</span>
+                    </template>
+                    <a-button 
+                      type="primary" 
+                      @click="connectGSC"
+                    >
+                      Connect Google Search Console
+                    </a-button>
+                  </a-empty>
+                </template>
+                
+                <template v-else-if="!gscAnalytics?.dailyData?.length">
+                  <!-- No data state -->
+                  <a-empty 
+                    description="No data available" 
+                    class="centered-empty-state"
+                  />
+                </template>
+                
+                <template v-else>
+                  <!-- Chart container -->
+                  <div class="chart-wrapper">
+                    <div id="trafficChart" ref="chartRef" class="chart-container"></div>
+                  </div>
+                </template>
+              </a-card>
+            </a-collapse-panel>
+          </a-collapse>
         </a-col>
       </a-row>
     </div>
@@ -1004,7 +1010,7 @@ export default defineComponent({
       chart: null, // 添加到 data 中，使其成为响应式数据
       loadingUrls: {}, // 新增: 记录每个节点的加载状态
       nodeUrls: {}, // 新增: 缓存每个节点的URLs
-      activeCollapseKeys: ['sitemap'],
+      activeCollapseKeys: [], // 默认全部折叠
       selectedSiteUrl: '', // 当前选中的站点URL
       sitemapModal: {
         visible: false,
@@ -3341,6 +3347,132 @@ export default defineComponent({
     line-height: 1;
     white-space: nowrap;
     background: none;
+  }
+}
+
+/* 添加折叠面板样式 */
+:deep(.ant-collapse) {
+  background: transparent;
+  border: none;
+}
+
+:deep(.ant-collapse-item) {
+  margin-bottom: 16px;
+  border: none;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s;
+}
+
+/* 标题区域样式优化 */
+:deep(.ant-collapse-header) {
+  font-size: 16px;
+  font-weight: 500;
+  padding: 16px 24px !important;
+  background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%) !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+  
+  /* 添加光晕效果 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 50%),
+      radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.15), transparent 50%);
+    pointer-events: none;
+  }
+  
+  /* 添加鼠标悬停效果 */
+  &:hover {
+    background: linear-gradient(135deg, #1E1B4B 0%, #2D3A8C 100%) !important;
+    cursor: pointer;
+    
+    /* 移除这里的 transform scale 效果 */
+    .ant-collapse-expand-icon {
+      opacity: 0.9; /* 改用透明度来实现悬停效果 */
+    }
+  }
+  
+  /* 优化展开图标 */
+  .ant-collapse-expand-icon {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 16px;
+    margin-right: 12px;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    opacity: 0.8;
+  }
+  
+  /* 标题文本样式 */
+  .ant-collapse-header-text {
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    /* 让 emoji 更突出 */
+    span {
+      font-size: 20px;
+      margin-right: 4px;
+    }
+  }
+}
+
+/* 激活状态的面板样式 */
+:deep(.ant-collapse-item-active) {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  
+  .ant-collapse-header {
+    background: linear-gradient(135deg, #1E293B 0%, #312E81 100%) !important;
+    
+    /* 激活状态下的展开图标 */
+    .ant-collapse-expand-icon {
+      color: #818CF8;
+    }
+  }
+}
+
+:deep(.ant-collapse-content) {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+:deep(.ant-collapse-content-box) {
+  padding: 24px !important;
+  background: white;
+}
+
+/* 移除最后一个折叠面板的底部间距 */
+:deep(.ant-collapse-item:last-child) {
+  margin-bottom: 0;
+}
+
+/* 添加展开/折叠动画 */
+:deep(.ant-collapse-content) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &.ant-collapse-content-active {
+    animation: slideDown 0.3s ease-out;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>
