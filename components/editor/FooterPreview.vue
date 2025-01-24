@@ -1,33 +1,67 @@
 <template>
-  <div class="footer-preview">
+  <div class="footer-preview" :style="computedStyles">
     <div class="footer-container">
       <!-- 公司信息部分 -->
       <div class="grid-section company-section">
-        <h3 class="company-name">{{ data?.companyName || 'Company Name' }}</h3>
-        <p class="company-desc">{{ data?.description || 'Company description' }}</p>
+        <h3 class="company-name" :style="{ color: data.colors?.companyName }">
+          {{ data?.companyName || 'Company Name' }}
+        </h3>
+        <p class="company-desc" :style="{ color: data.colors?.description }">
+          {{ data?.description || 'Company description' }}
+        </p>
       </div>
 
       <!-- 功能特性部分 -->
       <div class="grid-section">
-        <h4 class="section-title">Features</h4>
+        <h4 class="section-title" :style="{ color: data.colors?.featuresTitle }">
+          {{ data?.features?.title || 'Features' }}
+        </h4>
         <ul class="features-list">
-          <li v-for="(feature, index) in data?.features" :key="index">
-            <a :href="feature.href" target="_blank" rel="noopener noreferrer" class="feature-link">{{ feature.title }}</a>
+          <li v-for="(feature, index) in data?.features?.items" :key="index">
+            <a 
+              :href="feature.href" 
+              class="feature-link"
+              :style="{ color: data.colors?.featureLinks }"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ feature.title }}
+            </a>
           </li>
         </ul>
       </div>
 
       <!-- 订阅部分 -->
-      <div class="grid-section newsletter-section">
-        <h4 class="section-title">Stay Updated</h4>
-        <p class="newsletter-desc">{{ data?.newsletter?.text }}</p>
+      <div 
+        v-if="data?.newsletter?.enabled"
+        class="grid-section newsletter-section"
+      >
+        <h4 class="section-title" :style="{ color: data.colors?.newsletterTitle }">
+          {{ data?.newsletter?.title || 'Stay Updated' }}
+        </h4>
+        <p class="newsletter-desc" :style="{ color: data.colors?.newsletterText }">
+          {{ data?.newsletter?.text || 'Subscribe to our newsletter' }}
+        </p>
         <div class="subscribe-form">
           <input 
             type="email" 
             placeholder="Enter your email"
             class="email-input"
+            :style="{
+              background: data.colors?.inputBackground,
+              color: data.colors?.newsletterText,
+              '--placeholder-color': data.colors?.inputPlaceholder
+            }"
           >
-          <button class="subscribe-button">{{ data?.newsletter?.buttonText }}</button>
+          <button 
+            class="subscribe-button"
+            :style="{
+              background: data.colors?.buttonBackground,
+              color: data.colors?.buttonText
+            }"
+          >
+            {{ data?.newsletter?.buttonText }}
+          </button>
         </div>
       </div>
 
@@ -37,16 +71,26 @@
       <!-- 底部区域 -->
       <div class="bottom-section">
         <div class="social-links">
-          <a v-for="(link, type) in data?.socialMedia" 
-             :key="type"
-             :href="link"
-             target="_blank"
-             class="social-link"
+          <a 
+            v-for="link in data?.socialMedia?.links || []" 
+            :key="link.platform"
+            :href="link.url"
+            class="social-link"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            <component :is="getSocialIcon(type)" />
+            <component 
+              :is="getSocialIcon(link.platform)" 
+              :style="{
+                fontSize: `${data?.socialMedia?.iconSize || 24}px`,
+                color: data?.socialMedia?.iconColor || '#9CA3AF'
+              }"
+            />
           </a>
         </div>
-        <p class="copyright">{{ data?.copyright || `© ${currentYear} ${data?.companyName || 'Company Name'}. All rights reserved.` }}</p>
+        <p class="copyright" :style="{ color: data.colors?.copyright }">
+          {{ data?.copyright || `© ${currentYear} ${data?.companyName || 'Company Name'}. All rights reserved.` }}
+        </p>
       </div>
     </div>
   </div>
@@ -58,13 +102,31 @@ import {
   TwitterOutlined, 
   YoutubeOutlined, 
   LinkedinOutlined,
-  MessageOutlined 
+  FacebookOutlined,
+  InstagramOutlined,
+  GithubOutlined,
+  RedditOutlined,
+  MessageOutlined,
+  GlobalOutlined,
+  MailOutlined,
+  MediumOutlined,
+  BehanceOutlined
 } from '@ant-design/icons-vue'
 
 const props = defineProps({
   data: {
     type: Object,
     default: () => ({})
+  },
+  styles: {
+    type: Object,
+    default: () => ({
+      backgroundType: 'solid',
+      backgroundColor: '#000000',
+      gradientStart: '#000000',
+      gradientEnd: '#1F2937',
+      gradientAngle: 135
+    })
   }
 })
 
@@ -75,15 +137,40 @@ const getSocialIcon = (type) => {
     twitter: TwitterOutlined,
     youtube: YoutubeOutlined,
     linkedin: LinkedinOutlined,
-    discord: MessageOutlined
+    facebook: FacebookOutlined,
+    instagram: InstagramOutlined,
+    github: GithubOutlined,
+    reddit: RedditOutlined,
+    discord: MessageOutlined,
+    website: GlobalOutlined,
+    email: MailOutlined,
+    medium: MediumOutlined,
+    behance: BehanceOutlined,
+    tiktok: InstagramOutlined,
+    pinterest: InstagramOutlined,
+    twitch: YoutubeOutlined,
+    dribbble: BehanceOutlined
   }
-  return icons[type]
+  return icons[type] || GlobalOutlined
 }
+
+// 添加计算样式
+const computedStyles = computed(() => {
+  const styles = {
+    background: props.styles.backgroundType === 'solid' 
+      ? props.styles.backgroundColor
+      : `linear-gradient(${props.styles.gradientAngle}deg, ${props.styles.gradientStart}, ${props.styles.gradientEnd})`,
+    transition: 'all 0.3s ease'
+  }
+  console.log('Computed footer styles:', styles) // 添加调试日志
+  return styles
+})
 </script>
 
 <style scoped>
 .footer-preview {
-  background: #000000;
+  /* 删除固定的背景色 */
+  /* background: #000000; */
   border-radius: 8px;
   padding: 48px 24px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
@@ -100,6 +187,15 @@ const getSocialIcon = (type) => {
 
 .grid-section {
   padding: 0 16px;
+}
+
+.company-name,
+.company-desc,
+.section-title,
+.feature-link,
+.newsletter-desc,
+.copyright {
+  transition: color 0.3s ease;
 }
 
 .company-name {
@@ -158,23 +254,25 @@ const getSocialIcon = (type) => {
   flex: 1;
   padding: 8px 16px;
   border-radius: 6px;
-  background: #1f2937;
   border: 1px solid #374151;
-  color: #ffffff;
   font-size: 14px;
+}
+
+.email-input::placeholder {
+  color: var(--placeholder-color);
+  opacity: 1;
 }
 
 .subscribe-button {
   padding: 8px 24px;
-  background: #2563eb;
-  color: #ffffff;
   border-radius: 6px;
   font-weight: 500;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  border: none;
 }
 
 .subscribe-button:hover {
-  background: #1d4ed8;
+  opacity: 0.9;
 }
 
 .divider {
@@ -198,12 +296,12 @@ const getSocialIcon = (type) => {
 }
 
 .social-link {
-  color: #9ca3af;
-  transition: color 0.2s;
+  text-decoration: none;
+  transition: opacity 0.2s;
 }
 
 .social-link:hover {
-  color: #ffffff;
+  opacity: 0.8;
 }
 
 .copyright {

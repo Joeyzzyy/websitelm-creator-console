@@ -1,5 +1,5 @@
 <template>
-  <div class="header-preview">
+  <div class="header-preview" :style="computedStyles">
     <div class="logo">
       <img 
         v-if="data.logo.src" 
@@ -19,7 +19,10 @@
           :trigger="['hover']"
           placement="bottom"
         >
-          <a class="menu-item" @click.prevent>
+          <a class="menu-item" @click.prevent :style="{ 
+            fontWeight: item.fontWeight,
+            color: item.color || '#4b5563'
+          }">
             {{ item.label }}
             <down-outlined />
           </a>
@@ -41,6 +44,10 @@
           target="_blank"
           rel="noopener noreferrer"
           class="menu-item"
+          :style="{ 
+            fontWeight: item.fontWeight,
+            color: item.color || '#4b5563'
+          }"
         >
           {{ item.label }}
         </a>
@@ -51,10 +58,15 @@
       <a-button
         v-for="item in data.actionItems"
         :key="item.key"
-        :type="item.buttonType"
         :href="item.href"
         target="_blank"
         rel="noopener noreferrer"
+        class="custom-button"
+        :style="{
+          '--button-bg': item.backgroundColor || '#1890ff',
+          '--button-color': item.textColor || '#ffffff',
+          '--button-border': item.backgroundColor || '#1890ff'
+        }"
       >
         {{ item.label }}
       </a-button>
@@ -63,13 +75,31 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { DownOutlined } from '@ant-design/icons-vue'
 
-defineProps({
+const props = defineProps({
   data: {
     type: Object,
     required: true
+  },
+  styles: {
+    type: Object,
+    required: true
   }
+})
+
+// 计算背景样式
+const computedStyles = computed(() => {
+  const styles = {
+    background: props.styles.backgroundType === 'solid' 
+      ? props.styles.backgroundColor || '#FFFFFF'
+      : `linear-gradient(${props.styles.gradientAngle || 0}deg, ${props.styles.gradientStart || '#1890FF'}, ${props.styles.gradientEnd || '#3B82F6'})`,
+    transition: 'all 0.3s ease'
+  }
+  
+  console.log('Computed header styles:', styles)
+  return styles
 })
 </script>
 
@@ -79,8 +109,8 @@ defineProps({
   align-items: center;
   justify-content: space-between;
   padding: 1rem;
-  background: white;
   border-radius: 8px;
+  transition: all 0.3s ease;
 }
 
 .logo img {
@@ -100,6 +130,9 @@ defineProps({
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  padding: 0 16px;
+  cursor: pointer;
+  transition: color 0.3s ease;
 }
 
 .menu-item:hover {
@@ -148,5 +181,15 @@ defineProps({
 :deep(.ant-btn-link) {
   padding: 4px 15px;
   color: #1890ff;
+}
+
+:deep(.custom-button.ant-btn) {
+  background-color: var(--button-bg) !important;
+  color: var(--button-color) !important;
+  border-color: var(--button-border) !important;
+}
+
+:deep(.custom-button.ant-btn:hover) {
+  opacity: 0.9;
 }
 </style>

@@ -1011,8 +1011,7 @@ export default defineComponent({
         status: getKeywordStatus(item),
         grade: item.grade,
         reason: item.reasoning || 'No specific reason provided',
-        pages: [],
-        competitors: [],
+        relatedOutlines: item.relatedOutlines || [], // 添加 relatedOutlines
         favorited: item.status === 'selected',
       }
     }
@@ -1869,8 +1868,10 @@ export default defineComponent({
         
         message.success('All outlines have been cleared')
         
-        // Refresh the content plans list
+        // 重新检查生成状态并获取最新列表
+        await checkOutlineGenerationStatus()
         await fetchContentPlans()
+
       } catch (error) {
         console.error('Failed to clear outlines:', error)
         message.error('Failed to clear outlines. Please try again.')
@@ -3087,6 +3088,11 @@ export default defineComponent({
 
 .compact-table :deep(.ant-table-tbody > tr > td) {
   padding: 8px 16px;
+}
+
+.related-outlines {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.65);
 }
 </style>
 

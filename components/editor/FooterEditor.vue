@@ -1,7 +1,86 @@
 <template>
   <div class="editor-container">
     <div class="preview-section">
-      <FooterPreview :data="footerData" />
+      <FooterPreview :data="footerData" :styles="footerStyles" />
+      
+      <!-- 添加背景色设置 -->
+      <div class="color-settings">
+        <div class="color-type-switch">
+          <a-radio-group v-model:value="footerStyles.backgroundType" size="small">
+            <a-radio value="solid">Solid</a-radio>
+            <a-radio value="gradient">Gradient</a-radio>
+          </a-radio-group>
+        </div>
+
+        <div class="color-pickers">
+          <!-- Solid color picker -->
+          <template v-if="footerStyles.backgroundType === 'solid'">
+            <div class="color-input">
+              <div 
+                class="color-preview"
+                :style="{ background: footerStyles.backgroundColor }"
+                @click="toggleColorPicker('background', $event)"
+              ></div>
+              <input 
+                v-model="footerStyles.backgroundColor"
+                type="text"
+                placeholder="#000000"
+              />
+            </div>
+          </template>
+
+          <!-- Gradient color pickers -->
+          <template v-if="footerStyles.backgroundType === 'gradient'">
+            <div class="gradient-inputs">
+              <div class="color-input">
+                <div 
+                  class="color-preview"
+                  :style="{ background: footerStyles.gradientStart }"
+                  @click="toggleColorPicker('start', $event)"
+                ></div>
+                <input 
+                  v-model="footerStyles.gradientStart"
+                  type="text"
+                  placeholder="#000000"
+                />
+              </div>
+              <div class="color-input">
+                <div 
+                  class="color-preview"
+                  :style="{ background: footerStyles.gradientEnd }"
+                  @click="toggleColorPicker('end', $event)"
+                ></div>
+                <input 
+                  v-model="footerStyles.gradientEnd"
+                  type="text"
+                  placeholder="#000000"
+                />
+              </div>
+              <div class="angle-control">
+                <div class="angle-hint">
+                  Adjust gradient angle (0-360°)
+                  <a-tooltip>
+                    <template #title>
+                      0° = left to right
+                      90° = bottom to top
+                      180° = right to left
+                      270° = top to bottom
+                    </template>
+                    <info-circle-outlined />
+                  </a-tooltip>
+                </div>
+                <Slider
+                  v-model="footerStyles.gradientAngle"
+                  :min="0"
+                  :max="360"
+                  :step="1"
+                  class="angle-slider"
+                />
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
     </div>
 
     <div class="editor-header">
@@ -23,35 +102,128 @@
           <div class="section">
             <h3 class="section-title">Basic Information</h3>
             <a-form-item label="Company Name">
-              <a-input v-model:value="footerData.companyName" />
+              <div class="input-with-color">
+                <a-input v-model:value="footerData.companyName" />
+                <div 
+                  class="color-picker"
+                  :style="{ background: footerData.colors.companyName }"
+                  @click="toggleColorPicker('companyName', $event)"
+                ></div>
+              </div>
             </a-form-item>
             
             <a-form-item label="Description">
-              <a-textarea 
-                v-model:value="footerData.description"
-                :rows="3"
-                placeholder="Enter company description"
-              />
+              <div class="input-with-color">
+                <a-textarea 
+                  v-model:value="footerData.description"
+                  :rows="3"
+                />
+                <div 
+                  class="color-picker"
+                  :style="{ background: footerData.colors.description }"
+                  @click="toggleColorPicker('description', $event)"
+                ></div>
+              </div>
             </a-form-item>
 
             <!-- 添加版权信息编辑 -->
             <a-form-item label="Copyright Text">
-              <a-input
-                v-model:value="footerData.copyright"
-                placeholder="© 2025 Company Name. All rights reserved."
-              />
+              <div class="input-with-color">
+                <a-input
+                  v-model:value="footerData.copyright"
+                  placeholder="© 2025 Company Name. All rights reserved."
+                />
+                <div 
+                  class="color-picker"
+                  :style="{ background: footerData.colors.copyright }"
+                  @click="toggleColorPicker('copyright', $event)"
+                ></div>
+              </div>
             </a-form-item>
           </div>
 
           <!-- Newsletter设置 -->
           <div class="section">
-            <h3 class="section-title">Newsletter</h3>
-            <a-form-item label="Subscribe Text">
-              <a-input v-model:value="footerData.newsletter.text" />
-            </a-form-item>
-            <a-form-item label="Button Text">
-              <a-input v-model:value="footerData.newsletter.buttonText" />
-            </a-form-item>
+            <div class="section-header">
+              <h3 class="section-title">Newsletter Section</h3>
+              <a-switch
+                v-model:checked="footerData.newsletter.enabled"
+                size="small"
+              />
+            </div>
+
+            <template v-if="footerData.newsletter.enabled">
+              <!-- Newsletter 标题 -->
+              <a-form-item label="Section Title">
+                <div class="input-with-color">
+                  <a-input v-model:value="footerData.newsletter.title" />
+                  <div 
+                    class="color-picker"
+                    :style="{ background: footerData.colors.newsletterTitle }"
+                    @click="toggleColorPicker('newsletterTitle', $event)"
+                  ></div>
+                </div>
+              </a-form-item>
+
+              <!-- Newsletter 描述文本 -->
+              <a-form-item label="Description">
+                <div class="input-with-color">
+                  <a-textarea 
+                    v-model:value="footerData.newsletter.text" 
+                    :rows="2"
+                  />
+                  <div 
+                    class="color-picker"
+                    :style="{ background: footerData.colors.newsletterText }"
+                    @click="toggleColorPicker('newsletterText', $event)"
+                  ></div>
+                </div>
+              </a-form-item>
+              
+              <!-- 输入框样式 -->
+              <a-form-item label="Input Field">
+                <div class="color-group">
+                  <div class="color-item">
+                    <span>Background</span>
+                    <div 
+                      class="color-picker"
+                      :style="{ background: footerData.colors.inputBackground }"
+                      @click="toggleColorPicker('inputBackground', $event)"
+                    ></div>
+                  </div>
+                  <div class="color-item">
+                    <span>Placeholder</span>
+                    <div 
+                      class="color-picker"
+                      :style="{ background: footerData.colors.inputPlaceholder }"
+                      @click="toggleColorPicker('inputPlaceholder', $event)"
+                    ></div>
+                  </div>
+                </div>
+              </a-form-item>
+              
+              <!-- 按钮样式 -->
+              <a-form-item label="Button">
+                <div class="color-group">
+                  <div class="color-item">
+                    <span>Background</span>
+                    <div 
+                      class="color-picker"
+                      :style="{ background: footerData.colors.buttonBackground }"
+                      @click="toggleColorPicker('buttonBackground', $event)"
+                    ></div>
+                  </div>
+                  <div class="color-item">
+                    <span>Text</span>
+                    <div 
+                      class="color-picker"
+                      :style="{ background: footerData.colors.buttonText }"
+                      @click="toggleColorPicker('buttonText', $event)"
+                    ></div>
+                  </div>
+                </div>
+              </a-form-item>
+            </template>
           </div>
         </a-col>
 
@@ -59,114 +231,108 @@
         <a-col :span="12">
           <!-- 功能列表 -->
           <div class="section">
-            <h3 class="section-title">Features</h3>
-            <div class="feature-list">
-              <div v-for="(feature, index) in footerData.features" :key="index" class="feature-item">
-                <a-input
-                  v-model:value="feature.title"
-                  style="width: 40%"
-                  placeholder="Feature name"
-                />
-                <a-input
-                  v-model:value="feature.href"
-                  style="width: 50%"
-                  placeholder="Feature link"
-                />
-                <a-button
-                  type="text"
-                  danger
-                  @click="removeFeature(index)"
-                >
-                  <delete-outlined />
-                </a-button>
+            <h3 class="section-title">Features Section</h3>
+            <a-form-item label="Section Title">
+              <div class="input-with-color">
+                <a-input v-model:value="footerData.features.title" />
+                <div 
+                  class="color-picker"
+                  :style="{ background: footerData.colors.featuresTitle }"
+                  @click="toggleColorPicker('featuresTitle', $event)"
+                ></div>
               </div>
-              <a-button type="dashed" block @click="addFeature">
-                Add Feature
-              </a-button>
-            </div>
-          </div>
+            </a-form-item>
 
-          <!-- 社交媒体链接 -->
-          <div class="social-media-section">
-            <h3>Social Media Links</h3>
-            <div class="social-links-container">
-              <div v-for="(url, platform) in footerData.socialMedia" 
-                   :key="platform" 
-                   class="social-link-item"
-              >
-                <a-select
-                  :value="platform"
-                  style="width: 120px"
-                  :disabled="disabled"
-                  @change="(newPlatform) => handleSocialPlatformChange(platform, newPlatform)"
-                >
-                  <a-select-option 
-                    v-for="item in availablePlatforms" 
-                    :key="item.value" 
-                    :value="item.value"
-                  >
-                    {{ item.label }}
-                  </a-select-option>
-                </a-select>
-                
-                <a-input
-                  v-model:value="footerData.socialMedia[platform]"
-                  :disabled="disabled"
-                  placeholder="Enter link"
-                  @change="handleChange"
-                />
-                
-                <a-button 
-                  type="text" 
-                  danger 
-                  @click="removeSocialLink(platform)"
-                >
-                  <delete-outlined />
-                </a-button>
+            <!-- Features 列表 -->
+            <a-form-item label="Feature Links">
+              <div class="feature-links-header">
+                <span>Links</span>
+                <div 
+                  class="color-picker"
+                  :style="{ background: footerData.colors.featureLinks }"
+                  @click="toggleColorPicker('featureLinks', $event)"
+                ></div>
               </div>
-            </div>
-            
-            <a-button 
-              type="primary" 
-              class="add-social-btn" 
-              @click="addSocialLink"
-            >
-              <plus-outlined /> Add Social Media
-            </a-button>
+              
+              <div class="feature-links-list">
+                <div 
+                  v-for="(feature, index) in footerData.features.items" 
+                  :key="index"
+                  class="feature-link-item"
+                >
+                  <a-input 
+                    v-model:value="feature.title" 
+                    placeholder="Link text"
+                    style="flex: 1"
+                  />
+                  <a-input 
+                    v-model:value="feature.href" 
+                    placeholder="URL"
+                    style="flex: 2"
+                  />
+                  <a-button 
+                    type="text" 
+                    danger 
+                    @click="removeFeature(index)"
+                  >
+                    <delete-outlined />
+                  </a-button>
+                </div>
+              </div>
+
+              <a-button 
+                type="dashed" 
+                block 
+                @click="addFeature" 
+                style="margin-top: 8px"
+              >
+                <plus-outlined /> Add Feature Link
+              </a-button>
+            </a-form-item>
           </div>
         </a-col>
       </a-row>
     </a-form>
   </div>
+
+  <!-- Color picker popup -->
+  <div 
+    v-if="showColorPicker"
+    class="color-picker-popup"
+    :style="colorPickerPosition"
+    @click.stop
+  >
+    <div class="color-wheel">
+      <input 
+        type="color" 
+        :value="getCurrentColor()"
+        @input="handleColorChange"
+        class="color-wheel-input"
+        @click.stop
+      />
+    </div>
+    <div class="preset-colors">
+      <div 
+        v-for="color in presetColors"
+        :key="color"
+        class="preset-color"
+        :style="{ background: color }"
+        @click="selectColor(color)"
+      ></div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { DeleteOutlined, PlusOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
 import FooterPreview from './FooterPreview.vue'
 import apiClient from '../../api/api'
 import { message } from 'ant-design-vue'
+import Slider from '@vueform/slider'
+import '@vueform/slider/themes/default.css'
 
 const emit = defineEmits(['update'])
-
-const availablePlatforms = [
-  { label: 'LinkedIn', value: 'linkedin' },
-  { label: 'Twitter/X', value: 'twitter' },
-  { label: 'Facebook', value: 'facebook' },
-  { label: 'Instagram', value: 'instagram' },
-  { label: 'GitHub', value: 'github' },
-  { label: 'YouTube', value: 'youtube' },
-  { label: 'TikTok', value: 'tiktok' },
-  { label: 'Pinterest', value: 'pinterest' },
-  { label: 'Reddit', value: 'reddit' },
-  { label: 'Discord', value: 'discord' },
-  { label: 'Twitch', value: 'twitch' },
-  { label: 'Medium', value: 'medium' },
-  { label: 'Behance', value: 'behance' },
-  { label: 'Dribbble', value: 'dribbble' },
-  { label: 'Personal Website', value: 'website' },
-  { label: 'Email', value: 'email' }
-]
 
 const props = defineProps({
   initialData: {
@@ -183,9 +349,22 @@ const footerData = ref({
   companyName: props.initialData.companyName,
   description: props.initialData.description,
   features: props.initialData.features,
-  socialMedia: props.initialData.socialMedia,
   newsletter: props.initialData.newsletter,
-  copyright: props.initialData.copyright
+  copyright: props.initialData.copyright,
+  colors: {
+    companyName: '#FFFFFF',
+    description: '#9CA3AF',
+    featuresTitle: '#FFFFFF',
+    featureLinks: '#9CA3AF',
+    newsletterTitle: '#FFFFFF',
+    newsletterText: '#9CA3AF',
+    copyright: '#9CA3AF',
+    inputBackground: '#1F2937',
+    inputPlaceholder: '#6B7280',
+    buttonBackground: '#2563EB',
+    buttonText: '#FFFFFF',
+    ...props.initialData?.colors
+  }
 })
 
 watch(() => props.initialData, (newValue) => {
@@ -198,38 +377,87 @@ watch(footerData, (newValue) => {
 
 // Features 相关方法
 const addFeature = () => {
-  footerData.value.features.push({ title: '', href: '#' })
+  footerData.value.features.items.push({
+    title: '',
+    href: '',
+    isExternal: false
+  })
 }
 
 const removeFeature = (index) => {
-  footerData.value.features.splice(index, 1)
+  footerData.value.features.items.splice(index, 1)
 }
 
-const handleSocialPlatformChange = (oldPlatform, newPlatform) => {
-  const url = footerData.value.socialMedia[oldPlatform]
-  delete footerData.value.socialMedia[oldPlatform]
-  footerData.value.socialMedia[newPlatform] = url
-  handleChange()
+// 添加 footer 样式配置
+const footerStyles = ref({
+  backgroundType: props.initialData?.styles?.backgroundType || 'solid',
+  backgroundColor: props.initialData?.styles?.backgroundColor || '#000000',
+  gradientStart: props.initialData?.styles?.gradientStart || '#000000',
+  gradientEnd: props.initialData?.styles?.gradientEnd || '#1F2937',
+  gradientAngle: props.initialData?.styles?.gradientAngle ?? 135
+})
+
+// 添加颜色选择器相关状态
+const showColorPicker = ref(false)
+const activeColorField = ref(null)
+const colorPickerPosition = ref({ top: '0px', left: '0px' })
+
+const presetColors = [
+  '#FFFFFF', '#9CA3AF', '#1F2937', '#111827',
+  '#F87171', '#60A5FA', '#34D399', '#FBBF24'
+]
+
+const getCurrentColor = () => {
+  if (activeColorField.value === 'background') {
+    return footerStyles.value.backgroundColor
+  } else if (activeColorField.value === 'start') {
+    return footerStyles.value.gradientStart
+  } else if (activeColorField.value === 'end') {
+    return footerStyles.value.gradientEnd
+  }
+  return footerData.value.colors[activeColorField.value] || '#FFFFFF'
 }
 
-const addSocialLink = () => {
-  const existingPlatforms = Object.keys(footerData.value.socialMedia)
-  const newPlatform = availablePlatforms.find(p => 
-    !existingPlatforms.includes(p.value)
-  )
-  if (newPlatform) {
-    footerData.value.socialMedia[newPlatform.value] = ''
-    handleChange()
+const handleColorChange = (event) => {
+  const newColor = event.target.value
+  if (activeColorField.value === 'background') {
+    footerStyles.value.backgroundColor = newColor
+  } else if (activeColorField.value === 'start') {
+    footerStyles.value.gradientStart = newColor
+  } else if (activeColorField.value === 'end') {
+    footerStyles.value.gradientEnd = newColor
+  } else {
+    footerData.value.colors[activeColorField.value] = newColor
   }
 }
 
-const removeSocialLink = (platform) => {
-  delete footerData.value.socialMedia[platform]
-  handleChange()
+const toggleColorPicker = (field, event) => {
+  console.log('Toggle color picker:', field)
+  activeColorField.value = field
+  showColorPicker.value = true
+  
+  // 计算颜色选择器的位置
+  const rect = event.target.getBoundingClientRect()
+  colorPickerPosition.value = {
+    top: `${rect.bottom + window.scrollY + 5}px`,
+    left: `${rect.left + window.scrollX}px`
+  }
+
+  // 阻止事件冒泡
+  event.stopPropagation()
 }
 
-const handleChange = () => {
-  emit('update', footerData.value)
+const selectColor = (color) => {
+  if (activeColorField.value === 'background') {
+    footerStyles.value.backgroundColor = color
+  } else if (activeColorField.value === 'start') {
+    footerStyles.value.gradientStart = color
+  } else if (activeColorField.value === 'end') {
+    footerStyles.value.gradientEnd = color
+  } else {
+    footerData.value.colors[activeColorField.value] = color
+  }
+  showColorPicker.value = false
 }
 
 // 添加保存相关逻辑
@@ -238,8 +466,12 @@ const saving = ref(false)
 const saveConfig = async () => {
   try {
     saving.value = true
+
     const payload = {
-      pageFooters: footerData.value,
+      pageFooters: {
+        ...footerData.value,
+        styles: footerStyles.value
+      }
     }
 
     const response = await apiClient.updatePageLayout(props.layoutId, payload)
@@ -256,6 +488,30 @@ const saveConfig = async () => {
     saving.value = false
   }
 }
+
+// 点击其他地方关闭颜色选择器
+const closeColorPicker = (event) => {
+  if (!event.target.closest('.color-picker-popup')) {
+    showColorPicker.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', closeColorPicker)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', closeColorPicker)
+})
+
+// 添加调试日志
+watch(showColorPicker, (newValue) => {
+  console.log('showColorPicker changed:', newValue)
+})
+
+watch(activeColorField, (newValue) => {
+  console.log('activeColorField changed:', newValue)
+})
 </script>
 
 <style scoped>
@@ -316,16 +572,22 @@ const saveConfig = async () => {
   margin-bottom: 16px;
 }
 
-.feature-list {
+.feature-links-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.feature-links-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.feature-item {
+.feature-link-item {
   display: flex;
   gap: 8px;
-  margin-bottom: 8px;
   align-items: center;
 }
 
@@ -360,5 +622,248 @@ const saveConfig = async () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+}
+
+/* 添加颜色设置相关样式 */
+.color-settings {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.color-type-switch {
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.color-pickers {
+  display: flex;
+  gap: 8px;
+}
+
+.color-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.color-preview {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+}
+
+.color-input input {
+  width: 80px;
+  border: none;
+  outline: none;
+  font-size: 12px;
+}
+
+.gradient-inputs {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.angle-slider {
+  width: 100px;
+  margin-left: 8px;
+}
+
+.color-picker-popup {
+  position: fixed;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  z-index: 1000;
+  width: 200px;
+  user-select: none;
+}
+
+.color-wheel {
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.color-wheel-input {
+  width: 100%;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.color-wheel-input::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.color-wheel-input::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+
+.preset-colors {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.preset-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.preset-color:hover {
+  transform: scale(1.1);
+}
+
+.angle-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.angle-hint {
+  font-size: 12px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+:deep(.anticon-info-circle) {
+  color: #1890ff;
+  cursor: help;
+}
+
+/* 自定义 Slider 数值提示的样式 */
+:deep(.slider-tooltip) {
+  background: #f0f0f0 !important;
+  color: #666 !important;
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-family: monospace !important;
+}
+
+:deep(.slider-tooltip::before) {
+  border-top-color: #f0f0f0 !important;
+}
+
+/* Customize slider appearance */
+:deep(.slider-target) {
+  height: 4px !important;
+}
+
+:deep(.slider-handle) {
+  width: 14px !important;
+  height: 14px !important;
+  background: white !important;
+  border: 2px solid #1890ff !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+:deep(.slider-connect) {
+  background: #1890ff !important;
+}
+
+:deep(.ant-radio-group) {
+  display: flex;
+  gap: 8px;
+}
+
+.input-with-color {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.color-picker {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.color-group {
+  display: flex;
+  gap: 16px;
+}
+
+.color-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.color-item span {
+  font-size: 14px;
+  color: #666;
+}
+
+.social-media-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.social-media-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.platform-label {
+  width: 80px;
+  text-transform: capitalize;
+}
+
+.icon-settings {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.color-picker {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.color-picker:hover {
+  transform: scale(1.05);
 }
 </style> 

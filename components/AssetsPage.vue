@@ -1646,7 +1646,15 @@ export default {
           isExternal: false,
           variant: 'button'
         }
-      ]
+      ],
+      // 添加 styles 对象
+      styles: {
+        backgroundType: 'solid',
+        backgroundColor: '#FFFFFF',
+        gradientStart: '#1890FF',
+        gradientEnd: '#3B82F6',
+        gradientAngle: 135
+      }
     })
 
     // 修改响应式变量定义，将 headerLayoutId 和 footerLayoutId 合并为一个
@@ -1666,7 +1674,6 @@ export default {
         })
 
         if (response?.data) {
-          // 统一设置 layoutId
           layoutId.value = response.data.pageLayoutId
 
           if (type === 'header') {
@@ -1687,20 +1694,76 @@ export default {
                     label: item.label || '',
                     href: item.href || '#',
                     isExternal: item.isExternal || false,
-                    variant: item.variant || 'link'
+                    variant: item.variant || 'link',
+                    backgroundColor: item.backgroundColor || '#FFFFFF',
+                    textColor: item.textColor || '#000000'
                   }))
-                : []
+                : [],
+              // 确保 styles 对象被正确设置
+              styles: {
+                backgroundType: headerData.styles?.backgroundType || 'solid',
+                backgroundColor: headerData.styles?.backgroundColor || '#FFFFFF',
+                gradientStart: headerData.styles?.gradientStart || '#1890FF',
+                gradientEnd: headerData.styles?.gradientEnd || '#3B82F6',
+                gradientAngle: headerData.styles?.gradientAngle ?? 135
+              }
             }
+            console.log('Updated headerConfig:', headerConfig.value) // 添加调试日志
           } else if (type === 'footer') {
             const footerData = response.data.pageFooters
             footerConfig.value = {
               companyName: footerData.companyName || '',
               description: footerData.description || '',
-              features: Array.isArray(footerData.features) ? footerData.features : [],
-              socialMedia: footerData.socialMedia || {},
+              features: {
+                title: footerData.features?.title || 'Features',  // 添加标题文本
+                items: Array.isArray(footerData.features?.items) ? footerData.features.items : []
+              },
+              socialMedia: {
+                links: {}, // 确保 links 对象始终存在
+                iconSize: footerData.socialMedia?.iconSize || 24,
+                iconColor: footerData.socialMedia?.iconColor || '#9CA3AF',
+                ...footerData.socialMedia, // 如果有现有数据，会覆盖上面的默认值
+              },
               newsletter: {
-                text: footerData.newsletter?.text || '',
-                buttonText: footerData.newsletter?.buttonText || ''
+                enabled: footerData.newsletter?.enabled ?? true, // 添加启用/禁用状态
+                title: footerData.newsletter?.title || 'Stay Updated',
+                text: footerData.newsletter?.text || 'Subscribe to our newsletter',
+                buttonText: footerData.newsletter?.buttonText || 'Subscribe'
+              },
+              copyright: footerData.copyright || '',
+              colors: {
+                companyName: footerData.colors?.companyName || '#FFFFFF',
+                description: footerData.colors?.description || '#9CA3AF',
+                featuresTitle: footerData.colors?.featuresTitle || '#FFFFFF',
+                featureLinks: footerData.colors?.featureLinks || '#9CA3AF',
+                newsletterTitle: footerData.colors?.newsletterTitle || '#FFFFFF',
+                newsletterText: footerData.colors?.newsletterText || '#9CA3AF',
+                copyright: footerData.colors?.copyright || '#9CA3AF',
+                inputBackground: footerData.colors?.inputBackground || '#1F2937',
+                inputPlaceholder: footerData.colors?.inputPlaceholder || '#6B7280',
+                buttonBackground: footerData.colors?.buttonBackground || '#2563EB',
+                buttonText: footerData.colors?.buttonText || '#FFFFFF',
+                featuresTitle: footerData.colors?.featuresTitle || '#FFFFFF',
+                newsletterTitle: footerData.colors?.newsletterTitle || '#FFFFFF',
+              },
+              styles: {
+                backgroundType: footerData.styles?.backgroundType || 'solid',
+                backgroundColor: footerData.styles?.backgroundColor || '#000000',
+                gradientStart: footerData.styles?.gradientStart || '#000000',
+                gradientEnd: footerData.styles?.gradientEnd || '#1F2937',
+                gradientAngle: footerData.styles?.gradientAngle ?? 135
+              }
+            }
+
+            // 如果有现有的社交媒体链接，确保它们被正确放置在 links 对象中
+            if (typeof footerData.socialMedia === 'object' && footerData.socialMedia !== null) {
+              footerConfig.value.socialMedia.links = {
+                ...footerConfig.value.socialMedia.links,
+                ...Object.fromEntries(
+                  Object.entries(footerData.socialMedia).filter(([key]) => 
+                    key !== 'iconSize' && key !== 'iconColor'
+                  )
+                )
               }
             }
           }
@@ -1721,7 +1784,10 @@ export default {
     const footerConfig = ref({
       companyName: '',
       description: '',
-      features: [],
+      features: {
+        title: 'Features',
+        items: []
+      },
       socialMedia: {},
       newsletter: {
         text: '',
