@@ -1,75 +1,98 @@
 <template>
   <div class="footer-preview" :style="computedStyles">
     <div class="footer-container">
-      <!-- 公司信息部分 -->
-      <div class="grid-section company-section">
-        <h3 class="company-name" :style="{ color: data.colors?.companyName }">
-          {{ data?.companyName || 'Company Name' }}
-        </h3>
-        <p class="company-desc" :style="{ color: data.colors?.description }">
-          {{ data?.description || 'Company description' }}
-        </p>
-      </div>
+      <!-- 主要内容区域 -->
+      <div class="main-content">
+        <!-- 公司信息部分 -->
+        <div class="grid-section company-section">
+          <h3 class="company-name" :style="{ color: data.colors?.companyName }">
+            {{ data?.companyName || 'Company Name' }}
+          </h3>
+          <p class="company-desc" :style="{ color: data.colors?.description }">
+            {{ data?.description || 'Company description' }}
+          </p>
+        </div>
 
-      <!-- 功能特性部分 -->
-      <div class="grid-section">
-        <h4 class="section-title" :style="{ color: data.colors?.featuresTitle }">
-          {{ data?.features?.title || 'Features' }}
-        </h4>
-        <ul class="features-list">
-          <li v-for="(feature, index) in data?.features?.items" :key="index">
-            <a 
-              :href="feature.href" 
-              class="feature-link"
-              :style="{ color: data.colors?.featureLinks }"
-              target="_blank"
-              rel="noopener noreferrer"
+        <!-- 功能特性部分 -->
+        <div class="grid-section">
+          <h4 class="section-title" :style="{ color: data.colors?.featuresTitle }">
+            {{ data?.features?.title || 'Features' }}
+          </h4>
+          <ul class="features-list">
+            <li v-for="(feature, index) in data?.features?.items" :key="index">
+              <a 
+                :href="feature.href" 
+                class="feature-link"
+                :style="{ color: data.colors?.featureLinks }"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {{ feature.title }}
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 订阅部分 -->
+        <div 
+          v-if="data?.newsletter?.enabled"
+          class="grid-section newsletter-section"
+        >
+          <h4 class="section-title" :style="{ color: data.colors?.newsletterTitle }">
+            {{ data?.newsletter?.title || 'Stay Updated' }}
+          </h4>
+          <p class="newsletter-desc" :style="{ color: data.colors?.newsletterText }">
+            {{ data?.newsletter?.text || 'Subscribe to our newsletter' }}
+          </p>
+          <div class="subscribe-form">
+            <input 
+              type="email" 
+              placeholder="Enter your email"
+              class="email-input"
+              :style="{
+                background: data.colors?.inputBackground,
+                color: data.colors?.newsletterText,
+                '--placeholder-color': data.colors?.inputPlaceholder
+              }"
             >
-              {{ feature.title }}
-            </a>
-          </li>
-        </ul>
-      </div>
-
-      <!-- 订阅部分 -->
-      <div 
-        v-if="data?.newsletter?.enabled"
-        class="grid-section newsletter-section"
-      >
-        <h4 class="section-title" :style="{ color: data.colors?.newsletterTitle }">
-          {{ data?.newsletter?.title || 'Stay Updated' }}
-        </h4>
-        <p class="newsletter-desc" :style="{ color: data.colors?.newsletterText }">
-          {{ data?.newsletter?.text || 'Subscribe to our newsletter' }}
-        </p>
-        <div class="subscribe-form">
-          <input 
-            type="email" 
-            placeholder="Enter your email"
-            class="email-input"
-            :style="{
-              background: data.colors?.inputBackground,
-              color: data.colors?.newsletterText,
-              '--placeholder-color': data.colors?.inputPlaceholder
-            }"
-          >
-          <button 
-            class="subscribe-button"
-            :style="{
-              background: data.colors?.buttonBackground,
-              color: data.colors?.buttonText
-            }"
-          >
-            {{ data?.newsletter?.buttonText }}
-          </button>
+            <button 
+              class="subscribe-button"
+              :style="{
+                background: data.colors?.buttonBackground,
+                color: data.colors?.buttonText
+              }"
+            >
+              {{ data?.newsletter?.buttonText }}
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- 分隔线 -->
-      <div class="divider"></div>
-
       <!-- 底部区域 -->
-      <div class="bottom-section">
+      <div class="footer-bottom">
+        <!-- Social Media Icons -->
+        <div class="footer-bottom-left">
+          <div class="social-icons">
+            <a
+              v-for="(social, index) in data.socialMedia?.links?.links || data.socialMedia?.links"
+              :key="index"
+              :href="social.url"
+              class="social-link"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <component 
+                :is="getSocialIcon(social.platform)"
+                class="social-icon"
+                :style="{ 
+                  fontSize: `${data.socialMedia?.iconSize || 24}px`,
+                  color: data.socialMedia?.iconColor || '#9CA3AF'
+                }"
+              />
+            </a>
+          </div>
+        </div>
+        
         <p class="copyright" :style="{ color: data.colors?.copyright }">
           {{ data?.copyright || `© ${currentYear} ${data?.companyName || 'Company Name'}. All rights reserved.` }}
         </p>
@@ -81,6 +104,20 @@
 <script setup>
 import { computed } from 'vue'
 import { GlobalOutlined } from '@ant-design/icons-vue'
+import {
+  FacebookFilled,
+  TwitterOutlined,
+  InstagramFilled,
+  LinkedinFilled,
+  GithubFilled,
+  YoutubeFilled,
+  RedditOutlined,
+  MediumOutlined,
+  BehanceOutlined,
+  DribbbleOutlined,
+  MailOutlined,
+  // Add more icons as needed
+} from '@ant-design/icons-vue'
 
 const props = defineProps({
   data: {
@@ -112,6 +149,26 @@ const computedStyles = computed(() => {
   console.log('Computed footer styles:', styles) // 添加调试日志
   return styles
 })
+
+// Add social icon mapping function
+const getSocialIcon = (platform) => {
+  const iconMap = {
+    facebook: FacebookFilled,
+    twitter: TwitterOutlined,
+    instagram: InstagramFilled,
+    linkedin: LinkedinFilled,
+    github: GithubFilled,
+    youtube: YoutubeFilled,
+    reddit: RedditOutlined,
+    medium: MediumOutlined,
+    behance: BehanceOutlined,
+    dribbble: DribbbleOutlined,
+    website: GlobalOutlined,
+    email: MailOutlined,
+    // Add more mappings as needed
+  }
+  return iconMap[platform] || GlobalOutlined
+}
 </script>
 
 <style scoped>
@@ -127,9 +184,33 @@ const computedStyles = computed(() => {
 .footer-container {
   max-width: 1280px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+.main-content {
   display: grid;
   grid-template-columns: 2fr 1fr 2fr;
   gap: 32px;
+  flex: 1;
+}
+
+.footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 32px;
+  margin-top: 32px;
+  padding-left: 32px;
+  padding-right: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-bottom-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .grid-section {
@@ -222,19 +303,24 @@ const computedStyles = computed(() => {
   opacity: 0.9;
 }
 
-.divider {
-  grid-column: 1 / -1;
-  height: 1px;
-  background: #374151;
-  margin: 32px 0;
+.social-icons {
+  display: flex;
+  gap: 24px;
+  align-items: center;
 }
 
-.bottom-section {
-  grid-column: 1 / -1;
+.social-link {
+  text-decoration: none;
   display: flex;
-  justify-content: center;
   align-items: center;
-  padding: 0 16px;
+}
+
+.social-link:hover {
+  opacity: 0.8;
+}
+
+.social-icon {
+  transition: all 0.3s ease;
 }
 
 .copyright {
@@ -251,10 +337,14 @@ const computedStyles = computed(() => {
     grid-column: 1;
   }
 
-  .bottom-section {
+  .footer-bottom {
     flex-direction: column;
     gap: 24px;
     text-align: center;
+  }
+
+  .footer-bottom-left {
+    justify-content: center;
   }
 }
 </style> 

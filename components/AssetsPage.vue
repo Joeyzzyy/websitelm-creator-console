@@ -1719,10 +1719,9 @@ export default {
                 items: Array.isArray(footerData.features?.items) ? footerData.features.items : []
               },
               socialMedia: {
-                links: {}, // 确保 links 对象始终存在
                 iconSize: footerData.socialMedia?.iconSize || 24,
                 iconColor: footerData.socialMedia?.iconColor || '#9CA3AF',
-                ...footerData.socialMedia, // 如果有现有数据，会覆盖上面的默认值
+                links: Array.isArray(footerData.socialMedia?.links) ? footerData.socialMedia.links : []
               },
               newsletter: {
                 enabled: footerData.newsletter?.enabled ?? true, // 添加启用/禁用状态

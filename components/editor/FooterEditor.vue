@@ -290,6 +290,98 @@
               </a-button>
             </a-form-item>
           </div>
+
+          <!-- 添加社交媒体设置部分 -->
+          <div class="section">
+            <div class="section-header">
+              <h3 class="section-title">Social Media</h3>
+            </div>
+
+            <!-- 图标全局设置 -->
+            <div class="icon-settings">
+              <a-form-item label="Icon Size" style="margin-bottom: 0">
+                <a-select
+                  v-model:value="footerData.socialMedia.iconSize"
+                  style="width: 100px"
+                >
+                  <a-select-option :value="16">Small</a-select-option>
+                  <a-select-option :value="20">Medium</a-select-option>
+                  <a-select-option :value="24">Large</a-select-option>
+                  <a-select-option :value="32">Extra Large</a-select-option>
+                </a-select>
+              </a-form-item>
+              
+              <a-form-item label="Icon Color" style="margin-bottom: 0">
+                <div 
+                  class="color-picker"
+                  :style="{ background: footerData.socialMedia.iconColor }"
+                  @click="toggleColorPicker('socialMediaIcon', $event)"
+                ></div>
+              </a-form-item>
+            </div>
+
+            <!-- 社交媒体链接列表 -->
+            <div class="social-media-list">
+              <template v-if="footerData.socialMedia.links && footerData.socialMedia.links.length > 0">
+                <div 
+                  v-for="(link, index) in footerData.socialMedia.links" 
+                  :key="index"
+                  class="social-media-item"
+                >
+                  <a-select
+                    v-model:value="link.platform"
+                    style="width: 120px"
+                    placeholder="Platform"
+                  >
+                    <a-select-option value="twitter">Twitter</a-select-option>
+                    <a-select-option value="facebook">Facebook</a-select-option>
+                    <a-select-option value="instagram">Instagram</a-select-option>
+                    <a-select-option value="linkedin">LinkedIn</a-select-option>
+                    <a-select-option value="youtube">YouTube</a-select-option>
+                    <a-select-option value="github">GitHub</a-select-option>
+                    <a-select-option value="reddit">Reddit</a-select-option>
+                    <a-select-option value="discord">Discord</a-select-option>
+                    <a-select-option value="medium">Medium</a-select-option>
+                    <a-select-option value="behance">Behance</a-select-option>
+                    <a-select-option value="tiktok">TikTok</a-select-option>
+                    <a-select-option value="pinterest">Pinterest</a-select-option>
+                    <a-select-option value="twitch">Twitch</a-select-option>
+                    <a-select-option value="dribbble">Dribbble</a-select-option>
+                  </a-select>
+                  
+                  <a-input
+                    v-model:value="link.url"
+                    placeholder="URL"
+                    style="flex: 1"
+                  />
+                  
+                  <a-button 
+                    type="text" 
+                    danger
+                    @click="removeSocialLink(index)"
+                  >
+                    <delete-outlined />
+                  </a-button>
+                </div>
+              </template>
+              <template v-else>
+                <div class="empty-state">
+                  <p class="empty-text">
+                    No social media links added yet
+                  </p>
+                </div>
+              </template>
+            </div>
+
+            <a-button 
+              type="dashed" 
+              block 
+              @click="addSocialLink"
+              style="margin-top: 12px"
+            >
+              <plus-outlined /> Add Social Media Link
+            </a-button>
+          </div>
         </a-col>
       </a-row>
     </a-form>
@@ -364,6 +456,11 @@ const footerData = ref({
     buttonBackground: '#2563EB',
     buttonText: '#FFFFFF',
     ...props.initialData?.colors
+  },
+  socialMedia: {
+    iconSize: props.initialData.socialMedia?.iconSize || 24,
+    iconColor: props.initialData.socialMedia?.iconColor || '#9CA3AF',
+    links: props.initialData.socialMedia?.links?.links || props.initialData.socialMedia?.links || []
   }
 })
 
@@ -414,9 +511,10 @@ const getCurrentColor = () => {
     return footerStyles.value.gradientStart
   } else if (activeColorField.value === 'end') {
     return footerStyles.value.gradientEnd
-  } else {
-    return footerData.value.colors[activeColorField.value] || '#FFFFFF'
+  } else if (activeColorField.value === 'socialMediaIcon') {
+    return footerData.value.socialMedia.iconColor
   }
+  return footerData.value.colors[activeColorField.value] || '#FFFFFF'
 }
 
 const handleColorChange = (event) => {
@@ -427,9 +525,26 @@ const handleColorChange = (event) => {
     footerStyles.value.gradientStart = newColor
   } else if (activeColorField.value === 'end') {
     footerStyles.value.gradientEnd = newColor
+  } else if (activeColorField.value === 'socialMediaIcon') {
+    footerData.value.socialMedia.iconColor = newColor
   } else {
     footerData.value.colors[activeColorField.value] = newColor
   }
+}
+
+const selectColor = (color) => {
+  if (activeColorField.value === 'background') {
+    footerStyles.value.backgroundColor = color
+  } else if (activeColorField.value === 'start') {
+    footerStyles.value.gradientStart = color
+  } else if (activeColorField.value === 'end') {
+    footerStyles.value.gradientEnd = color
+  } else if (activeColorField.value === 'socialMediaIcon') {
+    footerData.value.socialMedia.iconColor = color
+  } else {
+    footerData.value.colors[activeColorField.value] = color
+  }
+  showColorPicker.value = false
 }
 
 const toggleColorPicker = (field, event) => {
@@ -448,28 +563,24 @@ const toggleColorPicker = (field, event) => {
   event.stopPropagation()
 }
 
-const selectColor = (color) => {
-  if (activeColorField.value === 'background') {
-    footerStyles.value.backgroundColor = color
-  } else if (activeColorField.value === 'start') {
-    footerStyles.value.gradientStart = color
-  } else if (activeColorField.value === 'end') {
-    footerStyles.value.gradientEnd = color
-  } else {
-    footerData.value.colors[activeColorField.value] = color
-  }
-  showColorPicker.value = false
-}
-
 // 添加保存相关逻辑
 const saving = ref(false)
 
 const saveConfig = async () => {
   try {
     saving.value = true
+
+    // 确保 socialMedia 的数据结构正确
+    const socialMediaData = {
+      iconColor: footerData.value.socialMedia.iconColor,
+      iconSize: footerData.value.socialMedia.iconSize,
+      links: footerData.value.socialMedia.links
+    }
+
     const payload = {
       pageFooters: {
         ...footerData.value,
+        socialMedia: socialMediaData,  // 使用正确结构的数据
         styles: footerStyles.value
       }
     }
@@ -498,6 +609,10 @@ const closeColorPicker = (event) => {
 
 onMounted(() => {
   console.log('Initial props data:', props.initialData)
+  console.log('Props socialMedia:', props.initialData.socialMedia)
+  console.log('Props socialMedia links:', props.initialData.socialMedia?.links)
+  console.log('Footer data socialMedia:', footerData.value.socialMedia)
+  console.log('Footer data socialMedia links:', footerData.value.socialMedia?.links)
   document.addEventListener('click', closeColorPicker)
 })
 
@@ -513,6 +628,30 @@ watch(showColorPicker, (newValue) => {
 watch(activeColorField, (newValue) => {
   console.log('activeColorField changed:', newValue)
 })
+
+// 添加社交媒体相关方法
+const addSocialLink = () => {
+  if (!Array.isArray(footerData.value.socialMedia.links)) {
+    footerData.value.socialMedia.links = []
+  }
+  footerData.value.socialMedia.links.push({
+    platform: '',
+    url: ''
+  })
+}
+
+const removeSocialLink = (index) => {
+  footerData.value.socialMedia.links.splice(index, 1)
+}
+
+// 添加 watch 来监控数据变化
+watch(() => footerData.value.socialMedia, (newValue) => {
+  console.log('Social media data changed:', newValue)
+}, { deep: true })
+
+watch(() => props.initialData, (newValue) => {
+  console.log('Props initialData changed:', newValue)
+}, { deep: true })
 </script>
 
 <style scoped>
@@ -590,6 +729,32 @@ watch(activeColorField, (newValue) => {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.social-media-section {
+  margin: 24px 0;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.social-links-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.social-link-item {
+  display: grid;
+  grid-template-columns: 120px 1fr 40px;
+  gap: 8px;
+  align-items: center;
+}
+
+.add-social-btn {
+  margin-top: 12px;
+  width: 100%;
 }
 
 .editor-header {
@@ -802,14 +967,57 @@ watch(activeColorField, (newValue) => {
   color: #666;
 }
 
-.social-media-section,
-.social-links-container,
-.social-link-item,
-.add-social-btn,
-.social-media-list,
-.social-media-item,
-.platform-label,
+.social-media-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.social-media-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.platform-label {
+  width: 80px;
+  text-transform: capitalize;
+}
+
 .icon-settings {
-  display: none;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.color-picker {
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.color-picker:hover {
+  transform: scale(1.05);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 24px;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.empty-text {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
 }
 </style> 
