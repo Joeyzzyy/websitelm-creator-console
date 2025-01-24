@@ -70,24 +70,6 @@
 
       <!-- 底部区域 -->
       <div class="bottom-section">
-        <div class="social-links">
-          <a 
-            v-for="link in data?.socialMedia?.links || []" 
-            :key="link.platform"
-            :href="link.url"
-            class="social-link"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <component 
-              :is="getSocialIcon(link.platform)" 
-              :style="{
-                fontSize: `${data?.socialMedia?.iconSize || 24}px`,
-                color: data?.socialMedia?.iconColor || '#9CA3AF'
-              }"
-            />
-          </a>
-        </div>
         <p class="copyright" :style="{ color: data.colors?.copyright }">
           {{ data?.copyright || `© ${currentYear} ${data?.companyName || 'Company Name'}. All rights reserved.` }}
         </p>
@@ -98,20 +80,7 @@
 
 <script setup>
 import { computed } from 'vue'
-import { 
-  TwitterOutlined, 
-  YoutubeOutlined, 
-  LinkedinOutlined,
-  FacebookOutlined,
-  InstagramOutlined,
-  GithubOutlined,
-  RedditOutlined,
-  MessageOutlined,
-  GlobalOutlined,
-  MailOutlined,
-  MediumOutlined,
-  BehanceOutlined
-} from '@ant-design/icons-vue'
+import { GlobalOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps({
   data: {
@@ -131,28 +100,6 @@ const props = defineProps({
 })
 
 const currentYear = computed(() => new Date().getFullYear())
-
-const getSocialIcon = (type) => {
-  const icons = {
-    twitter: TwitterOutlined,
-    youtube: YoutubeOutlined,
-    linkedin: LinkedinOutlined,
-    facebook: FacebookOutlined,
-    instagram: InstagramOutlined,
-    github: GithubOutlined,
-    reddit: RedditOutlined,
-    discord: MessageOutlined,
-    website: GlobalOutlined,
-    email: MailOutlined,
-    medium: MediumOutlined,
-    behance: BehanceOutlined,
-    tiktok: InstagramOutlined,
-    pinterest: InstagramOutlined,
-    twitch: YoutubeOutlined,
-    dribbble: BehanceOutlined
-  }
-  return icons[type] || GlobalOutlined
-}
 
 // 添加计算样式
 const computedStyles = computed(() => {
@@ -285,23 +232,9 @@ const computedStyles = computed(() => {
 .bottom-section {
   grid-column: 1 / -1;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 0 16px;
-}
-
-.social-links {
-  display: flex;
-  gap: 24px;
-}
-
-.social-link {
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-
-.social-link:hover {
-  opacity: 0.8;
 }
 
 .copyright {

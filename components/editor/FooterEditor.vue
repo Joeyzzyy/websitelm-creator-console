@@ -414,8 +414,9 @@ const getCurrentColor = () => {
     return footerStyles.value.gradientStart
   } else if (activeColorField.value === 'end') {
     return footerStyles.value.gradientEnd
+  } else {
+    return footerData.value.colors[activeColorField.value] || '#FFFFFF'
   }
-  return footerData.value.colors[activeColorField.value] || '#FFFFFF'
 }
 
 const handleColorChange = (event) => {
@@ -466,7 +467,6 @@ const saving = ref(false)
 const saveConfig = async () => {
   try {
     saving.value = true
-
     const payload = {
       pageFooters: {
         ...footerData.value,
@@ -497,6 +497,7 @@ const closeColorPicker = (event) => {
 }
 
 onMounted(() => {
+  console.log('Initial props data:', props.initialData)
   document.addEventListener('click', closeColorPicker)
 })
 
@@ -589,32 +590,6 @@ watch(activeColorField, (newValue) => {
   display: flex;
   gap: 8px;
   align-items: center;
-}
-
-.social-media-section {
-  margin: 24px 0;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 8px;
-}
-
-.social-links-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin: 16px 0;
-}
-
-.social-link-item {
-  display: grid;
-  grid-template-columns: 120px 1fr 40px;
-  gap: 8px;
-  align-items: center;
-}
-
-.add-social-btn {
-  margin-top: 12px;
-  width: 100%;
 }
 
 .editor-header {
@@ -827,43 +802,14 @@ watch(activeColorField, (newValue) => {
   color: #666;
 }
 
-.social-media-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.social-media-item {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.platform-label {
-  width: 80px;
-  text-transform: capitalize;
-}
-
+.social-media-section,
+.social-links-container,
+.social-link-item,
+.add-social-btn,
+.social-media-list,
+.social-media-item,
+.platform-label,
 .icon-settings {
-  margin-bottom: 24px;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 8px;
-  display: flex;
-  gap: 24px;
-  align-items: center;
-}
-
-.color-picker {
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
-  border: 1px solid #e5e7eb;
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.color-picker:hover {
-  transform: scale(1.05);
+  display: none;
 }
 </style> 
