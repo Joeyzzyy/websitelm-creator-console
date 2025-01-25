@@ -27,120 +27,117 @@
     <div class="dashboard-content">
       <!-- Add test button -->
       <!-- Product Info Card -->
-      <a-card class="info-card">
+      <a-card class="product-info-card">
         <template #title>
-          <div class="card-title">
-            <span>🎯 Product Information</span>
-            <a-space >
+          <div class="info-card-header">
+            <span class="info-card-title">
+              <InfoCircleOutlined />
+              Product Information
+            </span>
+            <a-space>
               <a-button 
-                type="link" 
-                danger 
+                type="primary"
+                class="edit-button"
+                @click="editProductInfo"
+              >
+                <template #icon><EditOutlined /></template>
+                Edit Product
+              </a-button>
+              <a-button 
+                type="text" 
+                danger
                 @click="deleteProduct" 
                 v-if="productInfo?.productId"
-                class="align-button"
               >
-                <DeleteOutlined /> Delete
-              </a-button>
-              <a-button 
-                type="link" 
-                @click.stop="getSitemap(true)"
-                :disabled="!productInfo || loadingSitemap || !productInfo?.projectWebsite || !productInfo?.domainStatus"
-                v-if="productInfo?.productId"
-              >
-                <template v-if="loadingSitemap">Loading...</template>
-                <template v-else-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
-                  Add your site to get sitemap automatically →
-                </template>
-              </a-button>
-              <a-button 
-                type="link" 
-                @click="editProductInfo"
-                :disabled="!productInfo"
-                v-if="productInfo?.productId"
-                class="align-button"
-              >
-                <EditOutlined /> Edit
+                <DeleteOutlined />
               </a-button>
             </a-space>
           </div>
         </template>
 
-        <!-- Loading skeleton -->
-        <template v-if="!productInfo">
-          <a-skeleton active :paragraph="{ rows: 3 }" />
-        </template>
-        
-        
-        <!-- Error state -->
-        <template v-else-if="!productInfo.productId">
-          <a-result
-            status="error"
-            title="Failed to load product information"
-            sub-title="Please contact support@website-lm.com"
-          />
-        </template>
-        
-        <!-- Product info content -->
-        <template v-else>
-          <a-descriptions>
-            <a-descriptions-item label="Product Name">
-              {{ productInfo.productName }}
-            </a-descriptions-item>
+        <div class="info-grid">
+          <!-- Product Name -->
+          <div class="info-item">
+            <div class="info-label">
+              <AppstoreOutlined />
+              <span>Product Name</span>
+            </div>
+            <div class="info-content">
+              {{ productInfo?.productName || 'Not set' }}
+            </div>
+          </div>
 
-            <a-descriptions-item label="Your Site">
-              <template v-if="productInfo.projectWebsite">
-                <a-space>
-                  <a :href="'https://' + productInfo.projectWebsite" target="_blank">
-                    {{ productInfo.projectWebsite }}
-                  </a>
-                  <template v-if="productInfo.domainStatus">
-                    <a-tag color="success">
-                      Verified
-                    </a-tag>
-                  </template>
-                  <template v-else>
-                    <a-button 
-                      type="primary" 
-                      size="small"
-                      @click="openEditWithBasicInfoToVerify"
-                      :loading="goStartVerifying"
-                    >
-                      Go Start Verifying
-                    </a-button>
-                  </template>
-                </a-space>
-              </template>
-              <template v-else>
-                <a-typography-text type="secondary">
-                  No site added... <a @click="editProductInfo()">click here to add your site →</a>
-                </a-typography-text>
-              </template>
-            </a-descriptions-item>
+          <!-- Website Info -->
+          <div class="info-item">
+            <div class="info-label">
+              <GlobalOutlined />
+              Website
+              <a-tag v-if="productInfo?.domainStatus" color="success" class="status-tag">Verified</a-tag>
+              <a-tag v-else color="warning" class="status-tag">Unverified</a-tag>
+            </div>
+            <div class="info-content">
+              <div class="website-content">
+                <a :href="'https://' + productInfo?.projectWebsite" target="_blank" class="website-link">
+                  {{ productInfo?.projectWebsite }}
+                  <RightOutlined />
+                </a>
+              </div>
+            </div>
+          </div>
 
-            <a-descriptions-item label="Your Competitors">
-              <template v-if="competitors.length">
-                <div class="competitors-tags">
-                  <a-space wrap>
-                    <a-tag 
-                      v-for="(comp, index) in competitors" 
-                      :key="comp.name"
-                      :color="['blue', 'green', 'orange', 'purple'][index % 4]"
-                    >
-                      <a :href="'https://' + comp.url" target="_blank">
-                        {{ comp.name }}
-                      </a>
-                    </a-tag>
-                  </a-space>
+          <!-- Pages Overview (replacing Core Features) -->
+          <div class="info-item">
+            <div class="info-label">
+              <FileTextOutlined />
+              Pages Overview
+            </div>
+            <div class="info-content">
+              <div class="pages-stats-horizontal">
+                <div class="stat-item">
+                  <span class="stat-label">Generated</span>
+                  <span class="stat-value">{{ pagesDashboard?.generatorCount || 0 }}</span>
                 </div>
-              </template>
-              <template v-else>
-                <a-typography-text type="secondary">
-                  No competitors added
-                </a-typography-text>
-              </template>
-            </a-descriptions-item>
-          </a-descriptions>
-        </template>
+                <a-divider type="vertical" />
+                <div class="stat-item">
+                  <span class="stat-label">Published</span>
+                  <span class="stat-value">{{ pagesDashboard?.publishCount || 0 }}</span>
+                </div>
+                <a-divider type="vertical" />
+                <div class="stat-item">
+                  <span class="stat-label">Indexed</span>
+                  <span class="stat-value">{{ pagesDashboard?.indexedCount || 0 }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Competitors -->
+          <div class="info-item">
+            <div class="info-label">
+              <NodeIndexOutlined />
+              Competitors
+            </div>
+            <div class="info-content">
+              <div class="competitors-stats-horizontal">
+                <template v-if="competitors.length">
+                  <a-tag 
+                    v-for="comp in competitors" 
+                    :key="comp.url"
+                    class="competitor-tag"
+                  >
+                    <a :href="`https://${comp.url}`" target="_blank" class="competitor-link">
+                      {{ comp.name }}
+                      <RightOutlined />
+                    </a>
+                  </a-tag>
+                </template>
+                <template v-else>
+                  <span class="no-competitors">No competitors added</span>
+                </template>
+              </div>
+            </div>
+          </div>
+        </div>
       </a-card>
 
       <!-- Quick Access Panel -->
@@ -225,14 +222,13 @@
         <a-col :span="24">
           <a-collapse v-model:activeKey="activeCollapseKeys">
             <!-- Website Structure -->
-            <a-collapse-panel key="sitemap" header="Website Structure & Page Overview">
+            <a-collapse-panel key="sitemap" header="Website Structure (Sitemap)">
               <a-row :gutter="[16, 16]">
-                <!-- Sitemap Panel - occupies 2/3 width -->
-                <a-col :span="16">
+                <!-- Sitemap Panel - 调整为占满宽度 -->
+                <a-col :span="24">
                   <a-card class="sitemap-card">
                     <template #title>
                       <div class="card-title">
-                        <span>🗺️ Website Structure</span>
                         <a-space>
                           <a-button 
                             type="link" 
@@ -325,59 +321,6 @@
                     </template>
                   </a-card>
                 </a-col>
-
-                <!-- Pages Card - occupies 1/3 width -->
-                <a-col :span="8">
-                  <a-card class="pages-card">
-                    <template #title>
-                      <span>📄 Pages Overview</span>
-                    </template>
-                    <a-row :gutter="[16, 16]">
-                      <a-col :span="24">
-                        <a-statistic 
-                          title="Generated" 
-                          :value="pagesDashboard?.generatorCount || 0"
-                          :value-style="{ fontSize: '16px' }"
-                          :title-style="{ fontSize: '12px' }"
-                        >
-                          <template #suffix>
-                            <a-tag size="small" color="success" v-if="pagesDashboard?.generatedChange">
-                              <span style="font-size: 12px">↑ {{ pagesDashboard.generatedChange }}%</span>
-                            </a-tag>
-                          </template>
-                        </a-statistic>
-                      </a-col>
-                      <a-col :span="24">
-                        <a-statistic 
-                          title="Published" 
-                          :value="pagesDashboard?.publishCount || 0"
-                          :value-style="{ fontSize: '16px' }"
-                          :title-style="{ fontSize: '12px' }"
-                        >
-                          <template #suffix v-if="pagesDashboard?.publishCount === 0">
-                            <a-tag size="small">
-                              <span style="font-size: 12px">Not published</span>
-                            </a-tag>
-                          </template>
-                        </a-statistic>
-                      </a-col>
-                      <a-col :span="24">
-                        <a-statistic 
-                          title="Indexed Pages Published By WebsiteLM" 
-                          :value="pagesDashboard?.indexedCount || 0"
-                          :value-style="{ fontSize: '16px' }"
-                          :title-style="{ fontSize: '12px' }"
-                        >
-                          <template #suffix v-if="pagesDashboard?.indexedCount === 0">
-                            <a-tag size="small">
-                              <span style="font-size: 12px">Not indexed</span>
-                            </a-tag>
-                          </template>
-                        </a-statistic>
-                      </a-col>
-                    </a-row>
-                  </a-card>
-                </a-col>
               </a-row>
             </a-collapse-panel>
 
@@ -387,13 +330,24 @@
                 <template #title>
                   <div class="card-title">
                     <a-space>
-                      <span>📈 Traffic Analytics (Last 15 Days)</span>
-                      <!-- Add statistics inline -->
+                      <a-select 
+                        v-model:value="selectedSiteUrl" 
+                        style="width: 300px"
+                        @change="handleSiteChange"
+                      >
+                        <a-select-option 
+                          v-for="site in gscSites" 
+                          :key="site.siteUrl" 
+                          :value="site.siteUrl"
+                        >
+                          {{ site.siteUrl }}
+                        </a-select-option>
+                      </a-select>
                       <template v-if="isGscConnected && gscAnalytics">
+                        <span>has</span>
                         <div class="inline-stats">
                           <a-statistic 
-                            title="Impressions" 
-                            :value="gscAnalytics?.impressions ?? 'No impressions or clicks data'"
+                            :value="gscAnalytics?.impressions + ' impressions' ?? 'no impressions'"
                             :precision="0"
                             class="compact-stat inline-stat"
                           >
@@ -403,10 +357,9 @@
                               </a-tag>
                             </template>
                           </a-statistic>
-                          <a-divider type="vertical" style="margin: 0 16px; height: 24px" />
+                          <span>&nbsp;and&nbsp;</span>
                           <a-statistic 
-                            title="Clicks" 
-                            :value="gscAnalytics?.clicks ?? 'No impressions or clicks data'"
+                            :value="gscAnalytics?.clicks + ' clicks' ?? 'no clicks'"
                             :precision="0"
                             class="compact-stat inline-stat"
                           >
@@ -418,19 +371,7 @@
                           </a-statistic>
                         </div>
                       </template>
-                      <a-select 
-                        v-model:value="selectedSiteUrl" 
-                        style="width: 200px"
-                        @change="handleSiteChange"
-                      >
-                        <a-select-option 
-                          v-for="site in gscSites" 
-                          :key="site.siteUrl" 
-                          :value="site.siteUrl"
-                        >
-                          {{ site.siteUrl }}
-                        </a-select-option>
-                      </a-select>
+                      
                     </a-space>
                   </div>
                 </template>
@@ -771,7 +712,7 @@
               <span class="todo-title">2. Connect Google Search Console</span>
               <span class="todo-desc">Track your website performance</span>
             </div>
-            <a-button type="primary" @click="handleConnectGSC">
+            <a-button type="primary" @click="connectGSC">
               Connect Now
             </a-button>
           </div>
@@ -859,8 +800,7 @@
               <a-button 
                 type="link" 
                 size="small"
-                @click="handleConnectGSC"
-                :disabled="!isDomainVerified"
+                @click="connectGSC"
                 v-if="!isGscConnected"
               >
                 Connect
@@ -889,7 +829,6 @@
                 type="link" 
                 size="small"
                 @click="handleExploreTour"
-                :disabled="!isGscConnected"
                 v-if="!productInfo?.onboarding"
               >
                 Start
@@ -907,26 +846,19 @@
 import { defineComponent, ref, onMounted, onUnmounted } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
 import { 
-  CopyOutlined, 
   EditOutlined, 
   DeleteOutlined, 
-  ThunderboltOutlined, 
   FileTextOutlined, 
   LineChartOutlined, 
   NodeIndexOutlined,
   CalendarOutlined, 
   LinkOutlined, 
-  SearchOutlined, 
-  FolderOpenOutlined,
   GlobalOutlined,
   InfoCircleOutlined,
-  PlusOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   GoogleOutlined,
   CompassOutlined,
-  ReloadOutlined,
-  QuestionCircleOutlined,
   RightOutlined,
   CheckSquareOutlined,
   AppstoreOutlined,
@@ -939,27 +871,20 @@ import { dashboardTutorial } from '../config/tutorials/dashboard'
 
 export default defineComponent({
   components: {
-    CopyOutlined,
     PageLayout,
     EditOutlined,
     DeleteOutlined,
-    ThunderboltOutlined,
     FileTextOutlined,
     LineChartOutlined,
     NodeIndexOutlined,
     CalendarOutlined,
     LinkOutlined,
-    SearchOutlined,
-    FolderOpenOutlined,
     GlobalOutlined,
     CheckCircleOutlined,
     InfoCircleOutlined,
-    PlusOutlined,
     ClockCircleOutlined,
     GoogleOutlined,
     CompassOutlined,
-    ReloadOutlined,
-    QuestionCircleOutlined,
     RightOutlined,
     CheckSquareOutlined,
     AppstoreOutlined,
@@ -967,14 +892,10 @@ export default defineComponent({
   },
   data() {
     return {
-      traffic: '-',
-      clicks: '-',
-      purchases: '-',
       productInfo: null,
       onboardingModalVisible: false,
       loading: false,
       websitePrefix: 'https://',
-      defaultCompetitors: [],
       formState: {
         productId: undefined,
         productName: '',
@@ -983,15 +904,11 @@ export default defineComponent({
         competitors: []
       },
       successModalVisible: false,
-      currentView: 'sitemap',
-      generatedPages: [],
-      monthlyNewPages: 0,
       newCompetitor: {
         name: '',
         url: ''
       },
       sitemapData: [],
-      allPages: [],
       loadingSitemap: false,
       publishedPages: 0,
       isGscConnected: false,
@@ -999,9 +916,6 @@ export default defineComponent({
       gscAnalytics: null,
       gscSuccessModalVisible: false,
       gscCheckInterval: null,
-      findingCompetitors: false,
-      currentStep: 0, // 添加当前步骤
-      showFeatures: false, // 添加新的数据属性
       showVerifyRecord: false,
       verifyRecord: '',
       verifying: false,
@@ -1032,9 +946,6 @@ export default defineComponent({
     this.handleGscCallback()
     this.checkGscStatus()
     this.startGscStatusCheck()
-    
-    // 从 localStorage 或其他存储中获取功能导览状态
-    // this.hasTourCompleted = localStorage.getItem('tourCompleted') === 'true';
   },
   beforeUnmount() {
     if (this.gscCheckInterval) {
@@ -1042,10 +953,6 @@ export default defineComponent({
     }
   },
   setup() {
-    const showOnboardingModal = ref(false)
-    const isComponentMounted = ref(false)
-    const pagesTable = ref(null)
-    const productModalVisible = ref(false)
     const chartRef = ref(null)
     const chartInstance = ref(null)
     
@@ -1118,15 +1025,6 @@ export default defineComponent({
     }
   },
   methods: {
-    async copyRecord(text) {
-      try {
-        await navigator.clipboard.writeText(text);
-        this.$message.success('Copied to clipboard');
-      } catch (error) {
-        this.$message.error('Failed to copy');
-      }
-    },
-
     async checkDomainVerification() {
       if (!this.formState.website) return;
 
@@ -1621,18 +1519,28 @@ export default defineComponent({
         
         console.log('GSC Status:', response)
         
-        if (response?.code === 1201) {
+        // 扩展错误检查条件
+        if (
+          response?.code === 1201 || // 未授权
+          response?.code === 500 ||  // 服务器错误
+          response?.code !== 200     // 其他任何非200状态
+        ) {
           this.isGscConnected = false
           this.gscSites = []
           this.gscAnalytics = null
+          
+          // 可以根据不同的错误码显示不同的提示
+          if (response?.code === 500) {
+            console.error('GSC analytics failed:', response.message)
+          }
           return
         }
         
-        // 只更新连接状态
-        this.isGscConnected = response?.code === 200
+        // 只有在确实返回 200 时才认为是连接成功
+        this.isGscConnected = true
         
         // 仅在首次连接成功时加载数据
-        if (this.isGscConnected && !this.gscSites.length) {
+        if (!this.gscSites.length) {
           await this.loadGscData()
           await this.loadGscAnalytics()
         }
@@ -1653,45 +1561,7 @@ export default defineComponent({
         this.checkGscStatus()
       }, 60000)
     },
-    async findCompetitors() {
-      if (!this.formState.coreFeatures) {
-        this.$message.warning('Please enter product description first');
-        return;
-      }
-
-      this.findingCompetitors = true;
-      try {
-        const response = await apiClient.findCompetitors({
-          description: this.formState.coreFeatures
-        });
-
-        if (response?.code === 200 && response.data) {
-          const newCompetitors = response.data.map(comp => ({
-            name: comp.name,
-            url: comp.url
-          }));
-          
-          this.formState.competitors = [...newCompetitors];
-          
-          this.$message.success('Successfully found your competitors!');
-        }
-      } catch (error) {
-        this.$message.error('Failed to find competitors: ' + (error.message || 'Unknown error'));
-      } finally {
-        this.findingCompetitors = false;
-      }
-    },
-    nextStep() {
-      if (this.formState.productName) {
-        this.currentStep++;
-      }
-    },
-    prevStep() {
-      this.currentStep--;
-    },
-    toggleFeatures() {
-      this.showFeatures = !this.showFeatures;
-    },
+   
     openEditWithBasicInfoToVerify() {
       this.currentStep = 0;
       this.openEditWithBasicInfo();
@@ -1814,19 +1684,6 @@ export default defineComponent({
         deep: true
       }
     },
-    // 添加关闭弹窗的处理方法
-    handleModalClose() {
-      const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
-      if (this.formState.website === currentDomain) {
-        // 使用保存的原始状态
-        this.formState.domainStatus = this.originalDomainStatus;
-        this.showVerifyRecord = false;
-        this.verifyRecord = null;
-      }
-      this.onboardingModalVisible = false;
-      // 重置原始状态
-      this.originalDomainStatus = null;
-    },
     async loadGscAnalytics() {
       if (!this.isGscConnected || !this.gscSites.length) {
         return;
@@ -1897,8 +1754,8 @@ export default defineComponent({
       if (!Array.isArray(data) || data.length === 0) {
         console.warn('Invalid or empty analytics data');
         return {
-          impressions: 'No impressions or clicks data',
-          clicks: 'No impressions or clicks data',
+          impressions: 'no',
+          clicks: 'no',
           dailyData: []
         };
       }
@@ -2186,13 +2043,6 @@ export default defineComponent({
       // 添加其他处理逻辑
     },
     
-    // 处理连接 GSC
-    handleConnectGSC() {
-      console.log('连接 GSC');
-      this.successModalVisible = false;
-      // 添加其他处理逻辑
-    },
-    
     // 处理功能导览
     handleExploreTour() {
       this.successModalVisible = false;
@@ -2393,8 +2243,9 @@ export default defineComponent({
   }
   
   :deep(.ant-descriptions-item-label) {
-    font-weight: 500;
-    color: #666;
+    font-weight: 600 !important; /* 使用 600 而不是 500 来让文字更粗一些 */
+    color: #262626 !important; /* 使用深色来增加对比度 */
+    font-size: 15px;
   }
 }
 
@@ -3486,6 +3337,11 @@ export default defineComponent({
   z-index: 1;
   border: none !important; /* 移除原始边框 */
   
+  /* 移除 header 的底部边框 */
+  .ant-card-head {
+    border-bottom: none;
+  }
+  
   &::before {
     content: '';
     position: absolute;
@@ -3495,18 +3351,18 @@ export default defineComponent({
     bottom: -2px;
     background: linear-gradient(
       45deg,
-      #bae0ff,  /* 更浅的蓝色 */
-      #d6e8ff,  /* 非常浅的蓝色 */
-      #e6e6ff,  /* 浅紫色 */
-      #d6e8ff,  /* 非常浅的蓝色 */
-      #bae0ff   /* 更浅的蓝色 */
+      #69b1ff,  /* 深蓝色 */
+      #7c8eff,  /* 蓝紫色 */
+      #9f8fff,  /* 淡紫色 */
+      #7c8eff,  /* 蓝紫色 */
+      #69b1ff   /* 深蓝色 */
     );
     border-radius: 10px;
     z-index: -1;
     animation: glowing 30s linear infinite;
     background-size: 400%;
     filter: blur(3px);
-    opacity: 0.8;  /* 稍微降低不透明度 */
+    opacity: 0.8;
   }
 
   /* 确保卡片内容区域有正确的背景色和圆角 */
@@ -3528,5 +3384,332 @@ export default defineComponent({
   100% {
     background-position: 0 0;
   }
+}
+
+.product-info-card {
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s;
+  
+  &:hover {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.info-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #262626;
+  
+  :deep(.anticon) {
+    color: #1890ff;
+  }
+}
+
+.edit-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  background: #f0f7ff;
+  border-color: #d4e6ff;
+  color: #1890ff;
+  
+  &:hover {
+    background: #e6f4ff;
+    border-color: #1890ff;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.info-item {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #f5f5f5;
+  }
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #595959;
+  font-weight: 500;
+  
+  :deep(.anticon) {
+    color: #8c8c8c;
+  }
+  
+  .status-tag {
+    margin-left: auto;
+    font-weight: normal;
+  }
+  
+  .count-tag {
+    margin-left: 8px;
+    font-weight: normal;
+  }
+}
+
+.info-content {
+  color: #262626;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.website-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.website-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #1890ff;
+  
+  &:hover {
+    text-decoration: underline;
+    
+    .anticon {
+      transform: translateX(2px);
+    }
+  }
+  
+  .anticon {
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
+}
+
+.verify-button {
+  padding: 0 12px;
+  height: 24px;
+  border-radius: 4px;
+  
+  &:hover {
+    background: #e6f4ff;
+  }
+}
+
+.features-text {
+  max-height: 80px;
+  overflow-y: auto;
+  padding-right: 8px;
+  
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #d9d9d9;
+    border-radius: 2px;
+  }
+}
+
+.competitors-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.competitor-tag {
+  background: #f5f5f5;
+  border: none;
+  transition: all 0.2s;
+  
+  a {
+    color: #595959;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    
+    .link-icon {
+      font-size: 12px;
+      opacity: 0.5;
+      transition: all 0.2s;
+    }
+    
+    &:hover {
+      color: #1890ff;
+      
+      .link-icon {
+        opacity: 1;
+        transform: translateX(2px);
+      }
+    }
+  }
+  
+  &:hover {
+    background: #f0f0f0;
+  }
+}
+
+.empty-text {
+  color: #8c8c8c;
+  font-style: italic;
+}
+
+:deep(.ant-card-head) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 0 24px;
+  min-height: 56px;
+}
+
+:deep(.ant-card-body) {
+  padding: 24px;
+}
+
+.pages-stats-horizontal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.stat-label {
+  color: #8c8c8c;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: #262626;
+}
+
+:deep(.ant-divider-vertical) {
+  height: 32px;
+  margin: 0 16px;
+}
+
+.competitors-content {
+  display: flex;
+  align-items: center;
+  min-height: 40px; /* 确保有最小高度以便垂直居中 */
+}
+
+.competitors-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  padding: 4px 0;
+}
+
+.competitor-tag {
+  margin: 0 !important;
+  height: 32px !important; /* 增加标签高度 */
+  line-height: 30px !important; /* 调整行高以配合新高度 */
+  padding: 0 12px !important; /* 增加水平内边距 */
+  border-radius: 6px !important; /* 稍微增加圆角 */
+  background: #f5f5f5 !important;
+  border: 1px solid #e8e8e8 !important;
+  
+  &:hover {
+    background: #f0f0f0 !important;
+    border-color: #d9d9d9 !important;
+  }
+}
+
+.competitor-link {
+  color: #595959;
+  font-size: 14px; /* 增加字体大小 */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  &:hover {
+    color: #1890ff;
+  }
+  
+  .anticon {
+    font-size: 12px;
+  }
+}
+
+.no-competitors {
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+.competitors-stats-horizontal {
+  display: flex;
+  align-items: center; /* 垂直居中 */
+  flex-wrap: wrap;
+  gap: 12px; /* 统一的间距 */
+  min-height: 48px; /* 与 Pages Overview 保持一致的高度 */
+  padding: 8px 0;
+}
+
+.competitor-tag {
+  margin: 0 !important;
+  height: 32px !important;
+  line-height: 30px !important;
+  padding: 0 16px !important;
+  border-radius: 6px !important;
+  background: #f5f5f5 !important;
+  border: 1px solid #e8e8e8 !important;
+  
+  &:hover {
+    background: #f0f0f0 !important;
+    border-color: #d9d9d9 !important;
+  }
+}
+
+.competitor-link {
+  color: #595959;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  &:hover {
+    color: #1890ff;
+  }
+  
+  .anticon {
+    font-size: 12px;
+  }
+}
+
+.no-competitors {
+  color: #8c8c8c;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  height: 32px; /* 与标签高度保持一致 */
 }
 </style>
