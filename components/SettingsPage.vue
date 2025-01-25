@@ -4,6 +4,18 @@
     description="Configure your website settings and deployment options"
     icon="⚙️"
   >
+    <smart-banner
+      :theme="bannerTheme"
+      title="Website Settings"
+      description="Configure your domain settings, manage deployment options, and customize your login preferences."
+      :badges="[
+        { text: 'Domain Management' },
+        { text: 'Deployment Options' },
+        { text: 'Login Settings' }
+      ]"
+      emoji="⚙️"
+    />
+
     <a-tabs 
       class="main-tabs"
       v-model:activeKey="activeTab"
@@ -400,6 +412,7 @@ import { SettingOutlined, DeleteOutlined, ReloadOutlined, CloseOutlined } from '
 import apiClient from '../api/api';
 import { VERCEL_CONFIG } from '../config/vercelConfig';
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
+import SmartBanner from './common/SmartBanner.vue'
 
 
 export default {
@@ -411,6 +424,7 @@ export default {
     ReloadOutlined,
     CloseOutlined,
     NoSiteConfigured,
+    SmartBanner,
   },
   setup() {
     const PROJECT_ID = VERCEL_CONFIG.PROJECT_ID;
@@ -1064,6 +1078,20 @@ export default {
       }
     ];
 
+    // 添加 banner 相关配置
+    const bannerTheme = {
+      primary: '#38BDF8',
+      secondary: '#818CF8',
+      background: 'linear-gradient(135deg, #1a1a1a, #2d3748)',
+      textColor: '#FFFFFF',
+      descriptionColor: '#94A3B8',
+      badgeColor: '#94A3B8',
+      badgeBackground: 'rgba(255, 255, 255, 0.05)',
+      badgeHoverBackground: 'rgba(56, 189, 248, 0.1)',
+      badgeHoverColor: '#38BDF8',
+      iconBackground: 'rgba(255, 255, 255, 0.1)',
+    }
+
     return {
       cooldown,
       goToDashboard,
@@ -1116,6 +1144,7 @@ export default {
       handleSubfolderRefresh,
       showDeleteSubfolderDomainConfirm,
       dnsColumnsWithActions,
+      bannerTheme,
     };
   }
 }

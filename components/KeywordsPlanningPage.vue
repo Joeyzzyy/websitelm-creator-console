@@ -125,75 +125,6 @@
                 <div class="keywords-selection">
                   <!-- 原来第一步的内容 -->
                   <div class="left-panel" :class="{ 'panel-hidden': currentStep > 0 }">
-                    <!-- Mode Selector -->
-                    <a-card class="mode-selector-card">
-                      <div class="mode-selector-wrapper">
-                        <div class="mode-controls">
-                          <a-popover
-                            placement="rightTop"
-                            trigger="click"
-                            :overlayStyle="{ maxWidth: '400px' }"
-                          >
-                            <template #content>
-                              <div class="analysis-overview-popover">
-                                <div class="overview-section">
-                                  <div class="section-title">
-                                    <span class="number">1</span>
-                                    Analysis Overview
-                                  </div>
-                                  <p class="section-desc">We've completed a comprehensive keyword analysis</p>
-                                  <div class="stats-row">
-                                    <div class="stat-item">
-                                      <div class="stat-label">We've analyzed</div>
-                                      <div class="stat-value">{{ overviewData.totalKeywordsAnalyzed }} keywords</div>
-                                    </div>
-                                    <div class="stat-item">
-                                      <div class="stat-label">Compared your site with</div>
-                                      <div class="stat-value">{{ overviewData.totalTopPagesAnalyzed }} top pages</div>
-                                    </div>
-                                  </div>
-                                </div>
-                                
-                                <div class="overview-section">
-                                  <div class="section-title">
-                                    <span class="number">2</span>
-                                    What We Found
-                                  </div>
-                                  <p class="section-desc">Here's what our analysis revealed about your keyword coverage</p>
-                                  <div class="findings-tags">
-                                    <a-tag color="red">{{overviewData.absence}} keywords you're missing</a-tag>
-                                  </div>
-                                </div>
-                                
-                                <div class="overview-section">
-                                  <div class="section-title">
-                                    <span class="number">3</span>
-                                    Recommended Actions
-                                  </div>
-                                  <p class="section-desc">We've prioritized keywords based on potential impact and effort</p>
-                                  <div class="action-steps">
-                                    <div class="step-item">
-                                      <CheckCircleOutlined />
-                                      <span>Review and select keywords below</span>
-                                    </div>
-                                    <div class="step-item">
-                                      <ArrowRightOutlined />
-                                      <span>Focus on P0 (Quick Wins) first</span>
-                                    </div>
-                                    <div class="step-item">
-                                      <ArrowRightOutlined />
-                                      <span>Then move to higher effort opportunities</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </template>
-                            <QuestionCircleOutlined class="help-icon" />
-                          </a-popover>
-                        </div>
-                      </div>
-                    </a-card>
-
                     <!-- Keyword Selection Component -->
                     <div v-if="currentMode === 'beginner'" class="beginner-mode">
                       <a-row :gutter="[24, 24]" class="beginner-content">
@@ -599,7 +530,6 @@
       </template>
     </a-spin>
 
-    <!-- 添加进度弹窗 -->
     <a-modal
       v-model:open="generationProgressVisible"
       title="Generating Pages"
@@ -623,6 +553,68 @@
           {{ generationDetails }}
         </div>
       </div>
+    </a-modal>
+
+    <a-modal
+      v-model:open="showSelectedModal"
+      title="Selected Keywords"
+      width="800px"
+      @cancel="handleModalClose"
+    >
+      <a-tabs v-model:activeKey="currentModalTab">
+        <a-tab-pane key="comparison" tab="From Comparison">
+          <a-table
+            :dataSource="modalKeywords.comparison"
+            :columns="comparisonColumns"
+            :pagination="false"
+            size="small"
+          >
+            <template #actions="{ record }">
+              <a-button 
+                type="text"
+                danger
+                @click="handleCancelSelection(record)"
+              >
+                <template #icon>
+                  <DeleteOutlined />
+                </template>
+              </a-button>
+            </template>
+          </a-table>
+        </a-tab-pane>
+        
+        <a-tab-pane key="top_pages" tab="From Top Pages">
+          <a-table
+            :dataSource="modalKeywords.top_pages"
+            :columns="comparisonColumns"
+            :pagination="false"
+            size="small"
+          >
+            <template #actions="{ record }">
+              <a-button 
+                type="text"
+                danger
+                @click="handleCancelSelection(record)"
+              >
+                <template #icon>
+                  <DeleteOutlined />
+                </template>
+              </a-button>
+            </template>
+          </a-table>
+        </a-tab-pane>
+      </a-tabs>
+      
+      <template #footer>
+        <a-button @click="handleModalClose">Close</a-button>
+        <a-button 
+          type="primary" 
+          @click="proceedToContentPlan"
+          :disabled="totalSelectedKeywords === 0"
+        >
+          Proceed to Content Plan
+        </a-button>
+      </template>
     </a-modal>
   </page-layout>
 </template>
@@ -1891,7 +1883,6 @@ export default defineComponent({
       nextStep,
       previousStep,
       showSelectedModal,
-      showSelectedKeywords,
       handleModalClose,
       getKeywordsByPriority,
       isGenerating,
@@ -1992,41 +1983,47 @@ export default defineComponent({
 <style scoped>
 .planning-layout {
   display: flex;
-  gap: 24px;
   height: 100%;
-  margin-top: 24px;
 }
 
 .steps-navigation {
-  flex: 0 0 200px;
-  padding: 24px 0;
+  flex: 0 0 240px;
+  padding: 0 24px 24px 24px;
 }
 
 .step-item {
   position: relative;
-  padding: 12px;
+  margin-bottom: 32px;
   cursor: pointer;
 }
 
 .step-content {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  border-radius: 8px;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
   background: white;
   transition: all 0.3s;
   border: 1px solid #e5e7eb;
+  position: relative;
+  z-index: 2;
+}
+
+.step-item:hover .step-content {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .step-item.active .step-content {
   background: #f0f7ff;
   border: 1px solid #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
 }
 
 .step-number {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: #2563eb;
   color: white;
@@ -2035,6 +2032,7 @@ export default defineComponent({
   justify-content: center;
   font-weight: 600;
   font-size: 14px;
+  flex-shrink: 0;
 }
 
 .step-info {
@@ -2044,46 +2042,69 @@ export default defineComponent({
 .step-title {
   font-weight: 600;
   color: #1f2937;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
   font-size: 14px;
 }
 
 .step-desc {
   font-size: 12px;
   color: #6b7280;
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
+/* 修改连接线样式 */
 .step-connector {
   position: absolute;
-  left: 35px;
-  top: 64px;
-  bottom: 0;
+  left: 47px; /* 调整连接线位置对齐数字中心 */
+  top: 48px; /* 从第一个步骤底部开始 */
+  bottom: -16px;
   width: 2px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  z-index: 1;
 }
 
 .connector-line {
-  flex: 1;
   width: 2px;
+  height: 100%;
   background: #e5e7eb;
+  position: relative;
 }
 
+/* 移除原来的箭头，改用小圆点 */
 .connector-arrow {
-  width: 12px;
-  height: 12px;
-  border-right: 2px solid #e5e7eb;
-  border-bottom: 2px solid #e5e7eb;
-  transform: rotate(45deg);
-  margin-bottom: -6px;
+  display: none;
 }
 
-.step-item.active .connector-line,
-.step-item.active .connector-arrow {
+/* 添加连接线装饰 */
+.step-item.active .connector-line::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
   background: #2563eb;
-  border-color: #2563eb;
+}
+
+.step-item.active .connector-line::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563eb;
+}
+
+/* 最后一个步骤不显示连接线 */
+.step-item:last-child .step-connector {
+  display: none;
 }
 
 .main-content {
@@ -2091,20 +2112,14 @@ export default defineComponent({
   min-width: 0;
   background: white;
   border-radius: 8px;
-  padding: 24px;
+  padding: 0 24px 24px 24px;
 }
 
 .content-toolbar {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.content-toolbar {
-  justify-content: flex-start;
 }
 
 .step-panel[v-show="currentStep === '0'"] .content-toolbar {
