@@ -1,5 +1,17 @@
 <template>
-  <page-layout title="Page Management" description="Manage your AI-generation pages here" icon="✨">
+  <page-layout>
+    <smart-banner
+      :theme="bannerTheme"
+      title="Page Management"
+      description="Manage your AI-generated pages with powerful tools for publishing, editing, and tracking content status."
+      :badges="[
+        { text: 'AI Content' },
+        { text: 'Publishing Tools' },
+        { text: 'Status Tracking' }
+      ]"
+      emoji="📄"
+    />
+
     <a-spin :spinning="loading">
     <!-- 添加域名未配置的提示 -->
     <template v-if="!domainConfigured && !loading">
@@ -301,6 +313,7 @@ import apiClient from '../api/api'
 import config from '../config/settings'
 import { VERCEL_CONFIG } from '../config/vercelConfig'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
+import SmartBanner from './common/SmartBanner.vue'
 
 export default {
   name: 'TaskManagementPage',
@@ -318,7 +331,8 @@ export default {
     EyeOutlined,
     EllipsisOutlined,
     GlobalOutlined,
-    NoSiteConfigured
+    NoSiteConfigured,
+    SmartBanner
   },
 
   setup() {
@@ -942,7 +956,20 @@ export default {
           window.open(url, '_blank');
         }
       }
-    };
+    }; 
+
+    const bannerTheme = {
+      primary: '#059669',
+      secondary: '#10B981',
+      background: 'linear-gradient(135deg, #047857 0%, #10B981 100%)',
+      textColor: '#FFFFFF',
+      descriptionColor: '#FFFFFF',
+      badgeColor: '#FFFFFF',
+      badgeBackground: 'rgba(255, 255, 255, 0.15)',
+      badgeHoverBackground: 'rgba(255, 255, 255, 0.25)',
+      badgeHoverColor: '#FFFFFF',
+      iconBackground: 'rgba(255, 255, 255, 0.15)',
+    }
 
     onMounted(async () => {
       await loadProductInfo()
@@ -998,7 +1025,8 @@ export default {
       openPreview,
       handleTitleClick,
       getPreviewUrl,
-      domainConfigured
+      domainConfigured,
+      bannerTheme
     }
   }
 }

@@ -1,9 +1,17 @@
 <template>
-  <page-layout
-    title="Keyword & Content Planner"
-    description="Plan and generate content strategically"
-    icon="🎯"
-  >
+  <page-layout>
+    <smart-banner
+      :theme="bannerTheme"
+      title="AI-Powered Content Planning"
+      description="Leverage advanced AI algorithms to analyze keywords, generate content outlines, and create comprehensive content plans tailored to your audience."
+      :badges="[
+        { text: 'AI Analysis' },
+        { text: 'SEO Optimized' },
+        { text: 'Keyword Metrics' }
+      ]"
+      emoji="🎯"
+    />
+    
     <a-spin :spinning="loading">
       <template v-if="domainConfigured">
         <template v-if="analysisState !== 'finished'">
@@ -52,773 +60,537 @@
         </template>
 
         <template v-else>
-          <!-- 将 steps 替换为 tabs -->
-          <a-tabs v-model:activeKey="currentStep" class="planning-tabs" :defaultActiveKey="'0'">
-            <a-tab-pane key="0">
-              <template #tab>
-                <span class="tab-title">
-                  Select Keywords
-                </span>
-              </template>
-              
-              <!-- 第一步内容 -->
-              <div class="left-panel">
-                <!-- 原来第一步的内容 -->
-                <div class="left-panel" :class="{ 'panel-hidden': currentStep > 0 }">
-                  <!-- Mode Selector -->
-                  <a-card class="mode-selector-card">
-                    <div class="mode-selector-wrapper">
-                      <div class="mode-controls">
-                        <a-radio-group v-model:value="currentMode" button-style="solid" size="large">
-                          <a-radio-button value="beginner">
-                            <template #icon><UserOutlined /></template>
-                            Beginner
-                          </a-radio-button>
-                          <a-radio-button value="expert">
-                            <template #icon><ExperimentOutlined /></template>
-                            Expert
-                          </a-radio-button>
-                        </a-radio-group>
-                        
-                        <!-- 将按钮移到这里并改为 primary 类型 -->
-                        <a-button 
-                          type="primary"
-                          @click="showSelectedKeywords"
-                        >
-                          View Selected
-                        </a-button>
-                        
-                        <a-popover
-                          placement="rightTop"
-                          trigger="click"
-                          :overlayStyle="{ maxWidth: '400px' }"
-                        >
-                          <template #content>
-                            <div class="analysis-overview-popover">
-                              <div class="overview-section">
-                                <div class="section-title">
-                                  <span class="number">1</span>
-                                  Analysis Overview
-                                </div>
-                                <p class="section-desc">We've completed a comprehensive keyword analysis</p>
-                                <div class="stats-row">
-                                  <div class="stat-item">
-                                    <div class="stat-label">We've analyzed</div>
-                                    <div class="stat-value">{{ overviewData.totalKeywordsAnalyzed }} keywords</div>
-                                  </div>
-                                  <div class="stat-item">
-                                    <div class="stat-label">Compared your site with</div>
-                                    <div class="stat-value">{{ overviewData.totalTopPagesAnalyzed }} top pages</div>
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              <div class="overview-section">
-                                <div class="section-title">
-                                  <span class="number">2</span>
-                                  What We Found
-                                </div>
-                                <p class="section-desc">Here's what our analysis revealed about your keyword coverage</p>
-                                <div class="findings-tags">
-                                  <a-tag color="red">{{overviewData.absence}} keywords you're missing</a-tag>
-                                </div>
-                              </div>
-                              
-                              <div class="overview-section">
-                                <div class="section-title">
-                                  <span class="number">3</span>
-                                  Recommended Actions
-                                </div>
-                                <p class="section-desc">We've prioritized keywords based on potential impact and effort</p>
-                                <div class="action-steps">
-                                  <div class="step-item">
-                                    <CheckCircleOutlined />
-                                    <span>Review and select keywords below</span>
-                                  </div>
-                                  <div class="step-item">
-                                    <ArrowRightOutlined />
-                                    <span>Focus on P0 (Quick Wins) first</span>
-                                  </div>
-                                  <div class="step-item">
-                                    <ArrowRightOutlined />
-                                    <span>Then move to higher effort opportunities</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </template>
-                          <QuestionCircleOutlined class="help-icon" />
-                        </a-popover>
-                      </div>
-                    </div>
-                  </a-card>
-
-                  <!-- Keyword Selection Component -->
-                  <div v-if="currentMode === 'beginner'" class="beginner-mode">
-                    <a-row :gutter="[24, 24]" class="beginner-content">
-                      <!-- Keywords From Comparison Table -->
-                      <a-col :span="12">
-                        <a-card title="Keywords From Comparison" class="keyword-table-card">
-                          <a-tabs 
-                            v-model:activeKey="currentPriority"
-                            @change="handleTabChange"
-                            class="priority-tabs"
-                            tabPosition="left"
-                          >
-                            <a-tab-pane v-for="priority in priorities" :key="priority.level">
-                              <template #tab>
-                                <div class="priority-tab">
-                                  <div class="priority-indicator" :style="{ backgroundColor: priority.color }"></div>
-                                  <span>{{ priority.label }}</span>
-                                </div>
-                              </template>
-                              
-                              <a-table
-                                :dataSource="getKeywordsByPriority(recommendedKeywords, priority.level)"
-                                :columns="comparisonColumns"
-                                :pagination="recommendedPagination"
-                                @change="(page) => handleComparisonPaginationChange(priority.level, page.current, page.pageSize)"
-                                size="small"
-                              >
-                                <template #actions="{ record }">
-                                  <a-button 
-                                    type="text"
-                                    @click="handleKeywordFavorite(record)"
-                                  >
-                                    <template #icon>
-                                      <HeartFilled v-if="record.favorited" style="color: #ff4d4f;" />
-                                      <HeartOutlined v-else />
-                                    </template>
-                                  </a-button>
-                                </template>
-                              </a-table>
-                            </a-tab-pane>
-                          </a-tabs>
-                        </a-card>
-                      </a-col>
-
-                      <!-- Keywords From Top Pages Table -->
-                      <a-col :span="12">
-                        <a-card title="Keywords From Top Pages" class="keyword-table-card">
-                          <a-tabs 
-                            v-model:activeKey="currentPagePriority"
-                            @change="handlePageTabChange"
-                            class="priority-tabs"
-                            tabPosition="left"
-                          >
-                            <a-tab-pane v-for="priority in priorities" :key="priority.level">
-                              <template #tab>
-                                <div class="priority-tab">
-                                  <div class="priority-indicator" :style="{ backgroundColor: priority.color }"></div>
-                                  <span>{{ priority.label }}</span>
-                                </div>
-                              </template>
-                              
-                              <a-table
-                                :dataSource="getKeywordsByPriority(pageKeywords, priority.level)"
-                                :columns="comparisonColumns"
-                                :pagination="pagePagination"
-                                @change="(page) => handleTopPagesPaginationChange(priority.level, page.current, page.pageSize)"
-                                size="small"
-                              >
-                                <template #actions="{ record }">
-                                  <a-button 
-                                    type="text"
-                                    @click="handleKeywordFavorite(record)"
-                                  >
-                                    <template #icon>
-                                      <HeartFilled v-if="record.favorited" style="color: #ff4d4f;" />
-                                      <HeartOutlined v-else />
-                                    </template>
-                                  </a-button>
-                                </template>
-                              </a-table>
-                            </a-tab-pane>
-                          </a-tabs>
-                        </a-card>
-                      </a-col>
-                    </a-row>
+          <div class="planning-layout">
+            <!-- 左侧垂直步骤导航 -->
+            <div class="steps-navigation">
+              <div class="step-item" :class="{ active: currentStep === '0' }">
+                <div class="step-content" @click="currentStep = '0'">
+                  <div class="step-number">1</div>
+                  <div class="step-info">
+                    <div class="step-title">Select Keywords</div>
+                    <div class="step-desc">Choose and analyze keywords</div>
                   </div>
-
-                  <!-- Content in expert mode -->
-                  <template v-else>
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; text-align: center;">
-                      <h2 style="font-size: 24px; color: #1890ff; margin-bottom: 16px;">Expert Mode - Coming Soon</h2>
-                      <p style="font-size: 16px; color: rgba(0, 0, 0, 0.45);">
-                        We're working on something special for our advanced users.
-                        <br>Stay tuned for powerful expert features!
-                      </p>
-                    </div>
-                  </template>
+                </div>
+                <!-- 连接线 -->
+                <div class="step-connector">
+                  <div class="connector-line"></div>
+                  <div class="connector-arrow"></div>
                 </div>
               </div>
-            </a-tab-pane>
 
-            <a-tab-pane key="1">
-              <template #tab>
-                <span class="tab-title">
-                  Check Page Intent & Outline
-                </span>
-              </template>
-              
-              <!-- 修改第二步内容的布局结构 -->
-              <div class="step-two-content">
-                <div class="workspace-layout">
-                  <!-- 关键词列表卡片 -->
-                  <div class="keywords-section">
-                    <div class="keywords-column">
-                      <!-- Comparison Keywords -->
-                      <a-card class="keywords-card">
-                        <a-collapse v-model:activeKey="activeCollapseKeys">
-                          <a-collapse-panel 
-                            key="comparison" 
-                            :header="'Keywords selected from Comparison (' + selectedKeywordsData.comparison.length + ')'"
-                          >
-                            <a-table
-                              :data-source="selectedKeywordsData.comparison"
-                              :columns="comparisonColumns"
-                              :pagination="{ pageSize: 5, size: 'small' }"
-                              size="small"
-                              class="compact-table"
-                            >
-                              <template #actions="{ record }">
-                                <a-button 
-                                  type="text"
-                                  @click="handleRemoveKeyword(record)"
-                                >
-                                  <template #icon>
-                                    <DeleteOutlined style="color: #ff4d4f;" />
-                                  </template>
-                                </a-button>
-                              </template>
-                            </a-table>
-                          </a-collapse-panel>
-                        </a-collapse>
-                      </a-card>
-                    </div>
-
-                    <div class="keywords-column">
-                      <!-- Top Pages Keywords -->
-                      <a-card class="keywords-card">
-                        <a-collapse v-model:activeKey="activeCollapseKeys">
-                          <a-collapse-panel 
-                            key="top_pages" 
-                            :header="'Keywords selected from Top Pages (' + selectedKeywordsData.top_pages.length + ')'"
-                          >
-                            <a-table
-                              :data-source="selectedKeywordsData.top_pages"
-                              :columns="comparisonColumns"
-                              :pagination="{ pageSize: 5, size: 'small' }"
-                              size="small"
-                              class="compact-table"
-                            >
-                              <template #actions="{ record }">
-                                <a-button 
-                                  type="text"
-                                  @click="handleRemoveKeyword(record)"
-                                >
-                                  <template #icon>
-                                    <DeleteOutlined style="color: #ff4d4f;" />
-                                  </template>
-                                </a-button>
-                              </template>
-                            </a-table>
-                          </a-collapse-panel>
-                        </a-collapse>
-                      </a-card>
-                    </div>
+              <div class="step-item" :class="{ active: currentStep === '1' }">
+                <div class="step-content" @click="currentStep = '1'">
+                  <div class="step-number">2</div>
+                  <div class="step-info">
+                    <div class="step-title">Check Intent & Outline</div>
+                    <div class="step-desc">Review and generate content plan</div>
                   </div>
+                </div>
+              </div>
+            </div>
 
-                  <!-- Outline 内容部分 -->
-                  <div class="plan-section">
-                    <!-- Update task progress section -->
-                    <div class="task-progress-section">
-                      <a-alert
-                        :type="outlineGenerationStatus === 'failed' ? 'error' : 'info'"
-                        class="task-alert"
-                      >
-                        <template #icon>
-                          <LoadingOutlined v-if="outlineGenerationStatus === 'processing'" spin />
-                          <WarningOutlined v-else-if="outlineGenerationStatus === 'failed'" />
-                          <CheckCircleOutlined v-else />
-                        </template>
-                        <template #message>
-                          <div class="task-progress-content">
-                            <template v-if="outlineGenerationStatus && outlineGenerationStatus !== 'finished'">
-                              <div class="task-info">
-                                <span class="task-status">
-                                  {{ getTaskStatusText(outlineGenerationStatus) }}
-                                </span>
-                                <span v-if="taskStartTime" class="task-timing">
-                                  Started: {{ formatTime(taskStartTime) }}
-                                  <template v-if="taskEndTime">
-                                    | Completed: {{ formatTime(taskEndTime) }}
-                                  </template>
-                                </span>
-                              </div>
-                              <div v-if="taskDescription" class="task-description">
-                                {{ taskDescription }}
-                              </div>
-                            </template>
-                            <template v-else>
-                              <div class="task-info">
-                                <!-- 将按钮和状态文本分开，改为垂直布局 -->
-                                <div class="generate-section">
-                                  <div class="task-status">
-                                    ✨ Everything is ready! You can start page generation with your content plans below.
+            <!-- 主内容区域 -->
+            <div class="main-content">
+              <!-- 工具栏 -->
+              <div class="content-toolbar">
+                <!-- 只在第一步显示模式切换 -->
+                <a-radio-group 
+                  v-if="currentStep === '0'"
+                  v-model:value="currentMode" 
+                  button-style="solid" 
+                  size="middle"
+                  class="mode-switch"
+                >
+                  <a-radio-button value="beginner">
+                    Beginner
+                  </a-radio-button>
+                  <a-radio-button value="expert">
+                    Expert
+                  </a-radio-button>
+                </a-radio-group>
+                
+                <!-- View Selected 按钮在两个步骤都显示 -->
+                <a-button 
+                  type="primary"
+                  @click="showSelectedKeywords"
+                  class="view-selected-btn"
+                >
+                  View Selected
+                </a-button>
+              </div>
+
+              <!-- 步骤内容 -->
+              <div v-show="currentStep === '0'" class="step-panel">
+                <!-- 第一步的内容 -->
+                <div class="keywords-selection">
+                  <!-- 原来第一步的内容 -->
+                  <div class="left-panel" :class="{ 'panel-hidden': currentStep > 0 }">
+                    <!-- Mode Selector -->
+                    <a-card class="mode-selector-card">
+                      <div class="mode-selector-wrapper">
+                        <div class="mode-controls">
+                          <a-popover
+                            placement="rightTop"
+                            trigger="click"
+                            :overlayStyle="{ maxWidth: '400px' }"
+                          >
+                            <template #content>
+                              <div class="analysis-overview-popover">
+                                <div class="overview-section">
+                                  <div class="section-title">
+                                    <span class="number">1</span>
+                                    Analysis Overview
+                                  </div>
+                                  <p class="section-desc">We've completed a comprehensive keyword analysis</p>
+                                  <div class="stats-row">
+                                    <div class="stat-item">
+                                      <div class="stat-label">We've analyzed</div>
+                                      <div class="stat-value">{{ overviewData.totalKeywordsAnalyzed }} keywords</div>
+                                    </div>
+                                    <div class="stat-item">
+                                      <div class="stat-label">Compared your site with</div>
+                                      <div class="stat-value">{{ overviewData.totalTopPagesAnalyzed }} top pages</div>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div class="overview-section">
+                                  <div class="section-title">
+                                    <span class="number">2</span>
+                                    What We Found
+                                  </div>
+                                  <p class="section-desc">Here's what our analysis revealed about your keyword coverage</p>
+                                  <div class="findings-tags">
+                                    <a-tag color="red">{{overviewData.absence}} keywords you're missing</a-tag>
+                                  </div>
+                                </div>
+                                
+                                <div class="overview-section">
+                                  <div class="section-title">
+                                    <span class="number">3</span>
+                                    Recommended Actions
+                                  </div>
+                                  <p class="section-desc">We've prioritized keywords based on potential impact and effort</p>
+                                  <div class="action-steps">
+                                    <div class="step-item">
+                                      <CheckCircleOutlined />
+                                      <span>Review and select keywords below</span>
+                                    </div>
+                                    <div class="step-item">
+                                      <ArrowRightOutlined />
+                                      <span>Focus on P0 (Quick Wins) first</span>
+                                    </div>
+                                    <div class="step-item">
+                                      <ArrowRightOutlined />
+                                      <span>Then move to higher effort opportunities</span>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
                             </template>
-                          </div>
-                        </template>
-                      </a-alert>
+                            <QuestionCircleOutlined class="help-icon" />
+                          </a-popover>
+                        </div>
+                      </div>
+                    </a-card>
+
+                    <!-- Keyword Selection Component -->
+                    <div v-if="currentMode === 'beginner'" class="beginner-mode">
+                      <a-row :gutter="[24, 24]" class="beginner-content">
+                        <!-- Keywords From Comparison Table -->
+                        <a-col :span="12">
+                          <a-card title="Keywords From Comparison" class="keyword-table-card">
+                            <a-tabs 
+                              v-model:activeKey="currentPriority"
+                              @change="handleTabChange"
+                              class="priority-tabs"
+                              tabPosition="left"
+                            >
+                              <a-tab-pane v-for="priority in priorities" :key="priority.level">
+                                <template #tab>
+                                  <div class="priority-tab">
+                                    <div class="priority-indicator" :style="{ backgroundColor: priority.color }"></div>
+                                    <span>{{ priority.label }}</span>
+                                  </div>
+                                </template>
+                                
+                                <a-table
+                                  :dataSource="getKeywordsByPriority(recommendedKeywords, priority.level)"
+                                  :columns="comparisonColumns"
+                                  :pagination="recommendedPagination"
+                                  @change="(page) => handleComparisonPaginationChange(priority.level, page.current, page.pageSize)"
+                                  size="small"
+                                >
+                                  <template #actions="{ record }">
+                                    <a-button 
+                                      type="text"
+                                      @click="handleKeywordFavorite(record)"
+                                    >
+                                      {{ record.favorited ? 'Remove' : 'Add' }}
+                                    </a-button>
+                                  </template>
+                                </a-table>
+                              </a-tab-pane>
+                            </a-tabs>
+                          </a-card>
+                        </a-col>
+
+                        <!-- Keywords From Top Pages Table -->
+                        <a-col :span="12">
+                          <a-card title="Keywords From Top Pages" class="keyword-table-card">
+                            <a-tabs 
+                              v-model:activeKey="currentPagePriority"
+                              @change="handlePageTabChange"
+                              class="priority-tabs"
+                              tabPosition="left"
+                            >
+                              <a-tab-pane v-for="priority in priorities" :key="priority.level">
+                                <template #tab>
+                                  <div class="priority-tab">
+                                    <div class="priority-indicator" :style="{ backgroundColor: priority.color }"></div>
+                                    <span>{{ priority.label }}</span>
+                                  </div>
+                                </template>
+                                
+                                <a-table
+                                  :dataSource="getKeywordsByPriority(pageKeywords, priority.level)"
+                                  :columns="comparisonColumns"
+                                  :pagination="pagePagination"
+                                  @change="(page) => handleTopPagesPaginationChange(priority.level, page.current, page.pageSize)"
+                                  size="small"
+                                >
+                                  <template #actions="{ record }">
+                                    <a-button 
+                                      type="text"
+                                      @click="handleKeywordFavorite(record)"
+                                    >
+                                      {{ record.favorited ? 'Remove' : 'Add' }}
+                                    </a-button>
+                                  </template>
+                                </a-table>
+                              </a-tab-pane>
+                            </a-tabs>
+                          </a-card>
+                        </a-col>
+                      </a-row>
                     </div>
 
-                    <a-tabs 
-                      v-model:activeKey="contentPlanTab" 
-                      class="content-plan-tabs"
-                      @change="handleContentPlanTabChange"
-                    >
-                      <template #rightExtra>
-                        <a-space>
-                          <!-- Generate Content Plan button - 使用蓝色系 -->
-                          <a-button 
-                            type="primary"
-                            :loading="isGenerating"
-                            :disabled="totalSelectedKeywords === 0"
-                            @click="generateContentPlan"
-                            style="background: linear-gradient(to right, #1890ff, #40a9ff); 
-                                   border: none; 
-                                   font-weight: 500;
-                                   height: 40px;
-                                   padding: 0 24px;
-                                   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);"
-                            :class="{ 'hover-effect': !disabled }"
+                    <!-- Content in expert mode -->
+                    <template v-else>
+                      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; text-align: center;">
+                        <h2 style="font-size: 24px; color: #1890ff; margin-bottom: 16px;">Expert Mode - Coming Soon</h2>
+                        <p style="font-size: 16px; color: rgba(0, 0, 0, 0.45);">
+                          We're working on something special for our advanced users.
+                          <br>Stay tuned for powerful expert features!
+                        </p>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </div>
+
+              <div v-show="currentStep === '1'" class="step-panel">
+                <!-- 修改第二步内容的布局结构 -->
+                <div class="outline-generation">
+                  <div class="step-two-content">
+                    <div class="workspace-layout">
+                      <!-- 移除原来的关键词列表卡片 -->
+                      
+                      <!-- Outline 内容部分 -->
+                      <div class="plan-section">
+                        <!-- Update task progress section -->
+                        <div class="task-progress-section">
+                          <a-alert
+                            :type="outlineGenerationStatus === 'failed' ? 'error' : 'info'"
+                            class="task-alert"
                           >
                             <template #icon>
-                              <ThunderboltOutlined />
+                              <LoadingOutlined v-if="outlineGenerationStatus === 'processing'" spin />
+                              <WarningOutlined v-else-if="outlineGenerationStatus === 'failed'" />
+                              <CheckCircleOutlined v-else />
                             </template>
-                            Generate Content Plan
-                          </a-button>
-
-                          <a-button 
-                            type="primary"
-                            :disabled="!contentPlans.length"
-                            @click="handlePublishOutlines"
-                            style="background: linear-gradient(to right, #52c41a, #73d13d); 
-                                   border: none; 
-                                   font-weight: 500;
-                                   height: 40px;
-                                   padding: 0 24px;
-                                   box-shadow: 0 2px 8px rgba(82, 196, 26, 0.35);"
-                            :class="{ 'hover-effect': !disabled }"
-                          >
-                            Start Page generation
-                          </a-button>
-
-                          <!-- Existing buttons -->
-                          <a-button 
-                            type="text"
-                            :disabled="!contentPlans.length"
-                            @click="refreshContentPlans"
-                            :loading="isRefreshing"
-                          >
-                            Refresh
-                          </a-button>
-                          <a-button 
-                            type="text" 
-                            danger
-                            :disabled="!contentPlans.length"
-                            @click="confirmClearAllOutlines"
-                          >
-                            Clear All
-                          </a-button>
-                        </a-space>
-                      </template>
-                      <!-- All Outlines Tab -->
-                      <a-tab-pane key="all" tab="All Outlines">
-                        <div class="tab-content-wrapper">
-                          <div class="outlines-header">
-                            <a-checkbox 
-                              :checked="allOutlinesSelected"
-                              :indeterminate="someOutlinesSelected"
-                              @change="handleSelectAllOutlines"
-                            >
-                              Select All Outlines
-                            </a-checkbox>
-                            <span class="selected-count" v-if="selectedOutlinesCount > 0">
-                              ({{ selectedOutlinesCount }} selected)
-                            </span>
-                          </div>
-                          <div class="content-plans-grid">
-                            <template v-if="isLoadingOutlines">
-                              <div class="content-plans-loading">
-                                <LoadingOutlined style="font-size: 24px; color: #1890ff;" spin />
-                              </div>
-                            </template>
-                            <template v-else>
-                              <a-card 
-                                v-for="plan in contentPlans" 
-                                :key="plan.outlineId"
-                                class="plan-card"
-                              >
-                                <div class="card-header">
-                                  <div class="card-header-left">
-                                    <a-checkbox
-                                      :checked="plan.selected"
-                                      @change="(e) => handleOutlineSelect(plan, e.target.checked)"
-                                    />
-                                    <!-- 添加类型标签 -->
-                                    <a-tag :color="getTypeColor(plan.pageType)">
-                                      {{ plan.pageType }}
-                                    </a-tag>
+                            <template #message>
+                              <div class="task-progress-content">
+                                <template v-if="outlineGenerationStatus && outlineGenerationStatus !== 'finished'">
+                                  <div class="task-info">
+                                    <span class="task-status">
+                                      {{ getTaskStatusText(outlineGenerationStatus) }}
+                                    </span>
+                                    <span v-if="taskStartTime" class="task-timing">
+                                      Started: {{ formatTime(taskStartTime) }}
+                                      <template v-if="taskEndTime">
+                                        | Completed: {{ formatTime(taskEndTime) }}
+                                      </template>
+                                    </span>
                                   </div>
-                                  <div class="card-actions">
-                                    <HeartOutlined
-                                      v-if="!plan.favorited"
-                                      @click="handleFavorite(plan, $event)"
-                                    />
-                                    <HeartFilled
-                                      v-else
-                                      style="color: #ff4d4f"
-                                      @click="handleFavorite(plan, $event)"
-                                    />
-                                    <DeleteOutlined
-                                      @click="handleDeleteOutline(plan)"
-                                      style="color: #ff4d4f; margin-left: 8px"
-                                    />
+                                  <div v-if="taskDescription" class="task-description">
+                                    {{ taskDescription }}
                                   </div>
-                                </div>
-                                
-                                <div class="card-content" @click="showPlanDetails(plan)">
-                                  <h3 class="plan-title">{{ plan.title }}</h3>
-                                  <p class="plan-description">{{ plan.description }}</p>
-                                  
-                                  <div class="plan-metrics">
-                                    <div class="metric-item">
-                                      <span class="metric-label">
-                                        <FileTextOutlined /> Word Count
-                                      </span>
-                                      <span class="metric-value">{{ getTotalWordCount(plan).toLocaleString() }}</span>
-                                    </div>
-                                    <div class="metric-item">
-                                      <span class="metric-label">
-                                        <OrderedListOutlined /> Sections
-                                      </span>
-                                      <span class="metric-value">{{ plan.outline.length }}</span>
+                                </template>
+                                <template v-else>
+                                  <div class="task-info">
+                                    <!-- 将按钮和状态文本分开，改为垂直布局 -->
+                                    <div class="generate-section">
+                                      <div class="task-status">
+                                        ✨ Everything is ready! You can start page generation with your content plans below.
+                                      </div>
                                     </div>
                                   </div>
-
-                                  <div class="plan-keywords">
-                                    <a-tag 
-                                      v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
-                                      :key="keyword"
-                                      color="blue"
-                                    >
-                                      {{ keyword }}
-                                    </a-tag>
-                                    <a-tag v-if="plan.keywords.split(', ').length > 3">
-                                      +{{ plan.keywords.split(', ').length - 3 }} more
-                                    </a-tag>
-                                  </div>
-
-                                  <div class="plan-actions">
-                                    <a-button 
-                                      type="primary" 
-                                      @click="showPlanDetails(plan)"
-                                    >
-                                      View Details
-                                    </a-button>
-                                  </div>
-                                </div>
-                              </a-card>
+                                </template>
+                              </div>
                             </template>
-                          </div>
-                          <div class="pagination-container">
-                            <a-pagination
-                              v-model:current="contentPlansPagination.current"
-                              :total="contentPlansPagination.total"
-                              :pageSize="contentPlansPagination.pageSize"
-                              @change="handleContentPlansPaginationChange"
-                              show-size-changer
-                              show-quick-jumper
-                              :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
-                            />
-                          </div>
+                          </a-alert>
                         </div>
-                      </a-tab-pane>
 
-                      <!-- Selected Outlines Tab -->
-                      <a-tab-pane key="selected" tab="Selected Outlines">
-                        <div class="tab-content-wrapper">
-                          <div class="content-plans-grid">
-                            <a-card 
-                              v-for="plan in contentPlans.filter(p => p.favorited)" 
-                              :key="plan.outlineId"
-                              class="plan-card"
-                              :bordered="false"
-                            >
-                              <template #extra>
-                                <a-space>
-                                  <a-button 
-                                    type="text"
-                                    @click.stop="handleFavorite(plan)"
-                                  >
-                                    <template #icon>
-                                      <HeartFilled v-if="plan.favorited" style="color: #ff4d4f;" />
-                                      <HeartOutlined v-else />
-                                    </template>
-                                  </a-button>
-                                  <a-button
-                                    type="text"
-                                    danger
-                                    @click.stop="handleDeleteOutline(plan)"
-                                  >
-                                    <template #icon>
-                                      <DeleteOutlined />
-                                    </template>
-                                  </a-button>
-                                </a-space>
-                              </template>
-                              
-                              <div class="card-content" @click="showPlanDetails(plan)">
-                                <h3 class="plan-title">{{ plan.title }}</h3>
-                                <p class="plan-description">{{ plan.description }}</p>
-                                
-                                <div class="plan-metrics">
-                                  <div class="metric-item">
-                                    <span class="metric-label">
-                                      <FileTextOutlined /> Word Count
-                                    </span>
-                                    <span class="metric-value">{{ getTotalWordCount(plan).toLocaleString() }}</span>
-                                  </div>
-                                  <div class="metric-item">
-                                    <span class="metric-label">
-                                      <OrderedListOutlined /> Sections
-                                    </span>
-                                    <span class="metric-value">{{ plan.outline.length }}</span>
-                                  </div>
-                                </div>
-
-                                <div class="plan-keywords">
-                                  <a-tag 
-                                    v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
-                                    :key="keyword"
-                                    color="blue"
-                                  >
-                                    {{ keyword }}
-                                  </a-tag>
-                                  <a-tag v-if="plan.keywords.split(', ').length > 3">
-                                    +{{ plan.keywords.split(', ').length - 3 }} more
-                                  </a-tag>
-                                </div>
-
-                                <div class="plan-actions">
-                                  <a-button 
-                                    type="primary" 
-                                    @click="showPlanDetails(plan)"
-                                  >
-                                    View Details
-                                  </a-button>
-                                </div>
-                              </div>
-                            </a-card>
-                          </div>
-                          <div class="pagination-container">
-                            <a-pagination
-                              v-model:current="contentPlansPagination.current"
-                              :total="contentPlansPagination.total"
-                              :pageSize="contentPlansPagination.pageSize"
-                              @change="handleContentPlansPaginationChange"
-                              show-size-changer
-                              show-quick-jumper
-                              :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
-                            />
-                          </div>
-                        </div>
-                      </a-tab-pane>
-                    </a-tabs>
-                  </div>
-
-                  <!-- 添加右侧抽屉 -->
-                  <a-drawer
-                    :visible="drawerVisible"
-                    :width="600"
-                    placement="right"
-                    @close="closeDrawer"
-                    :title="selectedPlan?.title || 'Content Plan Details'"
-                    class="content-plan-drawer"
-                  >
-                    <template v-if="selectedPlan">
-                      <!-- Intent Section -->
-                      <section class="drawer-section">
-                        <h4 class="section-title">
-                          <CompassOutlined /> Intent & Value
-                        </h4>
-                        <div class="section-content">
-                          <div class="content-item">
-                            <div class="item-label">User Intent</div>
-                            <div class="item-value intent-value">{{ selectedPlan.userIntent }}</div>
-                          </div>
-                          <div class="content-item">
-                            <div class="item-label">Problem Solved</div>
-                            <div class="item-value problem-value">{{ selectedPlan.problemSolved }}</div>
-                          </div>
-                          <div class="content-tags">
-                            <div class="tags-label">Related Keywords:</div>
-                            <div class="tags-wrapper">
-                              <a-tag 
-                                v-for="keyword in selectedPlan.relatedKeywords.split(', ')" 
-                                :key="keyword"
-                                color="blue"
+                        <a-tabs 
+                          v-model:activeKey="contentPlanTab" 
+                          class="content-plan-tabs"
+                          @change="handleContentPlanTabChange"
+                        >
+                          <template #rightExtra>
+                            <a-space>
+                              <!-- Generate Content Plan button - 使用蓝色系 -->
+                              <a-button 
+                                type="primary"
+                                :loading="isGenerating"
+                                :disabled="totalSelectedKeywords === 0"
+                                @click="generateContentPlan"
+                                style="background: linear-gradient(to right, #1890ff, #40a9ff); 
+                                       border: none; 
+                                       font-weight: 500;
+                                       height: 40px;
+                                       padding: 0 24px;
+                                       box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);"
+                                :class="{ 'hover-effect': !disabled }"
                               >
-                                {{ keyword }}
-                              </a-tag>
-                            </div>
-                          </div>
-                        </div>
-                      </section>
+                                Generate Content Plan
+                              </a-button>
 
-                      <!-- TDK Section -->
-                      <section class="drawer-section">
-                        <h4 class="section-title">
-                          <FileTextOutlined /> Page Metadata
-                        </h4>
-                        <div class="section-content">
-                          <div class="content-item">
-                            <div class="item-label">Title</div>
-                            <div class="item-value title-value">{{ selectedPlan.title }}</div>
-                          </div>
-                          <div class="content-item">
-                            <div class="item-label">Description</div>
-                            <div class="item-value description-value">{{ selectedPlan.description }}</div>
-                          </div>
-                          <div class="content-item">
-                            <div class="item-label">Keywords</div>
-                            <div class="tags-wrapper keywords-tags">
-                              <a-tag 
-                                v-for="keyword in selectedPlan.keywords.split(', ')" 
-                                :key="keyword"
-                                color="green"
+                              <a-button 
+                                type="primary"
+                                :disabled="!contentPlans.length"
+                                @click="handlePublishOutlines"
+                                style="background: linear-gradient(to right, #52c41a, #73d13d); 
+                                       border: none; 
+                                       font-weight: 500;
+                                       height: 40px;
+                                       padding: 0 24px;
+                                       box-shadow: 0 2px 8px rgba(82, 196, 26, 0.35);"
+                                :class="{ 'hover-effect': !disabled }"
                               >
-                                {{ keyword }}
-                              </a-tag>
-                            </div>
-                          </div>
-                        </div>
-                      </section>
+                                Start Page generation
+                              </a-button>
 
-                      <!-- Outline Section -->
-                      <section class="drawer-section">
-                        <h4 class="section-title">
-                          <OrderedListOutlined /> Content Outline
-                        </h4>
-                        <div class="section-content">
-                          <div 
-                            v-for="section in selectedPlan.outline" 
-                            :key="section.sequence" 
-                            class="outline-item"
-                          >
-                            <div class="outline-header">
-                              <div class="sequence-badge">{{ section.sequence }}</div>
-                              <div class="outline-info">
-                                <div class="outline-title">{{ section.sectionTitle }}</div>
-                                <div class="outline-meta">
-                                  <span class="word-count">
-                                    <FileTextOutlined /> {{ section.wordCount.toLocaleString() }} words
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            <div class="outline-keywords" v-if="section.keywordsUsageRequirements">
-                              <div class="keywords-label">Keywords to Include:</div>
-                              <div class="keywords-list">
-                                <a-tag 
-                                  v-for="(count, keyword) in section.keywordsUsageRequirements" 
-                                  :key="keyword"
-                                  color="blue"
+                              <!-- Existing buttons -->
+                              <a-button 
+                                type="text"
+                                :disabled="!contentPlans.length"
+                                @click="refreshContentPlans"
+                                :loading="isRefreshing"
+                              >
+                                Refresh
+                              </a-button>
+                              <a-button 
+                                type="text" 
+                                danger
+                                :disabled="!contentPlans.length"
+                                @click="confirmClearAllOutlines"
+                              >
+                                Clear All
+                              </a-button>
+                            </a-space>
+                          </template>
+                          <!-- All Outlines Tab -->
+                          <a-tab-pane key="all" tab="All Outlines">
+                            <div class="tab-content-wrapper">
+                              <div class="outlines-header">
+                                <a-checkbox 
+                                  :checked="allOutlinesSelected"
+                                  :indeterminate="someOutlinesSelected"
+                                  @change="handleSelectAllOutlines"
                                 >
-                                  {{ keyword }} ({{ count }}×)
-                                </a-tag>
+                                  Select All Outlines
+                                </a-checkbox>
+                                <span class="selected-count" v-if="selectedOutlinesCount > 0">
+                                  ({{ selectedOutlinesCount }} selected)
+                                </span>
+                              </div>
+                              <div class="content-plans-grid">
+                                <template v-if="isLoadingOutlines">
+                                  <div class="content-plans-loading">
+                                    Loading...
+                                  </div>
+                                </template>
+                                <template v-else>
+                                  <a-card 
+                                    v-for="plan in contentPlans" 
+                                    :key="plan.outlineId"
+                                    class="plan-card"
+                                  >
+                                    <div class="card-header">
+                                      <div class="card-header-left">
+                                        <a-checkbox
+                                          :checked="plan.selected"
+                                          @change="(e) => handleOutlineSelect(plan, e.target.checked)"
+                                        />
+                                        <!-- 添加类型标签 -->
+                                        <a-tag :color="getTypeColor(plan.pageType)">
+                                          {{ plan.pageType }}
+                                        </a-tag>
+                                      </div>
+                                      <div class="card-actions">
+                                        <a-button 
+                                          type="text"
+                                          @click="handleFavorite(plan)"
+                                        >
+                                          {{ plan.favorited ? 'Remove' : 'Add' }}
+                                        </a-button>
+                                      </div>
+                                    </div>
+                                    
+                                    <div class="card-content" @click="showPlanDetails(plan)">
+                                      <h3 class="plan-title">{{ plan.title }}</h3>
+                                      <p class="plan-description">{{ plan.description }}</p>
+                                      
+                                      <div class="plan-metrics">
+                                        <div class="metric-item">
+                                          <span class="metric-label">
+                                            <FileTextOutlined /> Word Count
+                                          </span>
+                                          <span class="metric-value">{{ getTotalWordCount(plan).toLocaleString() }}</span>
+                                        </div>
+                                        <div class="metric-item">
+                                          <span class="metric-label">
+                                            <OrderedListOutlined /> Sections
+                                          </span>
+                                          <span class="metric-value">{{ plan.outline.length }}</span>
+                                        </div>
+                                      </div>
+
+                                      <div class="plan-keywords">
+                                        <a-tag 
+                                          v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
+                                          :key="keyword"
+                                          color="blue"
+                                        >
+                                          {{ keyword }}
+                                        </a-tag>
+                                        <a-tag v-if="plan.keywords.split(', ').length > 3">
+                                          +{{ plan.keywords.split(', ').length - 3 }} more
+                                        </a-tag>
+                                      </div>
+
+                                      <div class="plan-actions">
+                                        <a-button 
+                                          type="primary" 
+                                          @click="showPlanDetails(plan)"
+                                        >
+                                          View Details
+                                        </a-button>
+                                      </div>
+                                    </div>
+                                  </a-card>
+                                </template>
+                              </div>
+                              <div class="pagination-container">
+                                <a-pagination
+                                  v-model:current="contentPlansPagination.current"
+                                  :total="contentPlansPagination.total"
+                                  :pageSize="contentPlansPagination.pageSize"
+                                  @change="handleContentPlansPaginationChange"
+                                  show-size-changer
+                                  show-quick-jumper
+                                  :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
+                                />
                               </div>
                             </div>
-                          </div>
-                        </div>
-                      </section>
-                    </template>
-                  </a-drawer>
+                          </a-tab-pane>
+
+                          <!-- Selected Outlines Tab -->
+                          <a-tab-pane key="selected" tab="Selected Outlines">
+                            <div class="tab-content-wrapper">
+                              <div class="content-plans-grid">
+                                <a-card 
+                                  v-for="plan in contentPlans.filter(p => p.favorited)" 
+                                  :key="plan.outlineId"
+                                  class="plan-card"
+                                  :bordered="false"
+                                >
+                                  <template #extra>
+                                    <a-space>
+                                      <a-button 
+                                        type="text"
+                                        @click.stop="handleFavorite(plan)"
+                                      >
+                                        {{ plan.favorited ? 'Remove' : 'Add' }}
+                                      </a-button>
+                                    </a-space>
+                                  </template>
+                                  
+                                  <div class="card-content" @click="showPlanDetails(plan)">
+                                    <h3 class="plan-title">{{ plan.title }}</h3>
+                                    <p class="plan-description">{{ plan.description }}</p>
+                                    
+                                    <div class="plan-metrics">
+                                      <div class="metric-item">
+                                        <span class="metric-label">
+                                          <FileTextOutlined /> Word Count
+                                        </span>
+                                        <span class="metric-value">{{ getTotalWordCount(plan).toLocaleString() }}</span>
+                                      </div>
+                                      <div class="metric-item">
+                                        <span class="metric-label">
+                                          <OrderedListOutlined /> Sections
+                                        </span>
+                                        <span class="metric-value">{{ plan.outline.length }}</span>
+                                      </div>
+                                    </div>
+
+                                    <div class="plan-keywords">
+                                      <a-tag 
+                                        v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
+                                        :key="keyword"
+                                        color="blue"
+                                      >
+                                        {{ keyword }}
+                                      </a-tag>
+                                      <a-tag v-if="plan.keywords.split(', ').length > 3">
+                                        +{{ plan.keywords.split(', ').length - 3 }} more
+                                      </a-tag>
+                                    </div>
+
+                                    <div class="plan-actions">
+                                      <a-button 
+                                        type="primary" 
+                                        @click="showPlanDetails(plan)"
+                                      >
+                                        View Details
+                                      </a-button>
+                                    </div>
+                                  </div>
+                                </a-card>
+                              </div>
+                              <div class="pagination-container">
+                                <a-pagination
+                                  v-model:current="contentPlansPagination.current"
+                                  :total="contentPlansPagination.total"
+                                  :pageSize="contentPlansPagination.pageSize"
+                                  @change="handleContentPlansPaginationChange"
+                                  show-size-changer
+                                  show-quick-jumper
+                                  :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
+                                />
+                              </div>
+                            </div>
+                          </a-tab-pane>
+                        </a-tabs>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </a-tab-pane>
-          </a-tabs>
-
-          <!-- 添加保存配置的模态框 -->
-          <a-modal
-            v-model:open="saveModalVisible"
-            title="Save Filter Preset"
-            @ok="saveCurrentPreset"
-          >
-            <a-input v-model:value="newPresetName" placeholder="Enter preset name" />
-          </a-modal>
-
-          <!-- 修改 modal 内容部分 -->
-          <a-modal
-            v-model:open="showSelectedModal"
-            title="Selected Keywords"
-            width="800px"
-            @cancel="handleModalClose"
-          >
-            <template v-if="isLoadingModalKeywords">
-              <div class="loading-container">
-                <a-spin />
-              </div>
-            </template>
-            <template v-else>
-              <a-tabs
-                v-model:activeKey="currentModalTab"
-                @change="handleModalTabChange"
-              >
-                <a-tab-pane
-                  v-for="tab in modalTabs"
-                  :key="tab.key"
-                  :tab="`${tab.label} (${modalKeywords[tab.key].length})`"
-                >
-                  <a-table
-                    :data-source="modalKeywords[tab.key]"
-                    :columns="comparisonColumns"
-                    :pagination="{ pageSize: 10 }"
-                    size="small"
-                  >
-                    <template #actions="{ record }">
-                      <a-button 
-                        type="text"
-                        @click="handleCancelSelection(record)"
-                      >
-                        <template #icon>
-                          <HeartFilled style="color: #ff4d4f;" />
-                        </template>
-                      </a-button>
-                    </template>
-                  </a-table>
-                </a-tab-pane>
-              </a-tabs>
-            </template>
-            
-            <template #footer>
-              <div class="modal-footer">
-                <a-space>
-                  <a-button 
-                    type="primary"
-                    @click="proceedToContentPlan"
-                  >
-                    Proceed to Content Plan
-                  </a-button>
-                  <a-button @click="handleModalClose">Close</a-button>
-                </a-space>
-              </div>
-            </template>
-          </a-modal>
+            </div>
+          </div>
         </template>
       </template>
 
@@ -879,21 +651,27 @@ import {
   HeartOutlined,
   HeartFilled,
   InfoCircleOutlined,
-  ReloadOutlined, // Add this import
+  ReloadOutlined,
   CloudUploadOutlined,
   CloseCircleOutlined,
+  ExperimentOutlined,
+  ThunderboltOutlined,
+  AimOutlined,
+  BarChartOutlined,
+  UserOutlined
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
   competitorColumns,
   tableData,
-  recommendedKeywords as importedRecommendedKeywords  // 重命名导入
+  recommendedKeywords as importedRecommendedKeywords
 } from '../data/keywordPlanningData'
 import { message } from 'ant-design-vue'
 import api from '../api/api'
 import { useRouter } from 'vue-router'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
 import { Modal } from 'ant-design-vue'
+import SmartBanner from './common/SmartBanner.vue'
 
 export default defineComponent({
   name: 'KeywordsPlanningPage',
@@ -922,6 +700,12 @@ export default defineComponent({
     ReloadOutlined,
     CloudUploadOutlined,
     CloseCircleOutlined,
+    SmartBanner,
+    ExperimentOutlined,
+    ThunderboltOutlined,
+    AimOutlined,
+    BarChartOutlined,
+    UserOutlined
   },
   setup() {
     const currentMode = ref('beginner')
@@ -1011,7 +795,7 @@ export default defineComponent({
         status: getKeywordStatus(item),
         grade: item.grade,
         reason: item.reasoning || 'No specific reason provided',
-        relatedOutlines: item.relatedOutlines || [], // 添加 relatedOutlines
+        relatedOutlines: item.relatedOutlines || [],
         favorited: item.status === 'selected',
       }
     }
@@ -1405,7 +1189,7 @@ export default defineComponent({
     }
 
     const currentPriority = ref('1')
-    const currentPagePriority = ref('1')  // 添加这个变量
+    const currentPagePriority = ref('1')
 
     const handleTabChange = (activeKey) => {
       console.log('Tab changed to:', activeKey)
@@ -1482,7 +1266,6 @@ export default defineComponent({
     };
 
     const startPolling = () => {
-      // 先清除已存在的轮询
       if (pollingInterval.value) {
         clearInterval(pollingInterval.value)
       }
@@ -1490,10 +1273,9 @@ export default defineComponent({
       pollingInterval.value = setInterval(async () => {
         const response = await checkOutlineGenerationStatus()
         
-        // 如果状态是完成或失败，停止轮询
         if (response?.data?.status === 'finished' || response?.data?.status === 'failed') {
           clearInterval(pollingInterval.value)
-          pollingInterval.value = null // 重置轮询变量
+          pollingInterval.value = null
           
           if (response?.data?.status === 'finished') {
             await fetchContentPlans()
@@ -1502,7 +1284,7 @@ export default defineComponent({
             message.error('Content plan generation failed')
           }
         }
-      }, 5000) // 增加轮询间隔到 5 秒
+      }, 5000)
     }
 
     onUnmounted(() => {
@@ -1553,14 +1335,11 @@ export default defineComponent({
         hasGenerated.value = false
         isGenerating.value = false
         
-        // 检查生成状态并启动轮询
         await checkAndStartPolling()
       }
     })
 
-    // 修改 checkAndStartPolling 方法
     const checkAndStartPolling = async () => {
-      // 如果已经在轮询中，不重复启动
       if (pollingInterval.value) return
       
       try {
@@ -1605,7 +1384,6 @@ export default defineComponent({
     }
 
     const fetchContentPlans = async () => {
-      // 如果正在加载，不重复请求
       if (isLoadingOutlines.value) return
       
       isLoadingOutlines.value = true
@@ -1647,16 +1425,13 @@ export default defineComponent({
       total: 0
     })
 
-    // Add new methods
     const handleFavorite = async (plan, event) => {
       try {
         if (plan.favorited) {
-          // Cancel favorite
           await api.cancelPlanningOutlines([plan.outlineId]);
           plan.favorited = false;
           message.success('Removed from selection');
         } else {
-          // Add to favorites
           await api.selectPlanningOutlines([plan.outlineId]);
           plan.favorited = true;
           message.success('Added to selection');
@@ -1667,31 +1442,23 @@ export default defineComponent({
       }
     };
 
-    // Add contentPlanTab definition
     const contentPlanTab = ref('all')
 
-    // Add tab switch handling method
     const handleContentPlanTabChange = async (activeKey) => {
       contentPlanTab.value = activeKey
-      // 重置分页
       contentPlansPagination.value.current = 1
-      // 获取数据并检查状态
       await fetchContentPlans()
     }
 
-    // Add loading state
     const isLoadingOutlines = ref(false)
 
-    // Add favorite/unfavorite keyword method
     const handleKeywordFavorite = async (keyword) => {
       try {
         if (keyword.favorited) {
-          // Unfavorite
           await api.cancelPlanningKeywords([keyword.id]);
           keyword.favorited = false;
           message.success('Removed from selection');
         } else {
-          // Favorite
           await api.selectPlanningKeywords([keyword.id]);
           keyword.favorited = true;
           message.success('Added to selection');
@@ -1702,25 +1469,20 @@ export default defineComponent({
       }
     };
 
-    // Add tab switch handling method
     const handleModalTabChange = (activeKey) => {
       currentModalTab.value = activeKey
     }
 
-    // Add showSelectedKeywords method
     const showSelectedKeywords = async () => {
       showSelectedModal.value = true
       await fetchSelectedKeywords()
     }
 
-    // Add loading state variable
     const isLoadingModalKeywords = ref(false)
 
-    // Add cancel selection method
     const handleCancelSelection = async (keyword) => {
       try {
         await api.cancelPlanningKeywords([keyword.id])
-        // Remove keyword from list
         const sourceType = currentModalTab.value
         modalKeywords.value[sourceType] = modalKeywords.value[sourceType].filter(k => k.id !== keyword.id)
         message.success('Keyword deselected')
@@ -1730,7 +1492,6 @@ export default defineComponent({
       }
     }
 
-    // Add new reactive variables
     const selectedKeywordsTab = ref('comparison')
     const selectedKeywordsData = ref({
       comparison: [],
@@ -1738,15 +1499,12 @@ export default defineComponent({
     })
     const isLoadingSelectedKeywords = ref(false)
 
-    // Modify watch to sync data
     watch(currentStep, async (newStep) => {
       if (newStep === '1') {
-        // When switching to outline tab, load selected keywords
         await fetchSelectedKeywordsData()
       }
     })
 
-    // Add get selected keywords method
     const fetchSelectedKeywordsData = async () => {
       isLoadingSelectedKeywords.value = true
       try {
@@ -1777,14 +1535,11 @@ export default defineComponent({
       }
     }
 
-    // New remove keyword method
     const handleRemoveKeyword = async (keyword) => {
       try {
         await api.cancelPlanningKeywords([keyword.id])
-        // Remove keyword from both lists
         const sourceType = selectedKeywordsTab.value
         selectedKeywordsData.value[sourceType] = selectedKeywordsData.value[sourceType].filter(k => k.id !== keyword.id)
-        // Also update selectedKeywords
         selectedKeywords.value = selectedKeywords.value.filter(k => k.id !== keyword.id)
         message.success('Keyword removed')
       } catch (error) {
@@ -1793,7 +1548,6 @@ export default defineComponent({
       }
     }
 
-    // Add computed property to get total number of selected keywords
     const totalSelectedKeywords = computed(() => {
       return selectedKeywordsData.value.comparison.length + 
              selectedKeywordsData.value.top_pages.length
@@ -1801,7 +1555,6 @@ export default defineComponent({
 
     const handleDeleteOutline = async (plan) => {
       try {
-        // Show confirmation modal
         const confirmed = await new Promise(resolve => {
           Modal.confirm({
             title: 'Delete Outline',
@@ -1817,7 +1570,6 @@ export default defineComponent({
         if (confirmed) {
           await api.deletePlanningOutline(plan.outlineId);
           message.success('Outline deleted successfully');
-          // Refresh the outlines list
           await fetchContentPlans();
         }
       } catch (error) {
@@ -1826,7 +1578,6 @@ export default defineComponent({
       }
     };
 
-    // Add new refs and methods in setup
     const taskProgress = ref(null)
     const taskMessage = ref('')
 
@@ -1842,7 +1593,10 @@ export default defineComponent({
 
     const formatTaskDescription = (description) => {
       if (description?.includes('composite_generator')) {
-        return "Our AI is analyzing your keywords and creating personalized content recommendations. This usually takes 1-2 minutes."
+        if (outlineGenerationStatus.value !== 'failed') {
+          return "Our AI is analyzing your keywords and creating personalized content recommendations. This usually takes 1-2 minutes."
+        }
+        return description
       }
       return description
     }
@@ -1861,14 +1615,12 @@ export default defineComponent({
       try {
         isLoadingOutlines.value = true
         
-        // Delete outlines one by one in current page
         for (const plan of contentPlans.value) {
           await api.deletePlanningOutline(plan.outlineId)
         }
         
         message.success('All outlines have been cleared')
         
-        // 重新检查生成状态并获取最新列表
         await checkOutlineGenerationStatus()
         await fetchContentPlans()
 
@@ -1898,21 +1650,16 @@ export default defineComponent({
       })
     }
 
-    // Add new ref for refresh loading state
     const isRefreshing = ref(false)
 
-    // Modify refresh method
     const refreshContentPlans = async () => {
       isRefreshing.value = true
       try {
-        // First check the generation status
         const statusResponse = await checkOutlineGenerationStatus()
         
-        // If still processing, start polling
         if (statusResponse?.data?.status === 'processing') {
           startPolling()
         } else {
-          // If not processing, just fetch the content plans
           await fetchContentPlans()
         }
         
@@ -1925,10 +1672,9 @@ export default defineComponent({
       }
     }
 
-    // Add jump method
     const proceedToContentPlan = () => {
-      handleModalClose(); // Close the modal first
-      currentStep.value = '1'; // Switch to outline tab
+      handleModalClose();
+      currentStep.value = '1';
     };
 
     const handlePublishOutlines = async () => {
@@ -1938,7 +1684,6 @@ export default defineComponent({
         return
       }
 
-      // Add confirmation dialog
       const confirmed = await new Promise(resolve => {
         Modal.confirm({
           title: 'Start Page Generation',
@@ -2021,7 +1766,6 @@ export default defineComponent({
       }
     }
 
-    // Add new reactive variables
     const generationProgressVisible = ref(false)
     const generationProgress = ref(0)
     const generationStatus = ref('active')
@@ -2031,7 +1775,6 @@ export default defineComponent({
     const generationCompleted = ref(false)
     const generationFailed = ref(false)
 
-    // Add new reactive variables
     const allOutlinesSelected = computed(() => {
       return contentPlans.value.length > 0 && 
              contentPlans.value.every(plan => plan.selected)
@@ -2046,7 +1789,6 @@ export default defineComponent({
       return contentPlans.value.filter(plan => plan.selected).length
     })
 
-    // Add new methods
     const handleSelectAllOutlines = (e) => {
       const checked = e.target.checked
       contentPlans.value.forEach(plan => {
@@ -2058,13 +1800,12 @@ export default defineComponent({
       plan.selected = checked
     }
 
-    // 在 setup 函数内部定义 comparisonColumns
     const comparisonColumns = [
       {
         title: 'Keyword',
         dataIndex: 'keyword',
         key: 'keyword',
-        width: '25%'  // 调整宽度以适应新列
+        width: '25%'
       },
       {
         title: 'KRS',
@@ -2088,7 +1829,7 @@ export default defineComponent({
         title: 'Related Outlines',
         key: 'relatedOutlines',
         width: '20%',
-        customRender: () => '-'  // 默认显示 '-'
+        customRender: () => '-'
       },
       {
         title: 'Actions',
@@ -2100,17 +1841,28 @@ export default defineComponent({
       }
     ]
 
-    // 在 setup 函数中添加
     const getTypeColor = (type) => {
       const typeColors = {
         'Blog': 'blue',
         'Landing Page': 'green',
-        // 可以添加更多类型的颜色映射
       }
       return typeColors[type] || 'default'
     }
 
-    const activeCollapseKeys = ref([]) // 修改为空数组，使折叠面板默认收起
+    const activeCollapseKeys = ref([])
+
+    const bannerTheme = {
+      primary: '#2563EB',
+      secondary: '#0EA5E9',
+      background: 'linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%)',
+      textColor: '#FFFFFF',
+      descriptionColor: '#E2E8F0',
+      badgeColor: '#94A3B8',
+      badgeBackground: 'rgba(255, 255, 255, 0.08)',
+      badgeHoverBackground: 'rgba(37, 99, 235, 0.15)',
+      badgeHoverColor: '#60A5FA',
+      iconBackground: 'rgba(37, 99, 235, 0.15)',
+    }
 
     return {
       showSelectedKeywords,
@@ -2120,7 +1872,7 @@ export default defineComponent({
       clearSelection,
       overviewStats: ref(overviewStats),
       priorities,
-      recommendedKeywords,  // Ensure exposed in return
+      recommendedKeywords,
       pageKeywords: ref(pageKeywords),
       savedPresets: ref(savedPresets),
       columns,
@@ -2208,7 +1960,7 @@ export default defineComponent({
       taskDescription,
       formatTaskDescription,
       confirmClearAllOutlines,
-      pollingInterval, // If needed in template
+      pollingInterval,
       refreshContentPlans,
       isRefreshing,
       proceedToContentPlan,
@@ -2231,868 +1983,176 @@ export default defineComponent({
       comparisonColumns,
       getTypeColor,
       activeCollapseKeys,
+      bannerTheme,
     }
   }
 })
 </script>
 
 <style scoped>
-/* Workspace layout */
-.workspace-layout {
+.planning-layout {
   display: flex;
-  flex-direction: column;
   gap: 24px;
   height: 100%;
-  width: 100%;
-  overflow: visible; /* Changed to visible */
+  margin-top: 24px;
 }
 
-/* Content plans area */
-.content-plans-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-  padding: 16px;
+.steps-navigation {
+  flex: 0 0 200px;
+  padding: 24px 0;
 }
 
-.plan-card {
-  background: #fff;
-  border-radius: 8px;
-  transition: all 0.3s;
+.step-item {
+  position: relative;
+  padding: 12px;
   cursor: pointer;
-  height: 100%;  /* 确保所有卡片高度一致 */
 }
 
-.plan-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.plan-card :deep(.ant-card-body) {
-  padding: 16px;  /* 统一内边距 */
-  height: 100%;  /* 确保卡片内容区域填充满 */
+.step-content {
   display: flex;
-  flex-direction: column;
-}
-
-.card-content {
-  display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 8px;
-  height: 100%;  /* 确保内容填充整个卡片 */
-}
-
-.plan-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin: 0;  /* 移除默认边距 */
-  line-height: 1.4;
-  height: 40px;  /* 设置固定高度，约等于两行文字 */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;  /* 限制为2行 */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.plan-description {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.65);
-  line-height: 1.5;
-  height: 54px;  /* 3行文字的高度：12px * 1.5 * 3 = 54px */
-  margin: 8px 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;  /* 限制为3行 */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  word-break: break-word;  /* 确保长单词也能正常换行 */
-}
-
-.section-header {
-  padding: 16px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
-  border-radius: 8px 8px 0 0;
-}
-
-.keywords-content {
-  flex: 1;
-  overflow-y: auto; /* 添加垂直滚动 */
-  padding: 16px;
-}
-
-/* 美化滚动条 */
-.keywords-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.keywords-content::-webkit-scrollbar-thumb {
-  background-color: #d9d9d9;
-  border-radius: 3px;
-}
-
-.keywords-content::-webkit-scrollbar-track {
-  background-color: #f0f0f0;
-}
-
-.keyword-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.keyword-text {
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.keyword-metrics {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-/* Task progress area */
-.task-progress-section {
-  margin-bottom: 16px;
-}
-
-.task-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 24px;
-}
-
-.task-timing {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.65);
-}
-
-.task-description {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.65);
-  margin-top: 4px;
-}
-/* Ant Design component styles override */
-:deep(.ant-tabs-nav) {
-  margin-bottom: 8px;
-  padding: 0 16px;
-}
-
-:deep(.ant-tabs-tab) {
-  padding: 8px 0;
-  font-size: 13px;
-}
-
-:deep(.ant-alert) {
-  display: flex;
-  align-items: center;
-  margin: 0;
-}
-
-:deep(.ant-alert-message) {
-  margin: 0;
-  display: flex;
-  align-items: center;
-}
-
-:deep(.ant-alert-icon) {
-  display: flex;
-  align-items: center;
-  margin-top: 0;
-}
-
-:deep(.ant-list-item) {
-  border-bottom: 1px solid #f0f0f0 !important;
-}
-
-:deep(.ant-list-item:last-child) {
-  border-bottom: none !important;
-}
-
-/* Add styles for step two content container */
-.step-two-content {
-  flex: 1;
-  overflow-y: auto;
-  height: calc(100vh - 250px); /* Adjust height calculation */
-}
-
-/* Adjust pagination container position */
-.pagination-container {
+  padding: 12px;
+  border-radius: 8px;
   background: white;
-  padding: 16px;
-  border-top: 1px solid #f0f0f0;
-  margin-top: auto; /* Keep pagination at the bottom of the content */
+  transition: all 0.3s;
+  border: 1px solid #e5e7eb;
 }
 
-/* Ensure plan area can display content fully */
-.plan-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0; /* Allow content area to shrink */
+.step-item.active .step-content {
+  background: #f0f7ff;
+  border: 1px solid #2563eb;
 }
 
-/* Ensure tab content area can scroll properly */
-.tab-content-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 0; /* Allow content area to shrink */
-}
-
-/* Adjust mode-controls style to fit new layout */
-.mode-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px; /* Increase gap between components */
-}
-/* Ensure tags and icons are vertically aligned */
-:deep(.ant-tag) {
-  margin-right: 0;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* Optimize keyword item layout */
-.keyword-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 8px;
-}
-
-/* Ensure checkbox text doesn't wrap */
-:deep(.ant-checkbox-wrapper) {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-/* Add footer styles */
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-/* Add prominent button styles */
-.generate-btn {
-  background: linear-gradient(to right, #1890ff, #40a9ff);
-  border: none;
-  font-weight: 500;
-  height: 40px;
-  padding: 0 24px;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);
-  transition: all 0.3s ease;
-}
-
-.generate-btn:hover {
-  background: linear-gradient(to right, #40a9ff, #69c0ff);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.45);
-}
-
-.generate-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.35);
-}
-
-/* Ensure disabled state also has appropriate styles */
-.generate-btn[disabled] {
-  background: #f5f5f5;
-  border: 1px solid #d9d9d9;
-  box-shadow: none;
-  color: rgba(0, 0, 0, 0.25);
-}
-
-/* Adjust task status text style */
-.task-status {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.65);
-}
-
-/* Add new layout container styles */
-.generate-section {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-}
-
-/* 调整状态文本样式 */
-.task-status {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.65);
-  margin-left: 4px; /* 添加少许左边距 */
-}
-
-/* 添加新的样式 */
-.generation-progress {
-  padding: 20px 0;
-}
-
-.progress-status {
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.status-text {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.progress-details {
-  margin-top: 12px;
-  color: rgba(0, 0, 0, 0.45);
-  font-size: 14px;
-}
-
-/* Add new styles */
-.outlines-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 16px;
-  background: white;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.selected-count {
-  color: rgba(0, 0, 0, 0.45);
-  font-size: 14px;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.card-header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* 调整类型标签样式 */
-.card-header-left :deep(.ant-tag) {
-  margin: 0;
-  text-transform: capitalize;
-  font-size: 12px;
-  line-height: 20px;
-  height: 22px;
-  padding: 0 8px;
-}
-
-.card-actions {
-  display: flex;
-  align-items: center;
-}
-
-/* 优先级标签样式 */
-.priority-tab {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.priority-indicator {
-  width: 8px;
-  height: 8px;
+.step-number {
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-}
-
-/* 调整列表容器样式 */
-.keywords-list {
-  height: calc(100% - 40px); /* 减去标题和分页的高度 */
-  overflow-y: auto;
-}
-
-.content-plan-drawer :deep(.ant-drawer-header) {
-  padding: 16px 24px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.content-plan-drawer :deep(.ant-drawer-title) {
-  font-size: 16px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-.drawer-section {
-  margin-bottom: 24px;
-}
-
-.drawer-section:last-child {
- 
-  border-bottom: none;
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 16px;
-}
-
-.section-title :deep(.anticon) {
-  color: #1890ff;
-  font-size: 16px;
-}
-
-.section-content {
-  padding: 0 4px;
-}
-
-.content-item {
-  margin-bottom: 16px;
-}
-
-.content-item:last-child {
-  margin-bottom: 0;
-}
-
-.item-label {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.45);
-  margin-bottom: 8px;
-}
-
-.item-value {
-  font-size: 14px;
-  line-height: 1.6;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-.intent-value,
-.problem-value {
-  background: #fafafa;
-  padding: 12px;
-  border-radius: 4px;
-  border: 1px solid #f0f0f0;
-}
-
-.title-value {
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.description-value {
-  background: #fafafa;
-  padding: 12px;
-  border-radius: 4px;
-  border: 1px solid #f0f0f0;
-}
-
-.content-tags,
-.outline-keywords {
-  margin-top: 16px;
-}
-
-.tags-label,
-.keywords-label {
-  font-size: 13px;
-  color: rgba(0, 0, 0, 0.45);
-  margin-bottom: 8px;
-}
-
-.tags-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.tags-wrapper :deep(.ant-tag) {
-  margin: 0;
-  padding: 4px 8px;
-  font-size: 12px;
-}
-
-.outline-item {
-  padding: 16px;
-  background: #fafafa;
-  border-radius: 4px;
-  margin-bottom: 12px;
-  border: 1px solid #f0f0f0;
-}
-
-.outline-item:last-child {
-  margin-bottom: 0;
-}
-
-.outline-header {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.sequence-badge {
+  background: #2563eb;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  background: #1890ff;
-  color: white;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  flex-shrink: 0;
+  font-weight: 600;
+  font-size: 14px;
 }
 
-.outline-info {
+.step-info {
+  flex: 1;
+}
+
+.step-title {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 2px;
+  font-size: 14px;
+}
+
+.step-desc {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
+.step-connector {
+  position: absolute;
+  left: 35px;
+  top: 64px;
+  bottom: 0;
+  width: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.connector-line {
+  flex: 1;
+  width: 2px;
+  background: #e5e7eb;
+}
+
+.connector-arrow {
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid #e5e7eb;
+  border-bottom: 2px solid #e5e7eb;
+  transform: rotate(45deg);
+  margin-bottom: -6px;
+}
+
+.step-item.active .connector-line,
+.step-item.active .connector-arrow {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.main-content {
   flex: 1;
   min-width: 0;
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
 }
 
-.outline-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  margin-bottom: 4px;
-  line-height: 1.5;
-}
-
-.outline-meta {
+.content-toolbar {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.word-count {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.word-count :deep(.anticon) {
-  font-size: 12px;
-}
-
-.outline-keywords {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed #e8e8e8;
-}
-
-.keywords-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.selected-keywords-card :deep(.ant-card-body) {
-  padding: 0;
-}
-
-.selected-keywords-card :deep(.ant-tabs-nav) {
-  margin: 0;
-  padding: 0 16px;
-}
-
-.selected-keywords-card :deep(.ant-table-pagination) {
-  margin: 16px;
-}
-
-/* 调整表格内边距 */
-.selected-keywords-card :deep(.ant-table-wrapper) {
-  padding: 0 16px;
-}
-
-/* 调整表格行高 */
-.selected-keywords-card :deep(.ant-table-small) .ant-table-thead > tr > th,
-.selected-keywords-card :deep(.ant-table-small) .ant-table-tbody > tr > td {
-  padding: 8px 16px;
-}
-
-.selected-keywords-card :deep(.ant-card-body) {
-  padding: 0;
-}
-
-.selected-keywords-card :deep(.ant-tabs-nav) {
-  margin: 0;
-  padding: 8px 16px 0;
-}
-
-.selected-keywords-card :deep(.ant-table-pagination) {
-  margin: 8px 16px;
-}
-
-/* 调整表格内边距 */
-.selected-keywords-card :deep(.ant-table-wrapper) {
-  padding: 0 16px;
-}
-
-/* 进一步缩小表格行高和内边距 */
-.selected-keywords-card :deep(.compact-table) {
-  /* 调整表头 */
-  .ant-table-thead > tr > th {
-    padding: 4px 8px;
-    font-size: 13px;
-  }
-  
-  /* 调整表格内容 */
-  .ant-table-tbody > tr > td {
-    padding: 2px 8px;
-    font-size: 13px;
-  }
-  
-  /* 调整行高 */
-  .ant-table-tbody > tr {
-    height: 32px;
-  }
-  
-  /* 调整分页器样式 */
-  .ant-pagination {
-    font-size: 12px;
-    
-    .ant-pagination-item {
-      min-width: 24px;
-      height: 24px;
-      line-height: 22px;
-    }
-    
-    .ant-select-selector {
-      height: 24px !important;
-      
-      .ant-select-selection-item {
-        line-height: 22px;
-      }
-    }
-  }
-}
-
-/* 优化按钮样式 */
-.selected-keywords-card :deep(.ant-btn-text) {
-  padding: 0 4px;
-  height: 24px;
-  line-height: 24px;
-}
-
-.selected-keywords-card :deep(.ant-card-body) {
-  padding: 16px;
-}
-
-.table-section {
-  background: #fafafa;
-  border-radius: 4px;
-  padding: 8px;
-}
-
-.table-title {
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  padding: 0 8px;
-  color: #1f1f1f;
-}
-
-/* 调整表格样式 */
-.selected-keywords-card :deep(.compact-table) {
-  /* 调整表头 */
-  .ant-table-thead > tr > th {
-    padding: 4px 8px;
-    font-size: 13px;
-    background: #f5f5f5;
-  }
-  
-  /* 调整表格内容 */
-  .ant-table-tbody > tr > td {
-    padding: 2px 8px;
-    font-size: 13px;
-  }
-  
-  /* 调整行高 */
-  .ant-table-tbody > tr {
-    height: 32px;
-  }
-  
-  /* 调整分页器样式 */
-  .ant-pagination {
-    font-size: 12px;
-    margin: 8px 0 0 0;
-    
-    .ant-pagination-item {
-      min-width: 24px;
-      height: 24px;
-      line-height: 22px;
-    }
-    
-    .ant-select-selector {
-      height: 24px !important;
-      
-      .ant-select-selection-item {
-        line-height: 22px;
-      }
-    }
-  }
-}
-
-/* 优化按钮样式 */
-.selected-keywords-card :deep(.ant-btn-text) {
-  padding: 0 4px;
-  height: 24px;
-  line-height: 24px;
-}
-
-/* 移除表格外边框 */
-.selected-keywords-card :deep(.ant-table) {
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-/* 移除 priority-tabs 的左右内边距 */
-:deep(.priority-tabs .ant-tabs-nav) {
-  padding: 0;
-}
-
-/* 如果需要调整 tab 内容的样式 */
-:deep(.priority-tabs .ant-tabs-tab) {
-  padding: 8px 12px;  /* 可以根据需要调整内部的内边距 */
-}
-
-/* Add new styles for the button hover effect */
-.hover-effect:hover {
-  background: linear-gradient(to right, #40a9ff, #69c0ff) !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.45) !important;
-}
-
-.hover-effect:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.35) !important;
-}
-
-/* Ensure disabled state also looks appropriate */
-.ant-btn[disabled] {
-  background: #f5f5f5 !important;
-  border: 1px solid #d9d9d9 !important;
-  box-shadow: none !important;
-  color: rgba(0, 0, 0, 0.25) !important;
-}
-
-/* 调整指标样式 */
-.plan-metrics {
-  display: flex;
   gap: 16px;
-  margin: 8px 0;
-}
-
-.metric-item {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.metric-label {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);  /* 更浅的颜色 */
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.metric-label :deep(.anticon) {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.45);  /* 图标也使用相同的浅色 */
-}
-
-.metric-value {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.65);  /* 数值使用稍深一点的颜色，保持可读性 */
-}
-
-/* 添加折叠面板相关样式 */
-.selected-keywords-card {
   margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.selected-keywords-card :deep(.ant-collapse) {
+.content-toolbar {
+  justify-content: flex-start;
+}
+
+.step-panel[v-show="currentStep === '0'"] .content-toolbar {
+  justify-content: flex-start;
+}
+
+.step-panel[v-show="currentStep === '1'"] .content-toolbar {
+  justify-content: flex-start;
+}
+
+.mode-switch :deep(.ant-radio-button-wrapper) {
+  background: #f0f7ff;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.mode-switch :deep(.ant-radio-button-wrapper:hover) {
+  color: #1d4ed8;
+  background: #e6f0ff;
+}
+
+.mode-switch :deep(.ant-radio-button-wrapper-checked) {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+  color: white !important;
+  box-shadow: -1px 0 0 0 #2563eb;
+}
+
+.mode-switch :deep(.ant-radio-button-wrapper-checked:hover) {
+  background: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+
+.view-selected-btn {
+  background: linear-gradient(to right, #2563eb, #3b82f6);
   border: none;
-  background: transparent;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  height: 32px;
+  padding: 0 16px;
 }
 
-.selected-keywords-card :deep(.ant-collapse-header) {
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  padding: 12px 16px;
+.view-selected-btn:hover {
+  background: linear-gradient(to right, #1d4ed8, #2563eb);
+  border: none;
 }
 
-.selected-keywords-card :deep(.ant-collapse-content) {
-  border-top: 1px solid #f0f0f0;
-}
-
-.selected-keywords-card :deep(.ant-collapse-content-box) {
-  padding: 16px;
-}
-
-.compact-table :deep(.ant-table-thead > tr > th) {
-  padding: 8px 16px;
-}
-
-.compact-table :deep(.ant-table-tbody > tr > td) {
-  padding: 8px 16px;
-}
-
-.keywords-section {
-  display: flex;
-  gap: 24px;
-}
-
-.keywords-column {
-  flex: 1;
-  min-width: 0; /* 防止flex子项溢出 */
-}
-
-.keywords-card {
+.step-panel {
   height: 100%;
-}
-
-.keywords-card :deep(.ant-collapse) {
-  border: none;
-  background: transparent;
-}
-
-.keywords-card :deep(.ant-collapse-header) {
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-  padding: 12px 16px;
-}
-
-.keywords-card :deep(.ant-collapse-content) {
-  border-top: 1px solid #f0f0f0;
-}
-
-.keywords-card :deep(.ant-collapse-content-box) {
-  padding: 16px;
-}
-
-.compact-table :deep(.ant-table-thead > tr > th) {
-  padding: 8px 16px;
-}
-
-.compact-table :deep(.ant-table-tbody > tr > td) {
-  padding: 8px 16px;
-}
-
-.related-outlines {
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.65);
 }
 </style>
 

@@ -102,11 +102,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, h } from 'vue'
 import { GlobalOutlined } from '@ant-design/icons-vue'
 import {
   FacebookFilled,
-  TwitterOutlined,
   InstagramFilled,
   LinkedinFilled,
   GithubFilled,
@@ -116,7 +115,6 @@ import {
   BehanceOutlined,
   DribbbleOutlined,
   MailOutlined,
-  // Add more icons as needed
 } from '@ant-design/icons-vue'
 
 const props = defineProps({
@@ -150,11 +148,25 @@ const computedStyles = computed(() => {
   return styles
 })
 
-// Add social icon mapping function
+// 创建自定义 X 图标组件
+const XIcon = (props) => h('svg', {
+  viewBox: '0 0 24 24',
+  width: '1em',
+  height: '1em',
+  fill: 'currentColor',
+  style: props.style,
+  class: props.class,
+}, [
+  h('path', {
+    d: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'
+  })
+])
+
+// 更新 getSocialIcon 函数
 const getSocialIcon = (platform) => {
   const iconMap = {
     facebook: FacebookFilled,
-    twitter: TwitterOutlined,
+    twitter: XIcon,  // 使用新的 X 图标
     instagram: InstagramFilled,
     linkedin: LinkedinFilled,
     github: GithubFilled,
@@ -165,7 +177,6 @@ const getSocialIcon = (platform) => {
     dribbble: DribbbleOutlined,
     website: GlobalOutlined,
     email: MailOutlined,
-    // Add more mappings as needed
   }
   return iconMap[platform] || GlobalOutlined
 }

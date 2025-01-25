@@ -1,25 +1,6 @@
 <template>
   <a-layout style="min-height: 100vh; overflow: visible;">
     <a-layout-content style="padding: 0 12px 12px; overflow: visible;">
-      <!-- 页面头部 -->
-      <div class="page-header">
-        <div class="header-content">
-          <div class="title-wrapper">
-            <h2>
-              <span class="gradient-text">{{ title }}</span>
-              <span class="sparkle-icon">{{ icon }}</span>
-              <div class="description-row">
-                <p class="page-description">{{ description }}</p>
-                <slot name="title-extra"></slot>
-              </div>
-            </h2>
-          </div>
-          <!-- 可选的右侧内容插槽 -->
-          <slot name="header-right"></slot>
-        </div>
-      </div>
-
-      <!-- 固定的白色内容区域 -->
       <div class="content-wrapper">
         <div class="section-card">
           <!-- 内容区域的滚动容器 -->
@@ -96,7 +77,7 @@ export default {
 .content-wrapper {
   flex: 1;
   position: relative;
-  height: calc(100vh - 110px);
+  height: calc(100vh - 40px);
   max-width: 100%;
   overflow: visible;
 }

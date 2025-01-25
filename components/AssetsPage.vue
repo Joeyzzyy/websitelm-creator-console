@@ -1,9 +1,17 @@
 <template>
-  <page-layout
-    title="Assets"
-    description="Manage your assets, including images, videos, internal links and other"
-    icon="🎨"
-  >
+  <page-layout>
+    <smart-banner
+      :theme="bannerTheme"
+      title="Media Asset Management"
+      description="Efficiently manage and organize your media assets with our powerful asset management system."
+      :badges="[
+        { text: 'Image Library' },
+        { text: 'Video Storage' },
+        { text: 'Asset Analytics' }
+      ]"
+      emoji="📁"
+    />
+
     <a-spin :spinning="loading">
       <template v-if="domainConfigured">
         <a-tabs 
@@ -714,7 +722,13 @@ import {
   LinkOutlined,
   SettingOutlined,
   ExclamationCircleOutlined,
-  QuestionCircleOutlined
+  QuestionCircleOutlined,
+  ThunderboltOutlined,
+  CloudOutlined,
+  ApiOutlined,
+  AppstoreOutlined,
+  CheckCircleOutlined,
+  FileImageOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import apiClient from '../api/api';
@@ -722,6 +736,7 @@ import { useRouter } from 'vue-router';
 import HeaderTemplate from './sections/templates/HeaderTemplate.vue'
 import FooterTemplate from './sections/templates/FooterTemplate.vue'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
+import SmartBanner from './common/SmartBanner.vue'
 
 export default {
   name: 'BrandAssetsPage',
@@ -740,6 +755,13 @@ export default {
     FooterTemplate,
     NoSiteConfigured,
     QuestionCircleOutlined,
+    ThunderboltOutlined,
+    CloudOutlined,
+    ApiOutlined,
+    SmartBanner,
+    AppstoreOutlined,
+    CheckCircleOutlined,
+    FileImageOutlined
   },
   setup() {
     const router = useRouter();
@@ -1874,6 +1896,20 @@ export default {
       }
     };
 
+    // 添加 banner 相关配置
+    const bannerTheme = {
+      primary: '#38BDF8',
+      secondary: '#818CF8',
+      background: 'linear-gradient(135deg, #1a1a1a, #2d3748)',
+      textColor: '#FFFFFF',
+      descriptionColor: '#94A3B8',
+      badgeColor: '#94A3B8',
+      badgeBackground: 'rgba(255, 255, 255, 0.05)',
+      badgeHoverBackground: 'rgba(56, 189, 248, 0.1)',
+      badgeHoverColor: '#38BDF8',
+      iconBackground: 'rgba(255, 255, 255, 0.1)',
+    }
+
     return {
       domainConfigured,
       loading,
@@ -1968,6 +2004,8 @@ export default {
       total,
       handlePageChange,
       handleSizeChange,
+      bannerTheme,
+      AppstoreOutlined
     }
   }
 }

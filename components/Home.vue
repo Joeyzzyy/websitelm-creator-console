@@ -1028,7 +1028,7 @@ export default {
       mainNavItems: [
         { title: 'Home', view: 'DashboardPage' },
         { title: 'Planner', view: 'KeywordsPlanningPage' },
-        { title: 'Tasks', view: 'TaskManagementPage' },
+        { title: 'Pages', view: 'TaskManagementPage' },
         { title: 'Assets', view: 'AssetsPage' },
         { title: 'Settings', view: 'SettingsPage' },
       ],
