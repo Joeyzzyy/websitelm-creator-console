@@ -31,7 +31,7 @@
         <template #title>
           <div class="card-title">
             <span>🎯 Product Information</span>
-            <a-space>
+            <a-space >
               <a-button 
                 type="link" 
                 danger 
@@ -3476,6 +3476,57 @@ export default defineComponent({
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* 修改 info-card 相关样式 */
+:deep(.info-card) {
+  position: relative;
+  background: white;
+  z-index: 1;
+  border: none !important; /* 移除原始边框 */
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(
+      45deg,
+      #bae0ff,  /* 更浅的蓝色 */
+      #d6e8ff,  /* 非常浅的蓝色 */
+      #e6e6ff,  /* 浅紫色 */
+      #d6e8ff,  /* 非常浅的蓝色 */
+      #bae0ff   /* 更浅的蓝色 */
+    );
+    border-radius: 10px;
+    z-index: -1;
+    animation: glowing 30s linear infinite;
+    background-size: 400%;
+    filter: blur(3px);
+    opacity: 0.8;  /* 稍微降低不透明度 */
+  }
+
+  /* 确保卡片内容区域有正确的背景色和圆角 */
+  :deep(.ant-card-body) {
+    background: white;
+    border-radius: 8px;
+    position: relative;
+    z-index: 2;
+  }
+}
+
+@keyframes glowing {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 0;
   }
 }
 </style>
