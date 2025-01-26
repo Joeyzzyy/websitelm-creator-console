@@ -271,32 +271,40 @@
                             <template #message>
                               <div class="task-progress-content">
                                 <div class="task-info">
-                                  <div class="status-header">
-                                    <span class="task-status" :style="statusColor">
-                                      <template v-if="outlineGenerationStatus === 'processing'">
-                                        🚀 Generating Content Plans...
+                                  <template v-if="isLoadingTaskInfo">
+                                    <div class="loading-task-info">
+                                      <a-spin size="small" />
+                                      <span class="loading-text">Loading task information...</span>
+                                    </div>
+                                  </template>
+                                  <template v-else>
+                                    <div class="status-header">
+                                      <span class="task-status" :style="statusColor">
+                                        <template v-if="outlineGenerationStatus === 'processing'">
+                                          🚀 Generating Content Plans...
+                                        </template>
+                                        <template v-else-if="outlineGenerationStatus === 'finished'">
+                                          ✅ Generation Completed
+                                        </template>
+                                        <template v-else-if="outlineGenerationStatus === 'failed'">
+                                          ❌ Generation Failed
+                                        </template>
+                                      </span>
+                                      <a-tag :color="getStatusTagColor(outlineGenerationStatus)">
+                                        {{ taskDescription }}
+                                      </a-tag>
+                                    </div>
+                                    <div class="timing-info">
+                                      <template v-if="taskStartTime">
+                                        <span class="time-label">Started:</span>
+                                        <span class="time-value">{{ formatTime(taskStartTime) }}</span>
                                       </template>
-                                      <template v-else-if="outlineGenerationStatus === 'finished'">
-                                        ✅ Generation Completed
+                                      <template v-if="outlineGenerationStatus === 'finished' && taskEndTime">
+                                        <span class="time-label">Completed:</span>
+                                        <span class="time-value">{{ formatTime(taskEndTime) }}</span>
                                       </template>
-                                      <template v-else-if="outlineGenerationStatus === 'failed'">
-                                        ❌ Generation Failed
-                                      </template>
-                                    </span>
-                                    <a-tag :color="getStatusTagColor(outlineGenerationStatus)">
-                                      {{ taskDescription }}
-                                    </a-tag>
-                                  </div>
-                                  <div class="timing-info">
-                                    <template v-if="taskStartTime">
-                                      <span class="time-label">Started:</span>
-                                      <span class="time-value">{{ formatTime(taskStartTime) }}</span>
-                                    </template>
-                                    <template v-if="outlineGenerationStatus === 'finished' && taskEndTime">
-                                      <span class="time-label">Completed:</span>
-                                      <span class="time-value">{{ formatTime(taskEndTime) }}</span>
-                                    </template>
-                                  </div>
+                                    </div>
+                                  </template>
                                 </div>
                               </div>
                             </template>
@@ -314,122 +322,93 @@
                           </template>
                           
                           <a-tab-pane key="all" tab="All Outlines">
-                            <div class="outlines-header">
-                              <a-checkbox 
-                                v-if="contentPlans.length > 0"
-                                :checked="allOutlinesSelected"
-                                :indeterminate="someOutlinesSelected"
-                                @change="handleSelectAllOutlines"
-                              >
-                                Select All Outlines
-                              </a-checkbox>
-                              <span v-if="contentPlans.length > 0" class="outline-stats">
-                                {{ selectedOutlinesCount }} outlines selected
-                              </span>
-                            </div>
-                            <div class="content-plans-grid">
-                              <template v-if="isLoadingOutlines">
-                                <div class="content-plans-loading">
-                                  <a-spin size="large" />
-                                  <span class="loading-text">Loading...</span>
+                            <div class="tab-content-wrapper">
+                              <div v-if="isLoadingOutlines" class="content-plans-loading">
+                                <a-spin size="large" />
+                                <span class="loading-text">Loading...</span>
+                              </div>
+                              
+                              <div v-else-if="contentPlans.length === 0" class="empty-outlines-state">
+                                <div class="empty-content">
+                                  <RobotOutlined class="empty-icon" />
+                                  <h3>No Content Plans Yet</h3>
+                                  <p>Let AI help you select the best keywords and generate content plans</p>
+                                  <a-button 
+                                    type="primary"
+                                    @click="showAISelectionConfirm"
+                                    :loading="isAISelecting"
+                                    class="generate-btn"
+                                  >
+                                    <template #icon>
+                                      <RobotOutlined />
+                                    </template>
+                                    <span>AI Smart Selection</span>
+                                  </a-button>
                                 </div>
-                              </template>
-                              <template v-else>
-                                <template v-if="contentPlans.length === 0">
-                                  <div class="empty-outlines-state">
-                                    <div class="empty-content">
-                                      <RobotOutlined class="empty-icon" />
-                                      <h3>No Content Plans Yet</h3>
-                                      <p>Let AI help you discover the most valuable keywords for your content strategy.</p>
+                              </div>
+
+                              <div v-else class="content-plans-grid">
+                                <a-card 
+                                  v-for="plan in contentPlans" 
+                                  :key="plan.outlineId"
+                                  class="plan-card"
+                                  :bordered="false"
+                                  hoverable
+                                >
+                                  <template #extra>
+                                    <div class="card-extra">
+                                      <div class="recommended-times">
+                                        <span class="time-item" :title="`Suggested Generation: ${formatDate(plan.recommendedTime)}`">
+                                          <ClockCircleOutlined />
+                                          Gen: {{ formatDate(plan.recommendedTime) }}
+                                        </span>
+                                        <span class="time-item" :title="`Suggested Publication: ${formatDate(plan.recommendedReleaseTime)}`">
+                                          <CalendarOutlined />
+                                          Pub: {{ formatDate(plan.recommendedReleaseTime) }}
+                                        </span>
+                                      </div>
                                       <a-button 
                                         type="primary"
-                                        @click="showAISelectionConfirm"
-                                        class="ai-recommend-btn"
-                                        :loading="isAISelecting"
+                                        ghost
+                                        size="small"
+                                        :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
+                                        @click.stop="handleOutlineSelect(plan, !plan.favorited)"
                                       >
-                                        <template #icon>
-                                          <RobotOutlined />
-                                        </template>
-                                        <span>Try AI Smart Selection</span>
+                                        {{ plan.favorited ? 'Deselect' : 'Select' }}
                                       </a-button>
                                     </div>
-                                  </div>
-                                </template>
-                                
-                                <template v-else>
-                                  <a-card 
-                                    v-for="plan in contentPlans" 
-                                    :key="plan.outlineId"
-                                    class="plan-card"
-                                    :bordered="false"
-                                    hoverable
-                                  >
-                                    <template #extra>
-                                      <div class="card-extra">
-                                        <div class="recommended-times">
-                                          <span class="time-item" :title="`Suggested Generation: ${formatDate(plan.recommendedTime)}`">
-                                            <ClockCircleOutlined />
-                                            Gen: {{ formatDate(plan.recommendedTime) }}
-                                          </span>
-                                          <span class="time-item" :title="`Suggested Publication: ${formatDate(plan.recommendedReleaseTime)}`">
-                                            <CalendarOutlined />
-                                            Pub: {{ formatDate(plan.recommendedReleaseTime) }}
-                                          </span>
-                                        </div>
-                                        <a-button 
-                                          type="primary"
-                                          ghost
-                                          size="small"
-                                          :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
-                                          @click.stop="handleOutlineSelect(plan, !plan.favorited)"
-                                        >
-                                          {{ plan.favorited ? 'Deselect' : 'Select' }}
-                                        </a-button>
-                                      </div>
-                                    </template>
+                                  </template>
+                                  
+                                  <div class="card-content" @click.stop="showPlanDetails(plan)">
+                                    <h3 class="plan-title">{{ plan.title }}</h3>
+                                    <p class="plan-description">{{ plan.description }}</p>
                                     
-                                    <div class="card-content" @click.stop="showPlanDetails(plan)">
-                                      <h3 class="plan-title">{{ plan.title }}</h3>
-                                      <p class="plan-description">{{ plan.description }}</p>
-                                      
-                                      <div class="plan-metrics">
-                                        <div class="metric-item">
-                                          <FileTextOutlined />
-                                          <span>{{ getTotalWordCount(plan).toLocaleString() }} words</span>
-                                        </div>
-                                        <div class="metric-item">
-                                          <OrderedListOutlined />
-                                          <span>{{ plan.outline.length }} sections</span>
-                                        </div>
+                                    <div class="plan-metrics">
+                                      <div class="metric-item">
+                                        <FileTextOutlined />
+                                        <span>{{ getTotalWordCount(plan).toLocaleString() }} words</span>
                                       </div>
-
-                                      <div class="plan-keywords">
-                                        <a-tag 
-                                          v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
-                                          :key="keyword"
-                                          color="blue"
-                                        >
-                                          {{ keyword }}
-                                        </a-tag>
-                                        <a-tag v-if="plan.keywords.split(', ').length > 3" class="more-tag">
-                                          +{{ plan.keywords.split(', ').length - 3 }}
-                                        </a-tag>
+                                      <div class="metric-item">
+                                        <OrderedListOutlined />
+                                        <span>{{ plan.outline.length }} sections</span>
                                       </div>
                                     </div>
-                                  </a-card>
-                                </template>
-                              </template>
-                            </div>
-                            <div v-if="contentPlans.length > 0" class="pagination-container">
-                              <a-pagination
-                                v-model:current="contentPlansPagination.current"
-                                :total="contentPlansPagination.total"
-                                :pageSize="contentPlansPagination.pageSize"
-                                @change="handleContentPlansPaginationChange"
-                                show-size-changer
-                                show-quick-jumper
-                                :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
-                              />
+
+                                    <div class="plan-keywords">
+                                      <a-tag 
+                                        v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
+                                        :key="keyword"
+                                        color="blue"
+                                      >
+                                        {{ keyword }}
+                                      </a-tag>
+                                      <a-tag v-if="plan.keywords.split(', ').length > 3" class="more-tag">
+                                        +{{ plan.keywords.split(', ').length - 3 }}
+                                      </a-tag>
+                                    </div>
+                                  </div>
+                                </a-card>
+                              </div>
                             </div>
                           </a-tab-pane>
 
@@ -1429,6 +1408,7 @@ export default defineComponent({
     }
 
     const checkOutlineGenerationStatus = async () => {
+      isLoadingTaskInfo.value = true
       try {
         const response = await api.getAnalysisStatus('composite_generator')
         
@@ -1461,6 +1441,8 @@ export default defineComponent({
         console.error('Failed to check outline generation status:', error)
         message.error('Failed to get outline generation status')
         return null
+      } finally {
+        isLoadingTaskInfo.value = false
       }
     }
 
@@ -1866,11 +1848,40 @@ export default defineComponent({
       return contentPlans.value.filter(plan => plan.favorited).length
     })
 
-    const handleSelectAllOutlines = (e) => {
+    const handleSelectAllOutlines = async (e) => {
       const checked = e.target.checked
-      contentPlans.value.forEach(plan => {
-        plan.selected = checked
-      })
+      try {
+        const currentPageOutlineIds = contentPlans.value.map(plan => plan.outlineId)
+        
+        if (checked) {
+          // 选中当前页所有大纲
+          await api.selectPlanningOutlines(currentPageOutlineIds)
+          contentPlans.value = contentPlans.value.map(plan => ({
+            ...plan,
+            favorited: true,
+            selected: true
+          }))
+          message.success('All outlines on this page have been selected')
+        } else {
+          // 取消选中当前页所有大纲
+          await api.cancelPlanningOutlines(currentPageOutlineIds)
+          contentPlans.value = contentPlans.value.map(plan => ({
+            ...plan,
+            favorited: false,
+            selected: false
+          }))
+          message.success('All outlines on this page have been deselected')
+        }
+      } catch (error) {
+        console.error('Failed to update outlines selection:', error)
+        message.error('Failed to update selections')
+        // 回滚UI状态
+        contentPlans.value = contentPlans.value.map(plan => ({
+          ...plan,
+          favorited: !checked,
+          selected: !checked
+        }))
+      }
     }
 
     const handleOutlineSelect = async (plan, checked) => {
@@ -2003,10 +2014,7 @@ export default defineComponent({
       Modal.confirm({
         title: 'AI Smart Selection',
         content: h('div', {}, [
-          h('p', 'AI will analyze your website and competitors to recommend the top 5 most valuable keywords for your content strategy.'),
-          h('p', { style: 'color: #ff4d4f; margin-top: 12px;' }, 
-            'Note: This will clear your current keyword selections. Do you want to continue?'
-          ),
+          h('p', 'AI will analyze your website and competitors to recommend the most valuable keywords for your content strategy.'),
         ]),
         okText: 'Yes, Proceed',
         cancelText: 'Cancel',
@@ -2026,16 +2034,6 @@ export default defineComponent({
       
       isAISelecting.value = true
       try {
-        // First, clear all current selections
-        const currentSelected = recommendedKeywords.value.filter(k => k.favorited)
-        if (currentSelected.length) {
-          await api.cancelPlanningKeywords(currentSelected.map(k => k.id))
-          recommendedKeywords.value = recommendedKeywords.value.map(k => ({
-            ...k,
-            favorited: false
-          }))
-        }
-
         // Call AI selection API
         const response = await api.generatePlanningAI()
         
@@ -2091,6 +2089,8 @@ export default defineComponent({
       
       generateContentPlan();
     };
+
+    const isLoadingTaskInfo = ref(false)
 
     return {
       taskStartTime,
@@ -2210,7 +2210,8 @@ export default defineComponent({
       showAISelectionConfirm,
       handleAISelection,
       handleGenerateOutlinePlan,
-      getProgressStatus
+      getProgressStatus,
+      isLoadingTaskInfo
     }
   }
 })
@@ -2688,16 +2689,16 @@ export default defineComponent({
 }
 
 .content-plans-loading {
-  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 40px 0;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
 }
 
 .loading-text {
-  color: #6b7280;
+  color: #8c8c8c;
   font-size: 14px;
 }
 
@@ -3091,24 +3092,38 @@ export default defineComponent({
   margin-bottom: 24px;
 }
 
-.ai-recommend-btn {
-  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
-  border: none;
-  color: #ffffff !important;
+.generate-btn {
+  background: linear-gradient(135deg, #7928CA 0%, #FF0080 100%) !important;
+  border: none !important;
+  height: 40px;
+  padding: 0 24px;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(121, 40, 202, 0.3);
 }
 
-.ai-recommend-btn:hover {
-  background: linear-gradient(135deg, #40a9ff 0%, #854eca 100%);
-  opacity: 0.9;
+.generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(121, 40, 202, 0.4);
 }
 
-.ai-recommend-btn :deep(.anticon) {
-  color: #ffffff;
+.generate-btn:active {
+  transform: translateY(0);
+}
+
+.loading-task-info {
   display: flex;
   align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.loading-text {
+  color: #8c8c8c;
+  font-size: 14px;
 }
 </style>
 
