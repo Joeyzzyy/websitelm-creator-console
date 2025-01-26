@@ -109,13 +109,45 @@
                   </a-radio-button>
                 </a-radio-group>
                 
-                <!-- View Selected 按钮在两个步骤都显示 -->
                 <a-button 
                   type="primary"
                   @click="showSelectedKeywords"
                   class="view-selected-btn"
                 >
-                  View Selected
+                  View Selected Keywords
+                </a-button>
+
+                <a-button 
+                  v-if="currentStep === '1'"
+                  type="primary"
+                  :loading="isGenerating"
+                  :disabled="totalSelectedKeywords === 0"
+                  @click="generateContentPlan"
+                  style="background: linear-gradient(to right, #1890ff, #40a9ff); 
+                          border: none; 
+                          font-weight: 500;
+                          height: 40px;
+                          padding: 0 24px;
+                          box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);"
+                  :class="{ 'hover-effect': !disabled }"
+                >
+                  Generate Content Plan
+                </a-button>
+
+                <a-button 
+                  v-if="currentStep === '1'"
+                  type="primary"
+                  :disabled="!contentPlans.length"
+                  @click="handlePublishOutlines"
+                  style="background: linear-gradient(to right, #52c41a, #73d13d); 
+                          border: none; 
+                          font-weight: 500;
+                          height: 40px;
+                          padding: 0 24px;
+                          box-shadow: 0 2px 8px rgba(82, 196, 26, 0.35);"
+                  :class="{ 'hover-effect': !disabled }"
+                >
+                  Start Page generation
                 </a-button>
               </div>
 
@@ -154,10 +186,12 @@
                                 >
                                   <template #actions="{ record }">
                                     <a-button 
-                                      type="text"
+                                      type="primary"
+                                      ghost
+                                      :class="record.favorited ? 'deselect-btn' : 'select-btn'"
                                       @click="handleKeywordFavorite(record)"
                                     >
-                                      {{ record.favorited ? 'Remove' : 'Add' }}
+                                      {{ record.favorited ? 'Deselect' : 'Select' }}
                                     </a-button>
                                   </template>
                                 </a-table>
@@ -195,41 +229,27 @@
                         <div class="task-progress-section">
                           <a-alert
                             :type="outlineGenerationStatus === 'failed' ? 'error' : 'info'"
-                            class="task-alert"
+                            class="task-alert error-status"
                           >
                             <template #icon>
-                              <LoadingOutlined v-if="outlineGenerationStatus === 'processing'" spin />
-                              <WarningOutlined v-else-if="outlineGenerationStatus === 'failed'" />
-                              <CheckCircleOutlined v-else />
+                              <WarningOutlined class="error-icon" />
                             </template>
                             <template #message>
                               <div class="task-progress-content">
-                                <template v-if="outlineGenerationStatus && outlineGenerationStatus !== 'finished'">
-                                  <div class="task-info">
+                                <div class="task-info">
+                                  <div class="status-header">
                                     <span class="task-status">
-                                      {{ getTaskStatusText(outlineGenerationStatus) }}
+                                      ❌ Generation Failed
                                     </span>
-                                    <span v-if="taskStartTime" class="task-timing">
-                                      Started: {{ formatTime(taskStartTime) }}
-                                      <template v-if="taskEndTime">
-                                        | Completed: {{ formatTime(taskEndTime) }}
-                                      </template>
-                                    </span>
+                                    <a-tag color="red" class="workflow-tag">
+                                      {{ taskDescription }}
+                                    </a-tag>
                                   </div>
-                                  <div v-if="taskDescription" class="task-description">
-                                    {{ taskDescription }}
+                                  <div class="timing-info">
+                                    <span class="time-label">Started:</span>
+                                    <span class="time-value">{{ formatTime(taskStartTime) }}</span>
                                   </div>
-                                </template>
-                                <template v-else>
-                                  <div class="task-info">
-                                    <!-- 将按钮和状态文本分开，改为垂直布局 -->
-                                    <div class="generate-section">
-                                      <div class="task-status">
-                                        ✨ Everything is ready! You can start page generation with your content plans below.
-                                      </div>
-                                    </div>
-                                  </div>
-                                </template>
+                                </div>
                               </div>
                             </template>
                           </a-alert>
@@ -242,38 +262,7 @@
                         >
                           <template #rightExtra>
                             <a-space>
-                              <!-- Generate Content Plan button - 使用蓝色系 -->
-                              <a-button 
-                                type="primary"
-                                :loading="isGenerating"
-                                :disabled="totalSelectedKeywords === 0"
-                                @click="generateContentPlan"
-                                style="background: linear-gradient(to right, #1890ff, #40a9ff); 
-                                       border: none; 
-                                       font-weight: 500;
-                                       height: 40px;
-                                       padding: 0 24px;
-                                       box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);"
-                                :class="{ 'hover-effect': !disabled }"
-                              >
-                                Generate Content Plan
-                              </a-button>
-
-                              <a-button 
-                                type="primary"
-                                :disabled="!contentPlans.length"
-                                @click="handlePublishOutlines"
-                                style="background: linear-gradient(to right, #52c41a, #73d13d); 
-                                       border: none; 
-                                       font-weight: 500;
-                                       height: 40px;
-                                       padding: 0 24px;
-                                       box-shadow: 0 2px 8px rgba(82, 196, 26, 0.35);"
-                                :class="{ 'hover-effect': !disabled }"
-                              >
-                                Start Page generation
-                              </a-button>
-
+                              
                               <!-- Existing buttons -->
                               <a-button 
                                 type="text"
@@ -333,10 +322,12 @@
                                       </div>
                                       <div class="card-actions">
                                         <a-button 
-                                          type="text"
+                                          type="primary"
+                                          ghost
+                                          :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
                                           @click="handleFavorite(plan)"
                                         >
-                                          {{ plan.favorited ? 'Remove' : 'Add' }}
+                                          {{ plan.favorited ? 'Deselect' : 'Select' }}
                                         </a-button>
                                       </div>
                                     </div>
@@ -412,10 +403,12 @@
                                   <template #extra>
                                     <a-space>
                                       <a-button 
-                                        type="text"
+                                        type="primary"
+                                        ghost
+                                        :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
                                         @click.stop="handleFavorite(plan)"
                                       >
-                                        {{ plan.favorited ? 'Remove' : 'Add' }}
+                                        {{ plan.favorited ? 'Deselect' : 'Select' }}
                                       </a-button>
                                     </a-space>
                                   </template>
@@ -523,30 +516,25 @@
       width="800px"
       @cancel="handleModalClose"
     >
-      <a-tabs v-model:activeKey="currentModalTab">
-        <a-tab-pane key="comparison" tab="From Comparison">
-          <a-table
-            :dataSource="modalKeywords.comparison"
-            :columns="comparisonColumns"
-            :pagination="false"
-            size="small"
+      <a-table
+        :dataSource="modalKeywords.comparison"
+        :columns="modifiedComparisonColumns"
+        :pagination="false"
+        size="small"
+        class="selected-keywords-table"
+      >
+        <template #actions="{ record }">
+          <a-button 
+            type="primary"
+            ghost
+            class="deselect-btn"
+            @click="handleCancelSelection(record)"
           >
-            <template #actions="{ record }">
-              <a-button 
-                type="text" 
-                danger
-                @click="handleCancelSelection(record)"
-                class="delete-btn"
-              >
-                <template #icon>
-                  <DeleteOutlined />
-                </template>
-              </a-button>
-            </template>
-          </a-table>
-        </a-tab-pane>
-      </a-tabs>
-      
+            Deselect
+          </a-button>
+        </template>
+      </a-table>
+
       <template #footer>
         <a-button @click="handleModalClose">Close</a-button>
         <a-button 
@@ -711,7 +699,7 @@ export default defineComponent({
 
     const transformKeywordData = (item) => {
       return {
-        id: item.keywordId,
+        id: item.id,
         keyword: item.keyword,
         selected: false,
         favorited: item.status === 'selected',
@@ -942,10 +930,41 @@ export default defineComponent({
 
     const showSelectedModal = ref(false)
 
-    const modalTabs = ref([
-      { key: 'comparison', label: 'From Comparison' },
+    const modifiedComparisonColumns = ref([
+      {
+        title: 'Keyword',
+        dataIndex: 'keyword',
+        key: 'keyword',
+        width: '25%'
+      },
+      {
+        title: 'KRS',
+        dataIndex: 'krs',
+        key: 'krs',
+        width: '15%'
+      },
+      {
+        title: 'KD',
+        dataIndex: 'kd',
+        key: 'kd',
+        width: '15%'
+      },
+      {
+        title: 'Volume',
+        dataIndex: 'volume',
+        key: 'volume',
+        width: '15%'
+      },
+      {
+        title: 'Actions',
+        key: 'actions',
+        width: '20%',
+        slots: {
+          customRender: 'actions'
+        }
+      }
     ])
-    const currentModalTab = ref('comparison')
+
     const modalKeywords = ref({
       comparison: [],
     })
@@ -953,23 +972,25 @@ export default defineComponent({
     const fetchSelectedKeywords = async () => {
       isLoadingModalKeywords.value = true
       try {
-        const [keywordsResponse] = await Promise.all([
-          api.getPlanningKeywords({
-            source: 'keywords',
-            status: 'selected',
-            page: 1,
-            limit: 100
-          })
-        ])
+        const response = await api.getPlanningKeywords({
+          status: 'selected',
+          page: 1,
+          limit: 100
+        });
         
-        modalKeywords.value = {
-          comparison: (keywordsResponse?.data || []).map(transformKeywordData),
+        if (response?.data) {
+          modalKeywords.value.comparison = response.data
+            .map(transformKeywordData)
+            .filter(k => k.favorited);
+        } else {
+          modalKeywords.value.comparison = [];
         }
       } catch (error) {
-        console.error('Failed to get selected keywords:', error)
-        message.error('Failed to get selected keywords')
+        console.error('Failed to get selected keywords:', error);
+        message.error('Failed to load selected keywords');
+        modalKeywords.value.comparison = [];
       } finally {
-        isLoadingModalKeywords.value = false
+        isLoadingModalKeywords.value = false;
       }
     }
 
@@ -990,7 +1011,7 @@ export default defineComponent({
     }
 
     const initializeSelectedKeywords = () => {
-      const preSelectedKeywords = recommendedKeywords.value.filter(k => k.selected)
+      const preSelectedKeywords = recommendedKeywords.value.filter(k => k.favorited)
       selectedKeywords.value = preSelectedKeywords.map(k => ({
         ...k,
         selected: true
@@ -1101,6 +1122,12 @@ export default defineComponent({
     })
 
     const generateContentPlan = async () => {
+      const selectedIds = recommendedKeywords.value
+        .filter(k => k.favorited)
+        .map(k => k.id);
+      
+      console.log('Filtered IDs:', selectedIds);
+      
       if (totalSelectedKeywords.value === 0) {
         message.warning('Please select at least one keyword');
         return;
@@ -1121,11 +1148,6 @@ export default defineComponent({
 
       isGenerating.value = true;
       try {
-        const selectedIds = [
-          ...selectedKeywordsData.value.comparison.map(k => k.id),
-        ];
-
-        console.log('Submitting generation request...');
         await api.generatePlanningComposite(selectedIds);
         
         message.success('Content plan generation request submitted');
@@ -1164,9 +1186,7 @@ export default defineComponent({
           if (response?.data?.status === 'finished') {
             await fetchContentPlans()
             hasGenerated.value = true
-          } else {
-            message.error('Content plan generation failed')
-          }
+          } 
         }
       }, 5000)
     }
@@ -1253,7 +1273,7 @@ export default defineComponent({
             await fetchContentPlans()
           } else if (response.data.status === 'failed') {
             clearInterval(pollingInterval.value)
-            message.error('Content plan generation failed')
+            // message.error('Content plan generation failed')
           }
         }
         return response
@@ -1338,11 +1358,13 @@ export default defineComponent({
         if (keyword.favorited) {
           await api.cancelPlanningKeywords([keyword.id]);
           keyword.favorited = false;
-          message.success('Removed from selection');
+          selectedKeywords.value = selectedKeywords.value.filter(k => k.id !== keyword.id);
         } else {
           await api.selectPlanningKeywords([keyword.id]);
           keyword.favorited = true;
-          message.success('Added to selection');
+          if (!selectedKeywords.value.find(k => k.id === keyword.id)) {
+            selectedKeywords.value.push({ ...keyword, selected: true });
+          }
         }
       } catch (error) {
         console.error('Favorite operation failed:', error);
@@ -1363,20 +1385,23 @@ export default defineComponent({
 
     const handleCancelSelection = async (keyword) => {
       try {
-        await api.cancelPlanningKeywords([keyword.id])
-        const sourceType = currentModalTab.value
-        modalKeywords.value[sourceType] = modalKeywords.value[sourceType].filter(k => k.id !== keyword.id)
-        message.success('Keyword deselected')
+        await api.cancelPlanningKeywords([keyword.id]);
+        modalKeywords.value.comparison = modalKeywords.value.comparison.filter(k => k.id !== keyword.id);
+        recommendedKeywords.value = recommendedKeywords.value.map(k => {
+          if (k.id === keyword.id) {
+            return { ...k, favorited: false }
+          }
+          return k;
+        });
+        message.success('Keyword deselected');
       } catch (error) {
-        console.error('Failed to deselect keyword:', error)
-        message.error('Failed to deselect keyword')
+        console.error('Failed to deselect keyword:', error);
+        message.error('Failed to deselect keyword');
       }
-    }
+    };
 
     const selectedKeywordsTab = ref('comparison')
-    const selectedKeywordsData = ref({
-      comparison: [],
-    })
+    const selectedKeywordsData = ref([])
     const isLoadingSelectedKeywords = ref(false)
 
     watch(currentStep, async (newStep) => {
@@ -1388,21 +1413,18 @@ export default defineComponent({
     const fetchSelectedKeywordsData = async () => {
       isLoadingSelectedKeywords.value = true
       try {
-        const [keywordsResponse] = await Promise.all([
-          api.getPlanningKeywords({
-            source: 'keywords',
-            status: 'selected',
-            page: 1,
-            limit: 100
-          })
-        ])
+        const response = await api.getPlanningKeywords({
+          status: 'selected',
+          page: 1,
+          limit: 100
+        })
         
-        selectedKeywordsData.value = {
-          comparison: (keywordsResponse?.data || []).map(transformKeywordData),
-        }
+        selectedKeywordsData.value = response?.data?.map(transformKeywordData) || [];
+        console.log('已选关键词数据:', selectedKeywordsData.value);
+        
       } catch (error) {
-        console.error('Failed to get selected keywords:', error)
-        message.error('Failed to get selected keywords')
+        console.error('获取选中关键词失败:', error);
+        selectedKeywordsData.value = [];
       } finally {
         isLoadingSelectedKeywords.value = false
       }
@@ -1422,7 +1444,7 @@ export default defineComponent({
     }
 
     const totalSelectedKeywords = computed(() => {
-      return selectedKeywordsData.value.comparison.length
+      return recommendedKeywords.value.filter(k => k.favorited).length
     })
 
     const handleDeleteOutline = async (plan) => {
@@ -1809,9 +1831,6 @@ export default defineComponent({
       handleKeywordFavorite,
       modalKeywords,
       isLoadingModalKeywords,
-      modalTabs,
-      currentModalTab,
-      handleModalTabChange,
       handleCancelSelection,
       selectedKeywordsTab,
       selectedKeywordsData,
@@ -1850,6 +1869,7 @@ export default defineComponent({
       getTypeColor,
       activeCollapseKeys,
       bannerTheme,
+      modifiedComparisonColumns,
     }
   }
 })
@@ -2043,6 +2063,81 @@ export default defineComponent({
 
 .step-panel {
   height: 100%;
+}
+
+/* 新增按钮样式 */
+.select-btn {
+  color: #52c41a !important;  /* 绿色 */
+  border-color: #52c41a !important;
+}
+
+.select-btn:hover {
+  background: #f6ffed !important;
+  color: #73d13d !important;
+}
+
+.deselect-btn {
+  color: #ff4d4f !important;  /* 红色 */
+  border-color: #ff4d4f !important;
+}
+
+.deselect-btn:hover {
+  background: #fff1f0 !important;
+  color: #ff7875 !important;
+}
+
+/* 新增错误状态样式 */
+.error-status :deep(.ant-alert-message) {
+  width: 100%;
+}
+
+.status-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.task-status {
+  font-size: 15px;
+  font-weight: 500;
+  color: #ff4d4f;
+}
+
+.workflow-tag {
+  border-radius: 4px;
+  font-size: 12px;
+  padding: 2px 8px;
+  margin-left: 8px;
+}
+
+.timing-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.time-label {
+  color: #666;
+}
+
+.time-value {
+  color: #8c8c8c;
+  font-family: monospace;
+}
+
+.error-icon :deep(svg) {
+  color: #ff4d4f;
+  font-size: 18px;
+  margin-top: 2px;
+}
+
+.task-alert.error-status :deep(.ant-alert) {
+  background: #fff1f0;
+  border: 1px solid #ffccc7;
+  border-radius: 8px;
+  padding: 12px 16px;
 }
 </style>
 

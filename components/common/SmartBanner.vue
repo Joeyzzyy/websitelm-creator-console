@@ -11,16 +11,6 @@
         </p>
       </div>
     </div>
-    <div class="tech-indicators">
-      <span 
-        v-for="badge in badges" 
-        :key="badge.text" 
-        class="tech-badge"
-        :style="badgeStyles"
-      >
-        {{ badge.text }}
-      </span>
-    </div>
   </div>
 </template>
 
@@ -120,31 +110,6 @@ export default {
   line-height: 1.6;
 }
 
-.tech-indicators {
-  display: flex;
-  gap: 16px;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.tech-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  backdrop-filter: blur(8px);
-  transition: all 0.3s ease;
-}
-
-.tech-badge:hover {
-  background: var(--hover-bg) !important;
-  color: var(--hover-color) !important;
-  transform: translateY(-1px);
-}
-
 .banner-emoji {
   margin-right: 8px;
   font-size: 28px;
@@ -155,11 +120,6 @@ export default {
   .banner-content {
     flex-direction: column;
     text-align: center;
-  }
-  
-  .tech-indicators {
-    flex-wrap: wrap;
-    justify-content: center;
   }
   
   .banner-description {

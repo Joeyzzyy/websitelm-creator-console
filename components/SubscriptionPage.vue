@@ -28,7 +28,7 @@
           Choose the Perfect Plan for Your Growth
         </h1>
         <p class="mt-4 text-lg text-[#5C7299]">
-          Select a plan that suits your needs. Start now with a 7-day money-back guarantee.
+          Select a plan that suits your needs. Start now with a 14-day cash-back guarantee.
         </p>
 
         <!-- Billing Toggle -->
@@ -55,26 +55,47 @@
           <div 
             v-for="plan in plans" 
             :key="plan.id"
-            class="relative flex flex-col rounded-xl border border-gray-200 bg-white p-8 shadow-sm hover:shadow-md transition-shadow text-center"
-            :class="{ 'ring-2 ring-[#4B89FF]': plan.popular }"
+            class="relative flex flex-col rounded-xl border-2 p-8 shadow-sm hover:shadow-md transition-all text-center"
+            :class="{ 
+              'border-[#4B89FF] ring-4 ring-[#4B89FF]/10 scale-[1.02]': plan.popular,
+              'border-gray-200': !plan.popular
+            }"
           >
-            <h3 class="text-xl font-semibold text-gray-900">{{ plan.name }}</h3>
+            <!-- 新增Pro套餐标识 -->
+            <div v-if="plan.popular" class="absolute -top-4 left-1/2 -translate-x-1/2">
+              <div class="bg-gradient-to-r from-[#4B89FF] to-[#6C9AFF] text-white px-4 py-1 rounded-full text-xs font-bold shadow-lg">
+                MOST POPULAR ✨
+              </div>
+            </div>
 
-            <!-- Price Display -->
+            <!-- 价格显示优化 -->
             <div class="mt-4 flex items-baseline justify-center">
-              <span class="text-4xl font-bold tracking-tight text-gray-900">
-                {{ plan.price[selectedPeriod] }}
-              </span>
-              <span 
-                v-if="plan.discount" 
-                class="ml-2 text-sm text-purple-600 bg-purple-50 px-2 py-1 rounded"
-              >
-                Save {{ plan.discount }}
-              </span>
+              <div class="flex items-baseline">
+                <span class="text-4xl font-bold tracking-tight text-gray-900">
+                  {{ plan.price[selectedPeriod] === 'Custom' ? 'Custom' : `$${plan.price[selectedPeriod]}` }}
+                </span>
+                <span 
+                  v-if="plan.price[selectedPeriod] !== 'Custom'"
+                  class="text-xl text-gray-500 ml-1"
+                >
+                  /mo
+                </span>
+                <span 
+                  v-if="plan.discount && selectedPeriod === 'yearly'" 
+                  class="ml-2 text-sm text-purple-600 bg-purple-50 px-2 py-1 rounded"
+                >
+                  Save {{ plan.discount }}
+                </span>
+              </div>
             </div>
             
             <p class="mt-2 text-sm text-gray-500">
-              {{ selectedPeriod === 'yearly' ? 'per month, billed annually' : 'billed monthly' }}
+              <template v-if="plan.id !== 'enterprise'">
+                {{ selectedPeriod === 'yearly' ? 'billed annually' : 'billed monthly' }}
+              </template>
+              <template v-else>
+                Contact us for pricing details
+              </template>
             </p>
 
             <p class="mt-6 text-[#5C7299]">{{ plan.description }}</p>
@@ -88,20 +109,20 @@
               {{ plan.buttonText }}
             </a-button>
 
-            <!-- Features List -->
-            <div class="mt-8 space-y-4">
+            <!-- 功能列表样式优化 -->
+            <div class="mt-8 space-y-6">
               <template v-for="(section, index) in plan.features" :key="index">
-                <h4 class="text-sm font-medium text-gray-900 text-center">
+                <h4 class="text-sm font-semibold text-[#4B89FF] uppercase tracking-wide">
                   {{ section.title }}
                 </h4>
-                <ul class="mt-4 space-y-3">
+                <ul class="mt-4 space-y-4">
                   <li 
                     v-for="feature in section.items" 
                     :key="feature"
-                    class="flex items-center justify-center"
+                    class="flex items-start justify-center text-left"
                   >
-                    <i class="fas fa-check text-[#4B89FF] mr-2"></i>
-                    <span class="text-sm text-[#4A5568]">{{ feature }}</span>
+                    <i class="fas fa-check-circle text-[#4B89FF] mt-1 mr-3"></i>
+                    <span class="text-sm text-gray-700 leading-relaxed">{{ feature }}</span>
                   </li>
                 </ul>
               </template>
@@ -271,25 +292,25 @@ const billingPeriods = [
 const plans = [
   {
     id: 'basic',
-    name: 'Essential',
+    name: 'Standard',
     price: {
-      monthly: '$29',
-      yearly: '$19'
+      monthly: '45',
+      yearly: '36'
     },
-    discount: '$120',
+    discount: '20%',
     description: 'Everything you need to start optimizing your content',
     buttonText: 'Get Started',
     features: [
       {
         title: 'Features include:',
         items: [
-          'AI keyword research (50 times/month)',
-          '500 internal links',
+          'AI keyword recommendation (50 times/month)',
+          '30 indexing-ready page generation/month',
+          '500 pages free deployment',
+          'Unlimited GSC data tracking',
+          '500 internal links storage',
           '500 images storage',
           '100 videos storage',
-          '300 rank-ready content/month',
-          '500 pages/year',
-          'Unlimited tracking & suggestions',
           '1 Free onboarding call'
         ]
       }
@@ -300,22 +321,23 @@ const plans = [
     name: 'Professional',
     popular: true,
     price: {
-      monthly: '$59',
-      yearly: '$39'
+      monthly: '129',
+      yearly: '99'
     },
-    discount: '$240',
+    discount: '23%',
     description: 'Perfect for marketing teams scaling content production',
     buttonText: 'Get Started',
     features: [
       {
         title: 'Everything in Essential, plus:',
         items: [
-          'AI keyword research (100 times/month)',
-          '1500 internal links',
+          'AI keyword recommendation (100 times/month)',
+          '100 indexing-ready page generation/month',
+          '1000 pages free deployment',
+          'Unlimited GSC data tracking',
+          '1500 internal links storage',
           '1500 images storage',
           '1000 videos storage',
-          '300 rank-ready content/month',
-          '1500 pages/year'
         ]
       },
       {
@@ -340,11 +362,9 @@ const plans = [
       {
         title: 'Everything in Professional, plus:',
         items: [
-          'Unlimited AI keyword research',
-          'Unlimited internal links',
+          'Unlimited AI keyword recommendation',
+          'Unlimited internal links storage',
           'Unlimited storage',
-          'Custom content volume',
-          'Custom page deployment',
           'Dedicated success manager',
           'Custom onboarding & training',
           'Enterprise-grade support'
@@ -437,7 +457,7 @@ const featureComparison = [
     category: 'Keywords Analysis & Recommendation',
     features: [
       {
-        name: 'AI keyword research & recommendation',
+        name: 'AI keyword recommendation & recommendation',
         essential: '50 times/month',
         professional: '100 times/month',
         enterprise: 'Unlimited'
