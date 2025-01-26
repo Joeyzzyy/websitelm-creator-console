@@ -53,14 +53,6 @@
                       <span>{{ task.status }}</span>
                     </div>
                     
-                    <!-- Show progress if available -->
-                    <template v-if="task.progress">
-                      <a-progress 
-                        :percent="getProgressPercent(task.progress)"
-                        :format="() => `${task.progress.current}/${task.progress.total}`"
-                      />
-                    </template>
-                    
                     <!-- Show timing info -->
                     <div class="task-timing">
                       <span>Started: {{ formatTime(task.startTime) }}</span>
@@ -117,20 +109,32 @@
                       <template #icon>
                         <EyeOutlined />
                       </template>
-                      <span>View Keywords</span>
+                      <span>View Selected Keywords</span>
                     </a-button>
+
+                    <a-button 
+                      v-if="currentStep === '0'"
+                      @click="showAISelectionConfirm"
+                      class="action-button ai-select-btn"
+                      :loading="isAISelecting"
+                    >
+                      <template #icon>
+                        <RobotOutlined />
+                      </template>
+                      <span>AI Smart Selection</span>
+                    </a-button>
+                    
                     <a-button 
                       v-if="currentStep === '1'"
                       type="primary"
                       :loading="isGenerating"
-                      :disabled="totalSelectedKeywords === 0"
-                      @click="generateContentPlan"
+                      @click="handleGenerateOutlinePlan"
                       class="action-button"
                     >
                       <template #icon>
                         <ThunderboltOutlined />
                       </template>
-                      <span>Generate Plan</span>
+                      <span>Generate Outline Plan</span>
                     </a-button>
                   </a-button-group>
                 </div>
@@ -284,14 +288,6 @@
                                     </a-tag>
                                   </div>
                                   <div class="timing-info">
-                                    <template v-if="outlineGenerationStatus === 'processing'">
-                                      <span class="time-label">Progress:</span>
-                                      <a-progress 
-                                        :percent="getProgressPercent(taskProgress)" 
-                                        :status="getProgressStatus(outlineGenerationStatus)"
-                                        style="width: 200px; display: inline-block;"
-                                      />
-                                    </template>
                                     <template v-if="taskStartTime">
                                       <span class="time-label">Started:</span>
                                       <span class="time-value">{{ formatTime(taskStartTime) }}</span>
@@ -320,15 +316,16 @@
                           <a-tab-pane key="all" tab="All Outlines">
                             <div class="outlines-header">
                               <a-checkbox 
+                                v-if="contentPlans.length > 0"
                                 :checked="allOutlinesSelected"
                                 :indeterminate="someOutlinesSelected"
                                 @change="handleSelectAllOutlines"
                               >
                                 Select All Outlines
-                                <span class="selected-count" v-if="selectedOutlinesCount > 0">
-                                  ({{ selectedOutlinesCount }} selected)
-                                </span>
                               </a-checkbox>
+                              <span v-if="contentPlans.length > 0" class="outline-stats">
+                                {{ selectedOutlinesCount }} outlines selected
+                              </span>
                             </div>
                             <div class="content-plans-grid">
                               <template v-if="isLoadingOutlines">
@@ -338,57 +335,92 @@
                                 </div>
                               </template>
                               <template v-else>
-                                <a-card 
-                                  v-for="plan in contentPlans" 
-                                  :key="plan.outlineId"
-                                  class="plan-card"
-                                  :bordered="false"
-                                  hoverable
-                                >
-                                  <template #extra>
-                                    <a-button 
-                                      type="primary"
-                                      ghost
-                                      size="small"
-                                      :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
-                                      @click.stop="handleOutlineSelect(plan, !plan.favorited)"
-                                    >
-                                      {{ plan.favorited ? 'Deselect' : 'Select' }}
-                                    </a-button>
-                                  </template>
-                                  
-                                  <div class="card-content" @click.stop="showPlanDetails(plan)">
-                                    <h3 class="plan-title">{{ plan.title }}</h3>
-                                    <p class="plan-description">{{ plan.description }}</p>
-                                    
-                                    <div class="plan-metrics">
-                                      <div class="metric-item">
-                                        <FileTextOutlined />
-                                        <span>{{ getTotalWordCount(plan).toLocaleString() }} words</span>
-                                      </div>
-                                      <div class="metric-item">
-                                        <OrderedListOutlined />
-                                        <span>{{ plan.outline.length }} sections</span>
-                                      </div>
-                                    </div>
-
-                                    <div class="plan-keywords">
-                                      <a-tag 
-                                        v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
-                                        :key="keyword"
-                                        color="blue"
+                                <template v-if="contentPlans.length === 0">
+                                  <div class="empty-outlines-state">
+                                    <div class="empty-content">
+                                      <RobotOutlined class="empty-icon" />
+                                      <h3>No Content Plans Yet</h3>
+                                      <p>Let AI help you discover the most valuable keywords for your content strategy.</p>
+                                      <a-button 
+                                        type="primary"
+                                        @click="showAISelectionConfirm"
+                                        class="ai-recommend-btn"
+                                        :loading="isAISelecting"
                                       >
-                                        {{ keyword }}
-                                      </a-tag>
-                                      <a-tag v-if="plan.keywords.split(', ').length > 3" class="more-tag">
-                                        +{{ plan.keywords.split(', ').length - 3 }}
-                                      </a-tag>
+                                        <template #icon>
+                                          <RobotOutlined />
+                                        </template>
+                                        <span>Try AI Smart Selection</span>
+                                      </a-button>
                                     </div>
                                   </div>
-                                </a-card>
+                                </template>
+                                
+                                <template v-else>
+                                  <a-card 
+                                    v-for="plan in contentPlans" 
+                                    :key="plan.outlineId"
+                                    class="plan-card"
+                                    :bordered="false"
+                                    hoverable
+                                  >
+                                    <template #extra>
+                                      <div class="card-extra">
+                                        <div class="recommended-times">
+                                          <span class="time-item" :title="`Suggested Generation: ${formatDate(plan.recommendedTime)}`">
+                                            <ClockCircleOutlined />
+                                            Gen: {{ formatDate(plan.recommendedTime) }}
+                                          </span>
+                                          <span class="time-item" :title="`Suggested Publication: ${formatDate(plan.recommendedReleaseTime)}`">
+                                            <CalendarOutlined />
+                                            Pub: {{ formatDate(plan.recommendedReleaseTime) }}
+                                          </span>
+                                        </div>
+                                        <a-button 
+                                          type="primary"
+                                          ghost
+                                          size="small"
+                                          :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
+                                          @click.stop="handleOutlineSelect(plan, !plan.favorited)"
+                                        >
+                                          {{ plan.favorited ? 'Deselect' : 'Select' }}
+                                        </a-button>
+                                      </div>
+                                    </template>
+                                    
+                                    <div class="card-content" @click.stop="showPlanDetails(plan)">
+                                      <h3 class="plan-title">{{ plan.title }}</h3>
+                                      <p class="plan-description">{{ plan.description }}</p>
+                                      
+                                      <div class="plan-metrics">
+                                        <div class="metric-item">
+                                          <FileTextOutlined />
+                                          <span>{{ getTotalWordCount(plan).toLocaleString() }} words</span>
+                                        </div>
+                                        <div class="metric-item">
+                                          <OrderedListOutlined />
+                                          <span>{{ plan.outline.length }} sections</span>
+                                        </div>
+                                      </div>
+
+                                      <div class="plan-keywords">
+                                        <a-tag 
+                                          v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
+                                          :key="keyword"
+                                          color="blue"
+                                        >
+                                          {{ keyword }}
+                                        </a-tag>
+                                        <a-tag v-if="plan.keywords.split(', ').length > 3" class="more-tag">
+                                          +{{ plan.keywords.split(', ').length - 3 }}
+                                        </a-tag>
+                                      </div>
+                                    </div>
+                                  </a-card>
+                                </template>
                               </template>
                             </div>
-                            <div class="pagination-container">
+                            <div v-if="contentPlans.length > 0" class="pagination-container">
                               <a-pagination
                                 v-model:current="contentPlansPagination.current"
                                 :total="contentPlansPagination.total"
@@ -412,15 +444,27 @@
                                   hoverable
                                 >
                                   <template #extra>
-                                    <a-button 
-                                      type="primary"
-                                      ghost
-                                      size="small"
-                                      :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
-                                      @click.stop="handleOutlineSelect(plan, !plan.favorited)"
-                                    >
-                                      {{ plan.favorited ? 'Deselect' : 'Select' }}
-                                    </a-button>
+                                    <div class="card-extra">
+                                      <div class="recommended-times">
+                                        <span class="time-item" :title="`Suggested Generation: ${formatDate(plan.recommendedTime)}`">
+                                          <ClockCircleOutlined />
+                                          Gen: {{ formatDate(plan.recommendedTime) }}
+                                        </span>
+                                        <span class="time-item" :title="`Suggested Publication: ${formatDate(plan.recommendedReleaseTime)}`">
+                                          <CalendarOutlined />
+                                          Pub: {{ formatDate(plan.recommendedReleaseTime) }}
+                                        </span>
+                                      </div>
+                                      <a-button 
+                                        type="primary"
+                                        ghost
+                                        size="small"
+                                        :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
+                                        @click.stop="handleOutlineSelect(plan, !plan.favorited)"
+                                      >
+                                        {{ plan.favorited ? 'Deselect' : 'Select' }}
+                                      </a-button>
+                                    </div>
                                   </template>
                                   
                                   <div class="card-content" @click.stop="showPlanDetails(plan)">
@@ -453,7 +497,7 @@
                                   </div>
                                 </a-card>
                               </div>
-                              <div class="pagination-container">
+                              <div v-if="contentPlans.length > 0" class="pagination-container">
                                 <a-pagination
                                   v-model:current="contentPlansPagination.current"
                                   :total="contentPlansPagination.total"
@@ -720,7 +764,9 @@ import {
   BarChartOutlined,
   UserOutlined,
   TagsOutlined,
-  CheckCircleOutlined
+  CheckCircleOutlined,
+  CalendarOutlined,
+  RobotOutlined
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -769,7 +815,9 @@ export default defineComponent({
     BarChartOutlined,
     UserOutlined,
     TagsOutlined,
-    CheckCircleOutlined
+    CheckCircleOutlined,
+    CalendarOutlined,
+    RobotOutlined
   },
   setup() {
     const currentMode = ref('beginner')
@@ -1669,6 +1717,7 @@ export default defineComponent({
         okType: 'danger',
         async onOk() {
           await clearAllOutlines()
+          await refreshContentPlans()
         },
         okButtonProps: {
           danger: true
@@ -1939,6 +1988,110 @@ export default defineComponent({
       })
     }
 
+    const formatDate = (dateString) => {
+      if (!dateString) return '--'
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      })
+    }
+
+    const isAISelecting = ref(false)
+    
+    const showAISelectionConfirm = () => {
+      Modal.confirm({
+        title: 'AI Smart Selection',
+        content: h('div', {}, [
+          h('p', 'AI will analyze your website and competitors to recommend the top 5 most valuable keywords for your content strategy.'),
+          h('p', { style: 'color: #ff4d4f; margin-top: 12px;' }, 
+            'Note: This will clear your current keyword selections. Do you want to continue?'
+          ),
+        ]),
+        okText: 'Yes, Proceed',
+        cancelText: 'Cancel',
+        onOk: handleAISelection,
+        okButtonProps: {
+          type: 'primary',
+          danger: false
+        },
+        width: 500,
+        centered: true,
+        maskClosable: false
+      })
+    }
+
+    const handleAISelection = async () => {
+      if (isAISelecting.value) return
+      
+      isAISelecting.value = true
+      try {
+        // First, clear all current selections
+        const currentSelected = recommendedKeywords.value.filter(k => k.favorited)
+        if (currentSelected.length) {
+          await api.cancelPlanningKeywords(currentSelected.map(k => k.id))
+          recommendedKeywords.value = recommendedKeywords.value.map(k => ({
+            ...k,
+            favorited: false
+          }))
+        }
+
+        // Call AI selection API
+        const response = await api.generatePlanningAI()
+        
+        if (response?.code === 200) {
+          message.success('AI selection request submitted')
+          
+          // 直接跳转到 step 1
+          currentStep.value = '1'
+          
+          // 其他逻辑保持不变
+          await new Promise(resolve => setTimeout(resolve, 1000))
+          const statusResponse = await checkOutlineGenerationStatus()
+          
+          if (!statusResponse?.data || statusResponse.data.status !== 'finished') {
+            startPolling()
+          }
+        } else {
+          throw new Error('AI selection request failed')
+        }
+      } catch (error) {
+        console.error('AI selection failed:', error)
+        message.error('Failed to get AI recommendations. Please try again.')
+      } finally {
+        isAISelecting.value = false
+      }
+    }
+
+    const handleGenerateOutlinePlan = () => {
+      if (totalSelectedKeywords.value === 0) {
+        Modal.confirm({
+          title: 'No Keywords Selected',
+          content: h('div', {}, [
+            h('p', 'You need to select at least one keyword to generate content plans.'),
+            h('p', { style: 'margin-top: 12px;' }, [
+              'Would you like to:',
+              h('ul', { style: 'margin-top: 8px;' }, [
+                h('li', 'Select keywords manually, or'),
+                h('li', 'Use AI Smart Selection to get recommendations')
+              ])
+            ])
+          ]),
+          okText: 'Try AI Selection',
+          cancelText: 'Select Manually',
+          onOk: () => {
+            showAISelectionConfirm();
+          },
+          onCancel: () => {
+            currentStep.value = '0'; // Go back to keyword selection step
+          }
+        });
+        return;
+      }
+      
+      generateContentPlan();
+    };
+
     return {
       taskStartTime,
       taskEndTime,
@@ -2051,7 +2204,13 @@ export default defineComponent({
       bannerTheme,
       getStatusTagColor,
       statusColor,
-      formatOutlineTree
+      formatOutlineTree,
+      formatDate,
+      isAISelecting,
+      showAISelectionConfirm,
+      handleAISelection,
+      handleGenerateOutlinePlan,
+      getProgressStatus
     }
   }
 })
@@ -2196,7 +2355,7 @@ export default defineComponent({
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0;
+  padding: 0 0 16px 0;
   border-bottom: 1px solid #f0f0f0;
 }
 
@@ -2643,10 +2802,6 @@ export default defineComponent({
   background: #f9fafb;
 }
 
-.section-details {
-  padding: 16px;
-}
-
 .section-info {
   display: flex;
   flex-direction: column;
@@ -2803,10 +2958,157 @@ export default defineComponent({
 }
 
 .custom-collapse :deep(.ant-collapse-content-box) {
-  padding: 20px !important;
+  padding: 0 20px 20px 20px !important;
 }
 .task-alert {
   margin-bottom: 16px;
+}
+
+.card-extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recommended-times {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.time-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #666;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.time-item :deep(.anticon) {
+  font-size: 11px;
+}
+
+.plan-card :deep(.ant-card-extra) {
+  padding: 0;
+  margin: 0;
+  width: 100%; /* Make extra section full width */
+  display: flex;
+  justify-content: space-between;
+}
+
+.card-extra {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.recommended-times {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  flex: 1; /* Take up remaining space */
+}
+
+.time-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #666;
+  font-size: 11px;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.time-item :deep(.anticon) {
+  font-size: 11px;
+}
+
+/* Ensure button stays on the right */
+.card-extra .ant-btn {
+  flex-shrink: 0;
+}
+
+.ai-select-btn {
+  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  border: none;
+  margin-left: -1px; /* Fix border overlap with group */
+  color: #ffffff !important; /* Force white text */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-select-btn:hover {
+  background: linear-gradient(135deg, #40a9ff 0%, #854eca 100%);
+  opacity: 0.9;
+}
+
+.ai-select-btn:active {
+  background: linear-gradient(135deg, #096dd9 0%, #531dab 100%);
+  border: none;
+  color: #ffffff !important;
+}
+
+/* Ensure icon is also white */
+.ai-select-btn :deep(.anticon) {
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+}
+
+.empty-outlines-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.empty-content {
+  text-align: center;
+  padding: 32px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  color: #1890ff;
+  margin-bottom: 16px;
+}
+
+.empty-content h3 {
+  font-size: 20px;
+  color: #262626;
+  margin-bottom: 8px;
+}
+
+.empty-content p {
+  color: #8c8c8c;
+  margin-bottom: 24px;
+}
+
+.ai-recommend-btn {
+  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+  border: none;
+  color: #ffffff !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ai-recommend-btn:hover {
+  background: linear-gradient(135deg, #40a9ff 0%, #854eca 100%);
+  opacity: 0.9;
+}
+
+.ai-recommend-btn :deep(.anticon) {
+  color: #ffffff;
+  display: flex;
+  align-items: center;
 }
 </style>
 

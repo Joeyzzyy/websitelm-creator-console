@@ -1184,6 +1184,17 @@ const deletePlanningOutline = async (outlineId) => {
   }
 };
 
+// 新增：AI选词生成outline的方法
+const generatePlanningAI = async () => {
+  try {
+    const response = await apiClient.post('/planning/ai-generator');
+    return response.data;
+  } catch (error) {
+    console.error('AI选词生成outline失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1274,5 +1285,6 @@ export default {
   cancelPlanningOutlines,
   selectPlanningKeywords,
   cancelPlanningKeywords,
-  deletePlanningOutline
+  deletePlanningOutline,
+  generatePlanningAI
 };
