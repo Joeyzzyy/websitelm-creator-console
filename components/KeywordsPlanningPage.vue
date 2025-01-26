@@ -1,5 +1,5 @@
 <template>
-  <page-layout>
+  <PageLayout>
     <smart-banner
       :theme="bannerTheme"
       title="AI-Powered Content Planning"
@@ -12,17 +12,31 @@
       emoji="🎯"
     />
     
-    <a-spin :spinning="loading">
+    <a-spin 
+      :spinning="loading"
+      class="centered-spin"
+    >
       <template v-if="domainConfigured">
         <template v-if="analysisState !== 'finished'">
           <div class="analysis-loading-state">
             <a-card class="loading-card">
               <!-- Not Started State -->
               <template v-if="analysisState === 'not_started'">
-                <div class="loading-content">
-                  <LoadingOutlined class="analysis-icon" spin />
-                  <h2>Preparing Analysis</h2>
-                  <p>Collecting data from SEMrush and Ahrefs...</p>
+                <div class="analysis-loading-card">
+                  <div class="preparing-analysis-content">
+                    <LoadingOutlined class="analysis-icon" spin />
+                    <h2 class="analysis-title">Initializing Keyword Analysis</h2>
+                    <p class="analysis-description">
+                      Gathering competitive intelligence from 
+                      <span class="platform-tag semrush">SEMrush</span> 
+                      and 
+                      <span class="platform-tag ahrefs">Ahrefs</span>
+                    </p>
+                    <div class="loading-tips">
+                      <ThunderboltOutlined class="tip-icon" />
+                      <span class="tip-text">Pro Tip: This initial scan typically takes several minutes</span>
+                    </div>
+                  </div>
                 </div>
               </template>
 
@@ -93,62 +107,75 @@
             <div class="main-content">
               <!-- 工具栏 -->
               <div class="content-toolbar">
-                <!-- 只在第一步显示模式切换 -->
-                <a-radio-group 
-                  v-if="currentStep === '0'"
-                  v-model:value="currentMode" 
-                  button-style="solid" 
-                  size="middle"
-                  class="mode-switch"
-                >
-                  <a-radio-button value="beginner">
-                    Beginner
-                  </a-radio-button>
-                  <a-radio-button value="expert">
-                    Expert
-                  </a-radio-button>
-                </a-radio-group>
-                
-                <a-button 
-                  type="primary"
-                  @click="showSelectedKeywords"
-                  class="view-selected-btn"
-                >
-                  View Selected Keywords
-                </a-button>
+                <div class="toolbar-left">
+                  <a-button-group>
+                    <a-button 
+                      type="primary"
+                      @click="showSelectedKeywords"
+                      class="action-button"
+                    >
+                      <template #icon>
+                        <EyeOutlined />
+                      </template>
+                      <span>View Keywords</span>
+                    </a-button>
+                    <a-button 
+                      v-if="currentStep === '1'"
+                      type="primary"
+                      :loading="isGenerating"
+                      :disabled="totalSelectedKeywords === 0"
+                      @click="generateContentPlan"
+                      class="action-button"
+                    >
+                      <template #icon>
+                        <ThunderboltOutlined />
+                      </template>
+                      <span>Generate Plan</span>
+                    </a-button>
+                  </a-button-group>
+                </div>
 
-                <a-button 
-                  v-if="currentStep === '1'"
-                  type="primary"
-                  :loading="isGenerating"
-                  :disabled="totalSelectedKeywords === 0"
-                  @click="generateContentPlan"
-                  style="background: linear-gradient(to right, #1890ff, #40a9ff); 
-                          border: none; 
-                          font-weight: 500;
-                          height: 40px;
-                          padding: 0 24px;
-                          box-shadow: 0 2px 8px rgba(24, 144, 255, 0.35);"
-                  :class="{ 'hover-effect': !disabled }"
-                >
-                  Generate Content Plan
-                </a-button>
-
-                <a-button 
-                  v-if="currentStep === '1'"
-                  type="primary"
-                  :disabled="!contentPlans.length"
-                  @click="handlePublishOutlines"
-                  style="background: linear-gradient(to right, #52c41a, #73d13d); 
-                          border: none; 
-                          font-weight: 500;
-                          height: 40px;
-                          padding: 0 24px;
-                          box-shadow: 0 2px 8px rgba(82, 196, 26, 0.35);"
-                  :class="{ 'hover-effect': !disabled }"
-                >
-                  Start Page generation
-                </a-button>
+                <div class="toolbar-right">
+                  <a-space>
+                    <a-button 
+                      v-if="currentStep === '1'"
+                      type="text"
+                      :disabled="!contentPlans.length"
+                      @click="refreshContentPlans"
+                      class="action-button"
+                    >
+                      <template #icon>
+                        <ReloadOutlined />
+                      </template>
+                      <span>Refresh</span>
+                    </a-button>
+                    <a-button 
+                      v-if="currentStep === '1'"
+                      type="text" 
+                      danger
+                      :disabled="!contentPlans.length"
+                      @click="confirmClearAllOutlines"
+                      class="action-button"
+                    >
+                      <template #icon>
+                        <DeleteOutlined />
+                      </template>
+                      <span>Clear All</span>
+                    </a-button>
+                    <a-button 
+                      v-if="currentStep === '1'"
+                      type="primary"
+                      :disabled="selectedOutlinesCount === 0"
+                      @click="handlePublishOutlines"
+                      class="generate-pages-btn"
+                    >
+                      <template #icon>
+                        <CloudUploadOutlined />
+                      </template>
+                      <span>Generate Pages</span>
+                    </a-button>
+                  </a-space>
+                </div>
               </div>
 
               <!-- 步骤内容 -->
@@ -179,20 +206,22 @@
                                 
                                 <a-table
                                   :dataSource="getKeywordsByPriority(recommendedKeywords, priority.level)"
-                                  :columns="comparisonColumns"
+                                  :columns="keywordsTableColumns"
                                   :pagination="recommendedPagination"
                                   @change="(page) => handleComparisonPaginationChange(priority.level, page.current, page.pageSize)"
                                   size="small"
                                 >
-                                  <template #actions="{ record }">
-                                    <a-button 
-                                      type="primary"
-                                      ghost
-                                      :class="record.favorited ? 'deselect-btn' : 'select-btn'"
-                                      @click="handleKeywordFavorite(record)"
-                                    >
-                                      {{ record.favorited ? 'Deselect' : 'Select' }}
-                                    </a-button>
+                                  <template #bodyCell="{ column, record }">
+                                    <template v-if="column.key === 'actions'">
+                                      <a-button 
+                                        type="primary"
+                                        ghost
+                                        :class="record.favorited ? 'deselect-btn' : 'select-btn'"
+                                        @click="handleKeywordFavorite(record)"
+                                      >
+                                        {{ record.favorited ? 'Deselect' : 'Select' }}
+                                      </a-button>
+                                    </template>
                                   </template>
                                 </a-table>
                               </a-tab-pane>
@@ -221,33 +250,56 @@
                 <div class="outline-generation">
                   <div class="step-two-content">
                     <div class="workspace-layout">
-                      <!-- 移除原来的关键词列表卡片 -->
-                      
                       <!-- Outline 内容部分 -->
                       <div class="plan-section">
                         <!-- Update task progress section -->
                         <div class="task-progress-section">
                           <a-alert
                             :type="outlineGenerationStatus === 'failed' ? 'error' : 'info'"
-                            class="task-alert error-status"
+                            class="task-alert"
+                            :class="[outlineGenerationStatus]"
                           >
                             <template #icon>
-                              <WarningOutlined class="error-icon" />
+                              <LoadingOutlined v-if="outlineGenerationStatus === 'processing'" spin />
+                              <CheckCircleOutlined v-else-if="outlineGenerationStatus === 'finished'" style="color: #52c41a" />
+                              <CloseCircleOutlined v-else-if="outlineGenerationStatus === 'failed'" style="color: #ff4d4f" />
                             </template>
                             <template #message>
                               <div class="task-progress-content">
                                 <div class="task-info">
                                   <div class="status-header">
-                                    <span class="task-status">
-                                      ❌ Generation Failed
+                                    <span class="task-status" :style="statusColor">
+                                      <template v-if="outlineGenerationStatus === 'processing'">
+                                        🚀 Generating Content Plans...
+                                      </template>
+                                      <template v-else-if="outlineGenerationStatus === 'finished'">
+                                        ✅ Generation Completed
+                                      </template>
+                                      <template v-else-if="outlineGenerationStatus === 'failed'">
+                                        ❌ Generation Failed
+                                      </template>
                                     </span>
-                                    <a-tag color="red" class="workflow-tag">
+                                    <a-tag :color="getStatusTagColor(outlineGenerationStatus)">
                                       {{ taskDescription }}
                                     </a-tag>
                                   </div>
                                   <div class="timing-info">
-                                    <span class="time-label">Started:</span>
-                                    <span class="time-value">{{ formatTime(taskStartTime) }}</span>
+                                    <template v-if="outlineGenerationStatus === 'processing'">
+                                      <span class="time-label">Progress:</span>
+                                      <a-progress 
+                                        :percent="getProgressPercent(taskProgress)" 
+                                        :status="getProgressStatus(outlineGenerationStatus)"
+                                        style="width: 200px; display: inline-block;"
+                                      />
+                                    </template>
+                                    <template v-if="taskStartTime">
+                                      <span class="time-label">Started:</span>
+                                      <span class="time-value">{{ formatTime(taskStartTime) }}</span>
+                                    </template>
+                                    <template v-if="outlineGenerationStatus === 'finished' && taskEndTime">
+                                      <span class="time-label">Completed:</span>
+                                      <span class="time-value">{{ formatTime(taskEndTime) }}</span>
+                                    </template>
                                   </div>
                                 </div>
                               </div>
@@ -258,177 +310,65 @@
                         <a-tabs 
                           v-model:activeKey="contentPlanTab" 
                           class="content-plan-tabs"
-                          @change="handleContentPlanTabChange"
                         >
                           <template #rightExtra>
-                            <a-space>
-                              
-                              <!-- Existing buttons -->
-                              <a-button 
-                                type="text"
-                                :disabled="!contentPlans.length"
-                                @click="refreshContentPlans"
-                                :loading="isRefreshing"
-                              >
-                                Refresh
-                              </a-button>
-                              <a-button 
-                                type="text" 
-                                danger
-                                :disabled="!contentPlans.length"
-                                @click="confirmClearAllOutlines"
-                              >
-                                Clear All
-                              </a-button>
-                            </a-space>
+                            <span class="outline-stats">
+                              {{ contentPlans.length }} outlines | {{ selectedOutlinesCount }} selected
+                            </span>
                           </template>
-                          <!-- All Outlines Tab -->
+                          
                           <a-tab-pane key="all" tab="All Outlines">
-                            <div class="tab-content-wrapper">
-                              <div class="outlines-header">
-                                <a-checkbox 
-                                  :checked="allOutlinesSelected"
-                                  :indeterminate="someOutlinesSelected"
-                                  @change="handleSelectAllOutlines"
-                                >
-                                  Select All Outlines
-                                </a-checkbox>
+                            <div class="outlines-header">
+                              <a-checkbox 
+                                :checked="allOutlinesSelected"
+                                :indeterminate="someOutlinesSelected"
+                                @change="handleSelectAllOutlines"
+                              >
+                                Select All Outlines
                                 <span class="selected-count" v-if="selectedOutlinesCount > 0">
                                   ({{ selectedOutlinesCount }} selected)
                                 </span>
-                              </div>
-                              <div class="content-plans-grid">
-                                <template v-if="isLoadingOutlines">
-                                  <div class="content-plans-loading">
-                                    Loading...
-                                  </div>
-                                </template>
-                                <template v-else>
-                                  <a-card 
-                                    v-for="plan in contentPlans" 
-                                    :key="plan.outlineId"
-                                    class="plan-card"
-                                  >
-                                    <div class="card-header">
-                                      <div class="card-header-left">
-                                        <a-checkbox
-                                          :checked="plan.selected"
-                                          @change="(e) => handleOutlineSelect(plan, e.target.checked)"
-                                        />
-                                        <!-- 添加类型标签 -->
-                                        <a-tag :color="getTypeColor(plan.pageType)">
-                                          {{ plan.pageType }}
-                                        </a-tag>
-                                      </div>
-                                      <div class="card-actions">
-                                        <a-button 
-                                          type="primary"
-                                          ghost
-                                          :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
-                                          @click="handleFavorite(plan)"
-                                        >
-                                          {{ plan.favorited ? 'Deselect' : 'Select' }}
-                                        </a-button>
-                                      </div>
-                                    </div>
-                                    
-                                    <div class="card-content" @click="showPlanDetails(plan)">
-                                      <h3 class="plan-title">{{ plan.title }}</h3>
-                                      <p class="plan-description">{{ plan.description }}</p>
-                                      
-                                      <div class="plan-metrics">
-                                        <div class="metric-item">
-                                          <span class="metric-label">
-                                            <FileTextOutlined /> Word Count
-                                          </span>
-                                          <span class="metric-value">{{ getTotalWordCount(plan).toLocaleString() }}</span>
-                                        </div>
-                                        <div class="metric-item">
-                                          <span class="metric-label">
-                                            <OrderedListOutlined /> Sections
-                                          </span>
-                                          <span class="metric-value">{{ plan.outline.length }}</span>
-                                        </div>
-                                      </div>
-
-                                      <div class="plan-keywords">
-                                        <a-tag 
-                                          v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
-                                          :key="keyword"
-                                          color="blue"
-                                        >
-                                          {{ keyword }}
-                                        </a-tag>
-                                        <a-tag v-if="plan.keywords.split(', ').length > 3">
-                                          +{{ plan.keywords.split(', ').length - 3 }} more
-                                        </a-tag>
-                                      </div>
-
-                                      <div class="plan-actions">
-                                        <a-button 
-                                          type="primary" 
-                                          @click="showPlanDetails(plan)"
-                                        >
-                                          View Details
-                                        </a-button>
-                                      </div>
-                                    </div>
-                                  </a-card>
-                                </template>
-                              </div>
-                              <div class="pagination-container">
-                                <a-pagination
-                                  v-model:current="contentPlansPagination.current"
-                                  :total="contentPlansPagination.total"
-                                  :pageSize="contentPlansPagination.pageSize"
-                                  @change="handleContentPlansPaginationChange"
-                                  show-size-changer
-                                  show-quick-jumper
-                                  :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
-                                />
-                              </div>
+                              </a-checkbox>
                             </div>
-                          </a-tab-pane>
-
-                          <!-- Selected Outlines Tab -->
-                          <a-tab-pane key="selected" tab="Selected Outlines">
-                            <div class="tab-content-wrapper">
-                              <div class="content-plans-grid">
+                            <div class="content-plans-grid">
+                              <template v-if="isLoadingOutlines">
+                                <div class="content-plans-loading">
+                                  <a-spin size="large" />
+                                  <span class="loading-text">Loading...</span>
+                                </div>
+                              </template>
+                              <template v-else>
                                 <a-card 
-                                  v-for="plan in contentPlans.filter(p => p.favorited)" 
+                                  v-for="plan in contentPlans" 
                                   :key="plan.outlineId"
                                   class="plan-card"
                                   :bordered="false"
+                                  hoverable
                                 >
                                   <template #extra>
-                                    <a-space>
-                                      <a-button 
-                                        type="primary"
-                                        ghost
-                                        :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
-                                        @click.stop="handleFavorite(plan)"
-                                      >
-                                        {{ plan.favorited ? 'Deselect' : 'Select' }}
-                                      </a-button>
-                                    </a-space>
+                                    <a-button 
+                                      type="primary"
+                                      ghost
+                                      size="small"
+                                      :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
+                                      @click.stop="handleOutlineSelect(plan, !plan.favorited)"
+                                    >
+                                      {{ plan.favorited ? 'Deselect' : 'Select' }}
+                                    </a-button>
                                   </template>
                                   
-                                  <div class="card-content" @click="showPlanDetails(plan)">
+                                  <div class="card-content" @click.stop="showPlanDetails(plan)">
                                     <h3 class="plan-title">{{ plan.title }}</h3>
                                     <p class="plan-description">{{ plan.description }}</p>
                                     
                                     <div class="plan-metrics">
                                       <div class="metric-item">
-                                        <span class="metric-label">
-                                          <FileTextOutlined /> Word Count
-                                        </span>
-                                        <span class="metric-value">{{ getTotalWordCount(plan).toLocaleString() }}</span>
+                                        <FileTextOutlined />
+                                        <span>{{ getTotalWordCount(plan).toLocaleString() }} words</span>
                                       </div>
                                       <div class="metric-item">
-                                        <span class="metric-label">
-                                          <OrderedListOutlined /> Sections
-                                        </span>
-                                        <span class="metric-value">{{ plan.outline.length }}</span>
+                                        <OrderedListOutlined />
+                                        <span>{{ plan.outline.length }} sections</span>
                                       </div>
                                     </div>
 
@@ -440,18 +380,75 @@
                                       >
                                         {{ keyword }}
                                       </a-tag>
-                                      <a-tag v-if="plan.keywords.split(', ').length > 3">
-                                        +{{ plan.keywords.split(', ').length - 3 }} more
+                                      <a-tag v-if="plan.keywords.split(', ').length > 3" class="more-tag">
+                                        +{{ plan.keywords.split(', ').length - 3 }}
                                       </a-tag>
                                     </div>
+                                  </div>
+                                </a-card>
+                              </template>
+                            </div>
+                            <div class="pagination-container">
+                              <a-pagination
+                                v-model:current="contentPlansPagination.current"
+                                :total="contentPlansPagination.total"
+                                :pageSize="contentPlansPagination.pageSize"
+                                @change="handleContentPlansPaginationChange"
+                                show-size-changer
+                                show-quick-jumper
+                                :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
+                              />
+                            </div>
+                          </a-tab-pane>
 
-                                    <div class="plan-actions">
-                                      <a-button 
-                                        type="primary" 
-                                        @click="showPlanDetails(plan)"
+                          <a-tab-pane key="selected" tab="Selected Outlines">
+                            <div class="tab-content-wrapper">
+                              <div class="content-plans-grid">
+                                <a-card 
+                                  v-for="plan in contentPlans.filter(p => p.favorited)" 
+                                  :key="plan.outlineId"
+                                  class="plan-card"
+                                  :bordered="false"
+                                  hoverable
+                                >
+                                  <template #extra>
+                                    <a-button 
+                                      type="primary"
+                                      ghost
+                                      size="small"
+                                      :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
+                                      @click.stop="handleOutlineSelect(plan, !plan.favorited)"
+                                    >
+                                      {{ plan.favorited ? 'Deselect' : 'Select' }}
+                                    </a-button>
+                                  </template>
+                                  
+                                  <div class="card-content" @click.stop="showPlanDetails(plan)">
+                                    <h3 class="plan-title">{{ plan.title }}</h3>
+                                    <p class="plan-description">{{ plan.description }}</p>
+                                    
+                                    <div class="plan-metrics">
+                                      <div class="metric-item">
+                                        <FileTextOutlined />
+                                        <span>{{ getTotalWordCount(plan).toLocaleString() }} words</span>
+                                      </div>
+                                      <div class="metric-item">
+                                        <OrderedListOutlined />
+                                        <span>{{ plan.outline.length }} sections</span>
+                                      </div>
+                                    </div>
+
+                                    <div class="plan-keywords">
+                                      <a-tag 
+                                        v-for="keyword in plan.keywords.split(', ').slice(0, 3)" 
+                                        :key="keyword"
+                                        color="blue"
                                       >
-                                        View Details
-                                      </a-button>
+                                        {{ keyword }}
+                                      </a-tag>
+                                      <a-tag v-if="plan.keywords.split(', ').length > 3" class="more-tag">
+                                        +{{ plan.keywords.split(', ').length - 3 }}
+                                      </a-tag>
                                     </div>
                                   </div>
                                 </a-card>
@@ -478,10 +475,11 @@
             </div>
           </div>
         </template>
+
       </template>
 
       <template v-else>
-        <no-site-configured/>
+        <no-site-configured v-if="!loading"/>
       </template>
     </a-spin>
 
@@ -518,20 +516,22 @@
     >
       <a-table
         :dataSource="modalKeywords.comparison"
-        :columns="modifiedComparisonColumns"
+        :columns="keywordsTableColumns"
         :pagination="false"
         size="small"
         class="selected-keywords-table"
       >
-        <template #actions="{ record }">
-          <a-button 
-            type="primary"
-            ghost
-            class="deselect-btn"
-            @click="handleCancelSelection(record)"
-          >
-            Deselect
-          </a-button>
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'actions'">
+            <a-button 
+              type="primary"
+              ghost
+              class="deselect-btn"
+              @click="handleCancelSelection(record)"
+            >
+              Deselect
+            </a-button>
+          </template>
         </template>
       </a-table>
 
@@ -546,7 +546,145 @@
         </a-button>
       </template>
     </a-modal>
-  </page-layout>
+
+    <a-drawer
+      v-model:open="drawerVisible"
+      :title="selectedPlan?.title"
+      placement="right"
+      :width="720"
+      :footer="false"
+      @close="closeDrawer"
+      class="outline-drawer"
+    >
+      <template v-if="selectedPlan">
+        <div class="drawer-content">
+          <!-- Basic Information -->
+          <section class="drawer-section">
+            <h3 class="section-title">
+              <InfoCircleOutlined />
+              Basic Information
+            </h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Page Type</span>
+                <a-tag :color="getTypeColor(selectedPlan.pageType)">
+                  {{ selectedPlan.pageType }}
+                </a-tag>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Total Word Count</span>
+                <span>{{ getTotalWordCount(selectedPlan).toLocaleString() }} words</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Total Sections</span>
+                <span>{{ selectedPlan.outline.length }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Created At</span>
+                <span>{{ formatTime(selectedPlan.createdAt) }}</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Content Description -->
+          <section class="drawer-section">
+            <h3 class="section-title">
+              <FileTextOutlined />
+              Content Description
+            </h3>
+            <p class="content-description">{{ selectedPlan.description }}</p>
+          </section>
+
+          <!-- Target Keywords -->
+          <section class="drawer-section">
+            <h3 class="section-title">
+              <TagsOutlined />
+              Target Keywords
+            </h3>
+            <div class="keywords-container">
+              <a-tag
+                v-for="keyword in selectedPlan.keywords.split(', ')"
+                :key="keyword"
+                color="blue"
+              >
+                {{ keyword }}
+              </a-tag>
+            </div>
+          </section>
+
+          <!-- Content Outline -->
+          <section class="drawer-section">
+            <h3 class="section-title">
+              <OrderedListOutlined />
+              Content Outline
+            </h3>
+            <div class="outline-tree">
+              <a-collapse 
+                v-model:activeKey="activeOutlineSections" 
+                :bordered="false"
+                class="custom-collapse"
+              >
+                <a-collapse-panel 
+                  v-for="(section, index) in selectedPlan.outline" 
+                  :key="index"
+                >
+                  <template #header>
+                    <div class="section-header">
+                      <span class="section-title">
+                        {{ Array.isArray(section.sectionTitle) 
+                          ? section.sectionTitle[0] 
+                          : section.sectionTitle }}
+                      </span>
+                      <span class="section-wordcount">{{ section.wordCount }} words</span>
+                    </div>
+                  </template>
+
+                  <div class="section-details">
+                    <!-- Keywords -->
+                    <div class="info-row">
+                      <span class="info-key">Keywords Distribution:</span>
+                      <div class="keyword-distribution">
+                        <div 
+                          v-for="(count, keyword) in section.keywords" 
+                          :key="keyword"
+                          class="keyword-item"
+                        >
+                          <a-tag color="blue">{{ keyword }}</a-tag>
+                          <span class="keyword-count">× {{ count }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Subsections if array -->
+                    <div v-if="Array.isArray(section.sectionTitle) && section.sectionTitle.length > 1" class="subsections">
+                      <div class="info-row">
+                        <span class="info-key">Subsections:</span>
+                        <div class="subsection-list">
+                          <div 
+                            v-for="(title, subIndex) in section.sectionTitle.slice(1)" 
+                            :key="subIndex"
+                            class="subsection-item"
+                          >
+                            <span class="subsection-number">{{ subIndex + 1 }}.</span>
+                            <span class="subsection-title">{{ title }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </a-collapse-panel>
+              </a-collapse>
+            </div>
+          </section>
+        </div>
+
+        <!-- Drawer Footer -->
+        <div class="drawer-footer">
+          <a-button @click="closeDrawer">Close</a-button>
+        </div>
+      </template>
+    </a-drawer>
+  </PageLayout>
 </template>
 
 <script>
@@ -580,7 +718,9 @@ import {
   ThunderboltOutlined,
   AimOutlined,
   BarChartOutlined,
-  UserOutlined
+  UserOutlined,
+  TagsOutlined,
+  CheckCircleOutlined
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -627,7 +767,9 @@ export default defineComponent({
     ThunderboltOutlined,
     AimOutlined,
     BarChartOutlined,
-    UserOutlined
+    UserOutlined,
+    TagsOutlined,
+    CheckCircleOutlined
   },
   setup() {
     const currentMode = ref('beginner')
@@ -638,7 +780,8 @@ export default defineComponent({
     const taskStartTime = ref(null)
     const taskEndTime = ref(null)
     const taskDescription = ref(null)
-    const columns = computed(() => tableColumns)
+    const taskProgress = ref(null)
+    const columns = computed(() => keywordsTableColumns.value)
     
     const overviewData = ref({
       totalKeywordsAnalyzed: 0,
@@ -699,7 +842,7 @@ export default defineComponent({
 
     const transformKeywordData = (item) => {
       return {
-        id: item.id,
+        id: item.keywordId,
         keyword: item.keyword,
         selected: false,
         favorited: item.status === 'selected',
@@ -711,7 +854,6 @@ export default defineComponent({
         grade: item.grade,
         reason: item.reasoning || 'No specific reason provided',
         relatedOutlines: item.relatedOutlines || [],
-        favorited: item.status === 'selected',
       }
     }
 
@@ -930,41 +1072,6 @@ export default defineComponent({
 
     const showSelectedModal = ref(false)
 
-    const modifiedComparisonColumns = ref([
-      {
-        title: 'Keyword',
-        dataIndex: 'keyword',
-        key: 'keyword',
-        width: '25%'
-      },
-      {
-        title: 'KRS',
-        dataIndex: 'krs',
-        key: 'krs',
-        width: '15%'
-      },
-      {
-        title: 'KD',
-        dataIndex: 'kd',
-        key: 'kd',
-        width: '15%'
-      },
-      {
-        title: 'Volume',
-        dataIndex: 'volume',
-        key: 'volume',
-        width: '15%'
-      },
-      {
-        title: 'Actions',
-        key: 'actions',
-        width: '20%',
-        slots: {
-          customRender: 'actions'
-        }
-      }
-    ])
-
     const modalKeywords = ref({
       comparison: [],
     })
@@ -1073,8 +1180,24 @@ export default defineComponent({
       return Math.round((progress.current / progress.total) * 100)
     }
 
-    const formatTime = (timeString) => {
-      return new Date(timeString).toLocaleString()
+    const formatTime = (isoString) => {
+      if (!isoString) return '--'
+      try {
+        const date = new Date(isoString)
+        if (isNaN(date.getTime())) return '--'
+        
+        return new Intl.DateTimeFormat('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false
+        }).format(date)
+      } catch {
+        return '--'
+      }
     }
 
     const domainConfigured = ref(false)
@@ -1262,18 +1385,27 @@ export default defineComponent({
         const response = await api.getAnalysisStatus('composite_generator')
         
         if (response?.code === 200 && response?.data) {
+          console.log('API Response:', response.data)
+          
           outlineGenerationStatus.value = response.data.status
           taskStartTime.value = response.data.startTime
           taskEndTime.value = response.data.endTime
           taskDescription.value = formatTaskDescription(response.data.description)
           
+          console.log('Assigned Times:', {
+            start: taskStartTime.value,
+            end: taskEndTime.value
+          })
+          
           if (response.data.status === 'finished') {
+            console.log('Formatted Times:', {
+              start: formatTime(taskStartTime.value),
+              end: formatTime(taskEndTime.value)
+            })
+            
             clearInterval(pollingInterval.value)
             hasGenerated.value = true
             await fetchContentPlans()
-          } else if (response.data.status === 'failed') {
-            clearInterval(pollingInterval.value)
-            // message.error('Content plan generation failed')
           }
         }
         return response
@@ -1359,12 +1491,14 @@ export default defineComponent({
           await api.cancelPlanningKeywords([keyword.id]);
           keyword.favorited = false;
           selectedKeywords.value = selectedKeywords.value.filter(k => k.id !== keyword.id);
+          message.success('Removed from selection');
         } else {
           await api.selectPlanningKeywords([keyword.id]);
           keyword.favorited = true;
           if (!selectedKeywords.value.find(k => k.id === keyword.id)) {
             selectedKeywords.value.push({ ...keyword, selected: true });
           }
+          message.success('Added to selection');
         }
       } catch (error) {
         console.error('Favorite operation failed:', error);
@@ -1472,35 +1606,35 @@ export default defineComponent({
       }
     };
 
-    const taskProgress = ref(null)
     const taskMessage = ref('')
 
     const getTaskStatusText = (status) => {
       const statusMap = {
-        'processing': '🚀 AI is crafting your content plans...',
-        'failed': '❌ Oops! Content plan generation failed',
-        'not_started': '⏳ Getting ready to create your content plans',
-        'finished': '✨ Content plans are ready!'
+        processing: '🚀 AI is crafting your content plans...',
+        failed: '❌ Oops! Content plan generation failed',
+        not_started: '⏳ Getting ready to create your content plans',
+        finished: '✨ Content plans are ready!'
       }
       return statusMap[status] || 'Unknown Status'
     }
 
     const formatTaskDescription = (description) => {
       if (description?.includes('composite_generator')) {
-        if (outlineGenerationStatus.value !== 'failed') {
-          return "Our AI is analyzing your keywords and creating personalized content recommendations. This usually takes 1-2 minutes."
+        const statusMessages = {
+          processing: "Our AI is analyzing your keywords and creating personalized content recommendations. This usually takes 1-2 minutes.",
+          finished: "Content plans generation completed! You can review the generated outlines below.",
+          failed: description || "Content plan generation failed. Please try again."
         }
-        return description
+        return statusMessages[outlineGenerationStatus.value] || description
       }
       return description
     }
 
     const getProgressStatus = (status) => {
       const statusMap = {
-        'processing': 'active',
-        'failed': 'exception',
-        'finished': 'success',
-        'not_started': 'normal'
+        processing: 'active',
+        failed: 'exception',
+        finished: 'success'
       }
       return statusMap[status] || 'normal'
     }
@@ -1680,7 +1814,7 @@ export default defineComponent({
     })
 
     const selectedOutlinesCount = computed(() => {
-      return contentPlans.value.filter(plan => plan.selected).length
+      return contentPlans.value.filter(plan => plan.favorited).length
     })
 
     const handleSelectAllOutlines = (e) => {
@@ -1690,11 +1824,26 @@ export default defineComponent({
       })
     }
 
-    const handleOutlineSelect = (plan, checked) => {
-      plan.selected = checked
-    }
+    const handleOutlineSelect = async (plan, checked) => {
+      try {
+        if (checked) {
+          await api.selectPlanningOutlines([plan.outlineId]);
+          plan.favorited = true;
+          message.success('Added to selection');
+        } else {
+          await api.cancelPlanningOutlines([plan.outlineId]);
+          plan.favorited = false;
+          message.success('Removed from selection');
+        }
+      } catch (error) {
+        console.error('Failed to update outline selection:', error);
+        message.error('Failed to update selection');
+        // 回滚UI状态
+        plan.selected = !checked;
+      }
+    };
 
-    const comparisonColumns = [
+    const keywordsTableColumns = ref([
       {
         title: 'Keyword',
         dataIndex: 'keyword',
@@ -1728,12 +1877,9 @@ export default defineComponent({
       {
         title: 'Actions',
         key: 'actions',
-        width: '10%',
-        slots: {
-          customRender: 'actions'
-        }
+        width: '10%'
       }
-    ]
+    ])
 
     const getTypeColor = (type) => {
       const typeColors = {
@@ -1758,7 +1904,45 @@ export default defineComponent({
       iconBackground: 'rgba(37, 99, 235, 0.15)',
     }
 
+    const getStatusTagColor = (status) => {
+      const statusColors = {
+        processing: 'blue',
+        finished: 'green',
+        failed: 'red'
+      }
+      return statusColors[status] || 'default'
+    }
+
+    const statusColor = computed(() => {
+      return {
+        color: {
+          processing: '#1890ff',
+          finished: '#52c41a',
+          failed: '#ff4d4f'
+        }[outlineGenerationStatus.value]
+      }
+    })
+
+    const formatOutlineTree = (outline) => {
+      return outline.map((item, index) => {
+        const node = {
+          key: `${index}`,
+          title: item.title,
+          wordCount: item.wordCount
+        }
+        
+        if (item.subSections && item.subSections.length) {
+          node.children = formatOutlineTree(item.subSections)
+        }
+        
+        return node
+      })
+    }
+
     return {
+      taskStartTime,
+      taskEndTime,
+      taskDescription,
       showSelectedKeywords,
       currentMode,
       selectedKeywords,
@@ -1841,10 +2025,6 @@ export default defineComponent({
       taskProgress,
       taskMessage,
       getTaskStatusText,
-      getProgressStatus,
-      taskStartTime,
-      taskEndTime,
-      taskDescription,
       formatTaskDescription,
       confirmClearAllOutlines,
       pollingInterval,
@@ -1865,11 +2045,13 @@ export default defineComponent({
       selectedOutlinesCount,
       handleSelectAllOutlines,
       handleOutlineSelect,
-      comparisonColumns,
+      keywordsTableColumns,
       getTypeColor,
       activeCollapseKeys,
       bannerTheme,
-      modifiedComparisonColumns,
+      getStatusTagColor,
+      statusColor,
+      formatOutlineTree
     }
   }
 })
@@ -2012,53 +2194,95 @@ export default defineComponent({
 
 .content-toolbar {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.toolbar-left,
+.toolbar-right {
+  display: flex;
   align-items: center;
   gap: 16px;
-  padding-bottom: 16px;
 }
 
-.step-panel[v-show="currentStep === '0'"] .content-toolbar {
-  justify-content: flex-start;
+/* 修复图标和文字对齐 */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.step-panel[v-show="currentStep === '1'"] .content-toolbar {
-  justify-content: flex-start;
+.action-button :deep(.anticon) {
+  display: flex;
+  align-items: center;
 }
 
-.mode-switch :deep(.ant-radio-button-wrapper) {
-  background: #f0f7ff;
-  border-color: #2563eb;
-  color: #2563eb;
-}
-
-.mode-switch :deep(.ant-radio-button-wrapper:hover) {
-  color: #1d4ed8;
-  background: #e6f0ff;
-}
-
-.mode-switch :deep(.ant-radio-button-wrapper-checked) {
-  background: #2563eb !important;
-  border-color: #2563eb !important;
-  color: white !important;
-  box-shadow: -1px 0 0 0 #2563eb;
-}
-
-.mode-switch :deep(.ant-radio-button-wrapper-checked:hover) {
-  background: #1d4ed8 !important;
-  border-color: #1d4ed8 !important;
-}
-
-.view-selected-btn {
-  background: linear-gradient(to right, #2563eb, #3b82f6);
+/* 超级炫彩生成按钮 */
+.generate-pages-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
   border: none;
-  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
+  padding: 6px 16px;
   height: 32px;
-  padding: 0 16px;
+  box-shadow: 0 2px 12px rgba(24, 144, 255, 0.3);
+  transition: all 0.3s ease;
 }
 
-.view-selected-btn:hover {
-  background: linear-gradient(to right, #1d4ed8, #2563eb);
-  border: none;
+.generate-pages-btn:not(:disabled):hover {
+  background: linear-gradient(135deg, #40a9ff 0%, #854eca 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.4);
+}
+
+.generate-pages-btn:not(:disabled):active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+}
+
+.generate-pages-btn:disabled {
+  background: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  box-shadow: none;
+  color: rgba(0, 0, 0, 0.25);
+}
+
+/* 确保图标在禁用状态下也保持居中 */
+.generate-pages-btn :deep(.anticon) {
+  display: flex;
+  align-items: center;
+}
+
+.outline-stats {
+  color: #666;
+  font-size: 13px;
+  margin-right: 24px;
+}
+
+.outlines-header {
+  padding: 16px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.selected-count {
+  margin-left: 8px;
+  color: #666;
+  font-size: 13px;
+}
+
+.content-plan-tabs :deep(.ant-tabs-nav) {
+  margin-bottom: 0;
+}
+
+.content-plan-tabs :deep(.ant-tabs-tab) {
+  padding: 12px 24px;
+}
+
+.content-plan-tabs :deep(.ant-tabs-tab-active) {
+  background: #f0f7ff;
 }
 
 .step-panel {
@@ -2067,23 +2291,23 @@ export default defineComponent({
 
 /* 新增按钮样式 */
 .select-btn {
-  color: #52c41a !important;  /* 绿色 */
-  border-color: #52c41a !important;
+  color: #1890ff;
+  border-color: #1890ff;
 }
 
 .select-btn:hover {
-  background: #f6ffed !important;
-  color: #73d13d !important;
+  color: #40a9ff;
+  border-color: #40a9ff;
 }
 
 .deselect-btn {
-  color: #ff4d4f !important;  /* 红色 */
-  border-color: #ff4d4f !important;
+  color: #ff4d4f;
+  border-color: #ff4d4f;
 }
 
 .deselect-btn:hover {
-  background: #fff1f0 !important;
-  color: #ff7875 !important;
+  color: #ff7875;
+  border-color: #ff7875;
 }
 
 /* 新增错误状态样式 */
@@ -2138,6 +2362,451 @@ export default defineComponent({
   border: 1px solid #ffccc7;
   border-radius: 8px;
   padding: 12px 16px;
+}
+
+.analysis-loading-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.1);
+}
+
+.preparing-analysis-content {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.analysis-icon {
+  font-size: 48px;
+  color: #2563eb;
+  margin-bottom: 24px;
+}
+
+.analysis-title {
+  color: #1e293b;
+  font-size: 24px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.analysis-description {
+  color: #64748b;
+  font-size: 16px;
+  margin-bottom: 32px;
+}
+
+.platform-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  margin: 0 6px;
+}
+
+.semrush { background: #f0f4ff; color: #3b82f6; }
+.ahrefs { background: #e6f6ff; color: #0ea5e9; }
+
+.loading-tips {
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tip-icon {
+  color: #f59e0b;
+}
+
+.tip-text {
+  color: #64748b;
+  font-size: 14px;
+}
+
+.centered-spin {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 1000;
+}
+
+.centered-spin :deep(.ant-spin-spinning) {
+  max-height: none;
+}
+
+.content-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  padding: 16px 0;
+}
+
+.plan-card {
+  background: #ffffff;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.plan-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.plan-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.plan-description {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.plan-metrics {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.metric-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.plan-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.plan-keywords :deep(.ant-tag) {
+  margin: 0;
+  border-radius: 4px;
+}
+
+.more-tag {
+  background: #f3f4f6;
+  border: none;
+  color: #6b7280;
+}
+
+.content-plans-loading {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 0;
+}
+
+.loading-text {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.outline-drawer :deep(.ant-drawer-body) {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.drawer-section {
+  margin-bottom: 32px;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.content-description {
+  color: #4b5563;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.keywords-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.outline-tree {
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.tree-node-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding-right: 16px;
+}
+
+.word-count {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.drawer-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.custom-collapse {
+  background: transparent;
+}
+
+.custom-collapse :deep(.ant-collapse-item) {
+  margin-bottom: 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px !important;
+  overflow: hidden;
+}
+
+.custom-collapse :deep(.ant-collapse-header) {
+  font-weight: 600;
+  background: #f9fafb;
+}
+
+.section-details {
+  padding: 16px;
+}
+
+.section-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.info-key {
+  color: #6b7280;
+  font-weight: 500;
+  min-width: 100px;
+}
+
+.info-value {
+  color: #1f2937;
+}
+
+.section-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.subsections {
+  margin-top: 16px;
+  border-top: 1px dashed #e5e7eb;
+  padding-top: 16px;
+}
+
+.subsection-item {
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.subsection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.subsection-title {
+  font-weight: 500;
+  color: #374151;
+}
+
+.subsection-wordcount {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.subsection-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.subsection-focus,
+.subsection-keywords {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.keyword-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.drawer-footer {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.section-wordcount {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: normal;
+}
+
+.keyword-distribution {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.keyword-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.keyword-count {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.subsection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.subsection-item {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.subsection-number {
+  color: #6b7280;
+  font-weight: 500;
+  min-width: 24px;
+}
+
+.info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-key {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.custom-collapse :deep(.ant-collapse-header) {
+  padding: 16px !important;
+}
+
+.custom-collapse :deep(.ant-collapse-content-box) {
+  padding: 20px !important;
+}
+.task-alert {
+  margin-bottom: 16px;
 }
 </style>
 

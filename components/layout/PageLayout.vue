@@ -25,14 +25,6 @@
 export default {
   name: 'PageLayout',
   props: {
-    title: {
-      type: String,
-      required: true
-    },
-    description: {
-      type: String,
-      required: true
-    },
     icon: {
       type: String,
       default: '✨'
