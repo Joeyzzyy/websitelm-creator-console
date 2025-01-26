@@ -129,8 +129,8 @@
                     <div v-if="currentMode === 'beginner'" class="beginner-mode">
                       <a-row :gutter="[24, 24]" class="beginner-content">
                         <!-- Keywords From Comparison Table -->
-                        <a-col :span="12">
-                          <a-card title="Keywords From Comparison" class="keyword-table-card">
+                        <a-col :span="24">
+                          <a-card title="Keywords Analysis" class="keyword-table-card">
                             <a-tabs 
                               v-model:activeKey="currentPriority"
                               @change="handleTabChange"
@@ -150,44 +150,6 @@
                                   :columns="comparisonColumns"
                                   :pagination="recommendedPagination"
                                   @change="(page) => handleComparisonPaginationChange(priority.level, page.current, page.pageSize)"
-                                  size="small"
-                                >
-                                  <template #actions="{ record }">
-                                    <a-button 
-                                      type="text"
-                                      @click="handleKeywordFavorite(record)"
-                                    >
-                                      {{ record.favorited ? 'Remove' : 'Add' }}
-                                    </a-button>
-                                  </template>
-                                </a-table>
-                              </a-tab-pane>
-                            </a-tabs>
-                          </a-card>
-                        </a-col>
-
-                        <!-- Keywords From Top Pages Table -->
-                        <a-col :span="12">
-                          <a-card title="Keywords From Top Pages" class="keyword-table-card">
-                            <a-tabs 
-                              v-model:activeKey="currentPagePriority"
-                              @change="handlePageTabChange"
-                              class="priority-tabs"
-                              tabPosition="left"
-                            >
-                              <a-tab-pane v-for="priority in priorities" :key="priority.level">
-                                <template #tab>
-                                  <div class="priority-tab">
-                                    <div class="priority-indicator" :style="{ backgroundColor: priority.color }"></div>
-                                    <span>{{ priority.label }}</span>
-                                  </div>
-                                </template>
-                                
-                                <a-table
-                                  :dataSource="getKeywordsByPriority(pageKeywords, priority.level)"
-                                  :columns="comparisonColumns"
-                                  :pagination="pagePagination"
-                                  @change="(page) => handleTopPagesPaginationChange(priority.level, page.current, page.pageSize)"
                                   size="small"
                                 >
                                   <template #actions="{ record }">
@@ -571,30 +533,10 @@
           >
             <template #actions="{ record }">
               <a-button 
-                type="text"
+                type="text" 
                 danger
                 @click="handleCancelSelection(record)"
-              >
-                <template #icon>
-                  <DeleteOutlined />
-                </template>
-              </a-button>
-            </template>
-          </a-table>
-        </a-tab-pane>
-        
-        <a-tab-pane key="top_pages" tab="From Top Pages">
-          <a-table
-            :dataSource="modalKeywords.top_pages"
-            :columns="comparisonColumns"
-            :pagination="false"
-            size="small"
-          >
-            <template #actions="{ record }">
-              <a-button 
-                type="text"
-                danger
-                @click="handleCancelSelection(record)"
+                class="delete-btn"
               >
                 <template #icon>
                   <DeleteOutlined />
@@ -724,7 +666,6 @@ export default defineComponent({
     const clearSelection = () => {
       selectedKeywords.value = []
       recommendedKeywords.value.forEach(k => k.selected = false)
-      pageKeywords.value.forEach(k => k.selected = false)
     }
 
     const overviewStats = ref({
@@ -762,13 +703,7 @@ export default defineComponent({
     ]
 
     const recommendedKeywords = ref([])
-    const pageKeywords = ref([])
     const recommendedPagination = ref({
-      current: 1,
-      pageSize: 10,
-      total: 0
-    })
-    const pagePagination = ref({
       current: 1,
       pageSize: 10,
       total: 0
@@ -792,11 +727,10 @@ export default defineComponent({
       }
     }
 
-    const fetchKeywords = async (source, level, page = 1, limit = 10) => {
+    const fetchKeywords = async (level, page = 1, limit = 10) => {
       try {
-        console.log('Fetching keywords with params:', { source, level, page, limit })
+        console.log('Fetching keywords with params:', { level, page, limit })
         const response = await api.getPlanningKeywords({
-          source,
           level,
           page,
           limit,
@@ -805,13 +739,8 @@ export default defineComponent({
         
         if (response?.data) {
           const transformedData = response.data.map(transformKeywordData)
-          if (source === 'keywords') {
-            recommendedKeywords.value = transformedData
-            recommendedPagination.value.total = response.totalCount
-          } else if (source === 'top_page_keywords') {
-            pageKeywords.value = transformedData
-            pagePagination.value.total = response.totalCount
-          }
+          recommendedKeywords.value = transformedData
+          recommendedPagination.value.total = response.totalCount
         }
       } catch (error) {
         console.error('Failed to get keywords:', error)
@@ -821,17 +750,9 @@ export default defineComponent({
     }
 
     const handleComparisonPaginationChange = (priority, page, pageSize) => {
-      console.log('Comparison Pagination change:', { priority, page, pageSize })
       recommendedPagination.value.current = page
       recommendedPagination.value.pageSize = pageSize
-      fetchKeywords('keywords', priority, page, pageSize)
-    }
-
-    const handleTopPagesPaginationChange = (priority, page, pageSize) => {
-      console.log('Top Pages Pagination change:', { priority, page, pageSize })
-      pagePagination.value.current = page
-      pagePagination.value.pageSize = pageSize
-      fetchKeywords('top_page_keywords', priority, page, pageSize)
+      fetchKeywords(priority, page, pageSize)
     }
 
     onMounted(async () => {
@@ -863,10 +784,9 @@ export default defineComponent({
     watch(
       [
         () => recommendedKeywords.value,
-        () => pageKeywords.value,
         () => selectedKeywords.value
       ],
-      ([newRecommendedKeywords, newPageKeywords, newSelectedKeywords], [oldRecommendedKeywords, oldPageKeywords, oldSelectedKeywords]) => {
+      ([newRecommendedKeywords, newSelectedKeywords], [oldRecommendedKeywords, oldSelectedKeywords]) => {
         if (newRecommendedKeywords !== oldRecommendedKeywords) {
           console.log('recommendedKeywords changed:', newRecommendedKeywords)
           const selectedOnes = newRecommendedKeywords.filter(k => k.selected)
@@ -876,12 +796,8 @@ export default defineComponent({
           ]
         }
 
-        if (newPageKeywords !== oldPageKeywords) {
-          const selectedOnes = newPageKeywords.filter(k => k.selected)
-          selectedKeywords.value = [
-            ...selectedKeywords.value.filter(k => !newPageKeywords.find(nk => nk.keyword === k.keyword)),
-            ...selectedOnes
-          ]
+        if (newSelectedKeywords !== oldSelectedKeywords) {
+          selectedKeywords.value = newSelectedKeywords
         }
       },
       {
@@ -1028,26 +944,18 @@ export default defineComponent({
 
     const modalTabs = ref([
       { key: 'comparison', label: 'From Comparison' },
-      { key: 'top_pages', label: 'From Top Pages' }
     ])
     const currentModalTab = ref('comparison')
     const modalKeywords = ref({
       comparison: [],
-      top_pages: []
     })
 
     const fetchSelectedKeywords = async () => {
       isLoadingModalKeywords.value = true
       try {
-        const [keywordsResponse, pageKeywordsResponse] = await Promise.all([
+        const [keywordsResponse] = await Promise.all([
           api.getPlanningKeywords({
             source: 'keywords',
-            status: 'selected',
-            page: 1,
-            limit: 100
-          }),
-          api.getPlanningKeywords({
-            source: 'top_page_keywords',
             status: 'selected',
             page: 1,
             limit: 100
@@ -1056,7 +964,6 @@ export default defineComponent({
         
         modalKeywords.value = {
           comparison: (keywordsResponse?.data || []).map(transformKeywordData),
-          top_pages: (pageKeywordsResponse?.data || []).map(transformKeywordData)
         }
       } catch (error) {
         console.error('Failed to get selected keywords:', error)
@@ -1117,10 +1024,7 @@ export default defineComponent({
                 weak: overview.data.keywordsGroup.weak || 0
               }
             }
-            await Promise.all([
-              fetchKeywords('keywords', currentPriority.value, 1, recommendedPagination.value.pageSize),
-              fetchKeywords('top_page_keywords', currentPriority.value, 1, pagePagination.value.pageSize)
-            ])
+            await fetchKeywords(currentPriority.value, 1, recommendedPagination.value.pageSize)
           }
         }
       } catch (error) {
@@ -1181,23 +1085,12 @@ export default defineComponent({
     }
 
     const currentPriority = ref('1')
-    const currentPagePriority = ref('1')
 
     const handleTabChange = (activeKey) => {
-      console.log('Tab changed to:', activeKey)
       const priority = priorities.find(p => p.level === activeKey)
       if (priority) {
         recommendedPagination.value.current = 1
-        fetchKeywords('keywords', priority.level, 1, recommendedPagination.value.pageSize)
-      }
-    }
-
-    const handlePageTabChange = (activeKey) => {
-      console.log('Page tab changed to:', activeKey)
-      const priority = priorities.find(p => p.level === activeKey)
-      if (priority) {
-        pagePagination.value.current = 1
-        fetchKeywords('top_page_keywords', priority.level, 1, pagePagination.value.pageSize)
+        fetchKeywords(priority.level, 1, recommendedPagination.value.pageSize)
       }
     }
 
@@ -1230,7 +1123,6 @@ export default defineComponent({
       try {
         const selectedIds = [
           ...selectedKeywordsData.value.comparison.map(k => k.id),
-          ...selectedKeywordsData.value.top_pages.map(k => k.id)
         ];
 
         console.log('Submitting generation request...');
@@ -1318,10 +1210,7 @@ export default defineComponent({
 
     watch(currentStep, async (newStep) => {
       if (newStep === '0') {
-        await Promise.all([
-          fetchKeywords('keywords', currentPriority.value, 1, recommendedPagination.value.pageSize),
-          fetchKeywords('top_page_keywords', currentPriority.value, 1, pagePagination.value.pageSize)
-        ])
+        await fetchKeywords(currentPriority.value, 1, recommendedPagination.value.pageSize)
       } else if (newStep === '1') {
         contentPlans.value = []
         hasGenerated.value = false
@@ -1487,7 +1376,6 @@ export default defineComponent({
     const selectedKeywordsTab = ref('comparison')
     const selectedKeywordsData = ref({
       comparison: [],
-      top_pages: []
     })
     const isLoadingSelectedKeywords = ref(false)
 
@@ -1500,15 +1388,9 @@ export default defineComponent({
     const fetchSelectedKeywordsData = async () => {
       isLoadingSelectedKeywords.value = true
       try {
-        const [keywordsResponse, pageKeywordsResponse] = await Promise.all([
+        const [keywordsResponse] = await Promise.all([
           api.getPlanningKeywords({
             source: 'keywords',
-            status: 'selected',
-            page: 1,
-            limit: 100
-          }),
-          api.getPlanningKeywords({
-            source: 'top_page_keywords',
             status: 'selected',
             page: 1,
             limit: 100
@@ -1517,7 +1399,6 @@ export default defineComponent({
         
         selectedKeywordsData.value = {
           comparison: (keywordsResponse?.data || []).map(transformKeywordData),
-          top_pages: (pageKeywordsResponse?.data || []).map(transformKeywordData)
         }
       } catch (error) {
         console.error('Failed to get selected keywords:', error)
@@ -1541,8 +1422,7 @@ export default defineComponent({
     }
 
     const totalSelectedKeywords = computed(() => {
-      return selectedKeywordsData.value.comparison.length + 
-             selectedKeywordsData.value.top_pages.length
+      return selectedKeywordsData.value.comparison.length
     })
 
     const handleDeleteOutline = async (plan) => {
@@ -1865,7 +1745,6 @@ export default defineComponent({
       overviewStats: ref(overviewStats),
       priorities,
       recommendedKeywords,
-      pageKeywords: ref(pageKeywords),
       savedPresets: ref(savedPresets),
       columns,
       competitorColumns: computed(() => competitorColumns),
@@ -1905,9 +1784,7 @@ export default defineComponent({
       formatTime,
       domainConfigured,
       recommendedPagination,
-      pagePagination,
       handleComparisonPaginationChange,
-      handleTopPagesPaginationChange,
       currentPriority,
       handleTabChange,
       contentPlans,
@@ -1969,8 +1846,6 @@ export default defineComponent({
       selectedOutlinesCount,
       handleSelectAllOutlines,
       handleOutlineSelect,
-      currentPagePriority,
-      handlePageTabChange,
       comparisonColumns,
       getTypeColor,
       activeCollapseKeys,
