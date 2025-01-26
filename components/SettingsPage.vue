@@ -1078,18 +1078,18 @@ export default {
       }
     ];
 
-    // 添加 banner 相关配置
+    // 修改 banner 相关配置
     const bannerTheme = {
-      primary: '#38BDF8',
-      secondary: '#818CF8',
-      background: 'linear-gradient(135deg, #1a1a1a, #2d3748)',
+      primary: '#B7791F',
+      secondary: '#975A16',
+      background: 'linear-gradient(135deg, #975A16, #B7791F)',
       textColor: '#FFFFFF',
-      descriptionColor: '#94A3B8',
-      badgeColor: '#94A3B8',
-      badgeBackground: 'rgba(255, 255, 255, 0.05)',
-      badgeHoverBackground: 'rgba(56, 189, 248, 0.1)',
-      badgeHoverColor: '#38BDF8',
-      iconBackground: 'rgba(255, 255, 255, 0.1)',
+      descriptionColor: '#FEF9C3',
+      badgeColor: '#FEFCE8',
+      badgeBackground: 'rgba(255, 255, 255, 0.12)',
+      badgeHoverBackground: 'rgba(183, 121, 31, 0.2)',
+      badgeHoverColor: '#FEF08A',
+      iconBackground: 'rgba(255, 255, 255, 0.15)',
     }
 
     return {

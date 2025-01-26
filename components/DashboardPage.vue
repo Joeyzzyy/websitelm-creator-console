@@ -2040,7 +2040,6 @@ export default defineComponent({
     handleVerifyDomain() {
       console.log('验证域名');
       this.successModalVisible = false;
-      // 添加其他处理逻辑
     },
     
     // 处理功能导览
@@ -2949,7 +2948,7 @@ export default defineComponent({
   margin-bottom: 24px;
   border: none !important;
   /* 使用更高级的渐变配色，从深邃的靛蓝过渡到神秘的紫色 */
-  background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%) !important;
+  background: linear-gradient(135deg, #0F172A 0%, #2E1065 100%) !important;  /* 更浅的紫色 */
   box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3) !important;
   border-radius: 16px !important;
   position: relative;
@@ -2964,9 +2963,11 @@ export default defineComponent({
     bottom: 0;
     /* 添加更精致的光晕效果 */
     background: 
-      radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 50%),
-      radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.15), transparent 50%),
-      radial-gradient(circle at center, rgba(59, 130, 246, 0.1), transparent 40%);
+      radial-gradient(circle at top right, rgba(224, 231, 255, 0.15), transparent 50%),  /* 接近白色的淡紫 */
+      radial-gradient(circle at bottom left, rgba(243, 232, 255, 0.15), transparent 50%),  /* 接近白色的淡粉紫 */
+      radial-gradient(circle at center, rgba(219, 234, 254, 0.12), transparent 40%);  /* 接近白色的淡蓝 */
+    opacity: 0.9;  /* 增加整体不透明度 */
+    mix-blend-mode: soft-light;  /* 添加混合模式 */
     pointer-events: none;
   }
 
@@ -3032,9 +3033,9 @@ export default defineComponent({
 
     .quick-link-icon {
       transform: scale(1.05);
-      background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+      background: linear-gradient(135deg, #818CF8 0%, #A78BFA 100%);  /* 更浅的紫色渐变 */
       box-shadow: 
-        0 8px 20px rgba(79, 70, 229, 0.3),
+        0 8px 20px rgba(129, 140, 248, 0.3),  /* 更浅的紫色阴影 */
         0 0 0 1px rgba(255, 255, 255, 0.1);
     }
   }
@@ -3047,7 +3048,7 @@ export default defineComponent({
   min-width: 36px;
   min-height: 36px;
   /* 更高级的图标渐变 */
-  background: linear-gradient(135deg, #4F46E5 0%, #6D28D9 100%);
+  background: linear-gradient(135deg, #818CF8 0%, #9333EA 100%);  /* 更浅的紫色渐变 */
   border-radius: 8px;
   margin-right: 16px;
   font-size: 16px;
@@ -3225,7 +3226,7 @@ export default defineComponent({
   font-size: 16px;
   font-weight: 500;
   padding: 16px 24px !important;
-  background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%) !important;
+  background: linear-gradient(135deg, #0F172A 0%, #2E1065 100%) !important;  /* 更浅的紫色 */
   border-bottom: 2px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s;
   position: relative;
@@ -3247,7 +3248,7 @@ export default defineComponent({
   
   /* 添加鼠标悬停效果 */
   &:hover {
-    background: linear-gradient(135deg, #1E1B4B 0%, #2D3A8C 100%) !important;
+    background: linear-gradient(135deg, #1E1B4B 0%, #4C1D95 100%) !important;  /* 更浅的紫色 */
     cursor: pointer;
     
     /* 移除这里的 transform scale 效果 */
@@ -3287,7 +3288,7 @@ export default defineComponent({
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   
   .ant-collapse-header {
-    background: linear-gradient(135deg, #1E293B 0%, #312E81 100%) !important;
+    background: linear-gradient(135deg, #1E293B 0%, #4C1D95 100%) !important;  /* 更浅的紫色 */
     
     /* 激活状态下的展开图标 */
     .ant-collapse-expand-icon {
@@ -3387,14 +3388,19 @@ export default defineComponent({
 }
 
 .product-info-card {
-  background: #ffffff;
-  border: 1px solid #f0f0f0;
+  background: linear-gradient(to bottom, #ffffff, #fafafa);
+  border: 1px solid rgba(24, 144, 255, 0.1);
   border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.05),
+    0 0 0 1px rgba(24, 144, 255, 0.1);
   transition: all 0.3s;
   
   &:hover {
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 
+      0 8px 24px rgba(0, 0, 0, 0.08),
+      0 0 0 1px rgba(24, 144, 255, 0.2);
+    transform: translateY(-2px);
   }
 }
 
@@ -3421,16 +3427,24 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 32px;
+  height: 36px;
   padding: 0 16px;
-  border-radius: 6px;
-  background: #f0f7ff;
-  border-color: #d4e6ff;
+  border-radius: 8px;
+  background: linear-gradient(145deg, #f0f7ff, #e6f4ff);
+  border: 1px solid rgba(24, 144, 255, 0.2);
   color: #1890ff;
+  font-weight: 500;
+  transition: all 0.3s;
   
   &:hover {
-    background: #e6f4ff;
-    border-color: #1890ff;
+    background: linear-gradient(145deg, #e6f4ff, #d6e8ff);
+    border-color: rgba(24, 144, 255, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(24, 144, 255, 0.15);
+  }
+  
+  :deep(.anticon) {
+    font-size: 14px;
   }
 }
 
@@ -3441,13 +3455,21 @@ export default defineComponent({
 }
 
 .info-item {
-  background: #fafafa;
-  border-radius: 8px;
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(24, 144, 255, 0.08);
+  border-radius: 10px;
   padding: 16px;
-  transition: all 0.2s;
+  transition: all 0.3s;
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.03),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
   
   &:hover {
-    background: #f5f5f5;
+    background: linear-gradient(145deg, #f8fafc, #f0f7ff);
+    border-color: rgba(24, 144, 255, 0.15);
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.05),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.8);
   }
 }
 
@@ -3456,28 +3478,23 @@ export default defineComponent({
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
-  color: #595959;
-  font-weight: 500;
+  color: #1f2937;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.01em;
   
   :deep(.anticon) {
-    color: #8c8c8c;
-  }
-  
-  .status-tag {
-    margin-left: auto;
-    font-weight: normal;
-  }
-  
-  .count-tag {
-    margin-left: 8px;
-    font-weight: normal;
+    color: #1890ff;
+    font-size: 16px;
+    opacity: 0.9;
   }
 }
 
 .info-content {
-  color: #262626;
+  color: #374151;
   font-size: 14px;
   line-height: 1.6;
+  letter-spacing: 0.01em;
 }
 
 .website-content {
@@ -3489,11 +3506,18 @@ export default defineComponent({
 .website-link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   color: #1890ff;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(24, 144, 255, 0.06);
+  transition: all 0.3s;
   
   &:hover {
-    text-decoration: underline;
+    background: rgba(24, 144, 255, 0.1);
+    text-decoration: none;
+    transform: translateX(2px);
     
     .anticon {
       transform: translateX(2px);
@@ -3501,8 +3525,8 @@ export default defineComponent({
   }
   
   .anticon {
-    font-size: 12px;
-    transition: transform 0.2s;
+    font-size: 14px;
+    transition: transform 0.3s;
   }
 }
 
@@ -3538,34 +3562,25 @@ export default defineComponent({
 }
 
 .competitor-tag {
-  background: #f5f5f5;
-  border: none;
-  transition: all 0.2s;
+  background: linear-gradient(145deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(24, 144, 255, 0.08);
+  border-radius: 6px;
+  padding: 4px 12px;
+  transition: all 0.3s;
+  
+  &:hover {
+    background: linear-gradient(145deg, #f8fafc, #f0f7ff);
+    border-color: rgba(24, 144, 255, 0.15);
+    transform: translateY(-1px);
+  }
   
   a {
-    color: #595959;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    
-    .link-icon {
-      font-size: 12px;
-      opacity: 0.5;
-      transition: all 0.2s;
-    }
+    color: #4b5563;
+    font-weight: 500;
     
     &:hover {
       color: #1890ff;
-      
-      .link-icon {
-        opacity: 1;
-        transform: translateX(2px);
-      }
     }
-  }
-  
-  &:hover {
-    background: #f0f0f0;
   }
 }
 
