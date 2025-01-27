@@ -1048,14 +1048,10 @@ export default defineComponent({
       try {
         const response = await apiClient.getProductsByCustomerId()
         
-        console.log('API Response:', response);
-        console.log('Product Info:', response?.data);
-        console.log('Onboarding Status:', response?.data?.onboarding);
-        
         if (response?.code === 200) {
           this.productInfo = response.data
           if (!response.data) {
-            console.log('New user, showing onboarding modal');
+            // 只保留新用户设置产品的逻辑
             this.currentStep = 0;
             this.formState = {
               productId: undefined,
@@ -1066,19 +1062,12 @@ export default defineComponent({
             }
             this.onboardingModalVisible = true
           } else {
-            console.log('Existing user, checking onboarding status');
+            // 只保留加载数据的逻辑
             if (this.productInfo.domainStatus) {
               this.getSitemap()
               this.loadPagesDashboard()
             }
           }
-        } else {
-          // Handle error response code
-          this.$notification.error({
-            message: 'Failed to Load Product',
-            description: 'An error occurred while loading product information. Please try again later.'
-          });
-          this.productInfo = {} // 修改这里: 从 null 改为空对象
         }
       } catch (error) {
         console.error('Failed to load product information:', error);
@@ -1086,7 +1075,6 @@ export default defineComponent({
           message: 'Failed to Load Product',
           description: 'An error occurred while loading product information. Please try again later.'
         });
-        this.productInfo = {} // 修改这里: 从 null 改为空对象
       }
     },
     handleCompetitorChange(value) {

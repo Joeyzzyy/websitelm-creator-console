@@ -985,13 +985,7 @@ import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import OnboardingTour from './OnboardingTour.vue'
 import { tutorialConfig } from '../config/tutorials'
-
-// 导入PNG图片
-import onboardingImage from '../assets/images/tutorials/onboarding.png';
-import gscConnectionImage from '../assets/images/tutorials/gsc-connection.png';
-import domainVerificationImage from '../assets/images/tutorials/domain-verification.png';
-import assetManagementImage from '../assets/images/tutorials/asset-management.png';
-import setUpDeploymentDomainImage from '../assets/images/tutorials/set-up-deployment-domain.png';
+import apiClient from '../api/api'
 
 export default {
   name: 'Home',
@@ -1146,17 +1140,32 @@ export default {
       this.guideModeVisible = true;
     },
 
-    handleOnboardingComplete() {
-      this.$message.success('Tour completed! You can always restart the tour using the button in the bottom left corner.')
+    async checkAndStartOnboarding() {
+      try {
+        // 只检查后端的 onboarding 状态
+        const response = await apiClient.getProductsByCustomerId()
+        
+        console.log('Product Info:', response?.data);
+        console.log('Onboarding Status:', response?.data?.onboarding);
+        
+        // 只有当后端明确返回 onboarding 为 false 时才显示导览
+        if (response?.data && !response?.data.onboarding && this.$refs.onboardingTour) {
+          console.log('Starting onboarding tour...');
+          this.$nextTick(() => {
+            this.$refs.onboardingTour.start();
+          });
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+      }
     },
 
-    checkAndStartOnboarding() {
-      const onboardingCompleted = localStorage.getItem('onboardingCompleted')
-      if (!onboardingCompleted) {
-        this.$nextTick(() => {
-          this.$refs.onboardingTour.start()
-        })
-      }
+    handleOnboardingComplete() {
+      // 只更新后端状态
+      const customerId = localStorage.getItem('currentCustomerId');
+      apiClient.updateOnboardingStatus(customerId, true).then(() => {
+        this.$message.success('Tour completed! You can always restart the tour using the button in the bottom left corner.');
+      });
     },
 
     // 开始分步引导
