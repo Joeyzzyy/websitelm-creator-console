@@ -1067,6 +1067,10 @@ export default defineComponent({
       try {
         const response = await apiClient.getProductsByCustomerId()
         
+        console.log('API Response:', response); // 添加日志
+        console.log('Product Info:', response?.data); // 添加日志
+        console.log('Onboarding Status:', response?.data?.onboarding); // 添加日志
+        
         if (response?.code === 200) {
           this.productInfo = response.data
           if (!response.data) {
@@ -1081,11 +1085,14 @@ export default defineComponent({
             }
             this.onboardingModalVisible = true
           } else {
-            // 检查是否需要显示导览
+            console.log('Existing user, checking onboarding status'); // 添加日志
             if (!response.data.onboarding) {
+              console.log('Onboarding not completed, showing guide'); // 添加日志
               this.$nextTick(() => {
                 this.openGuideModeDialog();
               });
+            } else {
+              console.log('Onboarding completed, skipping guide'); // 添加日志
             }
             
             if (this.productInfo.domainStatus) {
