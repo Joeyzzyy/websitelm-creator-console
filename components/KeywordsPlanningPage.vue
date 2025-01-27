@@ -1509,33 +1509,20 @@ export default defineComponent({
         const response = await api.getAnalysisStatus('composite_generator')
         
         if (response?.code === 200 && response?.data) {
-          console.log('API Response:', response.data)
-          
           outlineGenerationStatus.value = response.data.status
           taskStartTime.value = response.data.startTime
           taskEndTime.value = response.data.endTime
           taskDescription.value = formatTaskDescription(response.data.description)
           
-          console.log('Assigned Times:', {
-            start: taskStartTime.value,
-            end: taskEndTime.value
-          })
-          
           if (response.data.status === 'finished') {
-            console.log('Formatted Times:', {
-              start: formatTime(taskStartTime.value),
-              end: formatTime(taskEndTime.value)
-            })
-            
             clearInterval(pollingInterval.value)
             hasGenerated.value = true
-            await fetchContentPlans()
           }
         }
         return response
       } catch (error) {
-        console.error('Failed to check outline generation status:', error)
-        message.error('Failed to get outline generation status')
+        console.error('Failed to check outline status:', error)
+        message.error('Failed to check outline status')
         return null
       } finally {
         isLoadingTaskInfo.value = false
