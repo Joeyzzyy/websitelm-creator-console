@@ -184,9 +184,6 @@
               <div class="quick-link-header">
                 <div class="quick-link-title">
                   Content Manager
-                  <a-tag color="warning" v-if="productInfo?.domainStatus">
-                    {{ pagesDashboard?.pendingTasks || 2 }} To Review
-                  </a-tag>
                 </div>
               </div>
               <div class="quick-link-desc">
@@ -2366,10 +2363,10 @@ export default defineComponent({
     }
     
     .ant-statistic {
-      transition: transform 0.3s;
+      transition: background-color 0.3s; /* 只保留背景色过渡效果 */
       
       &:hover {
-        transform: translateY(-2px);
+        transform: none; /* 移除位移效果 */
       }
     }
   }
@@ -3099,7 +3096,6 @@ export default defineComponent({
   position: absolute;
   right: 20px;
   top: 50%;
-  transform: translateY(-50%) translateX(10px);
   opacity: 0.9;
   transition: all 0.3s ease;
 }
@@ -3121,7 +3117,6 @@ export default defineComponent({
     color: white;
     background: linear-gradient(135deg, #40a9ff, #1890ff);
     box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-    transform: translateY(-1px);
     
     .anticon {
       transform: translateX(3px);
