@@ -324,16 +324,19 @@
                         <a-tabs 
                           v-model:activeKey="contentPlanTab" 
                           class="content-plan-tabs"
+                          @change="handleContentPlanTabChange"
                         >
                           <template #rightExtra>
-                            <!-- 添加全选复选框 -->
-                            <a-checkbox
-                              :checked="allOutlinesSelected"
-                              :indeterminate="someOutlinesSelected"
-                              @change="handleSelectAllOutlines"
-                            >
-                              Select All On This Page
-                            </a-checkbox>
+                            <!-- 只在 All Outlines tab 显示全选复选框 -->
+                            <template v-if="contentPlanTab === 'all'">
+                              <a-checkbox
+                                :checked="allOutlinesSelected"
+                                :indeterminate="someOutlinesSelected"
+                                @change="handleSelectAllOutlines"
+                              >
+                                Select All On This Page
+                              </a-checkbox>
+                            </template>
                             <span class="outline-stats">
                               {{ contentPlans.length }} outlines | {{ selectedOutlinesCount }} selected
                             </span>
@@ -427,14 +430,40 @@
                                   </div>
                                 </a-card>
                               </div>
+                              
+                              <!-- 恢复 All Outlines 的分页器 -->
+                              <div v-if="contentPlans.length > 0" class="pagination-container">
+                                <a-pagination
+                                  v-model:current="contentPlansPagination.current"
+                                  :total="contentPlansPagination.total"
+                                  :pageSize="contentPlansPagination.pageSize"
+                                  @change="handleContentPlansPaginationChange"
+                                  show-size-changer
+                                  show-quick-jumper
+                                  :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
+                                />
+                              </div>
                             </div>
                           </a-tab-pane>
 
                           <a-tab-pane key="selected" tab="Selected Outlines">
                             <div class="tab-content-wrapper">
-                              <div class="content-plans-grid">
+                              <div v-if="isLoadingSelectedOutlines" class="content-plans-loading">
+                                <a-spin size="large" />
+                                <span class="loading-text">Loading...</span>
+                              </div>
+                              
+                              <div v-else-if="selectedContentPlans.length === 0" class="empty-outlines-state">
+                                <div class="empty-content">
+                                  <RobotOutlined class="empty-icon" />
+                                  <h3>No Selected Outlines</h3>
+                                  <p>Select outlines from the All Outlines tab to see them here</p>
+                                </div>
+                              </div>
+
+                              <div v-else class="content-plans-grid">
                                 <a-card 
-                                  v-for="plan in contentPlans.filter(p => p.favorited)" 
+                                  v-for="plan in selectedContentPlans" 
                                   :key="plan.outlineId"
                                   class="plan-card"
                                   :bordered="false"
@@ -494,12 +523,14 @@
                                   </div>
                                 </a-card>
                               </div>
-                              <div v-if="contentPlans.length > 0" class="pagination-container">
+                              
+                              <!-- Selected Outlines 的分页器 -->
+                              <div v-if="selectedContentPlans.length > 0" class="pagination-container">
                                 <a-pagination
-                                  v-model:current="contentPlansPagination.current"
-                                  :total="contentPlansPagination.total"
-                                  :pageSize="contentPlansPagination.pageSize"
-                                  @change="handleContentPlansPaginationChange"
+                                  v-model:current="selectedPlansPagination.current"
+                                  :total="selectedPlansPagination.total"
+                                  :pageSize="selectedPlansPagination.pageSize"
+                                  @change="handleSelectedPlansPaginationChange"
                                   show-size-changer
                                   show-quick-jumper
                                   :show-total="(total, range) => `${range[0]}-${range[1]} of ${total} items`"
@@ -1522,13 +1553,18 @@ export default defineComponent({
           limit: contentPlansPagination.value.pageSize
         })
         
+        console.log('Outlines Response:', outlinesResponse) // 添加日志
+        
         if (outlinesResponse?.data) {
           contentPlans.value = outlinesResponse.data.map(plan => ({
             ...plan,
             selected: false,
             favorited: plan.status === 'selected'
           }))
+          // 确保设置总数
           contentPlansPagination.value.total = outlinesResponse.totalCount || 0
+          console.log('Content Plans:', contentPlans.value) // 添加日志
+          console.log('Pagination:', contentPlansPagination.value) // 添加日志
           hasGenerated.value = true
         }
       } catch (error) {
@@ -1574,8 +1610,13 @@ export default defineComponent({
 
     const handleContentPlanTabChange = async (activeKey) => {
       contentPlanTab.value = activeKey
-      contentPlansPagination.value.current = 1
-      await fetchContentPlans()
+      if (activeKey === 'all') {
+        contentPlansPagination.value.current = 1
+        await fetchContentPlans()
+      } else {
+        selectedPlansPagination.value.current = 1
+        await fetchSelectedContentPlans()
+      }
     }
 
     const isLoadingOutlines = ref(false)
@@ -1960,6 +2001,11 @@ export default defineComponent({
           plan.favorited = false;
           message.success('Removed from selection');
         }
+        
+        // 如果当前在已选标签页，需要刷新列表
+        if (contentPlanTab.value === 'selected') {
+          await fetchSelectedContentPlans();
+        }
       } catch (error) {
         console.error('Failed to update outline selection:', error);
         message.error('Failed to update selection');
@@ -2339,6 +2385,47 @@ export default defineComponent({
       historyRecords.value = []
     }
 
+    const selectedContentPlans = ref([])
+    const isLoadingSelectedOutlines = ref(false)
+    const selectedPlansPagination = ref({
+      current: 1,
+      pageSize: 12,
+      total: 0
+    })
+
+    const fetchSelectedContentPlans = async () => {
+      if (isLoadingSelectedOutlines.value) return
+      
+      isLoadingSelectedOutlines.value = true
+      try {
+        const response = await api.getPlanningOutlines({
+          status: 'selected',
+          page: selectedPlansPagination.value.current,
+          limit: selectedPlansPagination.value.pageSize
+        })
+        
+        if (response?.data) {
+          selectedContentPlans.value = response.data.map(plan => ({
+            ...plan,
+            selected: false,
+            favorited: true // 已选中的内容计划默认为 favorited
+          }))
+          selectedPlansPagination.value.total = response.totalCount || 0
+        }
+      } catch (error) {
+        console.error('Failed to fetch selected content plans:', error)
+        message.error('Failed to get selected content plans')
+      } finally {
+        isLoadingSelectedOutlines.value = false
+      }
+    }
+
+    const handleSelectedPlansPaginationChange = async (page, pageSize) => {
+      selectedPlansPagination.value.current = page
+      selectedPlansPagination.value.pageSize = pageSize
+      await fetchSelectedContentPlans()
+    }
+
     return {
       taskStartTime,
       taskEndTime,
@@ -2478,7 +2565,12 @@ export default defineComponent({
       handleBatchesPaginationChange,
       handleRecordsPaginationChange,
       viewBatchDetail,
-      backToBatchList
+      backToBatchList,
+      selectedContentPlans,
+      isLoadingSelectedOutlines,
+      selectedPlansPagination,
+      fetchSelectedContentPlans,
+      handleSelectedPlansPaginationChange
     }
   }
 })
