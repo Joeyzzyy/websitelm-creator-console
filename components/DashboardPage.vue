@@ -25,8 +25,6 @@
     
     <!-- Rest of the content -->
     <div class="dashboard-content">
-      <!-- Add test button -->
-      <!-- Product Info Card -->
       <a-card class="product-info-card">
         <template #title>
           <div class="info-card-header">
@@ -143,26 +141,35 @@
       <!-- Quick Access Panel -->
       <a-card class="quick-access-panel">
         <template #title>
-          <span style="color: white;">⚡ Smart Recommendations</span>
+          <span class="quick-access-title">
+            <ThunderboltOutlined />
+            Core Features
+          </span>
         </template>
         <div class="quick-links">
           <div class="quick-link-item">
-            <div class="quick-link-icon">
+            <div class="quick-link-icon planner">
               <CalendarOutlined />
             </div>
             <div class="quick-link-content">
               <div class="quick-link-header">
-                <div class="quick-link-title">Keywords Planner</div>
-                <a-tag color="success" v-if="productInfo?.domainStatus">
-                  {{ pagesDashboard?.keywordOpportunities || 3 }} Opportunities
-                </a-tag>
+                <div class="quick-link-title">
+                  Smart SEO Planner
+                  <a-tag color="success" v-if="productInfo?.domainStatus">
+                    {{ pagesDashboard?.keywordOpportunities || 3 }} Topics Found
+                  </a-tag>
+                </div>
               </div>
               <div class="quick-link-desc">
-                Based on your product analysis, we've identified high-potential traffic opportunities and crafted a customized keyword strategy.
+                <ul class="feature-list">
+                  <li>AI analyzes your market and competitors</li>
+                  <li>Generates SEO-optimized content ideas</li>
+                  <li>Suggests high-potential keywords</li>
+                </ul>
               </div>
               <div class="quick-link-action">
                 <router-link to="/keywords" class="action-link">
-                  View Recommendations
+                  Start Planning
                   <RightOutlined />
                 </router-link>
               </div>
@@ -170,22 +177,28 @@
           </div>
 
           <div class="quick-link-item">
-            <div class="quick-link-icon">
+            <div class="quick-link-icon manager">
               <CheckSquareOutlined />
             </div>
             <div class="quick-link-content">
               <div class="quick-link-header">
-                <div class="quick-link-title">Content Tasks</div>
-                <a-tag color="warning" v-if="productInfo?.domainStatus">
-                  {{ pagesDashboard?.pendingTasks || 2 }} Pending
-                </a-tag>
+                <div class="quick-link-title">
+                  Content Manager
+                  <a-tag color="warning" v-if="productInfo?.domainStatus">
+                    {{ pagesDashboard?.pendingTasks || 2 }} To Review
+                  </a-tag>
+                </div>
               </div>
               <div class="quick-link-desc">
-                We've analyzed your site's indexing status and identified content gaps. Let's create a strategic publishing plan.
+                <ul class="feature-list">
+                  <li>Review AI-generated content</li>
+                  <li>One-click publishing to your site</li>
+                  <li>Track content performance</li>
+                </ul>
               </div>
               <div class="quick-link-action">
                 <router-link to="/task-management" class="action-link">
-                  View Tasks
+                  Manage Content
                   <RightOutlined />
                 </router-link>
               </div>
@@ -193,22 +206,28 @@
           </div>
 
           <div class="quick-link-item">
-            <div class="quick-link-icon">
+            <div class="quick-link-icon profile">
               <AppstoreOutlined />
             </div>
             <div class="quick-link-content">
               <div class="quick-link-header">
-                <div class="quick-link-title">Brand Assets</div>
-                <a-tag color="processing" v-if="productInfo?.domainStatus">
-                  {{ pagesDashboard?.missingAssets || 4 }} Recommended
-                </a-tag>
+                <div class="quick-link-title">
+                  Product Profile
+                  <a-tag color="processing" v-if="productInfo?.domainStatus">
+                    {{ pagesDashboard?.missingAssets || 4 }} Missing
+                  </a-tag>
+                </div>
               </div>
               <div class="quick-link-desc">
-                Enhance your content quality with comprehensive brand assets. We've prepared suggestions based on your site analysis.
+                <ul class="feature-list">
+                  <li>Define your product details</li>
+                  <li>Add competitor information</li>
+                  <li>Improve AI content accuracy</li>
+                </ul>
               </div>
               <div class="quick-link-action">
                 <router-link to="/assets" class="action-link">
-                  Manage Assets
+                  Complete Profile
                   <RightOutlined />
                 </router-link>
               </div>
@@ -862,6 +881,7 @@ import {
   RightOutlined,
   CheckSquareOutlined,
   AppstoreOutlined,
+  ThunderboltOutlined,
 } from '@ant-design/icons-vue'
 import apiClient from '../api/api'
 import { Modal, message } from 'ant-design-vue'
@@ -888,6 +908,7 @@ export default defineComponent({
     RightOutlined,
     CheckSquareOutlined,
     AppstoreOutlined,
+    ThunderboltOutlined,
     ModuleTutorial,
   },
   data() {
@@ -2945,163 +2966,192 @@ export default defineComponent({
 
 /* Quick Access Panel Styles */
 .quick-access-panel {
-  margin-bottom: 24px;
-  border: none !important;
-  /* 使用更高级的渐变配色，从深邃的靛蓝过渡到神秘的紫色 */
-  background: linear-gradient(135deg, #0F172A 0%, #2E1065 100%) !important;  /* 更浅的紫色 */
-  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.3) !important;
-  border-radius: 16px !important;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    /* 添加更精致的光晕效果 */
-    background: 
-      radial-gradient(circle at top right, rgba(224, 231, 255, 0.15), transparent 50%),  /* 接近白色的淡紫 */
-      radial-gradient(circle at bottom left, rgba(243, 232, 255, 0.15), transparent 50%),  /* 接近白色的淡粉紫 */
-      radial-gradient(circle at center, rgba(219, 234, 254, 0.12), transparent 40%);  /* 接近白色的淡蓝 */
-    opacity: 0.9;  /* 增加整体不透明度 */
-    mix-blend-mode: soft-light;  /* 添加混合模式 */
-    pointer-events: none;
-  }
-
+  margin: 16px 0;
+  border-radius: 12px;
+  
   :deep(.ant-card-head) {
-    padding: 20px 24px;
-    background: transparent;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-
-    .ant-card-head-title {
-      span {
-        font-size: 22px;
-        font-weight: 600;
-        color: rgba(255, 255, 255, 0.95);
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-    }
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 0 24px;
   }
+}
 
-  :deep(.ant-card-body) {
-    background: transparent;
-    padding: 24px;
-  }
-
-  :deep(.ant-card-head-title) {
-    /* 修改: 使用白色系的颜色 */
-    color: rgba(255, 255, 255, 0.95) !important;
-    /* 添加: 文字阴影提高可读性 */
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+.quick-access-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  color: #262626;
+  
+  .anticon {
+    color: #faad14;
   }
 }
 
 .quick-links {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 16px;
-  position: relative;
-  z-index: 1;
 }
 
 .quick-link-item {
   display: flex;
-  align-items: flex-start;
-  padding: 24px;
-  /* 使用更高级的半透明背景 */
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
-  border-radius: 12px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  /* 更细腻的边框效果 */
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  gap: 16px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  transition: all 0.3s;
+  position: relative; /* 添加相对定位 */
   
   &:hover {
-    background: rgba(255, 255, 255, 0.05);
-    transform: translateY(-3px);
-    border-color: rgba(255, 255, 255, 0.12);
-    box-shadow: 
-      0 12px 28px rgba(0, 0, 0, 0.25),
-      0 0 0 1px rgba(255, 255, 255, 0.1);
-
-    .quick-link-icon {
-      transform: scale(1.05);
-      background: linear-gradient(135deg, #818CF8 0%, #A78BFA 100%);  /* 更浅的紫色渐变 */
-      box-shadow: 
-        0 8px 20px rgba(129, 140, 248, 0.3),  /* 更浅的紫色阴影 */
-        0 0 0 1px rgba(255, 255, 255, 0.1);
+    border-color: #1890ff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transform: translateY(-2px);
+    
+    .quick-link-action {
+      transform: translateX(0);
+      opacity: 1;
     }
   }
 }
 
 .quick-link-icon {
-  flex: none;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  /* 更高级的图标渐变 */
-  background: linear-gradient(135deg, #818CF8 0%, #9333EA 100%);  /* 更浅的紫色渐变 */
-  border-radius: 8px;
-  margin-right: 16px;
-  font-size: 16px;
-  color: rgba(255, 255, 255, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.25);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 24px;
+  
+  &.planner {
+    background: #e6f7ff;
+    color: #1890ff;
+  }
+  
+  &.manager {
+    background: #f6ffed;
+    color: #52c41a;
+  }
+  
+  &.profile {
+    background: #fff7e6;
+    color: #faad14;
+  }
+}
+
+.quick-link-content {
+  flex: 1;
+  padding-right: 120px; /* 为右侧按钮预留空间 */
+}
+
+.quick-link-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .quick-link-title {
-  font-weight: 600;
   font-size: 16px;
-  /* 更柔和的文字颜色 */
-  color: rgba(255, 255, 255, 0.95);
-  margin: 0;
+  font-weight: 600;
+  color: #262626;
+  display: flex;  /* 新增 */
+  align-items: center;  /* 新增 */
+  gap: 8px;  /* 新增 */
+}
+
+/* 标签样式优化 */
+:deep(.ant-tag) {
+  margin: 0;  /* 移除默认外边距 */
+  height: 22px;  /* 稍微降低高度 */
+  line-height: 20px;  /* 调整行高 */
+  padding: 0 8px;  /* 调整内边距 */
+  border-radius: 4px;  /* 圆角稍小 */
+  font-size: 12px;  /* 字体稍小 */
+  font-weight: 500;  /* 字体加粗 */
+  
+  &.ant-tag-success {
+    color: #389e0d;
+    background: #f6ffed;
+    border-color: #b7eb8f;
+  }
+  
+  &.ant-tag-warning {
+    color: #d48806;
+    background: #fff7e6;
+    border-color: #ffd591;
+  }
+  
+  &.ant-tag-processing {
+    color: #1890ff;
+    background: #e6f7ff;
+    border-color: #91d5ff;
+  }
 }
 
 .quick-link-desc {
-  font-size: 14px;
-  /* 更柔和的描述文字颜色 */
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.6;
-  margin: 8px 0;
+  margin-top: 8px;  /* 增加与标题的间距 */
 }
 
 .quick-link-action {
-  margin-top: 12px;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%) translateX(10px);
+  opacity: 0.9;
+  transition: all 0.3s ease;
+}
 
-  .action-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    /* 更明亮的操作链接颜色 */
-    color: #818CF8;
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.3s ease;
-
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 16px;
+  color: white;
+  font-weight: 500;
+  background: linear-gradient(135deg, #1890ff, #096dd9);
+  border-radius: 8px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+  
+  &:hover {
+    color: white;
+    background: linear-gradient(135deg, #40a9ff, #1890ff);
+    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+    transform: translateY(-1px);
+    
     .anticon {
-      font-size: 12px;
-      transition: transform 0.3s ease;
+      transform: translateX(3px);
     }
+  }
+  
+  .anticon {
+    transition: transform 0.3s ease;
+  }
+}
 
-    &:hover {
-      color: #A5B4FC;
-      gap: 8px;
-      .anticon {
-        transform: translateX(4px);
-      }
-    }
+/* 为不同功能模块设置不同的按钮颜色 */
+.planner + .quick-link-content .action-link {
+  background: linear-gradient(135deg, #1890ff, #096dd9);
+  &:hover {
+    background: linear-gradient(135deg, #40a9ff, #1890ff);
+  }
+}
+
+.manager + .quick-link-content .action-link {
+  background: linear-gradient(135deg, #52c41a, #389e0d);
+  &:hover {
+    background: linear-gradient(135deg, #73d13d, #52c41a);
+  }
+}
+
+.profile + .quick-link-content .action-link {
+  background: linear-gradient(135deg, #faad14, #d48806);
+  &:hover {
+    background: linear-gradient(135deg, #ffc53d, #faad14);
   }
 }
 
@@ -3226,13 +3276,12 @@ export default defineComponent({
   font-size: 16px;
   font-weight: 500;
   padding: 16px 24px !important;
-  background: linear-gradient(135deg, #0F172A 0%, #2E1065 100%) !important;  /* 更浅的紫色 */
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(to right, #fafafa, #f5f5f5) !important;  /* 更改为浅色渐变 */
+  border-bottom: 1px solid #f0f0f0;
   transition: all 0.3s;
   position: relative;
-  overflow: hidden;
   
-  /* 添加光晕效果 */
+  /* 添加微妙的光晕效果 */
   &::before {
     content: '';
     position: absolute;
@@ -3241,36 +3290,33 @@ export default defineComponent({
     right: 0;
     bottom: 0;
     background: 
-      radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 50%),
-      radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.15), transparent 50%);
+      radial-gradient(circle at top right, rgba(24, 144, 255, 0.03), transparent 70%),
+      radial-gradient(circle at bottom left, rgba(24, 144, 255, 0.03), transparent 70%);
     pointer-events: none;
   }
   
   /* 添加鼠标悬停效果 */
   &:hover {
-    background: linear-gradient(135deg, #1E1B4B 0%, #4C1D95 100%) !important;  /* 更浅的紫色 */
+    background: linear-gradient(to right, #f5f5f5, #f0f0f0) !important;
     cursor: pointer;
     
-    /* 移除这里的 transform scale 效果 */
     .ant-collapse-expand-icon {
-      opacity: 0.9; /* 改用透明度来实现悬停效果 */
+      opacity: 0.9;
     }
   }
   
   /* 优化展开图标 */
   .ant-collapse-expand-icon {
-    color: rgba(255, 255, 255, 0.9);
+    color: #1890ff;
     font-size: 16px;
     margin-right: 12px;
     transition: all 0.3s ease;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
     opacity: 0.8;
   }
   
   /* 标题文本样式 */
   .ant-collapse-header-text {
-    color: rgba(255, 255, 255, 0.95);
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    color: #262626;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -3285,14 +3331,14 @@ export default defineComponent({
 
 /* 激活状态的面板样式 */
 :deep(.ant-collapse-item-active) {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   
   .ant-collapse-header {
-    background: linear-gradient(135deg, #1E293B 0%, #4C1D95 100%) !important;  /* 更浅的紫色 */
+    background: linear-gradient(to right, #f0f7ff, #e6f4ff) !important;  /* 激活时使用浅蓝色渐变 */
     
     /* 激活状态下的展开图标 */
     .ant-collapse-expand-icon {
-      color: #818CF8;
+      color: #1890ff;
     }
   }
 }
