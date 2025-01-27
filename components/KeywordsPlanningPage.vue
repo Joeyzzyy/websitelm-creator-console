@@ -1830,7 +1830,7 @@ export default defineComponent({
     };
 
     const handlePublishOutlines = async () => {
-      const selectedOutlines = contentPlans.value.filter(plan => plan.selected)
+      const selectedOutlines = contentPlans.value.filter(plan => plan.favorited)
       if (!selectedOutlines.length) {
         message.warning('Please select at least one outline')
         return
