@@ -1195,6 +1195,39 @@ const generatePlanningAI = async () => {
   }
 };
 
+// 新增：获取用户生成outline批次详细记录的方法
+const getPlanningOutlineBatchRecord = async (params = {}) => {
+  try {
+    const queryParams = {
+      ...(params.batchNo && { batchNo: params.batchNo }),
+      ...(params.page && { page: params.page }),
+      ...(params.limit && { limit: params.limit })
+    };
+    
+    const response = await apiClient.get('/planning/outline/batch-record', { params: queryParams });
+    return response.data;
+  } catch (error) {
+    console.error('获取outline批次记录失败:', error);
+    return null;
+  }
+};
+
+// 新增：获取用户批量生成outline批次列表的方法
+const getPlanningOutlineBatches = async (params = {}) => {
+  try {
+    const queryParams = {
+      ...(params.page && { page: params.page }),
+      ...(params.limit && { limit: params.limit })
+    };
+    
+    const response = await apiClient.get('/planning/outline/batch', { params: queryParams });
+    return response.data;
+  } catch (error) {
+    console.error('获取outline批次列表失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1286,5 +1319,7 @@ export default {
   selectPlanningKeywords,
   cancelPlanningKeywords,
   deletePlanningOutline,
-  generatePlanningAI
+  generatePlanningAI,
+  getPlanningOutlineBatchRecord,
+  getPlanningOutlineBatches
 };

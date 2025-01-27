@@ -93,37 +93,36 @@
                   </div>
                 </div>
               </div>
+
+              <!-- 添加新的按钮区域 -->
+              <div class="navigation-actions">
+                <a-button 
+                  type="default"
+                  block
+                  class="history-button"
+                  @click="showHistoryModal"
+                >
+                  <span>Keywords Selection History</span>
+                </a-button>
+              </div>
             </div>
 
             <!-- 主内容区域 -->
             <div class="main-content">
-              <!-- 工具栏 -->
               <div class="content-toolbar">
                 <div class="toolbar-left">
-                  <a-button-group>
-                    <a-button 
-                      type="primary"
-                      @click="showSelectedKeywords"
-                      class="action-button"
-                    >
-                      <template #icon>
-                        <EyeOutlined />
-                      </template>
-                      <span>View Selected Keywords</span>
-                    </a-button>
+                  <a-button 
+                    @click="showAISelectionConfirm"
+                    class="generate-btn"
+                    :loading="isAISelecting"
+                  >
+                    <template #icon>
+                      <ThunderboltOutlined />
+                    </template>
+                    AI Autopilot
+                  </a-button>
 
-                    <a-button 
-                      v-if="currentStep === '0'"
-                      @click="showAISelectionConfirm"
-                      class="action-button ai-select-btn"
-                      :loading="isAISelecting"
-                    >
-                      <template #icon>
-                        <RobotOutlined />
-                      </template>
-                      <span>AI Smart Selection</span>
-                    </a-button>
-                    
+                  <a-button-group>
                     <a-button 
                       v-if="currentStep === '1'"
                       type="primary"
@@ -135,6 +134,17 @@
                         <ThunderboltOutlined />
                       </template>
                       <span>Generate Outline Plan</span>
+                    </a-button>
+
+                    <a-button 
+                      type="primary"
+                      @click="showSelectedKeywords"
+                      class="action-button"
+                    >
+                      <template #icon>
+                        <EyeOutlined />
+                      </template>
+                      <span>View Selected Keywords</span>
                     </a-button>
                   </a-button-group>
                 </div>
@@ -316,6 +326,14 @@
                           class="content-plan-tabs"
                         >
                           <template #rightExtra>
+                            <!-- 添加全选复选框 -->
+                            <a-checkbox
+                              :checked="allOutlinesSelected"
+                              :indeterminate="someOutlinesSelected"
+                              @change="handleSelectAllOutlines"
+                            >
+                              Select All On This Page
+                            </a-checkbox>
                             <span class="outline-stats">
                               {{ contentPlans.length }} outlines | {{ selectedOutlinesCount }} selected
                             </span>
@@ -340,9 +358,9 @@
                                     class="generate-btn"
                                   >
                                     <template #icon>
-                                      <RobotOutlined />
+                                      <ThunderboltOutlined />
                                     </template>
-                                    <span>AI Smart Selection</span>
+                                    AI Autopilot
                                   </a-button>
                                 </div>
                               </div>
@@ -358,13 +376,13 @@
                                   <template #extra>
                                     <div class="card-extra">
                                       <div class="recommended-times">
-                                        <span class="time-item" :title="`Suggested Generation: ${formatDate(plan.recommendedTime)}`">
+                                        <span class="time-item" :title="`Recommended Generation Time: ${formatDate(plan.recommendedTime)}`">
                                           <ClockCircleOutlined />
-                                          Gen: {{ formatDate(plan.recommendedTime) }}
+                                          Rec.Gen: {{ formatDate(plan.recommendedTime) }}
                                         </span>
-                                        <span class="time-item" :title="`Suggested Publication: ${formatDate(plan.recommendedReleaseTime)}`">
+                                        <span class="time-item" :title="`Recommended Publication Time: ${formatDate(plan.recommendedReleaseTime)}`">
                                           <CalendarOutlined />
-                                          Pub: {{ formatDate(plan.recommendedReleaseTime) }}
+                                          Rec.Pub: {{ formatDate(plan.recommendedReleaseTime) }}
                                         </span>
                                       </div>
                                       <a-button 
@@ -425,13 +443,13 @@
                                   <template #extra>
                                     <div class="card-extra">
                                       <div class="recommended-times">
-                                        <span class="time-item" :title="`Suggested Generation: ${formatDate(plan.recommendedTime)}`">
+                                        <span class="time-item" :title="`Recommended Generation Time: ${formatDate(plan.recommendedTime)}`">
                                           <ClockCircleOutlined />
-                                          Gen: {{ formatDate(plan.recommendedTime) }}
+                                          Rec.Gen: {{ formatDate(plan.recommendedTime) }}
                                         </span>
-                                        <span class="time-item" :title="`Suggested Publication: ${formatDate(plan.recommendedReleaseTime)}`">
+                                        <span class="time-item" :title="`Recommended Publication Time: ${formatDate(plan.recommendedReleaseTime)}`">
                                           <CalendarOutlined />
-                                          Pub: {{ formatDate(plan.recommendedReleaseTime) }}
+                                          Rec.Pub: {{ formatDate(plan.recommendedReleaseTime) }}
                                         </span>
                                       </div>
                                       <a-button 
@@ -707,6 +725,49 @@
         </div>
       </template>
     </a-drawer>
+
+    <!-- Add History Modal -->
+    <a-modal
+      v-model:open="historyModalVisible"
+      :title="selectedBatchNo ? 'Batch Details' : 'Generation History'"
+      width="1200px"
+      @cancel="closeHistoryModal"
+      :footer="null"
+    >
+      <div v-if="selectedBatchNo" class="mb-4">
+        <a-button @click="backToBatchList">
+          Back to List
+        </a-button>
+      </div>
+
+      <template v-if="!selectedBatchNo">
+        <a-table
+          :dataSource="historyBatches"
+          :columns="batchesColumns"
+          :pagination="batchesPagination"
+          :loading="isLoadingHistory"
+          @change="({ current }) => handleBatchesPaginationChange(current)"
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'action'">
+              <a-button type="link" @click="viewBatchDetail(record.batchNo)">
+                View Details
+              </a-button>
+            </template>
+          </template>
+        </a-table>
+      </template>
+
+      <template v-else>
+        <a-table
+          :dataSource="historyRecords"
+          :columns="recordsColumns"
+          :pagination="recordsPagination"
+          :loading="isLoadingHistory"
+          @change="({ current }) => handleRecordsPaginationChange(current)"
+        />
+      </template>
+    </a-modal>
   </PageLayout>
 </template>
 
@@ -745,7 +806,9 @@ import {
   TagsOutlined,
   CheckCircleOutlined,
   CalendarOutlined,
-  RobotOutlined
+  RobotOutlined,
+  HistoryOutlined,
+  ArrowLeftOutlined
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -796,7 +859,9 @@ export default defineComponent({
     TagsOutlined,
     CheckCircleOutlined,
     CalendarOutlined,
-    RobotOutlined
+    RobotOutlined,
+    HistoryOutlined,
+    ArrowLeftOutlined
   },
   setup() {
     const currentMode = ref('beginner')
@@ -2012,11 +2077,11 @@ export default defineComponent({
     
     const showAISelectionConfirm = () => {
       Modal.confirm({
-        title: 'AI Smart Selection',
+        title: 'Auto Generate with AI',
         content: h('div', {}, [
-          h('p', 'AI will analyze your website and competitors to recommend the most valuable keywords for your content strategy.'),
+          h('p', 'Leverage AI to automatically identify and prioritize the top 5 most impactful untapped keywords from your repository, instantly transforming them into strategically optimized content outlines.'),
         ]),
-        okText: 'Yes, Proceed',
+        okText: 'Start Generation',
         cancelText: 'Cancel',
         onOk: handleAISelection,
         okButtonProps: {
@@ -2071,11 +2136,11 @@ export default defineComponent({
               'Would you like to:',
               h('ul', { style: 'margin-top: 8px;' }, [
                 h('li', 'Select keywords manually, or'),
-                h('li', 'Use AI Smart Selection to get recommendations')
+                h('li', 'Use AI to automatically select keywords and generate outlines')
               ])
             ])
           ]),
-          okText: 'Try AI Selection',
+          okText: 'Auto Generate with AI',
           cancelText: 'Select Manually',
           onOk: () => {
             showAISelectionConfirm();
@@ -2091,6 +2156,188 @@ export default defineComponent({
     };
 
     const isLoadingTaskInfo = ref(false)
+
+    const showHelpDrawer = () => {
+      // Implementation of showHelpDrawer method
+    }
+
+    const historyModalVisible = ref(false)
+    const isLoadingHistory = ref(false)
+    const historyBatches = ref([])
+    const historyRecords = ref([])
+    const selectedBatchNo = ref(null)
+
+    const batchesPagination = ref({
+      current: 1,
+      pageSize: 10,
+      total: 0
+    })
+
+    const recordsPagination = ref({
+      current: 1, 
+      pageSize: 10,
+      total: 0
+    })
+
+    const batchesColumns = [
+      {
+        title: 'Batch No.',
+        dataIndex: 'batchNo',
+        key: 'batchNo',
+        width: '25%'
+      },
+      {
+        title: 'Keywords',
+        dataIndex: 'keywordCount',
+        key: 'keywordCount',
+        width: '15%'
+      },
+      {
+        title: 'Source',
+        dataIndex: 'source',
+        key: 'source',
+        width: '15%',
+        customRender: ({ text }) => text.toUpperCase()
+      },
+      {
+        title: 'Status',
+        dataIndex: 'generator_status',
+        key: 'generator_status',
+        width: '15%',
+        customRender: ({ text }) => text.charAt(0).toUpperCase() + text.slice(1)
+      },
+      {
+        title: 'Created',
+        dataIndex: 'created',
+        key: 'created',
+        width: '20%',
+        customRender: ({ text }) => formatTime(text)
+      },
+      {
+        title: 'Action',
+        key: 'action',
+        width: '10%'
+      }
+    ]
+
+    const recordsColumns = [
+      {
+        title: 'Keyword',
+        dataIndex: 'keyword',
+        key: 'keyword',
+        width: '30%'
+      },
+      {
+        title: 'Type',
+        dataIndex: 'keywordType',
+        key: 'keywordType',
+        width: '15%',
+        customRender: ({ text }) => text.charAt(0).toUpperCase() + text.slice(1)
+      },
+      {
+        title: 'Source',
+        dataIndex: 'source',
+        key: 'source',
+        width: '15%',
+        customRender: ({ text }) => text.charAt(0).toUpperCase() + text.slice(1)
+      },
+      {
+        title: 'Created',
+        dataIndex: 'created',
+        key: 'created',
+        width: '25%',
+        customRender: ({ text }) => formatTime(text)
+      }
+    ]
+
+    const getHistoryStatusColor = (status) => {
+      const statusColors = {
+        processing: 'blue',
+        completed: 'green',
+        failed: 'red'
+      }
+      return statusColors[status] || 'default'
+    }
+
+    const viewHistoryDetail = (record) => {
+      // Implement detail view logic if needed
+      console.log('Viewing details for batch:', record.batchId)
+    }
+
+    const loadHistoryBatches = async (page = 1) => {
+      isLoadingHistory.value = true
+      try {
+        const response = await api.getPlanningOutlineBatches({
+          page,
+          limit: batchesPagination.value.pageSize
+        })
+        
+        if (response?.data) {
+          historyBatches.value = response.data
+          batchesPagination.value.total = response.totalCount || 0
+        }
+      } catch (error) {
+        console.error('Failed to load batch history:', error)
+        message.error('Failed to load history')
+      } finally {
+        isLoadingHistory.value = false
+      }
+    }
+
+    const loadBatchRecords = async (batchNo, page = 1) => {
+      isLoadingHistory.value = true
+      try {
+        const response = await api.getPlanningOutlineBatchRecord({
+          batchNo,
+          page,
+          limit: recordsPagination.value.pageSize
+        })
+        
+        if (response?.data) {
+          historyRecords.value = response.data
+          recordsPagination.value.total = response.totalCount
+        }
+      } catch (error) {
+        console.error('Failed to load batch records:', error)
+        message.error('Failed to load records')
+      } finally {
+        isLoadingHistory.value = false
+      }
+    }
+
+    const showHistoryModal = async () => {
+      historyModalVisible.value = true
+      batchesPagination.value.current = 1
+      await loadHistoryBatches(1)
+    }
+
+    const viewBatchDetail = async (batchNo) => {
+      selectedBatchNo.value = batchNo
+      recordsPagination.value.current = 1
+      await loadBatchRecords(batchNo, 1)
+    }
+
+    const backToBatchList = () => {
+      selectedBatchNo.value = null
+      historyRecords.value = []
+    }
+
+    const handleBatchesPaginationChange = async (page) => {
+      batchesPagination.value.current = page
+      await loadHistoryBatches(page)
+    }
+
+    const handleRecordsPaginationChange = async (page) => {
+      recordsPagination.value.current = page
+      await loadBatchRecords(selectedBatchNo.value, page)
+    }
+
+    const closeHistoryModal = () => {
+      historyModalVisible.value = false
+      selectedBatchNo.value = null
+      historyBatches.value = []
+      historyRecords.value = []
+    }
 
     return {
       taskStartTime,
@@ -2211,7 +2458,27 @@ export default defineComponent({
       handleAISelection,
       handleGenerateOutlinePlan,
       getProgressStatus,
-      isLoadingTaskInfo
+      isLoadingTaskInfo,
+      showHelpDrawer,
+      historyModalVisible,
+      historyBatches,
+      historyRecords,
+      selectedBatchNo,
+      batchesPagination,
+      recordsPagination,
+      batchesColumns,
+      recordsColumns,
+      isLoadingHistory,
+      showHistoryModal,
+      closeHistoryModal,
+      getHistoryStatusColor,
+      viewHistoryDetail,
+      loadHistoryBatches,
+      loadBatchRecords,
+      handleBatchesPaginationChange,
+      handleRecordsPaginationChange,
+      viewBatchDetail,
+      backToBatchList
     }
   }
 })
@@ -2224,26 +2491,59 @@ export default defineComponent({
 }
 
 .steps-navigation {
-  flex: 0 0 240px;
-  padding: 0 24px 24px 24px;
+  flex: 0 0 180px;  /* 从 200px 进一步减少到 180px */
+  padding: 0 12px 24px 12px;  /* 进一步减小padding */
 }
 
 .step-item {
   position: relative;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
   cursor: pointer;
+}
+
+/* 添加连接线 */
+.step-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 25px; /* 调整到数字圆圈中心 */
+  top: 40px; /* 从第一个步骤底部开始 */
+  width: 4px;
+  height: calc(100% - 16px);
+  background: #e5e7eb; /* 默认浅灰色 */
+  z-index: 1;
+}
+
+/* 当步骤激活时，连接线变色 */
+.step-item.active::after {
+  background: #2563eb;
 }
 
 .step-content {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 12px;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 8px;
   background: white;
   transition: all 0.3s;
   border: 1px solid #e5e7eb;
   position: relative;
+  z-index: 2; /* 确保内容在连接线上层 */
+}
+
+.step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  flex-shrink: 0;
+  position: relative; /* 确保数字在连接线上层 */
   z-index: 2;
 }
 
@@ -2258,90 +2558,17 @@ export default defineComponent({
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
 }
 
-.step-number {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #2563eb;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-.step-info {
-  flex: 1;
-}
-
 .step-title {
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 4px;
-  font-size: 14px;
+  font-size: 13px;  /* 稍微减小字体大小 */
 }
 
 .step-desc {
-  font-size: 12px;
-  color: #6b7280;
-  line-height: 1.4;
+  font-size: 11px;
 }
 
-/* 修改连接线样式 */
+/* 修改连接线位置 */
 .step-connector {
-  position: absolute;
-  left: 47px; /* 调整连接线位置对齐数字中心 */
-  top: 48px; /* 从第一个步骤底部开始 */
-  bottom: -16px;
-  width: 2px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  z-index: 1;
-}
-
-.connector-line {
-  width: 2px;
-  height: 100%;
-  background: #e5e7eb;
-  position: relative;
-}
-
-/* 移除原来的箭头，改用小圆点 */
-.connector-arrow {
-  display: none;
-}
-
-/* 添加连接线装饰 */
-.step-item.active .connector-line::before {
-  content: '';
-  position: absolute;
-  top: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #2563eb;
-}
-
-.step-item.active .connector-line::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #2563eb;
-}
-
-/* 最后一个步骤不显示连接线 */
-.step-item:last-child .step-connector {
-  display: none;
+  left: 41px;  /* 根据新的布局调整连接线位置 */
 }
 
 .main-content {
@@ -2700,6 +2927,7 @@ export default defineComponent({
 .loading-text {
   color: #8c8c8c;
   font-size: 14px;
+  margin-left: 8px;
 }
 
 .outline-drawer :deep(.ant-drawer-body) {
@@ -3092,38 +3320,146 @@ export default defineComponent({
   margin-bottom: 24px;
 }
 
+/* AI Autopilot 按钮样式 */
 .generate-btn {
-  background: linear-gradient(135deg, #7928CA 0%, #FF0080 100%) !important;
-  border: none !important;
+  background: linear-gradient(-45deg, #2563eb, #7c3aed, #2563eb);
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+  border: none;
   height: 40px;
   padding: 0 24px;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(121, 40, 202, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3),
+              0 0 20px rgba(37, 99, 235, 0.2),
+              inset 0 0 8px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  color: white !important;  /* 添加 !important */
+}
+
+.generate-btn :deep(span) {  /* 添加这个选择器 */
+  color: white !important;
 }
 
 .generate-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(121, 40, 202, 0.4);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4),
+              0 0 30px rgba(37, 99, 235, 0.3),
+              inset 0 0 12px rgba(255, 255, 255, 0.3);
 }
 
 .generate-btn:active {
-  transform: translateY(0);
+  transform: translateY(1px) scale(0.98);
 }
 
-.loading-task-info {
+.generate-btn:before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+  transform: rotate(45deg);
+  animation: shine 3s infinite;
+  pointer-events: none;
+}
+
+.generate-btn :deep(.anticon) {
+  font-size: 18px;
+  margin-right: 8px;
+  animation: pulse 2s infinite;
+}
+
+/* 加载状态特效 */
+.generate-btn:loading {
+  background: linear-gradient(-45deg, #64748b, #94a3b8, #64748b);
+  animation: gradient-shift 2s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes shine {
+  0% { transform: rotate(45deg) translateY(-100%); }
+  100% { transform: rotate(45deg) translateY(100%); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* 添加新的样式 */
+.navigation-actions {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.help-button {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 0;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  border-radius: 8px;
+  transition: all 0.3s;
+  font-size: 11px;  /* 保持一致的文字大小 */
 }
 
-.loading-text {
-  color: #8c8c8c;
+.help-button:hover {
+  background: #f0f7ff;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.history-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;  /* 减小图标和文字的间距 */
+  height: 36px;  /* 稍微降低按钮高度 */
+  border-radius: 8px;
+  transition: all 0.3s;
+  font-size: 11px;  /* 减小文字大小 */
+}
+
+.history-button:hover {
+  background: #f0f7ff;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.history-content {
+  margin: -24px;
+}
+
+.history-content :deep(.ant-table-pagination) {
+  margin: 16px 24px;
+}
+
+.history-content {
+  .back-header {
+    margin-bottom: 16px;
+  }
+}
+
+/* 工具栏中的 generate-btn 特殊调整 */
+.action-button.generate-btn {
+  height: 32px !important;
+  padding: 0 16px !important;
+  border-radius: 6px !important;
+}
+
+.action-button.generate-btn :deep(.anticon) {
   font-size: 14px;
+  margin-right: 6px;
 }
 </style>
 

@@ -214,6 +214,13 @@ html, body, #app {
   background: transparent;
 }
 
+:deep(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.15) 0%, rgba(24, 144, 255, 0.05) 100%) !important;
+  color: #1890ff !important;
+  border-left-color: #1890ff !important;
+  box-shadow: 0 4px 15px rgba(24, 144, 255, 0.1);
+}
+
 :deep(.ant-menu-item:hover) {
   background: rgba(255, 255, 255, 0.05) !important;
   color: #fff !important;
