@@ -947,27 +947,8 @@ export default defineComponent({
       clearInterval(this.gscCheckInterval)
     }
   },
-  setup() {
-    const chartRef = ref(null)
-    const chartInstance = ref(null)
-    
-    const initChart = () => {
-      if (chartInstance.value) {
-        chartInstance.value.dispose()
-      }
-      chartInstance.value = echarts.init(chartRef.value)
-    }
-    
-    onMounted(() => {
-      isComponentMounted.value = true
-      if (chartRef.value) {
-        initChart()
-      }
-    })
-
-    onUnmounted(() => {
-    })
-
+  setup(props, { emit }) {
+    // 移除这个方法，使用 methods 中的版本
     return {
       showOnboardingModal,
       isComponentMounted,
