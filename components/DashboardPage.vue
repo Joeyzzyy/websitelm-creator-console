@@ -1067,14 +1067,14 @@ export default defineComponent({
       try {
         const response = await apiClient.getProductsByCustomerId()
         
-        console.log('API Response:', response); // 添加日志
-        console.log('Product Info:', response?.data); // 添加日志
-        console.log('Onboarding Status:', response?.data?.onboarding); // 添加日志
+        console.log('API Response:', response);
+        console.log('Product Info:', response?.data);
+        console.log('Onboarding Status:', response?.data?.onboarding);
         
         if (response?.code === 200) {
           this.productInfo = response.data
           if (!response.data) {
-            // 新用户，显示产品设置对话框
+            console.log('New user, showing onboarding modal');
             this.currentStep = 0;
             this.formState = {
               productId: undefined,
@@ -1085,16 +1085,7 @@ export default defineComponent({
             }
             this.onboardingModalVisible = true
           } else {
-            console.log('Existing user, checking onboarding status'); // 添加日志
-            if (!response.data.onboarding) {
-              console.log('Onboarding not completed, showing guide'); // 添加日志
-              this.$nextTick(() => {
-                this.openGuideModeDialog();
-              });
-            } else {
-              console.log('Onboarding completed, skipping guide'); // 添加日志
-            }
-            
+            console.log('Existing user, checking onboarding status');
             if (this.productInfo.domainStatus) {
               this.getSitemap()
               this.loadPagesDashboard()
@@ -1683,12 +1674,12 @@ export default defineComponent({
           if (this.productInfo) {
             this.hasTourCompleted = !!newVal;
             
-            // 如果 onboarding 为 false，且不是首次设置产品，则自动打开导览
-            if (!newVal && this.productInfo.productId) {
-              this.$nextTick(() => {
-                this.openGuideModeDialog();
-              });
-            }
+            // 这里的逻辑可能有问题，让我们移除它
+            // if (!newVal && this.productInfo.productId) {
+            //   this.$nextTick(() => {
+            //     this.openGuideModeDialog();
+            //   });
+            // }
           }
         }
       },
@@ -2068,9 +2059,19 @@ export default defineComponent({
     },
 
     openGuideModeDialog() {
-      // 通过事件触发父组件的方法
-      this.$emit('open-guide-mode');
+      console.log('Guide triggered with productInfo:', this.productInfo);
+      console.log('Onboarding status when guide triggered:', this.productInfo?.onboarding);
+      if (this.shouldShowGuide()) {
+        this.$emit('open-guide-mode');
+      } else {
+        console.log('Guide skipped due to onboarding status');
+      }
     },
+
+    // 添加一个方法来检查是否应该显示导览
+    shouldShowGuide() {
+      return this.productInfo && !this.productInfo.onboarding;
+    }
   },
 
   emits: ['open-guide-mode'],
