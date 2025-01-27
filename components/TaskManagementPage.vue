@@ -25,22 +25,34 @@
           <div class="header-left">
             <div class="header-top">
               <h3>Page List</h3>
-              <a-button type="link" :loading="loading" @click="handleRefresh">
-                <template #icon><ReloadOutlined /></template>
-                Refresh
-              </a-button>
-              <a-button 
-                type="link" 
-                size="small"
-                @click="collectPublishedUrls"
-                :disabled="!tasks.length"
-              >
-                Submit Sitemap
-              </a-button>
-              <a-button type="primary" @click="handleAddPage">
-                <template #icon><PlusOutlined /></template>
-                Manual Add Page
-              </a-button>
+              <a-space>
+                <a-button 
+                  class="action-button secondary-btn"
+                  :loading="loading" 
+                  @click="handleRefresh"
+                >
+                  <template #icon><ReloadOutlined /></template>
+                  <span>Refresh</span>
+                </a-button>
+                
+                <a-button 
+                  class="action-button secondary-btn"
+                  @click="collectPublishedUrls"
+                  :disabled="!tasks.length"
+                >
+                  <template #icon><GlobalOutlined /></template>
+                  <span>Submit Sitemap</span>
+                </a-button>
+
+                <a-button 
+                  type="primary"
+                  @click="handleAddPage"
+                  class="generate-btn action-button"
+                >
+                  <template #icon><PlusOutlined /></template>
+                  <span>Manual Add Page</span>
+                </a-button>
+              </a-space>
             </div>
             
             <div class="header-bottom">
@@ -66,7 +78,6 @@
                 <SearchOutlined />
               </template>
             </a-input>
-            <span class="task-count">Total Tasks: {{ filteredTasks.length }}</span>
           </div>
         </div>
 
@@ -1056,7 +1067,14 @@ export default {
 .header-top {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
+}
+
+.header-top h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .header-bottom {
@@ -1660,5 +1678,119 @@ export default {
   padding: 8px !important;
   text-align: center;
   background: #fff;
+}
+
+/* 新增和修改的样式 */
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* 增加间距 */
+}
+
+.header-top h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 修改按钮样式 */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-button :deep(.anticon) {
+  display: flex;
+  align-items: center;
+  margin-right: 0; /* 覆盖默认的 margin */
+}
+
+/* 主按钮渐变样式 */
+.generate-btn {
+  background: linear-gradient(-45deg, #2563eb, #7c3aed, #2563eb);
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+  border: none;
+  padding: 0 16px;
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3),
+              0 0 20px rgba(37, 99, 235, 0.2),
+              inset 0 0 8px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4),
+              0 0 30px rgba(37, 99, 235, 0.3),
+              inset 0 0 12px rgba(255, 255, 255, 0.3);
+}
+
+.generate-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.generate-btn :deep(span) {
+  color: white !important;
+}
+
+.generate-btn :deep(.anticon) {
+  color: white !important;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 优化次要按钮样式 */
+.secondary-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.secondary-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.secondary-btn:active {
+  background: #e2e8f0;
+  transform: translateY(0);
+}
+
+.secondary-btn:disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.secondary-btn :deep(.anticon) {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+/* 修改 loading 状态样式 */
+.secondary-btn:loading {
+  opacity: 0.8;
+  cursor: wait;
 }
 </style>

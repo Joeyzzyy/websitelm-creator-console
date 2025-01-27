@@ -4,25 +4,6 @@
     description="Manage your product and track your performance"
     icon="📊"
   >
-    <!-- Make sure the slot name matches exactly -->
-    <template #title-extra>
-      <a-button 
-        class="tutorial-trigger"
-        type="text"
-        size="middle"
-        @click="showTutorial"
-      >
-       What can i do with Dashboard?
-      </a-button>
-    </template>
-
-    <!-- Tutorial component -->
-    <ModuleTutorial
-      v-model:visible="tutorialVisible"
-      :steps="dashboardTutorial.steps"
-      @complete="onTutorialComplete"
-    />
-    
     <!-- Rest of the content -->
     <div class="dashboard-content">
       <a-card class="product-info-card">
@@ -238,7 +219,7 @@
         <a-col :span="24">
           <a-collapse v-model:activeKey="activeCollapseKeys">
             <!-- Website Structure -->
-            <a-collapse-panel key="sitemap" header="Website Structure (Sitemap)">
+            <a-collapse-panel key="sitemap" header="🗺️ Website Structure (Sitemap)">
               <a-row :gutter="[16, 16]">
                 <!-- Sitemap Panel - 调整为占满宽度 -->
                 <a-col :span="24">
@@ -572,7 +553,7 @@
             </template>
             <template v-else-if="productInfo.domainStatus && formState.website === productInfo.projectWebsite?.replace('https://', '')">
               <a-tag color="success" class="mt-3">
-                <CheckCircleOutlined /> Domain Verified
+              Domain Verified
               </a-tag>
             </template>
           </template>
@@ -883,7 +864,6 @@ import {
 import apiClient from '../api/api'
 import { Modal, message } from 'ant-design-vue'
 import * as echarts from 'echarts'
-import ModuleTutorial from '../components/common/ModuleTutorial.vue'
 import { dashboardTutorial } from '../config/tutorials/dashboard'
 
 export default defineComponent({
@@ -906,7 +886,6 @@ export default defineComponent({
     CheckSquareOutlined,
     AppstoreOutlined,
     ThunderboltOutlined,
-    ModuleTutorial,
   },
   data() {
     return {
@@ -953,9 +932,6 @@ export default defineComponent({
       publishedUrls: [],
       pagesDashboard: null,
       isDomainVerified: false,
-      hasTourCompleted: false, // 修改初始值
-      tutorialVisible: false,
-      dashboardTutorial: dashboardTutorial, // 添加到 data 中
       expandedKeys: [], // 添加新的数据属性
     }
   },
@@ -2065,37 +2041,13 @@ export default defineComponent({
       this.successModalVisible = false;
       this.openGuideModeDialog();
     },
-    
-    // 关闭成功弹窗
-    handleSuccessModalClose() {
-      console.log('关闭 success modal');
-      this.successModalVisible = false;
-    },
-
-    // 添加测试方法
-    testShowModal() {
-      console.log('点击测试按钮');
-      this.successModalVisible = true;
-      console.log('当前 modal 状态:', this.successModalVisible);
-    },
 
     openGuideModeDialog() {
       // 通过事件触发父组件的方法
       this.$emit('open-guide-mode');
     },
-
-    showTutorial() {
-      console.log('显示教程...', this.dashboardTutorial); // 添加日志以检查数据
-      this.tutorialVisible = true;
-    },
-
-    onTutorialComplete() {
-      console.log('教程完成');
-      this.$message.success('Dashboard tutorial completed!');
-    }
   },
 
-  // 如果使用组合式 API，也可以这样写：
   emits: ['open-guide-mode'],
   setup(props, { emit }) {
     const openGuideModeDialog = () => {
@@ -2126,11 +2078,6 @@ export default defineComponent({
 /* 覆盖一些 Ant Design 默认样式 */
 :deep(.ant-card-head) {
   border-bottom: 1px solid #f0f0f0;
-}
-
-
-.d-block {
-  display: block;
 }
 
 .verify-record-container {
@@ -2446,9 +2393,6 @@ export default defineComponent({
   padding-top: 0; /* 修改这里，原来是 4px */
 }
 
-.traffic-section {
-  margin-bottom: 24px;
-}
 
 .traffic-analytics {
   height: 400px;
@@ -2901,51 +2845,6 @@ export default defineComponent({
   border-radius: 12px;
 }
 
-.tutorial-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1890ff;
-  padding: 0;
-  height: auto;
-  transition: all 0.3s ease;
-  text-shadow: 0 0 1px rgba(24, 144, 255, 0.1);
-  position: relative;
-  
-  /* 柔和的发光动画 */
-  animation: glow 3s ease-in-out infinite alternate;
-  
-  &:hover {
-    color: #40a9ff;
-    background: transparent;
-    text-shadow: 0 0 6px rgba(24, 144, 255, 0.3);
-    
-    :deep(.anticon) {
-      transform: rotate(12deg);
-      filter: drop-shadow(0 0 4px rgba(24, 144, 255, 0.2));
-    }
-  }
-  
-  :deep(.anticon) {
-    font-size: 16px;
-    transition: all 0.3s ease;
-    filter: drop-shadow(0 0 2px rgba(24, 144, 255, 0.2));
-  }
-}
-
-@keyframes glow {
-  from {
-    text-shadow: 0 0 1px rgba(24, 144, 255, 0.1),
-                 0 0 2px rgba(24, 144, 255, 0.1);
-  }
-  to {
-    text-shadow: 0 0 2px rgba(24, 144, 255, 0.2),
-                 0 0 4px rgba(24, 144, 255, 0.2);
-  }
-}
-
 .analytics-card {
   background: #fff;
   border-radius: 8px;
@@ -2965,12 +2864,7 @@ export default defineComponent({
 .quick-access-panel {
   margin: 16px 0;
   border-radius: 12px;
-  
-  :deep(.ant-card-head) {
-    background: #fafafa;
-    border-bottom: 1px solid #f0f0f0;
-    padding: 0 24px;
-  }
+
 }
 
 .quick-access-title {
