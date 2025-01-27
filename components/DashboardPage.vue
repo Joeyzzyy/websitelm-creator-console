@@ -933,6 +933,7 @@ export default defineComponent({
       pagesDashboard: null,
       isDomainVerified: false,
       expandedKeys: [], // 添加新的数据属性
+      hasTourCompleted: false, // 添加新的数据属性
     }
   },
   created() {
@@ -1069,6 +1070,7 @@ export default defineComponent({
         if (response?.code === 200) {
           this.productInfo = response.data
           if (!response.data) {
+            // 新用户，显示产品设置对话框
             this.currentStep = 0;
             this.formState = {
               productId: undefined,
@@ -1079,9 +1081,16 @@ export default defineComponent({
             }
             this.onboardingModalVisible = true
           } else {
+            // 检查是否需要显示导览
+            if (!response.data.onboarding) {
+              this.$nextTick(() => {
+                this.openGuideModeDialog();
+              });
+            }
+            
             if (this.productInfo.domainStatus) {
               this.getSitemap()
-              this.loadPagesDashboard() // 替换原来的 loadPublishedPagesCount
+              this.loadPagesDashboard()
             }
           }
         } else {
@@ -1664,7 +1673,16 @@ export default defineComponent({
       'productInfo.onboarding': {
         immediate: true,
         handler(newVal) {
-          this.hasTourCompleted = !!newVal; // 将 onboarding 状态同步到 hasTourCompleted
+          if (this.productInfo) {
+            this.hasTourCompleted = !!newVal;
+            
+            // 如果 onboarding 为 false，且不是首次设置产品，则自动打开导览
+            if (!newVal && this.productInfo.productId) {
+              this.$nextTick(() => {
+                this.openGuideModeDialog();
+              });
+            }
+          }
         }
       },
       'gscAnalytics.dailyData': {
