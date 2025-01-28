@@ -672,8 +672,10 @@ export default {
       if (!record?.slug || !record?.lang) {
         return '';
       }
-      // 使用 config 中的预览域名
-      return `${config.domains.preview}/${record.lang}/${record.slug}`;
+      // 使用 productInfo 中的 projectWebsite 作为 userDomain
+      const userDomain = productInfo.value?.projectWebsite || '';
+      // 构建预览 URL，将 userDomain 放在最后
+      return `${config.domains.preview}/${record.lang}/${record.slug}/${userDomain}`;
     };
 
     const getStatusColor = (status) => {
