@@ -345,7 +345,7 @@
 
       <!-- Preview modal -->
       <a-modal
-        v-model:visible="previewModal.visible"
+        v-model:open="previewModal.visible"
         :title="previewModal.title"
         :width="1200"
         :footer="null"
@@ -372,7 +372,7 @@
 
       <!-- 修改发布确认弹窗 -->
       <a-modal
-        v-model:visible="publishModal.visible"
+        v-model:open="publishModal.visible"
         :title="publishModal.title"
         :confirm-loading="publishModal.loading"
         @ok="confirmPublish"
@@ -956,8 +956,16 @@ export default defineComponent({
     };
 
     const getPreviewUrl = (article) => {
+      if (!article?.slug || !article?.language) {
+        return '';
+      }
+      
+      // 使用 productInfo 中的 projectWebsite 作为 userDomain
+      const userDomain = productInfo.value?.projectWebsite || '';
       const previewDomain = config.domains.preview.replace(/\/$/, '');
-      return `${previewDomain}/${article.language}/${article.slug}`;
+      
+      // 构建预览 URL，将 userDomain 放在最后
+      return `${previewDomain}/${article.language}/${article.slug}/${userDomain}`;
     };
 
     const handlePreview = () => {

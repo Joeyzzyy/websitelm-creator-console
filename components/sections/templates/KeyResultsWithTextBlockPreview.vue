@@ -60,6 +60,8 @@
                       target="_blank"
                       rel="noopener noreferrer"
                     >{{ part.content }}</a>
+                    <i v-else-if="part.type === 'italic'">{{ part.content }}</i>
+                    <b v-else-if="part.type === 'bold'">{{ part.content }}</b>
                     <span v-else>{{ part.content }}</span>
                   </template>
                 </h3>
@@ -79,6 +81,77 @@
                       target="_blank"
                       rel="noopener noreferrer"
                     >{{ part.content }}</a>
+                    <div 
+                      v-else-if="part.type === 'video'"
+                      class="video-container my-4"
+                    >
+                      <video
+                        :src="part.src"
+                        :controls="part.controls"
+                        :preload="part.preload"
+                        class="embedded-video w-full rounded-lg"
+                      ></video>
+                    </div>
+                    <i v-else-if="part.type === 'italic'" class="italic">
+                      <template v-if="part.nested">
+                        <template v-for="(child, j) in part.children" :key="j">
+                          <img 
+                            v-if="child.type === 'image'"
+                            :src="child.src"
+                            :alt="child.alt"
+                            class="max-w-full h-auto my-4 rounded-lg shadow-sm inline-block"
+                            style="margin-left: 0; margin-right: 0;"
+                          />
+                          <b v-else-if="child.type === 'bold'" class="font-bold">
+                            <template v-if="child.nested">
+                              <template v-for="(grandChild, k) in child.children" :key="k">
+                                <img 
+                                  v-if="grandChild.type === 'image'"
+                                  :src="grandChild.src"
+                                  :alt="grandChild.alt"
+                                  class="max-w-full h-auto my-4 rounded-lg shadow-sm inline-block"
+                                  style="margin-left: 0; margin-right: 0;"
+                                />
+                                <span v-else>{{ grandChild.content }}</span>
+                              </template>
+                            </template>
+                            <template v-else>{{ child.content }}</template>
+                          </b>
+                          <span v-else>{{ child.content }}</span>
+                        </template>
+                      </template>
+                      <template v-else>{{ part.content }}</template>
+                    </i>
+                    <b v-else-if="part.type === 'bold'" class="font-bold">
+                      <template v-if="part.nested">
+                        <template v-for="(child, j) in part.children" :key="j">
+                          <img 
+                            v-if="child.type === 'image'"
+                            :src="child.src"
+                            :alt="child.alt"
+                            class="max-w-full h-auto my-4 rounded-lg shadow-sm inline-block"
+                            style="margin-left: 0; margin-right: 0;"
+                          />
+                          <i v-else-if="child.type === 'italic'" class="italic">
+                            <template v-if="child.nested">
+                              <template v-for="(grandChild, k) in child.children" :key="k">
+                                <img 
+                                  v-if="grandChild.type === 'image'"
+                                  :src="grandChild.src"
+                                  :alt="grandChild.alt"
+                                  class="max-w-full h-auto my-4 rounded-lg shadow-sm inline-block"
+                                  style="margin-left: 0; margin-right: 0;"
+                                />
+                                <span v-else>{{ grandChild.content }}</span>
+                              </template>
+                            </template>
+                            <template v-else>{{ child.content }}</template>
+                          </i>
+                          <span v-else>{{ child.content }}</span>
+                        </template>
+                      </template>
+                      <template v-else>{{ part.content }}</template>
+                    </b>
                     <span v-else>{{ part.content }}</span>
                   </template>
                 </div>
@@ -112,10 +185,11 @@ const parseHtmlContent = (htmlString) => {
   
   const result = []
   let currentIndex = 0
-  const linkRegex = /<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*>(.*?)<\/a>/g
+  // 更新正则表达式以匹配 <a>, <i>, <b> 标签
+  const tagRegex = /<(a|i|b)(?:\s+(?:[^>]*?\s+)?href="([^"]*)")?[^>]*>(.*?)<\/\1>/g
   
   let match
-  while ((match = linkRegex.exec(htmlString)) !== null) {
+  while ((match = tagRegex.exec(htmlString)) !== null) {
     if (match.index > currentIndex) {
       result.push({
         type: 'text',
@@ -123,16 +197,28 @@ const parseHtmlContent = (htmlString) => {
       })
     }
     
-    let href = match[1]
-    if (!href.match(/^https?:\/\//)) {
-      href = `https://${href}`
+    const tagType = match[1]
+    if (tagType === 'a') {
+      let href = match[2]
+      if (!href.match(/^https?:\/\//)) {
+        href = `https://${href}`
+      }
+      result.push({
+        type: 'link',
+        href: href,
+        content: match[3]
+      })
+    } else if (tagType === 'i') {
+      result.push({
+        type: 'italic',
+        content: match[3]
+      })
+    } else if (tagType === 'b') {
+      result.push({
+        type: 'bold',
+        content: match[3]
+      })
     }
-    
-    result.push({
-      type: 'link',
-      href: href,
-      content: match[2]
-    })
     
     currentIndex = match.index + match[0].length
   }
@@ -229,60 +315,79 @@ const displayedResults = computed(() => {
 const parseContent = (content) => {
   if (!content) return [];
   
-  const result = [];
-  let currentIndex = 0;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(`<div>${content}</div>`, 'text/html');
   
-  // 匹配图片标签、链接标签和占位符
-  const htmlRegex = /<(img|a)(?:[^>]*?\s+)?(?:src|href)="([^"]*)"[^>]*>(?:(.*?)<\/a>)?|\[Image:\s*([^\]]+)\]/g;
-  
-  let match;
-  while ((match = htmlRegex.exec(content)) !== null) {
-    if (match.index > currentIndex) {
-      result.push({
+  const processNode = (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node.textContent ? [{
         type: 'text',
-        content: content.slice(currentIndex, match.index)
-      });
+        content: node.textContent
+      }] : [];
     }
     
-    if (match[1] === 'img') {
-      // 处理 img 标签
-      result.push({
-        type: 'image',
-        src: match[2],
-        alt: match[0].match(/alt="([^"]*)"/)?.[1] || ''
-      });
-    } else if (match[1] === 'a') {
-      // 处理链接
-      let href = match[2];
-      if (!href.match(/^https?:\/\//)) {
-        href = `https://${href}`;
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const tagName = node.tagName.toLowerCase();
+      
+      // 添加对 br 标签的处理
+      if (tagName === 'br') {
+        return [{
+          type: 'text',
+          content: '\n'
+        }];
       }
-      result.push({
-        type: 'link',
-        href,
-        content: match[3]
-      });
-    } else if (match[4]) {
-      // 处理占位符，将其转换为图片对象
-      const imageName = match[4].trim();
-      result.push({
-        type: 'image',
-        src: content._images?.find(img => img.name === imageName)?.url || '',
-        alt: imageName
-      });
+      
+      // 处理图片
+      if (tagName === 'img') {
+        return [{
+          type: 'image',
+          src: node.getAttribute('src'),
+          alt: node.getAttribute('alt') || ''
+        }];
+      }
+      
+      // 处理链接
+      if (tagName === 'a') {
+        let href = node.getAttribute('href');
+        if (href && !href.match(/^https?:\/\//)) {
+          href = `https://${href}`;
+        }
+        return [{
+          type: 'link',
+          href,
+          content: node.textContent
+        }];
+      }
+      
+      // 处理视频
+      if (tagName === 'video') {
+        return [{
+          type: 'video',
+          src: node.getAttribute('src'),
+          controls: true,
+          preload: 'metadata'
+        }];
+      }
+      
+      // 处理斜体和粗体
+      if (tagName === 'i' || tagName === 'b') {
+        const children = Array.from(node.childNodes).flatMap(processNode);
+        return [{
+          type: tagName === 'i' ? 'italic' : 'bold',
+          nested: children.length > 1,
+          children,
+          content: node.innerHTML
+        }];
+      }
+      
+      // 处理其他元素
+      return Array.from(node.childNodes).flatMap(processNode);
     }
     
-    currentIndex = match.index + match[0].length;
-  }
+    return [];
+  };
   
-  if (currentIndex < content.length) {
-    result.push({
-      type: 'text',
-      content: content.slice(currentIndex)
-    });
-  }
-  
-  return result;
+  return Array.from(doc.body.firstChild.childNodes).flatMap(processNode);
 };
 </script>
 <style scoped>

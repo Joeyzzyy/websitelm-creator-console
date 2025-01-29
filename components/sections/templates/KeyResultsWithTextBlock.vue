@@ -108,29 +108,83 @@
                                 <picture-outlined />
                               </a-button>
                             </a-tooltip>
+                            <a-tooltip title="Insert Video">
+                              <a-button 
+                                type="text"
+                                class="toolbar-btn"
+                                @click="handleAddVideoClick(index)"
+                              >
+                                <video-camera-outlined />
+                              </a-button>
+                            </a-tooltip>
+                            <a-tooltip title="Add Link">
+                              <a-button 
+                                type="text"
+                                class="toolbar-btn"
+                                @click="handleAddLinkClick('contentText', 'rightContent', index)"
+                              >
+                                <link-outlined />
+                              </a-button>
+                            </a-tooltip>
+                            <a-tooltip title="Bold">
+                              <a-button 
+                                type="text"
+                                class="toolbar-btn"
+                                @click="handleBoldClick"
+                              >
+                                <bold-outlined />
+                              </a-button>
+                            </a-tooltip>
+                            <a-tooltip title="Italic">
+                              <a-button 
+                                type="text"
+                                class="toolbar-btn"
+                                @click="handleItalicClick"
+                              >
+                                <italic-outlined />
+                              </a-button>
+                            </a-tooltip>
                           </div>
                         </div>
-                        <a-textarea
-                          v-model:value="item.contentText"
-                          :disabled="disabled"
-                          :rows="12"
-                          @change="handleChange"
-                          @input="(e) => handleTextareaEvent(e, index)"
-                          @click="(e) => handleTextareaEvent(e, index)"
-                          @select="(e) => handleTextareaEvent(e, index)"
-                          @keyup="(e) => handleTextareaEvent(e, index)"
-                          @mouseup="(e) => handleTextareaEvent(e, index)"
+                        <div
                           class="content-textarea"
-                          :style="{ minHeight: '360px' }"
+                          :contenteditable="!disabled"
+                          :innerHTML="formatContentWithLinks(item.contentText)"
+                          @input="(e) => handleContentInput(e, index)"
+                          @select="() => handleTextSelect('contentText', 'rightContent', index)"
                           :ref="el => textareaRefs[index] = el"
-                        />
+                        ></div>
                         <div class="editor-footer">
                           <span class="char-count">{{ item.contentText.length }} characters</span>
+                        </div>
+                        <!-- 添加调试区域 -->
+                        <div class="debug-area">
+                          <div class="debug-title">Raw HTML Content:</div>
+                          <pre class="debug-content">{{ item.contentText }}</pre>
                         </div>
                       </div>
                     </div>
                   </a-form-item>
                 </a-form>
+
+                <!-- 添加链接列表显示区域 -->
+                <div class="link-tags" v-if="getLinksByField('rightContent', index, 'contentText').length">
+                  <div 
+                    v-for="(link, linkIndex) in getLinksByField('rightContent', index, 'contentText')" 
+                    :key="linkIndex"
+                    class="link-tag"
+                  >
+                    <span class="link-text">{{ link.text }}</span>
+                    <span class="link-url">({{ link.url }})</span>
+                    <a-button 
+                      type="text" 
+                      size="small"
+                      @click="removeLink(link.globalIndex)"
+                    >
+                      <close-outlined />
+                    </a-button>
+                  </div>
+                </div>
               </div>
             </a-col>
           </a-row>
@@ -145,7 +199,7 @@
           </a-button>
         </div>
 
-        <!-- 链接输入弹窗 -->
+        <!-- 添加链接输入弹窗 -->
         <a-modal
           v-model:visible="linkModalVisible"
           title="Add Link"
@@ -171,6 +225,21 @@
             v-if="imageLibraryVisible"
             @select="onImageSelect"
             @close="handleImageLibraryCancel"
+          />
+        </a-modal>
+
+        <!-- 添加视频库 Modal -->
+        <a-modal
+          v-model:visible="videoLibraryVisible"
+          title="Select Video"
+          width="800px"
+          @ok="handleVideoSelect"
+          @cancel="handleVideoLibraryCancel"
+        >
+          <video-library
+            v-if="videoLibraryVisible"
+            @select="onVideoSelect"
+            @close="handleVideoLibraryCancel"
           />
         </a-modal>
       </div>
@@ -199,8 +268,9 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import KeyResultsWithTextBlockPreview from './KeyResultsWithTextBlockPreview.vue'
 import themeConfig from '../../../assets/config/themeConfig'
-import { LinkOutlined, DeleteOutlined, PictureOutlined } from '@ant-design/icons-vue'
+import { LinkOutlined, DeleteOutlined, PictureOutlined, CloseOutlined, VideoCameraOutlined, BoldOutlined, ItalicOutlined } from '@ant-design/icons-vue'
 import ImageLibrary from '../common/ImageLibrary.vue'
+import VideoLibrary from '../common/VideoLibrary.vue'
 
 export default {
   name: 'KeyResultsWithTextBlock',
@@ -210,7 +280,12 @@ export default {
     DeleteOutlined,
     KeyResultsWithTextBlockPreview,
     PictureOutlined,
-    ImageLibrary
+    ImageLibrary,
+    CloseOutlined,
+    VideoCameraOutlined,
+    VideoLibrary,
+    BoldOutlined,
+    ItalicOutlined
   },
   computed: {
     tags() {
@@ -237,6 +312,10 @@ export default {
       contentTextArea: [],
       selectedImage: null,
       textareaRefs: {},
+      savedSelection: null,
+      videoLibraryVisible: false,
+      selectedVideo: null,
+      lastCaretPosition: null,
     }
   },
   created() {
@@ -252,6 +331,9 @@ export default {
     if (!Array.isArray(this.localSection.rightContent)) {
       this.localSection.rightContent = []
     }
+    this.$nextTick(() => {
+      this.detectExistingLinks();
+    });
   },
   watch: {
     section: {
@@ -279,34 +361,32 @@ export default {
 
     detectExistingLinks() {
       this.localSection.rightContent.forEach((content, index) => {
-        ['contentTitle', 'contentText'].forEach(field => {
-          const text = content[field];
-          const linkRegex = /<a\s+href="([^"]+)">([^<]+)<\/a>/g;
-          let match;
+        const text = content.contentText;
+        const linkRegex = /<a\s+href="([^"]+)">([^<]+)<\/a>/g;
+        let match;
+        
+        while ((match = linkRegex.exec(text)) !== null) {
+          const [fullMatch, url, linkText] = match;
+          const exists = this.textLinks.some(link => 
+            link.text === linkText && 
+            link.url === url && 
+            link.field.type === 'rightContent' && 
+            link.field.index === index && 
+            link.field.field === 'contentText'
+          );
           
-          while ((match = linkRegex.exec(text)) !== null) {
-            const [fullMatch, url, linkText] = match;
-            const exists = this.textLinks.some(link => 
-              link.text === linkText && 
-              link.url === url && 
-              link.field.type === 'rightContent' && 
-              link.field.index === index && 
-              link.field.field === field
-            );
-            
-            if (!exists) {
-              this.textLinks.push({
-                text: linkText,
-                url: url,
-                field: {
-                  type: 'rightContent',
-                  index: index,
-                  field: field
-                }
-              });
-            }
+          if (!exists) {
+            this.textLinks.push({
+              text: linkText,
+              url: url,
+              field: {
+                type: 'rightContent',
+                index: index,
+                field: 'contentText'
+              }
+            });
           }
-        });
+        }
       });
     },
 
@@ -350,44 +430,23 @@ export default {
           index: index,
           field: field
         };
-        this.linkModalVisible = true;
+        this.saveSelection();
       }
     },
 
-    handleAddLink() {
-      if (this.linkUrl && this.selectedText) {
-        this.textLinks.push({
-          text: this.selectedText,
-          url: this.linkUrl,
-          field: { ...this.currentField }
-        });
-        
-        const linkHtml = `<a href="${this.linkUrl}">${this.selectedText}</a>`;
-        const content = this.localSection[this.currentField.type][this.currentField.index];
-        content[this.currentField.field] = content[this.currentField.field]
-          .replace(this.selectedText, linkHtml);
-        
-        this.handleChange();
-        this.resetLinkModal();
+    saveSelection() {
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        this.savedSelection = selection.getRangeAt(0);
       }
     },
 
-    removeLink(index) {
-      const link = this.textLinks[index];
-      const content = this.localSection[link.field.type][link.field.index];
-      const linkRegex = new RegExp(`<a[^>]*>${link.text}</a>`);
-      content[link.field.field] = content[link.field.field]
-        .replace(linkRegex, link.text);
-      
-      this.textLinks.splice(index, 1);
-      this.handleChange();
-    },
-
-    resetLinkModal() {
-      this.linkModalVisible = false;
-      this.linkUrl = '';
-      this.selectedText = '';
-      this.currentField = null;
+    restoreSelection() {
+      if (this.savedSelection) {
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(this.savedSelection);
+      }
     },
 
     handleAddLinkClick(field, contentType, index) {
@@ -401,10 +460,64 @@ export default {
           index: index,
           field: field
         };
+        this.saveSelection();
         this.linkModalVisible = true;
       } else {
-        this.$message.warning('Please select text first');
+        this.$message.warning('Please select text');
       }
+    },
+
+    handleAddLink() {
+      if (!this.linkUrl || !this.selectedText) {
+        this.$message.warning('Please enter URL');
+        return;
+      }
+
+      try {
+        this.restoreSelection();
+        
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+        
+        const linkElement = document.createElement('a');
+        linkElement.href = this.linkUrl;
+        linkElement.textContent = this.selectedText;
+        
+        range.deleteContents();
+        range.insertNode(linkElement);
+        
+        this.textLinks.push({
+          text: this.selectedText,
+          url: this.linkUrl,
+          field: { ...this.currentField }
+        });
+        
+        const editor = this.textareaRefs[this.currentField.index];
+        if (editor) {
+          const content = this.localSection[this.currentField.type][this.currentField.index];
+          content[this.currentField.field] = editor.innerHTML
+            .replace(/<br>/g, '\n')
+            .replace(/<div>/g, '\n')
+            .replace(/<\/div>/g, '')
+            .replace(/&nbsp;/g, ' ');
+          
+          this.handleChange();
+        }
+
+        this.handleCancelLink();
+        this.$message.success('Link added successfully');
+      } catch (error) {
+        console.error('Error adding link:', error);
+        this.$message.error('Failed to add link, please try again');
+      }
+    },
+
+    handleCancelLink() {
+      this.linkModalVisible = false;
+      this.linkUrl = '';
+      this.selectedText = '';
+      this.currentField = null;
+      this.savedSelection = null;
     },
 
     getLinksByField(contentType, index, field) {
@@ -419,8 +532,17 @@ export default {
       return filteredLinks;
     },
 
-    handleCancelLink() {
-      this.resetLinkModal();
+    removeLink(globalIndex) {
+      const link = this.textLinks[globalIndex];
+      if (!link) return;
+
+      const content = this.localSection[link.field.type][link.field.index];
+      const linkRegex = new RegExp(`<a[^>]*>${link.text}</a>`);
+      content[link.field.field] = content[link.field.field]
+        .replace(linkRegex, link.text);
+      
+      this.textLinks.splice(globalIndex, 1);
+      this.handleChange();
     },
 
     removeContent(index) {
@@ -437,10 +559,15 @@ export default {
     },
 
     handleAddImageClick(index) {
-      this.currentContentIndex = index;
-      this.currentTextareaIndex = index;
-      const position = this.cursorPositions[index] || 0;
-      this.imageLibraryVisible = true;
+      const selection = window.getSelection();
+      if (!selection.toString().trim()) {
+        this.currentContentIndex = index;
+        this.currentTextareaIndex = index;
+        this.saveSelection();
+        this.imageLibraryVisible = true;
+      } else {
+        this.$message.warning('Please clear text selection before inserting image');
+      }
     },
 
     onImageSelect(image) {
@@ -453,42 +580,49 @@ export default {
         return;
       }
 
-      const content = this.localSection.rightContent[this.currentContentIndex];
-      if (!content) return;
-
-      const insertPosition = this.cursorPositions[this.currentContentIndex] || 0;
-      const imgTag = `\n<img src="${this.selectedImage.url}" alt="${this.selectedImage.name}" />\n`;
-      const currentText = content.contentText || '';
-
-      const beforeText = currentText.substring(0, insertPosition);
-      const afterText = currentText.substring(insertPosition);
-      
-      content.contentText = beforeText + imgTag + afterText;
-
-      const newPosition = insertPosition + imgTag.length;
-      this.cursorPositions[this.currentContentIndex] = newPosition;
-
-      this.$nextTick(() => {
-        const textareaElement = this.textareaRefs[this.currentContentIndex];
-        if (textareaElement?.$el) {
-          const nativeTextarea = textareaElement.$el.querySelector('textarea');
-          if (nativeTextarea) {
-            nativeTextarea.focus();
-            nativeTextarea.setSelectionRange(newPosition, newPosition);
-          }
+      try {
+        this.restoreSelection();
+        
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+        
+        const imgElement = document.createElement('img');
+        imgElement.src = this.selectedImage.url;
+        imgElement.alt = this.selectedImage.name;
+        
+        range.deleteContents();
+        range.insertNode(imgElement);
+        
+        range.setStartAfter(imgElement);
+        range.setEndAfter(imgElement);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        
+        const editor = this.textareaRefs[this.currentContentIndex];
+        if (editor) {
+          const content = this.localSection.rightContent[this.currentContentIndex];
+          content.contentText = editor.innerHTML
+            .replace(/<br>/g, '\n')
+            .replace(/<div>/g, '\n')
+            .replace(/<\/div>/g, '')
+            .replace(/&nbsp;/g, ' ');
+          
+          this.handleChange();
         }
-      });
 
-      this.handleChange();
-      this.handleImageLibraryCancel();
+        this.handleImageLibraryCancel();
+        this.$message.success('Image inserted successfully');
+      } catch (error) {
+        console.error('Error inserting image:', error);
+        this.$message.error('Failed to insert image, please try again');
+      }
     },
 
     handleImageLibraryCancel() {
       this.imageLibraryVisible = false;
       this.selectedImage = null;
       this.currentContentIndex = null;
-      this.cursorPositions = {};
-      this.textareaRefs = {};
+      this.savedSelection = null;
     },
 
     hasImageTags(text) {
@@ -528,7 +662,252 @@ export default {
       if (textareaElement) {
         this.cursorPositions[index] = textareaElement.selectionStart;
       }
-    }
+    },
+
+    formatContentWithLinks(content) {
+      if (!content) return '';
+      return content
+        .replace(/\n/g, '<br>')
+        .replace(/&nbsp;/g, ' ');
+    },
+
+    handleContentInput(event, index) {
+      try {
+        // 保存当前光标位置相关信息
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+          const range = selection.getRangeAt(0);
+          const preCaretRange = range.cloneRange();
+          preCaretRange.selectNodeContents(event.target);
+          preCaretRange.setEnd(range.endContainer, range.endOffset);
+          
+          // 计算真实的光标位置，考虑换行符
+          let position = 0;
+          const walker = document.createTreeWalker(
+            event.target,
+            NodeFilter.SHOW_TEXT,
+            null,
+            false
+          );
+          
+          let node;
+          let found = false;
+          while ((node = walker.nextNode()) && !found) {
+            if (node === range.endContainer) {
+              position += range.endOffset;
+              found = true;
+            } else {
+              position += node.length;
+            }
+            
+            // 如果节点后面有 <br>，添加换行符的长度
+            const nextSibling = node.nextSibling;
+            if (nextSibling && nextSibling.nodeName === 'BR') {
+              position += 1;
+            }
+          }
+          
+          this.lastCaretPosition = {
+            globalPosition: position,
+            node: range.endContainer,
+            offset: range.endOffset
+          };
+          
+          console.log('保存光标位置:', {
+            globalPosition: position,
+            nodeType: range.endContainer.nodeType,
+            nodeValue: range.endContainer.nodeValue,
+            offset: range.endOffset
+          });
+        }
+
+        const content = event.target.innerHTML;
+        console.log('更新前的内容:', content);
+        
+        this.localSection.rightContent[index].contentText = content;
+        
+        this.$nextTick(() => {
+          if (this.lastCaretPosition && this.textareaRefs[index]) {
+            const editor = this.textareaRefs[index];
+            console.log('编辑器内容:', editor.innerHTML);
+            
+            // 重新定位光标
+            let currentPos = 0;
+            let targetNode = null;
+            let targetOffset = 0;
+            
+            const walker = document.createTreeWalker(
+              editor,
+              NodeFilter.SHOW_TEXT,
+              null,
+              false
+            );
+            
+            let node;
+            while ((node = walker.nextNode())) {
+              const nodeLength = node.length;
+              
+              // 考虑节点后的换行符
+              let effectiveLength = nodeLength;
+              const nextSibling = node.nextSibling;
+              if (nextSibling && nextSibling.nodeName === 'BR') {
+                effectiveLength += 1;
+              }
+              
+              if (currentPos + effectiveLength >= this.lastCaretPosition.globalPosition) {
+                targetNode = node;
+                targetOffset = this.lastCaretPosition.globalPosition - currentPos;
+                break;
+              }
+              currentPos += effectiveLength;
+            }
+            
+            if (targetNode) {
+              const selection = window.getSelection();
+              const range = document.createRange();
+              range.setStart(targetNode, targetOffset);
+              range.setEnd(targetNode, targetOffset);
+              selection.removeAllRanges();
+              selection.addRange(range);
+            }
+          }
+        });
+        
+        this.handleChange();
+      } catch (error) {
+        console.error('内容更新错误:', error);
+      }
+    },
+
+    handleAddVideoClick(index) {
+      const selection = window.getSelection();
+      if (!selection.toString().trim()) {
+        this.currentContentIndex = index;
+        this.currentTextareaIndex = index;
+        this.saveSelection();
+        this.videoLibraryVisible = true;
+      } else {
+        this.$message.warning('Please clear text selection before inserting video');
+      }
+    },
+
+    onVideoSelect(video) {
+      this.selectedVideo = video;
+    },
+
+    handleVideoSelect() {
+      if (!this.selectedVideo || this.currentContentIndex === null) {
+        this.$message.warning('Please select a video first');
+        return;
+      }
+
+      try {
+        this.restoreSelection();
+        
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+        
+        const videoContainer = document.createElement('div');
+        videoContainer.className = 'video-container';
+        
+        const videoElement = document.createElement('video');
+        videoElement.src = this.selectedVideo.url;
+        videoElement.controls = true;
+        videoElement.preload = 'metadata';
+        videoElement.className = 'embedded-video';
+        
+        videoContainer.appendChild(videoElement);
+        
+        range.deleteContents();
+        range.insertNode(videoContainer);
+        
+        range.setStartAfter(videoContainer);
+        range.setEndAfter(videoContainer);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        
+        const editor = this.textareaRefs[this.currentContentIndex];
+        if (editor) {
+          const content = this.localSection.rightContent[this.currentContentIndex];
+          content.contentText = editor.innerHTML
+            .replace(/<br>/g, '\n')
+            .replace(/<div>/g, '\n')
+            .replace(/<\/div>/g, '')
+            .replace(/&nbsp;/g, ' ');
+          
+          this.handleChange();
+        }
+
+        this.handleVideoLibraryCancel();
+        this.$message.success('Video inserted successfully');
+      } catch (error) {
+        console.error('Error inserting video:', error);
+        this.$message.error('Failed to insert video, please try again');
+      }
+    },
+
+    handleVideoLibraryCancel() {
+      this.videoLibraryVisible = false;
+      this.selectedVideo = null;
+      this.currentContentIndex = null;
+      this.savedSelection = null;
+    },
+
+    // 更新格式化内容的方法，确保视频标签被正确处理
+    formatContentWithLinks(content) {
+      if (!content) return '';
+      return content
+        .replace(/\n/g, '<br>')
+        .replace(/&nbsp;/g, ' ');
+    },
+
+    handleBoldClick() {
+      const selection = window.getSelection();
+      const text = selection.toString().trim();
+      
+      if (text) {
+        this.restoreSelection();
+        document.execCommand('bold', false, null);
+        
+        const editor = this.textareaRefs[this.currentTextareaIndex];
+        if (editor) {
+          const content = this.localSection.rightContent[this.currentTextareaIndex];
+          content.contentText = editor.innerHTML
+            .replace(/<br>/g, '\n')
+            .replace(/<div>/g, '\n')
+            .replace(/<\/div>/g, '')
+            .replace(/&nbsp;/g, ' ');
+          
+          this.handleChange();
+        }
+      } else {
+        this.$message.warning('Please select text first');
+      }
+    },
+
+    handleItalicClick() {
+      const selection = window.getSelection();
+      const text = selection.toString().trim();
+      
+      if (text) {
+        this.restoreSelection();
+        document.execCommand('italic', false, null);
+        
+        const editor = this.textareaRefs[this.currentTextareaIndex];
+        if (editor) {
+          const content = this.localSection.rightContent[this.currentTextareaIndex];
+          content.contentText = editor.innerHTML
+            .replace(/<br>/g, '\n')
+            .replace(/<div>/g, '\n')
+            .replace(/<\/div>/g, '')
+            .replace(/&nbsp;/g, ' ');
+          
+          this.handleChange();
+        }
+      } else {
+        this.$message.warning('Please select text first');
+      }
+    },
   }
 }
 </script>
@@ -1004,28 +1383,45 @@ export default {
 }
 
 .content-textarea {
-  border: none !important;
-  padding: 16px !important;
+  min-height: 360px;
+  padding: 16px;
+  border: none;
+  outline: none;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
   line-height: 1.6;
   color: #1f2937;
-  resize: vertical;
   background: #ffffff;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .content-textarea:focus {
-  box-shadow: none !important;
+  outline: none;
 }
 
-:deep(.content-textarea.ant-input) {
-  border: none;
-  border-radius: 0;
+.content-textarea :deep(img) {
+  max-width: 150px;
+  height: auto;
+  margin: 8px 0;
+  display: block;
 }
 
-:deep(.content-textarea.ant-input:focus) {
-  border: none;
-  box-shadow: none;
+.content-textarea :deep(img:hover) {
+  cursor: pointer;
+  opacity: 0.9;
+}
+
+.content-textarea :deep(a) {
+  color: #1890ff;
+  text-decoration: underline;
+  cursor: pointer;
+  background: transparent;
+}
+
+.content-textarea :deep(a:hover) {
+  color: #40a9ff;
 }
 
 .editor-footer {
@@ -1079,5 +1475,72 @@ export default {
 .bottom-add-btn {
   margin-top: 16px;
   width: 100%;
+}
+
+/* 视频相关样式 */
+.content-textarea :deep(.video-container) {
+  max-width: 400px;
+  margin: 8px 0;
+  position: relative;
+  background: #f8f9fa;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.content-textarea :deep(.embedded-video) {
+  width: 100%;
+  max-height: 225px; /* 16:9 比例 */
+  display: block;
+  border: none;
+}
+
+.content-textarea :deep(.video-container:hover) {
+  cursor: pointer;
+  opacity: 0.95;
+}
+
+/* 视频控件样式优化 */
+.content-textarea :deep(video::-webkit-media-controls) {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.content-textarea :deep(video::-webkit-media-controls-panel) {
+  display: flex !important;
+  opacity: 1 !important;
+}
+
+.content-textarea :deep(b) {
+  font-weight: bold;
+}
+
+.content-textarea :deep(i) {
+  font-style: italic;
+}
+
+/* 添加调试区域样式 */
+.debug-area {
+  padding: 12px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.debug-title {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.debug-content {
+  font-family: monospace;
+  font-size: 12px;
+  background: #f1f5f9;
+  padding: 8px;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: #334155;
+  max-height: 200px;
+  overflow-y: auto;
 }
 </style> 
