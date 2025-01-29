@@ -490,15 +490,17 @@ export default {
         // 1. 首先获取域名列表
         const response = await apiClient.getVercelDomainInfo(projectId);
         
-        // 2. 对于每个已验证的域名，获取其配置信息
+        // 2. 过滤并检查域名
         const verifiedDomainsPromises = response?.domains
-          ?.filter(domain => domain.verified)
+          ?.filter(domain => 
+            domain.verified && 
+            !domain.name.includes('vercel.app') && // 过滤掉 vercel.app 域名
+            domain.name !== productInfo.value?.projectWebsite // 过滤掉主域名
+          )
           ?.map(async domain => {
             try {
-              // 获取域名配置
-              const configResponse = await apiClient.getDomainConfig(domain.name);
-              // 只有配置正确的域名才返回
-              return !configResponse?.misconfigured ? domain.name : null;
+              const config = await apiClient.getVercelDomainConfig(domain.name);
+              return !config?.misconfigured ? domain.name : null;
             } catch (error) {
               console.error(`Failed to get config for domain ${domain.name}:`, error);
               return null;
@@ -507,7 +509,7 @@ export default {
 
         // 3. 等待所有配置检查完成
         const verifiedDomainsList = (await Promise.all(verifiedDomainsPromises))
-          .filter(Boolean); // 移除 null 值
+          .filter(Boolean);
 
         await loadSubfolders();
         
@@ -793,24 +795,15 @@ export default {
 
     // 修改获取完整发布URL的方法
     const getFullPublishUrl = (record) => {
-      console.log('Publishing record:', record);
       if (!record?.publishURL || !record?.lang || !record?.slug) {
-        console.log('Missing required fields:', {
-          publishURL: record?.publishURL,
-          lang: record?.lang,
-          slug: record?.slug
-        });
         return '';
       }
       
       // 从 publishURL 中提取基础域名和路径
       let baseUrl = record.publishURL.replace(/\/+$/, '');
-      console.log('Base URL after cleanup:', baseUrl);
       
       // 分离域名和路径
       const [domain, ...pathParts] = baseUrl.split('/');
-      console.log('Domain:', domain);
-      console.log('Path parts:', pathParts);
       
       // 构建基础URL（带协议）
       const baseWithProtocol = domain.startsWith('http') ? domain : `https://${domain}`;
@@ -822,10 +815,7 @@ export default {
         record.slug                                 // slug
       ].filter(Boolean).join('/');                 // 过滤掉空值并用斜杠连接
       
-      const finalUrl = `${baseWithProtocol}/${pathComponents}`;
-      console.log('Final generated URL:', finalUrl);
-      
-      return finalUrl;
+      return `${baseWithProtocol}/${pathComponents}`;
     };
 
     // 修改发布确认处理
@@ -946,26 +936,18 @@ export default {
       }
     }
 
-    // 添加标题点击处理函数
+    // 修改标题点击处理函数
     const handleTitleClick = (record) => {
-      // 添加调试日志
-      console.log('Record:', record);
-      
       const url = record.publishStatus === 'publish' 
         ? getFullPublishUrl(record)
         : getPreviewUrl(record);
       
-      // 添加调试日志
-      console.log('Generated URL:', url);
-      
       if (url) {
-        // 使用完整的 URL，如果是已发布的页面
+        // 确保 URL 是完整的（包含 http:// 或 https://）
         if (record.publishStatus === 'publish') {
-          // 确保 URL 是完整的（包含 http:// 或 https://）
           const fullUrl = url.startsWith('http') ? url : `https://${url}`;
           window.open(fullUrl, '_blank');
         } else {
-          // 预览页面使用相对路径
           window.open(url, '_blank');
         }
       }
