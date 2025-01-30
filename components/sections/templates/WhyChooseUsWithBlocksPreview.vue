@@ -53,7 +53,7 @@ const handleRedirect = (e) => {
             <img 
               :src="content.imageUrl || '/images/placeholder.png'"
               :alt="content.imageAlt"
-              class="w-full h-full object-cover rounded-lg border border-gray-100 max-h-[300px]"
+              class="w-full h-full object-contain rounded-lg border border-gray-100 max-h-[300px]"
             />
           </div>
         </template>
@@ -62,7 +62,7 @@ const handleRedirect = (e) => {
             <img 
               :src="content.imageUrl || '/images/placeholder.png'"
               :alt="content.imageAlt"
-              class="w-full h-full object-cover rounded-lg border border-gray-100 max-h-[300px]"
+              class="w-full h-full object-contain rounded-lg border border-gray-100 max-h-[300px]"
             />
           </div>
           <div class="w-full md:w-1/2">
