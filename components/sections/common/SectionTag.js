@@ -27,7 +27,8 @@ export const SECTION_TAGS = {
     buttonText: 'button',
     ctaButtonText: 'button',
     buttonLink: 'a',
-    ctaButtonLink: 'a'
+    ctaButtonLink: 'a',
+    highlightWordCount: 'span'
   },
   WhyChooseUsWithSmallBlocks: {
     emoji: 'span',

@@ -44,7 +44,8 @@ export const createCleanComponentData = (componentType) => {
         ctaButtonText: 'Contact Sales',
         ctaButtonLink: '#',
         showButton: true,
-        showCtaButton: true
+        showCtaButton: true,
+        highlightWordCount: 2
       }
     },
     

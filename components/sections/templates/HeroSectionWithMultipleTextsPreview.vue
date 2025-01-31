@@ -13,7 +13,7 @@
               {{ titleFirstPart }}
             </span>
             <span class="inline-block -rotate-1 px-2 py-1 bg-gradient-to-r from-[#3374FF]/[0.75] via-[#3374FF]/[0.5] to-[#3374FF]/[0.75] text-white">
-              {{ titleLastTwoWords }}
+              {{ titleLastWords }}
             </span>
           </h1>
         </div>
@@ -63,11 +63,13 @@ export default {
   computed: {
     titleFirstPart() {
       const words = (this.section.topContent?.title || '').split(' ')
-      return words.slice(0, -2).join(' ')
+      const highlightCount = this.section.topContent?.highlightWordCount || 2
+      return words.slice(0, -highlightCount).join(' ')
     },
-    titleLastTwoWords() {
+    titleLastWords() {
       const words = (this.section.topContent?.title || '').split(' ')
-      return words.slice(-2).join(' ')
+      const highlightCount = this.section.topContent?.highlightWordCount || 2
+      return words.slice(-highlightCount).join(' ')
     }
   },
   methods: {

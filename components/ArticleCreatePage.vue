@@ -22,7 +22,7 @@
           class="compact-tabs"
         >
           <!-- Component selection panel -->
-          <a-tab-pane key="components" tab="Add">
+          <a-tab-pane key="components" tab="All Components">
             <div class="components-list">
               <a-collapse v-model:activeKey="activeCategories">
                 <a-collapse-panel 

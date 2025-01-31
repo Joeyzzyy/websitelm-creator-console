@@ -17,6 +17,21 @@
                 />
               </div>
             </a-form-item>
+
+            <a-form-item label="Highlight Last N Words">
+              <a-select
+                v-model:value="localSection.topContent.highlightWordCount"
+                :disabled="disabled"
+                @change="handleChange"
+                style="width: 200px"
+              >
+                <a-select-option :value="1">Last 1 Word</a-select-option>
+                <a-select-option :value="2">Last 2 Words</a-select-option>
+                <a-select-option :value="3">Last 3 Words</a-select-option>
+                <a-select-option :value="4">Last 4 Words</a-select-option>
+                <a-select-option :value="5">Last 5 Words</a-select-option>
+              </a-select>
+            </a-form-item>
     
             <a-form-item label="SubTitle">
               <div class="input-with-tag">
@@ -88,6 +103,8 @@
                 />
               </div>
             </a-form-item>
+
+            
           </a-form>
         </div>
       </div>
@@ -166,7 +183,8 @@
             showButton: true,
             ctaButtonText: '',
             ctaButtonLink: '#',
-            showCtaButton: true
+            showCtaButton: true,
+            highlightWordCount: 2
           }
         },
         styles: themeConfig.normal,
@@ -188,7 +206,8 @@
               showButton: true,
               ctaButtonText: '',
               ctaButtonLink: '#',
-              showCtaButton: true
+              showCtaButton: true,
+              highlightWordCount: 2
             }
           }
         },
