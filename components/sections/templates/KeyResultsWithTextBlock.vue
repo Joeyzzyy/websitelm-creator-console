@@ -7,7 +7,19 @@
       <div class="editor-content">
         <!-- 顶部内容 -->
         <div class="top-content">
-          <h3 class="section-title">{{ localSection.title }}</h3>
+          <a-form layout="vertical">
+            <a-form-item label="Section Title">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.contentTitle }}</span>
+                <a-input
+                  v-model:value="localSection.title"
+                  :disabled="disabled"
+                  placeholder="Enter section title"
+                  @change="handleChange"
+                />
+              </div>
+            </a-form-item>
+          </a-form>
         </div>
 
         <!-- 左侧指标部分 -->
@@ -50,162 +62,116 @@
           </a-form>
         </div>
 
-        <!-- 右侧内容部分 -->
+        <!-- 右侧内容部分 - 简化为单个编辑器 -->
         <div class="right-content">
           <div class="content-header-with-button">
-            <span>Feature Sections</span>
+            <span>Blog Content</span>
           </div>
 
-          <a-row :gutter="24">
-            <a-col 
-              v-for="(item, index) in localSection.rightContent" 
-              :key="index"
-              :span="24"
-            >
-              <div class="content-item">
-                <div class="content-header">
-                  <span>Feature Section {{ index + 1 }}</span>
+          <div class="content-item">
+            <div class="editor-wrapper">
+              <!-- 工具栏 -->
+              <div class="editor-toolbar">
+                <a-button-group>
                   <a-button 
-                    v-if="!disabled"
                     type="text"
-                    danger
-                    class="delete-btn"
-                    @click="removeContent(index)"
+                    :class="{ active: editor?.isActive('heading', { level: 1 }) }"
+                    @click="editor?.chain().focus().toggleHeading({ level: 1 }).run()"
                   >
-                    <DeleteOutlined />
+                    H1
                   </a-button>
-                </div>
-
-                <a-form layout="vertical">
-                  <a-form-item label="Content Title">
-                    <div class="input-with-tag">
-                      <span class="html-tag">{{ tags.contentTitle }}</span>
-                      <a-input
-                        v-model:value="item.contentTitle"
-                        :disabled="disabled"
-                        @change="handleChange"
-                      />
-                    </div>
-                  </a-form-item>
-
-                  <a-form-item label="Content Text">
-                    <div class="form-item-label">
-                      <div class="action-buttons">
-                        <!-- 移除了 add-image-btn -->
-                      </div>
-                    </div>
-                    <div class="input-with-tag">
-                      <span class="html-tag">{{ tags.contentText }}</span>
-                      <div class="rich-content-editor">
-                        <div class="editor-toolbar">
-                          <div class="toolbar-group">
-                            <a-tooltip title="Insert Image">
-                              <a-button 
-                                type="text"
-                                class="toolbar-btn"
-                                @click="handleAddImageClick(index)"
-                              >
-                                <picture-outlined />
-                              </a-button>
-                            </a-tooltip>
-                            <a-tooltip title="Insert Video">
-                              <a-button 
-                                type="text"
-                                class="toolbar-btn"
-                                @click="handleAddVideoClick(index)"
-                              >
-                                <video-camera-outlined />
-                              </a-button>
-                            </a-tooltip>
-                            <a-tooltip title="Add Link">
-                              <a-button 
-                                type="text"
-                                class="toolbar-btn"
-                                @click="handleAddLinkClick('contentText', 'rightContent', index)"
-                              >
-                                <link-outlined />
-                              </a-button>
-                            </a-tooltip>
-                            <a-tooltip title="Bold">
-                              <a-button 
-                                type="text"
-                                class="toolbar-btn"
-                                @click="handleBoldClick"
-                              >
-                                <bold-outlined />
-                              </a-button>
-                            </a-tooltip>
-                            <a-tooltip title="Italic">
-                              <a-button 
-                                type="text"
-                                class="toolbar-btn"
-                                @click="handleItalicClick"
-                              >
-                                <italic-outlined />
-                              </a-button>
-                            </a-tooltip>
-                          </div>
-                        </div>
-                        <div
-                          class="content-textarea"
-                          :contenteditable="!disabled"
-                          :innerHTML="formatContentWithLinks(item.contentText)"
-                          @input="(e) => handleContentInput(e, index)"
-                          @select="() => handleTextSelect('contentText', 'rightContent', index)"
-                          :ref="el => textareaRefs[index] = el"
-                        ></div>
-                        <div class="editor-footer">
-                          <span class="char-count">{{ item.contentText.length }} characters</span>
-                        </div>
-                        <!-- 添加调试区域 -->
-                        <div class="debug-area">
-                          <div class="debug-title">Raw HTML Content:</div>
-                          <pre class="debug-content">{{ item.contentText }}</pre>
-                        </div>
-                      </div>
-                    </div>
-                  </a-form-item>
-                </a-form>
-
-                <!-- 添加链接列表显示区域 -->
-                <div class="link-tags" v-if="getLinksByField('rightContent', index, 'contentText').length">
-                  <div 
-                    v-for="(link, linkIndex) in getLinksByField('rightContent', index, 'contentText')" 
-                    :key="linkIndex"
-                    class="link-tag"
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('heading', { level: 2 }) }"
+                    @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()"
                   >
-                    <span class="link-text">{{ link.text }}</span>
-                    <span class="link-url">({{ link.url }})</span>
-                    <a-button 
-                      type="text" 
-                      size="small"
-                      @click="removeLink(link.globalIndex)"
-                    >
-                      <close-outlined />
-                    </a-button>
-                  </div>
-                </div>
-              </div>
-            </a-col>
-          </a-row>
+                    H2
+                  </a-button>
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('heading', { level: 3 }) }"
+                    @click="editor?.chain().focus().toggleHeading({ level: 3 }).run()"
+                  >
+                    H3
+                  </a-button>
+                </a-button-group>
 
-          <a-button 
-            v-if="!disabled"
-            type="primary" 
-            class="add-content-btn bottom-add-btn"
-            @click="addContent"
-          >
-            Add Feature Section
-          </a-button>
+                <a-divider type="vertical" />
+
+                <a-button-group>
+                  <a-button 
+                    type="text" 
+                    :class="{ active: editor?.isActive('bold') }"
+                    @click="editor?.chain().focus().toggleBold().run()"
+                  >
+                    <bold-outlined />
+                  </a-button>
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('italic') }"
+                    @click="editor?.chain().focus().toggleItalic().run()"
+                  >
+                    <italic-outlined />
+                  </a-button>
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('strike') }"
+                    @click="editor?.chain().focus().toggleStrike().run()"
+                  >
+                    <strikethrough-outlined />
+                  </a-button>
+                </a-button-group>
+
+                <a-divider type="vertical" />
+
+                <a-button-group>
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('bulletList') }"
+                    @click="editor?.chain().focus().toggleBulletList().run()"
+                  >
+                    <unordered-list-outlined />
+                  </a-button>
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('orderedList') }"
+                    @click="editor?.chain().focus().toggleOrderedList().run()"
+                  >
+                    <ordered-list-outlined />
+                  </a-button>
+                </a-button-group>
+
+                <a-divider type="vertical" />
+
+                <a-button-group>
+                  <a-button type="text" @click="handleAddImageClick">
+                    <picture-outlined />
+                  </a-button>
+                  <a-button type="text" @click="handleAddVideoClick">
+                    <video-camera-outlined />
+                  </a-button>
+                  <a-button type="text" @click="handleAddLinkClick">
+                    <link-outlined />
+                  </a-button>
+                </a-button-group>
+              </div>
+
+              <editor-content 
+                :editor="editor" 
+                class="content-textarea"
+              />
+            </div>
+          </div>
+
+          <!-- 添加调试区域 -->
+          <div class="debug-area">
+            <div class="debug-title">Editor HTML Content:</div>
+            <pre class="debug-content">{{ editorContent }}</pre>
+          </div>
         </div>
 
-        <!-- 添加链接输入弹窗 -->
-        <a-modal
-          v-model:visible="linkModalVisible"
-          title="Add Link"
-          @ok="handleAddLink"
-          @cancel="handleCancelLink"
-        >
+        <!-- Modal 部分保持不变 -->
+        <a-modal v-model:visible="linkModalVisible" title="Add Link" @ok="handleAddLink" @cancel="handleCancelLink">
           <p class="selected-text-preview">Selected Text: {{ selectedText }}</p>
           <a-input 
             v-model:value="linkUrl"
@@ -213,14 +179,7 @@
           />
         </a-modal>
 
-        <!-- 添加图片库 Modal -->
-        <a-modal
-          v-model:visible="imageLibraryVisible"
-          title="Select Image"
-          width="800px"
-          @ok="handleImageSelect"
-          @cancel="handleImageLibraryCancel"
-        >
+        <a-modal v-model:visible="imageLibraryVisible" title="Select Image" width="800px" @ok="handleImageSelect" @cancel="handleImageLibraryCancel">
           <image-library
             v-if="imageLibraryVisible"
             @select="onImageSelect"
@@ -228,14 +187,7 @@
           />
         </a-modal>
 
-        <!-- 添加视频库 Modal -->
-        <a-modal
-          v-model:visible="videoLibraryVisible"
-          title="Select Video"
-          width="800px"
-          @ok="handleVideoSelect"
-          @cancel="handleVideoLibraryCancel"
-        >
+        <a-modal v-model:visible="videoLibraryVisible" title="Select Video" width="800px" @ok="handleVideoSelect" @cancel="handleVideoLibraryCancel">
           <video-library
             v-if="videoLibraryVisible"
             @select="onVideoSelect"
@@ -268,9 +220,48 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import KeyResultsWithTextBlockPreview from './KeyResultsWithTextBlockPreview.vue'
 import themeConfig from '../../../assets/config/themeConfig'
-import { LinkOutlined, DeleteOutlined, PictureOutlined, CloseOutlined, VideoCameraOutlined, BoldOutlined, ItalicOutlined } from '@ant-design/icons-vue'
+import { LinkOutlined, DeleteOutlined, PictureOutlined, CloseOutlined, VideoCameraOutlined, BoldOutlined, ItalicOutlined, StrikethroughOutlined, UnorderedListOutlined, OrderedListOutlined } from '@ant-design/icons-vue'
 import ImageLibrary from '../common/ImageLibrary.vue'
 import VideoLibrary from '../common/VideoLibrary.vue'
+import { debounce } from 'lodash'
+import { Editor, EditorContent } from '@tiptap/vue-3'
+import StarterKit from '@tiptap/starter-kit'
+import Image from '@tiptap/extension-image'
+import Link from '@tiptap/extension-link'
+import { Node } from '@tiptap/core'
+
+// 创建视频扩展
+const Video = Node.create({
+  name: 'video',
+  group: 'block',
+  atom: true,
+
+  addAttributes() {
+    return {
+      src: {
+        default: null,
+      },
+      controls: {
+        default: true,
+      },
+      class: {
+        default: 'embedded-video',
+      },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'video',
+      },
+    ]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['video', HTMLAttributes]
+  },
+})
 
 export default {
   name: 'KeyResultsWithTextBlock',
@@ -285,7 +276,11 @@ export default {
     VideoCameraOutlined,
     VideoLibrary,
     BoldOutlined,
-    ItalicOutlined
+    ItalicOutlined,
+    StrikethroughOutlined,
+    UnorderedListOutlined,
+    OrderedListOutlined,
+    EditorContent
   },
   computed: {
     tags() {
@@ -297,277 +292,103 @@ export default {
       localSection: {
         title: '',
         leftContent: [],
-        rightContent: []
+        rightContent: [{ contentText: '' }] // 简化为单个内容
       },
+      editor: null, // 改为单个编辑器
       linkModalVisible: false,
+      imageLibraryVisible: false,
+      videoLibraryVisible: false,
       linkUrl: '',
       selectedText: '',
-      textLinks: [],
-      currentField: null,
       styles: themeConfig.normal,
-      imageLibraryVisible: false,
-      currentContentIndex: null,
-      cursorPositions: {},
-      currentTextareaIndex: null,
-      contentTextArea: [],
       selectedImage: null,
-      textareaRefs: {},
-      savedSelection: null,
-      videoLibraryVisible: false,
       selectedVideo: null,
-      lastCaretPosition: null,
+      editorContent: '', // 添加这个属性
     }
   },
   created() {
     this.localSection = Object.assign({
       title: '',
       leftContent: [],
-      rightContent: []
+      rightContent: [{ contentText: '' }]
     }, JSON.parse(JSON.stringify(this.section)))
     
     if (!Array.isArray(this.localSection.leftContent)) {
       this.localSection.leftContent = []
     }
-    if (!Array.isArray(this.localSection.rightContent)) {
-      this.localSection.rightContent = []
-    }
+    
+    // 确保只有一个 rightContent
+    this.localSection.rightContent = [
+      this.localSection.rightContent[0] || { contentText: '' }
+    ]
+
     this.$nextTick(() => {
-      this.detectExistingLinks();
-    });
+      this.initEditor()
+    })
+    
+    this.debouncedHandleChange = debounce(this.handleChange, 300)
   },
-  watch: {
-    section: {
-      handler(newVal) {
-        this.localSection = Object.assign({
-          title: '',
-          leftContent: [],
-          rightContent: []
-        }, JSON.parse(JSON.stringify(newVal)))
-        
-        if (!Array.isArray(this.localSection.leftContent)) {
-          this.localSection.leftContent = []
-        }
-        if (!Array.isArray(this.localSection.rightContent)) {
-          this.localSection.rightContent = []
-        }
-      },
-      deep: true
+  beforeUnmount() {
+    if (this.editor) {
+      this.editor.destroy()
     }
   },
   methods: {
-    handleChange() {
-      this.emitUpdate(this.localSection)
-    },
+    initEditor() {
+      if (this.editor) {
+        this.editor.destroy()
+      }
 
-    detectExistingLinks() {
-      this.localSection.rightContent.forEach((content, index) => {
-        const text = content.contentText;
-        const linkRegex = /<a\s+href="([^"]+)">([^<]+)<\/a>/g;
-        let match;
-        
-        while ((match = linkRegex.exec(text)) !== null) {
-          const [fullMatch, url, linkText] = match;
-          const exists = this.textLinks.some(link => 
-            link.text === linkText && 
-            link.url === url && 
-            link.field.type === 'rightContent' && 
-            link.field.index === index && 
-            link.field.field === 'contentText'
-          );
+      this.editor = new Editor({
+        extensions: [
+          StarterKit,
+          Image.configure({
+            inline: true,
+            HTMLAttributes: {
+              class: 'embedded-image',
+            },
+          }),
+          Link.configure({
+            openOnClick: false,
+            HTMLAttributes: {
+              class: 'content-link',
+            },
+          }),
+          Video.configure({
+            HTMLAttributes: {
+              class: 'embedded-video',
+              controls: true,
+              preload: 'metadata',
+            },
+          }),
+        ],
+        content: this.localSection.rightContent[0].contentText || '',
+        editable: !this.disabled,
+        autofocus: false,
+        onUpdate: ({ editor }) => {
+          if (this._isDestroyed) return
           
-          if (!exists) {
-            this.textLinks.push({
-              text: linkText,
-              url: url,
-              field: {
-                type: 'rightContent',
-                index: index,
-                field: 'contentText'
-              }
-            });
-          }
-        }
-      });
-    },
-
-    handleChange(value, field, contentType, index) {
-      // 检查并清理失效的链接
-      this.cleanInvalidLinks(value, field, contentType, index);
-      this.emitUpdate(this.localSection);
-    },
-
-    cleanInvalidLinks(currentValue, field, contentType, index) {
-      const linksForField = this.getLinksByField(contentType, index, field);
-      
-      linksForField.forEach(link => {
-        // 检查链接文本是否完整存在于当前值中
-        if (!currentValue.includes(link.text)) {
-          // 移除 a 标签，恢复为纯文本
-          const content = this.localSection[contentType][index];
-          const linkRegex = new RegExp(`<a[^>]*>${link.text}</a>`);
-          content[field] = content[field].replace(linkRegex, link.text);
-          
-          // 从 textLinks 中移除该链接
-          this.textLinks.splice(link.globalIndex, 1);
-        }
-      });
-    },
-
-    // 修改输入框的 change 事件绑定
-    handleInputChange(e, field, contentType, index) {
-      const value = e.target.value;
-      this.handleChange(value, field, contentType, index);
-    },
-
-    handleTextSelect(field, contentType, index) {
-      const selection = window.getSelection();
-      const text = selection.toString().trim();
-      
-      if (text) {
-        this.selectedText = text;
-        this.currentField = {
-          type: contentType,
-          index: index,
-          field: field
-        };
-        this.saveSelection();
-      }
-    },
-
-    saveSelection() {
-      const selection = window.getSelection();
-      if (selection.rangeCount > 0) {
-        this.savedSelection = selection.getRangeAt(0);
-      }
-    },
-
-    restoreSelection() {
-      if (this.savedSelection) {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(this.savedSelection);
-      }
-    },
-
-    handleAddLinkClick(field, contentType, index) {
-      const selection = window.getSelection();
-      const text = selection.toString().trim();
-      
-      if (text) {
-        this.selectedText = text;
-        this.currentField = {
-          type: contentType,
-          index: index,
-          field: field
-        };
-        this.saveSelection();
-        this.linkModalVisible = true;
-      } else {
-        this.$message.warning('Please select text');
-      }
-    },
-
-    handleAddLink() {
-      if (!this.linkUrl || !this.selectedText) {
-        this.$message.warning('Please enter URL');
-        return;
-      }
-
-      try {
-        this.restoreSelection();
-        
-        const selection = window.getSelection();
-        const range = selection.getRangeAt(0);
-        
-        const linkElement = document.createElement('a');
-        linkElement.href = this.linkUrl;
-        linkElement.textContent = this.selectedText;
-        
-        range.deleteContents();
-        range.insertNode(linkElement);
-        
-        this.textLinks.push({
-          text: this.selectedText,
-          url: this.linkUrl,
-          field: { ...this.currentField }
-        });
-        
-        const editor = this.textareaRefs[this.currentField.index];
-        if (editor) {
-          const content = this.localSection[this.currentField.type][this.currentField.index];
-          content[this.currentField.field] = editor.innerHTML
-            .replace(/<br>/g, '\n')
-            .replace(/<div>/g, '\n')
-            .replace(/<\/div>/g, '')
-            .replace(/&nbsp;/g, ' ');
-          
-          this.handleChange();
-        }
-
-        this.handleCancelLink();
-        this.$message.success('Link added successfully');
-      } catch (error) {
-        console.error('Error adding link:', error);
-        this.$message.error('Failed to add link, please try again');
-      }
-    },
-
-    handleCancelLink() {
-      this.linkModalVisible = false;
-      this.linkUrl = '';
-      this.selectedText = '';
-      this.currentField = null;
-      this.savedSelection = null;
-    },
-
-    getLinksByField(contentType, index, field) {
-      const filteredLinks = this.textLinks.map((link, idx) => ({
-        ...link,
-        globalIndex: idx
-      })).filter(link => 
-        link.field.type === contentType && 
-        link.field.index === index && 
-        link.field.field === field
-      );
-      return filteredLinks;
-    },
-
-    removeLink(globalIndex) {
-      const link = this.textLinks[globalIndex];
-      if (!link) return;
-
-      const content = this.localSection[link.field.type][link.field.index];
-      const linkRegex = new RegExp(`<a[^>]*>${link.text}</a>`);
-      content[link.field.field] = content[link.field.field]
-        .replace(linkRegex, link.text);
-      
-      this.textLinks.splice(globalIndex, 1);
-      this.handleChange();
-    },
-
-    removeContent(index) {
-      this.localSection.rightContent.splice(index, 1);
-      this.handleChange();
-    },
-
-    addContent() {
-      this.localSection.rightContent.push({
-        contentTitle: '',
-        contentText: ''
+          const html = editor.getHTML()
+          this.editorContent = html // 更新 HTML 内容
+          this.localSection.rightContent[0].contentText = html
+          this.debouncedHandleChange()
+        },
       })
-      this.handleChange()
+
+      // 初始化时也设置一次内容
+      this.$nextTick(() => {
+        if (this.editor) {
+          this.editorContent = this.editor.getHTML()
+        }
+      })
     },
 
-    handleAddImageClick(index) {
-      const selection = window.getSelection();
-      if (!selection.toString().trim()) {
-        this.currentContentIndex = index;
-        this.currentTextareaIndex = index;
-        this.saveSelection();
-        this.imageLibraryVisible = true;
-      } else {
-        this.$message.warning('Please clear text selection before inserting image');
-      }
+    handleChange() {
+      this.$emit('update', this.localSection)
+    },
+
+    handleAddImageClick() {
+      this.imageLibraryVisible = true
     },
 
     onImageSelect(image) {
@@ -575,220 +396,34 @@ export default {
     },
 
     handleImageSelect() {
-      if (!this.selectedImage || this.currentContentIndex === null) {
-        this.$message.warning('Please select an image first');
-        return;
+      if (!this.selectedImage) {
+        this.$message.warning('Please select an image first')
+        return
       }
 
       try {
-        this.restoreSelection();
-        
-        const selection = window.getSelection();
-        const range = selection.getRangeAt(0);
-        
-        const imgElement = document.createElement('img');
-        imgElement.src = this.selectedImage.url;
-        imgElement.alt = this.selectedImage.name;
-        
-        range.deleteContents();
-        range.insertNode(imgElement);
-        
-        range.setStartAfter(imgElement);
-        range.setEndAfter(imgElement);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        
-        const editor = this.textareaRefs[this.currentContentIndex];
-        if (editor) {
-          const content = this.localSection.rightContent[this.currentContentIndex];
-          content.contentText = editor.innerHTML
-            .replace(/<br>/g, '\n')
-            .replace(/<div>/g, '\n')
-            .replace(/<\/div>/g, '')
-            .replace(/&nbsp;/g, ' ');
-          
-          this.handleChange();
+        if (this.editor) {
+          this.editor
+            .chain()
+            .focus()
+            .setImage({ src: this.selectedImage.url, alt: this.selectedImage.name })
+            .run()
         }
-
-        this.handleImageLibraryCancel();
-        this.$message.success('Image inserted successfully');
+        this.handleImageLibraryCancel()
+        this.$message.success('Image inserted successfully')
       } catch (error) {
-        console.error('Error inserting image:', error);
-        this.$message.error('Failed to insert image, please try again');
+        console.error('Error inserting image:', error)
+        this.$message.error('Failed to insert image, please try again')
       }
     },
 
     handleImageLibraryCancel() {
       this.imageLibraryVisible = false;
       this.selectedImage = null;
-      this.currentContentIndex = null;
-      this.savedSelection = null;
     },
 
-    hasImageTags(text) {
-      return /<img[^>]+>/g.test(text);
-    },
-
-    extractImages(text) {
-      const imgRegex = /<img[^>]+src="([^"]+)"[^>]+alt="([^"]+)"[^>]*>/g;
-      const images = [];
-      let match;
-
-      while ((match = imgRegex.exec(text)) !== null) {
-        images.push({
-          fullTag: match[0],
-          src: match[1],
-          alt: match[2]
-        });
-      }
-
-      return images;
-    },
-
-    removeImage(contentIndex, imgTag) {
-      const content = this.localSection.rightContent[contentIndex];
-      content.contentText = content.contentText.replace(imgTag, '');
-      this.handleChange();
-    },
-
-    handleTextareaEvent(event, index) {
-      this.currentTextareaIndex = index;
-      this.updateCursorPosition(index, event);
-    },
-
-    // 更新光标位置的方法
-    updateCursorPosition(index, event) {
-      const textareaElement = event.target;
-      if (textareaElement) {
-        this.cursorPositions[index] = textareaElement.selectionStart;
-      }
-    },
-
-    formatContentWithLinks(content) {
-      if (!content) return '';
-      return content
-        .replace(/\n/g, '<br>')
-        .replace(/&nbsp;/g, ' ');
-    },
-
-    handleContentInput(event, index) {
-      try {
-        // 保存当前光标位置相关信息
-        const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0);
-          const preCaretRange = range.cloneRange();
-          preCaretRange.selectNodeContents(event.target);
-          preCaretRange.setEnd(range.endContainer, range.endOffset);
-          
-          // 计算真实的光标位置，考虑换行符
-          let position = 0;
-          const walker = document.createTreeWalker(
-            event.target,
-            NodeFilter.SHOW_TEXT,
-            null,
-            false
-          );
-          
-          let node;
-          let found = false;
-          while ((node = walker.nextNode()) && !found) {
-            if (node === range.endContainer) {
-              position += range.endOffset;
-              found = true;
-            } else {
-              position += node.length;
-            }
-            
-            // 如果节点后面有 <br>，添加换行符的长度
-            const nextSibling = node.nextSibling;
-            if (nextSibling && nextSibling.nodeName === 'BR') {
-              position += 1;
-            }
-          }
-          
-          this.lastCaretPosition = {
-            globalPosition: position,
-            node: range.endContainer,
-            offset: range.endOffset
-          };
-          
-          console.log('保存光标位置:', {
-            globalPosition: position,
-            nodeType: range.endContainer.nodeType,
-            nodeValue: range.endContainer.nodeValue,
-            offset: range.endOffset
-          });
-        }
-
-        const content = event.target.innerHTML;
-        console.log('更新前的内容:', content);
-        
-        this.localSection.rightContent[index].contentText = content;
-        
-        this.$nextTick(() => {
-          if (this.lastCaretPosition && this.textareaRefs[index]) {
-            const editor = this.textareaRefs[index];
-            console.log('编辑器内容:', editor.innerHTML);
-            
-            // 重新定位光标
-            let currentPos = 0;
-            let targetNode = null;
-            let targetOffset = 0;
-            
-            const walker = document.createTreeWalker(
-              editor,
-              NodeFilter.SHOW_TEXT,
-              null,
-              false
-            );
-            
-            let node;
-            while ((node = walker.nextNode())) {
-              const nodeLength = node.length;
-              
-              // 考虑节点后的换行符
-              let effectiveLength = nodeLength;
-              const nextSibling = node.nextSibling;
-              if (nextSibling && nextSibling.nodeName === 'BR') {
-                effectiveLength += 1;
-              }
-              
-              if (currentPos + effectiveLength >= this.lastCaretPosition.globalPosition) {
-                targetNode = node;
-                targetOffset = this.lastCaretPosition.globalPosition - currentPos;
-                break;
-              }
-              currentPos += effectiveLength;
-            }
-            
-            if (targetNode) {
-              const selection = window.getSelection();
-              const range = document.createRange();
-              range.setStart(targetNode, targetOffset);
-              range.setEnd(targetNode, targetOffset);
-              selection.removeAllRanges();
-              selection.addRange(range);
-            }
-          }
-        });
-        
-        this.handleChange();
-      } catch (error) {
-        console.error('内容更新错误:', error);
-      }
-    },
-
-    handleAddVideoClick(index) {
-      const selection = window.getSelection();
-      if (!selection.toString().trim()) {
-        this.currentContentIndex = index;
-        this.currentTextareaIndex = index;
-        this.saveSelection();
-        this.videoLibraryVisible = true;
-      } else {
-        this.$message.warning('Please clear text selection before inserting video');
-      }
+    handleAddVideoClick() {
+      this.videoLibraryVisible = true
     },
 
     onVideoSelect(video) {
@@ -796,117 +431,64 @@ export default {
     },
 
     handleVideoSelect() {
-      if (!this.selectedVideo || this.currentContentIndex === null) {
-        this.$message.warning('Please select a video first');
-        return;
+      if (!this.selectedVideo) {
+        this.$message.warning('Please select a video first')
+        return
       }
 
       try {
-        this.restoreSelection();
-        
-        const selection = window.getSelection();
-        const range = selection.getRangeAt(0);
-        
-        const videoContainer = document.createElement('div');
-        videoContainer.className = 'video-container';
-        
-        const videoElement = document.createElement('video');
-        videoElement.src = this.selectedVideo.url;
-        videoElement.controls = true;
-        videoElement.preload = 'metadata';
-        videoElement.className = 'embedded-video';
-        
-        videoContainer.appendChild(videoElement);
-        
-        range.deleteContents();
-        range.insertNode(videoContainer);
-        
-        range.setStartAfter(videoContainer);
-        range.setEndAfter(videoContainer);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        
-        const editor = this.textareaRefs[this.currentContentIndex];
-        if (editor) {
-          const content = this.localSection.rightContent[this.currentContentIndex];
-          content.contentText = editor.innerHTML
-            .replace(/<br>/g, '\n')
-            .replace(/<div>/g, '\n')
-            .replace(/<\/div>/g, '')
-            .replace(/&nbsp;/g, ' ');
-          
-          this.handleChange();
+        if (this.editor) {
+          const videoHtml = `<div class="video-container"><video src="${this.selectedVideo.url}" controls preload="metadata" class="embedded-video"></video></div>`
+          this.editor
+            .chain()
+            .focus()
+            .insertContent(videoHtml)
+            .run()
         }
-
-        this.handleVideoLibraryCancel();
-        this.$message.success('Video inserted successfully');
+        this.handleVideoLibraryCancel()
+        this.$message.success('Video inserted successfully')
       } catch (error) {
-        console.error('Error inserting video:', error);
-        this.$message.error('Failed to insert video, please try again');
+        console.error('Error inserting video:', error)
+        this.$message.error('Failed to insert video, please try again')
       }
     },
 
     handleVideoLibraryCancel() {
       this.videoLibraryVisible = false;
       this.selectedVideo = null;
-      this.currentContentIndex = null;
-      this.savedSelection = null;
     },
 
-    // 更新格式化内容的方法，确保视频标签被正确处理
-    formatContentWithLinks(content) {
-      if (!content) return '';
-      return content
-        .replace(/\n/g, '<br>')
-        .replace(/&nbsp;/g, ' ');
-    },
-
-    handleBoldClick() {
-      const selection = window.getSelection();
-      const text = selection.toString().trim();
-      
-      if (text) {
-        this.restoreSelection();
-        document.execCommand('bold', false, null);
-        
-        const editor = this.textareaRefs[this.currentTextareaIndex];
-        if (editor) {
-          const content = this.localSection.rightContent[this.currentTextareaIndex];
-          content.contentText = editor.innerHTML
-            .replace(/<br>/g, '\n')
-            .replace(/<div>/g, '\n')
-            .replace(/<\/div>/g, '')
-            .replace(/&nbsp;/g, ' ');
-          
-          this.handleChange();
-        }
+    handleAddLinkClick() {
+      if (this.editor && this.editor.state.selection.content().size > 0) {
+        this.selectedText = this.editor.state.selection.content().textContent
+        this.linkModalVisible = true
       } else {
-        this.$message.warning('Please select text first');
+        this.$message.warning('Please select text first')
       }
     },
 
-    handleItalicClick() {
-      const selection = window.getSelection();
-      const text = selection.toString().trim();
-      
-      if (text) {
-        this.restoreSelection();
-        document.execCommand('italic', false, null);
-        
-        const editor = this.textareaRefs[this.currentTextareaIndex];
-        if (editor) {
-          const content = this.localSection.rightContent[this.currentTextareaIndex];
-          content.contentText = editor.innerHTML
-            .replace(/<br>/g, '\n')
-            .replace(/<div>/g, '\n')
-            .replace(/<\/div>/g, '')
-            .replace(/&nbsp;/g, ' ');
-          
-          this.handleChange();
-        }
-      } else {
-        this.$message.warning('Please select text first');
+    handleAddLink() {
+      if (!this.linkUrl || !this.selectedText) {
+        this.$message.warning('Please enter URL')
+        return
       }
+
+      if (this.editor) {
+        this.editor
+          .chain()
+          .focus()
+          .setLink({ href: this.linkUrl })
+          .run()
+      }
+
+      this.handleCancelLink()
+      this.$message.success('Link added successfully')
+    },
+
+    handleCancelLink() {
+      this.linkModalVisible = false
+      this.linkUrl = ''
+      this.selectedText = ''
     },
   }
 }
@@ -1339,137 +921,98 @@ export default {
   padding: 0;
 }
 
-.rich-content-editor {
-  width: 100%;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
+.editor-wrapper {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  margin-top: 8px;
 }
 
 .editor-toolbar {
-  padding: 8px 12px;
-  border-bottom: 1px solid #e2e8f0;
-  background: #f8fafc;
+  padding: 8px;
+  border-bottom: 1px solid #d9d9d9;
+  background: #fafafa;
   display: flex;
+  gap: 8px;
   align-items: center;
 }
 
-.toolbar-group {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.toolbar-btn {
-  padding: 6px;
+.editor-toolbar .ant-btn {
+  padding: 4px 8px;
   height: 32px;
-  width: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: all 0.2s;
 }
 
-.toolbar-btn:hover {
-  background: #e2e8f0;
+.editor-toolbar .ant-btn.active {
   color: #1890ff;
-}
-
-.toolbar-btn :deep(.anticon) {
-  font-size: 16px;
+  background: #e6f7ff;
 }
 
 .content-textarea {
-  min-height: 360px;
-  padding: 16px;
-  border: none;
-  outline: none;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 14px;
-  line-height: 1.6;
-  color: #1f2937;
-  background: #ffffff;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  word-wrap: break-word;
+  padding: 12px;
+  min-height: 120px;
 }
 
-.content-textarea:focus {
+.content-textarea :deep(.ProseMirror) {
+  min-height: 120px;
   outline: none;
+  line-height: 1.5;
 }
 
-.content-textarea :deep(img) {
-  max-width: 150px;
+.content-textarea :deep(.ProseMirror p) {
+  margin: 0 0 0.3em 0;
+}
+
+.content-textarea :deep(.ProseMirror p:last-child) {
+  margin-bottom: 0;
+}
+
+.content-textarea :deep(.ProseMirror ul),
+.content-textarea :deep(.ProseMirror ol) {
+  padding-left: 1.5em;
+  margin: 0 0 1em 0;
+}
+
+.content-textarea :deep(.ProseMirror li) {
+  margin-bottom: 0.5em;
+}
+
+.content-textarea :deep(.ProseMirror li:last-child) {
+  margin-bottom: 0;
+}
+
+.content-textarea :deep(.embedded-image) {
+  max-width: 100%;
   height: auto;
   margin: 8px 0;
   display: block;
 }
 
-.content-textarea :deep(img:hover) {
-  cursor: pointer;
-  opacity: 0.9;
+.content-textarea :deep(.video-container) {
+  margin: 8px 0;
 }
 
-.content-textarea :deep(a) {
+.content-textarea :deep(.embedded-video) {
+  max-width: 100%;
+  height: auto;
+}
+
+.content-textarea :deep(.content-link) {
   color: #1890ff;
+  text-decoration: none;
+}
+
+.content-textarea :deep(.content-link:hover) {
   text-decoration: underline;
-  cursor: pointer;
-  background: transparent;
 }
 
-.content-textarea :deep(a:hover) {
-  color: #40a9ff;
+/* 添加光标样式 */
+.content-textarea :deep(.ProseMirror-focused) {
+  outline: none;
+  background-color: #fff;
 }
 
-.editor-footer {
-  padding: 8px 12px;
-  border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.char-count {
-  font-size: 12px;
-  color: #64748b;
-}
-
-/* 优化图片占位符的显示 */
-.content-textarea::placeholder {
-  color: #94a3b8;
-}
-
-/* 自定义滚动条样式 */
-.content-textarea::-webkit-scrollbar {
-  width: 8px;
-}
-
-.content-textarea::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
-}
-
-.content-textarea::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.content-textarea::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* 图片占位符样式 */
-.image-placeholder {
-  background: #f1f5f9;
-  border-radius: 4px;
-  padding: 8px 12px;
-  margin: 4px 0;
-  color: #1f2937;
-  font-family: monospace;
+/* 选中文本的样式 */
+.content-textarea :deep(.ProseMirror-selectednode) {
+  outline: 2px solid #1890ff;
 }
 
 .bottom-add-btn {
@@ -1519,6 +1062,7 @@ export default {
 
 /* 添加调试区域样式 */
 .debug-area {
+  margin-top: 20px;
   padding: 12px;
   border-top: 1px solid #e2e8f0;
   background: #f8fafc;

@@ -25,7 +25,7 @@
           {{ section.topContent.subTitle }}
         </p>
 
-        <div class="pt-8 flex justify-center gap-4">
+        <div class="pt-8 flex justify-center items-center gap-4">
           <button 
             v-if="section.topContent.showButton"
             @click="handleButtonClick('demo')"
@@ -41,6 +41,22 @@
           >
             {{ section.topContent.ctaButtonText }}
           </button>
+
+          <!-- Product Hunt Widget -->
+          <a 
+            v-if="section.topContent.enableProductHunt && section.topContent.productHuntId"
+            :href="`https://www.producthunt.com/posts/${section.topContent.productHuntId}?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-${section.topContent.productHuntId}`" 
+            target="_blank"
+            class="transition-transform duration-200 hover:scale-105"
+          >
+            <img 
+              :src="`https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=${section.topContent.productHuntId}&theme=light`" 
+              :alt="`${section.topContent.productHuntId} - Featured on Product Hunt`" 
+              style="width: 250px; height: 54px;"
+              width="250"
+              height="54"
+            />
+          </a>
         </div>
       </div>
     </div>
@@ -75,11 +91,23 @@ export default {
   methods: {
     handleButtonClick(type) {
       if (type === 'demo') {
-        window.open('https://calendly.com/joey-techacc/30min', '_blank')
+        window.open(this.section.topContent.buttonLink || 'https://calendly.com/joey-techacc/30min', '_blank')
       } else {
-        window.location.href = 'https://app.websitelm.com'
+        window.open(this.section.topContent.ctaButtonLink || 'https://app.websitelm.com', '_blank')
       }
     }
   }
 }
-</script> 
+</script>
+
+<style scoped>
+.ph-widget-preview {
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.ph-widget-preview:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+</style> 

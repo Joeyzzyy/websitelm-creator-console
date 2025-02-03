@@ -50,8 +50,8 @@
               <div v-for="(content, index) in props.section.rightContent" 
                    :key="index"
                    :id="`section-${index}`"
-                   class="mb-8 last:mb-0">
-                <h3 class="text-base md:text-lg font-semibold mb-3 text-gray-800">
+                   class="mb-4 last:mb-0">
+                <h3 class="text-base md:text-lg font-semibold mb-2 text-gray-800">
                   <template v-for="(part, i) in parseHtmlContent(content.contentTitle)" :key="i">
                     <a
                       v-if="part.type === 'link'"
@@ -65,7 +65,7 @@
                     <span v-else>{{ part.content }}</span>
                   </template>
                 </h3>
-                <div class="text-sm md:text-base leading-[1.6] text-gray-700 whitespace-pre-line">
+                <div class="text-sm md:text-base leading-[1.2] text-gray-700 [&>p]:mb-1 whitespace-pre-line space-y-1">
                   <template v-for="(part, i) in parseContent(content.contentText)" :key="i">
                     <img 
                       v-if="part.type === 'image'"
@@ -320,16 +320,28 @@ const parseContent = (content) => {
   
   const processNode = (node) => {
     if (node.nodeType === Node.TEXT_NODE) {
-      return node.textContent ? [{
+      return node.textContent ? node.textContent.split('\n').map(text => ({
         type: 'text',
-        content: node.textContent
-      }] : [];
+        content: text
+      })).reduce((acc, curr, idx, arr) => {
+        acc.push(curr);
+        if (idx < arr.length - 1) {
+          acc.push({ type: 'text', content: '\n' });
+        }
+        return acc;
+      }, []) : [];
     }
     
     if (node.nodeType === Node.ELEMENT_NODE) {
       const tagName = node.tagName.toLowerCase();
       
-      // 添加对 br 标签的处理
+      // 处理段落
+      if (tagName === 'p') {
+        const processedNodes = Array.from(node.childNodes).flatMap(processNode);
+        return [...processedNodes, { type: 'text', content: '\n' }];
+      }
+      
+      // 处理换行
       if (tagName === 'br') {
         return [{
           type: 'text',
@@ -337,25 +349,23 @@ const parseContent = (content) => {
         }];
       }
       
+      // 处理标题
+      if (['h1', 'h2', 'h3'].includes(tagName)) {
+        const processedNodes = Array.from(node.childNodes).flatMap(processNode);
+        return [
+          { type: 'text', content: '\n' },
+          ...processedNodes,
+          { type: 'text', content: '\n' }
+        ];
+      }
+      
       // 处理图片
       if (tagName === 'img') {
         return [{
           type: 'image',
           src: node.getAttribute('src'),
-          alt: node.getAttribute('alt') || ''
-        }];
-      }
-      
-      // 处理链接
-      if (tagName === 'a') {
-        let href = node.getAttribute('href');
-        if (href && !href.match(/^https?:\/\//)) {
-          href = `https://${href}`;
-        }
-        return [{
-          type: 'link',
-          href,
-          content: node.textContent
+          alt: node.getAttribute('alt') || '',
+          class: node.getAttribute('class') || ''
         }];
       }
       
@@ -364,20 +374,42 @@ const parseContent = (content) => {
         return [{
           type: 'video',
           src: node.getAttribute('src'),
-          controls: true,
-          preload: 'metadata'
+          controls: node.hasAttribute('controls'),
+          preload: 'metadata',
+          class: node.getAttribute('class') || ''
         }];
       }
       
-      // 处理斜体和粗体
-      if (tagName === 'i' || tagName === 'b') {
+      // 处理粗体
+      if (tagName === 'strong' || tagName === 'b') {
         const children = Array.from(node.childNodes).flatMap(processNode);
         return [{
-          type: tagName === 'i' ? 'italic' : 'bold',
+          type: 'bold',
           nested: children.length > 1,
           children,
-          content: node.innerHTML
+          content: node.textContent
         }];
+      }
+      
+      // 处理斜体
+      if (tagName === 'em' || tagName === 'i') {
+        const children = Array.from(node.childNodes).flatMap(processNode);
+        return [{
+          type: 'italic',
+          nested: children.length > 1,
+          children,
+          content: node.textContent
+        }];
+      }
+      
+      // 处理列表项
+      if (tagName === 'li') {
+        const processedNodes = Array.from(node.childNodes).flatMap(processNode);
+        return [
+          { type: 'text', content: '- ' },
+          ...processedNodes,
+          { type: 'text', content: ' ' }
+        ];
       }
       
       // 处理其他元素
@@ -387,7 +419,16 @@ const parseContent = (content) => {
     return [];
   };
   
-  return Array.from(doc.body.firstChild.childNodes).flatMap(processNode);
+  const results = Array.from(doc.body.firstChild.childNodes).flatMap(processNode);
+  
+  // 移除末尾多余的换行
+  while (results.length > 0 && 
+         results[results.length - 1].type === 'text' && 
+         results[results.length - 1].content.trim() === '') {
+    results.pop();
+  }
+  
+  return results;
 };
 </script>
 <style scoped>

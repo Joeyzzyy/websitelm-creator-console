@@ -45,7 +45,9 @@ export const createCleanComponentData = (componentType) => {
         ctaButtonLink: '#',
         showButton: true,
         showCtaButton: true,
-        highlightWordCount: 2
+        highlightWordCount: 2,
+        enableProductHunt: false,
+        productHuntId: '',
       }
     },
     

@@ -243,123 +243,123 @@
 
           <!-- Knowledge Tab Content -->
           <template v-else-if="activeTab === 'knowledge'">
-            <a-spin :spinning="loading">
-            </a-spin>
-            <div class="traffic-light-descriptions" v-if="!loading">
-              <p><span class="status-dot status-green"></span> Green: No human intervention needed.</p>
-              <p><span class="status-dot status-yellow"></span> Yellow: Requires review.</p>
-              <p><span class="status-dot status-red"></span> Red: Needs human supplementation.</p>
-            </div>
-            <div class="assets-content">
-              <div class="assets-grid" v-if="!loading">
-                <div class="main-content">
-                  <!-- Knowledge Base Status Alert -->
-                  <a-alert
-                    type="info"
-                    class="knowledge-alert"
-                  >
-                    <template #description>
-                      <div class="alert-content" v-if="processingKnowledge">
-                        <div class="kb-status-header">
-                          <div class="status-message">
-                            <p>
-                              Knowledge base processing: 
-                              <span class="highlight yellow">
-                                {{ knowledgeStatus === 'fetch' ? 'Fetching data' : 
-                                  knowledgeStatus === 'process' ? 'Processing content' : 
-                                  knowledgeStatus === 'analyze' ? 'Analyzing content' : 
-                                  knowledgeStatus === 'vector2' ? 'Vectorizing content' : 
-                                  'Initializing...' }}
-                              </span>
-                              (Estimated time: {{ knowledgeTime }}s)
-                            </p>
+            <a-spin :spinning="!loading && processingKnowledge">  <!-- 修改这里 -->
+              <div class="traffic-light-descriptions" v-if="!loading">
+                <p><span class="status-dot status-green"></span> Green: No human intervention needed.</p>
+                <p><span class="status-dot status-yellow"></span> Yellow: Requires review.</p>
+                <p><span class="status-dot status-red"></span> Red: Needs human supplementation.</p>
+              </div>
+              <div class="assets-content">
+                <div class="assets-grid" v-if="!loading">
+                  <div class="main-content">
+                    <!-- Knowledge Base Status Alert -->
+                    <a-alert
+                      type="info"
+                      class="knowledge-alert"
+                    >
+                      <template #description>
+                        <div class="alert-content" v-if="processingKnowledge">
+                          <div class="kb-status-header">
+                            <div class="status-message">
+                              <p>
+                                Knowledge base processing: 
+                                <span class="highlight yellow">
+                                  {{ knowledgeStatus === 'fetch' ? 'Fetching data' : 
+                                    knowledgeStatus === 'process' ? 'Processing content' : 
+                                    knowledgeStatus === 'analyze' ? 'Analyzing content' : 
+                                    knowledgeStatus === 'vector2' ? 'Vectorizing content' : 
+                                    'Initializing...' }}
+                                </span>
+                                (Estimated time: {{ knowledgeTime }}s)
+                              </p>
+                            </div>
                           </div>
                         </div>
+                      </template>
+                    </a-alert>
+
+                    <!-- Knowledge Base Content -->
+                    <template v-if="!processingKnowledge">
+                      <!-- Breadcrumb Navigation -->
+                      <div class="breadcrumb" v-if="currentArticle">
+                        <span @click="clearCurrentArticle">Knowledge Base</span>
+                        <span class="separator">/</span>
+                        <span>{{ currentArticle.label }}</span>
+                        <span class="separator">/</span>
+                        <span class="current">{{ currentArticle.title }}</span>
+                      </div>
+
+                      <!-- Category Grid -->
+                      <div class="grid-container" v-if="!currentArticle">
+                        <div 
+                          v-for="(articles, label) in groupedArticles" 
+                          :key="label"
+                          class="category-card"
+                        >
+                          <div class="category-header">
+                            <h2>{{ label }}</h2>
+                            <span class="article-count">{{ articles.length }} articles</span>
+                          </div>
+                          <div class="category-stats">
+                            <span class="stat-item">
+                              <span class="status-dot status-green"></span>
+                              {{ getCategoryStats(articles).green }}
+                            </span>
+                            <span class="stat-item">
+                              <span class="status-dot status-yellow"></span>
+                              {{ getCategoryStats(articles).yellow }}
+                            </span>
+                            <span class="stat-item">
+                              <span class="status-dot status-red"></span>
+                              {{ getCategoryStats(articles).red }}
+                            </span>
+                          </div>
+                          <div class="article-list">
+                            <div 
+                              v-for="article in articles" 
+                              :key="article.title"
+                              class="article-item"
+                              @click="selectArticle(article)"
+                            >
+                              <span 
+                                class="status-dot" 
+                                :class="{
+                                  'status-green': article.quality === 'A',
+                                  'status-yellow': article.quality === 'B',
+                                  'status-red': article.quality === 'C'
+                                }"
+                              ></span>
+                              {{ article.title }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Article Detail View -->
+                      <div v-else class="article-detail">
+                        <div class="article-actions">
+                          <a-button 
+                            type="primary"
+                            :loading="saving"
+                            @click="saveArticle"
+                          >
+                            Save Changes
+                          </a-button>
+                        </div>
+                        <h1 class="article-title">{{ currentArticle.title }}</h1>
+                        <a-textarea
+                          v-model:value="editableContent"
+                          :rows="20"
+                          class="article-editor"
+                          :bordered="false"
+                          placeholder="Enter article content..."
+                        />
                       </div>
                     </template>
-                  </a-alert>
-
-                  <!-- Knowledge Base Content -->
-                  <template v-if="!processingKnowledge">
-                    <!-- Breadcrumb Navigation -->
-                    <div class="breadcrumb" v-if="currentArticle">
-                      <span @click="clearCurrentArticle">Knowledge Base</span>
-                      <span class="separator">/</span>
-                      <span>{{ currentArticle.label }}</span>
-                      <span class="separator">/</span>
-                      <span class="current">{{ currentArticle.title }}</span>
-                    </div>
-
-                    <!-- Category Grid -->
-                    <div class="grid-container" v-if="!currentArticle">
-                      <div 
-                        v-for="(articles, label) in groupedArticles" 
-                        :key="label"
-                        class="category-card"
-                      >
-                        <div class="category-header">
-                          <h2>{{ label }}</h2>
-                          <span class="article-count">{{ articles.length }} articles</span>
-                        </div>
-                        <div class="category-stats">
-                          <span class="stat-item">
-                            <span class="status-dot status-green"></span>
-                            {{ getCategoryStats(articles).green }}
-                          </span>
-                          <span class="stat-item">
-                            <span class="status-dot status-yellow"></span>
-                            {{ getCategoryStats(articles).yellow }}
-                          </span>
-                          <span class="stat-item">
-                            <span class="status-dot status-red"></span>
-                            {{ getCategoryStats(articles).red }}
-                          </span>
-                        </div>
-                        <div class="article-list">
-                          <div 
-                            v-for="article in articles" 
-                            :key="article.title"
-                            class="article-item"
-                            @click="selectArticle(article)"
-                          >
-                            <span 
-                              class="status-dot" 
-                              :class="{
-                                'status-green': article.quality === 'A',
-                                'status-yellow': article.quality === 'B',
-                                'status-red': article.quality === 'C'
-                              }"
-                            ></span>
-                            {{ article.title }}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <!-- Article Detail View -->
-                    <div v-else class="article-detail">
-                      <div class="article-actions">
-                        <a-button 
-                          type="primary"
-                          :loading="saving"
-                          @click="saveArticle"
-                        >
-                          Save Changes
-                        </a-button>
-                      </div>
-                      <h1 class="article-title">{{ currentArticle.title }}</h1>
-                      <a-textarea
-                        v-model:value="editableContent"
-                        :rows="20"
-                        class="article-editor"
-                        :bordered="false"
-                        placeholder="Enter article content..."
-                      />
-                    </div>
-                  </template>
+                  </div>
                 </div>
               </div>
-            </div>
+            </a-spin>
           </template>
 
           <!-- Header Section -->
@@ -766,7 +766,7 @@ export default {
   setup() {
     const router = useRouter();
     const domainConfigured = ref(false);
-    const loading = ref(true);
+    const loading = ref(true);  // 全局 loading
     const activeTab = ref('knowledge')
     const assets = ref([])
     const pollTimer = ref(null);
@@ -894,6 +894,7 @@ export default {
             break;
           // knowledge base 的数据已经在 onMounted 中加载，这里不需要重复加载
           case 'knowledge':
+            await initKnowledgeBase();  // 添加这行，切换到 knowledge tab 时重新加载数据
             break;
         }
       } catch (error) {

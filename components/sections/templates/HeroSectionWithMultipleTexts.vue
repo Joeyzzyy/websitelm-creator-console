@@ -55,7 +55,7 @@
               </div>
             </a-form-item>
     
-            <a-form-item label="Show Button">
+            <a-form-item label="Show Button 1">
               <a-switch
                 v-model:checked="localSection.topContent.showButton"
                 :disabled="disabled"
@@ -85,7 +85,7 @@
               </div>
             </a-form-item>
 
-            <a-form-item label="Show CTA Button">
+            <a-form-item label="Show Button 2">
               <a-switch
                 v-model:checked="localSection.topContent.showCtaButton"
                 :disabled="disabled"
@@ -104,7 +104,32 @@
               </div>
             </a-form-item>
 
-            
+            <a-form-item label="Enable Product Hunt">
+              <a-switch
+                v-model:checked="localSection.topContent.enableProductHunt"
+                :disabled="disabled"
+                @change="handleChange"
+              />
+            </a-form-item>
+
+            <template v-if="localSection.topContent.enableProductHunt">
+              <a-form-item label="Product Hunt ID">
+                <div class="input-with-tag">
+                  <a-input
+                    v-model:value="localSection.topContent.productHuntId"
+                    :disabled="disabled"
+                    placeholder="e.g. 123456"
+                    @change="handleChange"
+                  />
+                  <a-tooltip>
+                    <template #title>
+                      Find your Product ID in the URL of your Product Hunt page: https://www.producthunt.com/posts/[product-id-here]
+                    </template>
+                    <QuestionCircleOutlined style="margin-left: 8px" />
+                  </a-tooltip>
+                </div>
+              </a-form-item>
+            </template>
           </a-form>
         </div>
       </div>
@@ -184,7 +209,10 @@
             ctaButtonText: '',
             ctaButtonLink: '#',
             showCtaButton: true,
-            highlightWordCount: 2
+            highlightWordCount: 2,
+            enableProductHunt: false,
+            productHuntId: '',
+            productHuntPosition: 'top-right'
           }
         },
         styles: themeConfig.normal,
@@ -207,7 +235,10 @@
               ctaButtonText: '',
               ctaButtonLink: '#',
               showCtaButton: true,
-              highlightWordCount: 2
+              highlightWordCount: 2,
+              enableProductHunt: false,
+              productHuntId: '',
+              productHuntPosition: 'top-right'
             }
           }
         },
