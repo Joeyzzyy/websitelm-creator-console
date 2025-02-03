@@ -75,32 +75,6 @@
                 <a-button-group>
                   <a-button 
                     type="text"
-                    :class="{ active: editor?.isActive('heading', { level: 1 }) }"
-                    @click="editor?.chain().focus().toggleHeading({ level: 1 }).run()"
-                  >
-                    H1
-                  </a-button>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('heading', { level: 2 }) }"
-                    @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()"
-                  >
-                    H2
-                  </a-button>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('heading', { level: 3 }) }"
-                    @click="editor?.chain().focus().toggleHeading({ level: 3 }).run()"
-                  >
-                    H3
-                  </a-button>
-                </a-button-group>
-
-                <a-divider type="vertical" />
-
-                <a-button-group>
-                  <a-button 
-                    type="text" 
                     :class="{ active: editor?.isActive('bold') }"
                     @click="editor?.chain().focus().toggleBold().run()"
                   >
