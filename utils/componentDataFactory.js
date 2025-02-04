@@ -608,6 +608,81 @@ export const createCleanComponentData = (componentType) => {
           targetUrl: '#'
         }
       ]
+    },
+
+    SubscriptionCard: {
+      title: '[DEMO] Choose Your Plan',
+      subTitle: '[DEMO] Select a plan that suits your needs',
+      bottomContent: {
+        plans: [
+          {
+            name: 'Basic',
+            price: {
+              monthly: '29',
+              yearly: '24'
+            },
+            discount: '20%',
+            description: 'Perfect for getting started',
+            buttonText: 'Get Started',
+            popular: false,
+            features: [
+              {
+                title: 'Core Features',
+                items: [
+                  'Up to 10 users',
+                  'Basic analytics',
+                  'Email support'
+                ]
+              }
+            ]
+          },
+          {
+            name: 'Professional',
+            price: {
+              monthly: '79',
+              yearly: '64'
+            },
+            discount: '20%',
+            description: 'Best for growing teams',
+            buttonText: 'Start Free Trial',
+            popular: true,
+            features: [
+              {
+                title: 'Everything in Basic, plus:',
+                items: [
+                  'Up to 50 users',
+                  'Advanced analytics',
+                  'Priority support',
+                  'Custom integrations'
+                ]
+              }
+            ]
+          },
+          {
+            name: 'Enterprise',
+            price: {
+              monthly: '199',
+              yearly: '164'
+            },
+            discount: '20%',
+            description: 'For large organizations',
+            buttonText: 'Contact Sales',
+            popular: false,
+            features: [
+              {
+                title: 'Everything in Pro, plus:',
+                items: [
+                  'Unlimited users',
+                  'Custom reporting',
+                  'Dedicated support',
+                  'Advanced security',
+                  'SLA guarantee'
+                ]
+              }
+            ]
+          }
+        ]
+      }
     }
   };
 

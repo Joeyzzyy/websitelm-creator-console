@@ -195,6 +195,18 @@ export const SECTION_TAGS = {
     targetUrl: 'a',
     cardTitle: 'h3',
     tag: 'p'
+  },
+  SubscriptionCard: {
+    title: 'h2',
+    subTitle: 'p',
+    planName: 'h3',
+    monthlyPrice: 'span',
+    yearlyPrice: 'span',
+    discount: 'span',
+    description: 'p',
+    buttonText: 'button',
+    featureTitle: 'h4',
+    featureItem: 'li'
   }
 }
   

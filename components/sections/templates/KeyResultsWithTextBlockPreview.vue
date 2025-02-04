@@ -16,12 +16,14 @@
               </h3>
               <ul class="space-y-2">
                 <li v-for="(content, index) in props.section.rightContent" :key="`toc-${index}`">
-                  <button
-                    @click="scrollToSection(`section-${index}`)"
-                    class="text-gray-600 hover:text-blue-600 text-xs text-left"
-                  >
-                    {{ content.contentTitle }}
-                  </button>
+                  <template v-for="(title, titleIndex) in extractContentTitle(content.contentText)" :key="`title-${titleIndex}`">
+                    <button
+                      @click="scrollToSection(`section-${index}`)"
+                      class="text-gray-600 hover:text-blue-600 text-xs text-left"
+                    >
+                      {{ title }}
+                    </button>
+                  </template>
                 </li>
               </ul>
             </div>
@@ -51,20 +53,6 @@
                    :key="index"
                    :id="`section-${index}`"
                    class="mb-4 last:mb-0">
-                <h3 class="text-base md:text-lg font-semibold mb-2 text-gray-800">
-                  <template v-for="(part, i) in parseHtmlContent(content.contentTitle)" :key="i">
-                    <a
-                      v-if="part.type === 'link'"
-                      :href="part.href"
-                      class="text-blue-500 hover:text-blue-700 hover:underline font-bold"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >{{ part.content }}</a>
-                    <i v-else-if="part.type === 'italic'">{{ part.content }}</i>
-                    <b v-else-if="part.type === 'bold'">{{ part.content }}</b>
-                    <span v-else>{{ part.content }}</span>
-                  </template>
-                </h3>
                 <div class="text-sm md:text-base leading-[1.2] text-gray-700 [&>p]:mb-1 whitespace-pre-line space-y-1">
                   <template v-for="(part, i) in parseContent(content.contentText)" :key="i">
                     <img 
@@ -92,7 +80,7 @@
                         class="embedded-video w-full rounded-lg"
                       ></video>
                     </div>
-                    <i v-else-if="part.type === 'italic'" class="italic">
+                    <i v-else-if="part.type === 'italic' || part.type === 'em'" class="italic">
                       <template v-if="part.nested">
                         <template v-for="(child, j) in part.children" :key="j">
                           <img 
@@ -385,7 +373,7 @@ const parseContent = (content) => {
         const children = Array.from(node.childNodes).flatMap(processNode);
         return [{
           type: 'bold',
-          nested: children.length > 1,
+          nested: children.length > 1 || children.some(child => child.type === 'italic' || child.type === 'em'),
           children,
           content: node.textContent
         }];
@@ -396,9 +384,19 @@ const parseContent = (content) => {
         const children = Array.from(node.childNodes).flatMap(processNode);
         return [{
           type: 'italic',
-          nested: children.length > 1,
+          nested: children.length > 1 || children.some(child => child.type === 'bold'),
           children,
           content: node.textContent
+        }];
+      }
+      
+      // 处理 span，特别是 content-subtitle class
+      if (tagName === 'span' && node.classList.contains('content-subtitle')) {
+        const children = Array.from(node.childNodes).flatMap(processNode);
+        return [{
+          type: 'text',
+          content: node.textContent,
+          isSubtitle: true
         }];
       }
       
@@ -410,6 +408,15 @@ const parseContent = (content) => {
           ...processedNodes,
           { type: 'text', content: ' ' }
         ];
+      }
+      
+      // 添加链接处理
+      if (tagName === 'a') {
+        return [{
+          type: 'link',
+          href: node.getAttribute('href'),
+          content: node.textContent
+        }];
       }
       
       // 处理其他元素
@@ -429,6 +436,18 @@ const parseContent = (content) => {
   }
   
   return results;
+};
+
+// 添加提取标题的函数
+const extractContentTitle = (contentText) => {
+  if (!contentText) return [];
+  
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(contentText, 'text/html');
+  const subtitleSpans = doc.querySelectorAll('span.content-subtitle');
+  
+  // 返回所有副标题文本组成的数组
+  return Array.from(subtitleSpans).map(span => span.textContent);
 };
 </script>
 <style scoped>

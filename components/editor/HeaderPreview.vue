@@ -19,10 +19,16 @@
           :trigger="['hover']"
           placement="bottom"
         >
-          <a class="menu-item" @click.prevent :style="{ 
-            fontWeight: item.fontWeight,
-            color: item.color || '#4b5563'
-          }">
+          <a 
+            class="menu-item" 
+            :href="item.link"
+            :target="item.isExternal ? '_blank' : '_self'"
+            :rel="item.isExternal ? 'noopener noreferrer' : ''"
+            :style="{ 
+              fontWeight: item.fontWeight,
+              color: item.color || '#4b5563'
+            }"
+          >
             {{ item.label }}
             <down-outlined />
           </a>
@@ -40,10 +46,10 @@
 
         <a 
           v-else
-          :href="item.href"
-          target="_blank"
-          rel="noopener noreferrer"
           class="menu-item"
+          :href="item.link"
+          :target="item.isExternal ? '_blank' : '_self'"
+          :rel="item.isExternal ? 'noopener noreferrer' : ''"
           :style="{ 
             fontWeight: item.fontWeight,
             color: item.color || '#4b5563'
@@ -137,6 +143,7 @@ const computedStyles = computed(() => {
 
 .menu-item:hover {
   color: #1890ff;
+  text-decoration: none;
 }
 
 .actions {

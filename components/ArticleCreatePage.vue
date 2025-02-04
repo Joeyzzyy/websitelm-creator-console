@@ -439,6 +439,8 @@ import ProductBenefitsWithBlocks from './sections/templates/ProductBenefitsWithB
 import ProductBenefitsWithBlocksPreview from './sections/templates/ProductBenefitsWithBlocksPreview.vue';
 import UserReviewsWithMovingCards from './sections/templates/UserReviewsWithMovingCards.vue';
 import UserReviewsWithMovingCardsPreview from './sections/templates/UserReviewsWithMovingCardsPreview.vue';
+import SubscriptionCard from './sections/templates/SubscriptionCard.vue';
+import SubscriptionCardPreview from './sections/templates/SubscriptionCardPreview.vue';
 import Faqs from './sections/templates/Faqs.vue';
 import FaqsPreview from './sections/templates/FaqsPreview.vue';
 import CallToActionComplex from './sections/templates/CallToActionComplex.vue';
@@ -535,7 +537,9 @@ export default defineComponent({
     CallToActionPreview,
     KeyResultsWithImagePreview,
     KeyResultsWithCardsPreview,
-    PageListCardPreview
+    PageListCardPreview,
+    SubscriptionCardPreview,
+    SubscriptionCard
   },
 
   setup() {

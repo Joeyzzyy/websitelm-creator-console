@@ -89,29 +89,10 @@
                   </a-button>
                   <a-button 
                     type="text"
-                    :class="{ active: editor?.isActive('strike') }"
-                    @click="editor?.chain().focus().toggleStrike().run()"
+                    :class="{ active: editor?.isActive('subtitle') }"
+                    @click="editor?.chain().focus().toggleMark('subtitle').run()"
                   >
-                    <strikethrough-outlined />
-                  </a-button>
-                </a-button-group>
-
-                <a-divider type="vertical" />
-
-                <a-button-group>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('bulletList') }"
-                    @click="editor?.chain().focus().toggleBulletList().run()"
-                  >
-                    <unordered-list-outlined />
-                  </a-button>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('orderedList') }"
-                    @click="editor?.chain().focus().toggleOrderedList().run()"
-                  >
-                    <ordered-list-outlined />
+                    <font-size-outlined />
                   </a-button>
                 </a-button-group>
 
@@ -194,7 +175,7 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import KeyResultsWithTextBlockPreview from './KeyResultsWithTextBlockPreview.vue'
 import themeConfig from '../../../assets/config/themeConfig'
-import { LinkOutlined, DeleteOutlined, PictureOutlined, CloseOutlined, VideoCameraOutlined, BoldOutlined, ItalicOutlined, StrikethroughOutlined, UnorderedListOutlined, OrderedListOutlined } from '@ant-design/icons-vue'
+import { LinkOutlined, DeleteOutlined, PictureOutlined, CloseOutlined, VideoCameraOutlined, BoldOutlined, ItalicOutlined, FontSizeOutlined } from '@ant-design/icons-vue'
 import ImageLibrary from '../common/ImageLibrary.vue'
 import VideoLibrary from '../common/VideoLibrary.vue'
 import { debounce } from 'lodash'
@@ -203,6 +184,8 @@ import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
 import { Node } from '@tiptap/core'
+import { Mark } from '@tiptap/core'
+import { mergeAttributes } from '@tiptap/core'
 
 // 创建视频扩展
 const Video = Node.create({
@@ -237,6 +220,31 @@ const Video = Node.create({
   },
 })
 
+// 创建子标题扩展
+const Subtitle = Mark.create({
+  name: 'subtitle',
+  
+  addOptions() {
+    return {
+      HTMLAttributes: {
+        class: 'content-subtitle',
+      },
+    }
+  },
+
+  parseHTML() {
+    return [
+      {
+        tag: 'span.content-subtitle',
+      },
+    ]
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['span', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0]
+  },
+})
+
 export default {
   name: 'KeyResultsWithTextBlock',
   extends: BaseSection,
@@ -251,9 +259,7 @@ export default {
     VideoLibrary,
     BoldOutlined,
     ItalicOutlined,
-    StrikethroughOutlined,
-    UnorderedListOutlined,
-    OrderedListOutlined,
+    FontSizeOutlined,
     EditorContent
   },
   computed: {
@@ -335,6 +341,7 @@ export default {
               preload: 'metadata',
             },
           }),
+          Subtitle, // 添加子标题扩展
         ],
         content: this.localSection.rightContent[0].contentText || '',
         editable: !this.disabled,
@@ -442,8 +449,8 @@ export default {
     },
 
     handleAddLink() {
-      if (!this.linkUrl || !this.selectedText) {
-        this.$message.warning('Please enter URL')
+      if (!this.linkUrl) {
+        this.$message.warning('请输入URL')
         return
       }
 
@@ -456,7 +463,7 @@ export default {
       }
 
       this.handleCancelLink()
-      this.$message.success('Link added successfully')
+      this.$message.success('链接添加成功')
     },
 
     handleCancelLink() {
@@ -1060,5 +1067,14 @@ export default {
   color: #334155;
   max-height: 200px;
   overflow-y: auto;
+}
+
+/* 添加子标题样式 */
+.content-textarea :deep(.content-subtitle) {
+  font-size: 1.25em;
+  font-weight: 600;
+  color: #374151;
+  display: inline-block;
+  line-height: 1.4;
 }
 </style> 

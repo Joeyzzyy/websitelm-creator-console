@@ -233,14 +233,26 @@
             <div class="menu-list">
               <div v-for="(item, index) in headerData.mainMenuItems" :key="index" class="menu-item">
                 <div class="menu-item-main">
-                  <a-input
-                    v-model:value="item.label"
-                    style="width: 100%"
-                    placeholder="Menu label"
-                  />
+                  <a-input-group compact>
+                    <a-input
+                      v-model:value="item.label"
+                      style="width: 40%"
+                      placeholder="Menu label"
+                    />
+                    <a-input
+                      v-model:value="item.link"
+                      style="width: 60%"
+                      placeholder="URL"
+                    />
+                  </a-input-group>
                   <a-button type="text" danger @click="removeMenuItem(index)">
                     <delete-outlined />
                   </a-button>
+                </div>
+
+                <!-- 添加外部链接选项 -->
+                <div class="menu-item-options">
+                  <a-checkbox v-model:checked="item.isExternal">Open in new tab</a-checkbox>
                 </div>
 
                 <!-- 添加字体粗细选择 -->
@@ -450,9 +462,11 @@ watch(() => props.initialData?.styles, (newStyles) => {
 const addMenuItem = () => {
   headerData.value.mainMenuItems.push({ 
     label: '',
+    link: '',  // 添加链接字段
+    isExternal: false,  // 添加是否外部链接字段
     children: [],
     fontWeight: 'normal',
-    color: '#4b5563'  // 添加默认颜色
+    color: '#4b5563'
   })
 }
 
@@ -526,7 +540,9 @@ const saveConfig = async () => {
         logo: headerData.value.logo,
         mainMenuItems: headerData.value.mainMenuItems.map(item => ({
           ...item,
-          key: item.key || `menu-${Date.now()}-${Math.random()}`
+          key: item.key || `menu-${Date.now()}-${Math.random()}`,
+          link: item.link || '#',  // 确保链接字段存在
+          isExternal: item.isExternal || false  // 确保外部链接字段存在
         })),
         actionItems: headerData.value.actionItems.map(item => ({
           ...item,
@@ -1101,5 +1117,12 @@ watch(() => props.initialData?.logo, (newLogo) => {
   margin-top: 8px;
   display: flex;
   gap: 16px;
+}
+
+.menu-item-options {
+  margin-top: 8px;
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 4px;
 }
 </style>

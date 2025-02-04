@@ -187,5 +187,15 @@ export const availableComponents = [
         template: createCleanComponentData('PageListCard'),
       }
     ]
+  },
+  {
+    category: 'Subscription',
+    items: [
+      {
+        type: 'SubscriptionCard',
+        label: 'Subscription Card',
+        template: createCleanComponentData('SubscriptionCard')
+      }
+    ]
   }
 ]; 

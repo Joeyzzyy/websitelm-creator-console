@@ -338,6 +338,16 @@ const componentValidationRules = {
         'subTitle'
       ]
     },
+    SubscriptionCard: {
+      requiredFields: [
+        'title',
+        'subTitle'
+      ],
+      allowedFields: [
+        'title',
+        'subTitle'
+      ]
+    }
   };
 
 export { componentValidationRules };

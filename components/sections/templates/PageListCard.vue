@@ -36,14 +36,30 @@
           <div v-for="(insight, index) in localSection.bottomContent" :key="index" class="card-item">
             <div class="card-header">
               <h3>Card {{ index + 1 }}</h3>
-              <a-button 
-                type="text" 
-                danger 
-                @click="removeCard(index)"
-                :disabled="disabled"
-              >
-                <delete-outlined />
-              </a-button>
+              <div class="card-actions">
+                <a-button 
+                  type="text" 
+                  @click="moveCard(index, 'up')"
+                  :disabled="disabled || index === 0"
+                >
+                  <arrow-up-outlined />
+                </a-button>
+                <a-button 
+                  type="text" 
+                  @click="moveCard(index, 'down')"
+                  :disabled="disabled || index === localSection.bottomContent.length - 1"
+                >
+                  <arrow-down-outlined />
+                </a-button>
+                <a-button 
+                  type="text" 
+                  danger 
+                  @click="removeCard(index)"
+                  :disabled="disabled"
+                >
+                  <delete-outlined />
+                </a-button>
+              </div>
             </div>
 
             <a-form-item label="Image URL">
@@ -160,7 +176,7 @@
 import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import PageListCardPreview from './PageListCardPreview.vue'
-import { DeleteOutlined, PlusOutlined } from '@ant-design/icons-vue'
+import { DeleteOutlined, PlusOutlined, ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons-vue'
 import ImageLibrary from '../common/ImageLibrary.vue'
 
 export default {
@@ -170,6 +186,8 @@ export default {
     PageListCardPreview,
     DeleteOutlined,
     PlusOutlined,
+    ArrowUpOutlined,
+    ArrowDownOutlined,
     ImageLibrary
   },
   data() {
@@ -239,6 +257,15 @@ export default {
         this.handleChange()
       }
       this.closeImageLibrary()
+    },
+
+    moveCard(index, direction) {
+      const newIndex = direction === 'up' ? index - 1 : index + 1
+      const cards = this.localSection.bottomContent
+      const temp = cards[index]
+      cards[index] = cards[newIndex]
+      cards[newIndex] = temp
+      this.handleChange()
     }
   }
 }
@@ -380,5 +407,11 @@ export default {
 
 .change-image-btn {
   flex-shrink: 0;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 </style>
