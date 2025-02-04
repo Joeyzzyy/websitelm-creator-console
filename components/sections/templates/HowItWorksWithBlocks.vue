@@ -369,7 +369,7 @@ export default {
   background: white;
   border-radius: 8px;
   padding: 24px;
-  min-height: 400px;
+  height: fit-content;
 }
 
 .modules-container {

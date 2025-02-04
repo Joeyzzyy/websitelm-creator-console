@@ -285,7 +285,7 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  min-height: 500px;
+  height: fit-content;
 }
 
 /* 编辑区域和预览区域样式 */
@@ -293,6 +293,7 @@ export default {
 .preview-area {
   border-radius: 8px;
   padding: 24px;
+  height: fit-content;
 }
 
 .editor-area {
@@ -349,11 +350,9 @@ export default {
 .preview-content {
   background: white;
   border-radius: 8px;
-  flex: 1;
   padding: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: fit-content;
+  flex: 0 0 auto;
 }
 
 .arrow-flow {

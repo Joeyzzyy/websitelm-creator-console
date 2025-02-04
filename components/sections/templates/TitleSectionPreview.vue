@@ -4,33 +4,33 @@
       <div class="content-wrapper text-center py-12 md:py-16">
         <h1 
           v-if="section.title" 
-          class="text-4xl md:text-5xl font-bold text-gray-900 mb-4"
+          class="text-xl md:text-2xl font-bold text-gray-900 mb-4"
         >
           {{ section.title }}
         </h1>
         
         <h2
           v-if="section.subTitle"
-          class="text-3xl md:text-4xl font-bold text-gray-900 mb-6"
+          class="text-lg md:text-xl font-bold text-gray-900 mb-6"
         >
           {{ section.subTitle }}
         </h2>
 
         <div class="flex justify-center gap-8">
           <div v-if="section.bottomContent?.author">
-            <span class="text-base text-gray-600 block mb-1 font-medium">
+            <span class="text-xs text-gray-600 block mb-1 font-medium">
               {{ authorLabel }}
             </span>
-            <span class="text-base text-gray-600">
+            <span class="text-xs text-gray-600">
               {{ section.bottomContent.author }}
             </span>
           </div>
 
           <div v-if="section.bottomContent?.publishDate">
-            <span class="text-base text-gray-600 block mb-1 font-medium">
+            <span class="text-xs text-gray-600 block mb-1 font-medium">
               {{ dateLabel }}
             </span>
-            <span class="text-base text-gray-600">
+            <span class="text-xs text-gray-600">
               {{ section.bottomContent.publishDate }}
             </span>
           </div>

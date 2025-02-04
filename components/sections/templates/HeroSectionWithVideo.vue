@@ -212,7 +212,7 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
-  min-height: 500px;
+  min-height: 400px;
 }
 
 .editor-area {
@@ -290,10 +290,12 @@ export default {
   background: white;
   border-radius: 8px;
   flex: 1;
-  padding: 24px;
+  padding: 16px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
+  max-height: 600px;
+  overflow-y: auto;
 }
 
 /* 添加编辑区域和预览区域的共同样式 */

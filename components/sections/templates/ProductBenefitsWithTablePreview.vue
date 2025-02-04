@@ -1,10 +1,10 @@
 <template>
-  <div :class="[theme === 'tech' ? 'bg-gray-900' : 'bg-white', 'py-12 md:py-16']">
-    <div class="max-w-6xl mx-auto px-4">
-      <div class="flex flex-col md:flex-row gap-8 md:gap-12">
+  <div :class="[theme === 'tech' ? 'bg-gray-900' : 'bg-white', 'py-10 px-8']">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex flex-col md:flex-row gap-6">
         <!-- 左侧内容 -->
         <div class="w-full md:w-1/2">
-          <div class="grid border border-gray-200 rounded-lg px-4">
+          <div class="grid border border-gray-200 rounded-lg">
             <div
               v-for="(item, index) in section.leftContent"
               :key="index"
@@ -17,7 +17,7 @@
             >
               <div 
                 :class="[
-                  'w-16 py-2 flex-shrink-0 text-center border-r',
+                  'w-12 py-2 flex-shrink-0 text-center border-r',
                   theme === 'tech' ? 'text-blue-400 border-gray-700' : 'text-blue-600 border-gray-200'
                 ]"
               >
@@ -26,13 +26,13 @@
               <div class="flex-1 pl-4">
                 <h3 
                   :class="[
-                    'text-xl font-bold',
+                    'text-base font-bold mb-1',
                     theme === 'tech' ? 'text-white' : 'text-gray-900'
                   ]"
                 >
                   {{ item.contentTitle }}
                 </h3>
-                <p :class="[theme === 'tech' ? 'text-gray-300' : 'text-gray-600', 'text-base']">
+                <p :class="[theme === 'tech' ? 'text-gray-300' : 'text-gray-600', 'text-xs']">
                   {{ item.content }}
                 </p>
               </div>
@@ -42,27 +42,27 @@
 
         <!-- 右侧内容 -->
         <div class="w-full md:w-1/2">
-          <div :class="[theme === 'tech' ? 'text-blue-400' : 'text-blue-600', 'text-3xl mb-4']">
+          <div :class="[theme === 'tech' ? 'text-blue-400' : 'text-blue-600', 'text-2xl mb-3']">
             {{ section.rightContent.icon }}
           </div>
           <h2 
             :class="[
-              'text-2xl font-bold mb-2',
+              'text-xl md:text-2xl font-bold mb-2',
               theme === 'tech' ? 'text-white' : 'text-gray-900'
             ]"
           >
             {{ section.rightContent.title }}
           </h2>
-          <p :class="[theme === 'tech' ? 'text-gray-300' : 'text-gray-600', 'mb-6']">
+          <p :class="[theme === 'tech' ? 'text-gray-300' : 'text-gray-600', 'text-xs mb-4']">
             {{ section.rightContent.subTitle }}
           </p>
           <a
             :href="formatUrl(section.rightContent.buttonLink)"
             :class="[
-              'inline-block px-4 py-2 rounded-md',
+              'inline-block px-6 py-2 rounded-3xl text-sm font-semibold',
               theme === 'tech'
-                ? 'bg-transparent border border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white'
-                : 'bg-transparent border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white'
+                ? 'bg-transparent border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white'
+                : 'bg-transparent border-2 border-[#3374FF] text-[#3374FF] hover:bg-[#3374FF] hover:text-white'
             ]"
           >
             {{ section.rightContent.buttonText }}

@@ -48,23 +48,23 @@ const socialIcons = {
 </script>
 
 <template>
-  <div class="bg-white py-12 md:py-16">
-    <div class="max-w-5xl mx-auto px-4">
+  <div class="bg-white py-10 px-8">
+    <div class="max-w-5xl mx-auto">
       <!-- 顶部内容 -->
-      <div class="text-center mb-12">
-        <p class="text-base text-gray-600 mb-2">
+      <div class="text-center mb-8">
+        <p class="text-xs text-gray-600 mb-2">
           {{ section.topContent.subtitle }}
         </p>
-        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+        <h1 class="text-xl md:text-2xl font-bold text-gray-900 mb-3">
           {{ section.topContent.title }}
         </h1>
-        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+        <p class="text-xs text-gray-600 max-w-2xl mx-auto">
           {{ section.topContent.description }}
         </p>
       </div>
 
       <!-- 团队成员网格 -->
-      <div class="grid grid-cols-1 gap-12 lg:grid-cols-3 mt-12">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-3 mt-8">
         <div 
           v-for="(member, index) in section.bottomContent"
           :key="index"
@@ -77,17 +77,17 @@ const socialIcons = {
               class="w-full h-full object-cover"
             />
           </div>
-          <div class="p-6 text-center">
-            <h3 class="text-xl md:text-2xl font-semibold text-gray-900 mb-2 hover:text-[#3374FF]">
+          <div class="p-4 text-center">
+            <h3 class="text-base font-semibold text-gray-900 mb-2 hover:text-[#3374FF]">
               {{ member.name }}
             </h3>
-            <p class="text-base text-gray-600">
+            <p class="text-sm text-gray-600">
               {{ member.title }}
             </p>
-            <p class="text-sm text-gray-600 mb-6 leading-relaxed whitespace-pre-line">
+            <p class="text-xs text-gray-600 mb-4 leading-relaxed whitespace-pre-line">
               {{ member.description }}
             </p>
-            <div class="flex justify-center space-x-6">
+            <div class="flex justify-center space-x-4">
               <template v-for="social in member.socials" :key="social.platform">
                 <a
                   v-if="social.url"
@@ -96,7 +96,7 @@ const socialIcons = {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <component :is="socialIcons[social.platform]" class="text-xl" />
+                  <component :is="socialIcons[social.platform]" class="text-base" />
                 </a>
               </template>
             </div>

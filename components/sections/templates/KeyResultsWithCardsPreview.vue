@@ -1,9 +1,9 @@
 <template>
   <div class="w-full bg-white">
-    <div class="max-w-6xl mx-auto px-4">
+    <div class="max-w-6xl mx-auto px-8">
       <h2
         v-if="section.title"
-        class="text-4xl md:text-5xl font-bold text-gray-900 text-center mb-16"
+        class="text-xl md:text-2xl font-bold text-gray-900 text-center mb-12"
       >
         {{ section.title }}
       </h2>
@@ -12,38 +12,38 @@
         <div
           v-for="(comparison, index) in section.bottomContent"
           :key="index"
-          class="bg-white rounded-lg p-8 shadow-lg flex flex-col h-full"
+          class="bg-white rounded-lg p-4 border border-gray-100 hover:border-gray-200 hover:shadow-sm flex flex-col h-full"
         >
-          <div class="mb-6 text-left">
+          <div class="mb-3 text-left h-20">
             <img
               v-if="comparison.competitorLogo"
               :src="comparison.competitorLogo"
               :alt="comparison.competitorLogoAlt || ''"
-              class="h-12 w-auto mb-4 mr-auto"
+              class="h-6 w-auto mb-2 mr-auto"
             />
             <h4
               v-if="comparison.competitorName"
-              class="text-xl font-bold text-gray-900 mb-2"
+              class="text-base font-bold text-gray-900 mb-2 line-clamp-2"
             >
               {{ comparison.competitorName }}
             </h4>
           </div>
 
-          <div class="mb-6">
-            <div class="text-4xl font-bold text-blue-600 mb-2">
+          <div class="mb-3">
+            <div class="text-xl md:text-2xl font-bold text-blue-600 mb-2">
               {{ comparison.percentage }}%
             </div>
-            <div class="text-lg text-gray-900 mb-4">
+            <div class="text-sm text-gray-900 mb-2">
               {{ comparison.metric }}
             </div>
-            <p class="text-base text-gray-600">
+            <p class="text-xs text-gray-600">
               {{ comparison.description }}
             </p>
           </div>
 
-          <button class="mt-auto flex items-center text-blue-600 font-medium">
+          <button class="mt-auto flex items-center text-xs text-blue-600 font-medium">
             {{ comparison.buttonText }}
-            <svg class="w-4 h-4 ml-2 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <svg class="w-2.5 h-2.5 ml-1 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
           </button>

@@ -8,17 +8,17 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="bg-white py-12 md:py-16">
-    <div class="max-w-4xl mx-auto px-4 text-center">
-      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+  <div class="bg-white py-10 px-8">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-3 leading-tight">
         {{ section.title }}
       </h2>
-      <p class="text-xl md:text-2xl font-semibold text-gray-900 mb-8 leading-relaxed max-w-2xl mx-auto">
+      <p class="text-base font-semibold text-gray-900 mb-4 leading-relaxed max-w-2xl mx-auto">
         {{ section.subTitle }}
       </p>
       <a 
         :href="section.bottomContent.buttonLink"
-        class="px-8 py-3 rounded-3xl text-lg font-semibold transition-all duration-200 bg-[#3374FF] text-white hover:bg-[#2861E5] hover:scale-105"
+        class="inline-block px-6 py-2 rounded-3xl text-sm font-semibold transition-all duration-200 bg-[#3374FF] text-white hover:bg-[#2861E5]"
       >
         {{ section.bottomContent.buttonText }}
       </a>

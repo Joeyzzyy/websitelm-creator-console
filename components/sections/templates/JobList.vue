@@ -225,6 +225,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
+    height: fit-content;
   }
   
   /* 编辑区域和预览区域的共同样式 */
@@ -294,9 +295,8 @@
   .preview-area {
     background: #f8fafc;
     min-width: 768px;
-    overflow-x: auto;
-    display: flex;
-    flex-direction: column;
+    border-radius: 8px;
+    padding: 24px;
     height: fit-content;
   }
   
@@ -314,12 +314,9 @@
   .preview-content {
     background: white;
     border-radius: 8px;
-    flex: 1;
     padding: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow-y: auto;
+    height: fit-content;
+    flex: 0 0 auto;
   }
   
   /* 添加新的样式 */

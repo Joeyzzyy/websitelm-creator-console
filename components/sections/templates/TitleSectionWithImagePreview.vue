@@ -1,39 +1,39 @@
 <template>
   <div class="relative z-10 flex items-center w-full transition-all duration-200 bg-white py-12 md:py-16">
     <header class="w-full">
-      <div class="max-w-6xl mx-auto px-4">
+      <div class="max-w-6xl mx-auto px-8">
         <div class="flex flex-col md:flex-row gap-8 md:gap-12 items-center">
           <div class="w-full md:w-1/2">
             <div class="max-w-xl">
               <h1 
                 v-if="section.title" 
-                class="text-4xl md:text-5xl font-bold text-gray-900 mb-4"
+                class="text-xl md:text-2xl font-bold text-gray-900 mb-4"
               >
                 {{ section.title }}
               </h1>
               
               <h2 
                 v-if="section.subTitle" 
-                class="text-xl md:text-2xl font-semibold text-gray-900 mb-6"
+                class="text-lg md:text-xl font-semibold text-gray-900 mb-6"
               >
                 {{ section.subTitle }}
               </h2>
               
               <div class="flex gap-8">
                 <div v-if="section.leftContent.author">
-                  <span class="text-base text-gray-600 block mb-1 font-medium">
+                  <span class="text-xs text-gray-600 block mb-1 font-medium">
                     {{ isChineseTitle ? '作者' : 'WRITTEN BY' }}
                   </span>
-                  <span class="text-base text-gray-600">
+                  <span class="text-xs text-gray-600">
                     {{ section.leftContent.author }}
                   </span>
                 </div>
                 
                 <div v-if="section.leftContent.publishDate">
-                  <span class="text-base text-gray-600 block mb-1 font-medium">
+                  <span class="text-xs text-gray-600 block mb-1 font-medium">
                     {{ isChineseTitle ? '发布日期' : 'PUBLISHED ON' }}
                   </span>
-                  <span class="text-base text-gray-600">
+                  <span class="text-xs text-gray-600">
                     {{ section.leftContent.publishDate }}
                   </span>
                 </div>

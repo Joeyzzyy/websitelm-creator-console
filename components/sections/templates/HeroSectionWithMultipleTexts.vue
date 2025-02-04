@@ -277,7 +277,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
-    min-height: 500px;
+    min-height: 400px;
   }
   
   .editor-area {
@@ -338,6 +338,7 @@
     display: flex;
     flex-direction: column;
     padding: 24px;
+    height: fit-content;
   }
   
   .preview-header {
@@ -354,11 +355,12 @@
   .preview-content {
     background: white;
     border-radius: 8px;
-    flex: 1;
-    padding: 24px;
+    padding: 16px;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
+    height: fit-content;
+    flex: 0 0 auto;
   }
   
   /* 添加编辑区域和预览区域的共同样式 */

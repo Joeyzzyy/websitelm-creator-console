@@ -122,6 +122,7 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
+  height: fit-content;
 }
 
 /* 编辑区域和预览区域的共同样式 */
@@ -165,12 +166,9 @@ export default {
 /* 预览区域样式 */
 .preview-area {
   background: #f8fafc;
+  min-width: 768px;
   border-radius: 8px;
   padding: 24px;
-  min-width: 768px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
   height: fit-content;
 }
 
@@ -188,13 +186,9 @@ export default {
 .preview-content {
   background: white;
   border-radius: 8px;
-  flex: 1;
-  overflow-y: auto;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 48px;
+  padding: 24px;
+  height: fit-content;
+  flex: 0 0 auto;
 }
 
 .html-tag {

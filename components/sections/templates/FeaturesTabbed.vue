@@ -285,8 +285,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
-    min-height: 500px;
-    height: 100%;
+    height: fit-content;
   }
   
   /* 编辑区域和预览区域的共同样式 */
@@ -378,9 +377,8 @@
     background: white;
     border-radius: 8px;
     padding: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: fit-content;
+    flex: 0 0 auto;
   }
   
   /* 添加新的样式 */

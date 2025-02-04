@@ -113,7 +113,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 24px;
-    min-height: 500px;
+    height: fit-content;
   }
   
   .editor-area,
@@ -155,10 +155,9 @@
   .preview-area {
     background: #f8fafc;
     min-width: 768px;
-    overflow-x: auto;
-    height: 600px;
-    display: flex;
-    flex-direction: column;
+    border-radius: 8px;
+    padding: 24px;
+    height: fit-content;
   }
   
   .preview-header {
@@ -175,11 +174,9 @@
   .preview-content {
     background: white;
     border-radius: 8px;
-    flex: 1;
     padding: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: fit-content;
+    flex: 0 0 auto;
   }
   
   .html-tag {
