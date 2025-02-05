@@ -57,15 +57,6 @@
     
         <!-- 底部两个模块 -->
         <div class="bottom-content">
-          <a-button 
-            v-if="!disabled"
-            type="primary" 
-            class="add-module-btn"
-            @click="addModule"
-          >
-            Add Module
-          </a-button>
-
           <a-row :gutter="24">
             <a-col 
               v-for="(module, index) in localSection.bottomContent" 
@@ -172,6 +163,16 @@
               </div>
             </a-col>
           </a-row>
+
+          <!-- 将Add Module按钮移到这里 -->
+          <a-button 
+            v-if="!disabled"
+            type="primary" 
+            class="add-module-btn"
+            @click="addModule"
+          >
+            Add Module
+          </a-button>
         </div>
     
         <!-- 添加图片库模态框 -->
@@ -478,7 +479,7 @@ export default {
 }
 
 .add-module-btn {
-  margin-bottom: 24px;
+  width: 100%;
 }
 
 .module-header {

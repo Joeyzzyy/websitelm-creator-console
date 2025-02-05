@@ -316,19 +316,36 @@
             
             <div class="section-actions">
               <a-button 
+                type="text"
+                class="action-btn"
+                @click="toggleImmersiveMode(index)"
+              >
+                <ExpandOutlined v-if="currentImmersiveSection !== index" />
+                <CompressOutlined v-else />
+              </a-button>
+              <a-button 
                 type="text" 
                 danger
-                class="delete-btn"
+                class="action-btn"
                 @click="removeSection(index)"
               >
                 <DeleteOutlined />
               </a-button>
             </div>
-            <component 
-              :is="section.componentName"
-              :section="section"
-              @update="(updatedSection) => handleSectionUpdate(updatedSection, index)"
-            />
+            
+            <!-- 添加过渡效果的包装器 -->
+            <div 
+              :class="[
+                'section-content-wrapper',
+                { 'immersive': currentImmersiveSection === index }
+              ]"
+            >
+              <component 
+                :is="section.componentName"
+                :section="section"
+                @update="(updatedSection) => handleSectionUpdate(updatedSection, index)"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -394,6 +411,37 @@
           </p>
         </template>
       </a-modal>
+
+      <!-- 添加全屏遮罩 -->
+      <div 
+        v-if="currentImmersiveSection !== null" 
+        class="immersive-overlay"
+        @click="exitImmersiveMode"
+      >
+        <div class="immersive-content" @click.stop>
+          <!-- 全屏模式的顶部工具栏 -->
+          <div class="immersive-toolbar">
+            <span class="component-name">
+              {{ formatComponentName(articleData.sections[currentImmersiveSection]?.componentName) }}
+            </span>
+            <div class="toolbar-actions">
+              <a-button type="text" @click="exitImmersiveMode">
+                <CompressOutlined />
+              </a-button>
+            </div>
+          </div>
+          
+          <!-- 全屏模式的内容 -->
+          <div class="immersive-body">
+            <component 
+              v-if="currentImmersiveSection !== null"
+              :is="articleData.sections[currentImmersiveSection]?.componentName"
+              :section="articleData.sections[currentImmersiveSection]"
+              @update="(updatedSection) => handleSectionUpdate(updatedSection, currentImmersiveSection)"
+            />
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -414,7 +462,9 @@ import {
   AlignLeftOutlined,
   ReloadOutlined,
   EyeOutlined,
-  LeftOutlined
+  LeftOutlined,
+  ExpandOutlined,
+  CompressOutlined
 } from '@ant-design/icons-vue';
 import SectionWrapper from './sections/index.vue';
 import { useRouter, useRoute } from 'vue-router';
@@ -492,6 +542,8 @@ export default defineComponent({
     ReloadOutlined,
     EyeOutlined,
     LeftOutlined,
+    ExpandOutlined,
+    CompressOutlined,
     SectionWrapper,
     FloatingStats,
     TitleSection,
@@ -1552,6 +1604,42 @@ export default defineComponent({
       }
     });
 
+    // 添加沉浸式模式相关的响应式变量
+    const currentImmersiveSection = ref(null);
+    
+    // 切换沉浸式模式
+    const toggleImmersiveMode = (index) => {
+      if (currentImmersiveSection.value === index) {
+        exitImmersiveMode();
+      } else {
+        currentImmersiveSection.value = index;
+        // 禁用body滚动
+        document.body.style.overflow = 'hidden';
+      }
+    };
+    
+    // 退出沉浸式模式
+    const exitImmersiveMode = () => {
+      currentImmersiveSection.value = null;
+      // 恢复body滚动
+      document.body.style.overflow = '';
+    };
+    
+    // 监听 ESC 键退出全屏
+    onMounted(() => {
+      const handleEsc = (e) => {
+        if (e.key === 'Escape' && currentImmersiveSection.value !== null) {
+          exitImmersiveMode();
+        }
+      };
+      
+      window.addEventListener('keydown', handleEsc);
+      
+      onUnmounted(() => {
+        window.removeEventListener('keydown', handleEsc);
+      });
+    });
+
     return {
       loading,
       saving,
@@ -1610,6 +1698,9 @@ export default defineComponent({
       getPreviewPublishUrl,
       getCategoryHeader, // 添加到返回对象中
       requiredFields,
+      currentImmersiveSection,
+      toggleImmersiveMode,
+      exitImmersiveMode,
     };
   }
 });
@@ -1836,21 +1927,28 @@ export default defineComponent({
   right: 12px;
   top: 12px;
   z-index: 10;
+  display: flex; /* 使用 flex 布局 */
+  gap: 8px; /* 设置按钮之间的间距 */
 }
 
-.delete-btn {
+.action-btn {
   width: 32px;
   height: 32px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.delete-btn:hover {
+.action-btn:hover {
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn.ant-btn-dangerous:hover {
   background: #fff2f0;
   color: #ff4d4f;
 }
@@ -2093,6 +2191,30 @@ export default defineComponent({
   right: 12px;
   top: 12px;
   z-index: 10;
+  display: flex; /* 使用 flex 布局 */
+  gap: 8px; /* 设置按钮之间的间距 */
+}
+
+.action-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.action-btn:hover {
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn.ant-btn-dangerous:hover {
+  background: #fff2f0;
+  color: #ff4d4f;
 }
 
 /* 美组列表的滚动条 */
@@ -2929,5 +3051,84 @@ export default defineComponent({
   margin-top: 4px;
   line-height: 1.5;
   font-style: italic;
+}
+
+/* 沉浸式模式相关样式 */
+.immersive-btn {
+  margin-right: 8px;
+}
+
+.section-content-wrapper {
+  transition: all 0.3s ease;
+}
+
+.immersive-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+
+.immersive-content {
+  background: white;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.immersive-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.component-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.immersive-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* 添加进入/退出动画 */
+.immersive-overlay-enter-active,
+.immersive-overlay-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.immersive-overlay-enter-from,
+.immersive-overlay-leave-to {
+  opacity: 0;
+}
+
+.immersive-content-enter-active,
+.immersive-content-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.immersive-content-enter-from,
+.immersive-content-leave-to {
+  transform: scale(0.95);
 }
 </style>
