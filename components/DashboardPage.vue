@@ -1966,7 +1966,11 @@ export default defineComponent({
             return;
           }
 
-          this.publishedUrls = urls;
+          // 过滤掉 URL 中的 /en/ 标记
+          this.publishedUrls = urls.map(url => {
+            return url.replace(/([^\/]+)\/en\//, '$1/');
+          });
+          
           this.sitemapModal.visible = true;
         } else {
           throw new Error(response?.message || 'Failed to get published URLs');
@@ -1987,6 +1991,14 @@ export default defineComponent({
 
       this.submitLoading = true;
       try {
+        // 在提交前再次过滤 URLs
+        const filteredUrls = this.publishedUrls.map(url => {
+          return url.replace(/([^\/]+)\/en\//, '$1/');
+        });
+        
+        // 使用过滤后的 URLs 更新 publishedUrls
+        this.publishedUrls = filteredUrls;
+        
         const response = await apiClient.publishSitemapAndUrls();
         
         if (response?.code === 200) {

@@ -882,7 +882,11 @@ export default {
             return;
           }
 
-          publishedUrls.value = urls;
+          // 过滤掉 URL 中的 /en/ 标记
+          publishedUrls.value = urls.map(url => {
+            // 使用正则表达式替换 /en/ 标记
+            return url.replace(/([^\/]+)\/en\//, '$1/');
+          });
           sitemapModal.value.visible = true;
         } else {
           throw new Error(response?.message || 'Failed to get published URLs');
