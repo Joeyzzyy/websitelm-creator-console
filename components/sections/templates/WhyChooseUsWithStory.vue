@@ -370,8 +370,7 @@
   .preview-area {
     background: #f8fafc;
     min-width: 768px;
-    overflow-y: auto;
-    height: 800px;
+    height: fit-content;
     border-radius: 8px;
     padding: 24px;
   }
@@ -386,7 +385,7 @@
   }
   
   .preview-content {
-    height: calc(100% - 40px);
+    height: fit-content;
     overflow-y: auto;
   }
   

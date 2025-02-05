@@ -231,89 +231,100 @@
           <div class="section">
             <h3 class="section-title">Main Menu Items</h3>
             <div class="menu-list">
-              <div v-for="(item, index) in headerData.mainMenuItems" :key="index" class="menu-item">
-                <div class="menu-item-main">
-                  <a-input-group compact>
-                    <a-input
-                      v-model:value="item.label"
-                      style="width: 40%"
-                      placeholder="Menu label"
-                    />
-                    <a-input
-                      v-model:value="item.link"
-                      style="width: 60%"
-                      placeholder="URL"
-                    />
-                  </a-input-group>
-                  <a-button type="text" danger @click="removeMenuItem(index)">
-                    <delete-outlined />
-                  </a-button>
-                </div>
+              <draggable 
+                v-model="headerData.mainMenuItems"
+                :item-key="(item) => item.key || item.label"
+                handle=".drag-handle"
+                @end="handleMenuDragEnd"
+              >
+                <template #item="{element: item, index}">
+                  <div class="menu-item">
+                    <div class="menu-item-main">
+                      <div class="drag-handle">
+                        <HolderOutlined />
+                      </div>
+                      
+                      <a-input-group compact>
+                        <a-input
+                          v-model:value="item.label"
+                          style="width: 40%"
+                          placeholder="Menu label"
+                        />
+                        <a-input
+                          v-model:value="item.link"
+                          style="width: 60%"
+                          placeholder="URL"
+                        />
+                      </a-input-group>
+                      <a-button type="text" danger @click="removeMenuItem(index)">
+                        <DeleteOutlined />
+                      </a-button>
+                    </div>
 
-                <!-- 添加外部链接选项 -->
-                <div class="menu-item-options">
-                  <a-checkbox v-model:checked="item.isExternal">Open in new tab</a-checkbox>
-                </div>
+                    <div class="menu-item-options">
+                      <a-checkbox v-model:checked="item.isExternal">Open in new tab</a-checkbox>
+                    </div>
 
-                <!-- 添加字体粗细选择 -->
-                <div class="menu-item-style">
-                  <a-radio-group 
-                    v-model:value="item.fontWeight" 
-                    size="small"
-                    button-style="solid"
-                  >
-                    <a-radio-button value="normal">Regular</a-radio-button>
-                    <a-radio-button value="600">Bold</a-radio-button>
-                  </a-radio-group>
-                  <div class="color-section">
-                    <span class="color-label">Text Color</span>
-                    <div 
-                      class="color-preview menu-color"
-                      :style="{ background: item.color || '#4b5563' }"
-                      @click="toggleColorPicker('menuItem-' + index, $event)"
-                    ></div>
+                    <div class="menu-item-style">
+                      <a-radio-group 
+                        v-model:value="item.fontWeight" 
+                        size="small"
+                        button-style="solid"
+                      >
+                        <a-radio-button value="normal">Regular</a-radio-button>
+                        <a-radio-button value="600">Bold</a-radio-button>
+                      </a-radio-group>
+                      <div class="color-section">
+                        <span class="color-label">Text Color</span>
+                        <div 
+                          class="color-preview menu-color"
+                          :style="{ background: item.color || '#4b5563' }"
+                          @click="toggleColorPicker('menuItem-' + index, $event)"
+                        ></div>
+                      </div>
+                    </div>
+
+                    <!-- 子菜单部分 -->
+                    <div class="submenu-list" v-if="item.children && item.children.length">
+                      <div 
+                        v-for="(subItem, subIndex) in item.children" 
+                        :key="subIndex"
+                        class="submenu-item"
+                      >
+                        <a-input-group compact>
+                          <a-input
+                            v-model:value="subItem.label"
+                            style="width: 40%"
+                            placeholder="Submenu label"
+                          />
+                          <a-input
+                            v-model:value="subItem.href"
+                            style="width: 60%"
+                            placeholder="URL"
+                          />
+                        </a-input-group>
+                        <a-button 
+                          type="text" 
+                          danger 
+                          @click="removeSubMenuItem(index, subIndex)"
+                        >
+                          <DeleteOutlined />
+                        </a-button>
+                      </div>
+                    </div>
+
+                    <div class="submenu-actions">
+                      <a-button 
+                        type="dashed" 
+                        size="small"
+                        @click="addSubMenuItem(index)"
+                      >
+                        Add Submenu Item
+                      </a-button>
+                    </div>
                   </div>
-                </div>
-
-                <!-- 子菜单项 -->
-                <div class="submenu-list" v-if="item.children && item.children.length">
-                  <div 
-                    v-for="(subItem, subIndex) in item.children" 
-                    :key="subIndex"
-                    class="submenu-item"
-                  >
-                    <a-input-group compact>
-                      <a-input
-                        v-model:value="subItem.label"
-                        style="width: 40%"
-                        placeholder="Submenu label"
-                      />
-                      <a-input
-                        v-model:value="subItem.href"
-                        style="width: 60%"
-                        placeholder="URL"
-                      />
-                    </a-input-group>
-                    <a-button 
-                      type="text" 
-                      danger 
-                      @click="removeSubMenuItem(index, subIndex)"
-                    >
-                      <delete-outlined />
-                    </a-button>
-                  </div>
-                </div>
-
-                <div class="submenu-actions">
-                  <a-button 
-                    type="dashed" 
-                    size="small"
-                    @click="addSubMenuItem(index)"
-                  >
-                    Add Submenu Item
-                  </a-button>
-                </div>
-              </div>
+                </template>
+              </draggable>
 
               <a-button type="dashed" block @click="addMenuItem">
                 Add Menu Item
@@ -371,13 +382,14 @@
 
 <script setup>
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import { DeleteOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
+import { DeleteOutlined, InfoCircleOutlined, HolderOutlined } from '@ant-design/icons-vue'
 import HeaderPreview from './HeaderPreview.vue'
 import ImageLibrary from '../sections/common/ImageLibrary.vue'
 import apiClient from '../../api/api'
 import { message } from 'ant-design-vue'
 import Slider from '@vueform/slider'
 import '@vueform/slider/themes/default.css'
+import draggable from 'vuedraggable'
 
 const emit = defineEmits(['update'])
 
@@ -700,6 +712,10 @@ watch(() => props.initialData?.logo, (newLogo) => {
     logoScale.value = Math.round((newLogo.width / 200) * 100)
   }
 }, { immediate: true })
+
+const handleMenuDragEnd = (event) => {
+  // Handle menu item drag end
+}
 </script>
 
 <style scoped>

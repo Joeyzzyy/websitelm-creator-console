@@ -17,27 +17,25 @@ const handleScroll = () => {
   const container = containerRef.value;
   const sticky = stickyRef.value;
   const containerRect = container.getBoundingClientRect();
-  const stickyHeight = sticky.offsetHeight;
-  const windowHeight = window.innerHeight;
+  const stickyRect = sticky.getBoundingClientRect();
+  const topOffset = 64;
   
-  const containerTop = containerRect.top;
-  const containerBottom = containerRect.bottom;
+  const containerTop = window.pageYOffset + containerRect.top;
+  const containerBottom = containerTop + containerRect.height;
   
-  if (containerBottom <= windowHeight) {
+  const currentScroll = window.pageYOffset;
+
+  if (currentScroll + topOffset < containerTop) {
     sticky.style.position = 'absolute';
-    sticky.style.bottom = '0';
-    sticky.style.top = 'auto';
-  } else if (containerTop > 0) {
-    sticky.style.position = 'sticky';
-    sticky.style.top = '128px';
+    sticky.style.top = '0';
     sticky.style.bottom = 'auto';
-  } else if (containerBottom < stickyHeight + 128) {
+  } else if (currentScroll + topOffset + stickyRect.height > containerBottom) {
     sticky.style.position = 'absolute';
-    sticky.style.bottom = '0';
-    sticky.style.top = 'auto';
+    sticky.style.top = `${containerRect.height - stickyRect.height}px`;
+    sticky.style.bottom = 'auto';
   } else {
-    sticky.style.position = 'sticky';
-    sticky.style.top = '128px';
+    sticky.style.position = 'fixed';
+    sticky.style.top = `${topOffset}px`;
     sticky.style.bottom = 'auto';
   }
 };
@@ -55,34 +53,34 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg w-full py-10 px-8">
-    <div class="max-w-6xl mx-auto">
+  <div class="bg-white rounded-lg w-full h-full min-h-full p-4 relative">
+    <div class="max-w-3xl mx-auto w-full h-full">
       <!-- 标题部分 -->
-      <div v-if="section.title" class="text-center mb-6">
-        <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+      <div v-if="section.title" class="text-center mb-4">
+        <h2 class="text-lg font-bold text-gray-900 mb-1">
           {{ section.title }}
         </h2>
         <p v-if="section.description" 
-           class="text-xs text-gray-600 max-w-3xl mx-auto">
+           class="text-xs text-gray-600 max-w-xl mx-auto">
           {{ section.description }}
         </p>
       </div>
       
       <!-- 主要内容区域 -->
-      <div class="grid grid-cols-[240px_1fr] gap-6" ref="containerRef">
+      <div class="grid grid-cols-[200px_1fr] gap-6 w-full h-full" ref="containerRef">
         <!-- 左侧固定部分 -->
-        <div class="relative w-[240px]">
-          <div ref="stickyRef" class="sticky top-32 inline-block" style="width: 240px">
+        <div class="relative w-[200px]">
+          <div ref="stickyRef" class="sticky top-16 inline-block" style="width: 200px">
             <!-- 个人信息卡片 -->
-            <div class="bg-gray-50 p-6 rounded-lg">
-              <div class="text-center mb-4">
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <div class="text-center mb-3">
                 <img 
                   :src="section.leftContent.avatarUrl" 
                   :alt="section.leftContent.name"
-                  class="w-24 h-24 rounded-full mx-auto mb-3 object-cover"
+                  class="w-16 h-16 rounded-full mx-auto mb-2 object-cover"
                 />
-                <h3 class="text-base font-bold mb-2">{{ section.leftContent.name }}</h3>
-                <p class="text-gray-600 text-xs">{{ section.leftContent.title }}</p>
+                <h3 class="text-sm font-bold mb-1">{{ section.leftContent.name }}</h3>
+                <p class="text-xs text-gray-600">{{ section.leftContent.title }}</p>
               </div>
               <div class="text-gray-700 text-xs leading-relaxed whitespace-pre-line">
                 {{ section.leftContent.introduction }}
@@ -94,12 +92,11 @@ onUnmounted(() => {
         <!-- 右侧内容区域 -->
         <div>
           <main class="main-content">
-            <article class="article max-w-[900px] pr-4 py-4">
+            <article class="article max-w-[400px] pr-2">
               <div v-for="(content, index) in section.rightContent" 
                    :key="index" 
-                   class="mb-6 last:mb-0" 
-                   :id="`section-${index}`">
-                <h3 class="text-base font-semibold mb-3 text-gray-800">
+                   class="mb-4 last:mb-0">
+                <h3 class="text-sm font-semibold mb-2 text-gray-800">
                   {{ content.contentTitle }}
                 </h3>
                 <div class="text-xs leading-[1.6] text-gray-700 whitespace-pre-line">
@@ -113,3 +110,11 @@ onUnmounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.bg-white {
+  min-height: 100%;
+  height: 100%;
+  width: 100%;
+}
+</style>
