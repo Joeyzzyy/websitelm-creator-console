@@ -683,6 +683,58 @@ export const createCleanComponentData = (componentType) => {
           }
         ]
       }
+    },
+
+    FeatureComparisonTable: {
+      title: '[DEMO] Compare All Features',
+      subTitle: '[DEMO] Choose the plan that best fits your needs',
+      bottomContent: {
+        columns: [
+          {
+            title: 'Essential',
+            subtitle: 'Basic features',
+            recommended: false
+          },
+          {
+            title: 'Professional',
+            subtitle: 'Most popular',
+            recommended: true
+          },
+          {
+            title: 'Enterprise',
+            subtitle: 'Custom solutions',
+            recommended: false
+          }
+        ],
+        featureGroups: [
+          {
+            name: 'Core Features',
+            features: [
+              {
+                name: 'Number of Users',
+                values: ['Up to 10 users', 'Up to 50 users', 'Unlimited']
+              },
+              {
+                name: 'Storage Space',
+                values: ['10 GB', '50 GB', 'Unlimited']
+              }
+            ]
+          },
+          {
+            name: 'Support',
+            features: [
+              {
+                name: 'Email Support',
+                values: ['Basic', 'Priority', '24/7 Dedicated']
+              },
+              {
+                name: 'Phone Support',
+                values: ['✖', '✔', '✔']
+              }
+            ]
+          }
+        ]
+      }
     }
   };
 

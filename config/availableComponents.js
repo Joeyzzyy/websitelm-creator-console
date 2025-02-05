@@ -197,5 +197,16 @@ export const availableComponents = [
         template: createCleanComponentData('SubscriptionCard')
       }
     ]
+  },
+  {
+    category: 'Comparison',
+    items: [
+      {
+        type: 'FeatureComparisonTable',
+        label: 'Feature Comparison Table',
+        template: createCleanComponentData('FeatureComparisonTable'),
+        description: "A detailed feature comparison table for comparing different plans or products."
+      }
+    ]
   }
 ]; 

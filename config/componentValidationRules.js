@@ -347,6 +347,20 @@ const componentValidationRules = {
         'title',
         'subTitle'
       ]
+    },
+    FeatureComparisonTable: {
+      requiredFields: [
+        'title',
+        'subTitle',
+        'bottomContent.columns',
+        'bottomContent.featureGroups'
+      ],
+      allowedFields: [
+        'title',
+        'subTitle',
+        'bottomContent.columns',
+        'bottomContent.featureGroups'
+      ]
     }
   };
 

@@ -26,6 +26,7 @@ import TitleSectionWithImage from './templates/TitleSectionWithImage.vue'
 import ProductBenefitsWithTable from './templates/ProductBenefitsWithTable.vue'
 import PageListCard from './templates/PageListCard.vue'
 import SubscriptionCard from './templates/SubscriptionCard.vue'
+import FeatureComparisonTable from './templates/FeatureComparisonTable.vue'
 
 // 组件映射表
 const SECTION_COMPONENTS = {
@@ -45,7 +46,8 @@ const SECTION_COMPONENTS = {
   TitleSectionWithImage: TitleSectionWithImage,
   ProductBenefitsWithTable: ProductBenefitsWithTable,
   PageListCard: PageListCard,
-  SubscriptionCard: SubscriptionCard
+  SubscriptionCard: SubscriptionCard,
+  FeatureComparisonTable: FeatureComparisonTable
 }
 
 export default {

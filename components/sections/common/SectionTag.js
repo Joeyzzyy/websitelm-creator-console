@@ -207,6 +207,15 @@ export const SECTION_TAGS = {
     buttonText: 'button',
     featureTitle: 'h4',
     featureItem: 'li'
+  },
+  FeatureComparisonTable: {
+    title: 'h2',
+    description: 'p',
+    columnTitle: 'h3',
+    columnSubtitle: 'p',
+    groupName: 'h4',
+    featureName: 'li',
+    featureValue: 'span'
   }
 }
   

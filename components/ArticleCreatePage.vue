@@ -468,6 +468,8 @@ import KeyResultsWithCards from './sections/templates/KeyResultsWithCards.vue';
 import KeyResultsWithCardsPreview from './sections/templates/KeyResultsWithCardsPreview.vue';
 import PageListCard from './sections/templates/PageListCard.vue';
 import PageListCardPreview from './sections/templates/PageListCardPreview.vue';
+import FeatureComparisonTable from './sections/templates/FeatureComparisonTable.vue';
+import FeatureComparisonTablePreview from './sections/templates/FeatureComparisonTablePreview.vue';
 import { VERCEL_CONFIG } from '../config/vercelConfig';
 import { createCleanComponentData } from '../utils/componentDataFactory';
 import { availableComponents } from '../config/availableComponents';
@@ -539,7 +541,9 @@ export default defineComponent({
     KeyResultsWithCardsPreview,
     PageListCardPreview,
     SubscriptionCardPreview,
-    SubscriptionCard
+    SubscriptionCard,
+    FeatureComparisonTable,
+    FeatureComparisonTablePreview
   },
 
   setup() {
@@ -2649,10 +2653,9 @@ export default defineComponent({
   border-radius: 8px;
   overflow: hidden;
   background: #ffffff;
-  min-height: 400px;
-  max-height: 80vh;
-  overflow-y: auto;
-  padding: 48px 24px; /* 增加内边距让预览内容更居中 */
+  /* 移除固定的 min-height 和 max-height */
+  padding: 48px 24px;
+  margin-bottom: 24px;
 }
 
 /* 美化预览区域的滚动条 */
@@ -2713,11 +2716,9 @@ export default defineComponent({
   border-radius: 8px;
   overflow: hidden;
   background: #ffffff;
-  min-height: 400px;
-  max-height: calc(80vh - 120px); /* 调整最大高度，为底部按钮留出空间 */
-  overflow-y: auto;
+  /* 移除固定的 min-height 和 max-height */
   padding: 48px 24px;
-  margin-bottom: 24px; /* 添加底部间距 */
+  margin-bottom: 24px;
 }
 
 /* Keywords 标签样式优化 */
