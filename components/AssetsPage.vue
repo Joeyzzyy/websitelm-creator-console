@@ -245,52 +245,34 @@
           <template v-else-if="activeTab === 'knowledge'">
             <a-spin :spinning="!loading && processingKnowledge">
               <div v-if="!loading && !processingKnowledge">
-                <!-- Empty state display -->
-                <div v-if="!Object.keys(groupedArticles).length" class="empty-state">
-                  <h3 class="empty-state-title">Knowledge Base Not Initialized 🔍</h3>
-                  <p class="empty-state-description">
-                    Your knowledge base is currently empty. Click the button below to start the initialization process.
-                  </p>
-                  <a-button 
-                    type="primary" 
-                    class="upload-btn-empty" 
-                    @click="initializeKnowledgeBase"
-                    :loading="initializingKnowledge"
-                  >
-                    Initialize Knowledge Base
-                  </a-button>
-                </div>
-                
-                <!-- Existing knowledge base content -->
-                <div v-else class="grid-container">
+                <!-- Knowledge Base Content -->
+                <div class="knowledge-base-container">
                   <!-- Knowledge Base Status Alert -->
-                  <a-alert
-                    type="info"
-                    class="knowledge-alert"
+                  <div 
+                    v-if="!groupedArticles || Object.keys(groupedArticles).length === 0"
+                    role="alert" 
+                    class="knowledge-alert ant-alert ant-alert-info ant-alert-with-description ant-alert-no-icon"
                   >
-                    <template #description>
-                      <div class="alert-content" v-if="processingKnowledge">
-                        <div class="kb-status-header">
-                          <div class="status-message">
-                            <p>
-                              Knowledge base processing: 
-                              <span class="highlight yellow">
-                                {{ knowledgeStatus === 'fetch' ? 'Fetching data' : 
-                                  knowledgeStatus === 'process' ? 'Processing content' : 
-                                  knowledgeStatus === 'analyze' ? 'Analyzing content' : 
-                                  knowledgeStatus === 'vector2' ? 'Vectorizing content' : 
-                                  'Initializing...' }}
-                              </span>
-                              (Estimated time: {{ knowledgeTime }}s)
-                            </p>
-                          </div>
+                    <div class="ant-alert-content">
+                      <div class="ant-alert-description">
+                        <div class="empty-state">
+                          <h3>Build Your Knowledge Base ✨</h3>
+                          <p>Let us help you create a comprehensive knowledge base system to provide complete documentation for your users.</p>
+                          <a-button 
+                            type="primary" 
+                            :loading="initializingKnowledge" 
+                            @click="initializeKnowledgeBase"
+                            class="init-button"
+                          >
+                            Initialize Knowledge Base
+                          </a-button>
                         </div>
                       </div>
-                    </template>
-                  </a-alert>
+                    </div>
+                  </div>
 
-                  <!-- Knowledge Base Content -->
-                  <template v-if="!processingKnowledge">
+                  <!-- 只在有数据时显示网格 -->
+                  <template v-else>
                     <!-- Breadcrumb Navigation -->
                     <div class="breadcrumb" v-if="currentArticle">
                       <span @click="clearCurrentArticle">Knowledge Base</span>
@@ -301,7 +283,7 @@
                     </div>
 
                     <!-- Category Grid -->
-                    <div class="grid-container" v-if="!currentArticle">
+                    <div class="knowledge-grid">
                       <div 
                         v-for="(articles, label) in groupedArticles" 
                         :key="label"
@@ -344,27 +326,6 @@
                           </div>
                         </div>
                       </div>
-                    </div>
-
-                    <!-- Article Detail View -->
-                    <div v-else class="article-detail">
-                      <div class="article-actions">
-                        <a-button 
-                          type="primary"
-                          :loading="saving"
-                          @click="saveArticle"
-                        >
-                          Save Changes
-                        </a-button>
-                      </div>
-                      <h1 class="article-title">{{ currentArticle.title }}</h1>
-                      <a-textarea
-                        v-model:value="editableContent"
-                        :rows="20"
-                        class="article-editor"
-                        :bordered="false"
-                        placeholder="Enter article content..."
-                      />
                     </div>
                   </template>
                 </div>
@@ -3268,5 +3229,63 @@ export default {
 
 .upload-btn-empty:hover {
   background: linear-gradient(135deg, #3B82F6, #2563EB);
+}
+
+.knowledge-base-container {
+  margin-bottom: 24px;
+}
+
+.knowledge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.empty-state h3 {
+  font-size: 24px;
+  color: #1f2937;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.empty-state p {
+  font-size: 16px;
+  color: #6b7280;
+  margin-bottom: 24px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.init-button {
+  height: 40px;
+  padding: 0 24px;
+  font-size: 16px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #1890ff, #3B82F6);
+  border: none;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.init-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.3);
+  background: linear-gradient(135deg, #40a9ff, #60a5fa);
+}
+
+.init-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
+}
+
+.init-button .anticon {
+  margin-right: 8px;
 }
 </style> 
