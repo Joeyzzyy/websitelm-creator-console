@@ -20,11 +20,17 @@
       <!-- 头像部分 -->
       <div class="user-profile-section">
         <div class="welcome-text" v-if="!collapsed">Welcome back!</div>
-        <div v-if="!collapsed" class="user-name-display">
-          {{ currentCustomerEmail }}
+        <div v-if="!collapsed" class="user-info-container">
+          <div class="user-email">{{ currentCustomerEmail }}</div>
+          <div class="subscription-link" @click="showSubscriptionInfo">
+            View Plan Usage <i class="fas fa-chart-pie"></i>
+          </div>
         </div>
         <a-tooltip v-else :title="currentCustomerEmail" placement="right">
-          <div class="user-avatar">
+          <div 
+            class="user-avatar"
+            @click="showSubscriptionInfo"
+          >
             {{ getEmailInitial(currentCustomerEmail) }}
           </div>
         </a-tooltip>
@@ -152,6 +158,93 @@
           <div class="read-more">Read Documentation →</div>
         </div>
       </div>
+    </div>
+  </a-modal>
+
+  <!-- Subscription Info Modal -->
+  <a-modal
+    v-model:visible="subscriptionModalVisible"
+    title="Current Plan Usage"
+    :footer="null"
+    width="800px"
+    class="subscription-modal"
+  >
+    <div class="subscription-info">
+      <div class="current-plan">
+        <h3>{{ currentPlan.name }} Plan</h3>
+        <div class="plan-period">
+          {{ currentPlan.period === 'monthly' ? 'Monthly Billing' : 'Annual Billing' }}
+        </div>
+      </div>
+      
+      <div class="usage-grid">
+        <div class="usage-column">
+          <div 
+            v-for="(usage, index) in usageInfo.slice(0, Math.ceil(usageInfo.length/2))" 
+            :key="index"
+            class="usage-item"
+          >
+            <div class="usage-header">
+              <div class="usage-label">{{ usage.label }}</div>
+              <div class="usage-description">{{ usage.description }}</div>
+            </div>
+            <div class="usage-bar">
+              <div 
+                class="usage-progress"
+                :style="{ 
+                  width: usage.used === 'Unlimited' ? '100%' : `${(usage.used / usage.total) * 100}%`,
+                  background: usage.used === 'Unlimited' ? '#52c41a' : 
+                             (usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff')
+                }"
+              ></div>
+            </div>
+            <div class="usage-numbers">
+              <span class="used">{{ usage.used }}</span>
+              <span class="separator" v-if="usage.used !== 'Unlimited'">/</span>
+              <span class="total" v-if="usage.used !== 'Unlimited'">{{ usage.total }}</span>
+              <span class="unit">{{ usage.unit }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="usage-column">
+          <div 
+            v-for="(usage, index) in usageInfo.slice(Math.ceil(usageInfo.length/2))" 
+            :key="index"
+            class="usage-item"
+          >
+            <div class="usage-header">
+              <div class="usage-label">{{ usage.label }}</div>
+              <div class="usage-description">{{ usage.description }}</div>
+            </div>
+            <div class="usage-bar">
+              <div 
+                class="usage-progress"
+                :style="{ 
+                  width: usage.used === 'Unlimited' ? '100%' : `${(usage.used / usage.total) * 100}%`,
+                  background: usage.used === 'Unlimited' ? '#52c41a' : 
+                             (usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff')
+                }"
+              ></div>
+            </div>
+            <div class="usage-numbers">
+              <span class="used">{{ usage.used }}</span>
+              <span class="separator" v-if="usage.used !== 'Unlimited'">/</span>
+              <span class="total" v-if="usage.used !== 'Unlimited'">{{ usage.total }}</span>
+              <span class="unit">{{ usage.unit }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <a-button 
+        type="primary" 
+        block
+        class="upgrade-btn"
+        @click="goToSubscriptionPage"
+      >
+        Upgrade Plan
+      </a-button>
     </div>
   </a-modal>
 </template>
@@ -606,25 +699,176 @@ html, body, #app {
   animation: fadeIn 0.5s ease;
 }
 
-.user-name-display {
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-  margin-top: 4px;
-  padding: 8px 16px;
-  background: rgba(24, 144, 255, 0.1);
-  border-radius: 20px;
-  display: inline-block;
-  transition: all 0.3s ease;
-  animation: slideUp 0.5s ease;
-  border: 1px solid rgba(24, 144, 255, 0.2);
-  backdrop-filter: blur(8px);
+.user-info-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-.user-name-display:hover {
-  transform: translateY(-2px);
+.user-email {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+}
+
+.subscription-link {
+  font-size: 12px;
+  color: #1890ff;
+  padding: 4px 12px;
   background: rgba(24, 144, 255, 0.1);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.subscription-link:hover {
+  background: rgba(24, 144, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.subscription-link i {
+  font-size: 10px;
+}
+
+/* Modal Styles */
+.subscription-info {
+  padding: 16px;
+}
+
+.current-plan {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+}
+
+.current-plan h3 {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.plan-period {
+  padding: 2px 12px;
+  font-size: 12px;
+}
+
+.usage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.usage-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.usage-item {
+  background: #f8f9fa;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.usage-header {
+  margin-bottom: 8px;
+}
+
+.usage-label {
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.usage-description {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.usage-bar {
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.usage-progress {
+  height: 100%;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+/* 进度条颜色状态 */
+.usage-progress {
+  background: #1890ff;  /* 默认蓝色 */
+}
+
+.usage-progress[style*="width: 100%"] {
+  background: #52c41a !important;  /* 无限制时显示绿色 */
+}
+
+.usage-progress[style*="width: 90%"],
+.usage-progress[style*="width: 91%"],
+.usage-progress[style*="width: 92%"],
+.usage-progress[style*="width: 93%"],
+.usage-progress[style*="width: 94%"],
+.usage-progress[style*="width: 95%"],
+.usage-progress[style*="width: 96%"],
+.usage-progress[style*="width: 97%"],
+.usage-progress[style*="width: 98%"],
+.usage-progress[style*="width: 99%"] {
+  background: #ff4d4f !important;  /* 使用量超过90%时显示红色 */
+}
+
+/* 确保进度条动画平滑 */
+.usage-progress {
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.usage-numbers {
+  font-size: 11px;
+}
+
+.upgrade-btn {
+  height: 38px;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.subscription-modal {
+  :deep(.ant-modal-header) {
+    padding: 16px 24px;
+  }
+
+  :deep(.ant-modal-body) {
+    padding: 16px;
+  }
+
+  :deep(.ant-modal-title) {
+    font-size: 18px;
+  }
+}
+
+/* 确保无限制项的样式保持一致 */
+.usage-numbers .used,
+.usage-numbers .total {
+  font-size: 11px;
+}
+
+.usage-numbers .unit {
+  font-size: 11px;
+}
+
+/* 优化计划周期标签样式 */
+.plan-period {
+  padding: 2px 12px;
+  font-size: 12px;
 }
 
 /* 添加动画效果 */
@@ -654,7 +898,12 @@ html, body, #app {
     display: none;
   }
   
-  .user-name-display {
+  .user-info-container {
+    flex-direction: row;
+    align-items: center;
+  }
+  
+  .user-email {
     font-size: 14px;
     padding: 4px 8px;
     white-space: nowrap;
@@ -1048,7 +1297,74 @@ export default {
         docsLink: tutorial.docsLink,
         badge: tutorial.badge,
         features: tutorial.features
-      }))
+      })),
+      subscriptionModalVisible: false,
+      currentPlan: {
+        name: 'Professional',
+        period: 'yearly',
+        price: {
+          monthly: '129',
+          yearly: '99'
+        }
+      },
+      usageInfo: [
+        {
+          label: 'AI Keyword Recommendation',
+          used: 45,
+          total: 100,
+          unit: 'times/month',
+          description: 'Monthly AI-powered keyword analysis and suggestions'
+        },
+        {
+          label: 'Indexing Page Generation',
+          used: 68,
+          total: 100,
+          unit: 'pages/month',
+          description: 'SEO-optimized page creation'
+        },
+        {
+          label: 'Free Page Deployment',
+          used: 650,
+          total: 1000,
+          unit: 'pages/year',
+          description: 'Number of pages that can be deployed'
+        },
+        {
+          label: 'Internal Links Storage',
+          used: 980,
+          total: 1500,
+          unit: 'links',
+          description: 'Store and manage internal link structure'
+        },
+        {
+          label: 'Image Storage',
+          used: 1100,
+          total: 1500,
+          unit: 'images',
+          description: 'Store and optimize images'
+        },
+        {
+          label: 'Video Storage',
+          used: 850,
+          total: 1000,
+          unit: 'videos',
+          description: 'Store and manage video content'
+        },
+        {
+          label: 'GSC Data Tracking',
+          used: 'Unlimited',
+          total: 'Unlimited',
+          unit: '',
+          description: 'Google Search Console data integration'
+        },
+        {
+          label: 'Onboarding Support',
+          used: 'Unlimited',
+          total: 'Unlimited',
+          unit: 'calls',
+          description: 'One-on-one onboarding sessions'
+        }
+      ]
     };
   },
   computed: {
@@ -1191,6 +1507,15 @@ export default {
     startInteractiveGuide() {
       this.guideModeVisible = false; // 确保选择对话框是关闭的
       this.startStepByStepTour(); // 直接开始交互式引导
+    },
+
+    showSubscriptionInfo() {
+      this.subscriptionModalVisible = true;
+    },
+
+    goToSubscriptionPage() {
+      this.subscriptionModalVisible = false;
+      this.$router.push('/subscription');
     }
   },
   watch: {
