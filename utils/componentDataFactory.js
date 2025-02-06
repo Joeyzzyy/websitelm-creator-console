@@ -614,6 +614,7 @@ export const createCleanComponentData = (componentType) => {
       title: '[DEMO] Choose Your Plan',
       subTitle: '[DEMO] Select a plan that suits your needs',
       bottomContent: {
+        yearlyDiscount: '20%',
         plans: [
           {
             name: 'Basic',

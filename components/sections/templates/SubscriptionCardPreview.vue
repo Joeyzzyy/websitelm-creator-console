@@ -40,7 +40,7 @@
           >
             <!-- Popular 标识 -->
             <div v-if="plan.popular" class="absolute -top-2 left-1/2 -translate-x-1/2">
-              <div class="bg-gradient-to-r from-[#4B89FF] to-[#6C9AFF] text-white px-2 py-0.5 rounded-full text-[10px] font-bold shadow-sm">
+              <div class="bg-gradient-to-r from-[#4B89FF] to-[#6C9AFF] text-white px-1.5 py-0.5 rounded-full text-[9px] font-medium whitespace-nowrap shadow-sm">
                 MOST POPULAR ✨
               </div>
             </div>
@@ -96,6 +96,8 @@
   </template>
   
   <script>
+  import { computed } from 'vue'
+
   export default {
     name: 'SubscriptionCardPreview',
     props: {
@@ -108,7 +110,7 @@
       return {
         selectedPeriod: 'yearly',
         billingPeriods: [
-          { id: 'yearly', label: 'Annual · Save 20%' },
+          { id: 'yearly', label: computed(() => `Annual · Save ${this.section.bottomContent.yearlyDiscount}`) },
           { id: 'monthly', label: 'Monthly' }
         ]
       }

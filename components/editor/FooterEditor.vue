@@ -126,7 +126,6 @@
               </div>
             </a-form-item>
 
-            <!-- 添加版权信息编辑 -->
             <a-form-item label="Copyright Text">
               <div class="input-with-color">
                 <a-input
@@ -140,90 +139,6 @@
                 ></div>
               </div>
             </a-form-item>
-          </div>
-
-          <!-- Newsletter设置 -->
-          <div class="section">
-            <div class="section-header">
-              <h3 class="section-title">Newsletter Section</h3>
-              <a-switch
-                v-model:checked="footerData.newsletter.enabled"
-                size="small"
-              />
-            </div>
-
-            <template v-if="footerData.newsletter.enabled">
-              <!-- Newsletter 标题 -->
-              <a-form-item label="Section Title">
-                <div class="input-with-color">
-                  <a-input v-model:value="footerData.newsletter.title" />
-                  <div 
-                    class="color-picker"
-                    :style="{ background: footerData.colors.newsletterTitle }"
-                    @click="toggleColorPicker('newsletterTitle', $event)"
-                  ></div>
-                </div>
-              </a-form-item>
-
-              <!-- Newsletter 描述文本 -->
-              <a-form-item label="Description">
-                <div class="input-with-color">
-                  <a-textarea 
-                    v-model:value="footerData.newsletter.text" 
-                    :rows="2"
-                  />
-                  <div 
-                    class="color-picker"
-                    :style="{ background: footerData.colors.newsletterText }"
-                    @click="toggleColorPicker('newsletterText', $event)"
-                  ></div>
-                </div>
-              </a-form-item>
-              
-              <!-- 输入框样式 -->
-              <a-form-item label="Input Field">
-                <div class="color-group">
-                  <div class="color-item">
-                    <span>Background</span>
-                    <div 
-                      class="color-picker"
-                      :style="{ background: footerData.colors.inputBackground }"
-                      @click="toggleColorPicker('inputBackground', $event)"
-                    ></div>
-                  </div>
-                  <div class="color-item">
-                    <span>Placeholder</span>
-                    <div 
-                      class="color-picker"
-                      :style="{ background: footerData.colors.inputPlaceholder }"
-                      @click="toggleColorPicker('inputPlaceholder', $event)"
-                    ></div>
-                  </div>
-                </div>
-              </a-form-item>
-              
-              <!-- 按钮样式 -->
-              <a-form-item label="Button">
-                <div class="color-group">
-                  <div class="color-item">
-                    <span>Background</span>
-                    <div 
-                      class="color-picker"
-                      :style="{ background: footerData.colors.buttonBackground }"
-                      @click="toggleColorPicker('buttonBackground', $event)"
-                    ></div>
-                  </div>
-                  <div class="color-item">
-                    <span>Text</span>
-                    <div 
-                      class="color-picker"
-                      :style="{ background: footerData.colors.buttonText }"
-                      @click="toggleColorPicker('buttonText', $event)"
-                    ></div>
-                  </div>
-                </div>
-              </a-form-item>
-            </template>
           </div>
         </a-col>
 
@@ -441,20 +356,13 @@ const footerData = ref({
   companyName: props.initialData.companyName,
   description: props.initialData.description,
   features: props.initialData.features,
-  newsletter: props.initialData.newsletter,
   copyright: props.initialData.copyright,
   colors: {
     companyName: '#FFFFFF',
     description: '#9CA3AF',
     featuresTitle: '#FFFFFF',
     featureLinks: '#9CA3AF',
-    newsletterTitle: '#FFFFFF',
-    newsletterText: '#9CA3AF',
     copyright: '#9CA3AF',
-    inputBackground: '#1F2937',
-    inputPlaceholder: '#6B7280',
-    buttonBackground: '#2563EB',
-    buttonText: '#FFFFFF',
     ...props.initialData?.colors
   },
   socialMedia: {

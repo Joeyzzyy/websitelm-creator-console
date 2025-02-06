@@ -30,6 +30,19 @@
             </div>
           </a-form-item>
 
+          <!-- 添加年付折扣设置 -->
+          <a-form-item label="Yearly Discount">
+            <div class="input-with-tag">
+              <span class="html-tag">{{ tags.yearlyDiscount }}</span>
+              <a-input
+                v-model:value="localSection.bottomContent.yearlyDiscount"
+                :disabled="disabled"
+                placeholder="e.g. 20%"
+                @change="handleChange"
+              />
+            </div>
+          </a-form-item>
+
           <div class="divider" style="margin: 24px 0;"></div>
 
           <!-- 订阅卡片列表编辑 -->

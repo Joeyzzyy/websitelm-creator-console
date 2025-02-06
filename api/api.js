@@ -43,20 +43,16 @@ apiClient.interceptors.response.use(
     },
     error => {
         if (error.response && error.response.status === 401) {
-          // 只清除认证相关的存储项
           localStorage.removeItem('accessToken');
           localStorage.removeItem('currentCustomerId');
 
-          // 添加一个标志来防止重复导航
           if (!window.isNavigatingToLogin) {
             window.isNavigatingToLogin = true;
             
             if (window.location.pathname !== '/login') {
-              // 使用 replace 而不是普通导航，这样不会保留在历史记录中
               window.location.replace('/login');
             }
             
-            // 清除标志（虽然在重定向后这个清除可能不会执行）
             setTimeout(() => {
               window.isNavigatingToLogin = false;
             }, 1000);

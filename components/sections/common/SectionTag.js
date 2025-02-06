@@ -199,6 +199,7 @@ export const SECTION_TAGS = {
   SubscriptionCard: {
     title: 'h2',
     subTitle: 'p',
+    yearlyDiscount: 'span',
     planName: 'h3',
     monthlyPrice: 'span',
     yearlyPrice: 'span',
