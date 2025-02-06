@@ -56,7 +56,7 @@ const activeContent = computed(() =>
     <!-- 内容区域 -->
     <div 
       class="flex flex-col md:flex-row items-center justify-center gap-6"
-      :class="{ 'md:flex-row-reverse': activeContent?.imageOnRight === false }"
+      :class="{ 'md:flex-row-reverse': !activeContent?.imageOnRight }"
     >
       <div class="w-full md:w-1/3 space-y-3">
         <h3 class="text-base font-semibold text-gray-900">
