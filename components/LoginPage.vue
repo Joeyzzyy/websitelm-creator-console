@@ -984,6 +984,9 @@ export default {
   font-weight: 500;
   box-shadow: 0 4px 12px rgba(108, 152, 255, 0.25);
   transition: all 0.3s ease;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .login-button:hover {
