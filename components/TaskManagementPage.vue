@@ -1034,16 +1034,17 @@ export default {
 <style scoped>
 /* Container styles */
 .task-container {
-  height: 100%;
+  height: calc(100vh - 200px); /* 使用视窗高度减去头部空间 */
   background: #fff;
   border-radius: 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
 }
 
 .header-left {
@@ -1080,33 +1081,37 @@ export default {
 }
 
 .task-list {
-  height: auto;
-  overflow: visible;
+  flex: 1; /* 让任务列表占据剩余空间 */
+  display: flex; /* 添加 flex 布局 */
+  flex-direction: column; /* 垂直方向排列 */
+  min-height: 0; /* 防止溢出 */
 }
 
 /* Empty state styles */
 .empty-state {
+  flex: 1; /* 占据所有可用空间 */
   text-align: center;
   padding: 40px;
-  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-.empty-icon {
-  margin-bottom: 20px;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin: 20px;
 }
 
 .empty-state h3 {
   font-size: 18px;
   color: #374151;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  font-weight: 500;
 }
 
 .empty-state p {
   color: #6B7280;
+  margin: 0;
+  font-size: 14px;
 }
 
 /* Task card styles */
