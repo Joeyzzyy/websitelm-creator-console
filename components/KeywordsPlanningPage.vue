@@ -183,73 +183,96 @@
                       <span>Generate Pages</span>
                     </a-button>
                   </a-space>
-                </div>
+                </div> 
               </div>
 
               <!-- 步骤内容 -->
               <div v-show="currentStep === '0'" class="step-panel">
-                <!-- 第一步的内容 -->
-                <div class="keywords-selection">
-                  <!-- 原来第一步的内容 -->
-                  <div class="left-panel" :class="{ 'panel-hidden': currentStep > 0 }">
-                    <!-- Keyword Selection Component -->
-                    <div v-if="currentMode === 'beginner'" class="beginner-mode">
-                      <a-row :gutter="[24, 24]" class="beginner-content">
-                        <!-- Keywords From Comparison Table -->
-                        <a-col :span="24">
-                          <a-card title="Keywords Analysis" class="keyword-table-card">
-                            <a-tabs 
-                              v-model:activeKey="currentPriority"
-                              @change="handleTabChange"
-                              class="priority-tabs"
-                              tabPosition="left"
-                            >
-                              <a-tab-pane v-for="priority in priorities" :key="priority.level">
-                                <template #tab>
-                                  <div class="priority-tab">
-                                    <div class="priority-indicator" :style="{ backgroundColor: priority.color }"></div>
-                                    <span>{{ priority.label }}</span>
-                                  </div>
-                                </template>
-                                
-                                <a-table
-                                  :dataSource="getKeywordsByPriority(recommendedKeywords, priority.level)"
-                                  :columns="keywordsTableColumns"
-                                  :pagination="recommendedPagination"
-                                  @change="(page) => handleComparisonPaginationChange(priority.level, page.current, page.pageSize)"
-                                  size="small"
-                                >
-                                  <template #bodyCell="{ column, record }">
-                                    <template v-if="column.key === 'actions'">
-                                      <a-button 
-                                        type="primary"
-                                        ghost
-                                        :class="record.favorited ? 'deselect-btn' : 'select-btn'"
-                                        @click="handleKeywordFavorite(record)"
-                                      >
-                                        {{ record.favorited ? 'Deselect' : 'Select' }}
-                                      </a-button>
-                                    </template>
-                                  </template>
-                                </a-table>
-                              </a-tab-pane>
-                            </a-tabs>
-                          </a-card>
-                        </a-col>
-                      </a-row>
-                    </div>
-
-                    <!-- Content in expert mode -->
-                    <template v-else>
-                      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; text-align: center;">
-                        <h2 style="font-size: 24px; color: #1890ff; margin-bottom: 16px;">Expert Mode - Coming Soon</h2>
-                        <p style="font-size: 16px; color: rgba(0, 0, 0, 0.45);">
-                          We're working on something special for our advanced users.
-                          <br>Stay tuned for powerful expert features!
-                        </p>
-                      </div>
-                    </template>
+                <!-- Add KRS Info Card -->
+                <div class="krs-info-card">
+                  <div class="krs-header">
+                    <TrophyOutlined class="krs-icon" />
+                    <h3>Keyword Ranking Score (KRS)</h3>
                   </div>
+                  <div class="krs-content">
+                    <p class="krs-description">
+                      Our AI-powered KRS system analyzes competitor performance and market opportunities to rank keywords from P1 to P5.
+                    </p>
+                    <div class="krs-benefits">
+                      <div class="benefit-item">
+                        <CheckCircleOutlined />
+                        <span>The higher the KRS score (0-10), the better chance to rank</span>
+                      </div>
+                      <div class="benefit-item">
+                        <RiseOutlined />
+                        <span>P1 keywords (KRS ≥ 8.0) represent immediate ranking opportunities</span>
+                      </div>
+                      <div class="benefit-item">
+                        <BarChartOutlined />
+                        <span>Strategic balance of competition and search volume</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 原来第一步的内容 -->
+                <div class="keywords-selection">
+                  <!-- Keyword Selection Component -->
+                  <div v-if="currentMode === 'beginner'" class="beginner-mode">
+                    <a-row :gutter="[24, 24]" class="beginner-content">
+                      <!-- Keywords From Comparison Table -->
+                      <a-col :span="24">
+                        <a-card title="Keywords Analysis" class="keyword-table-card">
+                          <a-tabs 
+                            v-model:activeKey="currentPriority"
+                            @change="handleTabChange"
+                            class="priority-tabs"
+                            tabPosition="left"
+                          >
+                            <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
+                              <a-table
+                                :dataSource="getKeywordsByPriority(recommendedKeywords, priority.level)"
+                                :columns="keywordsTableColumns"
+                                :pagination="{
+                                  current: recommendedPagination.current,
+                                  pageSize: 10,
+                                  total: recommendedPagination.total,
+                                  showSizeChanger: false,
+                                  showQuickJumper: true
+                                }"
+                                @change="(page) => handleComparisonPaginationChange(priority.level, page.current)"
+                                size="small"
+                              >
+                                <template #bodyCell="{ column, record }">
+                                  <template v-if="column.key === 'actions'">
+                                    <a-button 
+                                      type="primary"
+                                      ghost
+                                      :class="record.favorited ? 'deselect-btn' : 'select-btn'"
+                                      @click="handleKeywordFavorite(record)"
+                                    >
+                                      {{ record.favorited ? 'Deselect' : 'Select' }}
+                                    </a-button>
+                                  </template>
+                                </template>
+                              </a-table>
+                            </a-tab-pane>
+                          </a-tabs>
+                        </a-card>
+                      </a-col>
+                    </a-row>
+                  </div>
+
+                  <!-- Content in expert mode -->
+                  <template v-else>
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; text-align: center;">
+                      <h2 style="font-size: 24px; color: #1890ff; margin-bottom: 16px;">Expert Mode - Coming Soon</h2>
+                      <p style="font-size: 16px; color: rgba(0, 0, 0, 0.45);">
+                        We're working on something special for our advanced users.
+                        <br>Stay tuned for powerful expert features!
+                      </p>
+                    </div>
+                  </template>
                 </div>
               </div>
 
@@ -833,7 +856,8 @@ import {
   CalendarOutlined,
   RobotOutlined,
   HistoryOutlined,
-  ArrowLeftOutlined
+  ArrowLeftOutlined,
+  RiseOutlined
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -886,7 +910,8 @@ export default defineComponent({
     CalendarOutlined,
     RobotOutlined,
     HistoryOutlined,
-    ArrowLeftOutlined
+    ArrowLeftOutlined,
+    RiseOutlined
   },
   setup() {
     const currentMode = ref('beginner')
@@ -3537,7 +3562,140 @@ export default defineComponent({
   font-size: 14px;
   margin-right: 6px;
 }
+
+/* Add these styles */
+.krs-info-card {
+  background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
+  border: 1px solid #e6f0fd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+
+.krs-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.krs-icon {
+  font-size: 20px;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.krs-header h3 {
+  font-size: 16px;
+  color: #1f2937;
+  margin: 0;
+  font-weight: 600;
+}
+
+.krs-description {
+  color: #4b5563;
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+.krs-benefits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 8px;
+  background: rgba(37, 99, 235, 0.02);
+  border-radius: 6px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #374151;
+  padding: 6px 8px;
+  background: white;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.benefit-item :deep(.anticon) {
+  color: #2563eb;
+  font-size: 14px;
+  background: rgba(37, 99, 235, 0.08);
+  padding: 4px;
+  border-radius: 4px;
+}
+
+.priority-legend {
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.legend-item {
+  background: white;
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.legend-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-title {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 13px;
+}
+
+.legend-desc {
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.priority-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.p1 {
+  border-left: 2px solid #f50;
+  background: rgba(245, 0, 0, 0.02);
+}
+
+.p2 {
+  border-left: 2px solid #fa8c16;
+  background: rgba(250, 140, 22, 0.02);
+}
+
+.p3 {
+  border-left: 2px solid #1890ff;
+  background: rgba(24, 144, 255, 0.02);
+}
+
+.p1 .priority-dot { background-color: #f50; }
+.p2 .priority-dot { background-color: #fa8c16; }
+.p3 .priority-dot { background-color: #1890ff; }
+
+/* 确保表格分页样式统一 */
+:deep(.ant-pagination-options) {
+  display: none;
+}
 </style>
-
-
-
