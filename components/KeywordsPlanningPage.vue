@@ -22,17 +22,12 @@
             <a-card class="loading-card">
               <!-- Not Started State -->
               <template v-if="analysisState === 'not_started'">
-                <div class="analysis-loading-card">
+                <div class="analysis-loading-card" style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
                   <div class="preparing-analysis-content">
                     <LoadingOutlined class="analysis-icon" spin />
                     <h2 class="analysis-title">Initializing Keyword Analysis</h2>
-                    <p class="analysis-description">
-                      Gathering competitive intelligence from 
-                      <span class="platform-tag semrush">SEMrush</span> 
-                      and 
-                      <span class="platform-tag ahrefs">Ahrefs</span>
-                    </p>
-                    <div class="loading-tips">
+                    <p class="analysis-description">Gathering competitive intelligence from <span class="platform-tag semrush">SEMrush</span>, <span class="platform-tag ahrefs">Ahrefs</span>, <span class="platform-tag google">Google Trends</span>, and <span class="platform-tag social">Social Media</span></p>
+                    <div class="loading-tips"> 
                       <ThunderboltOutlined class="tip-icon" />
                       <span class="tip-text">Pro Tip: This initial scan typically takes several minutes</span>
                     </div>
@@ -40,7 +35,6 @@
                 </div>
               </template>
 
-              <!-- Processing State -->
               <template v-if="analysisState === 'processing'">
                 <div class="loading-content">
                   <LoadingOutlined class="analysis-icon" spin />
@@ -2567,6 +2561,8 @@ export default defineComponent({
 .planning-layout {
   display: flex;
   height: 100%;
+  position: relative;
+  min-height: 400px; /* 设置最小高度以确保有足够空间显示 spin */
 }
 
 .steps-navigation {
@@ -2831,16 +2827,14 @@ export default defineComponent({
 }
 
 .analysis-loading-card {
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 16px;
-  padding: 40px;
-  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
 }
 
 .preparing-analysis-content {
   text-align: center;
-  max-width: 680px;
-  margin: 0 auto;
 }
 
 .analysis-icon {
@@ -2872,6 +2866,8 @@ export default defineComponent({
 
 .semrush { background: #f0f4ff; color: #3b82f6; }
 .ahrefs { background: #e6f6ff; color: #0ea5e9; }
+.google { background: #fff3cd; color: #ffc107; }
+.social { background: #d3f2c5; color: #28a745; }
 
 .loading-tips {
   padding: 12px;
@@ -2891,11 +2887,12 @@ export default defineComponent({
   font-size: 14px;
 }
 
-.centered-spin {
-  position: fixed !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
+/* 添加 centered-spin 样式 */
+:deep(.centered-spin) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 1000;
 }
 

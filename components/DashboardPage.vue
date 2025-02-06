@@ -1090,6 +1090,9 @@ export default defineComponent({
         console.log('开始处理 onboarding');
         console.log('Form State:', this.formState);
         
+        // 添加：检查域名是否发生变化
+        const isWebsiteChanged = this.formState.website !== (this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '') || '');
+        
         const formData = {
           customerId: localStorage.getItem('currentCustomerId'),
           productName: this.formState.productName,
@@ -1099,9 +1102,8 @@ export default defineComponent({
           ).join(','),
           website: this.formState.website || '',
           sitemap: '',
-          domainStatus: this.formState.website !== (this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '') || '') 
-            ? false 
-            : this.originalDomainStatus
+          // 修改：如果域名发生变化，验证状态应该重置为 false
+          domainStatus: isWebsiteChanged ? false : this.formState.domainStatus
         };
 
         let response;
@@ -1144,35 +1146,6 @@ export default defineComponent({
         console.error('Error:', error);
       } finally {
         this.loading = false;
-      }
-    },
-
-    // 新方法：生成新的验证记录
-    async generateNewVerificationRecord() {
-      try {
-        const domain = this.formState.website.replace(/^https?:\/\//, '');
-        const response = await apiClient.createDomainWithTXT({
-          customerId: localStorage.getItem('currentCustomerId'),
-          domainName: domain
-        });
-        
-        if (response?.code === 200) {
-          this.verifyRecord = JSON.parse(response.data.txt);
-          this.showVerifyRecord = true;
-          
-          // 显示新的验证记录提示
-          this.$notification.info({
-            message: 'Domain Verification Required',
-            description: 'A new verification record has been generated for your domain. Please add it to your DNS settings.',
-            duration: 0
-          });
-        }
-      } catch (error) {
-        console.error('Failed to generate verification record:', error);
-        this.$notification.error({
-          message: 'Verification Record Generation Failed',
-          description: error.message || 'Failed to generate new verification record.'
-        });
       }
     },
 
@@ -1543,7 +1516,6 @@ export default defineComponent({
         const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
         const domain = this.formState.website.replace(/^https?:\/\//, '');
 
-        // 如果域名发生变化，先更新产品信息
         if (domain !== currentDomain) {
           const formData = {
             customerId: localStorage.getItem('currentCustomerId'),
@@ -1557,7 +1529,6 @@ export default defineComponent({
             domainStatus: false // 确保新域名的验证状态为 false
           };
 
-          // 更新产品信息
           const updateResponse = await apiClient.updateProduct(this.formState.productId, formData);
           if (updateResponse?.code !== 200) {
             throw new Error('Failed to update product information');
@@ -1567,7 +1538,6 @@ export default defineComponent({
           await this.loadProductInfo();
         }
 
-        // 获取验证记录
         const response = await apiClient.createDomainWithTXT({
           customerId: localStorage.getItem('currentCustomerId'),
           domainName: domain
@@ -1613,7 +1583,30 @@ export default defineComponent({
         if (response?.code === 200) {
           this.$message.success('Domain verified successfully!');
           this.showVerifyRecord = false;
-          await this.loadProductInfo();
+          
+          // 同时更新 formState 和 productInfo 的验证状态
+          this.formState = {
+            ...this.formState,
+            domainStatus: true
+          };
+          
+          // 更新 productInfo 的验证状态
+          if (this.productInfo) {
+            this.productInfo = {
+              ...this.productInfo,
+              domainStatus: true
+            };
+          }
+          
+          // 更新原始域名验证状态
+          this.originalDomainStatus = true;
+          
+          // 添加提示，提醒用户保存更改
+          this.$notification.info({
+            message: 'Domain Verified',
+            description: 'Please click "Save Changes" to apply your changes.',
+            duration: 0
+          });
         } else {
           this.$message.error('Verification failed. If you have added the TXT record correctly, please wait for some seconds and try again.');
         }

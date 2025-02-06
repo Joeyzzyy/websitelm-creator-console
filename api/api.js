@@ -200,17 +200,6 @@ const deleteDomain = async (domainId) => {
   }
 };
 
-// 新增：添加域名的方法
-const addDomain = async ({ customerId, domainName }) => {
-  try {
-    const response = await apiClient.post('/domain', { customerId, domainName });
-    return response.data;
-  } catch (error) {
-    console.error('添加域名失败:', error);
-    return null;
-  }
-};
-
 // 新增：删除页面的方法
 const deletePage = async (pageId) => {
   try {
@@ -1247,7 +1236,6 @@ export default {
   editKeyword,
   getDomains,
   deleteDomain,
-  addDomain,
   deletePage,
   updateSection,
   updatePageStatus,
