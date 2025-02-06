@@ -94,7 +94,7 @@
         </div>
         
         <p class="copyright" :style="{ color: data.colors?.copyright }">
-          {{ data?.copyright || `© ${currentYear} ${data?.companyName || 'Company Name'}. All rights reserved.` }}
+          {{ data?.copyright }}
         </p>
       </div>
     </div>

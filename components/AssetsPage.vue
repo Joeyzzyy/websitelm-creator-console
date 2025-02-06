@@ -38,7 +38,7 @@
           >
             <span class="btn-content">
               <span>Add {{ activeTab === 'links' ? 'Link' : 'Button Link' }}</span>
-              <plus-outlined />
+              
             </span>
           </a-button>
         </template>
@@ -86,8 +86,8 @@
 
           <!-- Media Asset Content -->
           <template v-if="activeTab === 'images' || activeTab === 'videos'">
-            <a-spin :spinning="loading">
-              <div class="assets-grid" v-if="!loading">
+            <a-spin :spinning="mediaLoading">
+              <div class="assets-grid" v-if="!mediaLoading">
                 <template v-if="!showEmptyState">
                   <a-row :gutter="[16, 16]">
                     <a-col 
@@ -176,7 +176,7 @@
                     class="upload-btn-empty" 
                     @click="showUploadModal"
                   >
-                    <upload-outlined /> Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}
+                    Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}
                   </a-button>
                 </div>
               </div>
@@ -198,7 +198,7 @@
                     class="upload-btn-empty" 
                     @click="showAddLinkModal"
                   >
-                    <plus-outlined /> Add First Link
+                     Add First Link
                   </a-button>
                 </div>
                 
@@ -243,120 +243,130 @@
 
           <!-- Knowledge Tab Content -->
           <template v-else-if="activeTab === 'knowledge'">
-            <a-spin :spinning="!loading && processingKnowledge">  <!-- 修改这里 -->
-              <div class="traffic-light-descriptions" v-if="!loading">
-                <p><span class="status-dot status-green"></span> Green: No human intervention needed.</p>
-                <p><span class="status-dot status-yellow"></span> Yellow: Requires review.</p>
-                <p><span class="status-dot status-red"></span> Red: Needs human supplementation.</p>
-              </div>
-              <div class="assets-content">
-                <div class="assets-grid" v-if="!loading">
-                  <div class="main-content">
-                    <!-- Knowledge Base Status Alert -->
-                    <a-alert
-                      type="info"
-                      class="knowledge-alert"
-                    >
-                      <template #description>
-                        <div class="alert-content" v-if="processingKnowledge">
-                          <div class="kb-status-header">
-                            <div class="status-message">
-                              <p>
-                                Knowledge base processing: 
-                                <span class="highlight yellow">
-                                  {{ knowledgeStatus === 'fetch' ? 'Fetching data' : 
-                                    knowledgeStatus === 'process' ? 'Processing content' : 
-                                    knowledgeStatus === 'analyze' ? 'Analyzing content' : 
-                                    knowledgeStatus === 'vector2' ? 'Vectorizing content' : 
-                                    'Initializing...' }}
-                                </span>
-                                (Estimated time: {{ knowledgeTime }}s)
-                              </p>
-                            </div>
+            <a-spin :spinning="!loading && processingKnowledge">
+              <div v-if="!loading && !processingKnowledge">
+                <!-- Empty state display -->
+                <div v-if="!Object.keys(groupedArticles).length" class="empty-state">
+                  <h3 class="empty-state-title">Knowledge Base Not Initialized 🔍</h3>
+                  <p class="empty-state-description">
+                    Your knowledge base is currently empty. Click the button below to start the initialization process.
+                  </p>
+                  <a-button 
+                    type="primary" 
+                    class="upload-btn-empty" 
+                    @click="initializeKnowledgeBase"
+                    :loading="initializingKnowledge"
+                  >
+                    Initialize Knowledge Base
+                  </a-button>
+                </div>
+                
+                <!-- Existing knowledge base content -->
+                <div v-else class="grid-container">
+                  <!-- Knowledge Base Status Alert -->
+                  <a-alert
+                    type="info"
+                    class="knowledge-alert"
+                  >
+                    <template #description>
+                      <div class="alert-content" v-if="processingKnowledge">
+                        <div class="kb-status-header">
+                          <div class="status-message">
+                            <p>
+                              Knowledge base processing: 
+                              <span class="highlight yellow">
+                                {{ knowledgeStatus === 'fetch' ? 'Fetching data' : 
+                                  knowledgeStatus === 'process' ? 'Processing content' : 
+                                  knowledgeStatus === 'analyze' ? 'Analyzing content' : 
+                                  knowledgeStatus === 'vector2' ? 'Vectorizing content' : 
+                                  'Initializing...' }}
+                              </span>
+                              (Estimated time: {{ knowledgeTime }}s)
+                            </p>
                           </div>
                         </div>
-                      </template>
-                    </a-alert>
-
-                    <!-- Knowledge Base Content -->
-                    <template v-if="!processingKnowledge">
-                      <!-- Breadcrumb Navigation -->
-                      <div class="breadcrumb" v-if="currentArticle">
-                        <span @click="clearCurrentArticle">Knowledge Base</span>
-                        <span class="separator">/</span>
-                        <span>{{ currentArticle.label }}</span>
-                        <span class="separator">/</span>
-                        <span class="current">{{ currentArticle.title }}</span>
-                      </div>
-
-                      <!-- Category Grid -->
-                      <div class="grid-container" v-if="!currentArticle">
-                        <div 
-                          v-for="(articles, label) in groupedArticles" 
-                          :key="label"
-                          class="category-card"
-                        >
-                          <div class="category-header">
-                            <h2>{{ label }}</h2>
-                            <span class="article-count">{{ articles.length }} articles</span>
-                          </div>
-                          <div class="category-stats">
-                            <span class="stat-item">
-                              <span class="status-dot status-green"></span>
-                              {{ getCategoryStats(articles).green }}
-                            </span>
-                            <span class="stat-item">
-                              <span class="status-dot status-yellow"></span>
-                              {{ getCategoryStats(articles).yellow }}
-                            </span>
-                            <span class="stat-item">
-                              <span class="status-dot status-red"></span>
-                              {{ getCategoryStats(articles).red }}
-                            </span>
-                          </div>
-                          <div class="article-list">
-                            <div 
-                              v-for="article in articles" 
-                              :key="article.title"
-                              class="article-item"
-                              @click="selectArticle(article)"
-                            >
-                              <span 
-                                class="status-dot" 
-                                :class="{
-                                  'status-green': article.quality === 'A',
-                                  'status-yellow': article.quality === 'B',
-                                  'status-red': article.quality === 'C'
-                                }"
-                              ></span>
-                              {{ article.title }}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Article Detail View -->
-                      <div v-else class="article-detail">
-                        <div class="article-actions">
-                          <a-button 
-                            type="primary"
-                            :loading="saving"
-                            @click="saveArticle"
-                          >
-                            Save Changes
-                          </a-button>
-                        </div>
-                        <h1 class="article-title">{{ currentArticle.title }}</h1>
-                        <a-textarea
-                          v-model:value="editableContent"
-                          :rows="20"
-                          class="article-editor"
-                          :bordered="false"
-                          placeholder="Enter article content..."
-                        />
                       </div>
                     </template>
-                  </div>
+                  </a-alert>
+
+                  <!-- Knowledge Base Content -->
+                  <template v-if="!processingKnowledge">
+                    <!-- Breadcrumb Navigation -->
+                    <div class="breadcrumb" v-if="currentArticle">
+                      <span @click="clearCurrentArticle">Knowledge Base</span>
+                      <span class="separator">/</span>
+                      <span>{{ currentArticle.label }}</span>
+                      <span class="separator">/</span>
+                      <span class="current">{{ currentArticle.title }}</span>
+                    </div>
+
+                    <!-- Category Grid -->
+                    <div class="grid-container" v-if="!currentArticle">
+                      <div 
+                        v-for="(articles, label) in groupedArticles" 
+                        :key="label"
+                        class="category-card"
+                      >
+                        <div class="category-header">
+                          <h2>{{ label }}</h2>
+                          <span class="article-count">{{ articles.length }} articles</span>
+                        </div>
+                        <div class="category-stats">
+                          <span class="stat-item">
+                            <span class="status-dot status-green"></span>
+                            {{ getCategoryStats(articles).green }}
+                          </span>
+                          <span class="stat-item">
+                            <span class="status-dot status-yellow"></span>
+                            {{ getCategoryStats(articles).yellow }}
+                          </span>
+                          <span class="stat-item">
+                            <span class="status-dot status-red"></span>
+                            {{ getCategoryStats(articles).red }}
+                          </span>
+                        </div>
+                        <div class="article-list">
+                          <div 
+                            v-for="article in articles" 
+                            :key="article.title"
+                            class="article-item"
+                            @click="selectArticle(article)"
+                          >
+                            <span 
+                              class="status-dot" 
+                              :class="{
+                                'status-green': article.quality === 'A',
+                                'status-yellow': article.quality === 'B',
+                                'status-red': article.quality === 'C'
+                              }"
+                            ></span>
+                            {{ article.title }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Article Detail View -->
+                    <div v-else class="article-detail">
+                      <div class="article-actions">
+                        <a-button 
+                          type="primary"
+                          :loading="saving"
+                          @click="saveArticle"
+                        >
+                          Save Changes
+                        </a-button>
+                      </div>
+                      <h1 class="article-title">{{ currentArticle.title }}</h1>
+                      <a-textarea
+                        v-model:value="editableContent"
+                        :rows="20"
+                        class="article-editor"
+                        :bordered="false"
+                        placeholder="Enter article content..."
+                      />
+                    </div>
+                  </template>
                 </div>
               </div>
             </a-spin>
@@ -423,7 +433,7 @@
                     class="upload-btn-empty" 
                     @click="showAddLinkModal"
                   >
-                    <plus-outlined /> Add First Button Link
+                     Add First Button Link
                   </a-button>
                 </div>
                 
@@ -819,17 +829,19 @@ export default {
     
     // 修改 fetchAssets 方法支持分页
     const fetchAssets = async () => {
-      loading.value = true
+      mediaLoading.value = true;
+      const isImageTab = activeTab.value === 'images';
+
       try {
-        const customerId = localStorage.getItem('currentCustomerId')
-        const mediaType = activeTab.value === 'images' ? 'image' : 'video'
+        const customerId = localStorage.getItem('currentCustomerId');
+        const mediaType = isImageTab ? 'image' : 'video';
         const response = await apiClient.getMedia(
           customerId,
           mediaType,
           selectedCategory.value === 'all' ? null : selectedCategory.value,
           currentPage.value,
           pageSize.value
-        )
+        );
         
         if (response.data) {
           assets.value = response.data.map(item => ({
@@ -844,17 +856,16 @@ export default {
             size: 0,
             suggestedUsage: '',
             duration: item.mediaType === 'video' ? 0 : undefined
-          }))
-          // 修改这里：使用 TotalCount 而不是 totalCount
-          total.value = response.TotalCount || 0
+          }));
+          total.value = response.TotalCount || 0;
         }
       } catch (error) {
-        console.error('Failed to fetch assets:', error)
-        message.error('Failed to load assets')
+        console.error('Failed to fetch assets:', error);
+        message.error(`Failed to load ${isImageTab ? 'images' : 'videos'}`);
       } finally {
-        loading.value = false
+        mediaLoading.value = false;
       }
-    }
+    };
 
     // 添加分页处理方法
     const handlePageChange = (page, size) => {
@@ -1509,46 +1520,60 @@ export default {
 
     const getKnowledgeCenter = async () => {
       try {
-        const customerId = localStorage.getItem('currentCustomerId')
-        const response = await apiClient.getKnowledgeCenter(customerId)
-        return response.data || [] // 确保返回数组
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.getKnowledgeCenter(customerId);
+        // Return empty array if data is null or empty
+        return response.data || [];
       } catch (error) {
-        console.error('Failed to fetch knowledge base content:', error)
-        message.error('Failed to load knowledge base')
-        return []
-      } finally {
-
+        console.error('Failed to fetch knowledge base content:', error);
+        message.error('Failed to load knowledge base content');
+        return [];
       }
-    }
+    };
 
     // 修改 initKnowledgeBase 方法
     const initKnowledgeBase = async () => {
       try {
         loading.value = true;
         
-        // 先检查域名是否已配置
+        // 如果域名未配置,直接返回
         if (!domainConfigured.value) {
-          return; // 如果域名未配置,直接返回
+          loading.value = false;
+          return;
         }
         
         processingKnowledge.value = true;
         
-        // 开始轮询状态
+        // 修改轮询状态的逻辑
         const pollStatus = async () => {
           const status = await getKnowledgeStatus();
           knowledgeStatus.value = status.currentStep;
           
-          // 如果状态不是 'end'，继续轮询
-          if (status.currentStep !== 'end') {
-            setTimeout(pollStatus, 60000); // 每60秒轮询一次
-          } else {
-            // 状态为 'end' 时，获取知识库内容
+          // 如果 executeStep 为空,说明没有正在进行的处理
+          // 直接获取知识库内容
+          if (!status.currentStep) {
             processingKnowledge.value = false;
             const centerData = await getKnowledgeCenter();
             if (centerData && Array.isArray(centerData)) {
               groupArticlesByLabel(centerData);
             }
+            loading.value = false;
+            return;
           }
+          
+          // 如果 executeStep 为 'end',说明处理刚结束
+          if (status.currentStep === 'end') {
+            processingKnowledge.value = false;
+            const centerData = await getKnowledgeCenter();
+            if (centerData && Array.isArray(centerData)) {
+              groupArticlesByLabel(centerData);
+            }
+            loading.value = false;
+            return;
+          }
+          
+          // 继续轮询
+          setTimeout(pollStatus, 60000);
         };
 
         // 启动轮询
@@ -1557,7 +1582,7 @@ export default {
       } catch (error) {
         console.error('Failed to initialize knowledge base:', error);
         message.error('Failed to load knowledge base');
-      } finally {
+        processingKnowledge.value = false;
         loading.value = false;
       }
     };
@@ -1911,6 +1936,28 @@ export default {
       iconBackground: 'rgba(255, 255, 255, 0.1)',
     }
 
+    const mediaLoading = ref(false);
+
+    // Add to setup
+    const initializingKnowledge = ref(false);
+
+    // Add initialization method
+    const initializeKnowledgeBase = async () => {
+      try {
+        initializingKnowledge.value = true;
+        const customerId = localStorage.getItem('currentCustomerId');
+        await apiClient.initializeKnowledgeBase(customerId);
+        message.success('Knowledge base initialization started. Please refresh the page later to check progress.');
+        // Refresh knowledge base status
+        await initKnowledgeBase();
+      } catch (error) {
+        console.error('Failed to initialize knowledge base:', error);
+        message.error('Failed to initialize knowledge base. Please try again later.');
+      } finally {
+        initializingKnowledge.value = false;
+      }
+    };
+
     return {
       domainConfigured,
       loading,
@@ -2006,7 +2053,10 @@ export default {
       handlePageChange,
       handleSizeChange,
       bannerTheme,
-      AppstoreOutlined
+      AppstoreOutlined,
+      mediaLoading,
+      initializingKnowledge,
+      initializeKnowledgeBase,
     }
   }
 }
@@ -3201,5 +3251,22 @@ export default {
   position: relative;
   z-index: 10002;
   background: white;
+}
+
+.upload-btn-empty {
+  background: linear-gradient(135deg, #60A5FA, #3B82F6);
+  border: none;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 20px;
+  font-weight: 500;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-btn-empty:hover {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
 }
 </style> 
