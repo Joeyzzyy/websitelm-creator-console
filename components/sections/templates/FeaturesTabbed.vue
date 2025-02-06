@@ -62,6 +62,16 @@
                   />
                 </a-form-item>
   
+                <a-form-item label="Image Position">
+                  <a-switch
+                    v-model:checked="tab.imageOnRight"
+                    :disabled="disabled"
+                    @change="handleChange"
+                    checked-children="Right"
+                    un-checked-children="Left"
+                  />
+                </a-form-item>
+  
                 <a-form-item label="Title">
                   <a-input
                     v-model:value="tab.title"
@@ -248,7 +258,8 @@
           buttonText: '',
           buttonLink: '',
           imageUrl: '',
-          imageAlt: ''
+          imageAlt: '',
+          imageOnRight: false
         })
         this.handleChange()
       },

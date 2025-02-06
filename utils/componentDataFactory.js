@@ -349,7 +349,8 @@ export const createCleanComponentData = (componentType) => {
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: '[SAMPLE] Feature 1 illustration',
           buttonText: '[DEMO] Learn More',
-          buttonLink: '#'
+          buttonLink: '#',
+          imageOnRight: true
         },
         {
           tabName: '[DEMO] Feature 2',
@@ -358,7 +359,8 @@ export const createCleanComponentData = (componentType) => {
           imageUrl: '/assets/images/placeholder.png',
           imageAlt: '[SAMPLE] Feature 2 illustration',
           buttonText: '[DEMO] Learn More',
-          buttonLink: '#'
+          buttonLink: '#',
+          imageOnRight: false
         },
         {
           tabName: '[DEMO] Feature 3',
