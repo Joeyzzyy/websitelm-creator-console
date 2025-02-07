@@ -2107,19 +2107,14 @@ export default defineComponent({
 
 .sitemap-card {
   height: 100%;
-  
-  :deep(.ant-card-head) {
-    background: linear-gradient(to right, #f0f7ff, #f8fafc);
-    border-radius: 16px 16px 0 0;
-    padding: 24px;
-    border-bottom: 2px solid #e6f4ff;
-  }
+  max-height: 560px; /* 添加最大高度限制 */
   
   :deep(.ant-card-body) {
     padding: 24px !important;
-    height: calc(100% - 76px); 
+    height: calc(100% - 76px);
     overflow-y: auto;
     
+    /* 优化滚动条样式 */
     &::-webkit-scrollbar {
       width: 8px;
     }
@@ -2207,10 +2202,25 @@ export default defineComponent({
 
 /* 更新树节点样式 */
 .sitemap-tree {
-  :deep(.ant-tree-node-content-wrapper) {
-    width: 100%;
-    display: flex;
-    align-items: center;
+  :deep(.ant-tree) {
+    /* 设置合适的行高，避免节点太密集 */
+    .ant-tree-treenode {
+      padding: 4px 0;
+    }
+    
+    /* 优化展开/折叠图标的可点击区域 */
+    .ant-tree-switcher {
+      width: 24px;
+      height: 24px;
+      line-height: 24px;
+    }
+    
+    /* 优化节点内容的样式 */
+    .ant-tree-node-content-wrapper {
+      min-height: 24px;
+      line-height: 24px;
+      padding: 0 8px;
+    }
   }
 }
 
