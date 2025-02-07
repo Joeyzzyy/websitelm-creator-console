@@ -463,7 +463,7 @@
       <a-form 
         :model="formState" 
         layout="vertical"
-        @finish="handleOnboardingFinish"
+        @finish="handleFormSubmit" 
         ref="formRef"
       >
         <!-- Basic info -->
@@ -962,6 +962,7 @@ export default defineComponent({
       isDomainVerified: false,
       expandedKeys: [], // 添加新的数据属性
       hasTourCompleted: false, // 添加新的数据属性
+      originalWebsite: '', // 新增：保存原始域名
     }
   },
   created() {
@@ -1061,6 +1062,9 @@ export default defineComponent({
 
     editProductInfo() {
       this.originalDomainStatus = this.productInfo?.domainStatus;
+      // 保存原始域名
+      this.originalWebsite = this.productInfo?.projectWebsite?.replace('https://', '');
+      
       this.formState = {
         productId: this.productInfo.productId,
         productName: this.productInfo.productName,
@@ -1112,55 +1116,98 @@ export default defineComponent({
         this.formState.competitors = value
       }
     },
-    async handleOnboardingFinish() {
+    async handleFormSubmit() {
+      if (this.formState.productId) {
+        await this.handleProductEdit();
+      } else {
+        await this.handleOnboarding();
+      }
+    },
+
+    // 处理新用户 onboarding
+    async handleOnboarding() {
       this.loading = true;
       try {
-        console.log('开始处理 onboarding');
-        console.log('Form State:', this.formState);
+        const formData = this.prepareFormData();
+        const response = await apiClient.createProduct(formData);
         
-        // 添加：检查域名是否发生变化
-        const isWebsiteChanged = this.formState.website !== (this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '') || '');
+        if (response?.code === 200) {
+          console.log('API 调用成功，准备显示 modal');
+          this.onboardingModalVisible = false;
+          await this.$nextTick();
+          
+          // 延迟显示 success modal
+          setTimeout(() => {
+            this.successModalVisible = true;
+            console.log('设置 successModalVisible:', this.successModalVisible);
+          }, 100);
+          
+          this.resetFormState();
+          await this.loadProductInfo();
+        }
+      } catch (error) {
+        console.error('Error during onboarding:', error);
+        this.$notification.error({
+          message: 'Onboarding Failed',
+          description: error.message || 'Failed to create product'
+        });
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // 处理产品编辑
+    async handleProductEdit() {
+      this.loading = true;
+      try {
+        // 使用保存的原始域名进行对比
+        const isWebsiteChanged = this.formState.website !== this.originalWebsite;
         
+        console.log('Domain comparison:', {
+          formStateWebsite: this.formState.website,
+          originalWebsite: this.originalWebsite,
+          isWebsiteChanged,
+          comparison: `'${this.formState.website}' !== '${this.originalWebsite}'`
+        });
+        
+        if (isWebsiteChanged) {
+          // 添加初始状态日志
+          console.log('Domain change detected, preparing to reset verification');
+          // 先调用 startVerify 接口重置域名
+          const domain = this.formState.website.replace(/^https?:\/\//, '');
+          console.log('Domain to verify:', domain);
+          
+          const verifyResponse = await apiClient.createDomainWithTXT({
+            customerId: localStorage.getItem('currentCustomerId'),
+            domainName: domain
+          });
+          
+          if (verifyResponse?.code !== 200) {
+            throw new Error('Failed to initialize domain verification');
+          }
+          
+          // 更新验证记录状态
+          this.verifyRecord = JSON.parse(verifyResponse.data.txt);
+          this.showVerifyRecord = true;
+        }
+
+        // 准备表单数据，确保域名变更时重置验证状态
         const formData = {
-          customerId: localStorage.getItem('currentCustomerId'),
-          productName: this.formState.productName,
-          productDesc: this.formState.coreFeatures,
-          competeProduct: this.formState.competitors.map(comp => 
-            `${comp.name}|${comp.url}`
-          ).join(','),
-          website: this.formState.website || '',
-          sitemap: '',
-          // 修改：如果域名发生变化，验证状态应该重置为 false
+          ...this.prepareFormData(),
           domainStatus: isWebsiteChanged ? false : this.formState.domainStatus
         };
 
-        let response;
-        if (this.formState.productId) {
-          console.log('Updating existing product');
-          response = await apiClient.updateProduct(this.formState.productId, formData);
-        } else {
-          console.log('Creating new product');
-          response = await apiClient.createProduct(formData);
-        }
-
-        console.log('API Response:', response); // 检查API响应
-
+        const response = await apiClient.updateProduct(this.formState.productId, formData);
+        
         if (response?.code === 200) {
-          if (!this.formState.productId) {
-            console.log('API 调用成功，准备显示 modal');
-            // 先重置其他状态
-            this.onboardingModalVisible = false;
-            await this.$nextTick();
-            
-            // 延迟显示 success modal
-            setTimeout(() => {
-              this.successModalVisible = true;
-              console.log('设置 successModalVisible:', this.successModalVisible);
-            }, 100);
-
-            this.resetFormState();
+          // 如果域名已变更，显示验证提示
+          if (isWebsiteChanged) {
+            this.$notification.info({
+              message: 'Domain Verification Required',
+              description: 'Please verify your new domain to enable all features.',
+              duration: 0
+            });
           } else {
-            console.log('Updating existing product success');
             this.$notification.success({
               message: 'Product Updated',
               description: 'Product information has been updated successfully.'
@@ -1171,12 +1218,35 @@ export default defineComponent({
           await this.loadProductInfo();
         }
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error updating product:', error);
+        this.$notification.error({
+          message: 'Update Failed',
+          description: error.message || 'Failed to update product information'
+        });
       } finally {
         this.loading = false;
       }
     },
 
+    // 准备表单数据的公共方法
+    prepareFormData() {
+      const isWebsiteChanged = this.formState.website !== (this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '') || '');
+      
+      return {
+        customerId: localStorage.getItem('currentCustomerId'),
+        productName: this.formState.productName,
+        productDesc: this.formState.coreFeatures,
+        competeProduct: this.formState.competitors.map(comp => 
+          `${comp.name}|${comp.url}`
+        ).join(','),
+        website: this.formState.website || '',
+        sitemap: '',
+        // 域名变更时一定重置验证状态
+        domainStatus: isWebsiteChanged ? false : this.formState.domainStatus
+      };
+    },
+
+    // 重置表单状态的方法
     resetFormState() {
       this.formState = {
         productId: undefined,
@@ -1184,7 +1254,7 @@ export default defineComponent({
         website: '',
         coreFeatures: '',
         competitors: [],
-        domainStatus: false // 确保重置验证状态 false
+        domainStatus: false
       };
       this.showVerifyRecord = false;
       this.verifyRecord = null;
@@ -1535,6 +1605,7 @@ export default defineComponent({
         const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
         const domain = this.formState.website.replace(/^https?:\/\//, '');
 
+        // 如果域名发生变化，需要先更新产品信息
         if (domain !== currentDomain) {
           const formData = {
             customerId: localStorage.getItem('currentCustomerId'),
