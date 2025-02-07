@@ -58,8 +58,17 @@
               <div class="website-content">
                 <a :href="'https://' + productInfo?.projectWebsite" target="_blank" class="website-link">
                   {{ productInfo?.projectWebsite }}
-                  <RightOutlined />
+                  <icon-external-link />
                 </a>
+                <!-- 添加 View Data 按钮 -->
+                <a-button 
+                  v-if="productInfo?.domainStatus"
+                  type="primary"
+                  size="small"
+                  @click="showGscData"
+                >
+                  View Data
+                </a-button>
               </div>
             </div>
           </div>
@@ -796,6 +805,38 @@
         </div>
       </div>
     </transition>
+
+    <!-- 添加 GSC 数据弹窗 -->
+    <a-modal
+      v-model:visible="gscDataModalVisible"
+      title="Google Search Console Data"
+      :footer="null"
+      width="600px"
+    >
+      <div v-if="loadingGscData" class="centered-empty-state">
+        <a-spin />
+      </div>
+      <div v-else-if="gscData && gscData.length" class="gsc-data-container">
+        <a-table 
+          :dataSource="gscData" 
+          :columns="columns"
+          :pagination="false"
+          size="small"
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.dataIndex === 'date'">
+              {{ formatDate(record.keys[1]) }}
+            </template>
+            <template v-else-if="column.dataIndex === 'ctr'">
+              {{ (record.ctr * 100).toFixed(2) }}%
+            </template>
+          </template>
+        </a-table>
+      </div>
+      <div v-else class="centered-empty-state">
+        No data available
+      </div>
+    </a-modal>
   </page-layout>
 </template>
 
@@ -892,6 +933,36 @@ export default defineComponent({
       expandedKeys: [], // 添加新的数据属性
       hasTourCompleted: false, // 添加新的数据属性
       originalWebsite: '', // 新增：保存原始域名
+      gscDataModalVisible: false,
+      gscData: null,
+      loadingGscData: false,
+      columns: [
+        {
+          title: 'Date',
+          dataIndex: 'date',
+          width: '100px',
+        },
+        {
+          title: 'Clicks',
+          dataIndex: 'clicks',
+          width: '80px',
+        },
+        {
+          title: 'Impressions',
+          dataIndex: 'impressions',
+          width: '100px',
+        },
+        {
+          title: 'CTR',
+          dataIndex: 'ctr',
+          width: '80px',
+        },
+        {
+          title: 'Position',
+          dataIndex: 'position',
+          width: '80px',
+        },
+      ],
     }
   },
   created() {
@@ -1408,8 +1479,10 @@ export default defineComponent({
       }
     },
     formatDate(dateString) {
-      if (!dateString) return '';
-      return new Date(dateString).toLocaleDateString();
+      return new Date(dateString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric'
+      });
     },
     async connectGSC() {
       if (this.isGscConnected) {
@@ -1796,7 +1869,44 @@ export default defineComponent({
           description: error.message || 'An error occurred while disconnecting from Google Search Console'
         });
       }
-    }
+    },
+
+    async showGscData() {
+      this.gscDataModalVisible = true;
+      this.loadingGscData = true;
+      
+      try {
+        const customerId = localStorage.getItem('currentCustomerId');
+        const currentDomain = this.productInfo.projectWebsite;
+        
+        // 从 gscSites 中查找匹配的域名
+        const matchedSite = this.gscSites.find(site => {
+          const googleDomain = site.siteUrl.replace('sc-domain:', '');
+          return googleDomain === currentDomain;
+        });
+        
+        if (!matchedSite) {
+          this.$message.warning('This domain is not added to Google Search Console yet');
+          this.loadingGscData = false;
+          return;
+        }
+        
+        // 使用 Google 格式的域名请求数据
+        const response = await apiClient.getGscAnalytics(
+          customerId,
+          matchedSite.siteUrl  // 使用完整的 Google 格式域名
+        );
+        
+        if (response?.code === 200) {
+          this.gscData = response.data;
+        }
+      } catch (error) {
+        console.error('Failed to load GSC data:', error);
+        this.$message.error('Failed to load GSC data');
+      } finally {
+        this.loadingGscData = false;
+      }
+    },
   },
 
   emits: ['open-guide-mode'],
@@ -3444,5 +3554,15 @@ export default defineComponent({
 
 .host-option {
   flex: 1;
+}
+
+.website-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gsc-data-container {
+  padding: 8px;
 }
 </style>
