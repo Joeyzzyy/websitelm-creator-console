@@ -239,9 +239,24 @@
                             type="link"
                             size="small"
                             @click="collectPublishedUrls"
-                            :disabled="!productInfo?.productId"
+                            :disabled="!productInfo?.productId || !isGscConnected"
                           >
                             Submit Sitemap
+                            <template v-if="!isGscConnected">
+                              <a-tooltip title="Please connect Google Search Console first">
+                                <InfoCircleOutlined style="margin-left: 4px" />
+                              </a-tooltip>
+                            </template>
+                          </a-button>
+                          <!-- 添加 Disconnect 按钮 -->
+                          <a-button
+                            type="link"
+                            size="small"
+                            danger
+                            @click="disconnectGSC"
+                            v-if="isGscConnected"
+                          >
+                            Disconnect Google Search Console
                           </a-button>
                         </a-space>
                       </div>
@@ -254,6 +269,7 @@
 
                     <!-- Content -->
                     <template v-else>
+                      <!-- 第一步：检查网站是否添加和验证 -->
                       <template v-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
                         <a-empty 
                           description="Add and verify your site to get sitemap automatically"
@@ -266,6 +282,18 @@
                           </template>
                         </a-empty>
                       </template>
+                      <!-- 第二步：检查 GSC 是否连接 -->
+                      <template v-else-if="!isGscConnected">
+                        <a-empty 
+                          description="Connect Google Search Console to manage sitemap and analytics"
+                          class="centered-empty-state"
+                        >
+                          <a-button type="primary" @click="connectGSC">
+                            Connect Google Search Console
+                          </a-button>
+                        </a-empty>
+                      </template>
+                      <!-- 第三步：显示 sitemap 数据 -->
                       <template v-else-if="sitemapData?.length">
                         <div class="sitemap-content">
                           <a-tree
@@ -309,6 +337,7 @@
                           </a-tree>
                         </div>
                       </template>
+                      <!-- 最后：如果都满足条件但没有数据 -->
                       <template v-else>
                         <a-empty 
                           description="No pages found" 
@@ -374,10 +403,9 @@
                 </template>
                 
                 <template v-if="!isGscConnected">
-                  <!-- GSC not connected state -->
                   <a-empty class="centered-empty-state">
                     <template #description>
-                      <span>Connect Google Search Console to view analytics</span>
+                      <span>Connect Google Search Console to manage sitemap and analytics</span>
                     </template>
                     <a-button 
                       type="primary" 
@@ -1275,7 +1303,8 @@ export default defineComponent({
       this.formState.competitors = newCompetitors;
     },
     async getSitemap(isRefresh = false) {
-      if (!this.productInfo?.projectWebsite || !this.productInfo.domainStatus) {
+      // 添加 GSC 连接检查
+      if (!this.productInfo?.projectWebsite || !this.productInfo.domainStatus || !this.isGscConnected) {
         return;
       }
       
@@ -1292,12 +1321,7 @@ export default defineComponent({
         if (response?.code === 200) {
           if (!response.data) {
             this.allPages = [];
-            this.sitemapData = [{
-              key: 'empty',
-              title: 'No pages found',
-              selectable: false,
-              children: []
-            }];
+            this.sitemapData = [];
             return;
           }
 
@@ -1309,12 +1333,7 @@ export default defineComponent({
       } catch (error) {
         console.error('Failed to get sitemap:', error);
         this.$message.error('Failed to get sitemap, please try again later');
-        this.sitemapData = [{
-          key: 'error',
-          title: 'Failed to load sitemap',
-          selectable: false,
-          children: []
-        }];
+        this.sitemapData = [];
       } finally {
         this.loadingSitemap = false;
       }
@@ -2045,6 +2064,53 @@ export default defineComponent({
     // 添加一个方法来检查是否应该显示导览
     shouldShowGuide() {
       return this.productInfo && !this.productInfo.onboarding;
+    },
+
+    async disconnectGSC() {
+      try {
+        // Add confirmation dialog using Modal.confirm
+        const confirmed = await new Promise(resolve => {
+          Modal.confirm({
+            title: 'Disconnect Google Search Console',
+            content: 'Are you sure you want to disconnect from Google Search Console? This will remove access to your search analytics data.',
+            okText: 'Disconnect',
+            okType: 'danger',
+            cancelText: 'Cancel',
+            onOk: () => resolve(true),
+            onCancel: () => resolve(false),
+          });
+        });
+
+        if (!confirmed) return;
+
+        const customerId = localStorage.getItem('currentCustomerId');
+        const domain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
+        
+        if (!customerId || !domain) {
+          throw new Error('Missing required parameters');
+        }
+
+        // Convert to GSC format: sc-domain:domain.com
+        const gscSiteUrl = `sc-domain:${domain}`;
+
+        const response = await apiClient.deleteSite(customerId, gscSiteUrl);
+        if (response?.code === 200) {
+          this.isGscConnected = false;
+          this.gscSites = [];
+          this.gscAnalytics = null;
+          this.$notification.success({
+            message: 'Disconnected Successfully',
+            description: 'Successfully disconnected from Google Search Console'
+          });
+        } else {
+          throw new Error('Failed to disconnect from Google Search Console');
+        }
+      } catch (error) {
+        this.$notification.error({
+          message: 'Disconnect Failed',
+          description: error.message || 'An error occurred while disconnecting from Google Search Console'
+        });
+      }
     }
   },
 

@@ -1213,6 +1213,39 @@ const getPlanningOutlineBatches = async (params = {}) => {
   }
 };
 
+// 新增：更新用户outline的方法
+const updatePlanningOutline = async (outlineId, outlineData) => {
+  try {
+    const response = await apiClient.put(`/planning/outline/${outlineId}`, {
+      description: outlineData.description,
+      keywords: outlineData.keywords,
+      problemSolved: outlineData.problemSolved,
+      relatedKeywords: outlineData.relatedKeywords,
+      title: outlineData.title,
+      userIntent: outlineData.userIntent
+    });
+    return response.data;
+  } catch (error) {
+    console.error('更新用户outline失败:', error);
+    return null;
+  }
+};
+
+const deleteSite = async (customerId, siteURL) => {
+  try {
+    const response = await apiClient.delete('/sites', {
+      params: {
+        customerId,
+        siteURL
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('删除站点失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1305,5 +1338,7 @@ export default {
   deletePlanningOutline,
   generatePlanningAI,
   getPlanningOutlineBatchRecord,
-  getPlanningOutlineBatches
+  getPlanningOutlineBatches,
+  updatePlanningOutline,
+  deleteSite
 };

@@ -653,6 +653,23 @@
               <InfoCircleOutlined />
               Basic Information
             </h3>
+            
+            <!-- Add editable title section -->
+            <div class="editable-title">
+              <a-input
+                v-if="isEditingTitle"
+                v-model:value="selectedPlan.title"
+                @pressEnter="saveTitle"
+                @blur="saveTitle"
+                :maxLength="100"
+                class="title-input"
+              />
+              <div v-else class="title-display" @click="startEditingTitle">
+                <span>{{ selectedPlan.title }}</span>
+                <EditOutlined class="edit-icon" />
+              </div>
+            </div>
+
             <div class="info-grid">
               <div class="info-item">
                 <span class="info-label">Page Type</span>
@@ -663,10 +680,6 @@
               <div class="info-item">
                 <span class="info-label">Total Word Count</span>
                 <span>{{ getTotalWordCount(selectedPlan).toLocaleString() }} words</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Total Sections</span>
-                <span>{{ selectedPlan.outline.length }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Created At</span>
@@ -681,7 +694,23 @@
               <FileTextOutlined />
               Content Description
             </h3>
-            <p class="content-description">{{ selectedPlan.description }}</p>
+            
+            <!-- Add editable description section -->
+            <div class="editable-description">
+              <a-textarea
+                v-if="isEditingDesc"
+                v-model:value="selectedPlan.description"
+                @pressEnter="saveDescription"
+                @blur="saveDescription"
+                :maxLength="500"
+                :autoSize="{ minRows: 3, maxRows: 6 }"
+                class="description-input"
+              />
+              <div v-else class="description-display" @click="startEditingDesc">
+                <p>{{ selectedPlan.description }}</p>
+                <EditOutlined class="edit-icon" />
+              </div>
+            </div>
           </section>
 
           <!-- Target Keywords -->
@@ -857,7 +886,8 @@ import {
   RobotOutlined,
   HistoryOutlined,
   ArrowLeftOutlined,
-  RiseOutlined
+  RiseOutlined,
+  EditOutlined
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -911,7 +941,8 @@ export default defineComponent({
     RobotOutlined,
     HistoryOutlined,
     ArrowLeftOutlined,
-    RiseOutlined
+    RiseOutlined,
+    EditOutlined
   },
   setup() {
     const currentMode = ref('beginner')
@@ -2432,6 +2463,58 @@ export default defineComponent({
       await fetchSelectedContentPlans()
     }
 
+    // Add reactive variables for edit states
+    const isEditingTitle = ref(false)
+    const isEditingDesc = ref(false)
+    
+    // Start editing title
+    const startEditingTitle = () => {
+      isEditingTitle.value = true
+      nextTick(() => {
+        document.querySelector('.title-input')?.focus()
+      })
+    }
+    
+    // Start editing description
+    const startEditingDesc = () => {
+      isEditingDesc.value = true
+      nextTick(() => {
+        document.querySelector('.description-input')?.focus()
+      })
+    }
+    
+    // Save title
+    const saveTitle = async () => {
+      if (!selectedPlan.value) return
+      
+      try {
+        await api.updatePlanningOutline(selectedPlan.value.outlineId, {
+          title: selectedPlan.value.title
+        })
+        message.success('Title updated successfully')
+        isEditingTitle.value = false
+      } catch (error) {
+        console.error('Failed to update title:', error)
+        message.error('Failed to update title')
+      }
+    }
+    
+    // Save description
+    const saveDescription = async () => {
+      if (!selectedPlan.value) return
+      
+      try {
+        await api.updatePlanningOutline(selectedPlan.value.outlineId, {
+          description: selectedPlan.value.description
+        })
+        message.success('Description updated successfully')
+        isEditingDesc.value = false
+      } catch (error) {
+        console.error('Failed to update description:', error)
+        message.error('Failed to update description')
+      }
+    }
+
     return {
       taskStartTime,
       taskEndTime,
@@ -2576,7 +2659,13 @@ export default defineComponent({
       isLoadingSelectedOutlines,
       selectedPlansPagination,
       fetchSelectedContentPlans,
-      handleSelectedPlansPaginationChange
+      handleSelectedPlansPaginationChange,
+      isEditingTitle,
+      isEditingDesc,
+      startEditingTitle,
+      startEditingDesc,
+      saveTitle,
+      saveDescription
     }
   }
 })
@@ -3697,5 +3786,55 @@ export default defineComponent({
 /* 确保表格分页样式统一 */
 :deep(.ant-pagination-options) {
   display: none;
+}
+
+/* 添加新的样式 */
+.editable-title,
+.editable-description {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.title-display,
+.description-display {
+  position: relative;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.title-display:hover,
+.description-display:hover {
+  background: #f5f5f5;
+}
+
+.edit-icon {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #bfbfbf;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.title-display:hover .edit-icon,
+.description-display:hover .edit-icon {
+  opacity: 1;
+}
+
+.title-input,
+.description-input {
+  margin-bottom: 8px;
+}
+
+.description-display {
+  min-height: 60px;
+}
+
+.description-display p {
+  margin: 0;
+  padding-right: 24px;
 }
 </style>
