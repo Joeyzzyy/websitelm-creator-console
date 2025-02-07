@@ -708,29 +708,70 @@
     >
       <template v-if="selectedPlan">
         <div class="drawer-content">
-          <!-- Basic Information -->
+          <!-- Basic Information Section -->
           <section class="drawer-section">
             <h3 class="section-title">
-              <InfoCircleOutlined />
               Basic Information
             </h3>
-            
-            <!-- Add editable title section -->
-            <div class="editable-title">
-              <a-input
-                v-if="isEditingTitle"
-                v-model:value="selectedPlan.title"
-                @pressEnter="saveTitle"
-                @blur="saveTitle"
-                :maxLength="100"
-                class="title-input"
-              />
-              <div v-else class="title-display" @click="startEditingTitle">
-                <span>{{ selectedPlan.title }}</span>
-                <EditOutlined class="edit-icon" />
+            <!-- Title -->
+            <div class="info-item">
+              <span class="info-label">Title</span>
+              <div class="editable-title">
+                <a-input
+                  v-if="isEditingTitle"
+                  v-model:value="selectedPlan.title"
+                  @pressEnter="saveTitle"
+                  @blur="saveTitle"
+                  :maxLength="100"
+                  class="title-input"
+                />
+                <div v-else class="title-display" @click="startEditingTitle">
+                  <span>{{ selectedPlan.title }}</span>
+                  <EditOutlined class="edit-icon" />
+                </div>
               </div>
             </div>
 
+            <!-- Description -->
+            <div class="info-item">
+              <span class="info-label">Description</span>
+              <div class="editable-description">
+                <a-textarea
+                  v-if="isEditingDesc"
+                  v-model:value="selectedPlan.description"
+                  @pressEnter="saveDescription"
+                  @blur="saveDescription"
+                  :maxLength="500"
+                  :autoSize="{ minRows: 3, maxRows: 6 }"
+                  class="description-input"
+                />
+                <div v-else class="description-display" @click="startEditingDesc">
+                  <p>{{ selectedPlan.description }}</p>
+                  <EditOutlined class="edit-icon" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Keywords -->
+            <div class="info-item">
+              <span class="info-label">Keywords</span>
+              <a-select
+                v-model:value="selectedPlan.keywords"
+                mode="multiple"
+                style="width: 100%"
+                placeholder="Select keywords"
+                :options="availableKeywords"
+                :loading="isUpdatingKeywords"
+                @change="handleKeywordsChange"
+                @blur="handleBlur"
+                @deselect="handleChange"
+                @select="handleChange"
+              >
+                <!-- 移除 tagRender 模板，使用默认的标签样式 -->
+              </a-select>
+            </div>
+
+            <!-- Other Metadata -->
             <div class="info-grid">
               <div class="info-item">
                 <span class="info-label">Page Type</span>
@@ -739,7 +780,7 @@
                 </a-tag>
               </div>
               <div class="info-item">
-                <span class="info-label">Total Word Count</span>
+                <span class="info-label">Word Count</span>
                 <span>{{ getTotalWordCount(selectedPlan).toLocaleString() }} words</span>
               </div>
               <div class="info-item">
@@ -749,52 +790,8 @@
             </div>
           </section>
 
-          <!-- Content Description -->
           <section class="drawer-section">
             <h3 class="section-title">
-              <FileTextOutlined />
-              Content Description
-            </h3>
-            
-            <!-- Add editable description section -->
-            <div class="editable-description">
-              <a-textarea
-                v-if="isEditingDesc"
-                v-model:value="selectedPlan.description"
-                @pressEnter="saveDescription"
-                @blur="saveDescription"
-                :maxLength="500"
-                :autoSize="{ minRows: 3, maxRows: 6 }"
-                class="description-input"
-              />
-              <div v-else class="description-display" @click="startEditingDesc">
-                <p>{{ selectedPlan.description }}</p>
-                <EditOutlined class="edit-icon" />
-              </div>
-            </div>
-          </section>
-
-          <!-- Target Keywords -->
-          <section class="drawer-section">
-            <h3 class="section-title">
-              <TagsOutlined />
-              Target Keywords
-            </h3>
-            <div class="keywords-container">
-              <a-tag
-                v-for="keyword in selectedPlan.keywords.split(', ')"
-                :key="keyword"
-                color="blue"
-              >
-                {{ keyword }}
-              </a-tag>
-            </div>
-          </section>
-
-          <!-- Content Outline -->
-          <section class="drawer-section">
-            <h3 class="section-title">
-              <OrderedListOutlined />
               Content Outline
             </h3>
             <div class="outline-tree">
@@ -1600,7 +1597,16 @@ export default defineComponent({
     const selectedPlan = ref(null)
 
     const showPlanDetails = (plan) => {
-      selectedPlan.value = plan
+      selectedPlan.value = {
+        ...plan,
+        // 确保关键词是数组形式
+        keywords: Array.isArray(plan.keywords) 
+          ? [...plan.keywords]
+          : plan.keywords?.split(',').filter(Boolean) || [],
+        originalKeywords: Array.isArray(plan.keywords)
+          ? [...plan.keywords]
+          : plan.keywords?.split(',').filter(Boolean) || []
+      }
       drawerVisible.value = true
     }
 
@@ -2686,6 +2692,95 @@ export default defineComponent({
       console.log('Handling bulk import:', bulkKeywords.value)
     }
 
+    // 添加新的响应式变量
+    const isUpdatingKeywords = ref(false)
+
+    // 从已选关键词中获取可用的关键词选项
+    const availableKeywords = computed(() => {
+      return selectedKeywordsData.value.map(keyword => ({
+        label: keyword.keyword,
+        value: keyword.keyword,
+        krs: keyword.krs,
+        kd: keyword.kd,
+        volume: keyword.volume
+      }))
+    })
+
+    // 处理关键词变化
+    const handleKeywordsChange = async (newKeywords) => {
+      if (!selectedPlan.value) return
+      selectedPlan.value.keywords = newKeywords
+    }
+
+    // 保存关键词更新
+    const saveKeywords = async () => {
+      if (!selectedPlan.value || isUpdatingKeywords.value) return
+      
+      // 确保至少选择了一个关键词
+      if (!selectedPlan.value.keywords || selectedPlan.value.keywords.length === 0) {
+        message.warning('Please select at least one keyword')
+        selectedPlan.value.keywords = [...selectedPlan.value.originalKeywords] || []
+        return
+      }
+      
+      try {
+        isUpdatingKeywords.value = true
+        
+        // 将关键词数组转换为逗号分隔的字符串，不带空格
+        const keywordsString = selectedPlan.value.keywords.join(',')
+        await api.updatePlanningOutline(selectedPlan.value.outlineId, {
+          keywords: keywordsString
+        })
+        
+        selectedPlan.value.originalKeywords = [...selectedPlan.value.keywords]
+        message.success('Keywords updated successfully')
+      } catch (error) {
+        console.error('Failed to update keywords:', error)
+        message.error('Failed to update keywords')
+        selectedPlan.value.keywords = [...selectedPlan.value.originalKeywords] || []
+      } finally {
+        isUpdatingKeywords.value = false
+      }
+    }
+
+    // 根据关键词的 KRS 值设置标签颜色
+    const getKeywordTagColor = (keyword) => {
+      const keywordData = selectedKeywordsData.value.find(k => k.keyword === keyword)
+      if (!keywordData) return ''
+      
+      const krs = parseFloat(keywordData.krs)
+      if (krs >= 8) return 'red'
+      if (krs >= 6) return 'orange'
+      if (krs >= 4) return 'blue'
+      return 'default'
+    }
+
+    // 添加新的处理函数
+    const handleChange = () => {
+      // 使用防抖来延迟保存，避免频繁调用
+      if (window.saveKeywordsTimeout) {
+        clearTimeout(window.saveKeywordsTimeout)
+      }
+      window.saveKeywordsTimeout = setTimeout(() => {
+        saveKeywords()
+      }, 500)
+    }
+
+    // 处理失焦事件
+    const handleBlur = () => {
+      if (window.saveKeywordsTimeout) {
+        clearTimeout(window.saveKeywordsTimeout)
+      }
+      saveKeywords()
+    }
+
+    // 在组件卸载时清理定时器
+    onUnmounted(() => {
+      if (window.saveKeywordsTimeout) {
+        clearTimeout(window.saveKeywordsTimeout)
+      }
+    })
+
     return {
       taskStartTime,
       taskEndTime,
@@ -2849,7 +2944,14 @@ export default defineComponent({
       removeImportedKeyword,
       bulkKeywords,
       bulkInputVisible,
-      handleBulkImport
+      handleBulkImport,
+      isUpdatingKeywords,
+      availableKeywords,
+      handleKeywordsChange,
+      saveKeywords,
+      getKeywordTagColor,
+      handleChange,
+      handleBlur
     }
   }
 })
@@ -3305,9 +3407,7 @@ export default defineComponent({
 }
 
 .outline-drawer :deep(.ant-drawer-body) {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
+  padding: 8px; /* 从 24px 缩小到 8px */
 }
 
 .drawer-content {
@@ -3316,11 +3416,19 @@ export default defineComponent({
 }
 
 .drawer-section {
-  margin-bottom: 32px;
+  margin-bottom: 4px; /* 进一步缩小区块之间的垂直间距 */
+  padding: 8px;        /* 内边距也由之前 12px 减小到 8px */
   background: #ffffff;
   border-radius: 8px;
-  padding: 20px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.drawer-section .section-title {
+  margin-bottom: 4px; /* 标题与下方内容之间的间距进一步缩小 */
+}
+
+.drawer-section .info-item {
+  margin-bottom: 4px; /* 各信息项之间的间距也进一步减小 */
 }
 
 .section-title {
@@ -3976,13 +4084,13 @@ export default defineComponent({
 .editable-title,
 .editable-description {
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 4px; /* 将原来的间距从 16px 缩小到 4px */
 }
 
 .title-display,
 .description-display {
   position: relative;
-  padding: 8px;
+  padding: 4px 6px; /* 将内边距从 8px 缩小到 4px（垂直）和 6px（水平） */
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s;
@@ -3990,22 +4098,12 @@ export default defineComponent({
 
 .title-display:hover,
 .description-display:hover {
-  background: #f5f5f5;
+  background: #f9f9f9;
 }
 
 .edit-icon {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #bfbfbf;
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.title-display:hover .edit-icon,
-.description-display:hover .edit-icon {
-  opacity: 1;
+  right: 4px;      /* 缩小图标与右侧的距离 */
+  font-size: 12px; /* 缩小图标尺寸 */
 }
 
 .title-input,
@@ -4099,6 +4197,85 @@ export default defineComponent({
     
     .anticon {
       color: #1890ff;
+    }
+  }
+}
+
+.drawer-section {
+  margin-bottom: 24px;
+  
+  .section-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .info-item {
+    margin-bottom: 16px;
+
+    .info-label {
+      display: block;
+      color: #8c8c8c;
+      margin-bottom: 8px;
+    }
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .editable-title,
+  .editable-description {
+    position: relative;
+    
+    .edit-icon {
+      opacity: 0;
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      transition: opacity 0.2s;
+    }
+
+    &:hover .edit-icon {
+      opacity: 1;
+    }
+  }
+
+  .keywords-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+.drawer-section .ant-select {
+  margin-top: 8px;
+}
+
+:deep(.ant-select-dropdown) {
+  .ant-select-item-option-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .keyword-metrics {
+    font-size: 12px;
+    color: #8c8c8c;
+    
+    span {
+      margin-left: 8px;
+      
+      &:first-child {
+        margin-left: 0;
+      }
     }
   }
 }
