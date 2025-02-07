@@ -217,6 +217,7 @@
                   <a-tabs 
                     v-model:activeKey="keywordSelectionMode"
                     class="mode-tabs"
+                    @change="handleModeChange"
                   >
                     <a-tab-pane key="ai" tab="AI Recommendations">
                       <!-- 原来的 AI 推荐内容 -->
@@ -297,22 +298,6 @@
 
                         <!-- 导入的关键词列表 -->
                         <a-card title="Imported Keywords" class="imported-keywords-card">
-                          <div class="table-toolbar">
-                            <div class="toolbar-left">
-                            </div>
-                            <div class="toolbar-right">
-                              <a-button 
-                                type="primary"
-                                danger
-                                @click="clearImportedKeywords"
-                                :disabled="!importedKeywords.length"
-                              >
-                                <DeleteOutlined />
-                                Clear All
-                              </a-button>
-                            </div>
-                          </div>
-
                           <a-table
                             :dataSource="importedKeywords"
                             :columns="importedKeywordsColumns"
@@ -2658,10 +2643,60 @@ export default defineComponent({
       fetchImportedKeywords()
     }
 
-    const handleFileUpload = async (file) => {
-      // Implement file upload logic
-      console.log('Uploading file:', file)
-    }
+    const handleFileUpload = async ({ file }) => {
+      // 验证文件类型
+      const isCSV = file.type === 'text/csv';
+      const isExcel = file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+                      file.type === 'application/vnd.ms-excel';
+                      
+      if (!isCSV && !isExcel) {
+        message.error('Please upload CSV or Excel file only');
+        return;
+      }
+
+      // 验证文件大小 (例如限制为10MB)
+      const isLt10M = file.size / 1024 / 1024 < 10;
+      if (!isLt10M) {
+        message.error('File must be smaller than 10MB');
+        return;
+      }
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // 显示上传中的loading
+        const uploadingMessage = message.loading({
+          content: 'Uploading...',
+          duration: 0,
+          key: 'uploadingKeywords'
+        });
+
+        const response = await api.importKeywords(formData);
+        
+        // 关闭loading消息
+        message.destroy('uploadingKeywords');
+
+        // 检查响应状态
+        if (response?.code === 200 || response?.status === 'success') {
+          message.success({
+            content: `Successfully imported ${response?.data?.count || ''} keywords`,
+            duration: 3
+          });
+          
+          // 刷新导入的关键词列表
+          await fetchImportedKeywords();
+        } else {
+          throw new Error(response?.message || 'Import failed');
+        }
+      } catch (error) {
+        console.error('File upload failed:', error);
+        message.error({
+          content: error.message || 'Failed to import keywords, please try again',
+          duration: 3
+        });
+      }
+    };
 
     const downloadTemplate = () => {
       // Implement download template logic
@@ -2780,6 +2815,31 @@ export default defineComponent({
         clearTimeout(window.saveKeywordsTimeout)
       }
     })
+
+    const handleModeChange = async (mode) => {
+      if (mode === 'manual') {
+        // 当切换到manual模式时，加载imported keywords
+        await fetchImportedKeywords()
+      }
+    }
+
+    const fetchImportedKeywords = async () => {
+      try {
+        const response = await api.getPlanningKeywords({
+          source: 'import',
+          page: importedKeywordsPagination.value.current,
+          limit: importedKeywordsPagination.value.pageSize
+        })
+        
+        if (response?.data) {
+          importedKeywords.value = response.data.map(transformKeywordData)
+          importedKeywordsPagination.value.total = response.totalCount || 0
+        }
+      } catch (error) {
+        console.error('Failed to fetch imported keywords:', error)
+        message.error('Failed to load imported keywords')
+      }
+    }
 
     return {
       taskStartTime,
@@ -2951,7 +3011,9 @@ export default defineComponent({
       saveKeywords,
       getKeywordTagColor,
       handleChange,
-      handleBlur
+      handleBlur,
+      handleModeChange,
+      fetchImportedKeywords
     }
   }
 })

@@ -1288,6 +1288,21 @@ const cancelGscAuth = async () => {
   }
 };
 
+// 新增：导入关键词的方法
+const importKeywords = async (formData) => {
+  try {
+    const response = await apiClient.post('/import/keywords', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('导入关键词失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1382,5 +1397,6 @@ export default {
   getPlanningOutlineBatchRecord,
   getPlanningOutlineBatches,
   updatePlanningOutline,
-  cancelGscAuth
+  cancelGscAuth,
+  importKeywords
 };

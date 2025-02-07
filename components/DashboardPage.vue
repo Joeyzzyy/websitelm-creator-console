@@ -254,7 +254,7 @@
                             size="small"
                             danger
                             @click="disconnectGSC"
-                            v-if="isGscConnected"
+                           
                           >
                             Disconnect Google Search Console
                           </a-button>
@@ -913,7 +913,6 @@ import {
 import apiClient from '../api/api'
 import { Modal, message } from 'ant-design-vue'
 import * as echarts from 'echarts'
-import { dashboardTutorial } from '../config/tutorials/dashboard'
 
 export default defineComponent({
   components: {
@@ -1083,9 +1082,7 @@ export default defineComponent({
 
     editProductInfo() {
       this.originalDomainStatus = this.productInfo?.domainStatus;
-      // 保存原始域名
       this.originalWebsite = this.productInfo?.projectWebsite?.replace('https://', '');
-      
       this.formState = {
         productId: this.productInfo.productId,
         productName: this.productInfo.productName,
