@@ -2175,17 +2175,7 @@ export default defineComponent({
 
         if (!confirmed) return;
 
-        const customerId = localStorage.getItem('currentCustomerId');
-        const domain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
-        
-        if (!customerId || !domain) {
-          throw new Error('Missing required parameters');
-        }
-
-        // Convert to GSC format: sc-domain:domain.com
-        const gscSiteUrl = `sc-domain:${domain}`;
-
-        const response = await apiClient.deleteSite(customerId, gscSiteUrl);
+        const response = await apiClient.cancelGscAuth();
         if (response?.code === 200) {
           this.isGscConnected = false;
           this.gscSites = [];

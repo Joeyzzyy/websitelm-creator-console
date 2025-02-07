@@ -1,9 +1,15 @@
 import axios from 'axios';
 
-// 创建一个 axios 实例
 const apiClient = axios.create({
-  // baseURL: 'http://106.15.94.148:7070/v1', // 替换为实际的 API 基础地址
   baseURL: 'https://strapi.sheet2email.com/v1', // 替换为实际的 API 基础地址
+  timeout: 20000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+const knowledgeApiClient = axios.create({
+  baseURL: 'https://strapi.sheet2email.com', // 替换为实际的 API 基础地址
   timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
@@ -19,7 +25,6 @@ const vercelApiClient = axios.create({
   },
 });
 
-// 不需要 token 的接口列表
 const noAuthUrls = ['/login'];
 
 apiClient.interceptors.request.use(
@@ -38,6 +43,48 @@ apiClient.interceptors.request.use(
 );
 
 apiClient.interceptors.response.use(
+    response => {
+        return response;
+    },
+    error => {
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('currentCustomerId');
+
+          if (!window.isNavigatingToLogin) {
+            window.isNavigatingToLogin = true;
+            
+            if (window.location.pathname !== '/login') {
+              window.location.replace('/login');
+            }
+            
+            setTimeout(() => {
+              window.isNavigatingToLogin = false;
+            }, 1000);
+          }
+        }
+        return Promise.reject(error);
+    }
+);
+
+// 为 knowledgeApiClient 添加请求拦截器
+knowledgeApiClient.interceptors.request.use(
+    config => {
+        if (!noAuthUrls.includes(config.url)) {
+            const token = localStorage.getItem('accessToken');
+            if (token) {
+                config.headers['Authorization'] = `Bearer ${token}`;
+            }
+        }
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
+    }
+);
+
+// 为 knowledgeApiClient 添加响应拦截器
+knowledgeApiClient.interceptors.response.use(
     response => {
         return response;
     },
@@ -689,10 +736,10 @@ const validateDomain = async (customerId) => {
   }
 };
 
-// 新增：获取knowledge center内容列表的方法
+// 修改: 使用knowledgeApiClient获取knowledge center内容列表
 const getKnowledgeCenter = async () => {
   try {
-    const response = await apiClient.get('/knowledge/center');
+    const response = await knowledgeApiClient.get('/knowledge/list');
     return response.data;
   } catch (error) {
     console.error('获取knowledge center内容列表失败:', error);
@@ -700,10 +747,10 @@ const getKnowledgeCenter = async () => {
   }
 };
 
-// 新增：根据ID获取knowledge内容的方法
+// 修改: 使用knowledgeApiClient根据ID获取knowledge内容
 const getKnowledgeById = async (contentId) => {
   try {
-    const response = await apiClient.get(`/knowledge/${contentId}`);
+    const response = await knowledgeApiClient.get(`/knowledge/${contentId}`);
     return response.data;
   } catch (error) {
     console.error('获取knowledge内容详情失败:', error);
@@ -711,10 +758,10 @@ const getKnowledgeById = async (contentId) => {
   }
 };
 
-// 新增：更新knowledge内容的方法
+// 修改: 使用knowledgeApiClient更新knowledge内容
 const updateKnowledge = async (contentId, updateData) => {
   try {
-    const response = await apiClient.put(`/knowledge/center/${contentId}`, {
+    const response = await knowledgeApiClient.put(`/knowledge/center/${contentId}`, {
       content: updateData.content,
       description: updateData.description,
       source: updateData.source,
@@ -728,10 +775,10 @@ const updateKnowledge = async (contentId, updateData) => {
   }
 };
 
-// 新增：获取knowledge生成状态的方法
+// 修改: 使用knowledgeApiClient获取knowledge生成状态
 const getKnowledgeProcessStatus = async () => {
   try {
-    const response = await apiClient.get('/knowledge/process');
+    const response = await knowledgeApiClient.get('/knowledge/process');
     return response.data;
   } catch (error) {
     console.error('获取knowledge生成状态失败:', error);
@@ -1231,17 +1278,12 @@ const updatePlanningOutline = async (outlineId, outlineData) => {
   }
 };
 
-const deleteSite = async (customerId, siteURL) => {
+const cancelGscAuth = async () => {
   try {
-    const response = await apiClient.delete('/sites', {
-      params: {
-        customerId,
-        siteURL
-      }
-    });
+    const response = await apiClient.delete('/auth/cancel');
     return response.data;
   } catch (error) {
-    console.error('删除站点失败:', error);
+    console.error('取消 GSC OAuth 失败:', error);
     return null;
   }
 };
@@ -1340,5 +1382,5 @@ export default {
   getPlanningOutlineBatchRecord,
   getPlanningOutlineBatches,
   updatePlanningOutline,
-  deleteSite
+  cancelGscAuth
 };
