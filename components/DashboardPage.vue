@@ -512,13 +512,12 @@
               :disabled="verifying"
             />
           </a-input-group>
-          <p class="help-text">Make sure to enter the main domain of your product (e.g. example.com).</p>
-
-          <!-- Domain verification section -->
           <template v-if="formState.productId">
             <template v-if="(!productInfo.domainStatus || formState.website !== productInfo.projectWebsite?.replace('https://', '')) && formState.website">
               <a-typography-text type="secondary" class="mt-3 d-block">
-                <InfoCircleOutlined /> Domain verification required for automatic sitemap and content fetching
+                Make sure to enter the main domain of your product (e.g. example.com).
+                <br/>
+                Domain verification required for automatic sitemap and content fetching.
               </a-typography-text>
               
               <div class="mt-3">
@@ -535,7 +534,7 @@
                 <template v-else>
                   <div class="verify-record-container">
                     <div class="verify-record-title">
-                      <InfoCircleOutlined /> Please add the following TXT record to your DNS settings:
+                      Please add the following TXT record to your DNS settings:
                     </div>
                     <div class="verify-record-table">
                       <div class="verify-record-row">
@@ -544,14 +543,33 @@
                           <a-typography-text>TXT</a-typography-text>
                         </div>
                       </div>
+                      
+                      <!-- Combined Host row with horizontal layout -->
                       <div class="verify-record-row">
                         <div class="verify-record-cell">
                           <span class="verify-label">Host:</span>
-                          <a-typography-text code copyable class="record-value">
-                            {{ verifyRecord?.host || '_' }}
-                          </a-typography-text>
+                          <div class="record-value-container horizontal">
+                            <div class="host-option">
+                              <a-typography-text code copyable class="record-value">
+                                {{ verifyRecord?.host || '_' }}
+                              </a-typography-text>
+                              <span class="record-note">For most DNS providers</span>
+                            </div>
+                            
+                            <div class="host-divider">
+                              <span class="divider-text">OR</span>
+                            </div>
+                            
+                            <div class="host-option">
+                              <a-typography-text code copyable class="record-value">
+                                {{ verifyRecord?.host?.split('.' + formState.website)[0] || '_' }}
+                              </a-typography-text>
+                              <span class="record-note">For Namecheap, Aliyun, etc.</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
+                      
                       <div class="verify-record-row">
                         <div class="verify-record-cell">
                           <span class="verify-label">Value:</span>
@@ -561,12 +579,15 @@
                         </div>
                       </div>
                     </div>
+                    
                     <div class="verify-record-help">
                       <ul>
+                        <li>Choose the appropriate Host format based on your DNS provider</li>
                         <li>DNS changes may take up to several minutes to propagate</li>
                         <li>Make sure to copy the exact value without any modifications</li>
                       </ul>
                     </div>
+                    
                     <a-button 
                       type="primary" 
                       @click="verifyNow"
@@ -2622,11 +2643,6 @@ export default defineComponent({
     display: flex;
     align-items: center;
     gap: 6px;
-    
-    &::before {
-      content: '💡';
-      font-size: 13px;
-    }
   }
 
   .help-text {
@@ -2636,11 +2652,6 @@ export default defineComponent({
     display: flex;
     align-items: center;
     gap: 4px;
-    
-    &::before {
-      content: 'ℹ️';
-      font-size: 12px;
-    }
   }
 
   /* 修复输入框组件高度不一致的问题 */
@@ -3798,5 +3809,83 @@ export default defineComponent({
   display: flex;
   align-items: center;
   height: 32px; /* 与标签高度保持一致 */
+}
+
+.record-value-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.host-divider {
+  position: relative;
+  text-align: center;
+  margin: 8px 0;
+}
+
+.divider-text {
+  background: white;
+  padding: 0 12px;
+  color: #999;
+  font-size: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.host-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #f0f0f0;
+  z-index: 0;
+}
+
+.record-note {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+  margin-top: -4px;
+}
+
+.record-value {
+  font-family: monospace;
+  background: #f5f5f5;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.verify-record-help ul {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.verify-record-help li {
+  margin: 4px 0;
+}
+
+.verify-record-cell {
+  padding: 12px;
+}
+
+.verify-record-row {
+  border-bottom: 1px solid #f0f0f0;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.record-value-container.horizontal {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.host-option {
+  flex: 1;
 }
 </style>
