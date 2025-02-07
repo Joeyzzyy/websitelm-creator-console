@@ -165,9 +165,6 @@
                       @click="confirmClearAllOutlines"
                       class="action-button"
                     >
-                      <template #icon>
-                        <DeleteOutlined />
-                      </template>
                       <span>Clear All</span>
                     </a-button>
                     <a-button 
@@ -226,7 +223,7 @@
                       <div v-if="currentMode === 'beginner'" class="beginner-mode">
                         <a-row :gutter="[24, 24]" class="beginner-content">
                           <a-col :span="24">
-                            <a-card title="Keywords Analysis" class="keyword-table-card">
+                            <a-card class="keyword-table-card">
                               <a-tabs 
                                 v-model:activeKey="currentPriority"
                                 @change="handleTabChange"
@@ -302,9 +299,6 @@
                         <a-card title="Imported Keywords" class="imported-keywords-card">
                           <div class="table-toolbar">
                             <div class="toolbar-left">
-                              <span class="keyword-count">
-                                Total: {{ importedKeywords.length }} keywords
-                              </span>
                             </div>
                             <div class="toolbar-right">
                               <a-button 
