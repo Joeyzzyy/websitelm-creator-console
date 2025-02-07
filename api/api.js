@@ -1108,7 +1108,7 @@ const getKeywordAnalysisOverview = async () => {
 const getPlanningKeywords = async (params = {}) => {
   try {
     const queryParams = {
-      source: params.source,
+      keywordType: params.keywordType,
       level: params.level,
       ...(params.status && { status: params.status }),
       ...(params.page && { page: params.page }),

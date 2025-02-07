@@ -119,320 +119,231 @@
         </div>
       </a-card>
 
-      <!-- Quick Access Panel -->
-      <a-card class="quick-access-panel">
-        <template #title>
-          <span class="quick-access-title">
-            <ThunderboltOutlined />
-            Core Features
-          </span>
-        </template>
-        <div class="quick-links">
-          <div class="quick-link-item">
-            <div class="quick-link-icon planner">
-              <CalendarOutlined />
-            </div>
-            <div class="quick-link-content">
-              <div class="quick-link-header">
-                <div class="quick-link-title">
-                  Smart SEO Planner
-                  <a-tag color="success" v-if="productInfo?.domainStatus">
-                    {{ pagesDashboard?.keywordOpportunities || 3 }} Topics Found
-                  </a-tag>
-                </div>
-              </div>
-              <div class="quick-link-desc">
-                <ul class="feature-list">
-                  <li>AI analyzes your market and competitors</li>
-                  <li>Generates SEO-optimized content ideas</li>
-                  <li>Suggests high-potential keywords</li>
-                </ul>
-              </div>
-              <div class="quick-link-action">
-                <router-link to="/keywords" class="action-link">
-                  Start Planning
-                  <RightOutlined />
-                </router-link>
-              </div>
-            </div>
-          </div>
-
-          <div class="quick-link-item">
-            <div class="quick-link-icon manager">
-              <CheckSquareOutlined />
-            </div>
-            <div class="quick-link-content">
-              <div class="quick-link-header">
-                <div class="quick-link-title">
-                  Content Manager
-                </div>
-              </div>
-              <div class="quick-link-desc">
-                <ul class="feature-list">
-                  <li>Review AI-generated content</li>
-                  <li>One-click publishing to your site</li>
-                  <li>Track content performance</li>
-                </ul>
-              </div>
-              <div class="quick-link-action">
-                <router-link to="/task-management" class="action-link">
-                  Manage Content
-                  <RightOutlined />
-                </router-link>
-              </div>
-            </div>
-          </div>
-
-          <div class="quick-link-item">
-            <div class="quick-link-icon profile">
-              <AppstoreOutlined />
-            </div>
-            <div class="quick-link-content">
-              <div class="quick-link-header">
-                <div class="quick-link-title">
-                  Product Profile
-                  <a-tag color="processing" v-if="productInfo?.domainStatus">
-                    {{ pagesDashboard?.missingAssets || 4 }} Missing
-                  </a-tag>
-                </div>
-              </div>
-              <div class="quick-link-desc">
-                <ul class="feature-list">
-                  <li>Define your product details</li>
-                  <li>Add competitor information</li>
-                  <li>Improve AI content accuracy</li>
-                </ul>
-              </div>
-              <div class="quick-link-action">
-                <router-link to="/assets" class="action-link">
-                  Complete Profile
-                  <RightOutlined />
-                </router-link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </a-card>
-
-      <!-- Sitemap and Pages Row -->
+      <!-- Quick Access Panel and Sitemap Row -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
-        <a-col :span="24">
-          <a-collapse v-model:activeKey="activeCollapseKeys">
-            <!-- Website Structure -->
-            <a-collapse-panel key="sitemap" header="🗺️ Website Structure (Sitemap)">
-              <a-row :gutter="[16, 16]">
-                <!-- Sitemap Panel - 调整为占满宽度 -->
-                <a-col :span="24">
-                  <a-card class="sitemap-card">
-                    <template #title>
-                      <div class="card-title">
+        <a-col :span="12">
+          <!-- Quick Access Panel -->
+          <a-card class="quick-access-panel">
+            <template #title>
+              <span class="quick-access-title">
+                <ThunderboltOutlined />
+                Core Features
+              </span>
+            </template>
+            <div class="quick-links">
+              <div class="quick-link-item">
+                <div class="quick-link-icon planner">
+                  <CalendarOutlined />
+                </div>
+                <div class="quick-link-content">
+                  <div class="quick-link-header">
+                    <div class="quick-link-title">
+                      Smart SEO Planner
+                      <a-tag color="success" v-if="productInfo?.domainStatus">
+                        {{ pagesDashboard?.keywordOpportunities || 3 }} Topics Found
+                      </a-tag>
+                    </div>
+                  </div>
+                  <div class="quick-link-desc">
+                    <ul class="feature-list">
+                      <li>AI analyzes your market and competitors</li>
+                      <li>Generates SEO-optimized content ideas</li>
+                      <li>Suggests high-potential keywords</li>
+                    </ul>
+                  </div>
+                  <div class="quick-link-action">
+                    <router-link to="/keywords" class="action-link">
+                      Start Planning
+                      <RightOutlined />
+                    </router-link>
+                  </div>
+                </div>
+              </div>
+
+              <div class="quick-link-item">
+                <div class="quick-link-icon manager">
+                  <CheckSquareOutlined />
+                </div>
+                <div class="quick-link-content">
+                  <div class="quick-link-header">
+                    <div class="quick-link-title">
+                      Content Manager
+                    </div>
+                  </div>
+                  <div class="quick-link-desc">
+                    <ul class="feature-list">
+                      <li>Review AI-generated content</li>
+                      <li>One-click publishing to your site</li>
+                      <li>Track content performance</li>
+                    </ul>
+                  </div>
+                  <div class="quick-link-action">
+                    <router-link to="/task-management" class="action-link">
+                      Manage Content
+                      <RightOutlined />
+                    </router-link>
+                  </div>
+                </div>
+              </div>
+
+              <div class="quick-link-item">
+                <div class="quick-link-icon profile">
+                  <AppstoreOutlined />
+                </div>
+                <div class="quick-link-content">
+                  <div class="quick-link-header">
+                    <div class="quick-link-title">
+                      Product Profile
+                      <a-tag color="processing" v-if="productInfo?.domainStatus">
+                        {{ pagesDashboard?.missingAssets || 4 }} Missing
+                      </a-tag>
+                    </div>
+                  </div>
+                  <div class="quick-link-desc">
+                    <ul class="feature-list">
+                      <li>Define your product details</li>
+                      <li>Add competitor information</li>
+                      <li>Improve AI content accuracy</li>
+                    </ul>
+                  </div>
+                  <div class="quick-link-action">
+                    <router-link to="/assets" class="action-link">
+                      Complete Profile
+                      <RightOutlined />
+                    </router-link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a-card>
+        </a-col>
+
+        <a-col :span="12">
+          <!-- Website Structure -->
+          <a-card class="sitemap-card">
+            <template #title>
+              <div class="card-title">
+                <span>🗺️ Website Structure (Sitemap)</span>
+                <a-space>
+                  <a-button 
+                    type="link" 
+                    size="small"
+                    @click="handleRefreshSitemap"
+                    :loading="loadingSitemap"
+                  >
+                    Refresh
+                  </a-button>
+                  <a-button
+                    type="link"
+                    size="small"
+                    @click="collectPublishedUrls"
+                    :disabled="!productInfo?.productId || !isGscConnected"
+                  >
+                    Submit Sitemap
+                    <template v-if="!isGscConnected">
+                      <a-tooltip title="Please connect Google Search Console first">
+                        <InfoCircleOutlined style="margin-left: 4px" />
+                      </a-tooltip>
+                    </template>
+                  </a-button>
+                  <!-- 添加 Disconnect 按钮 -->
+                  <a-button
+                    type="link"
+                    size="small"
+                    danger
+                    @click="disconnectGSC"
+                    v-if="isGscConnected"
+                  >
+                    Disconnect Google Search Console
+                  </a-button>
+                </a-space>
+              </div>
+            </template>
+
+            <!-- Loading skeleton -->
+            <template v-if="loadingSitemap">
+              <a-skeleton active :paragraph="{ rows: 2 }" />
+            </template>
+
+            <!-- Content -->
+            <template v-else>
+              <!-- 第一步：检查网站是否添加和验证 -->
+              <template v-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
+                <a-empty 
+                  description="Add and verify your site to get sitemap automatically"
+                  class="centered-empty-state"
+                >
+                  <template #extra>
+                    <a-button type="primary" @click="openEditWithBasicInfoToVerify">
+                      Add Your Site
+                    </a-button>
+                  </template>
+                </a-empty>
+              </template>
+              <!-- 第二步：检查 GSC 是否连接 -->
+              <template v-else-if="!isGscConnected">
+                <a-empty 
+                  description="Connect Google Search Console to manage sitemap and analytics"
+                  class="centered-empty-state"
+                >
+                  <a-button type="primary" @click="connectGSC">
+                    Connect Google Search Console
+                  </a-button>
+                </a-empty>
+              </template>
+              <!-- 第三步：显示 sitemap 数据 -->
+              <template v-else-if="sitemapData?.length">
+                <div class="sitemap-content">
+                  <a-tree
+                    :tree-data="sitemapData"
+                    :default-expanded-keys="expandedKeys"
+                    class="sitemap-tree"
+                    @select="handleTreeSelect"
+                  >
+                    <template #title="{ title, key }">
+                      <div class="tree-node-title">
+                        <span>{{ title }}</span>
                         <a-space>
-                          <a-button 
-                            type="link" 
-                            size="small"
-                            @click="handleRefreshSitemap"
-                            :loading="loadingSitemap"
-                          >
-                            Refresh
-                          </a-button>
                           <a-button
+                            v-if="!key.includes('folder_')"
+                            :href="getVisitUrl(key)"
+                            target="_blank"
+                            class="visit-link"
+                            @click.stop
                             type="link"
                             size="small"
-                            @click="collectPublishedUrls"
-                            :disabled="!productInfo?.productId || !isGscConnected"
                           >
-                            Submit Sitemap
-                            <template v-if="!isGscConnected">
-                              <a-tooltip title="Please connect Google Search Console first">
-                                <InfoCircleOutlined style="margin-left: 4px" />
-                              </a-tooltip>
-                            </template>
+                            <GlobalOutlined /> Visit
                           </a-button>
-                          <!-- 添加 Disconnect 按钮 -->
-                          <a-button
-                            type="link"
-                            size="small"
-                            danger
-                            @click="disconnectGSC"
-                           
-                          >
-                            Disconnect Google Search Console
-                          </a-button>
+                          <a-spin v-if="loadingUrls[key]" size="small" />
+                          <template v-if="nodeUrls[key]">
+                            <a-button
+                              v-for="url in nodeUrls[key]"
+                              :key="url"
+                              :href="url"
+                              target="_blank"
+                              type="link"
+                              size="small"
+                              class="url-link"
+                            >
+                              <LinkOutlined />
+                            </a-button>
+                          </template>
                         </a-space>
                       </div>
                     </template>
-
-                    <!-- Loading skeleton -->
-                    <template v-if="loadingSitemap">
-                      <a-skeleton active :paragraph="{ rows: 2 }" />
-                    </template>
-
-                    <!-- Content -->
-                    <template v-else>
-                      <!-- 第一步：检查网站是否添加和验证 -->
-                      <template v-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
-                        <a-empty 
-                          description="Add and verify your site to get sitemap automatically"
-                          class="centered-empty-state"
-                        >
-                          <template #extra>
-                            <a-button type="primary" @click="openEditWithBasicInfoToVerify">
-                              Add Your Site
-                            </a-button>
-                          </template>
-                        </a-empty>
-                      </template>
-                      <!-- 第二步：检查 GSC 是否连接 -->
-                      <template v-else-if="!isGscConnected">
-                        <a-empty 
-                          description="Connect Google Search Console to manage sitemap and analytics"
-                          class="centered-empty-state"
-                        >
-                          <a-button type="primary" @click="connectGSC">
-                            Connect Google Search Console
-                          </a-button>
-                        </a-empty>
-                      </template>
-                      <!-- 第三步：显示 sitemap 数据 -->
-                      <template v-else-if="sitemapData?.length">
-                        <div class="sitemap-content">
-                          <a-tree
-                            :tree-data="sitemapData"
-                            :default-expanded-keys="expandedKeys"
-                            class="sitemap-tree"
-                            @select="handleTreeSelect"
-                          >
-                            <template #title="{ title, key }">
-                              <div class="tree-node-title">
-                                <span>{{ title }}</span>
-                                <a-space>
-                                  <a-button
-                                    v-if="!key.includes('folder_')"
-                                    :href="getVisitUrl(key)"
-                                    target="_blank"
-                                    class="visit-link"
-                                    @click.stop
-                                    type="link"
-                                    size="small"
-                                  >
-                                    <GlobalOutlined /> Visit
-                                  </a-button>
-                                  <a-spin v-if="loadingUrls[key]" size="small" />
-                                  <template v-if="nodeUrls[key]">
-                                    <a-button
-                                      v-for="url in nodeUrls[key]"
-                                      :key="url"
-                                      :href="url"
-                                      target="_blank"
-                                      type="link"
-                                      size="small"
-                                      class="url-link"
-                                    >
-                                      <LinkOutlined />
-                                    </a-button>
-                                  </template>
-                                </a-space>
-                              </div>
-                            </template>
-                          </a-tree>
-                        </div>
-                      </template>
-                      <!-- 最后：如果都满足条件但没有数据 -->
-                      <template v-else>
-                        <a-empty 
-                          description="No pages found" 
-                          class="centered-empty-state"
-                        />
-                      </template>
-                    </template>
-                  </a-card>
-                </a-col>
-              </a-row>
-            </a-collapse-panel>
-
-            <!-- Traffic Analytics -->
-            <a-collapse-panel key="analytics" header="📈 Traffic Analytics (Last 15 Days)">
-              <a-card>
-                <template #title>
-                  <div class="card-title">
-                    <a-space>
-                      <a-select 
-                        v-model:value="selectedSiteUrl" 
-                        style="width: 300px"
-                        @change="handleSiteChange"
-                      >
-                        <a-select-option 
-                          v-for="site in gscSites" 
-                          :key="site.siteUrl" 
-                          :value="site.siteUrl"
-                        >
-                          {{ site.siteUrl }}
-                        </a-select-option>
-                      </a-select>
-                      <template v-if="isGscConnected && gscAnalytics">
-                        <span>has</span>
-                        <div class="inline-stats">
-                          <a-statistic 
-                            :value="gscAnalytics?.impressions + ' impressions' ?? 'no impressions'"
-                            :precision="0"
-                            class="compact-stat inline-stat"
-                          >
-                            <template #suffix>
-                              <a-tag size="small" color="success" v-if="gscAnalytics?.impressionsChange">
-                                ↑ {{ gscAnalytics.impressionsChange }}%
-                              </a-tag>
-                            </template>
-                          </a-statistic>
-                          <span>&nbsp;and&nbsp;</span>
-                          <a-statistic 
-                            :value="gscAnalytics?.clicks + ' clicks' ?? 'no clicks'"
-                            :precision="0"
-                            class="compact-stat inline-stat"
-                          >
-                            <template #suffix>
-                              <a-tag size="small" color="success" v-if="gscAnalytics?.clicksChange">
-                                ↑ {{ gscAnalytics.clicksChange }}%
-                              </a-tag>
-                            </template>
-                          </a-statistic>
-                        </div>
-                      </template>
-                      
-                    </a-space>
-                  </div>
-                </template>
-                
-                <template v-if="!isGscConnected">
-                  <a-empty class="centered-empty-state">
-                    <template #description>
-                      <span>Connect Google Search Console to manage sitemap and analytics</span>
-                    </template>
-                    <a-button 
-                      type="primary" 
-                      @click="connectGSC"
-                    >
-                      Connect Google Search Console
-                    </a-button>
-                  </a-empty>
-                </template>
-                
-                <template v-else-if="!gscAnalytics?.dailyData?.length">
-                  <!-- No data state -->
-                  <a-empty 
-                    description="No data available" 
-                    class="centered-empty-state"
-                  />
-                </template>
-                
-                <template v-else>
-                  <!-- Chart container -->
-                  <div class="chart-wrapper">
-                    <div id="trafficChart" ref="chartRef" class="chart-container"></div>
-                  </div>
-                </template>
-              </a-card>
-            </a-collapse-panel>
-          </a-collapse>
+                  </a-tree>
+                </div>
+              </template>
+              <!-- 最后：如果都满足条件但没有数据 -->
+              <template v-else>
+                <a-empty 
+                  description="No pages found" 
+                  class="centered-empty-state"
+                />
+              </template>
+            </template>
+          </a-card>
         </a-col>
       </a-row>
     </div>
@@ -958,7 +869,6 @@ export default defineComponent({
       publishedPages: 0,
       isGscConnected: false,
       gscSites: [],
-      gscAnalytics: null,
       gscSuccessModalVisible: false,
       gscCheckInterval: null,
       showVerifyRecord: false,
@@ -971,7 +881,6 @@ export default defineComponent({
       loadingUrls: {}, // 新增: 记录每个节点的加载状态
       nodeUrls: {}, // 新增: 缓存每个节点的URLs
       activeCollapseKeys: [], // 默认全部折叠
-      selectedSiteUrl: '', // 当前选中的站点URL
       sitemapModal: {
         visible: false,
         publishedUrls: []
@@ -988,7 +897,6 @@ export default defineComponent({
   created() {
     this.loadProductInfo()
     this.handleGscCallback()
-    this.checkGscStatus()
     this.startGscStatusCheck()
   },
   beforeUnmount() {
@@ -997,7 +905,6 @@ export default defineComponent({
     }
   },
   setup(props, { emit }) {
-    // 移除这个方法，使用 methods 中的版本
     return {
       showOnboardingModal,
       isComponentMounted,
@@ -1095,6 +1002,7 @@ export default defineComponent({
     },
     
     async loadProductInfo() {
+      console.log('loadProductInfo called from:', new Error().stack);
       try {
         const response = await apiClient.getProductsByCustomerId()
         
@@ -1112,10 +1020,17 @@ export default defineComponent({
             }
             this.onboardingModalVisible = true
           } else {
-            // 只保留加载数据的逻辑
+            // 修改这里：检查域名验证状态和GSC连接状态后再获取sitemap
             if (this.productInfo.domainStatus) {
-              this.getSitemap()
-              this.loadPagesDashboard()
+              // 立即获取sitemap数据
+              await this.getSitemap();
+              await this.loadPagesDashboard();
+              
+              // 检查GSC连接状态并获取相关数据
+              await this.checkGscStatus();
+              if (this.isGscConnected) {
+                await this.loadGscData();
+              }
             }
           }
         }
@@ -1391,8 +1306,8 @@ export default defineComponent({
       this.formState.competitors = newCompetitors;
     },
     async getSitemap(isRefresh = false) {
-      // 添加 GSC 连接检查
-      if (!this.productInfo?.projectWebsite || !this.productInfo.domainStatus || !this.isGscConnected) {
+      // 只检查域名状态
+      if (!this.productInfo?.projectWebsite || !this.productInfo.domainStatus) {
         return;
       }
       
@@ -1554,7 +1469,6 @@ export default defineComponent({
           // 如果有站点数据，自动选择第一个
           if (this.gscSites.length > 0) {
             this.selectedSiteUrl = this.gscSites[0].siteUrl
-            await this.loadGscAnalytics()
           }
         }
       } catch (error) {
@@ -1577,7 +1491,6 @@ export default defineComponent({
         ) {
           this.isGscConnected = false
           this.gscSites = []
-          this.gscAnalytics = null
           
           // 可以根据不同的错误码显示不同的提示
           if (response?.code === 500) {
@@ -1588,17 +1501,10 @@ export default defineComponent({
         
         // 只有在确实返回 200 时才认为是连接成功
         this.isGscConnected = true
-        
-        // 仅在首次连接成功时加载数据
-        if (!this.gscSites.length) {
-          await this.loadGscData()
-          await this.loadGscAnalytics()
-        }
       } catch (error) {
         console.error('Failed to check GSC status:', error)
         this.isGscConnected = false
         this.gscSites = []
-        this.gscAnalytics = null
       }
     },
 
@@ -1753,264 +1659,7 @@ export default defineComponent({
           }
         }
       },
-      'gscAnalytics.dailyData': {
-        handler(newVal) {
-          if (newVal?.length) {
-            this.$nextTick(() => {
-              this.initOrUpdateChart();
-            });
-          }
-        },
-        deep: true
-      }
     },
-    async loadGscAnalytics() {
-      if (!this.isGscConnected || !this.gscSites.length) {
-        return;
-      }
-
-      try {
-        const customerId = localStorage.getItem('currentCustomerId');
-        const siteUrl = this.selectedSiteUrl;
-        
-        const response = await apiClient.getGscAnalytics(
-          customerId,
-          siteUrl
-        );
-
-        if (response?.code === 200) {
-          // 不管有没有数据，都调用 processGscAnalytics
-          this.gscAnalytics = this.processGscAnalytics(response.data || []);
-          
-          await this.$nextTick();
-          this.initOrUpdateChart();
-        }
-      } catch (error) {
-        console.error('Failed to load GSC analytics:', error);
-        if (this.chartInstance) {
-          this.chartInstance.clear();
-        }
-      }
-    },
-
-    async initOrUpdateChart() {
-      try {
-        // 确保有容器元素
-        const chartContainer = document.getElementById('trafficChart');
-        if (!chartContainer) {
-          console.log('Chart container not found');
-          return;
-        }
-
-        // 销毁现有实例
-        if (this.chartInstance) {
-          this.chartInstance.dispose();
-          this.chartInstance = null;
-        }
-
-        // 创建新实例
-        this.chartInstance = echarts.init(chartContainer);
-        console.log('New chart instance created:', this.chartInstance);
-
-        // 如果有数据，立即更新图表
-        if (this.gscAnalytics?.dailyData?.length) {
-          await this.$nextTick();
-          this.updateChart();
-        }
-
-        // 添加窗口大小变化监听
-        window.addEventListener('resize', () => {
-          if (this.chartInstance) {
-            this.chartInstance.resize();
-          }
-        });
-
-      } catch (error) {
-        console.error('Failed to initialize/update chart:', error);
-      }
-    },
-
-    processGscAnalytics(data) {
-      if (!Array.isArray(data) || data.length === 0) {
-        console.warn('Invalid or empty analytics data');
-        return {
-          impressions: 'no',
-          clicks: 'no',
-          dailyData: []
-        };
-      }
-
-      // 添加日志以检查数据
-      console.log('Raw analytics data:', data);
-
-      // 按日期排序
-      data.sort((a, b) => new Date(a.keys[1]) - new Date(b.keys[1]));
-
-      // 提取每日数据
-      const dailyData = data.map(item => ({
-        date: item.keys[1],
-        impressions: Number(item.impressions) || 0,
-        clicks: Number(item.clicks) || 0,
-        ctr: Number(item.ctr) || 0,
-        position: Number(item.position) || 0
-      }));
-
-      // 添加日志以检查处理后的数据
-      console.log('Processed daily data:', dailyData);
-
-      // 计算总量
-      const totals = {
-        impressions: data.reduce((sum, item) => sum + (item.impressions || 0), 0),
-        clicks: data.reduce((sum, item) => sum + (item.clicks || 0), 0),
-        ctr: 0
-      };
-
-      totals.ctr = totals.clicks > 0 ? 
-        ((totals.clicks / totals.impressions) * 100).toFixed(2) : 0;
-
-      // 计算环比
-      const halfLength = Math.floor(data.length / 2);
-      const firstHalf = {
-        impressions: data.slice(0, halfLength).reduce((sum, item) => sum + (item.impressions || 0), 0),
-        clicks: data.slice(0, halfLength).reduce((sum, item) => sum + (item.clicks || 0), 0)
-      };
-      const secondHalf = {
-        impressions: data.slice(halfLength).reduce((sum, item) => sum + (item.impressions || 0), 0),
-        clicks: data.slice(halfLength).reduce((sum, item) => sum + (item.clicks || 0), 0)
-      };
-
-      const impressionsChange = firstHalf.impressions > 0 ?
-        (((secondHalf.impressions - firstHalf.impressions) / firstHalf.impressions) * 100).toFixed(1) : 0;
-      
-      const clicksChange = firstHalf.clicks > 0 ?
-        (((secondHalf.clicks - firstHalf.clicks) / firstHalf.clicks) * 100).toFixed(1) : 0;
-
-      console.log('Processed analytics data:', {
-        dailyData,
-        totals,
-        changes: { impressionsChange, clicksChange }
-      });
-
-      return {
-        impressions: totals.impressions,
-        clicks: totals.clicks,
-        ctr: totals.ctr,
-        impressionsChange: impressionsChange > 0 ? impressionsChange : null,
-        clicksChange: clicksChange > 0 ? clicksChange : null,
-        dailyData
-      };
-    },
-
-    updateChart() {
-      if (!this.chartInstance || !this.gscAnalytics?.dailyData?.length) {
-        console.warn('Cannot update chart: missing instance or data');
-        return;
-      }
-
-      console.log('Updating chart with data:', this.gscAnalytics.dailyData);
-
-      const data = this.gscAnalytics.dailyData;
-      
-      const option = {
-        grid: {
-          top: 50,
-          right: 30,
-          bottom: 50,
-          left: 60
-        },
-        tooltip: {
-          trigger: 'axis',
-          formatter: function(params) {
-            const date = params[0].axisValue;
-            const impressions = params.find(p => p.seriesName === 'Impressions')?.value || 0;
-            const clicks = params.find(p => p.seriesName === 'Clicks')?.value || 0;
-            const ctr = clicks > 0 ? ((clicks / impressions) * 100).toFixed(1) : 0;
-            return `${date}<br/>
-                    Impressions: ${impressions}<br/>
-                    Clicks: ${clicks}<br/>
-                    CTR: ${ctr}%`;
-          }
-        },
-        legend: {
-          data: ['Impressions', 'Clicks'],
-          top: 10
-        },
-        xAxis: {
-          type: 'category',
-          data: data.map(item => item.date),
-          axisLabel: {
-            rotate: 45
-          }
-        },
-        yAxis: [
-          {
-            type: 'value',
-            name: 'Count',
-            position: 'left'
-          }
-        ],
-        series: [
-          {
-            name: 'Impressions',
-            type: 'line',
-            data: data.map(item => item.impressions),
-            smooth: true,
-            itemStyle: {
-              color: '#1890ff'
-            }
-          },
-          {
-            name: 'Clicks',
-            type: 'line',
-            data: data.map(item => item.clicks),
-            smooth: true,
-            itemStyle: {
-              color: '#52c41a'
-            }
-          }
-        ]
-      };
-
-      try {
-        console.log('Setting chart option');
-        this.chartInstance.setOption(option);
-        console.log('Chart option set successfully');
-      } catch (error) {
-        console.error('Failed to update chart:', error);
-      }
-    },
-
-    mounted() {
-      // 在组件挂载后初始化图表
-      this.$nextTick(() => {
-        this.initOrUpdateChart();
-        // 添加 resize 事件监听
-        window.addEventListener('resize', this.handleResize);
-      });
-    },
-
-    beforeUnmount() {
-      // 清理图表实例
-      if (this.chartInstance) {
-        this.chartInstance.dispose();
-        this.chartInstance = null;
-      }
-      
-      // 移除 resize 事件监听
-      window.removeEventListener('resize', this.handleResize);
-      
-      // 清理 GSC 检查间隔
-      if (this.gscCheckInterval) {
-        clearInterval(this.gscCheckInterval);
-      }
-    },
-
-    handleResize() {
-      if (this.chartInstance) {
-        this.chartInstance.resize()
-      }
-    },
-
     async handleRefreshSitemap(e) {
       // 阻止事件冒泡
       e.stopPropagation();
@@ -2039,48 +1688,6 @@ export default defineComponent({
         }
       } catch (error) {
         console.error('Failed to load pages dashboard:', error);
-      }
-    },
-
-    async handleSiteChange(value) {
-      console.log('Site changed to:', value);
-      this.selectedSiteUrl = value;
-      
-      // 加载新数据前先清空图表
-      if (this.chartInstance) {
-        this.chartInstance.clear();
-      }
-      
-      await this.loadGscAnalytics();
-    },
-
-    async collectPublishedUrls() {
-      try {
-        this.loading = true;
-        const response = await apiClient.getPublishUrls();
-        
-        if (response?.code === 200) {
-          const urls = response.data || [];
-          
-          if (urls.length === 0) {
-            message.warning('No published pages found');
-            return;
-          }
-
-          // 过滤掉 URL 中的 /en/ 标记
-          this.publishedUrls = urls.map(url => {
-            return url.replace(/([^\/]+)\/en\//, '$1/');
-          });
-          
-          this.sitemapModal.visible = true;
-        } else {
-          throw new Error(response?.message || 'Failed to get published URLs');
-        }
-      } catch (error) {
-        console.error('Failed to collect published URLs:', error);
-        message.error(error.message || 'Failed to get published URLs');
-      } finally {
-        this.loading = false;
       }
     },
 
@@ -2176,7 +1783,6 @@ export default defineComponent({
         if (response?.code === 200) {
           this.isGscConnected = false;
           this.gscSites = [];
-          this.gscAnalytics = null;
           this.$notification.success({
             message: 'Disconnected Successfully',
             description: 'Successfully disconnected from Google Search Console'
@@ -2997,7 +2603,6 @@ export default defineComponent({
 
 /* Quick Access Panel Styles */
 .quick-access-panel {
-  margin: 16px 0;
   border-radius: 12px;
 
 }

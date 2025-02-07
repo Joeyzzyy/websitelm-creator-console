@@ -2916,7 +2916,7 @@ export default defineComponent({
     const fetchImportedKeywords = async () => {
       try {
         const response = await api.getPlanningKeywords({
-          source: 'import',
+          keywordType: 'import',
           page: importedKeywordsPagination.value.current,
           limit: importedKeywordsPagination.value.pageSize
         })
