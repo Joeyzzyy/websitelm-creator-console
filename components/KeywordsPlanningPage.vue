@@ -215,69 +215,136 @@
                   </div>
                 </div>
 
-                <!-- 原来第一步的内容 -->
+                <!-- 添加模式选择的 Tabs -->
                 <div class="keywords-selection">
-                  <!-- Keyword Selection Component -->
-                  <div v-if="currentMode === 'beginner'" class="beginner-mode">
-                    <a-row :gutter="[24, 24]" class="beginner-content">
-                      <!-- Keywords From Comparison Table -->
-                      <a-col :span="24">
-                        <a-card title="Keywords Analysis" class="keyword-table-card">
-                          <a-tabs 
-                            v-model:activeKey="currentPriority"
-                            @change="handleTabChange"
-                            class="priority-tabs"
-                            tabPosition="left"
-                          >
-                            <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
-                              <a-table
-                                :dataSource="getKeywordsByPriority(recommendedKeywords, priority.level)"
-                                :columns="keywordsTableColumns"
-                                :pagination="{
-                                  current: recommendedPagination.current,
-                                  pageSize: 10,
-                                  total: recommendedPagination.total,
-                                  showSizeChanger: false,
-                                  showQuickJumper: true
-                                }"
-                                @change="(page) => handleComparisonPaginationChange(priority.level, page.current)"
-                                size="small"
+                  <a-tabs 
+                    v-model:activeKey="keywordSelectionMode"
+                    class="mode-tabs"
+                  >
+                    <a-tab-pane key="ai" tab="AI Recommendations">
+                      <!-- 原来的 AI 推荐内容 -->
+                      <div v-if="currentMode === 'beginner'" class="beginner-mode">
+                        <a-row :gutter="[24, 24]" class="beginner-content">
+                          <a-col :span="24">
+                            <a-card title="Keywords Analysis" class="keyword-table-card">
+                              <a-tabs 
+                                v-model:activeKey="currentPriority"
+                                @change="handleTabChange"
+                                class="priority-tabs"
+                                tabPosition="left"
                               >
-                                <template #bodyCell="{ column, record }">
-                                  <template v-if="column.key === 'actions'">
-                                    <a-button 
-                                      type="primary"
-                                      ghost
-                                      :class="record.favorited ? 'deselect-btn' : 'select-btn'"
-                                      @click="handleKeywordFavorite(record)"
-                                    >
-                                      {{ record.favorited ? 'Deselect' : 'Select' }}
-                                    </a-button>
-                                  </template>
-                                </template>
-                              </a-table>
-                            </a-tab-pane>
-                          </a-tabs>
-                        </a-card>
-                      </a-col>
-                    </a-row>
-                  </div>
+                                <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
+                                  <a-table
+                                    :dataSource="getKeywordsByPriority(recommendedKeywords, priority.level)"
+                                    :columns="keywordsTableColumns"
+                                    :pagination="{
+                                      current: recommendedPagination.current,
+                                      pageSize: 10,
+                                      total: recommendedPagination.total,
+                                      showSizeChanger: false,
+                                      showQuickJumper: true
+                                    }"
+                                    @change="(page) => handleComparisonPaginationChange(priority.level, page.current)"
+                                    size="small"
+                                  >
+                                    <template #bodyCell="{ column, record }">
+                                      <template v-if="column.key === 'actions'">
+                                        <a-button 
+                                          type="primary"
+                                          ghost
+                                          :class="record.favorited ? 'deselect-btn' : 'select-btn'"
+                                          @click="handleKeywordFavorite(record)"
+                                        >
+                                          {{ record.favorited ? 'Deselect' : 'Select' }}
+                                        </a-button>
+                                      </template>
+                                    </template>
+                                  </a-table>
+                                </a-tab-pane>
+                              </a-tabs>
+                            </a-card>
+                          </a-col>
+                        </a-row>
+                      </div>
+                    </a-tab-pane>
 
-                  <!-- Content in expert mode -->
-                  <template v-else>
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px; text-align: center;">
-                      <h2 style="font-size: 24px; color: #1890ff; margin-bottom: 16px;">Expert Mode - Coming Soon</h2>
-                      <p style="font-size: 16px; color: rgba(0, 0, 0, 0.45);">
-                        We're working on something special for our advanced users.
-                        <br>Stay tuned for powerful expert features!
-                      </p>
-                    </div>
-                  </template>
+                    <!-- 手动导入模式 -->
+                    <a-tab-pane key="manual" tab="Manual Import">
+                      <div class="manual-import-content">
+                        <!-- 导入方式选择卡片 -->
+                        <a-card class="import-methods-card">
+                          <div class="import-method-item">
+                            <div class="method-header">
+                              <FileExcelOutlined class="method-icon" />
+                              <h3>File Upload</h3>
+                            </div>
+                            <p class="method-desc">Import keywords from CSV or Excel files</p>
+                            <div class="method-actions">
+                              <a-upload
+                                :customRequest="handleFileUpload"
+                                :showUploadList="false"
+                                accept=".csv,.xlsx,.xls"
+                              >
+                                <a-button type="primary">
+                                  <UploadOutlined />
+                                  Upload File
+                                </a-button>
+                              </a-upload>
+                              <a-button type="link" @click="downloadTemplate">
+                                <DownloadOutlined />
+                                Download Template
+                              </a-button>
+                            </div>
+                          </div>
+                        </a-card>
+
+                        <!-- 导入的关键词列表 -->
+                        <a-card title="Imported Keywords" class="imported-keywords-card">
+                          <div class="table-toolbar">
+                            <div class="toolbar-left">
+                              <span class="keyword-count">
+                                Total: {{ importedKeywords.length }} keywords
+                              </span>
+                            </div>
+                            <div class="toolbar-right">
+                              <a-button 
+                                type="primary"
+                                danger
+                                @click="clearImportedKeywords"
+                                :disabled="!importedKeywords.length"
+                              >
+                                <DeleteOutlined />
+                                Clear All
+                              </a-button>
+                            </div>
+                          </div>
+
+                          <a-table
+                            :dataSource="importedKeywords"
+                            :columns="importedKeywordsColumns"
+                            :pagination="importedKeywordsPagination"
+                            @change="handleImportedKeywordsPaginationChange"
+                          >
+                            <template #bodyCell="{ column, record }">
+                              <template v-if="column.key === 'actions'">
+                                <a-button 
+                                  type="link" 
+                                  danger 
+                                  @click="removeImportedKeyword(record)"
+                                >
+                                  <DeleteOutlined />
+                                </a-button>
+                              </template>
+                            </template>
+                          </a-table>
+                        </a-card>
+                      </div>
+                    </a-tab-pane>
+                  </a-tabs>
                 </div>
               </div>
 
               <div v-show="currentStep === '1'" class="step-panel">
-                <!-- 修改第二步内容的布局结构 -->
                 <div class="outline-generation">
                   <div class="step-two-content">
                     <div class="workspace-layout">
@@ -845,6 +912,29 @@
         />
       </template>
     </a-modal>
+
+    <!-- 批量输入模态框 -->
+    <a-modal
+      v-model:open="bulkInputVisible"
+      title="Enter Keywords"
+      width="600px"
+      @ok="handleBulkImport"
+    >
+      <div class="bulk-input-container">
+        <div class="bulk-input-header">
+          <InfoCircleOutlined />
+          <span>Enter one keyword per line or separate with commas</span>
+        </div>
+        <a-textarea
+          v-model:value="bulkKeywords"
+          :rows="10"
+          placeholder="Example:
+seo tools
+content marketing
+digital marketing strategy"
+        />
+      </div>
+    </a-modal>
   </PageLayout>
 </template>
 
@@ -887,7 +977,10 @@ import {
   HistoryOutlined,
   ArrowLeftOutlined,
   RiseOutlined,
-  EditOutlined
+  EditOutlined,
+  UploadOutlined,
+  DownloadOutlined,
+  FileExcelOutlined,
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -942,6 +1035,10 @@ export default defineComponent({
     HistoryOutlined,
     ArrowLeftOutlined,
     RiseOutlined,
+    EditOutlined,
+    UploadOutlined,
+    DownloadOutlined,
+    FileExcelOutlined,
     EditOutlined
   },
   setup() {
@@ -2515,6 +2612,86 @@ export default defineComponent({
       }
     }
 
+    const keywordSelectionMode = ref('ai')
+    const importedKeywords = ref([])
+    const importedKeywordsPagination = ref({
+      current: 1,
+      pageSize: 10,
+      total: 0
+    })
+    const importedKeywordsColumns = [
+      {
+        title: 'Keyword',
+        dataIndex: 'keyword',
+        key: 'keyword',
+      },
+      {
+        title: 'KRS',
+        dataIndex: 'krs',
+        key: 'krs',
+      },
+      {
+        title: 'KD',
+        dataIndex: 'kd',
+        key: 'kd',
+      },
+      {
+        title: 'Volume',
+        dataIndex: 'volume',
+        key: 'volume',
+      },
+      {
+        title: 'Related Outlines',
+        key: 'relatedOutlines',
+        width: '20%',
+        customRender: () => '-'
+      },
+      {
+        title: 'Actions',
+        key: 'actions',
+        width: '10%'
+      }
+    ]
+
+    const handleImportedKeywordsPaginationChange = ({ current }) => {
+      importedKeywordsPagination.value.current = current
+      fetchImportedKeywords()
+    }
+
+    const handleFileUpload = async (file) => {
+      // Implement file upload logic
+      console.log('Uploading file:', file)
+    }
+
+    const downloadTemplate = () => {
+      // Implement download template logic
+      console.log('Downloading template')
+    }
+
+    const showBulkInput = () => {
+      // Implement show bulk input modal logic
+      console.log('Showing bulk input modal')
+    }
+
+    const clearImportedKeywords = () => {
+      // Implement clear imported keywords logic
+      console.log('Clearing imported keywords')
+    }
+
+    const removeImportedKeyword = (keyword) => {
+      // Implement remove imported keyword logic
+      console.log('Removing imported keyword:', keyword)
+    }
+
+    const bulkKeywords = ref('')
+
+    const bulkInputVisible = ref(false)
+
+    const handleBulkImport = () => {
+      // Implement handle bulk import logic
+      console.log('Handling bulk import:', bulkKeywords.value)
+    }
+
     return {
       taskStartTime,
       taskEndTime,
@@ -2665,7 +2842,20 @@ export default defineComponent({
       startEditingTitle,
       startEditingDesc,
       saveTitle,
-      saveDescription
+      saveDescription,
+      keywordSelectionMode,
+      importedKeywords,
+      importedKeywordsPagination,
+      importedKeywordsColumns,
+      handleImportedKeywordsPaginationChange,
+      handleFileUpload,
+      downloadTemplate,
+      showBulkInput,
+      clearImportedKeywords,
+      removeImportedKeyword,
+      bulkKeywords,
+      bulkInputVisible,
+      handleBulkImport
     }
   }
 })
@@ -3836,5 +4026,86 @@ export default defineComponent({
 .description-display p {
   margin: 0;
   padding-right: 24px;
+}
+
+.mode-tabs :deep(.ant-tabs-nav) {
+  margin-bottom: 0;
+}
+
+.mode-tabs :deep(.ant-tabs-tab) {
+  padding: 12px 24px;
+}
+
+.mode-tabs :deep(.ant-tabs-tab-active) {
+  background: #f0f7ff;
+}
+
+.manual-import-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.import-methods-card {
+  .import-method-item {
+    padding: 24px;
+    background: #fafafa;
+    border-radius: 8px;
+    height: 100%;
+    
+    .method-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      
+      .method-icon {
+        font-size: 24px;
+        color: #1890ff;
+      }
+      
+      h3 {
+        margin: 0;
+        font-size: 16px;
+      }
+    }
+    
+    .method-desc {
+      color: #8c8c8c;
+      margin-bottom: 16px;
+    }
+    
+    .method-actions {
+      display: flex;
+      gap: 12px;
+    }
+  }
+}
+
+.imported-keywords-card {
+  .table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    
+    .keyword-count {
+      color: #8c8c8c;
+    }
+  }
+}
+
+.bulk-input-container {
+  .bulk-input-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    color: #8c8c8c;
+    
+    .anticon {
+      color: #1890ff;
+    }
+  }
 }
 </style>
