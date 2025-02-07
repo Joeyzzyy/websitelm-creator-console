@@ -1034,11 +1034,13 @@ export default {
 <style scoped>
 /* Container styles */
 .task-container {
-  height: calc(100vh - 200px); /* 使用视窗高度减去头部空间 */
+  height: auto; /* 移除固定高度 */
+  min-height: calc(100vh - 200px);
   background: #fff;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
+  padding-bottom: 16px; /* 添加底部内边距 */
 }
 
 .header {
@@ -1071,6 +1073,7 @@ export default {
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
+  margin-bottom: 8px;
 }
 
 .header-left h3 {
@@ -1081,10 +1084,11 @@ export default {
 }
 
 .task-list {
-  flex: 1; /* 让任务列表占据剩余空间 */
-  display: flex; /* 添加 flex 布局 */
-  flex-direction: column; /* 垂直方向排列 */
-  min-height: 0; /* 防止溢出 */
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: visible; /* 确保内容可见 */
 }
 
 /* Empty state styles */
@@ -1408,6 +1412,11 @@ export default {
   display: flex;
   justify-content: flex-end;
   padding: 16px;
+  position: sticky; /* 使分页固定在底部 */
+  bottom: 0;
+  background: #fff;
+  z-index: 1;
+  border-top: 1px solid #f0f0f0; /* 添加顶部分隔线 */
 }
 
 /* 添加新的样式 */
