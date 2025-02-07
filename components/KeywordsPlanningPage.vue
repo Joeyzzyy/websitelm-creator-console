@@ -186,7 +186,7 @@
               <!-- 步骤内容 -->
               <div v-show="currentStep === '0'" class="step-panel">
                 <!-- Add KRS Info Card -->
-                <div class="krs-info-card">
+                <div class="krs-info-card" v-show="keywordSelectionMode === 'ai'">
                   <div class="krs-header">
                     <TrophyOutlined class="krs-icon" />
                     <h3>Keyword Ranking Score (KRS)</h3>
