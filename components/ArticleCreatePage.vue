@@ -99,12 +99,22 @@
         
         <div class="header-actions">
           <template v-if="isEditMode">
+            <!-- 修改查看已发布页面的按钮 -->
+            <a-button
+              v-if="articleData.publishStatus === 'publish'"
+              type="default"
+              @click="handleViewPublished"
+              :style="{ height: '36px' }"
+            >
+              View Published Page
+            </a-button>
+            
             <a-button 
               type="default"
               @click="handlePreview"
               :style="{ height: '36px' }"
             >
-              Preview
+              Preview Page
             </a-button>
             <a-tooltip :title="getPublishTooltip(articleData)">
               <a-button
@@ -1640,6 +1650,19 @@ export default defineComponent({
       });
     });
 
+    // 添加查看已发布页面的方法
+    const handleViewPublished = () => {
+      if (articleData.value.publishStatus === 'publish' && articleData.value.publishUrl) {
+        // 使用 publishUrl 作为基础URL，确保以 https:// 开头
+        const baseUrl = articleData.value.publishUrl.startsWith('http') 
+          ? articleData.value.publishUrl 
+          : `https://${articleData.value.publishUrl}`;
+          
+        const publishedUrl = `${baseUrl}/${articleData.value.language}/${articleData.value.slug}`;
+        window.open(publishedUrl, '_blank');
+      }
+    };
+
     return {
       loading,
       saving,
@@ -1701,6 +1724,7 @@ export default defineComponent({
       currentImmersiveSection,
       toggleImmersiveMode,
       exitImmersiveMode,
+      handleViewPublished,
     };
   }
 });
@@ -3130,5 +3154,16 @@ export default defineComponent({
 .immersive-content-enter-from,
 .immersive-content-leave-to {
   transform: scale(0.95);
+}
+
+/* 添加按钮样式 */
+:deep(.ant-btn-default) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  
+  .anticon {
+    font-size: 14px;
+  }
 }
 </style>
