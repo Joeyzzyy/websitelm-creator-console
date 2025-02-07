@@ -1132,7 +1132,9 @@ export default defineComponent({
         publishModal.value.loading = true;
         const isPublished = articleData.value.publishStatus === 'publish';
         
-        const fullPublishURL = `${articleData.value.publishUrl}/${articleData.value.language}/${articleData.value.slug}`;
+        // 只有非英语语言才添加语言路径
+        const langPath = articleData.value.language === 'en' ? '' : `/${articleData.value.language}`;
+        const fullPublishURL = `${articleData.value.publishUrl}${langPath}/${articleData.value.slug}`;
 
         if (isPublished) {
           await apiClient.updatePageStatus(pageId.value, 'unpublish', fullPublishURL);
@@ -1562,16 +1564,16 @@ export default defineComponent({
 
     // 添加 getPreviewPublishUrl 计算属性
     const getPreviewPublishUrl = computed(() => {
-      if (!articleData.value.publishUrl || !articleData.value.language) {
+      if (!articleData.value.publishUrl) {
         return '';
       }
 
-      // 构建预览 URL
       const baseUrl = articleData.value.publishUrl;
-      const lang = articleData.value.language;
-      const slug = articleData.value.slug || '[slug]'; // 如果没有 slug 则显示占位符
+      // 只有非英语语言才添加语言路径
+      const langPath = articleData.value.language === 'en' ? '' : `/${articleData.value.language}`;
+      const slug = articleData.value.slug || '[slug]';
 
-      return `${baseUrl}/${lang}/${slug}`;
+      return `${baseUrl}${langPath}/${slug}`;
     });
 
     // 添加新的方法来格式化分类标题
@@ -1653,12 +1655,13 @@ export default defineComponent({
     // 添加查看已发布页面的方法
     const handleViewPublished = () => {
       if (articleData.value.publishStatus === 'publish' && articleData.value.publishUrl) {
-        // 使用 publishUrl 作为基础URL，确保以 https:// 开头
         const baseUrl = articleData.value.publishUrl.startsWith('http') 
           ? articleData.value.publishUrl 
           : `https://${articleData.value.publishUrl}`;
           
-        const publishedUrl = `${baseUrl}/${articleData.value.language}/${articleData.value.slug}`;
+        // 只有非英语语言才添加语言路径
+        const langPath = articleData.value.language === 'en' ? '' : `/${articleData.value.language}`;
+        const publishedUrl = `${baseUrl}${langPath}/${articleData.value.slug}`;
         window.open(publishedUrl, '_blank');
       }
     };

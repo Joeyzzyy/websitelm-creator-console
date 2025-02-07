@@ -204,51 +204,57 @@
           </a-table>
         </div>
 
-        <!-- 保留外部分页组件 -->
+        <!-- 修改分页组件 -->
         <div class="pagination-wrapper" v-if="!loading && tasks.length > 0">
           <a-pagination
             v-model:current="pagination.current"
             :total="pagination.total"
             :pageSize="pagination.pageSize"
-            show-size-changer
             :show-total="(total) => `Total ${total} items`"
-            @change="handlePageChange"
+            :show-size-changer="false"
+            @change="handleTableChange"
           />
         </div>
       </div>
     </template>
 
-    <!-- Confirmation Modal -->
-    <a-modal
-      v-model:open="modalConfig.visible"
-      :title="modalConfig.title"
-      :confirm-loading="modalConfig.loading"
-      :closable="false"
-      @ok="handleModalConfirm"
-      class="custom-modal"
-    >
-      <p>{{ modalConfig.content }}</p>
-    </a-modal>
-
-    <!-- Publish Confirmation Modal -->
+    <!-- 合并后的发布模态框 -->
     <a-modal
       v-model:visible="publishModal.visible"
-      :title="publishModal.title"
+      :title="publishModal.data?.publishStatus === 'publish' ? 'Unpublish Page' : 'Publish Page'"
       :confirm-loading="publishModal.loading"
       @ok="handlePublishConfirm"
       @cancel="handlePublishCancel"
     >
-      <template v-if="!publishModal.data?.publishURL">
-        <p>Please set a publish URL for this page before publishing.</p>
-        <p>You can set the publish URL in the page editor.</p>
+      <template v-if="publishModal.data?.publishStatus === 'publish'">
+        <p>Are you sure you want to unpublish this page?</p>
+        <p>Current publish URL: <strong>{{ getFullPublishUrl(publishModal.data) }}</strong></p>
       </template>
       <template v-else>
-        <p>Are you sure you want to {{ publishModal.data?.publishStatus === 'publish' ? 'unpublish' : 'publish' }} this page?</p>
-        <p v-if="publishModal.data?.publishStatus !== 'publish'">
-          The page will be published to:
-          <br/>
-          <strong>{{ getFullPublishUrl(publishModal.data) }}</strong>
-        </p>
+        <a-form layout="vertical">
+          <a-form-item label="Publish URL" required>
+            <a-select
+              v-model:value="publishModal.publishUrl"
+              placeholder="Please select a root domain for the page to be published"
+              style="width: 100%"
+              allowClear
+            >
+              <a-select-option 
+                v-for="domain in verifiedDomains" 
+                :key="domain"
+                :value="domain"
+              >
+                {{ domain }}
+              </a-select-option>
+            </a-select>
+            <div class="preview-url-hint" v-if="publishModal.publishUrl && publishModal.data">
+              <div class="hint-label">This page will be published to:</div>
+              <div class="preview-url">
+                {{ getFullPublishUrl({...publishModal.data, publishURL: publishModal.publishUrl}) }}
+              </div>
+            </div>
+          </a-form-item>
+        </a-form>
       </template>
     </a-modal>
 
@@ -298,6 +304,17 @@
           </template>
         </a-list>
       </div>
+    </a-modal>
+
+    <!-- 添加通用确认模态框 -->
+    <a-modal
+      v-model:visible="modalConfig.visible"
+      :title="modalConfig.title"
+      :confirm-loading="modalConfig.loading"
+      @ok="handleModalConfirm"
+      @cancel="handleModalCancel"
+    >
+      {{ modalConfig.content }}
     </a-modal>
   </a-spin>
   </page-layout>
@@ -489,13 +506,13 @@ export default {
         const projectId = VERCEL_CONFIG.PROJECT_ID;
         // 1. 首先获取域名列表
         const response = await apiClient.getVercelDomainInfo(projectId);
+        console.log('API Response domains:', response?.domains);
         
-        // 2. 过滤并检查域名
+        // 2. 过滤并检查域名 - 移除了根域名过滤条件
         const verifiedDomainsPromises = response?.domains
           ?.filter(domain => 
             domain.verified && 
-            !domain.name.includes('vercel.app') && // 过滤掉 vercel.app 域名
-            domain.name !== productInfo.value?.projectWebsite // 过滤掉主域名
+            !domain.name.includes('vercel.app') // 只过滤 vercel.app 域名
           )
           ?.map(async domain => {
             try {
@@ -513,11 +530,17 @@ export default {
 
         await loadSubfolders();
         
+        console.log('Verified domains before merge:', verifiedDomainsList);
+        console.log('Project website:', productInfo.value?.projectWebsite);
+        console.log('Subfolders:', subfolders.value);
+        
         // 4. 合并验证过的域名和子文件夹
         verifiedDomains.value = [
           ...verifiedDomainsList,
           ...(subfolders.value.map(subfolder => `${productInfo.value?.projectWebsite}/${subfolder}`))
         ];
+        
+        console.log('Final verified domains:', verifiedDomains.value);
       } catch (error) {
         console.error('Failed to load domain info:', error);
       }
@@ -571,8 +594,8 @@ export default {
     };
 
     const handleTableChange = (pag) => {
-      pagination.current = pag.current
-      pagination.pageSize = pag.pageSize
+      pagination.current = pag
+      pagination.pageSize = pagination.pageSize // 保持原有的 pageSize
       fetchTasks()
     }
 
@@ -586,6 +609,7 @@ export default {
 
     // Delete article
     const deleteArticle = (article) => {
+      console.log('deleteArticle called:', article)
       modalConfig.visible = true
       modalConfig.title = 'Confirm Delete'
       modalConfig.content = 'Are you sure you want to delete this page?'
@@ -595,50 +619,51 @@ export default {
 
     // Handle modal confirmation
     const handleModalConfirm = async () => {
+      console.log('handleModalConfirm called, type:', modalConfig.type)
       modalConfig.loading = true
       try {
-        if (modalConfig.type === 'delete_batch') {
-          await apiClient.deleteBatch(modalConfig.data)
-          message.success('Task deleted successfully')
-          fetchTasks()
-        } else if (modalConfig.type === 'delete_article') {
+        if (modalConfig.type === 'delete_article') {
+          console.log('Deleting article:', modalConfig.data)
           await apiClient.deletePage(modalConfig.data.pageId)
-          message.success('Article deleted successfully')
+          message.success('Deleted successfully')
           fetchTasks()
         } else if (modalConfig.type === 'publish_action') {  
           const article = modalConfig.data
           const isPublished = article.publishStatus === 'publish'
           
-          const fullPublishURL = `${article.publishURL}/${article.lang}/${article.slug}`
+          const baseUrl = article.publishURL.startsWith('http') 
+            ? article.publishURL 
+            : `https://${article.publishURL}`
+          
+          const langPath = article.lang === 'en' ? '' : `/${article.lang}`
+          const fullPublishURL = `${baseUrl}${langPath}/${article.slug}`
           
           const response = isPublished
             ? await apiClient.updatePageStatus(article.pageId, 'unpublish', fullPublishURL)
             : await apiClient.updatePageStatus(article.pageId, 'publish', fullPublishURL)
 
-          // 检查响应中的 code
           if (response?.code === 200) {
             message.success(isPublished ? 'Unpublished successfully' : 'Published successfully')
             fetchTasks()
           } else {
-            // 显示服务器返回的错误信息或默认错误信息
             message.error(response?.message || 'Operation failed')
           }
         } else if (modalConfig.type === 'submit_sitemap') {
-          const record = modalConfig.data;
-          const customerId = localStorage.getItem('currentCustomerId');
-          const fullPublishURL = `${record.publishURL}/${record.lang}/${record.slug}`;
+          const record = modalConfig.data
+          const customerId = localStorage.getItem('currentCustomerId')
+          const fullPublishURL = `${record.publishURL}/${record.lang}/${record.slug}`
           
-          const response = await apiClient.submitSite(customerId, fullPublishURL);
+          const response = await apiClient.submitSite(customerId, fullPublishURL)
           
           if (response?.code === 200) {
-            message.success('Successfully submitted sitemap to Google Search Console');
+            message.success('Successfully submitted to Google Search Console')
           } else {
-            message.error('Failed to submit sitemap to Google Search Console');
+            message.error('Failed to submit to Google Search Console')
           }
         }
-      } catch(err) {
-        console.error('Operation failed:', err)
-        message.error(err?.message || 'Operation failed')
+      } catch (error) {
+        console.error('Operation failed:', error)
+        message.error(error?.message || 'Operation failed')
       } finally {
         modalConfig.loading = false
         modalConfig.visible = false
@@ -774,76 +799,80 @@ export default {
 
     // 修改发布处理逻辑
     const handlePublish = (record) => {
-      // 检查是否设置了发布URL
-      if (!record.publishURL) {
-        publishModal.value = {
-          visible: true,
-          title: 'Cannot Publish',
-          loading: false,
-          data: record
-        };
-        return;
-      }
-
       publishModal.value = {
         visible: true,
-        title: record.publishStatus === 'publish' ? 'Confirm Unpublish' : 'Confirm Publish',
         loading: false,
-        data: record
+        data: record,
+        publishUrl: record.publishURL || undefined
       };
     };
 
     // 修改获取完整发布URL的方法
     const getFullPublishUrl = (record) => {
-      if (!record?.publishURL || !record?.lang || !record?.slug) {
+      if (!record?.publishURL || !record?.slug) {
         return '';
       }
       
-      // 从 publishURL 中提取基础域名和路径
-      let baseUrl = record.publishURL.replace(/\/+$/, '');
+      // 确保 URL 以 https:// 开头
+      const baseUrl = record.publishURL.startsWith('http') 
+        ? record.publishURL 
+        : `https://${record.publishURL}`;
       
-      // 分离域名和路径
-      const [domain, ...pathParts] = baseUrl.split('/');
+      // 只有非英语时才添加语言路径
+      const langPath = record.lang === 'en' ? '' : `/${record.lang}`;
       
-      // 构建基础URL（带协议）
-      const baseWithProtocol = domain.startsWith('http') ? domain : `https://${domain}`;
-      
-      // 构建路径：如果语言不是英语，才添加语言标签
-      const pathComponents = [
-        record.lang !== 'en' ? record.lang : null,  // 只在非英语时添加语言标签
-        ...pathParts,                               // 原有的路径部分（如 tutorials）
-        record.slug                                 // slug
-      ].filter(Boolean).join('/');                 // 过滤掉空值并用斜杠连接
-      
-      return `${baseWithProtocol}/${pathComponents}`;
+      return `${baseUrl}${langPath}/${record.slug}`;
     };
 
-    // 修改发布确认处理
+    // 修改确认发布的方法
     const handlePublishConfirm = async () => {
       const record = publishModal.value.data;
-      if (!record || !record.publishURL) {
-        publishModal.value.visible = false;
+      if (!record) return;
+
+      // 如果是取消发布，直接执行
+      if (record.publishStatus === 'publish') {
+        try {
+          publishModal.value.loading = true;
+          const fullPublishURL = getFullPublishUrl(record);
+          await apiClient.updatePageStatus(record.pageId, 'unpublish', fullPublishURL);
+          message.success('Unpublished successfully');
+          fetchTasks();
+        } catch (error) {
+          console.error('Unpublish failed:', error);
+          message.error('Failed to unpublish page');
+        } finally {
+          publishModal.value.loading = false;
+          publishModal.value.visible = false;
+        }
         return;
       }
 
-      publishModal.value.loading = true;
+      // 发布前验证 URL
+      if (!publishModal.value.publishUrl) {
+        message.warning('Please select a root domain for the page to be published');
+        return;
+      }
+
       try {
-        const isPublished = record.publishStatus === 'publish';
-        const fullPublishURL = getFullPublishUrl(record);
+        publishModal.value.loading = true;
+        // 使用新选择的 publishUrl
+        const updatedRecord = {
+          ...record,
+          publishURL: publishModal.value.publishUrl
+        };
+        const fullPublishURL = getFullPublishUrl(updatedRecord);
 
-        const response = isPublished
-          ? await apiClient.updatePageStatus(record.pageId, 'unpublish', fullPublishURL)
-          : await apiClient.updatePageStatus(record.pageId, 'publish', fullPublishURL);
-
-        if (response?.code === 200) {
-          message.success(isPublished ? 'Unpublished successfully' : 'Published successfully');
-          fetchTasks();
-        } else {
-          message.error(response?.message || 'Operation failed');
-        }
+        // 先更新 publishUrl，再发布
+        await apiClient.updatePage(record.pageId, {
+          publishUrl: publishModal.value.publishUrl
+        });
+        await apiClient.updatePageStatus(record.pageId, 'publish', fullPublishURL);
+        
+        message.success('Published successfully');
+        fetchTasks();
       } catch (error) {
-        console.error('Publish action failed:', error);
-        message.error(error?.message || 'Operation failed');
+        console.error('Publish failed:', error);
+        message.error('Failed to publish page');
       } finally {
         publishModal.value.loading = false;
         publishModal.value.visible = false;
@@ -854,12 +883,12 @@ export default {
       publishModal.value.visible = false;
     };
 
-    // 添加发布模态框的响应式变量
+    // 修改发布模态框的响应式变量
     const publishModal = ref({
       visible: false,
-      title: '',
       loading: false,
-      data: null
+      data: null,
+      publishUrl: undefined
     });
 
     const sitemapModal = ref({
@@ -970,6 +999,12 @@ export default {
       iconBackground: 'rgba(255, 255, 255, 0.15)',
     }
 
+    const handleModalCancel = () => {
+      modalConfig.visible = false
+      modalConfig.loading = false
+      modalConfig.data = null
+    }
+
     onMounted(async () => {
       await loadProductInfo()
       // 只有在域名已配置的情况下才执行其他操作
@@ -1025,7 +1060,8 @@ export default {
       handleTitleClick,
       getPreviewUrl,
       domainConfigured,
-      bannerTheme
+      bannerTheme,
+      handleModalCancel
     }
   }
 }
@@ -1408,15 +1444,13 @@ export default {
 }
 
 .pagination-wrapper {
-  margin-top: 20px;
   display: flex;
   justify-content: flex-end;
   padding: 16px;
-  position: sticky; /* 使分页固定在底部 */
+  position: sticky;
   bottom: 0;
   background: #fff;
   z-index: 1;
-  border-top: 1px solid #f0f0f0; /* 添加顶部分隔线 */
 }
 
 /* 添加新的样式 */
@@ -1794,5 +1828,24 @@ export default {
 .secondary-btn:loading {
   opacity: 0.8;
   cursor: wait;
+}
+
+.preview-url-hint {
+  margin-top: 8px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.hint-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.preview-url {
+  font-size: 14px;
+  color: #1890ff;
+  word-break: break-all;
 }
 </style>
