@@ -2634,17 +2634,7 @@ export default defineComponent({
   border-radius: 8px;
   transition: all 0.3s;
   position: relative; /* 添加相对定位 */
-  
-  &:hover {
-    border-color: #1890ff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transform: translateY(-2px);
-    
-    .quick-link-action {
-      transform: translateX(0);
-      opacity: 1;
-    }
-  }
+  width: 100%; /* 确保每个item占满容器宽度 */
 }
 
 .quick-link-icon {
@@ -2674,7 +2664,8 @@ export default defineComponent({
 
 .quick-link-content {
   flex: 1;
-  padding-right: 120px; /* 为右侧按钮预留空间 */
+  min-width: 0; /* 防止内容溢出 */
+  padding-right: 180px; /* 增加右侧预留空间 */
 }
 
 .quick-link-header {
@@ -2730,14 +2721,16 @@ export default defineComponent({
   position: absolute;
   right: 20px;
   top: 50%;
-  opacity: 0.9;
-  transition: all 0.3s ease;
+  transform: translateY(-50%);
+  width: 160px; /* 增加按钮容器宽度 */
 }
 
 .action-link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: center; /* 确保内容居中 */
   gap: 8px;
+  width: 100%; /* 按钮占满容器宽度 */
   height: 36px;
   padding: 0 16px;
   color: white;
@@ -2746,42 +2739,14 @@ export default defineComponent({
   border-radius: 8px;
   transition: all 0.3s;
   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
-  
-  &:hover {
-    color: white;
-    background: linear-gradient(135deg, #40a9ff, #1890ff);
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-    
-    .anticon {
-      transform: translateX(3px);
-    }
-  }
-  
-  .anticon {
-    transition: transform 0.3s ease;
-  }
+  white-space: nowrap; /* 防止文字换行 */
 }
 
-/* 为不同功能模块设置不同的按钮颜色 */
-.planner + .quick-link-content .action-link {
-  background: linear-gradient(135deg, #1890ff, #096dd9);
-  &:hover {
-    background: linear-gradient(135deg, #40a9ff, #1890ff);
-  }
-}
-
-.manager + .quick-link-content .action-link {
-  background: linear-gradient(135deg, #52c41a, #389e0d);
-  &:hover {
-    background: linear-gradient(135deg, #73d13d, #52c41a);
-  }
-}
-
+/* 为不同功能模块设置相同宽度的按钮 */
+.planner + .quick-link-content .action-link,
+.manager + .quick-link-content .action-link,
 .profile + .quick-link-content .action-link {
-  background: linear-gradient(135deg, #faad14, #d48806);
-  &:hover {
-    background: linear-gradient(135deg, #ffc53d, #faad14);
-  }
+  width: 160px; /* 增加按钮宽度 */
 }
 
 .chart-wrapper {
