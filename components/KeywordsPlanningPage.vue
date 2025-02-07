@@ -284,14 +284,17 @@
                                 accept=".csv,.xlsx,.xls"
                               >
                                 <a-button type="primary">
-                                  <UploadOutlined />
                                   Upload File
                                 </a-button>
                               </a-upload>
-                              <a-button type="link" @click="downloadTemplate">
-                                <DownloadOutlined />
-                                Download Template
-                              </a-button>
+                              <a-space>
+                                <a-button type="link" @click="downloadTemplate">
+                                  Download Template
+                                </a-button>
+                                <a-button type="link" @click="showTemplateInfo">
+                                  Template Guide
+                                </a-button>
+                              </a-space>
                             </div>
                           </div>
                         </a-card>
@@ -1015,7 +1018,10 @@ export default defineComponent({
     UploadOutlined,
     DownloadOutlined,
     FileExcelOutlined,
-    EditOutlined
+    EditOutlined,
+    UploadOutlined,
+    DownloadOutlined,
+    QuestionCircleOutlined,
   },
   setup() {
     const currentMode = ref('beginner')
@@ -2698,9 +2704,93 @@ export default defineComponent({
       }
     };
 
-    const downloadTemplate = () => {
-      // Implement download template logic
-      console.log('Downloading template')
+    const downloadTemplate = async () => {
+      try {
+        message.loading({ content: 'Preparing template download...', key: 'downloadTemplate' })
+        
+        const templateUrl = '/templates/keywords-import-template.xlsx'
+        const response = await fetch(templateUrl)
+        
+        if (!response.ok) {
+          throw new Error('Template download failed')
+        }
+        
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', 'keywords-import-template.xlsx')
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+        
+        message.success({ content: 'Template downloaded successfully!', key: 'downloadTemplate' })
+      } catch (error) {
+        console.error('Template download failed:', error)
+        message.error({ content: 'Failed to download template, please try again', key: 'downloadTemplate' })
+      }
+    }
+
+    const showTemplateInfo = () => {
+      Modal.info({
+        title: 'Template Guide',
+        content: h('div', { class: 'template-guide' }, [
+          h('div', { class: 'guide-section' }, [
+            h('h4', { style: 'margin-bottom: 12px; color: #1890ff;' }, '📋 Required Columns'),
+            h('div', { class: 'column-info' }, [
+              h('strong', 'Keyword'),
+              h('span', ' - The target keyword you want to analyze')
+            ])
+          ]),
+          
+          h('div', { class: 'guide-section', style: 'margin-top: 16px;' }, [
+            h('h4', { style: 'margin-bottom: 12px; color: #52c41a;' }, '📊 Optional Metrics'),
+            h('ul', { style: 'list-style: none; padding: 0;' }, [
+              h('li', { style: 'margin-bottom: 8px;' }, [
+                h('strong', 'KD (Keyword Difficulty) '),
+                h('span', '- Indicates ranking competition level')
+              ]),
+              h('li', { style: 'margin-bottom: 8px;' }, [
+                h('strong', 'Volume '),
+                h('span', '- Monthly search volume')
+              ]),
+              h('li', { style: 'margin-bottom: 8px;' }, [
+                h('strong', 'CPC '),
+                h('span', '- Average cost per click')
+              ])
+            ])
+          ]),
+          
+          h('div', { class: 'guide-section', style: 'margin-top: 16px;' }, [
+            h('h4', { style: 'margin-bottom: 12px; color: #faad14;' }, '⚠️ Important Notes'),
+            h('ul', { style: 'list-style: none; padding: 0;' }, [
+              h('li', { style: 'margin-bottom: 8px; display: flex; align-items: center;' }, [
+                h('span', { style: 'color: #1890ff; margin-right: 8px;' }, '•'),
+                h('span', 'Keep the column headers unchanged in row 1')
+              ]),
+              h('li', { style: 'margin-bottom: 8px; display: flex; align-items: center;' }, [
+                h('span', { style: 'color: #1890ff; margin-right: 8px;' }, '•'),
+                h('span', 'Enter one keyword per row')
+              ]),
+              h('li', { style: 'margin-bottom: 8px; display: flex; align-items: center;' }, [
+                h('span', { style: 'color: #1890ff; margin-right: 8px;' }, '•'),
+                h('span', 'Maximum 1,000 keywords per import')
+              ])
+            ])
+          ]),
+          
+          h('div', { class: 'guide-section', style: 'margin-top: 16px; background: #f6ffed; padding: 12px; border-radius: 4px;' }, [
+            h('h4', { style: 'margin-bottom: 8px; color: #52c41a;' }, '💡 Pro Tips'),
+            h('p', { style: 'margin: 0; color: #555;' }, [
+              'For best results, include as many metrics as possible. This helps our AI better understand your keywords and generate more accurate content plans.'
+            ])
+          ])
+        ]),
+        width: 600,
+        maskClosable: true,
+        okText: 'Got it'
+      })
     }
 
     const showBulkInput = () => {
@@ -3013,7 +3103,8 @@ export default defineComponent({
       handleChange,
       handleBlur,
       handleModeChange,
-      fetchImportedKeywords
+      fetchImportedKeywords,
+      showTemplateInfo
     }
   }
 })
@@ -4231,7 +4322,26 @@ export default defineComponent({
     
     .method-actions {
       display: flex;
+      align-items: center;
       gap: 12px;
+      margin-top: 16px;
+    }
+
+    .method-actions :deep(.ant-upload) {
+      margin-right: 12px;
+    }
+
+    .template-info {
+      margin-top: 16px;
+    }
+
+    .template-info ul {
+      margin-top: 8px;
+      padding-left: 20px;
+    }
+
+    .template-info ul li {
+      margin-bottom: 4px;
     }
   }
 }
