@@ -242,19 +242,6 @@
                   >
                     Refresh
                   </a-button>
-                  <a-button
-                    type="link"
-                    size="small"
-                    @click="collectPublishedUrls"
-                    :disabled="!productInfo?.productId || !isGscConnected"
-                  >
-                    Submit Sitemap
-                    <template v-if="!isGscConnected">
-                      <a-tooltip title="Please connect Google Search Console first">
-                        <InfoCircleOutlined style="margin-left: 4px" />
-                      </a-tooltip>
-                    </template>
-                  </a-button>
                   <!-- 添加 Disconnect 按钮 -->
                   <a-button
                     type="link"
@@ -602,56 +589,6 @@
       </div>
     </a-modal>
 
-    <!-- Add Sitemap modal -->
-    <a-modal
-      v-model:visible="sitemapModal.visible"
-      title="Submit URLs to Google Search Console"
-      width="800px"
-      @ok="handleSubmitUrls"
-      @cancel="closeSitemapModal"
-      :confirmLoading="submitLoading"
-      :okText="'Submit to Google'"
-      :cancelText="'Cancel'"
-    >
-      <div class="sitemap-preview">
-        <div class="preview-header">
-          <a-alert
-            message="Below are all published page URLs. Confirm to submit to Google Search Console"
-            type="info"
-            show-icon
-            style="margin-bottom: 16px"
-          />
-          <div class="url-count">
-            Found {{ publishedUrls.length }} published pages
-          </div>
-        </div>
-        
-        <a-list
-          :data-source="publishedUrls"
-          :bordered="true"
-          size="small"
-          class="url-list"
-        >
-          <template #renderItem="{ item }">
-            <a-list-item>
-              <div class="url-item">
-                <span class="url-text">{{ item }}</span>
-                <a-button 
-                  type="link" 
-                  size="small"
-                  @click="openPreview(item)"
-                >
-                  View
-                </a-button>
-              </div>
-            </a-list-item>
-          </template>
-        </a-list>
-      </div>
-    </a-modal>
-
-
-    
     <a-modal
       v-model:visible="successModalVisible"
       title="Welcome to WebsiteLM!"
@@ -700,7 +637,6 @@
       </div>
     </a-modal>
 
-    <!-- 在 template 最后添加，body 级别 -->
     <transition name="panel">
       <div class="setup-progress-panel" v-if="shouldShowSetupPanel">
         <div class="panel-header">
@@ -1764,43 +1700,6 @@ export default defineComponent({
       }
     },
 
-    async handleSubmitUrls() {
-      if (this.publishedUrls.length === 0) {
-        message.warning('No URLs available for submission');
-        return;
-      }
-
-      this.submitLoading = true;
-      try {
-        // 在提交前再次过滤 URLs
-        const filteredUrls = this.publishedUrls.map(url => {
-          return url.replace(/([^\/]+)\/en\//, '$1/');
-        });
-        
-        // 使用过滤后的 URLs 更新 publishedUrls
-        this.publishedUrls = filteredUrls;
-        
-        const response = await apiClient.publishSitemapAndUrls();
-        
-        if (response?.code === 200) {
-          message.success('Successfully submitted URLs to Google Search Console');
-          this.sitemapModal.visible = false;
-        } else {
-          throw new Error(response?.message || 'Submission failed');
-        }
-      } catch (error) {
-        console.error('Failed to submit URLs:', error);
-        message.error(error.message || 'Submission failed');
-      } finally {
-        this.submitLoading = false;
-      }
-    },
-
-    closeSitemapModal() {
-      this.sitemapModal.visible = false;
-      this.publishedUrls = [];
-    },
-
     openPreview(url) {
       if (typeof window !== 'undefined') {
         const fullUrl = url.startsWith('http') ? url : `https://${url}`;
@@ -2107,32 +2006,63 @@ export default defineComponent({
 
 .sitemap-card {
   height: 100%;
-  max-height: 560px; /* 添加最大高度限制 */
+  max-height: 560px; /* 设置最大高度 */
   
   :deep(.ant-card-body) {
-    padding: 24px !important;
-    height: calc(100% - 76px);
-    overflow-y: auto;
+    height: calc(100% - 57px); /* 减去卡片头部高度 */
+    padding: 0 !important; /* 移除默认内边距 */
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* 添加树容器样式 */
+.tree-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px;
+  
+  /* 优化滚动条样式 */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
     
-    /* 优化滚动条样式 */
-    &::-webkit-scrollbar {
-      width: 8px;
+    &:hover {
+      background: #999;
     }
+  }
+}
+
+/* 优化树节点样式 */
+:deep(.ant-tree) {
+  background: transparent;
+  
+  .ant-tree-treenode {
+    padding: 4px 0;
     
-    &::-webkit-scrollbar-track {
-      background: #f8fafc;
-      border-radius: 4px;
+    &:hover {
+      background: #f5f5f5;
     }
-    
-    &::-webkit-scrollbar-thumb {
-      background: #bfdbfe;
-      border-radius: 4px;
-      border: 2px solid #f8fafc;
-      
-      &:hover {
-        background: #1890ff;
-      }
-    }
+  }
+  
+  .ant-tree-node-content-wrapper {
+    min-height: 24px;
+    line-height: 24px;
+  }
+  
+  .ant-tree-switcher {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
   }
 }
 
@@ -2262,11 +2192,6 @@ export default defineComponent({
 .competitors-input {
   margin-top: 0; /* 修改这里，原来是 4px */
   padding-top: 0; /* 修改这里，原来是 4px */
-}
-
-
-.traffic-analytics {
-  height: 400px;
 }
 
 :deep(.ant-select) {
@@ -2873,12 +2798,6 @@ export default defineComponent({
   width: 100%;
   height: 400px;
   position: relative;
-}
-
-.chart-container {
-  width: 100%;
-  height: 100%;
-  min-height: 400px;
 }
 
 .centered-empty-state {
@@ -3574,5 +3493,33 @@ export default defineComponent({
 
 .gsc-data-container {
   padding: 8px;
+}
+
+.sitemap-content {
+  overflow-y: auto;
+  height: 460px;
+  
+  /* 优化滚动条样式 */
+  &::-webkit-scrollbar {
+    width: 6px;
+    background-color: #f5f5f5; /* 滚动条背景色 */
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #bfbfbf; /* 加深滑块颜色 */
+    border-radius: 3px;
+    border: 2px solid transparent; /* 添加边框 */
+    background-clip: padding-box; /* 确保背景不会超出边框 */
+    
+    &:hover {
+      background: #8c8c8c; /* 悬停时更深的颜色 */
+      background-clip: padding-box;
+    }
+  }
 }
 </style>
