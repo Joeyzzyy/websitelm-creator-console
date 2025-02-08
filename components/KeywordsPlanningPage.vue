@@ -424,18 +424,20 @@
                                   <RobotOutlined class="empty-icon" />
                                   <h3>No Content Plans Yet</h3>
                                   <p>Let AI help you select the best keywords and generate content plans</p>
-                                  <a-button 
-                                    type="primary"
-                                    @click="showAISelectionConfirm"
-                                    :loading="isAISelecting"
-                                    class="generate-btn"
-                                    :disabled="isGenerating || outlineGenerationStatus === 'processing'"
-                                  >
-                                    <template #icon>
-                                      <ThunderboltOutlined />
-                                    </template>
-                                    AI Autopilot
-                                  </a-button>
+                                  <a-tooltip :title="getAIButtonTooltip">
+                                    <a-button 
+                                      type="primary"
+                                      @click="showAISelectionConfirm"
+                                      :loading="isAISelecting"
+                                      class="generate-btn"
+                                      :disabled="isGenerating || outlineGenerationStatus === 'processing'"
+                                    >
+                                      <template #icon>
+                                        <ThunderboltOutlined />
+                                      </template>
+                                      AI Autopilot
+                                    </a-button>
+                                  </a-tooltip>
                                 </div>
                               </div>
 
@@ -879,7 +881,7 @@
           <template #bodyCell="{ column, record }">
             <template v-if="column.key === 'action'">
               <a-button type="link" @click="viewBatchDetail(record.batchNo)">
-                View Details
+              View Used Keywords
               </a-button>
             </template>
           </template>
@@ -2156,7 +2158,7 @@ export default defineComponent({
         title: 'Source',
         dataIndex: 'keywordType',
         key: 'keywordType',
-        width: '10%',
+        width: '15%',
         customRender: ({ text }) => {
           const sourceMap = {
             'absence': 'Absence',
@@ -2174,7 +2176,7 @@ export default defineComponent({
         title: 'KRS',
         dataIndex: 'krs',
         key: 'krs',
-        width: '15%'
+        width: '10%'
       },
       {
         title: 'KD',
@@ -2186,7 +2188,7 @@ export default defineComponent({
         title: 'Volume',
         dataIndex: 'volume',
         key: 'volume',
-        width: '15%'
+        width: '10%'
       },
       {
         title: 'Related Outlines',
@@ -2650,12 +2652,6 @@ export default defineComponent({
           }
           return sourceMap[text?.toLowerCase()] || text
         }
-      },
-      {
-        title: 'KRS',
-        dataIndex: 'krs',
-        key: 'krs',
-        width: '15%'
       },
       {
         title: 'KD',
