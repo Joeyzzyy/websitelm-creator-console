@@ -105,16 +105,19 @@
             <div class="main-content">
               <div class="content-toolbar">
                 <div class="toolbar-left">
-                  <a-button 
-                    @click="showAISelectionConfirm"
-                    class="generate-btn"
-                    :loading="isAISelecting"
-                  >
-                    <template #icon>
-                      <ThunderboltOutlined />
-                    </template>
-                    AI Autopilot
-                  </a-button>
+                  <a-tooltip :title="getAIButtonTooltip">
+                    <a-button 
+                      @click="showAISelectionConfirm"
+                      class="generate-btn"
+                      :loading="isAISelecting"
+                      :disabled="isGenerating || outlineGenerationStatus === 'processing'"
+                    >
+                      <template #icon>
+                        <ThunderboltOutlined />
+                      </template>
+                      AI Autopilot
+                    </a-button>
+                  </a-tooltip>
 
                   <a-button-group>
                     <a-button 
@@ -300,13 +303,23 @@
                           >
                             <template #bodyCell="{ column, record }">
                               <template v-if="column.key === 'actions'">
-                                <a-button 
-                                  type="link" 
-                                  danger 
-                                  @click="removeImportedKeyword(record)"
-                                >
-                                  <DeleteOutlined />
-                                </a-button>
+                                <a-space>
+                                  <a-button 
+                                    type="primary"
+                                    ghost
+                                    :class="record.favorited ? 'deselect-btn' : 'select-btn'"
+                                    @click="handleKeywordFavorite(record)"
+                                  >
+                                    {{ record.favorited ? 'Deselect' : 'Select' }}
+                                  </a-button>
+                                  <a-button 
+                                    type="link" 
+                                    danger 
+                                    @click="removeImportedKeyword(record)"
+                                  >
+                                    <DeleteOutlined />
+                                  </a-button>
+                                </a-space>
                               </template>
                             </template>
                           </a-table>
@@ -416,6 +429,7 @@
                                     @click="showAISelectionConfirm"
                                     :loading="isAISelecting"
                                     class="generate-btn"
+                                    :disabled="isGenerating || outlineGenerationStatus === 'processing'"
                                   >
                                     <template #icon>
                                       <ThunderboltOutlined />
@@ -1096,6 +1110,8 @@ export default defineComponent({
         grade: item.grade,
         reason: item.reasoning || 'No specific reason provided',
         relatedOutlines: item.relatedOutlines || [],
+        source: item.source || 'manual',        // 添加 source 字段
+        keywordType: item.keywordType || 'manual'  // 添加 keywordType 字段
       }
     }
 
@@ -2134,7 +2150,25 @@ export default defineComponent({
         title: 'Keyword',
         dataIndex: 'keyword',
         key: 'keyword',
-        width: '25%'
+        width: '20%'
+      },
+      {
+        title: 'Source',
+        dataIndex: 'keywordType',
+        key: 'keywordType',
+        width: '10%',
+        customRender: ({ text }) => {
+          const sourceMap = {
+            'absence': 'Absence',
+            'top_page': 'Top Page',
+            'semrush': 'SEMrush',
+            'ahrefs': 'Ahrefs',
+            'google': 'Google',
+            'manual': 'Manual',
+            'import': 'Import'
+          }
+          return sourceMap[text] || text
+        }
       },
       {
         title: 'KRS',
@@ -2146,7 +2180,7 @@ export default defineComponent({
         title: 'KD',
         dataIndex: 'kd',
         key: 'kd',
-        width: '15%'
+        width: '10%'
       },
       {
         title: 'Volume',
@@ -2396,13 +2430,6 @@ export default defineComponent({
         customRender: ({ text }) => text.charAt(0).toUpperCase() + text.slice(1)
       },
       {
-        title: 'Source',
-        dataIndex: 'source',
-        key: 'source',
-        width: '15%',
-        customRender: ({ text }) => text.charAt(0).toUpperCase() + text.slice(1)
-      },
-      {
         title: 'Created',
         dataIndex: 'created',
         key: 'created',
@@ -2605,21 +2632,42 @@ export default defineComponent({
         title: 'Keyword',
         dataIndex: 'keyword',
         key: 'keyword',
+        width: '20%'
+      },
+      {
+        title: 'Source',
+        dataIndex: 'keywordType',
+        key: 'keywordType',
+        width: '10%',
+        customRender: ({ text }) => {
+          const sourceMap = {
+            'absence': 'Absence',
+            'semrush': 'SEMrush',
+            'ahrefs': 'Ahrefs',
+            'google': 'Google',
+            'manual': 'Manual',
+            'import': 'Import'
+          }
+          return sourceMap[text?.toLowerCase()] || text
+        }
       },
       {
         title: 'KRS',
         dataIndex: 'krs',
         key: 'krs',
+        width: '15%'
       },
       {
         title: 'KD',
         dataIndex: 'kd',
         key: 'kd',
+        width: '10%'
       },
       {
         title: 'Volume',
         dataIndex: 'volume',
         key: 'volume',
+        width: '15%'
       },
       {
         title: 'Related Outlines',
@@ -2921,6 +2969,17 @@ export default defineComponent({
       }
     }
 
+    // 在 setup 中添加计算属性
+    const getAIButtonTooltip = computed(() => {
+      if (isGenerating.value) {
+        return "Please wait until the current content generation is complete"
+      }
+      if (outlineGenerationStatus.value === 'processing') {
+        return "AI is currently processing your request. Please wait until it's finished"
+      }
+      return "Use AI to automatically select and analyze keywords"
+    })
+
     return {
       taskStartTime,
       taskEndTime,
@@ -3093,7 +3152,8 @@ export default defineComponent({
       handleBlur,
       handleModeChange,
       fetchImportedKeywords,
-      showTemplateInfo
+      showTemplateInfo,
+      getAIButtonTooltip
     }
   }
 })
