@@ -186,31 +186,7 @@
               <!-- 步骤内容 -->
               <div v-show="currentStep === '0'" class="step-panel">
                 <!-- Add KRS Info Card -->
-                <div class="krs-info-card" v-show="keywordSelectionMode === 'ai'">
-                  <div class="krs-header">
-                    <TrophyOutlined class="krs-icon" />
-                    <h3>Keyword Ranking Score (KRS)</h3>
-                  </div>
-                  <div class="krs-content">
-                    <p class="krs-description">
-                      Our AI-powered KRS system analyzes competitor performance and market opportunities to rank keywords from P1 to P5.
-                    </p>
-                    <div class="krs-benefits">
-                      <div class="benefit-item">
-                        <CheckCircleOutlined />
-                        <span>The higher the KRS score (0-10), the better chance to rank</span>
-                      </div>
-                      <div class="benefit-item">
-                        <RiseOutlined />
-                        <span>P1 keywords (KRS ≥ 8.0) represent immediate ranking opportunities</span>
-                      </div>
-                      <div class="benefit-item">
-                        <BarChartOutlined />
-                        <span>Strategic balance of competition and search volume</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+               
 
                 <!-- 添加模式选择的 Tabs -->
                 <div class="keywords-selection">
@@ -220,8 +196,33 @@
                     @change="handleModeChange"
                   >
                     <a-tab-pane key="ai" tab="AI Recommendations">
+                      <div class="krs-info-card">
+                        <div class="krs-header">
+                          <TrophyOutlined class="krs-icon" />
+                          <h3>Keyword Ranking Score (KRS)</h3>
+                        </div>
+                        <div class="krs-content">
+                          <p class="krs-description">
+                            Our AI-powered KRS system analyzes competitor performance and market opportunities to rank keywords from P1 to P5.
+                          </p>
+                          <div class="krs-benefits">
+                            <div class="benefit-item">
+                              <CheckCircleOutlined />
+                              <span>The higher the KRS score (0-10), the better chance to rank</span>
+                            </div>
+                            <div class="benefit-item">
+                              <RiseOutlined />
+                              <span>P1 keywords (KRS ≥ 8.0) represent immediate ranking opportunities</span>
+                            </div>
+                            <div class="benefit-item">
+                              <BarChartOutlined />
+                              <span>Strategic balance of competition and search volume</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       <!-- 原来的 AI 推荐内容 -->
-                      <div v-if="currentMode === 'beginner'" class="beginner-mode">
+                      <div class="beginner-mode">
                         <a-row :gutter="[24, 24]" class="beginner-content">
                           <a-col :span="24">
                             <a-card class="keyword-table-card">
@@ -273,28 +274,18 @@
                         <a-card class="import-methods-card">
                           <div class="import-method-item">
                             <div class="method-header">
-                              <FileExcelOutlined class="method-icon" />
-                              <h3>File Upload</h3>
-                            </div>
-                            <p class="method-desc">Import keywords from CSV or Excel files</p>
-                            <div class="method-actions">
-                              <a-upload
-                                :customRequest="handleFileUpload"
-                                :showUploadList="false"
-                                accept=".csv,.xlsx,.xls"
-                              >
-                                <a-button type="primary">
-                                  Upload File
-                                </a-button>
-                              </a-upload>
-                              <a-space>
-                                <a-button type="link" @click="downloadTemplate">
-                                  Download Template
-                                </a-button>
-                                <a-button type="link" @click="showTemplateInfo">
-                                  Template Guide
-                                </a-button>
-                              </a-space>
+                              <p class="method-desc">Import keywords from a CSV or Excel file</p>
+                              <div class="method-actions">
+                                <a-upload
+                                  :customRequest="handleFileUpload"
+                                  :showUploadList="false"
+                                  accept=".csv,.xlsx,.xls"
+                                >
+                                  <a-button type="primary">Upload File</a-button>
+                                </a-upload>
+                                <a-button @click="downloadTemplate">Download Template</a-button>
+                                <a-button type="link" @click="showTemplateInfo">View Guide</a-button>
+                              </div>
                             </div>
                           </div>
                         </a-card>
@@ -1024,7 +1015,6 @@ export default defineComponent({
     QuestionCircleOutlined,
   },
   setup() {
-    const currentMode = ref('beginner')
     const selectedKeywords = ref([])
     const isGeneratingTitles = ref(false) 
     const isGeneratingOutline = ref(false) 
@@ -2916,7 +2906,7 @@ export default defineComponent({
     const fetchImportedKeywords = async () => {
       try {
         const response = await api.getPlanningKeywords({
-          keywordType: 'import',
+          source: 'import',
           page: importedKeywordsPagination.value.current,
           limit: importedKeywordsPagination.value.pageSize
         })
@@ -2936,7 +2926,6 @@ export default defineComponent({
       taskEndTime,
       taskDescription,
       showSelectedKeywords,
-      currentMode,
       selectedKeywords,
       overviewData,
       clearSelection,
@@ -4296,52 +4285,24 @@ export default defineComponent({
     padding: 24px;
     background: #fafafa;
     border-radius: 8px;
-    height: 100%;
     
     .method-header {
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 12px;
       
-      .method-icon {
-        font-size: 24px;
-        color: #1890ff;
+      .method-desc {
+        flex-grow: 1;
+        color: #8c8c8c;
+        margin: 0; 
       }
       
-      h3 {
-        margin: 0;
-        font-size: 16px;
+      .method-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        white-space: nowrap;
       }
-    }
-    
-    .method-desc {
-      color: #8c8c8c;
-      margin-bottom: 16px;
-    }
-    
-    .method-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .method-actions :deep(.ant-upload) {
-      margin-right: 12px;
-    }
-
-    .template-info {
-      margin-top: 16px;
-    }
-
-    .template-info ul {
-      margin-top: 8px;
-      padding-left: 20px;
-    }
-
-    .template-info ul li {
-      margin-bottom: 4px;
     }
   }
 }
