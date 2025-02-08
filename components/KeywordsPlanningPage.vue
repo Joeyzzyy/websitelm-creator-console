@@ -4338,8 +4338,6 @@ export default defineComponent({
 
 .import-methods-card {
   .import-method-item {
-    padding: 24px;
-    background: #fafafa;
     border-radius: 8px;
     
     .method-header {
