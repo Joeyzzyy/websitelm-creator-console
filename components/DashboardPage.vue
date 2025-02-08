@@ -67,7 +67,7 @@
                   size="small"
                   @click="showGscData"
                 >
-                  View Data
+                  View Traffic Data
                 </a-button>
               </div>
             </div>
@@ -257,7 +257,7 @@
             </template>
 
             <!-- Loading skeleton -->
-            <template v-if="loadingSitemap">
+            <template v-if="loadingSitemap || checkingGscStatus">
               <a-skeleton active :paragraph="{ rows: 2 }" />
             </template>
 
@@ -638,7 +638,7 @@
     </a-modal>
 
     <transition name="panel">
-      <div class="setup-progress-panel" v-if="shouldShowSetupPanel">
+      <div class="setup-progress-panel" v-if="shouldShowSetupPanel && isPanelReady">
         <div class="panel-header">
           <div class="panel-title">
             <CheckCircleOutlined v-if="allStepsCompleted" />
@@ -899,6 +899,8 @@ export default defineComponent({
           width: '80px',
         },
       ],
+      checkingGscStatus: false, // 添加新的状态
+      isPanelReady: false, // 添加新的状态控制面板是否准备好显示
     }
   },
   created() {
@@ -955,11 +957,13 @@ export default defineComponent({
     },
     // 添加新的计算属性来控制面板显示
     shouldShowSetupPanel() {
-      // 只有当产品信息加载完成且未完成所有步骤时才显示
+      // 只有当所有必要数据都加载完成且未完成所有步骤时才显示
       return (
         this.productInfo && 
         !this.allStepsCompleted && 
-        !this.loading
+        !this.loading &&
+        !this.checkingGscStatus && // 确保GSC状态检查完成
+        this.isPanelReady // 确保面板准备就绪
       );
     }
   },
@@ -1027,18 +1031,24 @@ export default defineComponent({
             }
             this.onboardingModalVisible = true
           } else {
-            // 修改这里：检查域名验证状态和GSC连接状态后再获取sitemap
+            // 加载所有必要数据
+            await Promise.all([
+              this.checkGscStatus(),
+              this.loadPagesDashboard()
+            ]);
+
             if (this.productInfo.domainStatus) {
-              // 立即获取sitemap数据
               await this.getSitemap();
-              await this.loadPagesDashboard();
               
-              // 检查GSC连接状态并获取相关数据
-              await this.checkGscStatus();
               if (this.isGscConnected) {
                 await this.loadGscData();
               }
             }
+
+            // 所有数据加载完成后，再设置面板就绪状态
+            this.$nextTick(() => {
+              this.isPanelReady = true;
+            });
           }
         }
       } catch (error) {
@@ -1487,33 +1497,29 @@ export default defineComponent({
 
     async checkGscStatus() {
       try {
-        const customerId = localStorage.getItem('currentCustomerId')
-        const response = await apiClient.checkGscAuth(customerId)
+        this.checkingGscStatus = true; // 开始检查时设置loading状态
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.checkGscAuth(customerId);
         
-        console.log('GSC Status:', response)
+        console.log('GSC Status:', response);
         
-        // 扩展错误检查条件
         if (
-          response?.code === 1201 || // 未授权
-          response?.code === 500 ||  // 服务器错误
-          response?.code !== 200     // 其他任何非200状态
+          response?.code === 1201 || 
+          response?.code === 500 ||  
+          response?.code !== 200     
         ) {
-          this.isGscConnected = false
-          this.gscSites = []
-          
-          // 可以根据不同的错误码显示不同的提示
-          if (response?.code === 500) {
-            console.error('GSC analytics failed:', response.message)
-          }
-          return
+          this.isGscConnected = false;
+          this.gscSites = [];
+          return;
         }
         
-        // 只有在确实返回 200 时才认为是连接成功
-        this.isGscConnected = true
+        this.isGscConnected = true;
       } catch (error) {
-        console.error('Failed to check GSC status:', error)
-        this.isGscConnected = false
-        this.gscSites = []
+        console.error('Failed to check GSC status:', error);
+        this.isGscConnected = false;
+        this.gscSites = [];
+      } finally {
+        this.checkingGscStatus = false; // 检查完成后关闭loading状态
       }
     },
 
@@ -1668,6 +1674,13 @@ export default defineComponent({
           }
         }
       },
+      // 监听影响面板显示的关键状态变化
+      'productInfo.domainStatus'() {
+        this.handleStateChange();
+      },
+      isGscConnected() {
+        this.handleStateChange();
+      }
     },
     async handleRefreshSitemap(e) {
       // 阻止事件冒泡
@@ -1805,6 +1818,18 @@ export default defineComponent({
       } finally {
         this.loadingGscData = false;
       }
+    },
+
+    // 添加重置面板状态的方法
+    resetPanelState() {
+      this.isPanelReady = false;
+    },
+
+    // 在状态发生变化时重新评估是否显示面板
+    async handleStateChange() {
+      this.resetPanelState();
+      await this.$nextTick();
+      this.isPanelReady = true;
     },
   },
 
@@ -3520,6 +3545,39 @@ export default defineComponent({
       background: #8c8c8c; /* 悬停时更深的颜色 */
       background-clip: padding-box;
     }
+  }
+}
+
+/* 优化过渡动画 */
+.panel-enter-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.panel-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.panel-enter-from,
+.panel-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.setup-progress-panel {
+  /* ... existing styles ... */
+  
+  /* 添加初始显示时的动画 */
+  animation: panelAppear 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes panelAppear {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 </style>
