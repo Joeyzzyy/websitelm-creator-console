@@ -1303,6 +1303,17 @@ const importKeywords = async (formData) => {
   }
 };
 
+// 新增：重建知识库的方法
+const rebuildKnowledge = async () => {
+  try {
+    const response = await apiClient.post('/knowledge/rebuild');
+    return response.data;
+  } catch (error) {
+    console.error('重建知识库失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1398,5 +1409,6 @@ export default {
   getPlanningOutlineBatches,
   updatePlanningOutline,
   cancelGscAuth,
-  importKeywords
+  importKeywords,
+  rebuildKnowledge
 };

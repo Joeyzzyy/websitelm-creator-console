@@ -12,7 +12,6 @@
       emoji="📁"
     />
 
-    <a-spin :spinning="loading">
       <template v-if="domainConfigured">
         <a-tabs 
         class="main-tabs"
@@ -39,6 +38,18 @@
             <span class="btn-content">
               <span>Add {{ activeTab === 'links' ? 'Link' : 'Button Link' }}</span>
               
+            </span>
+          </a-button>
+          <a-button
+            v-else-if="activeTab === 'knowledge' && !processingKnowledge && Object.keys(groupedArticles).length > 0"
+            type="primary"
+            class="ai-analyze-btn"
+            :loading="regrabLoading"
+            @click="regrabKnowledgeBase"
+          >
+            <span class="btn-content">
+              <sync-outlined :spin="regrabLoading" />
+              <span>Regrab Info</span>
             </span>
           </a-button>
         </template>
@@ -78,364 +89,386 @@
 
       <div class="page-content">
         <div class="assets-content">
-          <div class="controls-header">
-            <div class="controls-right">
-              <slot name="controls"></slot>
+          <a-spin 
+            :spinning="loading || knowledgeLoading" 
+            class="unified-loading"
+          >
+            <div class="controls-header">
+              <div class="controls-right">
+                <slot name="controls"></slot>
+              </div>
             </div>
-          </div>
-
-          <!-- Media Asset Content -->
-          <template v-if="activeTab === 'images' || activeTab === 'videos'">
-            <a-spin :spinning="mediaLoading">
-              <div class="assets-grid" v-if="!mediaLoading">
-                <template v-if="!showEmptyState">
-                  <a-row :gutter="[16, 16]">
-                    <a-col 
-                      v-for="asset in filteredAssets" 
-                      :key="asset.id" 
-                      :xs="24" 
-                      :sm="12" 
-                      :md="8" 
-                      :lg="6"
-                    >
-                      <div class="asset-card">
-                        <div class="asset-preview" @click="previewAsset(asset)">
-                          <img 
-                            v-if="asset.type === 'image'" 
-                            :src="asset.url" 
-                            :alt="asset.name"
-                          >
-                          <video 
-                            v-else-if="asset.type === 'video'" 
-                            :src="asset.url" 
-                            controls
-                          ></video>
-                          <div class="asset-overlay">
-                            <eye-outlined class="preview-icon" />
-                          </div>
-                          <div class="asset-actions">
-                            <a-popconfirm
-                              title="Are you sure you want to delete this file?"
-                              ok-text="Delete"
-                              cancel-text="Cancel"
-                              @confirm="deleteAsset(asset)"
-                              ok-type="primary"
-                              :ok-button-props="{
-                                style: {
-                                  background: 'linear-gradient(135deg, #1890ff, #3B82F6)',
-                                  border: 'none'
-                                }
-                              }"
+            <!-- Media Asset Content -->
+            <template v-if="activeTab === 'images' || activeTab === 'videos'">
+              <a-spin :spinning="mediaLoading">
+                <div class="assets-grid" v-if="!mediaLoading">
+                  <template v-if="!showEmptyState">
+                    <a-row :gutter="[16, 16]">
+                      <a-col 
+                        v-for="asset in filteredAssets" 
+                        :key="asset.id" 
+                        :xs="24" 
+                        :sm="12" 
+                        :md="8" 
+                        :lg="6"
+                      >
+                        <div class="asset-card">
+                          <div class="asset-preview" @click="previewAsset(asset)">
+                            <img 
+                              v-if="asset.type === 'image'" 
+                              :src="asset.url" 
+                              :alt="asset.name"
                             >
-                              <a-button 
-                                type="link" 
-                                danger 
-                                class="delete-btn"
-                                @click.stop
+                            <video 
+                              v-else-if="asset.type === 'video'" 
+                              :src="asset.url" 
+                              controls
+                            ></video>
+                            <div class="asset-overlay">
+                              <eye-outlined class="preview-icon" />
+                            </div>
+                            <div class="asset-actions">
+                              <a-popconfirm
+                                title="Are you sure you want to delete this file?"
+                                ok-text="Delete"
+                                cancel-text="Cancel"
+                                @confirm="deleteAsset(asset)"
+                                ok-type="primary"
+                                :ok-button-props="{
+                                  style: {
+                                    background: 'linear-gradient(135deg, #1890ff, #3B82F6)',
+                                    border: 'none'
+                                  }
+                                }"
                               >
-                                <delete-outlined />
+                                <a-button 
+                                  type="link" 
+                                  danger 
+                                  class="delete-btn"
+                                  @click.stop
+                                >
+                                  <delete-outlined />
+                                </a-button>
+                              </a-popconfirm>
+                            </div>
+                          </div>
+                          <div class="asset-info">
+                            <div class="asset-name-container">
+                              <h4 class="asset-name" :title="asset.name">{{ asset.name }}</h4>
+                              <a-button type="link" class="edit-btn" @click="startEditing(asset)">
+                                <edit-outlined />
                               </a-button>
-                            </a-popconfirm>
+                            </div>
+                            <p class="asset-description" :title="asset.description">
+                              {{ asset.description || 'No description' }}
+                            </p>
                           </div>
                         </div>
-                        <div class="asset-info">
-                          <div class="asset-name-container">
-                            <h4 class="asset-name" :title="asset.name">{{ asset.name }}</h4>
-                            <a-button type="link" class="edit-btn" @click="startEditing(asset)">
-                              <edit-outlined />
+                      </a-col>
+                    </a-row>
+
+                    <!-- 添加分页组件 -->
+                    <div class="pagination-wrapper">
+                      <a-pagination
+                        v-model:current="currentPage"
+                        :total="total"
+                        :pageSize="pageSize"
+                        show-size-changer
+                        @change="handlePageChange"
+                        @showSizeChange="handleSizeChange"
+                      />
+                    </div>
+                  </template>
+                  
+                  <div v-else-if="showEmptyState && activeTab !== 'links'" class="empty-state">
+                    <h3 class="empty-state-title">Your creative canvas awaits! 🎨</h3>
+                    <p class="empty-state-description">
+                      Ready to bring your brand to life? Upload your first {{ activeTab === 'images' ? 'image' : 'video' }} and let's make something amazing together.
+                    </p>
+                    <a-button 
+                      type="primary" 
+                      class="upload-btn-empty" 
+                      @click="showUploadModal"
+                    >
+                      Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}
+                    </a-button>
+                  </div>
+                </div>
+              </a-spin>
+            </template>
+            <!-- Link Content -->
+            <template v-else-if="activeTab === 'links'">
+              <a-spin :spinning="linksLoading">
+                <template v-if="!linksLoading">
+                  <!-- 添加空状态显示 -->
+                  <div v-if="internalLinks.length === 0" class="empty-state">
+                    <h3 class="empty-state-title">No Internal Links Found 🔗</h3>
+                    <p class="empty-state-description">
+                      Start adding internal links to improve your site's navigation and SEO.
+                    </p>
+                    <a-button 
+                      type="primary" 
+                      class="upload-btn-empty" 
+                      @click="showAddLinkModal"
+                    >
+                      Add First Link
+                    </a-button>
+                  </div>
+                  
+                  <!-- 现有的表格组件 -->
+                  <a-table
+                    v-else
+                    :columns="linkColumns" 
+                    :dataSource="internalLinks" 
+                    :pagination="{ 
+                      pageSize: 10,
+                      showSizeChanger: true,
+                      showTotal: (total) => `Total ${total} items`
+                    }"
+                    :rowKey="record => record.id"
+                  >
+                    <template #bodyCell="{ column, record }">
+                      <template v-if="column.key === 'operation'">
+                        <a-space>
+                          <a-button type="link" @click="editLink(record)">
+                            <edit-outlined />
+                          </a-button>
+                          <a-popconfirm
+                            title="Are you sure you want to delete this link?"
+                            @confirm="deleteLink(record)"
+                            ok-text="Delete"
+                            cancel-text="Cancel"
+                          >
+                            <a-button type="link" danger>
+                              <delete-outlined />
+                            </a-button>
+                          </a-popconfirm>
+                        </a-space>
+                      </template>
+                      <template v-if="column.key === 'link'">
+                        <a :href="record.link" target="_blank">{{ record.link }}</a>
+                      </template>
+                    </template>
+                  </a-table>
+                </template>
+              </a-spin>
+            </template>
+            <!-- Knowledge Tab Content -->
+            <template v-else-if="activeTab === 'knowledge'">
+              <template v-if="processingKnowledge && !knowledgeLoading">
+                <a-card class="knowledge-processing-card">
+                  <div class="processing-content">
+                    <LoadingOutlined class="processing-icon" spin />
+                    <div class="status-info">
+                      <h3 class="status-title">{{ getKnowledgeStatusMessage(knowledgeStatus).title }}</h3>
+                      <p class="status-description">{{ getKnowledgeStatusMessage(knowledgeStatus).description }}</p>
+                    </div>
+                    
+                    <!-- 处理时间展示 -->
+                    <div class="processing-stats">
+                      <div class="stat-item">
+                        <ClockCircleOutlined />
+                        <span>Processing Time: {{ knowledgeTime }}</span>
+                      </div>
+                    </div>
+
+                    <!-- 进度提示 -->
+                    <div class="processing-tips">
+                      <InfoCircleOutlined />
+                      <span>This process may take several minutes. You'll be notified once it's complete.</span>
+                    </div>
+                  </div>
+                </a-card>
+              </template>
+                <div v-if="!knowledgeLoading && !processingKnowledge">
+                  <!-- Knowledge Base Content -->
+                  <div class="knowledge-base-container">
+                    <!-- Knowledge Base Status Alert -->
+                    <div 
+                      v-if="!groupedArticles || Object.keys(groupedArticles).length === 0"
+                      role="alert" 
+                      class="knowledge-alert ant-alert ant-alert-info ant-alert-with-description ant-alert-no-icon"
+                    >
+                      <div class="ant-alert-content">
+                        <div class="ant-alert-description">
+                          <div class="empty-state">
+                            <h3>Build Your Knowledge Base ✨</h3>
+                            <p>Let us help you create a comprehensive knowledge base system to provide complete documentation for your users.</p>
+                            <a-button 
+                              type="primary" 
+                              :loading="initializingKnowledge" 
+                              @click="initializeKnowledgeBase"
+                              class="init-button"
+                            >
+                              Initialize Knowledge Base
                             </a-button>
                           </div>
-                          <p class="asset-description" :title="asset.description">
-                            {{ asset.description || 'No description' }}
-                          </p>
                         </div>
                       </div>
-                    </a-col>
-                  </a-row>
+                    </div>
 
-                  <!-- 添加分页组件 -->
-                  <div class="pagination-wrapper">
-                    <a-pagination
-                      v-model:current="currentPage"
-                      :total="total"
-                      :pageSize="pageSize"
-                      show-size-changer
-                      @change="handlePageChange"
-                      @showSizeChange="handleSizeChange"
-                    />
-                  </div>
-                </template>
-                
-                <div v-else-if="showEmptyState && activeTab !== 'links'" class="empty-state">
-                  <h3 class="empty-state-title">Your creative canvas awaits! 🎨</h3>
-                  <p class="empty-state-description">
-                    Ready to bring your brand to life? Upload your first {{ activeTab === 'images' ? 'image' : 'video' }} and let's make something amazing together.
-                  </p>
-                  <a-button 
-                    type="primary" 
-                    class="upload-btn-empty" 
-                    @click="showUploadModal"
-                  >
-                    Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}
-                  </a-button>
-                </div>
-              </div>
-            </a-spin>
-          </template>
+                    <!-- 只在有数据时显示网格 -->
+                    <template v-else>
+                      <!-- Breadcrumb Navigation -->
+                      <div class="breadcrumb" v-if="currentArticle">
+                        <span @click="clearCurrentArticle">Knowledge Base</span>
+                        <span class="separator">/</span>
+                        <span>{{ currentArticle.label }}</span>
+                        <span class="separator">/</span>
+                        <span class="current">{{ currentArticle.title }}</span>
+                      </div>
 
-          <!-- Link Content -->
-          <template v-else-if="activeTab === 'links'">
-            <a-spin :spinning="linksLoading">
-              <template v-if="!linksLoading">
-                <!-- 添加空状态显示 -->
-                <div v-if="internalLinks.length === 0" class="empty-state">
-                  <h3 class="empty-state-title">No Internal Links Found 🔗</h3>
-                  <p class="empty-state-description">
-                    Start adding internal links to improve your site's navigation and SEO.
-                  </p>
-                  <a-button 
-                    type="primary" 
-                    class="upload-btn-empty" 
-                    @click="showAddLinkModal"
-                  >
-                     Add First Link
-                  </a-button>
-                </div>
-                
-                <!-- 现有的表格组件 -->
-                <a-table
-                  v-else
-                  :columns="linkColumns" 
-                  :dataSource="internalLinks" 
-                  :pagination="{ 
-                    pageSize: 10,
-                    showSizeChanger: true,
-                    showTotal: (total) => `Total ${total} items`
-                  }"
-                  :rowKey="record => record.id"
-                >
-                  <template #bodyCell="{ column, record }">
-                    <template v-if="column.key === 'operation'">
-                      <a-space>
-                        <a-button type="link" @click="editLink(record)">
-                          <edit-outlined />
-                        </a-button>
-                        <a-popconfirm
-                          title="Are you sure you want to delete this link?"
-                          @confirm="deleteLink(record)"
-                          ok-text="Delete"
-                          cancel-text="Cancel"
+                      <!-- Category Grid -->
+                      <div class="knowledge-grid">
+                        <div 
+                          v-for="(articles, label) in groupedArticles" 
+                          :key="label"
+                          class="category-card"
                         >
-                          <a-button type="link" danger>
-                            <delete-outlined />
-                          </a-button>
-                        </a-popconfirm>
-                      </a-space>
-                    </template>
-                    <template v-if="column.key === 'link'">
-                      <a :href="record.link" target="_blank">{{ record.link }}</a>
-                    </template>
-                  </template>
-                </a-table>
-              </template>
-            </a-spin>
-          </template>
-
-          <!-- Knowledge Tab Content -->
-          <template v-else-if="activeTab === 'knowledge'">
-            <a-spin :spinning="!loading && processingKnowledge">
-              <div v-if="!loading && !processingKnowledge">
-                <!-- Knowledge Base Content -->
-                <div class="knowledge-base-container">
-                  <!-- Knowledge Base Status Alert -->
-                  <div 
-                    v-if="!groupedArticles || Object.keys(groupedArticles).length === 0"
-                    role="alert" 
-                    class="knowledge-alert ant-alert ant-alert-info ant-alert-with-description ant-alert-no-icon"
-                  >
-                    <div class="ant-alert-content">
-                      <div class="ant-alert-description">
-                        <div class="empty-state">
-                          <h3>Build Your Knowledge Base ✨</h3>
-                          <p>Let us help you create a comprehensive knowledge base system to provide complete documentation for your users.</p>
-                          <a-button 
-                            type="primary" 
-                            :loading="initializingKnowledge" 
-                            @click="initializeKnowledgeBase"
-                            class="init-button"
-                          >
-                            Initialize Knowledge Base
-                          </a-button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- 只在有数据时显示网格 -->
-                  <template v-else>
-                    <!-- Breadcrumb Navigation -->
-                    <div class="breadcrumb" v-if="currentArticle">
-                      <span @click="clearCurrentArticle">Knowledge Base</span>
-                      <span class="separator">/</span>
-                      <span>{{ currentArticle.label }}</span>
-                      <span class="separator">/</span>
-                      <span class="current">{{ currentArticle.title }}</span>
-                    </div>
-
-                    <!-- Category Grid -->
-                    <div class="knowledge-grid">
-                      <div 
-                        v-for="(articles, label) in groupedArticles" 
-                        :key="label"
-                        class="category-card"
-                      >
-                        <div class="category-header">
-                          <h2>{{ label }}</h2>
-                          <span class="article-count">{{ articles.length }} articles</span>
-                        </div>
-                        <div class="category-stats">
-                          <span class="stat-item">
-                            <span class="status-dot status-green"></span>
-                            {{ getCategoryStats(articles).green }}
-                          </span>
-                          <span class="stat-item">
-                            <span class="status-dot status-yellow"></span>
-                            {{ getCategoryStats(articles).yellow }}
-                          </span>
-                          <span class="stat-item">
-                            <span class="status-dot status-red"></span>
-                            {{ getCategoryStats(articles).red }}
-                          </span>
-                        </div>
-                        <div class="article-list">
-                          <div 
-                            v-for="article in articles" 
-                            :key="article.title"
-                            class="article-item"
-                            @click="selectArticle(article)"
-                          >
-                            <span 
-                              class="status-dot" 
-                              :class="{
-                                'status-green': article.quality === 'A',
-                                'status-yellow': article.quality === 'B',
-                                'status-red': article.quality === 'C'
-                              }"
-                            ></span>
-                            {{ article.title }}
+                          <div class="category-header">
+                            <h2>{{ label }}</h2>
+                            <span class="article-count">{{ articles.length }} articles</span>
+                          </div>
+                          <div class="category-stats">
+                            <span class="stat-item">
+                              <span class="status-dot status-green"></span>
+                              {{ getCategoryStats(articles).green }}
+                            </span>
+                            <span class="stat-item">
+                              <span class="status-dot status-yellow"></span>
+                              {{ getCategoryStats(articles).yellow }}
+                            </span>
+                            <span class="stat-item">
+                              <span class="status-dot status-red"></span>
+                              {{ getCategoryStats(articles).red }}
+                            </span>
+                          </div>
+                          <div class="article-list">
+                            <div 
+                              v-for="article in articles" 
+                              :key="article.title"
+                              class="article-item"
+                              @click="selectArticle(article)"
+                            >
+                              <span 
+                                class="status-dot" 
+                                :class="{
+                                  'status-green': article.quality === 'A',
+                                  'status-yellow': article.quality === 'B',
+                                  'status-red': article.quality === 'C'
+                                }"
+                              ></span>
+                              {{ article.title }}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </template>
+                    </template>
+                  </div>
                 </div>
+            </template>
+            <!-- Header Section -->
+            <template v-else-if="activeTab === 'header'">
+              <div class="header-footer-content">
+                <a-spin :spinning="headerLoading">
+                  <div v-if="!headerLoading" class="settings-section">
+                    <div class="preview-section">
+                      <div class="preview-header">
+                        <div class="preview-header-content">
+                          <h4>Header Preview</h4>
+                        </div>
+                      </div>
+                      <div class="preview-container">
+                        <HeaderTemplate 
+                          :initialData="headerConfig"
+                          :layoutId="layoutId || ''"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </a-spin>
               </div>
-            </a-spin>
-          </template>
-
-          <!-- Header Section -->
-          <template v-else-if="activeTab === 'header'">
-            <div class="header-footer-content">
-              <a-spin :spinning="headerLoading">
-                <div v-if="!headerLoading" class="settings-section">
-                  <div class="preview-section">
-                    <div class="preview-header">
-                      <div class="preview-header-content">
-                        <h4>Header Preview</h4>
+            </template>
+            <!-- Footer Section -->
+            <template v-else-if="activeTab === 'footer'">
+              <div class="header-footer-content">
+                <a-spin :spinning="footerLoading">
+                  <div v-if="!footerLoading" class="settings-section">
+                    <div class="preview-section">
+                      <div class="preview-header">
+                        <div class="preview-header-content">
+                          <h4>Footer Preview</h4>
+                        </div>
+                      </div>
+                      <div class="preview-container">
+                        <FooterTemplate 
+                          :initial-data="footerConfig"
+                          :layoutId="layoutId || ''"
+                        />
                       </div>
                     </div>
-                    <div class="preview-container">
-                      <HeaderTemplate 
-                        :initialData="headerConfig"
-                        :layoutId="layoutId || ''"
-                      />
-                    </div>
                   </div>
-                </div>
-              </a-spin>
-            </div>
-          </template>
-
-          <!-- Footer Section -->
-          <template v-else-if="activeTab === 'footer'">
-            <div class="header-footer-content">
-              <a-spin :spinning="footerLoading">
-                <div v-if="!footerLoading" class="settings-section">
-                  <div class="preview-section">
-                    <div class="preview-header">
-                      <div class="preview-header-content">
-                        <h4>Footer Preview</h4>
-                      </div>
-                    </div>
-                    <div class="preview-container">
-                      <FooterTemplate 
-                        :initial-data="footerConfig"
-                        :layoutId="layoutId || ''"
-                      />
-                    </div>
+                </a-spin>
+              </div>
+            </template>
+            <!-- Button Links Content -->
+            <template v-else-if="activeTab === 'button-links'">
+              <a-spin :spinning="buttonLinksLoading">
+                <template v-if="!buttonLinksLoading">
+                  <!-- Empty state display -->
+                  <div v-if="buttonLinks.length === 0" class="empty-state">
+                    <h3 class="empty-state-title">No Button Links Found 🔗</h3>
+                    <p class="empty-state-description">
+                      Start adding button links to enhance your site's call-to-actions.
+                    </p>
+                    <a-button 
+                      type="primary" 
+                      class="upload-btn-empty" 
+                      @click="showAddLinkModal"
+                    >
+                      Add First Button Link
+                    </a-button>
                   </div>
-                </div>
-              </a-spin>
-            </div>
-          </template>
-
-          <!-- Button Links Content -->
-          <template v-else-if="activeTab === 'button-links'">
-            <a-spin :spinning="buttonLinksLoading">
-              <template v-if="!buttonLinksLoading">
-                <!-- Empty state display -->
-                <div v-if="buttonLinks.length === 0" class="empty-state">
-                  <h3 class="empty-state-title">No Button Links Found 🔗</h3>
-                  <p class="empty-state-description">
-                    Start adding button links to enhance your site's call-to-actions.
-                  </p>
-                  <a-button 
-                    type="primary" 
-                    class="upload-btn-empty" 
-                    @click="showAddLinkModal"
+                  
+                  <!-- Button links table -->
+                  <a-table
+                    v-else
+                    :columns="buttonLinkColumns" 
+                    :dataSource="buttonLinks" 
+                    :pagination="{ 
+                      pageSize: 10,
+                      showSizeChanger: true,
+                      showTotal: (total) => `Total ${total} items`
+                    }"
+                    :rowKey="record => record.id"
                   >
-                     Add First Button Link
-                  </a-button>
-                </div>
-                
-                <!-- Button links table -->
-                <a-table
-                  v-else
-                  :columns="buttonLinkColumns" 
-                  :dataSource="buttonLinks" 
-                  :pagination="{ 
-                    pageSize: 10,
-                    showSizeChanger: true,
-                    showTotal: (total) => `Total ${total} items`
-                  }"
-                  :rowKey="record => record.id"
-                >
-                  <template #bodyCell="{ column, record }">
-                    <template v-if="column.key === 'operation'">
-                      <a-space>
-                        <a-button type="link" @click="editButtonLink(record)">
-                          <edit-outlined />
-                        </a-button>
-                        <a-popconfirm
-                          title="Are you sure you want to delete this button link?"
-                          @confirm="() => deleteButtonLink(record)"
-                          ok-text="Delete"
-                          cancel-text="Cancel"
-                        >
-                          <a-button type="link" danger>
-                            <delete-outlined />
+                    <template #bodyCell="{ column, record }">
+                      <template v-if="column.key === 'operation'">
+                        <a-space>
+                          <a-button type="link" @click="editButtonLink(record)">
+                            <edit-outlined />
                           </a-button>
-                        </a-popconfirm>
-                      </a-space>
+                          <a-popconfirm
+                            title="Are you sure you want to delete this button link?"
+                            @confirm="() => deleteButtonLink(record)"
+                            ok-text="Delete"
+                            cancel-text="Cancel"
+                          >
+                            <a-button type="link" danger>
+                              <delete-outlined />
+                            </a-button>
+                          </a-popconfirm>
+                        </a-space>
+                      </template>
+                      <template v-if="column.key === 'link'">
+                        <a :href="record.link" target="_blank">{{ record.link }}</a>
+                      </template>
                     </template>
-                    <template v-if="column.key === 'link'">
-                      <a :href="record.link" target="_blank">{{ record.link }}</a>
-                    </template>
-                  </template>
-                </a-table>
-              </template>
-            </a-spin>
-          </template>
+                  </a-table>
+                </template>
+              </a-spin>
+            </template>
+          </a-spin>
         </div>
       </div>
       <!-- Preview Modal -->
@@ -672,16 +705,12 @@
         </a-form>
       </a-modal>
       </template>
-      
-      <template v-else>
-        <no-site-configured />
-      </template>
-    </a-spin>
+    <no-site-configured v-if="!domainConfigured && !loading" />
   </page-layout>
 </template>
 
 <script>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import PageLayout from './layout/PageLayout.vue'
 import { 
   EyeOutlined, 
@@ -699,7 +728,8 @@ import {
   ApiOutlined,
   AppstoreOutlined,
   CheckCircleOutlined,
-  FileImageOutlined
+  FileImageOutlined,
+  SyncOutlined,  // 添加 SyncOutlined 图标
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import apiClient from '../api/api';
@@ -732,7 +762,8 @@ export default {
     SmartBanner,
     AppstoreOutlined,
     CheckCircleOutlined,
-    FileImageOutlined
+    FileImageOutlined,
+    SyncOutlined,  // 注册 SyncOutlined 组件
   },
   setup() {
     const router = useRouter();
@@ -1462,13 +1493,29 @@ export default {
     const processingKnowledge = ref(false) // 新增:用于显示处理状态
     const knowledgeTime = ref('0'); // 添加处理时间的响应式变量
 
+    // 添加一个计算属性来格式化处理时间
+    const formatProcessingTime = (seconds) => {
+      if (!seconds) return '0';
+      
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      
+      if (hours > 0) {
+        return `${hours}h ${minutes}m`;
+      } else if (minutes > 0) {
+        return `${minutes}m`;
+      } else {
+        return `${seconds}s`;
+      }
+    };
+
     // 修改 getKnowledgeStatus 方法
     const getKnowledgeStatus = async () => {
       try {
         const customerId = localStorage.getItem('currentCustomerId');
         const response = await apiClient.getKnowledgeProcessStatus(customerId);
-        // 保存处理时间
-        knowledgeTime.value = response.data.executeTime || '0';
+        // 保存处理时间并格式化
+        knowledgeTime.value = formatProcessingTime(response.data.executeTime || 0);
         return {
           currentStep: response.data.executeStep,
           executeTime: response.data.executeTime
@@ -1495,56 +1542,45 @@ export default {
     // 修改 initKnowledgeBase 方法
     const initKnowledgeBase = async () => {
       try {
-        loading.value = true;
+        // 使用专门的 knowledgeLoading
+        knowledgeLoading.value = true;
         
-        // 如果域名未配置,直接返回
         if (!domainConfigured.value) {
-          loading.value = false;
+          knowledgeLoading.value = false;
           return;
         }
         
         processingKnowledge.value = true;
         
-        // 修改轮询状态的逻辑
         const pollStatus = async () => {
+          knowledgeLoading.value = true;
+          
           const status = await getKnowledgeStatus();
+          knowledgeLoading.value = false;
+          
           knowledgeStatus.value = status.currentStep;
           
-          // 如果 executeStep 为空,说明没有正在进行的处理
-          // 直接获取知识库内容
-          if (!status.currentStep) {
+          if (!status.currentStep || status.currentStep === 'end') {
             processingKnowledge.value = false;
+            knowledgeLoading.value = true;
             const centerData = await getKnowledgeCenter();
             if (centerData && Array.isArray(centerData)) {
               groupArticlesByLabel(centerData);
             }
-            loading.value = false;
+            knowledgeLoading.value = false;
             return;
           }
           
-          // 如果 executeStep 为 'end',说明处理刚结束
-          if (status.currentStep === 'end') {
-            processingKnowledge.value = false;
-            const centerData = await getKnowledgeCenter();
-            if (centerData && Array.isArray(centerData)) {
-              groupArticlesByLabel(centerData);
-            }
-            loading.value = false;
-            return;
-          }
-          
-          // 继续轮询
           setTimeout(pollStatus, 60000);
         };
 
-        // 启动轮询
         await pollStatus();
         
       } catch (error) {
         console.error('Failed to initialize knowledge base:', error);
         message.error('Failed to load knowledge base');
         processingKnowledge.value = false;
-        loading.value = false;
+        knowledgeLoading.value = false;
       }
     };
 
@@ -1898,6 +1934,7 @@ export default {
     }
 
     const mediaLoading = ref(false);
+    const knowledgeLoading = ref(false); // 新增 knowledge base 专用的 loading
 
     // Add to setup
     const initializingKnowledge = ref(false);
@@ -1916,6 +1953,65 @@ export default {
         message.error('Failed to initialize knowledge base. Please try again later.');
       } finally {
         initializingKnowledge.value = false;
+      }
+    };
+
+    const getKnowledgeStatusMessage = (step) => {
+      switch (step) {
+        case 'content':
+          return {
+            title: '🔍 Analyzing Website Content',
+            description: 'Scanning and extracting valuable information from your website'
+          };
+        case 'vector2':
+          return {
+            title: '🎯 Vectorizing Content',
+            description: 'Converting content into AI-readable semantic vectors'
+          };
+        case 'analyzing':
+          return {
+            title: '🧠 Processing Knowledge Base',
+            description: 'Organizing and structuring content for optimal retrieval'
+          };
+        case 'embedding':
+          return {
+            title: '🎯 Generating Embeddings',
+            description: 'Creating AI-powered semantic understanding of your content'
+          };
+        case 'end':
+          return {
+            title: '✅ Processing Complete',
+            description: 'Your knowledge base is ready to use'
+          };
+        default:
+          return {
+            title: '⚡ Preparing Analysis',
+            description: 'Initializing knowledge base processing'
+          };
+      }
+    };
+
+    // 添加重新获取知识库的相关状态
+    const regrabLoading = ref(false);
+
+    // 添加重新获取知识库的方法
+    const regrabKnowledgeBase = async () => {
+      try {
+        regrabLoading.value = true;
+        // 调用重新生成知识库的 API
+        await apiClient.rebuildKnowledge();
+        
+        message.success('Knowledge base regeneration started');
+        
+        // 重置知识库状态并开始轮询
+        processingKnowledge.value = true;
+        knowledgeStatus.value = '';
+        await initKnowledgeBase();
+      } catch (error) {
+        console.error('Failed to regrab knowledge base:', error);
+        message.error('Failed to regrab knowledge base');
+      } finally {
+        regrabLoading.value = false;
       }
     };
 
@@ -2018,6 +2114,10 @@ export default {
       mediaLoading,
       initializingKnowledge,
       initializeKnowledgeBase,
+      getKnowledgeStatusMessage,
+      knowledgeLoading,
+      regrabLoading,
+      regrabKnowledgeBase,
     }
   }
 }
@@ -2034,6 +2134,8 @@ export default {
   background: white;
   border-radius: 16px;
   padding: 0px 0px 12px 0px;
+  position: relative;
+  min-height: calc(100vh - 300px);
 }
 
 .controls-header {
@@ -2067,6 +2169,7 @@ export default {
 
 .btn-content .anticon {
   font-size: 14px;
+  margin-right: 4px;
 }
 
 .asset-card {
@@ -3287,5 +3390,97 @@ export default {
 
 .init-button .anticon {
   margin-right: 8px;
+}
+.knowledge-processing-card {
+  margin: 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.processing-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+  text-align: center;
+}
+
+.processing-icon {
+  font-size: 48px;
+  color: #1890ff;
+  margin-bottom: 24px;
+}
+
+.status-info {
+  margin-bottom: 24px;
+}
+
+.status-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.status-description {
+  font-size: 16px;
+  color: #666;
+  max-width: 500px;
+}
+
+.processing-stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+}
+
+.processing-tips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #8c8c8c;
+  font-size: 14px;
+  background: #f5f5f5;
+  padding: 12px 16px;
+  border-radius: 6px;
+}
+
+.unified-loading {
+  min-height: calc(100vh - 300px);
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.unified-loading .ant-spin-container) {
+  height: 100%;
+}
+
+:deep(.unified-loading .ant-spin) {
+  max-height: none;
+}
+
+:deep(.unified-loading .ant-spin-spinning) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* 确保内容在 loading 时保持正确的布局 */
+:deep(.ant-spin-nested-loading) {
+  height: 100%;
+}
+
+:deep(.ant-spin-container) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 </style> 
