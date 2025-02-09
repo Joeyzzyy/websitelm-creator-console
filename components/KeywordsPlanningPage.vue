@@ -3508,16 +3508,25 @@ export default defineComponent({
 
 .content-plans-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  padding: 16px 0;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  max-width: 100%;
+  margin: 0 auto;
+  
+  @media (min-width: 992px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .plan-card {
-  background: #ffffff;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  height: 100%;
+  width: 100%;
+  min-width: 300px;
+  max-width: 100%;
+  margin-bottom: 0;
+  
+  .card-content {
+    overflow: hidden;
+  }
 }
 
 .plan-card:hover {
