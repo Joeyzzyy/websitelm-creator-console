@@ -45,7 +45,7 @@
             type="primary"
             class="ai-analyze-btn"
             :loading="regrabLoading"
-            @click="regrabKnowledgeBase"
+            @click="showRegrabConfirm"
           >
             <span class="btn-content">
               <sync-outlined :spin="regrabLoading" />
@@ -283,7 +283,6 @@
                 <div v-if="!knowledgeLoading && !processingKnowledge">
                   <!-- Knowledge Base Content -->
                   <div class="knowledge-base-container">
-                    <!-- Knowledge Base Status Alert -->
                     <div 
                       v-if="!groupedArticles || Object.keys(groupedArticles).length === 0"
                       role="alert" 
@@ -306,18 +305,7 @@
                         </div>
                       </div>
                     </div>
-
-                    <!-- 只在有数据时显示网格 -->
                     <template v-else>
-                      <!-- Breadcrumb Navigation -->
-                      <div class="breadcrumb" v-if="currentArticle">
-                        <span @click="clearCurrentArticle">Knowledge Base</span>
-                        <span class="separator">/</span>
-                        <span>{{ currentArticle.label }}</span>
-                        <span class="separator">/</span>
-                        <span class="current">{{ currentArticle.title }}</span>
-                      </div>
-
                       <div class="knowledge-intro">
                         <a-collapse :default-active-key="['1']" :bordered="false">
                           <a-collapse-panel key="1">
@@ -401,21 +389,37 @@
                                  :key="article.contentId"
                                  class="article-item"
                                  :class="getQualityClass(article.grade)"
+                                 @click="selectArticle(article)"
                             >
-                              <div class="quality-indicator">
-                                <a-tooltip :title="getQualityDescription(article.grade)">
-                                  <check-circle-filled v-if="article.grade === 'A'" class="quality-icon excellent" />
-                                  <check-circle-filled v-else-if="article.grade === 'B'" class="quality-icon good" />
-                                  <warning-filled v-else-if="article.grade === 'C'" class="quality-icon fair" />
-                                  <exclamation-circle-filled v-else class="quality-icon poor" />
-                                </a-tooltip>
-                              </div>
-                              <div class="article-content">
+                              <div class="article-content" @click="selectArticle(article)">
                                 <h3>{{ article.title }}</h3>
-                                <p v-if="article.content" class="article-preview">{{ article.content.substring(0, 100) }}...</p>
-                                <p v-else class="article-empty">Content needs to be added</p>
+                                <p v-if="article.content" class="article-preview">
+                                  {{ article.content.substring(0, 100) }}...
+                                </p>
+                                <p v-else class="article-empty" style="color: #ff4d4f;">
+                                  Content needs to be added
+                                </p>
                               </div>
+                              <a-button 
+                                type="link" 
+                                danger
+                                class="delete-btn"
+                                @click.stop="showDeleteConfirm(article)"
+                              >
+                                <delete-outlined />
+                              </a-button>
                             </div>
+                          </div>
+
+                          <!-- 添加按钮移到底部 -->
+                          <div class="category-footer">
+                            <a-button 
+                              type="link"
+                              @click="showAddArticle(label)"
+                            >
+                              <plus-outlined />
+                              Add Article
+                            </a-button>
                           </div>
                         </div>
                       </div>
@@ -760,6 +764,77 @@
           </a-form-item>
         </a-form>
       </a-modal>
+
+      <!-- Knowledge Edit Modal -->
+      <a-modal
+        v-model:visible="knowledgeModalVisible"
+        :title="currentArticle?.contentId ? 'Edit Knowledge Content' : 'Add Knowledge Content'"
+        :width="1400"
+        @ok="handleKnowledgeSave"
+        @cancel="handleKnowledgeCancel"
+        :confirmLoading="knowledgeSaving"
+      >
+        <template v-if="currentArticle">
+          <!-- Article Info Section -->
+          <div class="article-info-section">
+            <div class="info-row">
+              <div class="info-item">
+                <div class="info-label">Title</div>
+                <div class="info-value">
+                  <a-input 
+                    v-if="!currentArticle.contentId"
+                    v-model:value="currentArticle.title"
+                    placeholder="Enter article title"
+                  />
+                  <template v-else>
+                    {{ currentArticle.title }}
+                  </template>
+                </div>
+              </div>
+              <!-- 只在编辑模式显示 grade -->
+              <div class="info-item" v-if="currentArticle.contentId">
+                <div class="info-label">Quality Grade</div>
+                <div class="info-value" :class="getQualityClass(currentArticle.grade)">
+                  {{ currentArticle.grade }}
+                </div>
+              </div>
+            </div>
+            <!-- source 只在编辑模式显示 -->
+            <div class="info-row" v-if="currentArticle.contentId">
+              <div class="info-item">
+                <div class="info-label">Category</div>
+                <div class="info-value">{{ currentArticle.label }}</div>
+              </div>
+              <div class="info-item">
+                <div class="info-label">Source</div>
+                <div class="info-value">
+                  {{ currentArticle.source || 'Not specified' }}
+                </div>
+              </div>
+            </div>
+            <!-- 新增模式只显示 Category -->
+            <div class="info-row" v-else>
+              <div class="info-item">
+                <div class="info-label">Category</div>
+                <div class="info-value">{{ currentArticle.label }}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Content Editor -->
+          <div class="content-editor">
+            <div class="editor-label">Content</div>
+            <a-textarea
+              v-model:value="editableContent"
+              :rows="20"  
+              placeholder="Enter knowledge content here..."
+              :maxLength="5000"
+              show-count
+              class="large-textarea" 
+            />
+          </div>
+        </template>
+      </a-modal>
       </template>
     <no-site-configured v-if="!domainConfigured && !loading" />
   </page-layout>
@@ -798,6 +873,7 @@ import HeaderTemplate from './sections/templates/HeaderTemplate.vue'
 import FooterTemplate from './sections/templates/FooterTemplate.vue'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
 import SmartBanner from './common/SmartBanner.vue'
+import { Modal } from 'ant-design-vue';
 
 export default {
   name: 'BrandAssetsPage',
@@ -1650,42 +1726,14 @@ export default {
 
     const selectArticle = (article) => {
       currentArticle.value = article
-      editableContent.value = article.content
+      editableContent.value = article.content || ''
+      knowledgeModalVisible.value = true
     }
 
     const clearCurrentArticle = () => {
       currentArticle.value = null
       editableContent.value = ''
     }
-
-    const saveArticle = async () => {
-      if (!currentArticle.value) return;
-
-      saving.value = true;
-      try {
-        const updateData = {
-          content: editableContent.value,
-          description: currentArticle.value.description,
-          source: currentArticle.value.source,
-          tags: currentArticle.value.tags,
-          title: currentArticle.value.title
-        };
-        const response = await apiClient.updateKnowledge(currentArticle.value.id, updateData);
-        
-        if (response && response.code === 200) {
-          message.success('Article updated successfully');
-        } else if (response && response.code === 500) {
-          message.error('Update content failed: ' + response.message);
-        } else {
-          message.error('Unexpected response from server');
-        }
-      } catch (error) {
-        console.error('Failed to save article:', error);
-        message.error('Failed to save changes');
-      } finally {
-        saving.value = false;
-      }
-    };
 
     const getCategoryStats = (articles) => {
       return {
@@ -1698,17 +1746,18 @@ export default {
     // 修改 groupArticlesByLabel 方法
     const groupArticlesByLabel = (articles) => {
       const grouped = articles.reduce((acc, article) => {
-        const label = article.label || 'Uncategorized'
-        if (!acc[label]) {
-          acc[label] = []
+        const category = article.category || 'Uncategorized'  // 使用 category 替代 label
+        if (!acc[category]) {
+          acc[category] = []
         }
-        acc[label].push({
+        acc[category].push({
           ...article,
           contentId: article.contentId,
           title: article.title,
           content: article.content,
           grade: article.grade,
           label: article.label,
+          category: article.category,  // 添加 category
           source: article.source,
           tags: article.tags || []
         })
@@ -2116,6 +2165,123 @@ export default {
       }
     };
 
+    const showRegrabConfirm = () => {
+      Modal.confirm({
+        title: 'Confirm Regrab',
+        content: 'This will re-analyze all your website content. The process may take several minutes. Do you want to continue?',
+        okText: 'Yes, Continue',
+        cancelText: 'Cancel',
+        okButtonProps: {
+          style: {
+            background: 'linear-gradient(135deg, #1890ff, #3B82F6)',
+            border: 'none'
+          }
+        },
+        onOk: regrabKnowledgeBase
+      });
+    };
+
+    // Add new reactive variables
+    const knowledgeModalVisible = ref(false)
+    const knowledgeSaving = ref(false)
+
+    // Add new methods for modal handling
+    const handleKnowledgeSave = async () => {
+      if (!currentArticle.value) return;
+
+      knowledgeSaving.value = true;
+      try {
+        const updateData = {
+          grade: currentArticle.value.grade || 'C',
+          title: currentArticle.value.title,
+          description: currentArticle.value.description,
+          source: currentArticle.value.source,
+          content: editableContent.value,
+          tags: currentArticle.value.tags || [],
+          category: currentArticle.value.label
+        };
+
+        let response;
+        if (currentArticle.value.contentId) {
+          // 更新现有文章
+          response = await apiClient.updateKnowledge(currentArticle.value.contentId, updateData);
+        } else {
+          // 创建新文章
+          response = await apiClient.createKnowledge(updateData);
+        }
+
+        if (response && response.code === 200) {
+          message.success(currentArticle.value.contentId ? 'Article updated successfully' : 'Article created successfully');
+          knowledgeModalVisible.value = false;
+          // 保存后重新获取知识库内容
+          const centerData = await getKnowledgeCenter();
+          if (centerData && Array.isArray(centerData)) {
+            groupArticlesByLabel(centerData);
+          }
+        } else {
+          message.error('Operation failed: ' + (response?.message || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Failed to save article:', error);
+        message.error('Failed to save changes');
+      } finally {
+        knowledgeSaving.value = false;
+      }
+    };
+
+    const handleKnowledgeCancel = () => {
+      knowledgeModalVisible.value = false
+      editableContent.value = currentArticle.value?.content || ''
+    }
+
+    // 添加删除文章的方法
+    const deleteArticle = async (contentId) => {
+      try {
+        const response = await apiClient.deleteKnowledge(contentId);
+        if (response && response.code === 200) {
+          message.success('Article deleted successfully');
+          // 删除后重新获取知识库内容
+          const centerData = await getKnowledgeCenter();
+          if (centerData && Array.isArray(centerData)) {
+            groupArticlesByLabel(centerData);
+          }
+        } else {
+          message.error('Failed to delete article');
+        }
+      } catch (error) {
+        console.error('Failed to delete article:', error);
+        message.error('Failed to delete article');
+      }
+    };
+
+    // 添加删除确认对话框
+    const showDeleteConfirm = (article) => {
+      Modal.confirm({
+        title: 'Delete Article',
+        content: 'Are you sure you want to delete this article?',
+        okText: 'Delete',
+        okType: 'danger',
+        cancelText: 'Cancel',
+        async onOk() {
+          await deleteArticle(article.contentId);
+        },
+      });
+    };
+
+    const showAddArticle = (category) => {
+      currentArticle.value = {
+        title: '',
+        description: '',
+        source: '',
+        content: '',
+        tags: [],
+        label: category,
+        grade: 'C' // 新文章默认等级
+      };
+      editableContent.value = '';
+      knowledgeModalVisible.value = true;
+    };
+
     return {
       domainConfigured,
       loading,
@@ -2189,7 +2355,6 @@ export default {
       saving,
       selectArticle,
       clearCurrentArticle,
-      saveArticle,
       getCategoryStats,
       pollTimer,
       knowledgeStatus,
@@ -2223,6 +2388,14 @@ export default {
       getCompletionRate,
       getQualityDescription,
       getQualityClass,
+      showRegrabConfirm,
+      knowledgeModalVisible,
+      knowledgeSaving,
+      handleKnowledgeSave,
+      handleKnowledgeCancel,
+      deleteArticle,
+      showDeleteConfirm,
+      showAddArticle,
     }
   }
 }
@@ -2875,21 +3048,28 @@ export default {
 
 .article-item {
   display: flex;
-  align-items: center;
-  gap: 8px; /* Add gap to ensure space between dot and title */
-  padding: 8px 12px;
-  border-radius: 6px;
-  color: #4b5563;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  white-space: normal; /* Allow text to wrap */
-  word-break: break-word; /* Ensure long words break properly */
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #F9FAFB;
+  transition: all 0.3s ease;
 }
 
-.article-item:hover {
-  background: #f3f4f6;
-  color: #2563eb;
+.article-content {
+  flex: 1;
+  cursor: pointer;
+}
+
+.delete-btn {
+  padding: 4px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.delete-btn:hover {
+  background: rgba(255, 77, 79, 0.1);
 }
 
 .status-dot {
@@ -2990,16 +3170,28 @@ export default {
 
 .article-item {
   display: flex;
-  align-items: center;
-  gap: 8px; /* Add gap to ensure space between dot and title */
-  padding: 8px 12px;
-  border-radius: 6px;
-  color: #4b5563;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #F9FAFB;
+  transition: all 0.3s ease;
+}
+
+.article-content {
+  flex: 1;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
-  white-space: normal; /* Allow text to wrap */
-  word-break: break-word; /* Ensure long words break properly */
+}
+
+.delete-btn {
+  padding: 4px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.delete-btn:hover {
+  background: rgba(255, 77, 79, 0.1);
 }
 
 .status-dot {
@@ -3445,8 +3637,9 @@ export default {
 
 .knowledge-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr); /* 改为3列 */
   gap: 24px;
+  padding: 0 24px;
 }
 
 .empty-state {
@@ -3786,5 +3979,285 @@ export default {
 
 :deep(.ant-collapse-arrow) {
   color: #ff4d4f !important;
+}
+
+/* 添加质量统计条相关样式 */
+.quality-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.quality-bar {
+  flex: 1;
+  height: 4px;
+  background: #f3f4f6;
+  border-radius: 2px;
+  display: flex;
+  overflow: hidden;
+}
+
+.bar-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.bar-segment.excellent {
+  background-color: #10B981; /* 绿色 */
+}
+
+.bar-segment.good {
+  background-color: #3B82F6; /* 蓝色 */
+}
+
+.bar-segment.fair {
+  background-color: #F59E0B; /* 橙色 */
+}
+
+.bar-segment.poor {
+  background-color: #EF4444; /* 红色 */
+}
+
+.completion-rate {
+  font-size: 12px;
+  color: #6B7280;
+  white-space: nowrap;
+  min-width: 80px;  /* 确保有足够空间显示百分比 */
+}
+
+.category-header {
+  display: flex;
+  flex-direction: column;  /* 改为纵向布局 */
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #E5E7EB;
+}
+
+.category-header h2 {
+  margin: 0;
+  font-size: 14px;  /* 缩小标题字体 */
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.quality-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;  /* 确保占满整行 */
+}
+
+.quality-bar {
+  flex: 1;
+  height: 4px;
+  background: #f3f4f6;
+  border-radius: 2px;
+  display: flex;
+  overflow: hidden;
+}
+
+/* 适配移动端 */
+@media (max-width: 1200px) {
+  .knowledge-grid {
+    grid-template-columns: repeat(2, 1fr);  /* 平板上显示2列 */
+  }
+}
+
+@media (max-width: 768px) {
+  .knowledge-grid {
+    grid-template-columns: 1fr;  /* 手机上显示1列 */
+  }
+}
+
+/* 添加质量指标相关的样式 */
+.quality-indicator {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.quality-icon {
+  font-size: 16px;
+}
+
+/* 不同等级的颜色样式 */
+.quality-icon.excellent {
+  color: #22C55E; /* 绿色 - A级 */
+}
+
+.quality-icon.good {
+  color: #3B82F6; /* 蓝色 - B级 */
+}
+
+.quality-icon.fair {
+  color: #F59E0B; /* 橙色 - C级 */
+}
+
+.quality-icon.poor {
+  color: #EF4444; /* 红色 - D级 */
+}
+
+/* 文章项的样式 */
+.article-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #F9FAFB;
+  transition: all 0.3s ease;
+}
+
+.article-item:hover {
+  background: #F3F4F6;
+}
+
+.article-content {
+  flex: 1;
+}
+
+.article-content h3 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  color: #1F2937;
+}
+
+.article-preview {
+  margin: 0;
+  font-size: 12px;
+  color: #6B7280;
+  line-height: 1.5;
+}
+
+.article-empty {
+  margin: 0;
+  font-size: 12px;
+  color: #9CA3AF;
+  font-style: italic;
+}
+
+/* 不同质量等级的文章背景样式 */
+.excellent-article {
+  border-left: 3px solid #22C55E;
+}
+
+.good-article {
+  border-left: 3px solid #3B82F6;
+}
+
+.fair-article {
+  border-left: 3px solid #F59E0B;
+}
+
+.poor-article {
+  border-left: 3px solid #EF4444;
+}
+
+.article-info-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.info-row {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.info-row:last-child {
+  margin-bottom: 0;
+}
+
+.info-item {
+  flex: 1;
+}
+
+.info-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.info-value {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+.content-editor {
+  margin-top: 16px;
+}
+
+.editor-label {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+/* Quality grade styles */
+.excellent-article {
+  color: #52c41a;
+}
+
+.good-article {
+  color: #1890ff;
+}
+
+.fair-article {
+  color: #faad14;
+}
+
+.poor-article {
+  color: #ff4d4f;
+}
+
+.content-editor :deep(.large-textarea) {
+  min-height: 500px;  /* 设置最小高度 */
+}
+
+.content-editor :deep(.ant-input) {
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 12px 16px;  /* 增加内边距 */
+}
+
+.header-actions {
+  margin-left: auto;
+  margin-right: 16px;
+}
+
+.header-actions .ant-btn {
+  background: linear-gradient(135deg, #60A5FA, #3B82F6);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.header-actions .ant-btn:hover {
+  background: linear-gradient(135deg, #3B82F6, #2563EB);
+}
+
+.category-footer {
+  padding: 8px 0;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.category-footer .ant-btn {
+  padding-left: 0;
+  color: #3B82F6;
+}
+
+.category-footer .ant-btn:hover {
+  color: #2563EB;
+}
+
+.info-value .ant-input {
+  width: 100%;
 }
 </style> 

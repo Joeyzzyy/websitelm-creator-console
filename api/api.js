@@ -761,13 +761,7 @@ const getKnowledgeById = async (contentId) => {
 // 修改: 使用knowledgeApiClient更新knowledge内容
 const updateKnowledge = async (contentId, updateData) => {
   try {
-    const response = await knowledgeApiClient.put(`/knowledge/center/${contentId}`, {
-      content: updateData.content,
-      description: updateData.description,
-      source: updateData.source,
-      tags: updateData.tags,
-      title: updateData.title
-    });
+    const response = await knowledgeApiClient.put(`/knowledge/${contentId}`, updateData);
     return response.data;
   } catch (error) {
     console.error('更新knowledge内容失败:', error);
@@ -1338,6 +1332,28 @@ const activateTrialPackage = async (inviteCode) => {
   }
 };
 
+// 新增: 删除knowledge内容的方法
+const deleteKnowledge = async (contentId) => {
+  try {
+    const response = await knowledgeApiClient.delete(`/knowledge/${contentId}`);
+    return response.data;
+  } catch (error) {
+    console.error('删除knowledge内容失败:', error);
+    return null;
+  }
+};
+
+// 新增: 创建knowledge内容的方法
+const createKnowledge = async (knowledgeData) => {
+  try {
+    const response = await knowledgeApiClient.post('/knowledge/add', knowledgeData);
+    return response.data;
+  } catch (error) {
+    console.error('创建knowledge内容失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1436,5 +1452,7 @@ export default {
   importKeywords,
   getCustomerPackage,
   rebuildKnowledge,
-  activateTrialPackage
+  activateTrialPackage,
+  deleteKnowledge,
+  createKnowledge
 };
