@@ -318,47 +318,103 @@
                         <span class="current">{{ currentArticle.title }}</span>
                       </div>
 
-                      <!-- Category Grid -->
+                      <div class="knowledge-intro">
+                        <a-collapse :default-active-key="['1']" :bordered="false">
+                          <a-collapse-panel key="1">
+                            <template #header>
+                              <div class="intro-header">
+                                <exclamation-circle-filled class="warning-icon" />
+                                <span>Important Quality Notice</span>
+                              </div>
+                            </template>
+                            <div class="intro-content">
+                              <div class="quality-alert">
+                                <div class="alert-main">
+                                  <p class="alert-title">
+                                    Content Quality Distribution:
+                                  </p>
+                                  <div class="quality-stats">
+                                    <div class="stat-item">
+                                      <span class="stat-grade excellent">A</span>
+                                      <span class="stat-value">{{ getQualityPercentage(Object.values(groupedArticles).flat(), 'A').toFixed(1) }}%</span>
+                                    </div>
+                                    <div class="stat-item">
+                                      <span class="stat-grade good">B</span>
+                                      <span class="stat-value">{{ getQualityPercentage(Object.values(groupedArticles).flat(), 'B').toFixed(1) }}%</span>
+                                    </div>
+                                    <div class="stat-item">
+                                      <span class="stat-grade fair">C</span>
+                                      <span class="stat-value">{{ getQualityPercentage(Object.values(groupedArticles).flat(), 'C').toFixed(1) }}%</span>
+                                    </div>
+                                    <div class="stat-item">
+                                      <span class="stat-grade poor">D</span>
+                                      <span class="stat-value">{{ getQualityPercentage(Object.values(groupedArticles).flat(), 'D').toFixed(1) }}%</span>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="alert-message">
+                                  <warning-filled class="alert-icon" />
+                                  <div class="message-content">
+                                    <p class="message-title">Action Required</p>
+                                    <p class="message-text">Please optimize content with C and D grades. Low-quality content may significantly impact AI-generated results.</p>
+                                  </div>
+                                </div>
+                                <div class="quality-tips">
+                                  <div class="tip-item">
+                                    <check-circle-outlined class="tip-icon" />
+                                    <span>Review and enhance content marked as C or D grade</span>
+                                  </div>
+                                  <div class="tip-item">
+                                    <bulb-outlined class="tip-icon" />
+                                    <span>Better content quality leads to more accurate AI page generation</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </a-collapse-panel>
+                        </a-collapse>
+                      </div>
                       <div class="knowledge-grid">
-                        <div 
-                          v-for="(articles, label) in groupedArticles" 
-                          :key="label"
-                          class="category-card"
+                        <div v-for="(articles, label) in groupedArticles" 
+                             :key="label"
+                             class="category-card"
                         >
                           <div class="category-header">
                             <h2>{{ label }}</h2>
-                            <span class="article-count">{{ articles.length }} articles</span>
+                            <div class="quality-stats">
+                              <div class="quality-bar">
+                                <div class="bar-segment excellent" :style="{ width: getQualityPercentage(articles, 'A') + '%' }"></div>
+                                <div class="bar-segment good" :style="{ width: getQualityPercentage(articles, 'B') + '%' }"></div>
+                                <div class="bar-segment fair" :style="{ width: getQualityPercentage(articles, 'C') + '%' }"></div>
+                                <div class="bar-segment poor" :style="{ width: getQualityPercentage(articles, 'D') + '%' }"></div>
+                              </div>
+                              <!-- 完成度统计 -->
+                              <div class="completion-rate">
+                                {{ getCompletionRate(articles) }}% Complete
+                              </div>
+                            </div>
                           </div>
-                          <div class="category-stats">
-                            <span class="stat-item">
-                              <span class="status-dot status-green"></span>
-                              {{ getCategoryStats(articles).green }}
-                            </span>
-                            <span class="stat-item">
-                              <span class="status-dot status-yellow"></span>
-                              {{ getCategoryStats(articles).yellow }}
-                            </span>
-                            <span class="stat-item">
-                              <span class="status-dot status-red"></span>
-                              {{ getCategoryStats(articles).red }}
-                            </span>
-                          </div>
-                          <div class="article-list">
-                            <div 
-                              v-for="article in articles" 
-                              :key="article.title"
-                              class="article-item"
-                              @click="selectArticle(article)"
+
+                          <!-- 文章列表 -->
+                          <div class="articles-list">
+                            <div v-for="article in articles" 
+                                 :key="article.contentId"
+                                 class="article-item"
+                                 :class="getQualityClass(article.grade)"
                             >
-                              <span 
-                                class="status-dot" 
-                                :class="{
-                                  'status-green': article.quality === 'A',
-                                  'status-yellow': article.quality === 'B',
-                                  'status-red': article.quality === 'C'
-                                }"
-                              ></span>
-                              {{ article.title }}
+                              <div class="quality-indicator">
+                                <a-tooltip :title="getQualityDescription(article.grade)">
+                                  <check-circle-filled v-if="article.grade === 'A'" class="quality-icon excellent" />
+                                  <check-circle-filled v-else-if="article.grade === 'B'" class="quality-icon good" />
+                                  <warning-filled v-else-if="article.grade === 'C'" class="quality-icon fair" />
+                                  <exclamation-circle-filled v-else class="quality-icon poor" />
+                                </a-tooltip>
+                              </div>
+                              <div class="article-content">
+                                <h3>{{ article.title }}</h3>
+                                <p v-if="article.content" class="article-preview">{{ article.content.substring(0, 100) }}...</p>
+                                <p v-else class="article-empty">Content needs to be added</p>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -730,6 +786,10 @@ import {
   CheckCircleOutlined,
   FileImageOutlined,
   SyncOutlined,  // 添加 SyncOutlined 图标
+  ClockCircleOutlined,
+  InfoCircleOutlined,
+  WarningFilled,
+  ExclamationCircleFilled,
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import apiClient from '../api/api';
@@ -764,6 +824,10 @@ export default {
     CheckCircleOutlined,
     FileImageOutlined,
     SyncOutlined,  // 注册 SyncOutlined 组件
+    ClockCircleOutlined,
+    InfoCircleOutlined,
+    WarningFilled,
+    ExclamationCircleFilled,
   },
   setup() {
     const router = useRouter();
@@ -1625,38 +1689,33 @@ export default {
 
     const getCategoryStats = (articles) => {
       return {
-        green: articles.filter(a => a.quality === 'A').length,
-        yellow: articles.filter(a => a.quality === 'B').length,
-        red: articles.filter(a => a.quality === 'C').length
+        green: articles.filter(a => a.grade === 'A').length,
+        yellow: articles.filter(a => a.grade === 'B').length,
+        red: articles.filter(a => a.grade === 'C' || a.grade === 'D').length
       }
     }
 
     // 修改 groupArticlesByLabel 方法
     const groupArticlesByLabel = (articles) => {
-      if (!articles || !articles.length) {
-        console.log('No article data')
-        groupedArticles.value = {}
-        return
-      }
-      
-      // 根据 label 分组
-      groupedArticles.value = articles.reduce((acc, article) => {
-        const label = article.label || 'Uncategorized' // 使用 label 字段，如果没有则归类为 Uncategorized
+      const grouped = articles.reduce((acc, article) => {
+        const label = article.label || 'Uncategorized'
         if (!acc[label]) {
           acc[label] = []
         }
         acc[label].push({
-          id: article.kId,
+          ...article,
+          contentId: article.contentId,
           title: article.title,
-          label: article.label,
-          description: article.description || '',
           content: article.content,
+          grade: article.grade,
+          label: article.label,
           source: article.source,
-          quality: article.quality || 'C', // 添加质量评级，默认为 C
-          createdAt: article.createdAt || ''
+          tags: article.tags || []
         })
         return acc
       }, {})
+      
+      groupedArticles.value = grouped
     }
 
     // 分别添加 header 和 footer 的 loading 状态
@@ -2015,6 +2074,48 @@ export default {
       }
     };
 
+    const getQualityPercentage = (articles, grade) => {
+      const totalArticles = articles.length;
+      const gradeArticles = articles.filter(article => article.grade === grade);
+      return totalArticles > 0 ? (gradeArticles.length / totalArticles) * 100 : 0;
+    };
+
+    const getCompletionRate = (articles) => {
+      const totalArticles = articles.length;
+      const completedArticles = articles.filter(article => article.content);
+      return totalArticles > 0 ? (completedArticles.length / totalArticles) * 100 : 0;
+    };
+
+    const getQualityDescription = (grade) => {
+      switch (grade) {
+        case 'A':
+          return 'Excellent';
+        case 'B':
+          return 'Good';
+        case 'C':
+          return 'Fair';
+        case 'D':
+          return 'Poor';
+        default:
+          return 'Unknown';
+      }
+    };
+
+    const getQualityClass = (grade) => {
+      switch (grade) {
+        case 'A':
+          return 'excellent-article';
+        case 'B':
+          return 'good-article';
+        case 'C':
+          return 'fair-article';
+        case 'D':
+          return 'poor-article';
+        default:
+          return '';
+      }
+    };
+
     return {
       domainConfigured,
       loading,
@@ -2118,6 +2219,10 @@ export default {
       knowledgeLoading,
       regrabLoading,
       regrabKnowledgeBase,
+      getQualityPercentage,
+      getCompletionRate,
+      getQualityDescription,
+      getQualityClass,
     }
   }
 }
@@ -3482,5 +3587,204 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+.quality-bar {
+  height: 4px;
+  display: flex;
+  margin: 8px 0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bar-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.bar-segment.excellent { background-color: #52c41a; }
+.bar-segment.good { background-color: #1890ff; }
+.bar-segment.fair { background-color: #faad14; }
+.bar-segment.poor { background-color: #ff4d4f; }
+
+.quality-icon {
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.quality-icon.excellent { color: #52c41a; }
+.quality-icon.good { color: #1890ff; }
+.quality-icon.fair { color: #faad14; }
+.quality-icon.poor { color: #ff4d4f; }
+
+.article-item {
+  display: flex;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.article-item:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+}
+
+.article-empty {
+  color: #ff4d4f;
+  font-style: italic;
+}
+
+.knowledge-intro {
+  padding: 0 24px;
+  margin-bottom: 20px;
+}
+
+.intro-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+.warning-icon {
+  font-size: 18px;
+  color: #ff4d4f;
+}
+
+.intro-content {
+  font-size: 14px;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+.quality-alert {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.alert-main {
+  margin-bottom: 16px;
+}
+
+.alert-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 12px 0;
+}
+
+.quality-stats {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-grade {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: #fff;
+}
+
+.stat-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.excellent { background: #52c41a; }
+.good { background: #1890ff; }
+.fair { background: #faad14; }
+.poor { background: #ff4d4f; }
+
+.alert-message {
+  display: flex;
+  gap: 12px;
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.alert-icon {
+  font-size: 20px;
+  color: #ff4d4f;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.message-content {
+  flex: 1;
+}
+
+.message-title {
+  font-weight: 600;
+  color: #ff4d4f;
+  margin: 0 0 4px 0;
+  font-size: 14px;
+}
+
+.message-text {
+  margin: 0;
+  color: #1f2937;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.quality-tips {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tip-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4b5563;
+  font-size: 13px;
+}
+
+.tip-icon {
+  color: #52c41a;
+  font-size: 14px;
+}
+
+:deep(.ant-collapse) {
+  background: transparent !important;
+  border: none !important;
+}
+
+:deep(.ant-collapse-header) {
+  padding: 8px 0 !important;
+}
+
+:deep(.ant-collapse-content) {
+  background: transparent !important;
+}
+
+:deep(.ant-collapse-content-box) {
+  padding: 12px 0 !important;
+}
+
+:deep(.ant-collapse-arrow) {
+  color: #ff4d4f !important;
 }
 </style> 
