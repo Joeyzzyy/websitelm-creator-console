@@ -8,22 +8,27 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="bg-white py-10 px-8">
-    <div class="max-w-4xl w-full">
-      <div class="bg-gray-50 rounded-lg p-6 relative overflow-hidden">
+  <div class="bg-white flex items-center justify-center px-2 py-8">
+    <div class="max-w-[95%] w-full">
+      <div class="bg-gradient-to-b from-[#3374FF] to-[#1F4699] rounded-xl p-8 relative overflow-hidden">
         <div class="relative z-10">
-          <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4 text-center">
+          <h2 class="text-lg font-bold text-white mb-6 text-center">
             {{ section.title }}
           </h2>
-          <div class="flex items-center space-x-2">
-            <a-input 
-              :placeholder="section.bottomContent.inputPlaceholder"
-              class="flex-1 bg-white border-none text-sm h-[40px] px-4"
-            />
-            <button class="px-6 py-2 rounded-3xl text-sm font-semibold transition-all duration-200 bg-[#3374FF] text-white hover:bg-[#2861E5]">
-              {{ section.buttonText }}
-            </button>
+          <div class="flex items-center justify-center">
+            <div class="relative w-[320px]">
+              <a-input 
+                :placeholder="section.bottomContent?.inputPlaceholder || 'Enter your email address'"
+                class="w-full bg-white border-none text-xs h-[40px] rounded-[26px] placeholder-gray-400"
+              />
+              <button class="absolute right-1 top-1/2 -translate-y-1/2 bg-black text-white px-4 py-[4px] text-xs rounded-[22px] hover:bg-gray-800 transition-colors">
+                {{ section.buttonText || 'Get Started' }}
+              </button>
+            </div>
           </div>
+          <p class="text-white text-xs mt-4 text-center">
+            {{ section.bottomContent?.smallText || 'We respect your privacy and keep your data secure' }}
+          </p>
         </div>
       </div>
     </div>

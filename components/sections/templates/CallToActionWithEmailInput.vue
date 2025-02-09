@@ -41,6 +41,17 @@
                   />
                 </div>
               </a-form-item>
+
+              <a-form-item label="Small Text">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.smallText }}</span>
+                  <a-input
+                    v-model:value="localSection.bottomContent.smallText"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
             </div>
           </a-form>
         </div>

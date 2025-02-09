@@ -8,13 +8,10 @@ const props = defineProps({
 </script>
 
 <template>
-  <div class="w-full bg-white py-6">
-    <div class="max-w-6xl mx-auto px-8">
-      <div class="text-center mb-8">
-        <div v-if="props.section.topContent.icon" class="text-2xl mb-3">
-          {{ props.section.topContent.icon }}
-        </div>
-        <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-3">
+  <div class="w-[95%] mx-auto bg-[#f5f6f7] rounded-2xl py-6">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="text-center mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-3">
           {{ props.section.topContent.title }}
         </h2>
         <p class="text-xs text-gray-600 max-w-2xl mx-auto">
@@ -22,22 +19,31 @@ const props = defineProps({
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div
-          v-for="(module, index) in props.section.bottomContent"
-          :key="index"
-          class="rounded-lg transition-all duration-200 bg-white border border-gray-100 hover:border-gray-200 hover:shadow-sm p-4 group flex flex-col items-center text-center"
-        >
-          <div class="text-2xl mb-4 group-hover:scale-105 transition-transform duration-300">
-            {{ module.icon }}
+      <div class="flex justify-between items-start">
+        <template v-for="(module, index) in props.section.bottomContent" :key="index">
+          <div class="flex-1 text-center flex flex-col">
+            <!-- 上层 - 标题 -->
+            <div class="mb-3">
+              <p class="text-gray-500 text-[10px]">{{ module.topText }}</p>
+            </div>
+            
+            <!-- 中层 - 主要内容 -->
+            <div class="mb-3">
+              <div class="text-xl font-semibold">
+                {{ module.middleText }}
+              </div>
+            </div>
+            
+            <!-- 下层 - 描述 -->
+            <div>
+              <p class="text-gray-500 text-[10px]">{{ module.bottomText }}</p>
+            </div>
           </div>
-          <h3 class="text-base font-semibold text-gray-900 mb-2">
-            {{ module.title }}
-          </h3>
-          <p class="text-xs text-gray-600 whitespace-pre-line">
-            {{ module.content }}
-          </p>
-        </div>
+          <div 
+            v-if="index < props.section.bottomContent.length - 1" 
+            class="h-32 w-px bg-gray-200 mx-4"
+          ></div>
+        </template>
       </div>
     </div>
   </div>

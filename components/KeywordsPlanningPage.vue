@@ -659,26 +659,38 @@
       width="800px"
       @cancel="handleModalClose"
     >
-      <a-table
-        :dataSource="modalKeywords.comparison"
-        :columns="keywordsTableColumns"
-        :pagination="false"
-        size="small"
-        class="selected-keywords-table"
-      >
-        <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'actions'">
-            <a-button 
-              type="primary"
-              ghost
-              class="deselect-btn"
-              @click="handleCancelSelection(record)"
-            >
-              Deselect
-            </a-button>
+      <!-- 添加加载状态显示 -->
+      <div v-if="isLoadingModalKeywords" class="loading-keywords">
+        <a-spin size="large">
+        </a-spin>
+        <div class="loading-content">
+          <p>Loading selected keywords...</p>
+        </div>
+      </div>
+
+      <!-- 已选关键词表格,仅在非加载状态显示 -->
+      <template v-else>
+        <a-table
+          :dataSource="modalKeywords.comparison"
+          :columns="keywordsTableColumns"
+          :pagination="false"
+          size="small"
+          class="selected-keywords-table"
+        >
+          <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'actions'">
+              <a-button 
+                type="primary"
+                ghost
+                class="deselect-btn"
+                @click="handleCancelSelection(record)"
+              >
+                Deselect
+              </a-button>
+            </template>
           </template>
-        </template>
-      </a-table>
+        </a-table>
+      </template>
 
       <template #footer>
         <a-button @click="handleModalClose">Close</a-button>
@@ -718,7 +730,7 @@
                   @pressEnter="saveTitle"
                   @blur="saveTitle"
                   :maxLength="100"
-                  class="title-input"
+                  class="title-input bordered"
                 />
                 <div v-else class="title-display" @click="startEditingTitle">
                   <span>{{ selectedPlan.title }}</span>
@@ -738,7 +750,7 @@
                   @blur="saveDescription"
                   :maxLength="500"
                   :autoSize="{ minRows: 3, maxRows: 6 }"
-                  class="description-input"
+                  class="description-input bordered"
                 />
                 <div v-else class="description-display" @click="startEditingDesc">
                   <p>{{ selectedPlan.description }}</p>
@@ -777,10 +789,6 @@
               <div class="info-item">
                 <span class="info-label">Word Count</span>
                 <span>{{ getTotalWordCount(selectedPlan).toLocaleString() }} words</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Created At</span>
-                <span>{{ formatTime(selectedPlan.createdAt) }}</span>
               </div>
             </div>
           </section>
@@ -4465,5 +4473,65 @@ export default defineComponent({
       }
     }
   }
+}
+
+/* 添加加载状态显示 */
+.loading-keywords {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  background: #fafafa;
+  border-radius: 8px;
+}
+
+.loading-content {
+  text-align: center;
+  padding: 32px;
+}
+
+.loading-text {
+  color: #8c8c8c;
+  font-size: 14px;
+  margin-top: 16px;
+}
+
+.selected-keywords-table {
+  margin-top: 16px;
+}
+
+.bordered {
+  border: 1px solid #d9d9d9;
+  border-radius: 2px;
+  padding: 4px 11px;
+  width: 100%;
+  
+  &:hover, &:focus {
+    border-color: #40a9ff;
+  }
+}
+
+.title-display, .description-display {
+  border: 1px solid #d9d9d9;
+  padding: 4px 11px;
+  border-radius: 2px;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: #40a9ff;
+    background-color: #fafafa;
+  }
+}
+
+.edit-icon {
+  margin-left: 8px;
+  color: #bfbfbf;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.title-display:hover .edit-icon,
+.description-display:hover .edit-icon {
+  opacity: 1;
 }
 </style>

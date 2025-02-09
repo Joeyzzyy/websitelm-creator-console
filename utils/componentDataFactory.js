@@ -48,37 +48,36 @@ export const createCleanComponentData = (componentType) => {
         highlightWordCount: 2,
         enableProductHunt: false,
         productHuntId: '',
+        bannerImage: '/assets/images/placeholder.png'
       }
     },
     
     WhyChooseUsWithSmallBlocks: {
       topContent: {
-        icon: '⭐',
         title: 'Why Choose Us',
         description: 'Discover our unique advantages'
       },
       bottomContent: [
         { 
-          icon: '🚀',
-          title: 'Feature 1', 
-          content: 'Description for feature 1' 
+          topText: 'Feature 1',
+          middleText: 'Value 1',
+          bottomText: 'Description 1'
         },
         { 
-          icon: '💡',
-          title: 'Feature 2', 
-          content: 'Description for feature 2' 
+          topText: 'Feature 2',
+          middleText: 'Value 2',
+          bottomText: 'Description 2'
         },
         { 
-          icon: '🎯',
-          title: 'Feature 3', 
-          content: 'Description for feature 3' 
+          topText: 'Feature 3',
+          middleText: 'Value 3',
+          bottomText: 'Description 3'
         }
       ]
     },
     
     WhyChooseUsWithBlocks: {
       topContent: {
-        icon: '🚀',
         title: 'Our Advantages',
         description: 'What sets us apart',
       },
@@ -106,14 +105,36 @@ export const createCleanComponentData = (componentType) => {
     
     HowItWorksWithWorkflow: {
       topContent: {
-        icon: '🚀',
-        title: 'How It Works',
-        description: 'Get Started Now'
+        title: 'Transform Your Business',
+        subTitle: 'Learn how our platform can help you grow',
+        buttonText: 'Get Started',
+        buttonLink: '#',
+        ctaButtonText: 'Learn More',
+        ctaButtonLink: '#',
+        showButton: true,
+        showCtaButton: true,
+        imageUrl: '/assets/images/placeholder.png',
+        imageAlt: 'Workflow Diagram Example'
       },
       bottomContent: [
-        { number: 'Step 1', title: 'Random Title', subTitle: 'Random Subtitle', content: 'Random Content For Step 1' },
-        { number: 'Step 2', title: 'Random Title', subTitle: 'Random Subtitle', content: 'Random Content For Step 2' },
-        { number: 'Step 3', title: 'Random Title', subTitle: 'Random Subtitle', content: 'Random Content For Step 3' }
+        {
+          number: 'Step 1',
+          title: 'Sign Up',
+          subTitle: 'Create Your Account',
+          content: 'Get started by creating your account in just a few minutes. No credit card required.'
+        },
+        {
+          number: 'Step 2',
+          title: 'Configure',
+          subTitle: 'Set Your Preferences',
+          content: 'Customize your settings and preferences to match your specific needs and requirements.'
+        },
+        {
+          number: 'Step 3',
+          title: 'Launch',
+          subTitle: 'Start Using Platform',
+          content: 'Begin using the platform immediately and see results. Our intuitive interface makes it easy to get started.'
+        }
       ]
     },
 
@@ -250,7 +271,7 @@ export const createCleanComponentData = (componentType) => {
       },
 
     Faqs: {
-      bottomContent: [
+      topContent: [
         {
           question: "What is your product/service?",
           answer: "Our product/service is designed to help businesses improve their efficiency and productivity. It offers comprehensive solutions for [specific problem/need]."
@@ -271,7 +292,12 @@ export const createCleanComponentData = (componentType) => {
           question: "Is there customer support available?",
           answer: "Yes, we provide 24/7 customer support through multiple channels including phone, email, and live chat. Our dedicated support team is always ready to help."
         }
-      ]
+      ],
+      bottomContent: {
+        showButton: true,
+        buttonText: "Learn More",
+        buttonLink: "#"
+      }
     },
 
     CallToActionComplex: {
@@ -449,7 +475,8 @@ export const createCleanComponentData = (componentType) => {
       title: '[DEMO] Your Main Call to Action Headline',
       buttonText: "[DEMO] Get Started",
       bottomContent: {
-        inputPlaceholder: "[SAMPLE] Enter your email"
+        inputPlaceholder: "[SAMPLE] Enter your email",
+        smallText: "[SAMPLE] We respect your privacy and keep your data secure"
       }
     },
 

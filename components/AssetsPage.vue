@@ -58,34 +58,34 @@
           <template #tab>
             <span class="knowledge-tab">Knowledge Base</span>
           </template>
-        </a-tab-pane>
-        <a-tab-pane key="images">
-          <template #tab>
-            <span class="images-tab">Images</span>
-          </template>
-        </a-tab-pane>
-        <a-tab-pane key="videos">
-          <template #tab>
-            <span class="videos-tab">Videos</span>
-          </template>
-        </a-tab-pane>
-        <a-tab-pane key="links">
-          <template #tab>
-            <span class="links-tab">Internal Links</span>
-          </template>
-        </a-tab-pane>
-        <a-tab-pane key="button-links">
-          <template #tab>
-            <span class="button-links-tab">Button Links</span>
-          </template>
-        </a-tab-pane>
-        <a-tab-pane key="header" tab="Header">
-          <template #tab>
-            <span class="header-tab">Header</span>
-          </template>
-        </a-tab-pane>
-        <a-tab-pane key="footer" tab="Footer" />
-      </a-tabs>
+          </a-tab-pane>
+          <a-tab-pane key="images">
+            <template #tab>
+              <span class="images-tab">Images</span>
+            </template>
+          </a-tab-pane>
+          <a-tab-pane key="videos">
+            <template #tab>
+              <span class="videos-tab">Videos</span>
+            </template>
+          </a-tab-pane>
+          <a-tab-pane key="links">
+            <template #tab>
+              <span class="links-tab">Internal Links</span>
+            </template>
+          </a-tab-pane>
+          <a-tab-pane key="button-links">
+            <template #tab>
+              <span class="button-links-tab">Button Links</span>
+            </template>
+          </a-tab-pane>
+          <a-tab-pane key="header" tab="Header">
+            <template #tab>
+              <span class="header-tab">Header</span>
+            </template>
+          </a-tab-pane>
+          <a-tab-pane key="footer" tab="Footer" />
+        </a-tabs>
 
       <div class="page-content">
         <div class="assets-content">

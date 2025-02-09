@@ -28,18 +28,18 @@ export const SECTION_TAGS = {
     ctaButtonText: 'button',
     buttonLink: 'a',
     ctaButtonLink: 'a',
-    highlightWordCount: 'span'
+    highlightWordCount: 'span',
+    bannerImage: 'img'
   },
   WhyChooseUsWithSmallBlocks: {
-    emoji: 'span',
     title: 'h2',
     description: 'p',
     icon: 'span',
-    moduleTitle: 'h3',
-    moduleContent: 'p'
+    topText: 'p',
+    middleText: 'div',
+    bottomText: 'p'
   },
   WhyChooseUsWithBlocks: {
-    emoji: 'span',
     title: 'h2',
     description: 'p',
     moduleTitle: 'h3',
@@ -63,7 +63,13 @@ export const SECTION_TAGS = {
   HowItWorksWithWorkflow: {
     emoji: 'span', 
     title: 'h2',
-    description: 'p',
+    subTitle: 'h3',
+    imageUrl: 'img',
+    imageAlt: 'alt',
+    buttonText: 'button',
+    buttonLink: 'a',
+    ctaButtonText: 'button',
+    ctaButtonLink: 'a',
     stepTitle: 'h3',
     stepSubTitle: 'h4',
     number: 'span',
@@ -154,7 +160,8 @@ export const SECTION_TAGS = {
   CallToActionWithEmailInput: {
     title: 'h2',
     inputPlaceholder: 'input',
-    buttonText: 'button'
+    buttonText: 'button',
+    smallText: 'p'
   },
   CallToAction: {
     title: 'h2',

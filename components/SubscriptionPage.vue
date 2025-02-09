@@ -1,25 +1,83 @@
 <template>
   <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
+    <!-- Original Header -->
     <header class="bg-white shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16 items-center">
-          <router-link to="/" class="text-gray-800 hover:text-gray-600">
-            <i class="fas fa-home text-xl"></i>
-          </router-link>
+          <div class="flex items-center space-x-4">
+            <router-link to="/" class="text-gray-800 hover:text-gray-600">
+              <i class="fas fa-home text-xl"></i>
+            </router-link>
+          </div>
           <div class="flex items-center space-x-4">
             <span class="text-gray-600">{{ userEmail }}</span>
-            <button 
-              class="secret-portal-btn"
-              @click="showSecretDialog = true"
-            >
-              <span style="font-size: 14px;">🔑</span>
-            </button>
             <a-button type="link" @click="handleLogout">Logout</a-button>
           </div>
         </div>
       </div>
     </header>
+
+    <!-- New Pre-launch Banner -->
+    <div class="bg-gradient-to-br from-[#4B89FF]/5 via-[#6C9AFF]/5 to-[#4B89FF]/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="relative bg-white/70 backdrop-blur-lg rounded-2xl p-8 border border-blue-100/50 shadow-xl overflow-hidden">
+          <!-- Decorative Elements -->
+          <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div class="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-blue-500/10 to-purple-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
+          
+          <div class="relative flex flex-col md:flex-row items-center justify-between gap-8">
+            <!-- Launch Info -->
+            <div class="flex-1 space-y-4 text-center md:text-left">
+              <div class="space-y-2">
+                <div class="flex items-center justify-center md:justify-start space-x-3">
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    Coming Soon
+                  </span>
+                  <span class="animate-pulse text-blue-600 font-semibold">
+                    Live on Product Hunt 🚀
+                  </span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900">
+                  February 25th Launch Day
+                </h2>
+              </div>
+              <p class="text-gray-600 max-w-2xl">
+                WebsiteLM is currently in exclusive early access. Join our pioneering users and start experiencing the future of AI-powered content management today!
+              </p>
+            </div>
+            
+            <!-- Access Code Input -->
+            <div class="flex-shrink-0 w-full md:w-auto">
+              <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Early Access Portal ✨
+                </h3>
+                <div class="space-y-3">
+                  <input
+                    v-model="secretCode"
+                    type="text"
+                    placeholder="Enter your access code"
+                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                    :disabled="verifyingCode"
+                    @keyup.enter="verifySecretCode"
+                  />
+                  <button 
+                    class="early-access-btn w-full"
+                    :class="{ 'verifying': verifyingCode }"
+                    @click="verifySecretCode"
+                  >
+                    <span class="flex items-center justify-center">
+                      <span>{{ verifyingCode ? 'Verifying...' : 'Activate Early Access' }}</span>
+                      <i class="fas fa-arrow-right ml-2"></i>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -277,9 +335,13 @@
 
 <script setup lang="ts">
 import { ref, h, defineComponent } from 'vue'
-import { Button as AButton } from 'ant-design-vue'
+import { Button as AButton, Modal, message } from 'ant-design-vue'
+import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import { useRouter } from 'vue-router'
+import { createVNode } from 'vue'
 
-const userEmail = ref('zhuyuejoey@gmail.com')
+const router = useRouter()
+const userEmail = ref(localStorage.getItem('currentCustomerEmail') || '')
 const selectedPeriod = ref('yearly')
 
 // Billing period options
@@ -299,7 +361,7 @@ const plans = [
     },
     discount: '20%',
     description: 'Everything you need to start optimizing your content',
-    buttonText: 'Get Started',
+    buttonText: 'Coming Soon...',
     features: [
       {
         title: 'Features include:',
@@ -326,7 +388,7 @@ const plans = [
     },
     discount: '23%',
     description: 'Perfect for marketing teams scaling content production',
-    buttonText: 'Get Started',
+    buttonText: 'Coming Soon...',
     features: [
       {
         title: 'Everything in Essential, plus:',
@@ -357,7 +419,7 @@ const plans = [
       yearly: 'Custom'
     },
     description: 'Custom solutions with enhanced control, security, training and support',
-    buttonText: 'Contact Sales',
+    buttonText: 'Coming Soon...',
     features: [
       {
         title: 'Everything in Professional, plus:',
@@ -380,7 +442,25 @@ const handleSelectPlan = (planId: string) => {
 }
 
 const handleLogout = () => {
-  console.log('User logout')
+  Modal.confirm({
+    title: 'Confirm Logout',
+    icon: createVNode(ExclamationCircleOutlined),
+    content: 'Are you sure you want to logout from the system?',
+    okText: 'OK',
+    cancelText: 'Cancel',
+    onOk: () => {
+      // Clear all auth related data
+      localStorage.removeItem('authToken')
+      localStorage.removeItem('intelickIsLoggedIn')
+      localStorage.removeItem('currentCustomer')
+      localStorage.removeItem('currentCustomerId')
+      localStorage.removeItem('currentCustomerEmail')
+      
+      // Redirect to login page
+      router.push('/login')
+      message.success('Logout successful')
+    }
+  })
 }
 
 // 控制比较表格的显示
@@ -720,6 +800,61 @@ html {
   transform: translateY(-10px);
 }
 
+.early-access-btn {
+  @apply px-6 py-3 bg-gradient-to-r from-[#4B89FF] to-[#6C9AFF] text-white font-medium rounded-lg transition-all duration-300;
+  box-shadow: 0 4px 12px rgba(75, 137, 255, 0.25);
+}
+
+.early-access-btn:hover {
+  @apply from-[#5C95FF] to-[#7CA5FF];
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(75, 137, 255, 0.35);
+}
+
+.early-access-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(75, 137, 255, 0.2);
+}
+
+.early-access-btn.verifying {
+  @apply opacity-75 cursor-not-allowed;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Modal 自定义样式 */
+:deep(.ant-modal-content) {
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+:deep(.ant-modal-wrap) {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+:deep(.ant-modal) {
+  padding: 0;
+}
+
+:deep(.ant-modal-body) {
+  padding: 0;
+}
+
+:deep(.ant-modal-close) {
+  color: rgba(255, 255, 255, 0.8);
+  top: 12px;
+  right: 12px;
+}
+
+:deep(.ant-modal-close:hover) {
+  color: white;
+}
+
 .secret-portal-btn {
   @apply p-2 rounded-full transition-all duration-300;
 }
@@ -765,35 +900,5 @@ html {
 
 .portal-verify-btn.verifying {
   background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
-}
-
-/* Modal 自定义样式 */
-:deep(.ant-modal-content) {
-  background: transparent !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-}
-
-:deep(.ant-modal-wrap) {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-:deep(.ant-modal) {
-  padding: 0;
-}
-
-:deep(.ant-modal-body) {
-  padding: 0;
-}
-
-:deep(.ant-modal-close) {
-  color: rgba(255, 255, 255, 0.8);
-  top: 12px;
-  right: 12px;
-}
-
-:deep(.ant-modal-close:hover) {
-  color: white;
 }
 </style>

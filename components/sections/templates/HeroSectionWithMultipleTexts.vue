@@ -18,21 +18,6 @@
               </div>
             </a-form-item>
 
-            <a-form-item label="Highlight Last N Words">
-              <a-select
-                v-model:value="localSection.topContent.highlightWordCount"
-                :disabled="disabled"
-                @change="handleChange"
-                style="width: 200px"
-              >
-                <a-select-option :value="1">Last 1 Word</a-select-option>
-                <a-select-option :value="2">Last 2 Words</a-select-option>
-                <a-select-option :value="3">Last 3 Words</a-select-option>
-                <a-select-option :value="4">Last 4 Words</a-select-option>
-                <a-select-option :value="5">Last 5 Words</a-select-option>
-              </a-select>
-            </a-form-item>
-    
             <a-form-item label="SubTitle">
               <div class="input-with-tag">
                 <span class="html-tag">{{ tags.subTitle }}</span>
@@ -43,18 +28,8 @@
                 />
               </div>
             </a-form-item>
-    
-            <a-form-item label="Button Text">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.buttonText }}</span>
-                <a-input
-                  v-model:value="localSection.topContent.buttonText"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-    
+
+            <!-- 按钮1设置 -->
             <a-form-item label="Show Button 1">
               <a-switch
                 v-model:checked="localSection.topContent.showButton"
@@ -62,29 +37,32 @@
                 @change="handleChange"
               />
             </a-form-item>
-    
-            <a-form-item label="Button Link">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.buttonLink }}</span>
-                <a-input
-                  v-model:value="localSection.topContent.buttonLink"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-    
-            <a-form-item label="CTA Button Text">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.ctaButtonText }}</span>
-                <a-input
-                  v-model:value="localSection.topContent.ctaButtonText"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
 
+            <template v-if="localSection.topContent.showButton">
+              <a-form-item label="Button 1 Text">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.buttonText }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.buttonText"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+
+              <a-form-item label="Button 1 Link">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.buttonLink }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.buttonLink"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+            </template>
+
+            <!-- 按钮2设置 -->
             <a-form-item label="Show Button 2">
               <a-switch
                 v-model:checked="localSection.topContent.showCtaButton"
@@ -93,17 +71,31 @@
               />
             </a-form-item>
 
-            <a-form-item label="CTA Button Link">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.ctaButtonLink }}</span>
-                <a-input
-                  v-model:value="localSection.topContent.ctaButtonLink"
-                  :disabled="disabled"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
+            <template v-if="localSection.topContent.showCtaButton">
+              <a-form-item label="Button 2 Text">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.ctaButtonText }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.ctaButtonText"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
 
+              <a-form-item label="Button 2 Link">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.ctaButtonLink }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.ctaButtonLink"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+            </template>
+
+            <!-- Product Hunt 设置 -->
             <a-form-item label="Enable Product Hunt">
               <a-switch
                 v-model:checked="localSection.topContent.enableProductHunt"
@@ -130,6 +122,26 @@
                 </div>
               </a-form-item>
             </template>
+
+            <!-- 添加图片上传区域 -->
+            <a-form-item label="Banner Image">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.bannerImage }}</span>
+                <a-input
+                  v-model:value="localSection.topContent.bannerImage"
+                  :disabled="disabled"
+                  placeholder="Enter image URL or upload"
+                  @change="handleChange"
+                />
+                <a-button 
+                  type="primary"
+                  style="margin-left: 8px"
+                  @click="openImageLibrary"
+                >
+                  Upload
+                </a-button>
+              </div>
+            </a-form-item>
           </a-form>
         </div>
       </div>
@@ -162,7 +174,22 @@
         @select="onVideoSelect"
         @close="closeVideoLibrary"
       />
-  </a-modal>
+    </a-modal>
+
+    <!-- 添加图片库模态框 -->
+    <a-modal
+      v-model:visible="imageLibraryVisible"
+      title="Select Image"
+      @ok="handleImageSelect"
+      @cancel="closeImageLibrary"
+      width="800px"
+    >
+      <image-library
+        v-if="imageLibraryVisible"
+        @select="onImageSelect"
+        @close="closeImageLibrary"
+      />
+    </a-modal>
   </template>
   
   <script>
@@ -171,13 +198,15 @@
   import HeroSectionWithMultipleTextsPreview from './HeroSectionWithMultipleTextsPreview.vue'
   import themeConfig from '../../../assets/config/themeConfig'
   import VideoLibrary from '../common/VideoLibrary.vue'
+  import ImageLibrary from '../common/ImageLibrary.vue'
   
   export default {
     name: 'HeroSectionWithMultipleTexts',
     extends: BaseSection,
     components: {
       HeroSectionWithMultipleTextsPreview,
-      VideoLibrary  
+      VideoLibrary,
+      ImageLibrary  
     },
     computed: {
       tags() {
@@ -209,16 +238,16 @@
             ctaButtonText: '',
             ctaButtonLink: '#',
             showCtaButton: true,
-            highlightWordCount: 2,
             enableProductHunt: false,
-            productHuntId: '',
-            productHuntPosition: 'top-right'
+            productHuntId: ''
           }
         },
         styles: themeConfig.normal,
         videoLibraryVisible: false,
         selectedVideo: null,
-        isMuted: true
+        isMuted: true,
+        imageLibraryVisible: false,
+        selectedImage: null
       }
     },
     watch: {
@@ -235,10 +264,8 @@
               ctaButtonText: '',
               ctaButtonLink: '#',
               showCtaButton: true,
-              highlightWordCount: 2,
               enableProductHunt: false,
-              productHuntId: '',
-              productHuntPosition: 'top-right'
+              productHuntId: ''
             }
           }
         },
@@ -265,6 +292,23 @@
           this.handleChange()
         }
         this.closeVideoLibrary()
+      },
+      openImageLibrary() {
+        this.imageLibraryVisible = true
+      },
+      closeImageLibrary() {
+        this.imageLibraryVisible = false
+        this.selectedImage = null
+      },
+      onImageSelect(image) {
+        this.selectedImage = image
+      },
+      handleImageSelect() {
+        if (this.selectedImage) {
+          this.localSection.topContent.bannerImage = this.selectedImage.url
+          this.handleChange()
+        }
+        this.closeImageLibrary()
       }
     }
   }

@@ -9,28 +9,6 @@
         <!-- 顶部内容 -->
         <div class="top-content">
           <a-form layout="vertical">
-
-            <a-form-item label="Icon">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.emoji }}</span>
-                <div class="emoji-input-wrapper">
-                  <a-input
-                    v-model:value="localSection.topContent.icon"
-                    :disabled="disabled"
-                    placeholder="Emoji"
-                    @change="handleChange"
-                  />
-                  <a-button
-                    v-if="!disabled"
-                    class="emoji-trigger"
-                    @click="(e) => showEmojiPicker(e)"
-                  >
-                    😊
-                  </a-button>
-                </div>
-              </div>
-            </a-form-item>
-            
             <a-form-item label="Title">
               <div class="input-with-tag">
                 <span class="html-tag">{{ tags.title }}</span>

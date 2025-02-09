@@ -10,26 +10,6 @@
           <!-- 顶部内容 -->
           <div class="top-content">
             <a-form layout="vertical">
-              <a-form-item label="Emoji">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.emoji }}</span>
-                  <div class="emoji-input-wrapper">
-                    <a-input
-                      v-model:value="localSection.topContent.icon"
-                      :disabled="disabled"
-                      @change="handleChange"
-                    />
-                    <a-button
-                      v-if="!disabled"
-                      class="emoji-trigger"
-                      @click="(e) => showEmojiPicker(e)"
-                    >
-                      😊
-                    </a-button>
-                  </div>
-                </div>
-              </a-form-item>
-
               <a-form-item label="Title">
                 <div class="input-with-tag">
                   <span class="html-tag">{{ tags.title }}</span>
@@ -40,16 +20,114 @@
                   />
                 </div>
               </a-form-item>
-  
-              <a-form-item label="Description">
+
+              <a-form-item label="Subtitle">
                 <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.description }}</span>
+                  <span class="html-tag">{{ tags.subTitle }}</span>
                   <a-input
-                    v-model:value="localSection.topContent.description"
+                    v-model:value="localSection.topContent.subTitle"
                     :disabled="disabled"
                     @change="handleChange"
                   />
                 </div>
+              </a-form-item>
+
+              <a-form-item label="Image URL">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.imageUrl }}</span>
+                  <div class="image-input-wrapper">
+                    <a-input
+                      v-model:value="localSection.topContent.imageUrl"
+                      :disabled="disabled"
+                      @change="handleChange"
+                    />
+                    <a-button 
+                      type="primary"
+                      class="change-image-btn"
+                      @click="openImageLibrary"
+                    >
+                      Change
+                    </a-button>
+                  </div>
+                </div>
+              </a-form-item>
+
+              <!-- 添加图片预览 -->
+              <div class="image-preview" v-if="localSection.topContent.imageUrl">
+                <a-image :src="localSection.topContent.imageUrl" :width="200" />
+              </div>
+
+              <a-form-item label="Image Alt Text">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.imageAlt }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.imageAlt"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+
+              <a-form-item label="Primary Button">
+                <a-space direction="vertical" style="width: 100%">
+                  <a-checkbox
+                    v-model:checked="localSection.topContent.showButton"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  >
+                    Show Primary Button
+                  </a-checkbox>
+                  <template v-if="localSection.topContent.showButton">
+                    <div class="input-with-tag">
+                      <span class="html-tag">{{ tags.buttonText }}</span>
+                      <a-input
+                        v-model:value="localSection.topContent.buttonText"
+                        :disabled="disabled"
+                        @change="handleChange"
+                      />
+                    </div>
+                    <div class="input-with-tag">
+                      <span class="html-tag">{{ tags.buttonLink }}</span>
+                      <a-input
+                        v-model:value="localSection.topContent.buttonLink"
+                        :disabled="disabled"
+                        placeholder="Enter button link (e.g., /about or https://...)"
+                        @change="handleChange"
+                      />
+                    </div>
+                  </template>
+                </a-space>
+              </a-form-item>
+
+              <a-form-item label="CTA Button">
+                <a-space direction="vertical" style="width: 100%">
+                  <a-checkbox
+                    v-model:checked="localSection.topContent.showCtaButton"
+                    :disabled="disabled"
+                    @change="handleChange"
+                  >
+                    Show CTA Button
+                  </a-checkbox>
+                  <template v-if="localSection.topContent.showCtaButton">
+                    <div class="input-with-tag">
+                      <span class="html-tag">{{ tags.ctaButtonText }}</span>
+                      <a-input
+                        v-model:value="localSection.topContent.ctaButtonText"
+                        :disabled="disabled"
+                        @change="handleChange"
+                      />
+                    </div>
+                    <div class="input-with-tag">
+                      <span class="html-tag">{{ tags.ctaButtonLink }}</span>
+                      <a-input
+                        v-model:value="localSection.topContent.ctaButtonLink"
+                        :disabled="disabled"
+                        placeholder="Enter button link (e.g., /contact or https://...)"
+                        @change="handleChange"
+                      />
+                    </div>
+                  </template>
+                </a-space>
               </a-form-item>
             </a-form>
           </div>
@@ -162,6 +240,21 @@
         @select="onEmojiSelect"
       />
     </a-modal>
+
+    <!-- 添加图片库模态框 -->
+    <a-modal
+      v-model:visible="imageLibraryVisible"
+      title="Select Image"
+      @ok="handleImageSelect"
+      @cancel="closeImageLibrary"
+      width="800px"
+    >
+      <image-library
+        v-if="imageLibraryVisible"
+        @select="onImageSelect"
+        @close="closeImageLibrary"
+      />
+    </a-modal>
   </div>
 </template>
 
@@ -170,6 +263,7 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import themeConfig from '../../../assets/config/themeConfig'
 import HowItWorksWithWorkflowPreview from './HowItWorksWithWorkflowPreview.vue'
+import ImageLibrary from '../common/ImageLibrary.vue'
 import EmojiPicker from 'vue3-emoji-picker'
 import 'vue3-emoji-picker/css'
 
@@ -178,22 +272,31 @@ export default {
   extends: BaseSection,
   components: {
     HowItWorksWithWorkflowPreview,
-    EmojiPicker
+    EmojiPicker,
+    ImageLibrary
   },
   data() {
     return {
       localSection: {
         topContent: {
           icon: '🔄',
-          title: 'How it works',
-          description: 'Discover our simple three-step process'
+          title: 'Transform Your Business',
+          subTitle: 'Learn how our platform can help you grow',
+          buttonText: 'Get Started',
+          buttonLink: '#',
+          ctaButtonText: 'Learn More',
+          ctaButtonLink: '#',
+          showButton: true,
+          showCtaButton: true,
+          imageUrl: '/assets/images/placeholder.png',
+          imageAlt: 'Workflow Diagram Example'
         },
         bottomContent: [
           {
             number: 'Step 1',
-            title: 'Sign up for an account',
-            subTitle: 'Sign up for an account',
-            content: 'Sign up for an account'
+            title: 'Sign Up',
+            subTitle: 'Create Your Account',
+            content: 'Get started by creating your account in just a few minutes. No credit card required.'
           },
           {
             number: 'Step 2',
@@ -210,7 +313,9 @@ export default {
         ],
       },
       styles: themeConfig.normal,
-      emojiPickerVisible: false
+      emojiPickerVisible: false,
+      imageLibraryVisible: false,
+      selectedImage: null
     }
   },
   created() {
@@ -274,6 +379,28 @@ export default {
       this.localSection.topContent.icon = emoji.i
       this.closeEmojiPicker()
       this.handleChange()
+    },
+
+    // 添加图片库相关方法
+    openImageLibrary() {
+      this.imageLibraryVisible = true
+    },
+
+    closeImageLibrary() {
+      this.imageLibraryVisible = false
+      this.selectedImage = null
+    },
+
+    onImageSelect(image) {
+      this.selectedImage = image
+    },
+
+    handleImageSelect() {
+      if (this.selectedImage) {
+        this.localSection.topContent.imageUrl = this.selectedImage.url
+        this.handleChange()
+      }
+      this.closeImageLibrary()
     }
   }
 }
@@ -427,5 +554,37 @@ export default {
   --ep-color-hover: #f7f9fa;
   border: none;
   box-shadow: none;
+}
+
+.image-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.change-image-btn {
+  background: linear-gradient(135deg, #1890ff, #1890ff);
+  border: none;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: white;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.change-image-btn:hover {
+  background: linear-gradient(135deg, #4338CA, #6D28D9);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.image-preview {
+  margin-top: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
 }
 </style>

@@ -6,220 +6,184 @@
   >
     <!-- Rest of the content -->
     <div class="dashboard-content">
-      <a-card class="product-info-card">
-        <template #title>
-          <div class="info-card-header">
-            <span class="info-card-title">
-              <InfoCircleOutlined />
-              Product Information
-            </span>
-            <a-space>
-              <a-button 
-                type="primary"
-                class="edit-button"
-                @click="editProductInfo"
-              >
-                <template #icon><EditOutlined /></template>
-                Edit Product
-              </a-button>
-              <a-button 
-                type="text" 
-                danger
-                @click="deleteProduct" 
-                v-if="productInfo?.productId"
-              >
-                <DeleteOutlined />
-              </a-button>
-            </a-space>
-          </div>
-        </template>
-
-        <div class="info-grid">
-          <!-- Product Name -->
-          <div class="info-item">
-            <div class="info-label">
-              <AppstoreOutlined />
-              <span>Product Name</span>
-            </div>
-            <div class="info-content">
-              {{ productInfo?.productName || 'Not set' }}
-            </div>
-          </div>
-
-          <!-- Website Info -->
-          <div class="info-item">
-            <div class="info-label">
-              <GlobalOutlined />
-              Website
-              <a-tag v-if="productInfo?.domainStatus" color="success" class="status-tag">Verified</a-tag>
-              <a-tag v-else color="warning" class="status-tag">Unverified</a-tag>
-            </div>
-            <div class="info-content">
-              <div class="website-content">
-                <a :href="'https://' + productInfo?.projectWebsite" target="_blank" class="website-link">
-                  {{ productInfo?.projectWebsite }}
-                  <icon-external-link />
-                </a>
-                <!-- 添加 View Data 按钮 -->
-                <a-button 
-                  v-if="productInfo?.domainStatus"
-                  type="primary"
-                  size="small"
-                  @click="showGscData"
-                >
-                  View Traffic Data
-                </a-button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pages Overview (replacing Core Features) -->
-          <div class="info-item">
-            <div class="info-label">
-              <FileTextOutlined />
-              Pages Overview
-            </div>
-            <div class="info-content">
-              <div class="pages-stats-horizontal">
-                <div class="stat-item">
-                  <span class="stat-label">Generated</span>
-                  <span class="stat-value">{{ pagesDashboard?.generatorCount || 0 }}</span>
-                </div>
-                <a-divider type="vertical" />
-                <div class="stat-item">
-                  <span class="stat-label">Published</span>
-                  <span class="stat-value">{{ pagesDashboard?.publishCount || 0 }}</span>
-                </div>
-                <a-divider type="vertical" />
-                <div class="stat-item">
-                  <span class="stat-label">Indexed</span>
-                  <span class="stat-value">{{ pagesDashboard?.indexedCount || 0 }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Competitors -->
-          <div class="info-item">
-            <div class="info-label">
-              <NodeIndexOutlined />
-              Competitors
-            </div>
-            <div class="info-content">
-              <div class="competitors-stats-horizontal">
-                <template v-if="competitors.length">
-                  <a-tag 
-                    v-for="comp in competitors" 
-                    :key="comp.url"
-                    class="competitor-tag"
-                  >
-                    <a :href="`https://${comp.url}`" target="_blank" class="competitor-link">
-                      {{ comp.name }}
-                      <RightOutlined />
-                    </a>
-                  </a-tag>
-                </template>
-                <template v-else>
-                  <span class="no-competitors">No competitors added</span>
-                </template>
-              </div>
-            </div>
-          </div>
-        </div>
-      </a-card>
-
-      <!-- Quick Access Panel and Sitemap Row -->
-      <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
-        <a-col :span="12">
-          <!-- Quick Access Panel -->
-          <a-card class="quick-access-panel">
+      <a-card class="quick-access-panel">
             <template #title>
               <span class="quick-access-title">
-                <ThunderboltOutlined />
-                Core Features
+                Once you have set up your product and domain verification, please check the following steps:
               </span>
             </template>
-            <div class="quick-links">
-              <div class="quick-link-item">
+            <div class="quick-links-row">
+              <div class="quick-link-item horizontal">
                 <div class="quick-link-icon planner">
                   <CalendarOutlined />
                 </div>
                 <div class="quick-link-content">
                   <div class="quick-link-header">
-                    <div class="quick-link-title">
-                      Smart SEO Planner
+                    <span class="quick-link-title">
+                      1. Use Our Smart SEO Keywords Planner
                       <a-tag color="success" v-if="productInfo?.domainStatus">
-                        {{ pagesDashboard?.keywordOpportunities || 3 }} Topics Found
+                        {{ pagesDashboard?.keywordOpportunities || 3 }} Topics
                       </a-tag>
-                    </div>
+                    </span>
                   </div>
-                  <div class="quick-link-desc">
-                    <ul class="feature-list">
-                      <li>AI analyzes your market and competitors</li>
-                      <li>Generates SEO-optimized content ideas</li>
-                      <li>Suggests high-potential keywords</li>
-                    </ul>
-                  </div>
-                  <div class="quick-link-action">
-                    <router-link to="/keywords" class="action-link">
-                      Start Planning
-                      <RightOutlined />
-                    </router-link>
-                  </div>
+                  <div class="quick-link-desc">AI-powered keywords pick and outline generation</div>
+                  <router-link to="/keywords" class="action-link">
+                    Start Planning <RightOutlined />
+                  </router-link>
                 </div>
               </div>
 
-              <div class="quick-link-item">
+              <div class="quick-link-item horizontal">
                 <div class="quick-link-icon manager">
                   <CheckSquareOutlined />
                 </div>
                 <div class="quick-link-content">
                   <div class="quick-link-header">
-                    <div class="quick-link-title">
-                      Content Manager
-                    </div>
+                    <span class="quick-link-title">
+                      2. Use Our Content Manager
+                    </span>
                   </div>
-                  <div class="quick-link-desc">
-                    <ul class="feature-list">
-                      <li>Review AI-generated content</li>
-                      <li>One-click publishing to your site</li>
-                      <li>Track content performance</li>
-                    </ul>
-                  </div>
-                  <div class="quick-link-action">
-                    <router-link to="/task-management" class="action-link">
-                      Manage Content
-                      <RightOutlined />
-                    </router-link>
-                  </div>
+                  <div class="quick-link-desc">To generate, review & publish content in one place</div>
+                  <router-link to="/task-management" class="action-link">
+                    Manage Content <RightOutlined />
+                  </router-link>
                 </div>
               </div>
 
-              <div class="quick-link-item">
+              <div class="quick-link-item horizontal">
                 <div class="quick-link-icon profile">
                   <AppstoreOutlined />
                 </div>
                 <div class="quick-link-content">
                   <div class="quick-link-header">
-                    <div class="quick-link-title">
-                      Product Profile
+                    <span class="quick-link-title">
+                      3. Instantly Update Your Product Profile
                       <a-tag color="processing" v-if="productInfo?.domainStatus">
                         {{ pagesDashboard?.missingAssets || 4 }} Missing
                       </a-tag>
+                    </span>
+                  </div>
+                  <div class="quick-link-desc">Complete product details from all angles</div>
+                  <router-link to="/assets" class="action-link">
+                    Complete Profile <RightOutlined />
+                  </router-link>
+                </div>
+              </div>
+            </div>
+          </a-card>
+      
+
+      <!-- Quick Access Panel and Sitemap Row -->
+      <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
+        <a-col :span="12">
+          <a-card class="product-info-card">
+            <template #title>
+              <div class="info-card-header">
+                <div class="info-card-title">
+                  Product Information
+                </div>
+                <div class="header-actions">
+                  <a-button 
+                    type="link"
+                    @click="editProductInfo"
+                    size="small"
+                  >
+                    Edit
+                  </a-button>
+                  <a-button 
+                    type="link" 
+                    @click="deleteProduct"
+                    size="small"
+                    danger
+                  >
+                    Delete
+                  </a-button>
+                </div>
+              </div>
+            </template>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="info-label">
+                  <AppstoreOutlined />
+                  <span>Product Name</span>
+                </div>
+                <div class="info-content">
+                  {{ productInfo?.productName || 'Not set' }}
+                </div>
+              </div>
+
+              <div class="info-item">
+                <div class="info-label">
+                  <GlobalOutlined />
+                  Website
+                  <a-tag v-if="productInfo?.domainStatus" color="success" class="status-tag">Verified</a-tag>
+                  <a-tag v-else color="warning" class="status-tag">Unverified</a-tag>
+                </div>
+                <div class="info-content">
+                  <div class="website-content">
+                    <a :href="'https://' + productInfo?.projectWebsite" target="_blank" class="website-link">
+                      {{ productInfo?.projectWebsite }}
+                      <icon-external-link />
+                    </a>
+                    <a-button 
+                      v-if="productInfo?.domainStatus"
+                      type="primary"
+                      size="small"
+                      @click="showGscData"
+                    >
+                      View Traffic Data
+                    </a-button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-item compact">
+                <div class="info-label">
+                  <FileTextOutlined />
+                  Pages Overview
+                </div>
+                <div class="info-content">
+                  <div class="pages-stats-horizontal">
+                    <div class="stat-item">
+                      <span class="stat-label">Generated</span>
+                      <span class="stat-value">{{ pagesDashboard?.generatorCount || 0 }}</span>
+                    </div>
+                    <a-divider type="vertical" />
+                    <div class="stat-item">
+                      <span class="stat-label">Published</span>
+                      <span class="stat-value">{{ pagesDashboard?.publishCount || 0 }}</span>
+                    </div>
+                    <a-divider type="vertical" />
+                    <div class="stat-item">
+                      <span class="stat-label">Indexed</span>
+                      <span class="stat-value">{{ pagesDashboard?.indexedCount || 0 }}</span>
                     </div>
                   </div>
-                  <div class="quick-link-desc">
-                    <ul class="feature-list">
-                      <li>Define your product details</li>
-                      <li>Add competitor information</li>
-                      <li>Improve AI content accuracy</li>
-                    </ul>
-                  </div>
-                  <div class="quick-link-action">
-                    <router-link to="/assets" class="action-link">
-                      Complete Profile
-                      <RightOutlined />
-                    </router-link>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <div class="info-label">
+                  <NodeIndexOutlined />
+                  Competitors
+                </div>
+                <div class="info-content">
+                  <div class="competitors-stats-horizontal">
+                    <template v-if="competitors.length">
+                      <a-tag 
+                        v-for="comp in competitors" 
+                        :key="comp.url"
+                        class="competitor-tag"
+                      >
+                        <a :href="`https://${comp.url}`" target="_blank" class="competitor-link">
+                          {{ comp.name }}
+                          <RightOutlined />
+                        </a>
+                      </a-tag>
+                    </template>
+                    <template v-else>
+                      <span class="no-competitors">No competitors added</span>
+                    </template>
                   </div>
                 </div>
               </div>
@@ -232,7 +196,7 @@
           <a-card class="sitemap-card">
             <template #title>
               <div class="card-title">
-                <span>🗺️ Website Structure (Sitemap)</span>
+                <span>Website Structure (Sitemap)</span>
                 <a-space>
                   <a-button 
                     type="link" 
@@ -2031,7 +1995,7 @@ export default defineComponent({
 
 .sitemap-card {
   height: 100%;
-  max-height: 560px; /* 设置最大高度 */
+  max-height: 600px; /* 设置最大高度 */
   
   :deep(.ant-card-body) {
     height: calc(100% - 57px); /* 减去卡片头部高度 */
@@ -2674,149 +2638,175 @@ export default defineComponent({
 /* Quick Access Panel Styles */
 .quick-access-panel {
   border-radius: 12px;
-
-}
-
-.quick-access-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  color: #262626;
+  margin-bottom: 20px;
+  background: linear-gradient(145deg, #f6f9fe, #edf3fc); /* 添加整体渐变背景 */
+  border: 1px solid rgba(24, 144, 255, 0.1);
+  transition: all 0.3s ease;
   
-  .anticon {
-    color: #faad14;
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px rgba(24, 144, 255, 0.08);
+    border-color: rgba(24, 144, 255, 0.2);
+  }
+
+  :deep(.ant-card-head) {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #1677ff, #4096ff);
+    border-radius: 12px 12px 0 0;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    
+    &::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+      animation: rotateGradient 8s linear infinite;
+    }
+    
+    .ant-card-head-title {
+      color: white;
+      font-size: 16px;
+      padding: 4px 0;
+    }
+  }
+
+  :deep(.ant-card-body) {
+    padding: 16px;
   }
 }
 
-.quick-links {
-  display: flex;
-  flex-direction: column;
+.quick-links-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
+  padding: 4px;
 }
 
-.quick-link-item {
-  display: flex;
-  gap: 16px;
-  padding: 20px;
-  background: #fff;
-  border: 1px solid #f0f0f0;
+.quick-link-item.horizontal {
+  background: white;
   border-radius: 8px;
-  transition: all 0.3s;
-  position: relative; /* 添加相对定位 */
-  width: 100%; /* 确保每个item占满容器宽度 */
+  padding: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(24, 144, 255, 0.08);
+  
+  /* 添加重点突出的背景效果 */
+  background: linear-gradient(
+    145deg,
+    white,
+    rgba(24, 144, 255, 0.02)
+  );
+  
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(24, 144, 255, 0.2);
+    background: linear-gradient(
+      145deg,
+      white,
+      rgba(24, 144, 255, 0.05)
+    );
+    
+    .quick-link-icon {
+      transform: scale(1.05);
+    }
+  }
+  
+  /* 优化装饰性背景 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, rgba(24,144,255,0.03) 0%, transparent 70%);
+    transform: translate(30%, -30%);
+  }
 }
 
 .quick-link-icon {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  font-size: 24px;
+  font-size: 20px;
+  transition: all 0.3s ease;
+  margin-bottom: 12px;
   
   &.planner {
-    background: #e6f7ff;
-    color: #1890ff;
+    background: linear-gradient(135deg, #f6ffed, #d9f7be);
+    color: #389e0d;
   }
   
   &.manager {
-    background: #f6ffed;
-    color: #52c41a;
+    background: linear-gradient(135deg, #e6f7ff, #bae7ff);
+    color: #096dd9;
   }
   
   &.profile {
-    background: #fff7e6;
-    color: #faad14;
+    background: linear-gradient(135deg, #f9f0ff, #efdbff);
+    color: #531dab;
   }
 }
 
 .quick-link-content {
   flex: 1;
-  min-width: 0; /* 防止内容溢出 */
-  padding-right: 180px; /* 增加右侧预留空间 */
-}
-
-.quick-link-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .quick-link-title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #262626;
-  display: flex;  /* 新增 */
-  align-items: center;  /* 新增 */
-  gap: 8px;  /* 新增 */
-}
-
-/* 标签样式优化 */
-:deep(.ant-tag) {
-  margin: 0;  /* 移除默认外边距 */
-  height: 22px;  /* 稍微降低高度 */
-  line-height: 20px;  /* 调整行高 */
-  padding: 0 8px;  /* 调整内边距 */
-  border-radius: 4px;  /* 圆角稍小 */
-  font-size: 12px;  /* 字体稍小 */
-  font-weight: 500;  /* 字体加粗 */
-  
-  &.ant-tag-success {
-    color: #389e0d;
-    background: #f6ffed;
-    border-color: #b7eb8f;
-  }
-  
-  &.ant-tag-warning {
-    color: #d48806;
-    background: #fff7e6;
-    border-color: #ffd591;
-  }
-  
-  &.ant-tag-processing {
-    color: #1890ff;
-    background: #e6f7ff;
-    border-color: #91d5ff;
-  }
+  line-height: 1.4;
 }
 
 .quick-link-desc {
-  margin-top: 8px;  /* 增加与标题的间距 */
-}
-
-.quick-link-action {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 160px; /* 增加按钮容器宽度 */
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .action-link {
+  margin-top: 12px;
+  color: #1890ff;
+  font-size: 13px;
+  font-weight: 500;
   display: flex;
   align-items: center;
-  justify-content: center; /* 确保内容居中 */
-  gap: 8px;
-  width: 100%; /* 按钮占满容器宽度 */
-  height: 36px;
-  padding: 0 16px;
-  color: white;
-  font-weight: 500;
-  background: linear-gradient(135deg, #1890ff, #096dd9);
-  border-radius: 8px;
-  transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
-  white-space: nowrap; /* 防止文字换行 */
+  gap: 4px;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    gap: 6px;
+    
+    .anticon {
+      transform: translateX(2px);
+    }
+  }
 }
 
-/* 为不同功能模块设置相同宽度的按钮 */
-.planner + .quick-link-content .action-link,
-.manager + .quick-link-content .action-link,
-.profile + .quick-link-content .action-link {
-  width: 160px; /* 增加按钮宽度 */
+:deep(.ant-tag) {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1;
+  padding: 2px 6px;
+}
+
+:deep(.ant-divider-vertical) {
+  margin: 0 16px;
+  border-left: 1px solid #e8e8e8;
 }
 
 .chart-wrapper {
@@ -3092,20 +3082,19 @@ export default defineComponent({
 }
 
 .product-info-card {
-  background: linear-gradient(to bottom, #ffffff, #fafafa);
-  border: 1px solid rgba(24, 144, 255, 0.1);
-  border-radius: 12px;
-  box-shadow: 
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    0 0 0 1px rgba(24, 144, 255, 0.1);
-  transition: all 0.3s;
+  max-height: 600px;
   
-  &:hover {
-    box-shadow: 
-      0 8px 24px rgba(0, 0, 0, 0.08),
-      0 0 0 1px rgba(24, 144, 255, 0.2);
-    transform: translateY(-2px);
+  :deep(.ant-card-body) {
+    height: calc(100% - 57px);
+    padding: 16px;
+    overflow-y: auto;
   }
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .info-card-header {
@@ -3152,29 +3141,18 @@ export default defineComponent({
   }
 }
 
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  width: 100%;
 }
 
-.info-item {
-  background: linear-gradient(145deg, #ffffff, #f8fafc);
-  border: 1px solid rgba(24, 144, 255, 0.08);
-  border-radius: 10px;
-  padding: 16px;
-  transition: all 0.3s;
-  box-shadow: 
-    0 2px 6px rgba(0, 0, 0, 0.03),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-  
-  &:hover {
-    background: linear-gradient(145deg, #f8fafc, #f0f7ff);
-    border-color: rgba(24, 144, 255, 0.15);
-    box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.05),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.8);
-  }
+.info-item.full-width {
+  width: 100%;
 }
 
 .info-label {
@@ -3522,30 +3500,7 @@ export default defineComponent({
 
 .sitemap-content {
   overflow-y: auto;
-  height: 460px;
-  
-  /* 优化滚动条样式 */
-  &::-webkit-scrollbar {
-    width: 6px;
-    background-color: #f5f5f5; /* 滚动条背景色 */
-  }
-  
-  &::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-radius: 3px;
-  }
-  
-  &::-webkit-scrollbar-thumb {
-    background: #bfbfbf; /* 加深滑块颜色 */
-    border-radius: 3px;
-    border: 2px solid transparent; /* 添加边框 */
-    background-clip: padding-box; /* 确保背景不会超出边框 */
-    
-    &:hover {
-      background: #8c8c8c; /* 悬停时更深的颜色 */
-      background-clip: padding-box;
-    }
-  }
+  height: 500px;
 }
 
 /* 优化过渡动画 */
@@ -3578,6 +3533,35 @@ export default defineComponent({
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* 更新 header-actions 样式 */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 移除旧的 edit-button 样式 */
+.edit-button {
+  display: none;
+}
+
+:deep(.ant-btn-link) {
+  padding: 4px 8px;
+  height: auto;
+  
+  .anticon {
+    font-size: 14px;
+  }
+  
+  &.ant-btn-dangerous {
+    color: #ff4d4f;
+    
+    &:hover {
+      color: #ff7875;
+    }
   }
 }
 </style>

@@ -1,62 +1,67 @@
 <template>
-  <div 
-    class="relative pt-6 pb-6 bg-white"
-  >
-    <div class="max-w-6xl mx-auto px-8">
-      <div class="relative z-10">
-        <div class="flex flex-col items-center gap-3">
-          <h1 
-            v-if="section.topContent.title"
-            class="text-center text-2xl md:text-3xl font-extrabold tracking-tight leading-tight"
-          >
-            <span class="text-gray-900">
-              {{ titleFirstPart }}
-            </span>
-            <span class="inline-block -rotate-1 px-2 py-1 bg-gradient-to-r from-[#3374FF]/[0.75] via-[#3374FF]/[0.5] to-[#3374FF]/[0.75] text-white">
-              {{ titleLastWords }}
-            </span>
-          </h1>
-        </div>
+  <div class="py-10">
+    <div 
+      class="relative bg-gradient-to-b from-[#3374FF] to-[#1F4699] w-[95%] mx-auto rounded-2xl py-10"
+    >
+      <div class="max-w-6xl mx-auto px-8">
+        <div class="relative z-10 pt-8 md:pt-12">
+          <div class="flex flex-col items-center gap-4">
+            <h1 
+              v-if="section.topContent.title"
+              class="text-center text-lg md:text-xl lg:text-2xl font-extrabold tracking-tight leading-tight text-white"
+            >
+              {{ section.topContent.title }}
+            </h1>
+          </div>
 
-        <p 
-          v-if="section.topContent.subTitle"
-          class="text-xs text-gray-600 pt-2 max-w-3xl mx-auto text-center"
-        >
-          {{ section.topContent.subTitle }}
-        </p>
+          <p 
+            v-if="section.topContent.subTitle"
+            class="text-center text-sm md:text-base font-semibold text-white pt-3 max-w-3xl mx-auto"
+          >
+            {{ section.topContent.subTitle }}
+          </p>
 
-        <div class="pt-4 flex justify-center items-center gap-3">
-          <button 
-            v-if="section.topContent.showButton"
-            @click="handleButtonClick('demo')"
-            class="px-6 py-2 rounded-3xl text-sm font-semibold transition-all duration-200 border-2 border-[#3374FF] text-[#3374FF] hover:bg-[#3374FF] hover:text-white"
-          >
-            {{ section.topContent.buttonText }}
-          </button>
-          
-          <button 
-            v-if="section.topContent.showCtaButton"
-            @click="handleButtonClick('getStarted')"
-            class="px-6 py-2 rounded-3xl text-sm font-semibold transition-all duration-200 bg-[#3374FF] text-white hover:bg-[#2861E5]"
-          >
-            {{ section.topContent.ctaButtonText }}
-          </button>
+          <div class="pt-6 flex justify-center gap-3">
+            <button 
+              v-if="section.topContent.showButton"
+              @click="handleButtonClick('demo')"
+              class="px-8 py-3 rounded-xl text-base font-semibold transition-all duration-200 bg-transparent text-white border-2 border-white hover:scale-105"
+            >
+              {{ section.topContent.buttonText }}
+            </button>
+            
+            <button 
+              v-if="section.topContent.showCtaButton"
+              @click="handleButtonClick('getStarted')"
+              class="px-8 py-3 rounded-xl text-base font-semibold transition-all duration-200 bg-[#3374FF] text-white hover:scale-105"
+            >
+              {{ section.topContent.ctaButtonText }}
+            </button>
 
-          <!-- Product Hunt Widget -->
-          <a 
-            v-if="section.topContent.enableProductHunt && section.topContent.productHuntId"
-            :href="`https://www.producthunt.com/posts/${section.topContent.productHuntId}?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-${section.topContent.productHuntId}`" 
-            target="_blank"
-            class="transition-transform duration-200"
-          >
+            <a 
+              v-if="section.topContent.enableProductHunt && section.topContent.productHuntId"
+              :href="`https://www.producthunt.com/posts/${section.topContent.productHuntId}?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-${section.topContent.productHuntId}`" 
+              target="_blank"
+              class="transition-transform duration-200 hover:scale-105"
+            >
+              <img 
+                :src="`https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=${section.topContent.productHuntId}&theme=light`" 
+                :alt="`${section.topContent.productHuntId} - Featured on Product Hunt`" 
+                style="width: 250px; height: 54px;"
+                width="250"
+                height="54"
+              />
+            </a>
+          </div>
+
+          <!-- 修改 banner 图片区域，使用动态的图片 URL -->
+          <div class="mt-12 w-full flex justify-center">
             <img 
-              :src="`https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=${section.topContent.productHuntId}&theme=light`" 
-              :alt="`${section.topContent.productHuntId} - Featured on Product Hunt`" 
-              style="width: 200px; height: 43px;"
-              width="200"
-              height="43"
+              :src="section.topContent.bannerImage || 'https://picsum.photos/1200/600'"
+              alt="Banner"
+              class="w-[95%] h-auto object-cover rounded-2xl shadow-lg"
             />
-          </a>
+          </div>
         </div>
       </div>
     </div>

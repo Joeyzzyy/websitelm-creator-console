@@ -6,7 +6,7 @@
       </div>
       <div class="editor-content">
         <a-form layout="vertical">
-          <div v-for="(faq, index) in localSection.bottomContent" :key="index">
+          <div v-for="(faq, index) in localSection.topContent" :key="index">
             <a-form-item>
               <div class="faq-header">
                 <span>FAQ #{{index + 1}}</span>
@@ -52,6 +52,42 @@
           >
             <plus-outlined /> Add New FAQ
           </a-button>
+
+          <div style="margin-top: 24px">
+            <a-form-item label="Bottom Button">
+              <a-space direction="vertical" style="width: 100%">
+                <a-checkbox
+                  v-model:checked="localSection.bottomContent.showButton"
+                  :disabled="disabled"
+                  @change="handleChange"
+                >
+                  Show Button
+                </a-checkbox>
+                
+                <template v-if="localSection.bottomContent.showButton">
+                  <div class="input-with-tag">
+                    <span class="html-tag">Button Text</span>
+                    <a-input
+                      v-model:value="localSection.bottomContent.buttonText"
+                      :disabled="disabled"
+                      placeholder="Button Text"
+                      @change="handleChange"
+                    />
+                  </div>
+                  
+                  <div class="input-with-tag">
+                    <span class="html-tag">Button Link</span>
+                    <a-input
+                      v-model:value="localSection.bottomContent.buttonLink"
+                      :disabled="disabled"
+                      placeholder="Button Link"
+                      @change="handleChange"
+                    />
+                  </div>
+                </template>
+              </a-space>
+            </a-form-item>
+          </div>
         </a-form>
       </div>
     </div>
@@ -111,14 +147,14 @@ export default {
       this.emitUpdate(this.localSection)
     },
     addFaq() {
-      this.localSection.bottomContent.push({
+      this.localSection.topContent.push({
         question: '',
         answer: ''
       })
       this.handleChange()
     },
     removeFaq(index) {
-      this.localSection.bottomContent.splice(index, 1)
+      this.localSection.topContent.splice(index, 1)
       this.handleChange()
     }
   }

@@ -7,25 +7,6 @@
       <div class="editor-content">
         <a-form layout="vertical">
           <!-- Top Content -->
-          <a-form-item label="Emoji">
-            <div class="input-with-tag">
-              <span class="html-tag">{{ tags.emoji }}</span>
-              <div class="emoji-input-wrapper">
-                <a-input 
-                  v-model:value="localSection.topContent.icon" 
-                  @change="handleChange" 
-                />
-                <a-button
-                  v-if="!disabled"
-                  class="emoji-trigger"
-                  @click="(e) => showEmojiPicker(e, 'top')"
-                >
-                  😊
-                </a-button>
-              </div>
-            </div>
-          </a-form-item>
-          
           <a-form-item label="Title">
             <div class="input-with-tag">
               <span class="html-tag">{{ tags.title }}</span>
@@ -46,61 +27,37 @@
 
           <!-- Bottom Content -->
           <div class="bottom-content">
-            <div class="flex justify-between items-center mb-4">
-              <h3>Modules</h3>
-              <a-button 
-                type="primary" 
-                @click="addModule"
-                :disabled="localSection.bottomContent.length >= 6"
-              >
-                Add Module
-              </a-button>
-            </div>
+            <h3 class="mb-4">Modules</h3>
             
             <div class="module-grid">
               <div v-for="(module, index) in localSection.bottomContent" :key="index">
                 <a-form-item>
-                  <div class="flex justify-between items-center mb-2">
+                  <div class="mb-2">
                     <span>Module {{ index + 1 }}</span>
-                    <a-button type="text" class="delete-btn" @click="removeModule(index)">
-                      <template #icon>
-                        <delete-outlined />
-                      </template>
-                    </a-button>
                   </div>
                   <div class="input-with-tag mb-2">
-                    <span class="html-tag">{{ tags.icon }}</span>
-                    <div class="emoji-input-wrapper">
-                      <a-input
-                        v-model:value="module.icon"
-                        placeholder="Icon"
-                        @change="handleChange"
-                      />
-                      <a-button
-                        v-if="!disabled"
-                        class="emoji-trigger"
-                        @click="(e) => showEmojiPicker(e, 'module', index)"
-                      >
-                        😊
-                      </a-button>
-                    </div>
-                  </div>
-                  <div class="input-with-tag mb-2">
-                    <span class="html-tag">{{ tags.moduleTitle }}</span>
+                    <span class="html-tag">{{ tags.topText }}</span>
                     <a-input
-                      v-model:value="module.title"
-                      placeholder="Title"
+                      v-model:value="module.topText"
+                      placeholder="Top Text"
+                      @change="handleChange"
+                    />
+                  </div>
+                  <div class="input-with-tag mb-2">
+                    <span class="html-tag">{{ tags.middleText }}</span>
+                    <a-input
+                      v-model:value="module.middleText"
+                      placeholder="Middle Text"
                       @change="handleChange"
                     />
                   </div>
                   <div class="input-with-tag">
-                    <span class="html-tag">{{ tags.moduleContent }}</span>
+                    <span class="html-tag">{{ tags.bottomText }}</span>
                     <a-textarea
-                      v-model:value="module.content"
-                      placeholder="Content"
-                      :rows="3"
+                      v-model:value="module.bottomText"
+                      placeholder="Bottom Text"
+                      :rows="2"
                       @change="handleChange"
-                      :style="{ minHeight: '80px' }"
                     />
                   </div>
                 </a-form-item>
@@ -152,7 +109,7 @@ import EmojiPicker from 'vue3-emoji-picker'
 import 'vue3-emoji-picker/css'
 
 export default {
-  name: 'WhyChooseUsWithSixSmallBlocks',
+  name: 'WhyChooseUsWithSmallBlocks',
   extends: BaseSection,
   computed: {
     tags() {
@@ -167,7 +124,23 @@ export default {
           title: '',
           description: ''
         },
-        bottomContent: []
+        bottomContent: [
+          {
+            topText: 'Feature 1',
+            middleText: 'Value 1',
+            bottomText: 'Description 1'
+          },
+          {
+            topText: 'Feature 2',
+            middleText: 'Value 2',
+            bottomText: 'Description 2'
+          },
+          {
+            topText: 'Feature 3',
+            middleText: 'Value 3',
+            bottomText: 'Description 3'
+          }
+        ]
       },
       styles: themeConfig.normal,
       emojiPickerVisible: false,
@@ -184,12 +157,24 @@ export default {
         title: '',
         description: ''
       },
-      bottomContent: []
+      bottomContent: [
+        {
+          topText: 'Feature 1',
+          middleText: 'Value 1',
+          bottomText: 'Description 1'
+        },
+        {
+          topText: 'Feature 2',
+          middleText: 'Value 2',
+          bottomText: 'Description 2'
+        },
+        {
+          topText: 'Feature 3',
+          middleText: 'Value 3',
+          bottomText: 'Description 3'
+        }
+      ]
     }, JSON.parse(JSON.stringify(this.section)))
-
-    if (!Array.isArray(this.localSection.bottomContent)) {
-      this.localSection.bottomContent = []
-    }
   },
   watch: {
     section: {
@@ -200,9 +185,25 @@ export default {
             title: newVal.topContent?.title || '',
             description: newVal.topContent?.description || ''
           },
-          bottomContent: Array.isArray(newVal.bottomContent) 
+          bottomContent: Array.isArray(newVal.bottomContent) && newVal.bottomContent.length === 3
             ? JSON.parse(JSON.stringify(newVal.bottomContent))
-            : []
+            : [
+                {
+                  topText: 'Feature 1',
+                  middleText: 'Value 1',
+                  bottomText: 'Description 1'
+                },
+                {
+                  topText: 'Feature 2',
+                  middleText: 'Value 2',
+                  bottomText: 'Description 2'
+                },
+                {
+                  topText: 'Feature 3',
+                  middleText: 'Value 3',
+                  bottomText: 'Description 3'
+                }
+              ]
         }
       },
       deep: true,
@@ -212,23 +213,6 @@ export default {
   methods: {
     handleChange() {
       this.emitUpdate(this.localSection)
-    },
-    addModule() {
-      if (this.localSection.bottomContent.length < 6) {
-        this.localSection.bottomContent = [
-          ...this.localSection.bottomContent,
-          {
-            icon: '⚡',
-            title: 'New Module',
-            content: 'Add your description here'
-          }
-        ]
-        this.handleChange()
-      }
-    },
-    removeModule(index) {
-      this.localSection.bottomContent = this.localSection.bottomContent.filter((_, i) => i !== index)
-      this.handleChange()
     },
     showEmojiPicker(e, type, index = null) {
       e.stopPropagation()
