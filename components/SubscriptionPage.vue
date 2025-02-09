@@ -295,41 +295,6 @@
         </div>
       </div>
     </main>
-
-    <!-- 添加弹窗组件 -->
-    <a-modal
-      v-model:visible="showSecretDialog"
-      :footer="null"
-      :closable="false"
-      width="400px"
-      class="secret-portal-modal"
-      :maskClosable="true"
-    >
-      <div class="secret-portal">
-        <div class="portal-header">
-          <div class="portal-title">✨ Free Trial Access Code ⭐️</div>
-        </div>
-        
-        <a-input
-          v-model:value="secretCode"
-          placeholder="Enter your access code"
-          class="portal-input"
-          :disabled="verifyingCode"
-          @keyup.enter="verifySecretCode"
-        />
-        
-        <div class="portal-button-container">
-          <button 
-            class="portal-verify-btn"
-            :class="{ 'verifying': verifyingCode }"
-            @click="verifySecretCode"
-          >
-            <span class="btn-text">{{ verifyingCode ? 'Checking...' : 'Start Free Trial 🚀' }}</span>
-            <div class="btn-particles"></div>
-          </button>
-        </div>
-      </div>
-    </a-modal>
   </div>
 </template>
 
@@ -339,6 +304,7 @@ import { Button as AButton, Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { useRouter } from 'vue-router'
 import { createVNode } from 'vue'
+import apiClient from '../api/api'
 
 const router = useRouter()
 const userEmail = ref(localStorage.getItem('currentCustomerEmail') || '')
@@ -677,30 +643,35 @@ const faqs = [
 ]
 
 // 添加新的响应式变量
-const showSecretDialog = ref(false)
 const secretCode = ref('')
 const verifyingCode = ref(false)
 
-// 验证方法
+// Verification method
 const verifySecretCode = async () => {
-  if (!secretCode.value) return
+  if (!secretCode.value) {
+    message.warning('Please enter access code')
+    return
+  }
   
   verifyingCode.value = true
   try {
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    const response = await apiClient.activateTrialPackage(secretCode.value)
     
-    const code = secretCode.value.toUpperCase()
-    if (['ESSENTIAL2024', 'PRO2024', 'ENT2024'].includes(code)) {
-      // 添加成功动画效果
-      await new Promise(resolve => setTimeout(resolve, 500))
-      showSecretDialog.value = false
-      
-      // 处理成功逻辑
-      const plan = code.split('2024')[0].toLowerCase()
-      // 这里添加跳转或激活逻辑
+    if (!response) {
+      message.error('Verification failed, please try again')
+      return
+    }
+    if (response.code === 10014) {
+      message.error('Invalid access code, please check and try again')
+    } else if (response.code === 200) {
+      message.success('Access code verified successfully!')
+      router.push('/dashboard')
+    } else {
+      message.error(response.message || 'Invalid access code')
     }
   } catch (error) {
-    // 处理错误
+    console.error('Verification failed:', error)
+    message.error('Verification failed, please try again')
   } finally {
     verifyingCode.value = false
     secretCode.value = ''
@@ -802,6 +773,7 @@ html {
 
 .early-access-btn {
   @apply px-6 py-3 bg-gradient-to-r from-[#4B89FF] to-[#6C9AFF] text-white font-medium rounded-lg transition-all duration-300;
+  min-width: 180px;
   box-shadow: 0 4px 12px rgba(75, 137, 255, 0.25);
 }
 

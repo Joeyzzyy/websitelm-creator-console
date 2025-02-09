@@ -2638,8 +2638,7 @@ export default defineComponent({
 /* Quick Access Panel Styles */
 .quick-access-panel {
   border-radius: 12px;
-  margin-bottom: 20px;
-  background: linear-gradient(145deg, #f6f9fe, #edf3fc); /* 添加整体渐变背景 */
+  background: linear-gradient(145deg, #f6f9fe, #edf3fc); 
   border: 1px solid rgba(24, 144, 255, 0.1);
   transition: all 0.3s ease;
   

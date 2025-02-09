@@ -330,7 +330,7 @@
   <!-- 添加次登录设置密码的弹窗 -->
   <a-modal
     v-model:visible="showSetPasswordModal"
-    title="设置密码"
+    title="Set Password"
     :closable="false"
     :maskClosable="false"
     :keyboard="false"
@@ -339,34 +339,34 @@
   >
     <a-form layout="vertical" @submit.prevent="handleSetPassword">
       <a-form-item
-        label="新密码"
+        label="New Password"
         :rules="[
-          { required: true, message: '请输入新密码!' },
+          { required: true, message: 'Please input new password!' },
           { validator: validatePassword }
         ]"
       >
         <a-input-password
           v-model:value="setPasswordForm.newPassword"
-          placeholder="请输入新密码"
+          placeholder="Please input new password"
           size="large"
           class="custom-input"
         />
         <div class="password-strength" v-if="setPasswordForm.newPassword">
-          密码强度:
+          Password Strength:
           <span :class="setPasswordStrengthClass">{{ setPasswordStrength }}</span>
         </div>
       </a-form-item>
 
       <a-form-item
-        label="确认密码"
+        label="Confirm Password"
         :rules="[
-          { required: true, message: '请确认密码!' },
+          { required: true, message: 'Please confirm password!' },
           { validator: validateConfirmSetPassword }
         ]"
       >
         <a-input-password
           v-model:value="setPasswordForm.confirmPassword"
-          placeholder="请确认密码"
+          placeholder="Please confirm password"
           size="large"
           class="custom-input"
         />
@@ -381,7 +381,7 @@
           class="login-button"
           :loading="setPasswordLoading"
         >
-          {{ setPasswordLoading ? '设置中...' : '设置密码' }}
+          {{ setPasswordLoading ? 'Setting...' : 'Set Password' }}
         </a-button>
       </a-form-item>
     </a-form>
@@ -508,17 +508,17 @@ export default {
       if (/\d/.test(password)) strength++;
       
       switch(strength) {
-        case 4: return '强';
-        case 3: return '中';
-        default: return '弱';
+        case 4: return 'Strong';
+        case 3: return 'Medium';
+        default: return 'Weak';
       }
     },
     
     setPasswordStrengthClass() {
       const strengthMap = {
-        '强': 'strength-strong',
-        '中': 'strength-medium',
-        '弱': 'strength-weak'
+        'Strong': 'strength-strong',
+        'Medium': 'strength-medium',
+        'Weak': 'strength-weak'
       };
       return strengthMap[this.setPasswordStrength] || '';
     }
@@ -863,10 +863,10 @@ export default {
     },
     validateConfirmSetPassword(rule, value) {
       if (!value) {
-        return Promise.reject('请确认密码!');
+        return Promise.reject('Please confirm password!');
       }
       if (value !== this.setPasswordForm.newPassword) {
-        return Promise.reject('两次输入的密码不一致!');
+        return Promise.reject('Two passwords do not match!');
       }
       return Promise.resolve();
     },
@@ -876,8 +876,8 @@ export default {
       
       if (!newPassword || !confirmPassword) {
         this.$notification.error({
-          message: '错误',
-          description: '请写写所有字段'
+          message: 'Error',
+          description: 'Please fill in all fields'
         });
         return;
       }
@@ -892,8 +892,8 @@ export default {
         
         if (response && response.code === 200) {
           this.$notification.success({
-            message: '成功',
-            description: '密码设置成功'
+            message: 'Success',
+            description: 'Password set successfully'
           });
           
           this.showSetPasswordModal = false;
@@ -902,8 +902,8 @@ export default {
         }
       } catch (error) {
         this.$notification.error({
-          message: '错误',
-          description: error.message || '密码设置失败'
+          message: 'Error',
+          description: error.message || 'Password set failed'
         });
       } finally {
         this.setPasswordLoading = false;

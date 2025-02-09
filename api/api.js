@@ -1314,6 +1314,30 @@ const rebuildKnowledge = async () => {
   }
 };
 
+// 新增：获取客户Package的方法
+const getCustomerPackage = async () => {
+  try {
+    const response = await apiClient.get('/customer/package');
+    return response.data;
+  } catch (error) {
+    console.error('获取客户Package失败:', error);
+    return null;
+  }
+};
+
+// 新增：激活试用套餐的方法
+const activateTrialPackage = async (inviteCode) => {
+  try {
+    const response = await apiClient.post('/trial-package/activate', {
+      inviteCode: inviteCode
+    });
+    return response.data;
+  } catch (error) {
+    console.error('激活试用套餐失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1410,5 +1434,7 @@ export default {
   updatePlanningOutline,
   cancelGscAuth,
   importKeywords,
-  rebuildKnowledge
+  getCustomerPackage,
+  rebuildKnowledge,
+  activateTrialPackage
 };

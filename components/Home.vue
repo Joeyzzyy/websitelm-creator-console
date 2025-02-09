@@ -223,23 +223,24 @@
           >
             <div class="usage-header">
               <div class="usage-label">{{ usage.label }}</div>
-              <div class="usage-description">{{ usage.description }}</div>
+              <div class="usage-description text-sm text-gray-500">{{ usage.description }}</div>
             </div>
             <div class="usage-bar">
               <div 
                 class="usage-progress"
                 :style="{ 
-                  width: usage.used === 'Unlimited' ? '100%' : `${(usage.used / usage.total) * 100}%`,
-                  background: usage.used === 'Unlimited' ? '#52c41a' : 
-                             (usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff')
+                  width: `${(usage.used / usage.total) * 100}%`,
+                  background: usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff'
                 }"
               ></div>
             </div>
-            <div class="usage-numbers">
-              <span class="used">{{ usage.used }}</span>
-              <span class="separator" v-if="usage.used !== 'Unlimited'">/</span>
-              <span class="total" v-if="usage.used !== 'Unlimited'">{{ usage.total }}</span>
-              <span class="unit">{{ usage.unit }}</span>
+            <div class="usage-stats">
+              <div class="usage-numbers">
+                <span class="font-medium">{{ usage.used }}/{{ usage.total }}</span>
+              </div>
+              <div class="usage-period text-sm text-gray-500">
+                {{ usage.unit }}
+              </div>
             </div>
           </div>
         </div>
@@ -252,36 +253,28 @@
           >
             <div class="usage-header">
               <div class="usage-label">{{ usage.label }}</div>
-              <div class="usage-description">{{ usage.description }}</div>
+              <div class="usage-description text-sm text-gray-500">{{ usage.description }}</div>
             </div>
             <div class="usage-bar">
               <div 
                 class="usage-progress"
                 :style="{ 
-                  width: usage.used === 'Unlimited' ? '100%' : `${(usage.used / usage.total) * 100}%`,
-                  background: usage.used === 'Unlimited' ? '#52c41a' : 
-                             (usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff')
+                  width: `${(usage.used / usage.total) * 100}%`,
+                  background: usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff'
                 }"
               ></div>
             </div>
-            <div class="usage-numbers">
-              <span class="used">{{ usage.used }}</span>
-              <span class="separator" v-if="usage.used !== 'Unlimited'">/</span>
-              <span class="total" v-if="usage.used !== 'Unlimited'">{{ usage.total }}</span>
-              <span class="unit">{{ usage.unit }}</span>
+            <div class="usage-stats">
+              <div class="usage-numbers">
+                <span class="font-medium">{{ usage.used }}/{{ usage.total }}</span>
+              </div>
+              <div class="usage-period text-sm text-gray-500">
+                {{ usage.unit }}
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      <a-button 
-        type="primary" 
-        block
-        class="upgrade-btn"
-        @click="goToSubscriptionPage"
-      >
-        Upgrade Plan
-      </a-button>
     </div>
   </a-modal>
 </template>
@@ -868,6 +861,13 @@ html, body, #app {
   transition: width 0.3s ease, background-color 0.3s ease;
 }
 
+.usage-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
 .usage-numbers {
   font-size: 11px;
 }
@@ -890,22 +890,6 @@ html, body, #app {
   :deep(.ant-modal-title) {
     font-size: 18px;
   }
-}
-
-/* 确保无限制项的样式保持一致 */
-.usage-numbers .used,
-.usage-numbers .total {
-  font-size: 11px;
-}
-
-.usage-numbers .unit {
-  font-size: 11px;
-}
-
-/* 优化计划周期标签样式 */
-.plan-period {
-  padding: 2px 12px;
-  font-size: 12px;
 }
 
 /* 添加动画效果 */
@@ -1310,7 +1294,6 @@ html, body, #app {
 
 <script>
 import { useRouter } from 'vue-router';
-import { onMounted } from 'vue';
 import TaskManagementPage from './TaskManagementPage.vue';
 import DashboardPage from './DashboardPage.vue';
 import KeywordsPlanningPage from './KeywordsPlanningPage.vue';
@@ -1339,24 +1322,36 @@ export default {
   setup() {
     const router = useRouter();
     
-    // 检查登录状态
-    const checkAuth = () => {
+    // 检查登录状态和套餐状态
+    const checkAuth = async () => {
       const isLoggedIn = localStorage.getItem('intelickIsLoggedIn');
       const accessToken = localStorage.getItem('accessToken');
       
       if (!isLoggedIn || !accessToken) {
-        // 直接在这里处理登出逻辑
+        // 处理未登录状态
         localStorage.removeItem('authToken');
         localStorage.removeItem('intelickIsLoggedIn');
         localStorage.removeItem('currentCustomer');
         localStorage.removeItem('currentCustomerId');
         router.push('/login');
+        return false;
+      }
+      
+      // 检查套餐状态
+      try {
+        const packageResponse = await apiClient.getCustomerPackage();
+        if (packageResponse?.data?.customerPackageStatus !== 1) {
+          router.push('/subscription');
+          return false;
+        }
+        return true;
+      } catch (error) {
+        console.error('检查套餐状态失败:', error);
+        return false;
       }
     };
 
-    onMounted(() => {
-      checkAuth();
-    });
+    return { checkAuth };
   },
   data() {
     const currentCustomerId = localStorage.getItem('currentCustomerId');
@@ -1602,8 +1597,78 @@ export default {
       this.startStepByStepTour(); // 直接开始交互式引导
     },
 
-    showSubscriptionInfo() {
-      this.subscriptionModalVisible = true;
+    async showSubscriptionInfo() {
+      try {
+        const response = await apiClient.getCustomerPackage()
+        
+        if (!response?.data) {
+          message.error('Failed to fetch package information')
+          return
+        }
+        
+        const packageData = response.data
+        
+        // 检查套餐状态
+        if (packageData.customerPackageStatus !== 1) {
+          message.warning('Your subscription has expired. Please renew your plan.')
+          this.$router.push('/subscription')
+          return
+        }
+        
+        // 更新当前套餐信息
+        this.currentPlan = {
+          name: packageData.packageName?.trim() || 'Professional',
+          period: packageData.packageName?.toLowerCase().includes('monthly') ? 'monthly' : 'yearly',
+          endDate: packageData.packageEndTime,
+          remainingDays: packageData.remainingDays
+        }
+        
+        // 更新使用量信息到现有的 usageInfo 数组
+        this.usageInfo = [
+          {
+            label: 'Outline Generator',
+            used: packageData.outlineGeneratorUsage || 0,
+            total: packageData.outlineGeneratorLimit,
+            unit: `${packageData.outlineGeneratorLimit} in total per month`,
+            description: 'AI-powered outline generation'
+          },
+          {
+            label: 'Page Generator',
+            used: packageData.pageGeneratorUsage || 0,
+            total: packageData.pageGeneratorLimit,
+            unit: `${packageData.pageGeneratorLimit} in total per month`,
+            description: 'SEO-optimized page creation'
+          },
+          {
+            label: 'Free Page Deployment',
+            used: packageData.freeDeploymentPageUsage || 0,
+            total: packageData.freeDeploymentPageLimit,
+            unit: `${packageData.freeDeploymentPageLimit} in total per year`,
+            description: 'Number of pages that can be deployed'
+          },
+          {
+            label: 'Internal Links Storage',
+            used: packageData.internalLinkStorageUsage || 0,
+            total: packageData.internalLinkStorageLimit,
+            unit: `${packageData.internalLinkStorageLimit} links in total`,
+            description: 'Store and manage internal link structure'
+          },
+          {
+            label: 'Image Storage',
+            used: packageData.imageStorageUsage || 0,
+            total: packageData.imageStorageLimit,
+            unit: `${packageData.imageStorageLimit} images in total`,
+            description: 'Store and optimize images'
+          }
+        ]
+        
+        // 显示现有的 Modal
+        this.subscriptionModalVisible = true
+        
+      } catch (error) {
+        console.error('Failed to fetch package information:', error)
+        message.error('Failed to load subscription details')
+      }
     },
 
     goToSubscriptionPage() {
@@ -1615,7 +1680,53 @@ export default {
       console.error(`Failed to load image for tutorial: ${tutorial.title}`);
       // 可以设置一个默认的占位图
       event.target.src = '/path/to/default-placeholder.png';  // 替换成你的默认图片路径
-    }
+    },
+
+    // 添加初始化方法
+    async initializeAfterLogin() {
+      try {
+        // 1. 检查套餐状态
+        const packageResponse = await apiClient.getCustomerPackage();
+        const packageStatus = packageResponse?.data?.customerPackageStatus;
+        
+        if (packageStatus === 0) {
+          this.$message.warning('您还未开通套餐，请先购买套餐');
+          this.$router.push('/subscription');
+          return;
+        } else if (packageStatus === 2) {
+          this.$message.warning('您的套餐已过期，请续费');
+          this.$router.push('/subscription');
+          return;
+        } else if (packageStatus !== 1) {
+          this.$message.error('套餐状态异常，请联系客服');
+          this.$router.push('/subscription');
+          return;
+        }
+
+        // 2. 获取用户信息
+        const userResponse = await apiClient.getCurrentUser();
+        if (userResponse?.data) {
+          localStorage.setItem('currentCustomerEmail', userResponse.data.email);
+          localStorage.setItem('currentCustomerId', userResponse.data.id);
+        }
+
+        // 3. 获取用户配置
+        const configResponse = await apiClient.getUserConfig();
+        if (configResponse?.data) {
+          this.collapsed = configResponse.data.sidebarCollapsed ?? false;
+        }
+
+        // 4. 检查引导状态
+        await this.checkAndStartOnboarding();
+
+        // 5. 初始化其他必要数据
+        await this.initializeUserData();
+
+      } catch (error) {
+        console.error('初始化失败:', error);
+        this.$message.error('系统初始化失败，请刷新页面重试');
+      }
+    },
   },
   watch: {
     '$route'(to) {
@@ -1630,8 +1741,20 @@ export default {
       this.currentView = routeToView[to.path] || 'DashboardPage';
     }
   },
-  mounted() {
-    this.checkAndStartOnboarding()
+  async mounted() {
+    const authResult = await this.checkAuth();
+    if (!authResult) {
+      return; // 如果认证或套餐检查失败，直接返回
+    }
+    
+    // 如果是从登录页面跳转来的，执行初始化
+    if (this.$route.query.fromLogin) {
+      await this.initializeAfterLogin();
+    }
+    // 否则只检查引导状态
+    else {
+      await this.checkAndStartOnboarding();
+    }
   }
 };
 </script>
