@@ -136,26 +136,63 @@
     title="Tutorial Library"
     :footer="null"
     class="tutorial-library-modal"
-    width="800px"
+    width="1000px"
   >
-    <div class="tutorial-grid">
-      <div 
-        v-for="(tutorial, index) in tutorials" 
-        :key="index"
-        class="tutorial-card"
-        @click="playTutorial(tutorial)"
-      >
-        <div class="tutorial-step-badge">
-          {{ tutorial.badge }}
+    <div class="max-w-full mx-auto px-4 max-h-[600px] overflow-y-auto custom-scrollbar">
+      <div v-for="(group, category) in groupedTutorials" :key="category" class="mb-8">
+        <div class="flex items-center mb-4 group">
+          <div class="relative">
+            <h3 class="text-xs font-medium text-[#1890ff] px-3 py-1.5 bg-gradient-to-r from-[#1890ff]/10 to-white rounded-lg border border-[#1890ff]/20 shadow-sm backdrop-blur-sm">
+              {{ category }}
+            </h3>
+            <div class="absolute inset-0 bg-[#1890ff]/10 blur-lg rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          </div>
+          <div class="ml-4 flex-grow">
+            <div class="h-px bg-gradient-to-r from-[#1890ff]/20 via-gray-200 to-transparent"></div>
+          </div>
         </div>
-        <div class="tutorial-thumbnail">
-          <div class="tech-overlay"></div>
-          <img :src="tutorial.imageUrl" :alt="tutorial.title" class="thumbnail-image">
-        </div>
-        <div class="tutorial-info">
-          <h4>{{ tutorial.title }}</h4>
-          <p>{{ tutorial.description }}</p>
-          <div class="read-more">Read Documentation →</div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div 
+            v-for="tutorial in group" 
+            :key="tutorial.id"
+            class="group flex flex-col bg-white rounded-lg border border-gray-200 hover:border-[#1890ff]/20 hover:shadow-lg transition-all duration-200 cursor-pointer"
+            @click="playTutorial(tutorial)"
+          >
+            <div class="relative aspect-[16/9] overflow-hidden">
+              <div class="tutorial-step-badge text-[10px] px-2 py-0.5">
+                Step {{ tutorial.badge }}
+              </div>
+              <div class="tech-overlay absolute inset-0 bg-gradient-to-b from-transparent to-black/10"></div>
+              <img 
+                :src="tutorial.imageUrl" 
+                :alt="tutorial.imageAlt || tutorial.title"
+                class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+                @load="$event.target.classList.add('loaded')"
+                @error="handleImageError($event, tutorial)"
+              >
+            </div>
+            
+            <div class="flex flex-col flex-grow p-2">
+              <div class="mb-1">
+                <span class="inline-block px-2 py-0.5 text-[10px] font-medium text-[#1890ff] bg-[#1890ff]/10 rounded-full">
+                  {{ tutorial.tag }}
+                </span>
+              </div>
+              
+              <h4 class="text-xs font-semibold text-gray-900 group-hover:text-[#1890ff] transition-colors duration-200 line-clamp-2 mb-1">
+                {{ tutorial.title }}
+              </h4>
+              
+              <p v-if="tutorial.description" class="text-[10px] text-gray-600 line-clamp-2 mb-1">
+                {{ tutorial.description }}
+              </p>
+              
+              <div class="read-more mt-auto text-[10px] text-[#1890ff] font-medium">
+                Read Documentation →
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1220,6 +1257,55 @@ html, body, #app {
 .tutorial-card:first-child .tutorial-step-badge {
   background: linear-gradient(135deg, #52c41a, #389e0d);
 }
+
+/* 添加自定义样式 */
+.tutorial-library-modal {
+  :deep(.ant-modal-body) {
+    padding: 16px;
+    max-height: calc(90vh - 110px); /* 减去标题和padding的高度 */
+    overflow-y: hidden; /* 防止双滚动条 */
+  }
+  
+  :deep(.ant-modal-content) {
+    max-height: 90vh;
+  }
+  
+  /* 自定义滚动条样式 */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(24, 144, 255, 0.3) transparent;
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba(24, 144, 255, 0.3);
+      border-radius: 3px;
+      
+      &:hover {
+        background-color: rgba(24, 144, 255, 0.5);
+      }
+    }
+  }
+}
+
+/* 确保模态框在小屏幕上也有合适的高度 */
+@media (max-height: 800px) {
+  .tutorial-library-modal {
+    :deep(.ant-modal-body) {
+      max-height: calc(80vh - 110px);
+    }
+    
+    :deep(.ant-modal-content) {
+      max-height: 80vh;
+    }
+  }
+}
 </style>
 
 <script>
@@ -1289,15 +1375,7 @@ export default {
       currentCustomerEmail: currentCustomerEmail,
       guideModeVisible: false,
       tutorialLibraryVisible: false,
-      tutorials: Object.values(tutorialConfig).map((tutorial, index) => ({
-        step: index + 1,
-        title: tutorial.title,
-        description: tutorial.content,
-        imageUrl: tutorial.imageUrl,
-        docsLink: tutorial.docsLink,
-        badge: tutorial.badge,
-        features: tutorial.features
-      })),
+      tutorials: tutorialConfig,
       subscriptionModalVisible: false,
       currentPlan: {
         name: 'Professional',
@@ -1383,6 +1461,22 @@ export default {
         width: '72px',
         height: '72px'
       };
+    },
+    // 将教程按tag分组
+    groupedTutorials() {
+      const groups = {};
+      this.tutorials.forEach((tutorial, index) => {
+        const category = tutorial.tag || 'General';
+        if (!groups[category]) {
+          groups[category] = [];
+        }
+        groups[category].push({
+          ...tutorial,
+          badge: `${groups[category].length + 1}`, // 添加序号作为badge
+          id: tutorial.targetUrl // 使用targetUrl作为唯一标识
+        });
+      });
+      return groups;
     }
   },
   methods: {
@@ -1499,8 +1593,7 @@ export default {
 
     // 播放选中的教程
     playTutorial(tutorial) {
-      // 实现教程播放逻辑
-      window.open(tutorial.docsLink, '_blank'); // 打开文章链接
+      window.open(tutorial.targetUrl, '_blank');
     },
 
     // 新增直接开始交互式引导的方法
@@ -1516,6 +1609,12 @@ export default {
     goToSubscriptionPage() {
       this.subscriptionModalVisible = false;
       this.$router.push('/subscription');
+    },
+
+    handleImageError(event, tutorial) {
+      console.error(`Failed to load image for tutorial: ${tutorial.title}`);
+      // 可以设置一个默认的占位图
+      event.target.src = '/path/to/default-placeholder.png';  // 替换成你的默认图片路径
     }
   },
   watch: {
