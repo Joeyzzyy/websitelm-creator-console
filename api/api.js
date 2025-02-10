@@ -1,7 +1,23 @@
 import axios from 'axios';
 
+// const apiClient = axios.create({
+//   baseURL: 'https://strapi.sheet2email.com/v1', // 替换为实际的 API 基础地址
+//   timeout: 20000,
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
+
+// const knowledgeApiClient = axios.create({
+//   baseURL: 'https://strapi.sheet2email.com', // 替换为实际的 API 基础地址
+//   timeout: 20000,
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
+
 const apiClient = axios.create({
-  baseURL: 'https://strapi.sheet2email.com/v1', // 替换为实际的 API 基础地址
+  baseURL: 'https://api.websitelm.com/v1', // 替换为实际的 API 基础地址
   timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
@@ -9,7 +25,7 @@ const apiClient = axios.create({
 });
 
 const knowledgeApiClient = axios.create({
-  baseURL: 'https://strapi.sheet2email.com', // 替换为实际的 API 基础地址
+  baseURL: 'https://api.websitelm.com', // 替换为实际的 API 基础地址
   timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
