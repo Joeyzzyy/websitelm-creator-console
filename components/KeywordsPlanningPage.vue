@@ -474,7 +474,16 @@
                                   </template>
                                   
                                   <div class="card-content" @click.stop="showPlanDetails(plan)">
-                                    <h3 class="plan-title">{{ plan.title }}</h3>
+                                    <h3 class="plan-title">
+                                      {{ plan.title }}
+                                      <a-tag 
+                                        v-if="plan.hasRelatedPageTask" 
+                                        color="green"
+                                        class="page-status-tag"
+                                      >
+                                        Page Generated
+                                      </a-tag>
+                                    </h3>
                                     <p class="plan-description">{{ plan.description }}</p>
                                     
                                     <div class="plan-metrics">
@@ -567,7 +576,16 @@
                                   </template>
                                   
                                   <div class="card-content" @click.stop="showPlanDetails(plan)">
-                                    <h3 class="plan-title">{{ plan.title }}</h3>
+                                    <h3 class="plan-title">
+                                      {{ plan.title }}
+                                      <a-tag 
+                                        v-if="plan.hasRelatedPageTask" 
+                                        color="green"
+                                        class="page-status-tag"
+                                      >
+                                        Page Generated
+                                      </a-tag>
+                                    </h3>
                                     <p class="plan-description">{{ plan.description }}</p>
                                     
                                     <div class="plan-metrics">
@@ -935,6 +953,7 @@ digital marketing strategy"
 <script>
 import { defineComponent, ref, computed, h, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
+import { Tag } from 'ant-design-vue'
 import { 
   DeleteOutlined,
   PlusOutlined,
@@ -1037,6 +1056,7 @@ export default defineComponent({
     UploadOutlined,
     DownloadOutlined,
     QuestionCircleOutlined,
+    Tag,
   },
   setup() {
     const selectedKeywords = ref([])
@@ -2199,13 +2219,19 @@ export default defineComponent({
         width: '10%'
       },
       {
-        title: 'Related Outlines',
+        title: 'Has Related Outlines',
         key: 'relatedOutlines',
         width: '20%',
-        customRender: () => '-'
+        customRender: ({ record }) => h('span', [
+          h(Tag, {
+            color: record.relatedOutlines?.length > 0 ? 'green' : 'red'
+          }, {
+            default: () => record.relatedOutlines?.length > 0 ? 'Yes' : 'No'
+          })
+        ])
       },
       {
-        title: 'Actions',
+        title: 'Manual Actions',
         key: 'actions',
         width: '10%'
       }
@@ -4542,5 +4568,10 @@ export default defineComponent({
 .title-display:hover .edit-icon,
 .description-display:hover .edit-icon {
   opacity: 1;
+}
+
+.page-status-tag {
+  margin-left: 8px;
+  font-size: 12px;
 }
 </style>
