@@ -976,19 +976,25 @@ export default {
         verifyingSubfolder.value = true;
         const projectId = PROJECT_ID;
         
-        // 使用主域名进行验证
+        // 1. 向 Vercel 发送主域名验证请求
         const domainData = {
-          name: productInfo.value.projectWebsite
+          name: productInfo.value.projectWebsite // 使用主域名
         };
         
-        // 提交验证申请
+        // 2. 调用 Vercel API 进行域名验证
         const response = await apiClient.addVercelDomain(projectId, domainData);
-        // 加载验证配置
+        
+        // 3. 加载验证配置
         await loadSubfolderDomainConfig();
+        message.success('验证请求已提交，请按照说明配置 DNS 记录');
         
       } catch (error) {
-        console.error('Failed to start domain verification:', error);
-        message.error('Failed to start domain verification');
+        console.error('开始域名验证失败:', error);
+        if (error.response?.data?.error?.code === 'domain_already_in_use') {
+          message.info('该域名已提交验证。请按照说明添加 DNS 记录，然后等待验证完成。');
+        } else {
+          message.error('开始域名验证失败');
+        }
       } finally {
         verifyingSubfolder.value = false;
       }
@@ -996,22 +1002,17 @@ export default {
 
     const loadSubfolderDomainConfig = async () => {
       try {
+        // 获取主域名的验证状态
         const config = await apiClient.getVercelDomainConfig(productInfo.value.projectWebsite);
         
-        // 根据实际配置设置 verified 状态
         subfolderDomainConfig.value = {
           ...config,
-          verified: !config.misconfigured // 根据 misconfigured 状态来确定是否已验证
+          verified: !config.misconfigured
         };
         
       } catch (error) {
         console.error('加载域名配置失败:', error);
-        console.error('错误详情:', {
-          message: error.message,
-          response: error.response?.data,
-          status: error.response?.status
-        });
-        message.error('Failed to load domain configuration');
+        message.error('加载域名配置失败');
       }
     };
 
@@ -1019,41 +1020,31 @@ export default {
       refreshingSubfolder.value = true;
       try {
         await loadSubfolderDomainConfig();
-        message.success('Refresh successful');
+        message.success('刷新成功');
       } catch (error) {
-        message.error('Refresh failed');
+        message.error('刷新失败');
       } finally {
         refreshingSubfolder.value = false;
       }
     };
 
-    // 在 watch 方法中添加对 deploymentForm.method 的监听
-    watch(() => deploymentForm.value.method, async (newMethod) => {
-      if (newMethod === 'subfolder') {
-        loadSubfolders();
-        // 如果有主域名，则加载域名配置
-        if (productInfo.value?.projectWebsite) {
-          await loadSubfolderDomainConfig();
-        }
-      }
-    });
-
+    // 删除子文件夹域名验证
     const showDeleteSubfolderDomainConfirm = () => {
       Modal.confirm({
-        title: 'Delete Domain Verification',
-        content: `Are you sure you want to delete the domain verification for ${productInfo.value.projectWebsite}?`,
-        okText: 'Delete',
+        title: '删除域名验证',
+        content: `确定要删除 ${productInfo.value.projectWebsite} 的域名验证吗？`,
+        okText: '删除',
         okType: 'danger',
-        cancelText: 'Cancel',
+        cancelText: '取消',
         async onOk() {
           try {
             const projectId = PROJECT_ID;
             await apiClient.deleteVercelDomain(projectId, productInfo.value.projectWebsite);
-            message.success('Domain verification deleted successfully');
+            message.success('域名验证已删除');
             subfolderDomainConfig.value = null; // 清除验证配置
           } catch (error) {
-            console.error('Failed to delete domain verification:', error);
-            message.error('Failed to delete domain verification');
+            console.error('删除域名验证失败:', error);
+            message.error('删除域名验证失败');
           }
         },
       });

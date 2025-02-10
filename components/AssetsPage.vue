@@ -85,6 +85,11 @@
             </template>
           </a-tab-pane>
           <a-tab-pane key="footer" tab="Footer" />
+          <a-tab-pane key="favicon" tab="Favicon">
+            <template #tab>
+              <span class="favicon-tab">Favicon</span>
+            </template>
+          </a-tab-pane>
         </a-tabs>
 
       <div class="page-content">
@@ -527,6 +532,111 @@
                   </a-table>
                 </template>
               </a-spin>
+            </template>
+            <!-- Favicon Content -->
+            <template v-else-if="activeTab === 'favicon'">
+              <div class="favicon-content">
+                <div class="preview-section">
+                  <div class="section-header">
+                    <h3>Favicon Settings</h3>
+                    <p class="section-description">
+                      Upload different sizes of favicons for various devices and platforms
+                    </p>
+                  </div>
+                  
+                  <div class="preview-devices">
+                    <!-- Browser Tab Preview -->
+                    <div class="device-preview">
+                      <div class="preview-header">
+                        <h4>Browser Tab Icon</h4>
+                        <p class="size-hint">16x16 px</p>
+                        <div class="upload-area" @click="() => triggerFaviconUpload('tab')">
+                          <upload-outlined v-if="!faviconPreviews.tab" class="upload-icon" />
+                          <img v-else :src="faviconPreviews.tab" class="preview-img" />
+                          <p>Click to upload</p>
+                        </div>
+                        <input
+                          type="file"
+                          ref="tabInput"
+                          accept="image/x-icon,image/png"
+                          style="display: none"
+                          @change="(e) => handleFaviconChange(e, 'tab')"
+                        />
+                      </div>
+                      
+                      <div class="preview-display">
+                        <div class="browser-chrome">
+                          <div class="tab">
+                            <img v-if="faviconPreviews.tab" :src="faviconPreviews.tab" class="tab-favicon" />
+                            <span>My Website - Chrome</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="preview-description">
+                        <p>Used in browser tabs, bookmarks, and favorites bar. This is the most common favicon size that every website should have.</p>
+                      </div>
+                    </div>
+
+                    <!-- Windows Taskbar Preview -->
+                    <div class="device-preview">
+                      <div class="preview-header">
+                        <h4>Windows Taskbar</h4>
+                        <p class="size-hint">32x32 px</p>
+                        <div class="upload-area" @click="() => triggerFaviconUpload('taskbar')">
+                          <upload-outlined v-if="!faviconPreviews.taskbar" class="upload-icon" />
+                          <img v-else :src="faviconPreviews.taskbar" class="preview-img" />
+                          <p>Click to upload</p>
+                        </div>
+                        <input
+                          type="file"
+                          ref="taskbarInput"
+                          accept="image/x-icon,image/png"
+                          style="display: none"
+                          @change="(e) => handleFaviconChange(e, 'taskbar')"
+                        />
+                      </div>
+                      
+                      <div class="preview-display">
+                        <div class="windows-taskbar">
+                          <img v-if="faviconPreviews.taskbar" :src="faviconPreviews.taskbar" class="taskbar-icon" />
+                        </div>
+                      </div>
+                      <div class="preview-description">
+                        <p>Displayed when users pin your website to Windows taskbar, add to Start menu, or view in high-resolution bookmarks.</p>
+                      </div>
+                    </div>
+
+                    <!-- iOS Preview -->
+                    <div class="device-preview">
+                      <div class="preview-header">
+                        <h4>iOS Home Screen</h4>
+                        <p class="size-hint">180x180 px</p>
+                        <div class="upload-area" @click="() => triggerFaviconUpload('ios')">
+                          <upload-outlined v-if="!faviconPreviews.ios" class="upload-icon" />
+                          <img v-else :src="faviconPreviews.ios" class="preview-img" />
+                          <p>Click to upload</p>
+                        </div>
+                        <input
+                          type="file"
+                          ref="iosInput"
+                          accept="image/x-icon,image/png"
+                          style="display: none"
+                          @change="(e) => handleFaviconChange(e, 'ios')"
+                        />
+                      </div>
+                      
+                      <div class="preview-display">
+                        <div class="ios-home">
+                          <img v-if="faviconPreviews.ios" :src="faviconPreviews.ios" class="ios-app-icon" />
+                        </div>
+                      </div>
+                      <div class="preview-description">
+                        <p>Appears when users add your website to their iOS home screen ("Add to Home Screen" feature) or in Safari bookmarks.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </template>
           </a-spin>
         </div>
@@ -2282,6 +2392,50 @@ export default {
       knowledgeModalVisible.value = true;
     };
 
+    // 修改为多个预览
+    const faviconPreviews = ref({
+      tab: '',
+      taskbar: '',
+      ios: ''
+    })
+    const tabInput = ref(null)
+    const taskbarInput = ref(null)
+    const iosInput = ref(null)
+    const currentUploadType = ref('')
+
+    const triggerFaviconUpload = (type) => {
+      const inputRefs = {
+        tab: tabInput,
+        taskbar: taskbarInput,
+        ios: iosInput
+      }
+      inputRefs[type].value.click()
+    }
+
+    const handleFaviconChange = async (e, type) => {
+      const file = e.target.files[0]
+      if (file) {
+        try {
+          faviconPreviews.value[type] = URL.createObjectURL(file)
+          
+          const formData = new FormData()
+          formData.append('file', file)
+          formData.append('type', type)
+          formData.append('customerId', localStorage.getItem('currentCustomerId'))
+          
+          await apiClient.uploadFavicon(formData)
+          message.success('Favicon uploaded successfully')
+          
+          // 重置文件输入
+          e.target.value = ''
+        } catch (error) {
+          console.error('Failed to upload favicon:', error)
+          message.error('Failed to upload favicon')
+          faviconPreviews.value[type] = ''
+        }
+      }
+    }
+
     return {
       domainConfigured,
       loading,
@@ -2396,6 +2550,12 @@ export default {
       deleteArticle,
       showDeleteConfirm,
       showAddArticle,
+      faviconPreviews,
+      tabInput,
+      taskbarInput,
+      iosInput,
+      triggerFaviconUpload,
+      handleFaviconChange,
     }
   }
 }
@@ -4259,5 +4419,189 @@ export default {
 
 .info-value .ant-input {
   width: 100%;
+}
+
+/* Add new styles */
+.favicon-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin: 24px;
+}
+
+.preview-section {
+  padding: 24px;
+}
+
+.section-header {
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.section-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.section-description {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.preview-devices {
+  display: flex;
+  gap: 48px;
+  align-items: flex-start;
+  margin-top: 24px;
+}
+
+.device-preview {
+  flex: 1;
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.preview-header {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.preview-header h4 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.size-hint {
+  color: #6b7280;
+  font-size: 13px;
+  margin: 0 0 16px;
+  padding: 4px 12px;
+  background: #f3f4f6;
+  border-radius: 16px;
+  display: inline-block;
+}
+
+.upload-area {
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: white;
+}
+
+.upload-area:hover {
+  border-color: #60a5fa;
+  background: #f8fafc;
+}
+
+.upload-icon {
+  font-size: 24px;
+  color: #60a5fa;
+}
+
+.preview-img {
+  max-width: 64px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.preview-display {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Browser Tab Preview */
+.browser-chrome {
+  background: #f1f3f4;
+  border-radius: 8px 8px 0 0;
+  padding: 8px;
+  width: 240px;
+  margin: 0 auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab {
+  background: white;
+  border-radius: 8px 8px 0 0;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Windows Taskbar Preview */
+.windows-taskbar {
+  background: #1f1f1f;
+  padding: 12px;
+  border-radius: 8px;
+  width: 200px;
+  margin: 0 auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* iOS Preview */
+.ios-home {
+  background: linear-gradient(135deg, #f8fafc, #e5e7eb);
+  padding: 24px;
+  border-radius: 16px;
+  width: 180px;
+  margin: 0 auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ios-app-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: block;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 响应式布局 */
+@media (max-width: 1024px) {
+  .preview-devices {
+    flex-direction: column;
+    gap: 32px;
+  }
+  
+  .device-preview {
+    width: 100%;
+  }
+  
+  .favicon-content {
+    margin: 16px;
+  }
+}
+
+/* Add new styles */
+.preview-description {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.preview-description p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+  text-align: left;
 }
 </style> 

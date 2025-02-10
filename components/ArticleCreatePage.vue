@@ -769,6 +769,12 @@ export default defineComponent({
 
     const handleSave = async (shouldQuit = false) => {
       try {
+        // Check if slug contains spaces
+        if (articleData.value.slug && articleData.value.slug.includes(' ')) {
+          message.error('Page slug cannot contain spaces');
+          return;
+        }
+
         // 如果是编辑模式，检查 slug
         if (isEditMode.value) {
           // 主动触发 slug 检查
@@ -1471,6 +1477,12 @@ export default defineComponent({
       }
 
       try {
+        // Check if slug contains spaces
+        if (articleData.value.slug && articleData.value.slug.includes(' ')) {
+          console.log('Slug contains spaces, skipping auto-save');
+          return;
+        }
+
         // 检查是否满足自动保存条件
         if (!checkRequiredFields()) {
           console.log('Required fields not filled, skipping auto-save');

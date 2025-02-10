@@ -272,7 +272,7 @@ export default {
       localSection: {
         title: '',
         leftContent: [],
-        rightContent: [{ contentText: '' }] // 简化为单个内容
+        rightContent: '' // 直接使用字符串
       },
       editor: null, // 改为单个编辑器
       linkModalVisible: false,
@@ -290,17 +290,12 @@ export default {
     this.localSection = Object.assign({
       title: '',
       leftContent: [],
-      rightContent: [{ contentText: '' }]
+      rightContent: '' // 直接使用字符串
     }, JSON.parse(JSON.stringify(this.section)))
     
     if (!Array.isArray(this.localSection.leftContent)) {
       this.localSection.leftContent = []
     }
-    
-    // 确保只有一个 rightContent
-    this.localSection.rightContent = [
-      this.localSection.rightContent[0] || { contentText: '' }
-    ]
 
     this.$nextTick(() => {
       this.initEditor()
@@ -343,7 +338,7 @@ export default {
           }),
           Subtitle, // 添加子标题扩展
         ],
-        content: this.localSection.rightContent[0].contentText || '',
+        content: this.localSection.rightContent || '', // 直接使用 rightContent 字符串
         editable: !this.disabled,
         autofocus: false,
         onUpdate: ({ editor }) => {
@@ -351,7 +346,7 @@ export default {
           
           const html = editor.getHTML()
           this.editorContent = html // 更新 HTML 内容
-          this.localSection.rightContent[0].contentText = html
+          this.localSection.rightContent = html // 直接设置 rightContent 字符串
           this.debouncedHandleChange()
         },
       })

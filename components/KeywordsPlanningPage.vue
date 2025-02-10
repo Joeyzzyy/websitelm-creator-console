@@ -824,10 +824,6 @@
                   {{ selectedPlan.pageType }}
                 </a-tag>
               </div>
-              <div class="info-item">
-                <span class="info-label">Word Count</span>
-                <span>{{ getTotalWordCount(selectedPlan).toLocaleString() }} words</span>
-              </div>
             </div>
           </section>
 
@@ -3058,9 +3054,6 @@ export default defineComponent({
               h('strong', outline.title),
               h('div', { style: 'margin-top: 8px; color: #666;' }, [
                 h('span', `Type: ${outline.pageType}`),
-                h('span', { style: 'margin-left: 16px;' }, 
-                  `Word Count: ${getTotalWordCount(outline).toLocaleString()} words`
-                )
               ])
             ]),
             
@@ -3083,40 +3076,21 @@ export default defineComponent({
       if (!confirmed) return;
 
       try {
-        generationProgressVisible.value = true;
         isGeneratingPages.value = true;
-        generationProgress.value = 0;
-        generationStatus.value = 'active';
-        generationCompleted.value = false;
-        generationFailed.value = false;
-        generationStatusText.value = 'Generating page...';
-        generationDetails.value = `Processing: "${outline.title}"`;
+        message.loading('Submitting page generation task...');
 
         await api.createAIPage(outline.outlineId);
 
-        generationCompleted.value = true;
-        isGeneratingPages.value = false;
-        generationStatus.value = 'success';
-        generationStatusText.value = 'Page generated successfully!';
-        generationDetails.value = 'The page has been created and is ready for review.';
-
+        message.success('Page generation task submitted successfully!');
+        
         // Refresh the outline list to update status
         await fetchContentPlans();
 
-        setTimeout(() => {
-          generationProgressVisible.value = false;
-          generationProgress.value = 0;
-          generationCompleted.value = false;
-          generationFailed.value = false;
-        }, 3000);
-
       } catch (error) {
         console.error('Page generation failed:', error);
-        generationFailed.value = true;
+        message.error(error.message || 'Failed to submit page generation task');
+      } finally {
         isGeneratingPages.value = false;
-        generationStatus.value = 'exception';
-        generationStatusText.value = 'Generation failed';
-        generationDetails.value = error.message || 'Unknown error occurred';
       }
     };
 
