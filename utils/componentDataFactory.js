@@ -498,20 +498,7 @@ export const createCleanComponentData = (componentType) => {
           display: true
         }
       ],
-      rightContent: [
-        {
-          contentTitle: '[DEMO] Main Feature 1',
-          contentText: '[SAMPLE] Our AI-driven solution significantly enhances your workflow efficiency. Through intelligent automation technology, tasks that previously took hours can now be completed in minutes. According to customer feedback, teams save 60-80% of their time on average, allowing them to focus on more creative and strategic initiatives. This breakthrough in productivity has transformed how our clients approach their daily operations.'
-        },
-        {
-          contentTitle: '[DEMO] Main Feature 2',
-          contentText: '[SAMPLE] Leveraging advanced machine learning algorithms, our platform continuously learns and optimizes workflows. The system automatically analyzes user behavior patterns, identifies efficiency bottlenecks, and provides personalized improvement recommendations. This data-driven approach has helped over 1,000 businesses achieve remarkable operational improvements, with many reporting a 200% increase in productivity within the first month.'
-        },
-        {
-          contentTitle: '[DEMO] Main Feature 3',
-          contentText: '[SAMPLE] We offer comprehensive integration solutions that seamlessly connect with your existing systems. Whether you\'re using CRM, ERP, or other enterprise software, our platform adapts to your needs. Our enterprise-grade security ensures data protection while maintaining high performance. With 24/7 technical support and regular updates, we ensure your business operations run smoothly and efficiently.'
-        }
-      ]
+      rightContent: ''
     },
 
     ProductBenefitsWithTable: {

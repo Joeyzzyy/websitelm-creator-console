@@ -165,15 +165,11 @@ const props = defineProps({
 const containerRef = ref(null)
 const stickyRef = ref(null)
 
-const { leftContent, rightContent } = props.section
-
-// 解析HTML内容的函数
 const parseHtmlContent = (htmlString) => {
   if (!htmlString) return []
   
   const result = []
   let currentIndex = 0
-  // 更新正则表达式以匹配 <a>, <i>, <b> 标签
   const tagRegex = /<(a|i|b)(?:\s+(?:[^>]*?\s+)?href="([^"]*)")?[^>]*>(.*?)<\/\1>/g
   
   let match
@@ -221,7 +217,6 @@ const parseHtmlContent = (htmlString) => {
   return result
 }
 
-// 滚动处理
 const handleScroll = () => {
   if (!containerRef.value || !stickyRef.value) return
   
@@ -257,7 +252,6 @@ const handleScroll = () => {
   }
 }
 
-// 生命周期钩子
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   window.addEventListener('resize', handleScroll)
@@ -269,7 +263,6 @@ onUnmounted(() => {
   window.removeEventListener('resize', handleScroll)
 })
 
-// 工具函数
 const scrollToSection = (id) => {
   const element = document.getElementById(id)
   if (element) {

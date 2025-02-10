@@ -45,6 +45,16 @@
                 </a-button>
 
                 <a-button 
+                  class="action-button secondary-btn"
+                  danger
+                  :disabled="!selectedRowKeys.length"
+                  @click="handleBatchDelete"
+                >
+                  <template #icon><DeleteOutlined /></template>
+                  <span>Delete Selected ({{ selectedRowKeys.length }})</span>
+                </a-button>
+
+                <a-button 
                   type="primary"
                   @click="handleAddPage"
                   class="generate-btn action-button"
@@ -95,6 +105,11 @@
             :data-source="tasks"
             :pagination="false"
             :scroll="{ x: true }"
+            :row-selection="{ 
+              selectedRowKeys: selectedRowKeys,
+              onChange: onSelectChange,
+              getCheckboxProps: getCheckboxProps
+            }"
             @change="handleTableChange"
           >
             <template #bodyCell="{ column, record }">
@@ -655,6 +670,14 @@ export default {
           } else {
             message.error('Failed to submit to Google Search Console')
           }
+        } else if (modalConfig.type === 'batch_delete') {
+          const deletePromises = modalConfig.data.map(pageId => 
+            apiClient.deletePage(pageId)
+          )
+          
+          await Promise.all(deletePromises)
+          message.success(`Successfully deleted ${modalConfig.data.length} pages`)
+          fetchTasks()
         }
       } catch (error) {
         console.error('Operation failed:', error)
@@ -1000,6 +1023,31 @@ export default {
       modalConfig.data = null
     }
 
+    // Add new reactive references
+    const selectedRowKeys = ref([])
+    const batchDeleteLoading = ref(false)
+
+    // Add selection change handler
+    const onSelectChange = (keys) => {
+      selectedRowKeys.value = keys
+    }
+
+    // Add checkbox props getter
+    const getCheckboxProps = (record) => ({
+      disabled: record.generatorStatus === 'processing',
+    })
+
+    // Add batch delete handler
+    const handleBatchDelete = () => {
+      if (!selectedRowKeys.value.length) return
+
+      modalConfig.visible = true
+      modalConfig.title = 'Confirm Batch Delete'
+      modalConfig.content = `Are you sure you want to delete ${selectedRowKeys.value.length} selected pages?`
+      modalConfig.type = 'batch_delete'
+      modalConfig.data = selectedRowKeys.value
+    }
+
     onMounted(async () => {
       await loadProductInfo()
       // 只有在域名已配置的情况下才执行其他操作
@@ -1056,7 +1104,11 @@ export default {
       getPreviewUrl,
       domainConfigured,
       bannerTheme,
-      handleModalCancel
+      handleModalCancel,
+      selectedRowKeys,
+      onSelectChange,
+      getCheckboxProps,
+      handleBatchDelete,
     }
   }
 }
@@ -1842,5 +1894,24 @@ export default {
   font-size: 14px;
   color: #1890ff;
   word-break: break-all;
+}
+
+/* Add styles for delete button */
+.action-button.secondary-btn[danger] {
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+.action-button.secondary-btn[danger]:hover {
+  color: #ff7875;
+  border-color: #ff7875;
+  background: #fff1f0;
+}
+
+.action-button.secondary-btn[danger]:disabled {
+  color: rgba(0, 0, 0, 0.25);
+  border-color: #d9d9d9;
+  background: #f5f5f5;
+  cursor: not-allowed;
 }
 </style>
