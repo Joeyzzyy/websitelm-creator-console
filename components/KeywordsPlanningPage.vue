@@ -177,9 +177,6 @@
                       @click="handlePublishOutlines"
                       class="generate-pages-btn"
                     >
-                      <template #icon>
-                        <CloudUploadOutlined />
-                      </template>
                       <span>Generate Pages</span>
                     </a-button>
                   </a-space>
@@ -461,15 +458,24 @@
                                           Rec.Pub: {{ formatDate(plan.recommendedReleaseTime) }}
                                         </span>
                                       </div>
-                                      <a-button 
-                                        type="primary"
-                                        ghost
-                                        size="small"
-                                        :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
-                                        @click.stop="handleOutlineSelect(plan, !plan.favorited)"
-                                      >
-                                        {{ plan.favorited ? 'Deselect' : 'Select' }}
-                                      </a-button>
+                                      <div class="action-buttons">
+                                        <a-button 
+                                          type="primary"
+                                          ghost
+                                          size="small"
+                                          :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
+                                          @click.stop="handleOutlineSelect(plan, !plan.favorited)"
+                                        >
+                                          {{ plan.favorited ? 'Deselect' : 'Select' }}
+                                        </a-button>
+                                        <a-button
+                                          type="primary"
+                                          size="small"
+                                          @click.stop="handleSinglePageGeneration(plan)"
+                                        >
+                                          Generate Page
+                                        </a-button>
+                                      </div>
                                     </div>
                                   </template>
                                   
@@ -488,12 +494,12 @@
                                     
                                     <div class="plan-metrics">
                                       <div class="metric-item">
-                                        <FileTextOutlined />
-                                        <span>{{ getTotalWordCount(plan).toLocaleString() }} words</span>
+                                        <a-tag :color="getPageTypeColor(plan.pageType)">
+                                          {{ plan.pageType }}
+                                        </a-tag>
                                       </div>
                                       <div class="metric-item">
-                                        <OrderedListOutlined />
-                                        <span>{{ plan.outline.length }} sections</span>
+                                        <span>Planned with {{ plan.outline.length }} sections</span>
                                       </div>
                                     </div>
 
@@ -563,15 +569,27 @@
                                           Rec.Pub: {{ formatDate(plan.recommendedReleaseTime) }}
                                         </span>
                                       </div>
-                                      <a-button 
-                                        type="primary"
-                                        ghost
-                                        size="small"
-                                        :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
-                                        @click.stop="handleOutlineSelect(plan, !plan.favorited)"
-                                      >
-                                        {{ plan.favorited ? 'Deselect' : 'Select' }}
-                                      </a-button>
+                                      <div class="action-buttons">
+                                        <a-button 
+                                          type="primary"
+                                          ghost
+                                          size="small"
+                                          :class="plan.favorited ? 'deselect-btn' : 'select-btn'"
+                                          @click.stop="handleOutlineSelect(plan, !plan.favorited)"
+                                        >
+                                          {{ plan.favorited ? 'Deselect' : 'Select' }}
+                                        </a-button>
+                                        <a-button
+                                          type="primary"
+                                          size="small"
+                                          @click.stop="handleSinglePageGeneration(plan)"
+                                        >
+                                          <template #icon>
+                                            <FileAddOutlined />
+                                          </template>
+                                          Generate Page
+                                        </a-button>
+                                      </div>
                                     </div>
                                   </template>
                                   
@@ -591,7 +609,9 @@
                                     <div class="plan-metrics">
                                       <div class="metric-item">
                                         <FileTextOutlined />
-                                        <span>{{ getTotalWordCount(plan).toLocaleString() }} words</span>
+                                        <a-tag :color="getPageTypeColor(plan.pageType)">
+                                          {{ plan.pageType }}
+                                        </a-tag>
                                       </div>
                                       <div class="metric-item">
                                         <OrderedListOutlined />
@@ -994,6 +1014,7 @@ import {
   UploadOutlined,
   DownloadOutlined,
   FileExcelOutlined,
+  FileAddOutlined,
 } from '@ant-design/icons-vue'
 import {
   tableColumns,
@@ -1057,6 +1078,7 @@ export default defineComponent({
     DownloadOutlined,
     QuestionCircleOutlined,
     Tag,
+    FileAddOutlined,
   },
   setup() {
     const selectedKeywords = ref([])
@@ -3010,6 +3032,102 @@ export default defineComponent({
       return "Use AI to automatically select and analyze keywords"
     })
 
+    const handleSinglePageGeneration = async (outline) => {
+      const confirmed = await new Promise(resolve => {
+        Modal.confirm({
+          title: outline.hasRelatedPageTask ? 'Warning: Page Already Exists' : 'Generate Single Page',
+          content: h('div', {}, [
+            // Warning message for existing page
+            outline.hasRelatedPageTask && h('div', {
+              style: 'margin-bottom: 16px; padding: 12px; background: #fff2f0; border: 1px solid #ffccc7; border-radius: 4px;'
+            }, [
+              h('div', { style: 'display: flex; align-items: center; margin-bottom: 8px;' }, [
+                h(WarningOutlined, { style: 'color: #ff4d4f; margin-right: 8px;' }),
+                h('span', { style: 'color: #ff4d4f; font-weight: 500;' }, 'This outline already has a generated page')
+              ]),
+              h('p', { style: 'margin: 0; color: #666;' }, 
+                'Generating a new page will create a duplicate. The existing page will remain unchanged. Please ensure this is intended.'
+              )
+            ]),
+            
+            // Basic information
+            h('p', 'You are about to generate a page for:'),
+            h('div', { 
+              style: 'margin: 16px 0; padding: 12px; background: #f5f5f5; border-radius: 4px;'
+            }, [
+              h('strong', outline.title),
+              h('div', { style: 'margin-top: 8px; color: #666;' }, [
+                h('span', `Type: ${outline.pageType}`),
+                h('span', { style: 'margin-left: 16px;' }, 
+                  `Word Count: ${getTotalWordCount(outline).toLocaleString()} words`
+                )
+              ])
+            ]),
+            
+            h('p', { style: 'margin-top: 12px;' }, 
+              'Would you like to proceed with page generation?'
+            )
+          ]),
+          okText: outline.hasRelatedPageTask ? 'Generate Anyway' : 'Generate',
+          cancelText: 'Cancel',
+          width: 500,
+          okButtonProps: {
+            type: outline.hasRelatedPageTask ? 'danger' : 'primary',
+            danger: outline.hasRelatedPageTask
+          },
+          onOk: () => resolve(true),
+          onCancel: () => resolve(false),
+        });
+      });
+
+      if (!confirmed) return;
+
+      try {
+        generationProgressVisible.value = true;
+        isGeneratingPages.value = true;
+        generationProgress.value = 0;
+        generationStatus.value = 'active';
+        generationCompleted.value = false;
+        generationFailed.value = false;
+        generationStatusText.value = 'Generating page...';
+        generationDetails.value = `Processing: "${outline.title}"`;
+
+        await api.createAIPage(outline.outlineId);
+
+        generationCompleted.value = true;
+        isGeneratingPages.value = false;
+        generationStatus.value = 'success';
+        generationStatusText.value = 'Page generated successfully!';
+        generationDetails.value = 'The page has been created and is ready for review.';
+
+        // Refresh the outline list to update status
+        await fetchContentPlans();
+
+        setTimeout(() => {
+          generationProgressVisible.value = false;
+          generationProgress.value = 0;
+          generationCompleted.value = false;
+          generationFailed.value = false;
+        }, 3000);
+
+      } catch (error) {
+        console.error('Page generation failed:', error);
+        generationFailed.value = true;
+        isGeneratingPages.value = false;
+        generationStatus.value = 'exception';
+        generationStatusText.value = 'Generation failed';
+        generationDetails.value = error.message || 'Unknown error occurred';
+      }
+    };
+
+    const getPageTypeColor = (pageType) => {
+      const typeColors = {
+        'Blog': 'blue',
+        'Landing Page': 'green'
+      };
+      return typeColors[pageType] || 'default';
+    };
+
     return {
       taskStartTime,
       taskEndTime,
@@ -3183,7 +3301,9 @@ export default defineComponent({
       handleModeChange,
       fetchImportedKeywords,
       showTemplateInfo,
-      getAIButtonTooltip
+      getAIButtonTooltip,
+      handleSinglePageGeneration,
+      getPageTypeColor,
     }
   }
 })
@@ -3604,15 +3724,24 @@ export default defineComponent({
 .plan-metrics {
   display: flex;
   gap: 16px;
-  margin-bottom: 12px;
+  margin: 12px 0;
+  align-items: center;
 }
 
 .metric-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #4b5563;
-  font-size: 13px;
+}
+
+.metric-item .anticon {
+  font-size: 14px;
+  color: #8c8c8c;
+}
+
+.metric-item .ant-tag {
+  margin-right: 0;
+  text-transform: capitalize;
 }
 
 .plan-keywords {
@@ -4573,5 +4702,19 @@ export default defineComponent({
 .page-status-tag {
   margin-left: 8px;
   font-size: 12px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.action-buttons .ant-btn {
+  min-width: auto;
+}
+
+.action-buttons .ant-btn[disabled] {
+  cursor: not-allowed;
 }
 </style>
