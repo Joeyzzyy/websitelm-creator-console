@@ -447,11 +447,6 @@ export default {
         width: '8%'
       },
       {
-        title: 'Empty Fields',
-        key: 'hasEmpty',
-        width: '7%'
-      },
-      {
         title: 'Actions',
         key: 'actions',
         width: 80,
