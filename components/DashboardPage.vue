@@ -125,14 +125,26 @@
                       {{ productInfo?.projectWebsite }}
                       <icon-external-link />
                     </a>
-                    <a-button 
-                      v-if="productInfo?.domainStatus"
-                      type="primary"
-                      size="small"
-                      @click="showGscData"
-                    >
-                      View Traffic Data
-                    </a-button>
+                    <!-- 添加条件渲染的验证按钮 -->
+                    <template v-if="!productInfo?.domainStatus">
+                      <a-button 
+                        type="primary"
+                        size="small"
+                        @click="openEditWithBasicInfoToVerify"
+                        :loading="goStartVerifying"
+                      >
+                        Go Verify
+                      </a-button>
+                    </template>
+                    <template v-else>
+                      <a-button 
+                        type="primary"
+                        size="small"
+                        @click="showGscData"
+                      >
+                        View Traffic Data
+                      </a-button>
+                    </template>
                   </div>
                 </div>
               </div>
