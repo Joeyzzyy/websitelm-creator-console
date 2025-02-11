@@ -915,6 +915,9 @@ export default {
   border: 1px solid #d9d9d9;
   border-radius: 4px;
   margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
 }
 
 .editor-toolbar {
@@ -924,6 +927,9 @@ export default {
   display: flex;
   gap: 8px;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .editor-toolbar .ant-btn {
@@ -938,13 +944,34 @@ export default {
 
 .content-textarea {
   padding: 12px;
-  min-height: 120px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .content-textarea :deep(.ProseMirror) {
   min-height: 120px;
   outline: none;
   line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+  font-size: 14px;
+}
+
+.content-textarea :deep(.ProseMirror *) {
+  font-family: inherit !important;
+}
+
+.content-textarea :deep(.ProseMirror b),
+.content-textarea :deep(.ProseMirror strong) {
+  font-family: inherit !important;
+  font-weight: bold;
+}
+
+.content-textarea :deep(.ProseMirror i),
+.content-textarea :deep(.ProseMirror em) {
+  font-family: inherit !important;
+  font-style: italic;
 }
 
 .content-textarea :deep(.ProseMirror p) {
