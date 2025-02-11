@@ -21,9 +21,6 @@
                   <div class="quick-link-header">
                     <span class="quick-link-title">
                       1. Use Our Smart SEO Keywords Planner
-                      <a-tag color="success" v-if="productInfo?.domainStatus">
-                        {{ pagesDashboard?.keywordOpportunities || 3 }} Topics
-                      </a-tag>
                     </span>
                   </div>
                   <div class="quick-link-desc">AI-powered keywords pick and outline generation</div>
@@ -58,9 +55,6 @@
                   <div class="quick-link-header">
                     <span class="quick-link-title">
                       3. Instantly Update Your Product Profile
-                      <a-tag color="processing" v-if="productInfo?.domainStatus">
-                        {{ pagesDashboard?.missingAssets || 4 }} Missing
-                      </a-tag>
                     </span>
                   </div>
                   <div class="quick-link-desc">Complete product details from all angles</div>
@@ -71,7 +65,6 @@
               </div>
             </div>
           </a-card>
-      
 
       <!-- Quick Access Panel and Sitemap Row -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
