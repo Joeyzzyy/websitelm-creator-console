@@ -311,7 +311,7 @@ const parseContent = (content) => {
       // 处理段落
       if (tagName === 'p') {
         const processedNodes = Array.from(node.childNodes).flatMap(processNode);
-        return [...processedNodes, { type: 'text', content: '\n' }];
+        return processedNodes;
       }
       
       // 处理换行

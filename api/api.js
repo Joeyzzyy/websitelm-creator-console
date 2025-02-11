@@ -1380,6 +1380,55 @@ const createKnowledge = async (knowledgeData) => {
   }
 };
 
+// 新增：上传favicon的方法
+const uploadFavicon = async (formData, faviconType) => {
+  try {
+    const response = await apiClient.post('/media/favicon', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      params: {
+        faviconType: faviconType
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('上传favicon失败:', error);
+    return null;
+  }
+};
+
+// 新增: 根据客户ID获取媒体文件列表的方法
+const getMediaByCustomer = async (params = {}) => {
+  try {
+    const queryParams = {
+      ...(params.mediaType && { mediaType: params.mediaType }),
+      ...(params.categoryName && { categoryName: params.categoryName }),
+      ...(params.page && { page: params.page }),
+      ...(params.limit && { limit: params.limit })
+    };
+    
+    const response = await apiClient.get('/media', { params: queryParams });
+    return response.data;
+  } catch (error) {
+    console.error('获取客户媒体文件列表失败:', error);
+    return null;
+  }
+};
+
+// 新增：获取域名favicon的方法
+const getDomainFavicon = async (domainName) => {
+  try {
+    const response = await apiClient.get('/domain/favicon', {
+      params: { domainName }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('获取域名favicon失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1480,5 +1529,8 @@ export default {
   rebuildKnowledge,
   activateTrialPackage,
   deleteKnowledge,
-  createKnowledge
+  createKnowledge,
+  uploadFavicon,
+  getMediaByCustomer,
+  getDomainFavicon
 };

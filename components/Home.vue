@@ -159,37 +159,18 @@
             class="group flex flex-col bg-white rounded-lg border border-gray-200 hover:border-[#1890ff]/20 hover:shadow-lg transition-all duration-200 cursor-pointer"
             @click="playTutorial(tutorial)"
           >
-            <div class="relative aspect-[16/9] overflow-hidden">
-              <div class="tutorial-step-badge text-[10px] px-2 py-0.5">
-                Step {{ tutorial.badge }}
-              </div>
-              <div class="tech-overlay absolute inset-0 bg-gradient-to-b from-transparent to-black/10"></div>
-              <img 
-                :src="tutorial.imageUrl" 
-                :alt="tutorial.imageAlt || tutorial.title"
-                class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-                @load="$event.target.classList.add('loaded')"
-                @error="handleImageError($event, tutorial)"
-              >
-            </div>
-            
-            <div class="flex flex-col flex-grow p-2">
-              <div class="mb-1">
-                <span class="inline-block px-2 py-0.5 text-[10px] font-medium text-[#1890ff] bg-[#1890ff]/10 rounded-full">
-                  {{ tutorial.tag }}
-                </span>
-              </div>
-              
-              <h4 class="text-xs font-semibold text-gray-900 group-hover:text-[#1890ff] transition-colors duration-200 line-clamp-2 mb-1">
+            <div class="flex flex-col flex-grow p-4">
+              <h4 class="text-sm font-semibold text-gray-900 group-hover:text-[#1890ff] transition-colors duration-200 line-clamp-2 mb-2">
                 {{ tutorial.title }}
               </h4>
               
-              <p v-if="tutorial.description" class="text-[10px] text-gray-600 line-clamp-2 mb-1">
+              <p v-if="tutorial.description" class="text-xs text-gray-600 line-clamp-2 mb-3">
                 {{ tutorial.description }}
               </p>
               
-              <div class="read-more mt-auto text-[10px] text-[#1890ff] font-medium">
-                Read Documentation →
+              <div class="read-more mt-auto text-xs text-[#1890ff] font-medium flex items-center gap-1">
+                Read Documentation 
+                <span class="transform transition-transform group-hover:translate-x-1">→</span>
               </div>
             </div>
           </div>
@@ -1130,9 +1111,9 @@ html, body, #app {
 }
 
 .tutorial-card {
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -1140,82 +1121,8 @@ html, body, #app {
   flex-direction: column;
   background: white;
   position: relative;
-}
-
-.tutorial-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
-  border-color: #1890ff;
-}
-
-.tutorial-thumbnail {
-  position: relative;
-  aspect-ratio: 16/9;
-  background: #f5f5f5;
-  flex-shrink: 0;
-}
-
-.tech-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, 
-    rgba(24, 144, 255, 0.05),
-    rgba(24, 144, 255, 0.1)
-  );
-  z-index: 1;
-}
-
-.tutorial-info {
-  padding: 16px;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.tutorial-info h4 {
-  margin: 0 0 8px;
-  font-size: 16px;
-  color: #1a1a1a;
-  font-weight: 500;
-}
-
-.tutorial-info p {
-  margin: 0;
-  font-size: 14px;
-  color: #666;
-  line-height: 1.6;
-  flex-grow: 1;
-}
-
-.read-more {
-  margin-top: 12px;
-  color: #1890ff;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.tutorial-card:hover .read-more {
-  color: #40a9ff;
-  transform: translateX(4px);
-}
-
-/* 添加缩略图图片样式 */
-.thumbnail-image {
-  width: 100%;
+  padding: 20px;
   height: 100%;
-  object-fit: cover;
-  position: relative;
-  z-index: 0;
-}
-
-/* 教程卡片中添加步骤标记样式 */
-.tutorial-card {
-  /* ... 现有样式 ... */
-  position: relative;
 }
 
 .tutorial-step-badge {
@@ -1232,14 +1139,41 @@ html, body, #app {
   box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
 }
 
-/* 为第一个教程添加特殊样式 */
-.tutorial-card:first-child {
-  border: 2px solid #1890ff;
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+/* 移除所有与图片相关的样式 */
+.tutorial-thumbnail,
+.tech-overlay,
+.thumbnail-image {
+  display: none;
 }
 
-.tutorial-card:first-child .tutorial-step-badge {
-  background: linear-gradient(135deg, #52c41a, #389e0d);
+/* 调整卡片内容布局 */
+.tutorial-info {
+  padding: 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 更新阅读更多链接样式 */
+.read-more {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 添加悬停效果 */
+.tutorial-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+  border-color: #1890ff;
+}
+
+/* 移除图片加载相关的方法 */
+.tutorial-card img {
+  display: none;
 }
 
 /* 添加自定义样式 */
@@ -1690,15 +1624,15 @@ export default {
         const packageStatus = packageResponse?.data?.customerPackageStatus;
         
         if (packageStatus === 0) {
-          this.$message.warning('您还未开通套餐，请先购买套餐');
+          this.$message.warning('No subscription found. Please purchase a plan.');
           this.$router.push('/subscription');
           return;
         } else if (packageStatus === 2) {
-          this.$message.warning('您的套餐已过期，请续费');
+          this.$message.warning('Your subscription has expired. Please renew your plan.');
           this.$router.push('/subscription');
           return;
         } else if (packageStatus !== 1) {
-          this.$message.error('套餐状态异常，请联系客服');
+          this.$message.error('Subscription status is abnormal. Please contact customer service.');
           this.$router.push('/subscription');
           return;
         }

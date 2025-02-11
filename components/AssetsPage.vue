@@ -528,106 +528,120 @@
             <!-- Favicon Content -->
             <template v-else-if="activeTab === 'favicon'">
               <div class="favicon-content">
-                <div class="preview-section">
-                  <div class="section-header">
-                    <h3>Favicon Settings</h3>
-                    <p class="section-description">
-                      Upload different sizes of favicons for various devices and platforms
-                    </p>
-                  </div>
-                  
-                  <div class="preview-devices">
-                    <!-- Browser Tab Preview -->
-                    <div class="device-preview">
-                      <div class="preview-header">
-                        <h4>Browser Tab Icon</h4>
-                        <p class="size-hint">16x16 px</p>
-                        <div class="upload-area" @click="() => triggerFaviconUpload('tab')">
-                          <upload-outlined v-if="!faviconPreviews.tab" class="upload-icon" />
-                          <img v-else :src="faviconPreviews.tab" class="preview-img" />
-                          <p>Click to upload</p>
+                <a-spin :spinning="faviconLoading">
+                  <div class="preview-section">
+                    <div class="section-header">
+                      <h3>Favicon Settings</h3>
+                      <p class="section-description">
+                        Upload different sizes of favicons for various devices and platforms
+                      </p>
+                    </div>
+                    
+                    <div class="preview-devices">
+                      <!-- Browser Tab Preview -->
+                      <div class="device-preview">
+                        <div class="preview-header">
+                          <h4>Browser Tab Icon</h4>
+                          <p class="size-hint">16x16 px</p>
+                          <div 
+                            class="upload-area" 
+                            @click="triggerFaviconUpload('tab')"
+                            style="cursor: pointer"
+                          >
+                            <upload-outlined v-if="!faviconPreviews.tab" class="upload-icon" />
+                            <img v-else :src="faviconPreviews.tab" class="preview-img" />
+                            <p>Click to upload</p>
+                          </div>
+                          <input
+                            type="file"
+                            ref="tabInput"
+                            accept=".ico,.png"
+                            style="display: none"
+                            @change="(e) => handleFaviconChange(e, 'favicon')"
+                          />
                         </div>
-                        <input
-                          type="file"
-                          ref="tabInput"
-                          accept="image/x-icon,image/png"
-                          style="display: none"
-                          @change="(e) => handleFaviconChange(e, 'tab')"
-                        />
-                      </div>
-                      
-                      <div class="preview-display">
-                        <div class="browser-chrome">
-                          <div class="tab">
-                            <img v-if="faviconPreviews.tab" :src="faviconPreviews.tab" class="tab-favicon" />
-                            <span>My Website - Chrome</span>
+                        
+                        <div class="preview-display">
+                          <div class="browser-chrome">
+                            <div class="tab">
+                              <img v-if="faviconPreviews.tab" :src="faviconPreviews.tab" class="tab-favicon" />
+                              <span>My Website - Chrome</span>
+                            </div>
                           </div>
                         </div>
+                        <div class="preview-description">
+                          <p>Used in browser tabs, bookmarks, and favorites bar. This is the most common favicon size that every website should have.</p>
+                        </div>
                       </div>
-                      <div class="preview-description">
-                        <p>Used in browser tabs, bookmarks, and favorites bar. This is the most common favicon size that every website should have.</p>
-                      </div>
-                    </div>
 
-                    <!-- Windows Taskbar Preview -->
-                    <div class="device-preview">
-                      <div class="preview-header">
-                        <h4>Windows Taskbar</h4>
-                        <p class="size-hint">32x32 px</p>
-                        <div class="upload-area" @click="() => triggerFaviconUpload('taskbar')">
-                          <upload-outlined v-if="!faviconPreviews.taskbar" class="upload-icon" />
-                          <img v-else :src="faviconPreviews.taskbar" class="preview-img" />
-                          <p>Click to upload</p>
+                      <!-- Windows Taskbar Preview -->
+                      <div class="device-preview">
+                        <div class="preview-header">
+                          <h4>Windows Taskbar</h4>
+                          <p class="size-hint">32x32 px</p>
+                          <div 
+                            class="upload-area" 
+                            @click="triggerFaviconUpload('taskbar')"
+                            style="cursor: pointer"
+                          >
+                            <upload-outlined v-if="!faviconPreviews.taskbar" class="upload-icon" />
+                            <img v-else :src="faviconPreviews.taskbar" class="preview-img" />
+                            <p>Click to upload</p>
+                          </div>
+                          <input
+                            type="file"
+                            ref="taskbarInput"
+                            accept=".ico,.png"
+                            style="display: none"
+                            @change="(e) => handleFaviconChange(e, 'windows')"
+                          />
                         </div>
-                        <input
-                          type="file"
-                          ref="taskbarInput"
-                          accept="image/x-icon,image/png"
-                          style="display: none"
-                          @change="(e) => handleFaviconChange(e, 'taskbar')"
-                        />
-                      </div>
-                      
-                      <div class="preview-display">
-                        <div class="windows-taskbar">
-                          <img v-if="faviconPreviews.taskbar" :src="faviconPreviews.taskbar" class="taskbar-icon" />
+                        
+                        <div class="preview-display">
+                          <div class="windows-taskbar">
+                            <img v-if="faviconPreviews.taskbar" :src="faviconPreviews.taskbar" class="taskbar-icon" />
+                          </div>
+                        </div>
+                        <div class="preview-description">
+                          <p>Displayed when users pin your website to Windows taskbar, add to Start menu, or view in high-resolution bookmarks.</p>
                         </div>
                       </div>
-                      <div class="preview-description">
-                        <p>Displayed when users pin your website to Windows taskbar, add to Start menu, or view in high-resolution bookmarks.</p>
-                      </div>
-                    </div>
 
-                    <!-- iOS Preview -->
-                    <div class="device-preview">
-                      <div class="preview-header">
-                        <h4>iOS Home Screen</h4>
-                        <p class="size-hint">180x180 px</p>
-                        <div class="upload-area" @click="() => triggerFaviconUpload('ios')">
-                          <upload-outlined v-if="!faviconPreviews.ios" class="upload-icon" />
-                          <img v-else :src="faviconPreviews.ios" class="preview-img" />
-                          <p>Click to upload</p>
+                      <!-- iOS Preview -->
+                      <div class="device-preview">
+                        <div class="preview-header">
+                          <h4>iOS Home Screen</h4>
+                          <p class="size-hint">180x180 px</p>
+                          <div 
+                            class="upload-area" 
+                            @click="triggerFaviconUpload('ios')"
+                            style="cursor: pointer"
+                          >
+                            <upload-outlined v-if="!faviconPreviews.ios" class="upload-icon" />
+                            <img v-else :src="faviconPreviews.ios" class="preview-img" />
+                            <p>Click to upload</p>
+                          </div>
+                          <input
+                            type="file"
+                            ref="iosInput"
+                            accept=".ico,.png"
+                            style="display: none"
+                            @change="(e) => handleFaviconChange(e, 'ios')"
+                          />
                         </div>
-                        <input
-                          type="file"
-                          ref="iosInput"
-                          accept="image/x-icon,image/png"
-                          style="display: none"
-                          @change="(e) => handleFaviconChange(e, 'ios')"
-                        />
-                      </div>
-                      
-                      <div class="preview-display">
-                        <div class="ios-home">
-                          <img v-if="faviconPreviews.ios" :src="faviconPreviews.ios" class="ios-app-icon" />
+                        
+                        <div class="preview-display">
+                          <div class="ios-home">
+                            <img v-if="faviconPreviews.ios" :src="faviconPreviews.ios" class="ios-app-icon" />
+                          </div>
                         </div>
-                      </div>
-                      <div class="preview-description">
-                        <p>Appears when users add your website to their iOS home screen ("Add to Home Screen" feature) or in Safari bookmarks.</p>
+                        <div class="preview-description">
+                          <p>Appears when users add your website to their iOS home screen ("Add to Home Screen" feature) or in Safari bookmarks.</p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                </a-spin>
               </div>
             </template>
           </div>
@@ -1134,14 +1148,15 @@ export default {
           case 'footer':
             await fetchLayoutData('footer');
             break;
-          // knowledge base 的数据已经在 onMounted 中加载，这里不需要重复加载
           case 'knowledge':
-            await initKnowledgeBase();  // 添加这行，切换到 knowledge tab 时重新加载数据
+            await initKnowledgeBase();
+            break;
+          case 'favicon':  // 新增: favicon tab 的处理
+            await fetchFavicons();
             break;
         }
       } catch (error) {
         console.error(`Failed to fetch data for ${newValue} tab:`, error);
-      } finally {
       }
     });
 
@@ -2380,49 +2395,140 @@ export default {
       knowledgeModalVisible.value = true;
     };
 
-    // 修改为多个预览
+    // 新增: favicon相关的响应式变量
     const faviconPreviews = ref({
-      tab: '',
-      taskbar: '',
-      ios: ''
-    })
-    const tabInput = ref(null)
-    const taskbarInput = ref(null)
-    const iosInput = ref(null)
-    const currentUploadType = ref('')
+      tab: null,
+      taskbar: null,
+      ios: null
+    });
 
+    const faviconInputs = {
+      tab: ref(null),
+      taskbar: ref(null),
+      ios: ref(null)
+    };
+
+    // 添加文件输入引用的定义
+    const tabInput = ref(null);
+    const taskbarInput = ref(null);
+    const iosInput = ref(null);
+
+    // 使用已定义的 triggerFaviconUpload 方法
     const triggerFaviconUpload = (type) => {
       const inputRefs = {
         tab: tabInput,
         taskbar: taskbarInput,
         ios: iosInput
+      };
+      
+      if (inputRefs[type]?.value) {
+        inputRefs[type].value.click();
       }
-      inputRefs[type].value.click()
-    }
+    };
 
+    // 新增: 处理favicon文件选择
     const handleFaviconChange = async (e, type) => {
-      const file = e.target.files[0]
-      if (file) {
-        try {
-          faviconPreviews.value[type] = URL.createObjectURL(file)
-          
-          const formData = new FormData()
-          formData.append('file', file)
-          formData.append('type', type)
-          formData.append('customerId', localStorage.getItem('currentCustomerId'))
-          
-          await apiClient.uploadFavicon(formData)
-          message.success('Favicon uploaded successfully')
-          
-          // 重置文件输入
-          e.target.value = ''
-        } catch (error) {
-          console.error('Failed to upload favicon:', error)
-          message.error('Failed to upload favicon')
-          faviconPreviews.value[type] = ''
-        }
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Validate file type
+      if (!['image/png', 'image/x-icon'].includes(file.type)) {
+        message.error('Please upload PNG or ICO format images');
+        return;
       }
-    }
+
+      // Validate file size (max 1MB)
+      if (file.size > 1024 * 1024) {
+        message.error('File size cannot exceed 1MB');
+        return;
+      }
+
+      // Validate image dimensions
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      
+      img.onload = async () => {
+        let isValid = true;
+        let errorMessage = '';
+
+        // Validate dimensions based on type
+        switch (type) {
+          case 'tab':
+            if (img.width !== 16 || img.height !== 16) {
+              isValid = false;
+              errorMessage = 'Browser tab icon must be 16x16 pixels';
+            }
+            break;
+          case 'taskbar':
+            if (img.width !== 32 || img.height !== 32) {
+              isValid = false;
+              errorMessage = 'Windows taskbar icon must be 32x32 pixels';
+            }
+            break;
+          case 'ios':
+            if (img.width !== 180 || img.height !== 180) {
+              isValid = false;
+              errorMessage = 'iOS home screen icon must be 180x180 pixels';
+            }
+            break;
+        }
+
+        if (!isValid) {
+          message.error(errorMessage);
+          return;
+        }
+
+        try {
+          loading.value = true;
+          const formData = new FormData();
+          formData.append('file', file);
+          
+          const response = await apiClient.uploadFavicon(formData, type);
+          
+          if (response) {
+            message.success('Uploaded successfully');
+            // Refresh all favicons after successful upload
+            await fetchFavicons();
+          }
+        } catch (error) {
+          console.error('Failed to upload favicon:', error);
+          message.error('Failed to upload favicon. Please try again.');
+        } finally {
+          loading.value = false;
+          // Clear input value to allow uploading the same file again
+          if (faviconInputs[type].value) {
+            faviconInputs[type].value.value = '';
+          }
+        }
+      };
+
+      img.onerror = () => {
+        message.error('Failed to load image. Please ensure the uploaded file is a valid image.');
+      };
+    };
+
+    // 修改: 获取favicon的方法
+    const fetchFavicons = async () => {
+      try {
+        faviconLoading.value = true;
+        const response = await apiClient.getProductsByCustomerId();
+        
+        if (response?.data) {
+          faviconPreviews.value = {
+            tab: response.data.favicon || null,
+            taskbar: response.data.windowIcon || null, 
+            ios: response.data.iosIcon || null
+          };
+        }
+      } catch (error) {
+        console.error('获取favicon失败:', error);
+        message.error('加载favicon失败');
+      } finally {
+        faviconLoading.value = false;
+      }
+    };
+
+    const faviconLoading = ref(false);
 
     return {
       domainConfigured,
@@ -2539,11 +2645,13 @@ export default {
       showDeleteConfirm,
       showAddArticle,
       faviconPreviews,
+      faviconInputs,
+      triggerFaviconUpload,
+      handleFaviconChange,
       tabInput,
       taskbarInput,
       iosInput,
-      triggerFaviconUpload,
-      handleFaviconChange,
+      faviconLoading,
     }
   }
 }
@@ -4591,5 +4699,74 @@ export default {
   color: #6b7280;
   line-height: 1.5;
   text-align: left;
+}
+
+/* 添加放大镜效果相关样式 */
+.preview-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.icon-wrapper {
+  position: relative;
+  cursor: zoom-in;
+}
+
+.preview-icon {
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+/* 放大镜效果 */
+.magnifier {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 2px solid #e5e7eb;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.8);
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 100;
+  
+  /* 添加放大镜内的图标样式 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.magnifier img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+.icon-wrapper:hover .magnifier {
+  opacity: 1;
+  transform: translate(-50%, -150%) scale(1);
+}
+
+/* 为不同尺寸的图标设置合适的预览尺寸 */
+.tab-preview {
+  width: 16px;
+  height: 16px;
+}
+
+.taskbar-preview {
+  width: 32px;
+  height: 32px;
+}
+
+.ios-preview {
+  width: 180px;
+  height: 180px;
 }
 </style> 
