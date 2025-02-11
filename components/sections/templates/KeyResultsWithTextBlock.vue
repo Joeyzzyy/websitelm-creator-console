@@ -118,10 +118,15 @@
             </div>
           </div>
 
-          <!-- 添加调试区域 -->
+          <!-- 修改调试区域 -->
           <div class="debug-area">
             <div class="debug-title">Editor HTML Content:</div>
-            <pre class="debug-content">{{ editorContent }}</pre>
+            <a-textarea
+              v-model:value="editorContent"
+              :rows="6"
+              @change="updateEditorFromHTML"
+              class="debug-content"
+            />
           </div>
         </div>
 
@@ -465,6 +470,15 @@ export default {
       this.linkModalVisible = false
       this.linkUrl = ''
       this.selectedText = ''
+    },
+
+    // 添加新方法
+    updateEditorFromHTML() {
+      if (this.editor) {
+        this.editor.commands.setContent(this.editorContent)
+        this.localSection.rightContent = this.editorContent
+        this.debouncedHandleChange()
+      }
     },
   }
 }
@@ -1036,7 +1050,7 @@ export default {
   font-style: italic;
 }
 
-/* 添加调试区域样式 */
+/* 修改调试区域样式 */
 .debug-area {
   margin-top: 20px;
   padding: 12px;
@@ -1055,13 +1069,9 @@ export default {
   font-family: monospace;
   font-size: 12px;
   background: #f1f5f9;
-  padding: 8px;
   border-radius: 4px;
-  white-space: pre-wrap;
-  word-break: break-all;
   color: #334155;
-  max-height: 200px;
-  overflow-y: auto;
+  width: 100%;
 }
 
 /* 添加子标题样式 */

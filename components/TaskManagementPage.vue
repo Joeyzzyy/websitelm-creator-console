@@ -676,6 +676,8 @@ export default {
           
           await Promise.all(deletePromises)
           message.success(`Successfully deleted ${modalConfig.data.length} pages`)
+          // 清空选中的行
+          selectedRowKeys.value = []
           fetchTasks()
         }
       } catch (error) {
