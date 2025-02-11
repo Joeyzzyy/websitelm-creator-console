@@ -89,6 +89,7 @@
         type="primary"
         :loading="saving"
         @click="saveConfig"
+        class="save-button"
       >
         Save Changes
       </a-button>
@@ -722,7 +723,7 @@ const handleMenuDragEnd = (event) => {
 .editor-container {
   background: white;
   border-radius: 8px;
-  padding: 24px;
+  padding-top: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   width: 100%;
 }
@@ -1140,5 +1141,30 @@ const handleMenuDragEnd = (event) => {
   padding: 8px;
   background: #fafafa;
   border-radius: 4px;
+}
+
+.save-button {
+  background: linear-gradient(45deg, #059669, #10b981);  /* 鲜艳的绿色渐变 */
+  font-weight: 600;
+  height: 40px;
+  padding: 0 24px;
+  font-size: 15px;
+  border-radius: 6px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.save-button:hover {
+  background: linear-gradient(45deg, #047857, #059669);  /* 更深的绿色渐变 */
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+}
+
+.save-button:active {
+  background: linear-gradient(45deg, #065f46, #047857);  /* 点击时的颜色 */
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
 }
 </style>

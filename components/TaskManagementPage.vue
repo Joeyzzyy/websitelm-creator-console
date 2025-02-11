@@ -12,227 +12,226 @@
       emoji="📄"
     />
 
-    <a-spin :spinning="loading">
+    <a-spin :spinning="loading" class="centered-spin">
     <!-- 添加域名未配置的提示 -->
-    <template v-if="!domainConfigured && !loading">
-      <no-site-configured />
-    </template>
-    
-    <template v-else>
-      <div class="task-container">
-        <!-- Header -->
-        <div class="header">
-          <div class="header-left">
-            <div class="header-top">
-              <h3>Page List</h3>
-              <a-space>
-                <a-button 
-                  class="action-button secondary-btn"
-                  :loading="loading" 
-                  @click="handleRefresh"
-                >
-                  <template #icon><ReloadOutlined /></template>
-                  <span>Refresh</span>
-                </a-button>
-                
-                <a-button 
-                  class="action-button secondary-btn"
-                  @click="collectPublishedUrls"
-                  :disabled="!tasks.length"
-                >
-                  <template #icon><GlobalOutlined /></template>
-                  <span>Submit Sitemap</span>
-                </a-button>
+      <template v-if="domainConfigured">
+        <div class="task-container">
+          <div class="header">
+            <div class="header-left">
+              <div class="header-top">
+                <h3>Page List</h3>
+                <a-space>
+                  <a-button 
+                    class="action-button secondary-btn"
+                    :loading="loading" 
+                    @click="handleRefresh"
+                  >
+                    <template #icon><ReloadOutlined /></template>
+                    <span>Refresh</span>
+                  </a-button>
+                  
+                  <a-button 
+                    class="action-button secondary-btn"
+                    @click="collectPublishedUrls"
+                    :disabled="!tasks.length"
+                  >
+                    <template #icon><GlobalOutlined /></template>
+                    <span>Submit Sitemap</span>
+                  </a-button>
 
-                <a-button 
-                  class="action-button secondary-btn"
-                  danger
-                  :disabled="!selectedRowKeys.length"
-                  @click="handleBatchDelete"
-                >
-                  <template #icon><DeleteOutlined /></template>
-                  <span>Delete Selected ({{ selectedRowKeys.length }})</span>
-                </a-button>
+                  <a-button 
+                    class="action-button secondary-btn"
+                    danger
+                    :disabled="!selectedRowKeys.length"
+                    @click="handleBatchDelete"
+                  >
+                    <template #icon><DeleteOutlined /></template>
+                    <span>Delete Selected ({{ selectedRowKeys.length }})</span>
+                  </a-button>
 
-                <a-button 
-                  type="primary"
-                  @click="handleAddPage"
-                  class="generate-btn action-button"
-                >
-                  <template #icon><PlusOutlined /></template>
-                  <span>Manual Add Page</span>
-                </a-button>
-              </a-space>
-            </div>
-            
-            <div class="header-bottom">
-              <span v-show="verifiedDomains.length === 0" class="domain-label">
-                No verified sub-domain available - <router-link to="/settings">click here to add sub-domain</router-link>
-              </span>
-              <span v-show="verifiedDomains.length > 0" class="domain-label">Pages could be published to:</span>
-              <div class="domain-tags">
-                <a-tag v-for="domain in verifiedDomains" :key="domain" color="success">
-                  {{ domain }}
-                </a-tag>
+                  <a-button 
+                    type="primary"
+                    @click="handleAddPage"
+                    class="generate-btn action-button"
+                  >
+                    <template #icon><PlusOutlined /></template>
+                    <span>Manual Add Page</span>
+                  </a-button>
+                </a-space>
+              </div>
+              
+              <div class="header-bottom">
+                <span v-show="verifiedDomains.length === 0" class="domain-label">
+                  No verified sub-domain available - <router-link to="/settings">click here to add sub-domain</router-link>
+                </span>
+                <span v-show="verifiedDomains.length > 0" class="domain-label">Pages could be published to:</span>
+                <div class="domain-tags">
+                  <a-tag v-for="domain in verifiedDomains" :key="domain" color="success">
+                    {{ domain }}
+                  </a-tag>
+                </div>
               </div>
             </div>
+            <div class="header-right">
+              <a-input
+                v-model:value="searchQuery"
+                placeholder="Search by page title..."
+                class="search-input"
+                @input="handleSearch"
+              >
+                <template #prefix>
+                  <SearchOutlined />
+                </template>
+              </a-input>
+            </div>
           </div>
-          <div class="header-right">
-            <a-input
-              v-model:value="searchQuery"
-              placeholder="Search by page title..."
-              class="search-input"
-              @input="handleSearch"
+
+          <!-- Task List -->
+          <div class="task-list">
+            <!-- Empty State -->
+            <div v-if="!loading && !tasks.length" class="empty-state">
+              <h3>No Pages Available</h3>
+              <p>Go to "Keyword Planning" to start creating your first task</p>
+            </div>
+            
+            <a-table
+              v-if="!loading && tasks.length > 0"
+              :columns="columns"
+              :data-source="tasks"
+              :pagination="false"
+              :scroll="{ x: true }"
+              :row-selection="{ 
+                selectedRowKeys: selectedRowKeys,
+                onChange: onSelectChange,
+                getCheckboxProps: getCheckboxProps
+              }"
+              @change="handleTableChange"
             >
-              <template #prefix>
-                <SearchOutlined />
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.key === 'title'">
+                  <a 
+                    @click="handleTitleClick(record)" 
+                    class="title-link"
+                    :title="record.publishStatus === 'publish' ? getFullPublishUrl(record) : getPreviewUrl(record)"
+                  >
+                    {{ record.title }}
+                  </a>
+                  <a-tag 
+                    v-if="record.generatorStatus === 'processing'" 
+                    color="processing"
+                    class="generating-tag"
+                  >
+                    <span class="generating-text">Generation in progress</span>
+                    <span class="dot-animation">...</span>
+                  </a-tag>
+                  <a-tag
+                    v-if="record.generatorStatus === 'failed'"
+                    class="generating-tag failed-tag"
+                  >
+                    <span class="generating-text">Generation Failed</span>
+                  </a-tag>
+                </template>
+
+                <template v-if="column.key === 'pageType'">
+                  <span>{{ record.pageType || '-' }}</span>
+                </template>
+
+                <template v-if="column.key === 'wordCount'">
+                  <span>{{ record.numberOfWords || '-' }}</span>
+                </template>
+
+                <template v-if="column.key === 'lang'">
+                  <span>{{ record.lang.toUpperCase() }}</span>
+                </template>
+
+                <template v-if="column.key === 'author'">
+                  <span>{{ record.author || '-' }}</span>
+                </template>
+
+                <template v-if="column.key === 'createdAt'">
+                  <span>{{ record.createdAt }}</span>
+                </template>
+
+                <template v-if="column.key === 'updatedAt'">
+                  <span>{{ record.updatedAt }}</span>
+                </template>
+
+                <template v-if="column.key === 'status'">
+                  <a-tag :color="getStatusColor(record.publishStatus)" style="white-space: nowrap; width: 100%;">
+                    {{ getStatusLabel(record.publishStatus) }}
+                  </a-tag>
+                </template>
+
+                <template v-if="column.key === 'hasEmpty'">
+                  <a-tag :color="record.hasEmpty ? 'warning' : 'success'" style="width: fit-content">
+                    {{ record.hasEmpty ? 'Has Empty Fields' : 'No Empty Fields' }}
+                  </a-tag>
+                </template>
+
+                <template v-if="column.key === 'actions'">
+                  <a-dropdown>
+                    <a-button size="small" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0;">
+                      <template #icon><EllipsisOutlined /></template>
+                    </a-button>
+                    <template #overlay>
+                      <a-menu>
+                        <template v-if="record.generatorStatus !== 'failed'">
+                          <a-menu-item 
+                            key="edit" 
+                            @click="handleEdit(record)"
+                            :disabled="record.generatorStatus === 'processing'"
+                          >
+                            Edit
+                          </a-menu-item>
+                          <a-menu-item 
+                            key="preview" 
+                            @click="handlePreview(record)"
+                            :disabled="record.generatorStatus === 'processing'"
+                          >
+                            Preview
+                          </a-menu-item>
+                          <a-menu-item 
+                            key="publish"
+                            @click="handlePublish(record)"
+                            :disabled="record.generatorStatus === 'processing'"
+                          >
+                            {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
+                          </a-menu-item>
+                        </template>
+                        <a-menu-item 
+                          key="delete"
+                          @click="handleDelete(record)"
+                          :disabled="record.generatorStatus === 'processing'"
+                          danger
+                        >
+                          Delete
+                        </a-menu-item>
+                      </a-menu>
+                    </template>
+                  </a-dropdown>
+                </template>
               </template>
-            </a-input>
+            </a-table>
+          </div>
+
+          <!-- 修改分页组件 -->
+          <div class="pagination-wrapper" v-if="!loading && tasks.length > 0">
+            <a-pagination
+              v-model:current="pagination.current"
+              :total="pagination.total"
+              :pageSize="pagination.pageSize"
+              :show-total="(total) => `Total ${total} items`"
+              :show-size-changer="false"
+              @change="handleTableChange"
+            />
           </div>
         </div>
+      </template>
 
-        <!-- Task List -->
-        <div class="task-list">
-          <!-- Empty State -->
-          <div v-if="!loading && !tasks.length" class="empty-state">
-            <h3>No Pages Available</h3>
-            <p>Go to "Keyword Planning" to start creating your first task</p>
-          </div>
-          
-          <a-table
-            v-if="!loading && tasks.length > 0"
-            :columns="columns"
-            :data-source="tasks"
-            :pagination="false"
-            :scroll="{ x: true }"
-            :row-selection="{ 
-              selectedRowKeys: selectedRowKeys,
-              onChange: onSelectChange,
-              getCheckboxProps: getCheckboxProps
-            }"
-            @change="handleTableChange"
-          >
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.key === 'title'">
-                <a 
-                  @click="handleTitleClick(record)" 
-                  class="title-link"
-                  :title="record.publishStatus === 'publish' ? getFullPublishUrl(record) : getPreviewUrl(record)"
-                >
-                  {{ record.title }}
-                </a>
-                <a-tag 
-                  v-if="record.generatorStatus === 'processing'" 
-                  color="processing"
-                  class="generating-tag"
-                >
-                  <span class="generating-text">Generation in progress</span>
-                  <span class="dot-animation">...</span>
-                </a-tag>
-                <a-tag
-                  v-if="record.generatorStatus === 'failed'"
-                  class="generating-tag failed-tag"
-                >
-                  <span class="generating-text">Generation Failed</span>
-                </a-tag>
-              </template>
-
-              <template v-if="column.key === 'pageType'">
-                <span>{{ record.pageType || '-' }}</span>
-              </template>
-
-              <template v-if="column.key === 'wordCount'">
-                <span>{{ record.numberOfWords || '-' }}</span>
-              </template>
-
-              <template v-if="column.key === 'lang'">
-                <span>{{ record.lang.toUpperCase() }}</span>
-              </template>
-
-              <template v-if="column.key === 'author'">
-                <span>{{ record.author || '-' }}</span>
-              </template>
-
-              <template v-if="column.key === 'createdAt'">
-                <span>{{ record.createdAt }}</span>
-              </template>
-
-              <template v-if="column.key === 'updatedAt'">
-                <span>{{ record.updatedAt }}</span>
-              </template>
-
-              <template v-if="column.key === 'status'">
-                <a-tag :color="getStatusColor(record.publishStatus)" style="white-space: nowrap; width: 100%;">
-                  {{ getStatusLabel(record.publishStatus) }}
-                </a-tag>
-              </template>
-
-              <template v-if="column.key === 'hasEmpty'">
-                <a-tag :color="record.hasEmpty ? 'warning' : 'success'" style="width: fit-content">
-                  {{ record.hasEmpty ? 'Has Empty Fields' : 'No Empty Fields' }}
-                </a-tag>
-              </template>
-
-              <template v-if="column.key === 'actions'">
-                <a-dropdown>
-                  <a-button size="small" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0;">
-                    <template #icon><EllipsisOutlined /></template>
-                  </a-button>
-                  <template #overlay>
-                    <a-menu>
-                      <template v-if="record.generatorStatus !== 'failed'">
-                        <a-menu-item 
-                          key="edit" 
-                          @click="handleEdit(record)"
-                          :disabled="record.generatorStatus === 'processing'"
-                        >
-                          Edit
-                        </a-menu-item>
-                        <a-menu-item 
-                          key="preview" 
-                          @click="handlePreview(record)"
-                          :disabled="record.generatorStatus === 'processing'"
-                        >
-                          Preview
-                        </a-menu-item>
-                        <a-menu-item 
-                          key="publish"
-                          @click="handlePublish(record)"
-                          :disabled="record.generatorStatus === 'processing'"
-                        >
-                          {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
-                        </a-menu-item>
-                      </template>
-                      <a-menu-item 
-                        key="delete"
-                        @click="handleDelete(record)"
-                        :disabled="record.generatorStatus === 'processing'"
-                        danger
-                      >
-                        Delete
-                      </a-menu-item>
-                    </a-menu>
-                  </template>
-                </a-dropdown>
-              </template>
-            </template>
-          </a-table>
-        </div>
-
-        <!-- 修改分页组件 -->
-        <div class="pagination-wrapper" v-if="!loading && tasks.length > 0">
-          <a-pagination
-            v-model:current="pagination.current"
-            :total="pagination.total"
-            :pageSize="pagination.pageSize"
-            :show-total="(total) => `Total ${total} items`"
-            :show-size-changer="false"
-            @change="handleTableChange"
-          />
-        </div>
-      </div>
-    </template>
-
+      <template v-else>
+        <no-site-configured v-if="!loading"/>
+      </template>
+    </a-spin>
     <!-- 合并后的发布模态框 -->
     <a-modal
       v-model:visible="publishModal.visible"
@@ -331,7 +330,7 @@
     >
       {{ modalConfig.content }}
     </a-modal>
-  </a-spin>
+  
   </page-layout>
 </template>
 
@@ -1399,26 +1398,39 @@ export default {
   padding: 20px 0;
 }
 
+/* 修改 loading spin 样式 */
 :deep(.ant-spin) {
-  /* 修改定位逻辑，考虑左侧导航栏的宽度 */
-  position: fixed !important;
+  /* 移除之前的定位和transform样式 */
+  position: absolute !important;
   top: 50% !important;
-  left: calc(50% + 120px) !important; /* 120px 是左侧导航栏的一半宽度，根据实际情况调整 */
+  left: 50% !important;
   transform: translate(-50%, -50%) !important;
   z-index: 1000;
 
   .ant-spin-dot {
-    font-size: 24px;
+    font-size: 20px; /* 减小spin大小 */
   }
   
   .ant-spin-text {
     margin-top: 8px;
-    font-size: 14px;
-    color: #1890ff;
+    font-size: 13px; /* 减小文字大小 */
+    color: #8c8c8c; /* 调整文字颜色 */
   }
 }
 
-/* 移除之前的相对定位样式 */
+/* 添加 centered-spin 样式，与 KeywordsPlanningPage 保持一致 */
+:deep(.centered-spin) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.centered-spin :deep(.ant-spin-spinning) {
+  max-height: none;
+}
+
 .ant-spin-container {
   min-height: unset;
 }
@@ -1913,5 +1925,18 @@ export default {
   border-color: #d9d9d9;
   background: #f5f5f5;
   cursor: not-allowed;
+}
+
+/* 添加 centered-spin 样式 */
+:deep(.centered-spin) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.centered-spin :deep(.ant-spin-spinning) {
+  max-height: none;
 }
 </style>

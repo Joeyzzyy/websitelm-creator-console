@@ -12,49 +12,54 @@
       emoji="📁"
     />
 
+    <a-spin 
+      :spinning="loading"
+      class="centered-spin"
+    >
+
       <template v-if="domainConfigured">
         <a-tabs 
-        class="main-tabs"
-        v-model:activeKey="activeTab"
-      >
-        <template #rightExtra>
-          <a-button 
-            v-if="activeTab === 'images' || activeTab === 'videos'" 
-            type="primary" 
-            class="ai-analyze-btn" 
-            @click="showUploadModal"
-          >
-            <span class="btn-content">
-              <span>Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}</span>
-              <upload-outlined />
-            </span>
-          </a-button>
-          <a-button 
-            v-else-if="activeTab === 'links' || activeTab === 'button-links'"
-            type="primary"
-            class="ai-analyze-btn" 
-            @click="showAddLinkModal"
-          >
-            <span class="btn-content">
-              <span>Add {{ activeTab === 'links' ? 'Link' : 'Button Link' }}</span>
-              
-            </span>
-          </a-button>
-          <a-button
-            v-else-if="activeTab === 'knowledge' && !processingKnowledge && Object.keys(groupedArticles).length > 0"
-            type="primary"
-            class="ai-analyze-btn"
-            :loading="regrabLoading"
-            @click="showRegrabConfirm"
-          >
-            <span class="btn-content">
-              <sync-outlined :spin="regrabLoading" />
-              <span>Regrab Info</span>
-            </span>
-          </a-button>
-        </template>
+          class="main-tabs"
+          v-model:activeKey="activeTab"
+        >
+          <template #rightExtra>
+            <a-button 
+              v-if="activeTab === 'images' || activeTab === 'videos'" 
+              type="primary" 
+              class="ai-analyze-btn" 
+              @click="showUploadModal"
+            >
+              <span class="btn-content">
+                <span>Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}</span>
+                <upload-outlined />
+              </span>
+            </a-button>
+            <a-button 
+              v-else-if="activeTab === 'links' || activeTab === 'button-links'"
+              type="primary"
+              class="ai-analyze-btn" 
+              @click="showAddLinkModal"
+            >
+              <span class="btn-content">
+                <span>Add {{ activeTab === 'links' ? 'Link' : 'Button Link' }}</span>
+                
+              </span>
+            </a-button>
+            <a-button
+              v-else-if="activeTab === 'knowledge' && !processingKnowledge && Object.keys(groupedArticles).length > 0"
+              type="primary"
+              class="ai-analyze-btn"
+              :loading="regrabLoading"
+              @click="showRegrabConfirm"
+            >
+              <span class="btn-content">
+                <sync-outlined :spin="regrabLoading" />
+                <span>Regrab Info</span>
+              </span>
+            </a-button>
+          </template>
 
-        <a-tab-pane key="knowledge">
+          <a-tab-pane key="knowledge">
           <template #tab>
             <span class="knowledge-tab">Knowledge Base</span>
           </template>
@@ -91,19 +96,14 @@
             </template>
           </a-tab-pane>
         </a-tabs>
-
-      <div class="page-content">
-        <div class="assets-content">
-          <a-spin 
-            :spinning="loading || knowledgeLoading" 
-            class="unified-loading"
-          >
+        <div class="page-content">
+          <div class="assets-content">
             <div class="controls-header">
-              <div class="controls-right">
-                <slot name="controls"></slot>
-              </div>
+                <div class="controls-right">
+                  <slot name="controls"></slot>
+                </div>
             </div>
-            <!-- Media Asset Content -->
+              <!-- Media Asset Content -->
             <template v-if="activeTab === 'images' || activeTab === 'videos'">
               <a-spin :spinning="mediaLoading">
                 <div class="assets-grid" v-if="!mediaLoading">
@@ -260,31 +260,32 @@
             </template>
             <!-- Knowledge Tab Content -->
             <template v-else-if="activeTab === 'knowledge'">
-              <template v-if="processingKnowledge && !knowledgeLoading">
-                <a-card class="knowledge-processing-card">
-                  <div class="processing-content">
-                    <LoadingOutlined class="processing-icon" spin />
-                    <div class="status-info">
-                      <h3 class="status-title">{{ getKnowledgeStatusMessage(knowledgeStatus).title }}</h3>
-                      <p class="status-description">{{ getKnowledgeStatusMessage(knowledgeStatus).description }}</p>
-                    </div>
-                    
-                    <!-- 处理时间展示 -->
-                    <div class="processing-stats">
-                      <div class="stat-item">
-                        <ClockCircleOutlined />
-                        <span>Processing Time: {{ knowledgeTime }}</span>
+              <a-spin :spinning="knowledgeLoading">
+                <template v-if="processingKnowledge && !knowledgeLoading">
+                  <a-card class="knowledge-processing-card">
+                    <div class="processing-content">
+                      <LoadingOutlined class="processing-icon" spin />
+                      <div class="status-info">
+                        <h3 class="status-title">{{ getKnowledgeStatusMessage(knowledgeStatus).title }}</h3>
+                        <p class="status-description">{{ getKnowledgeStatusMessage(knowledgeStatus).description }}</p>
+                      </div>
+                      
+                      <!-- 处理时间展示 -->
+                      <div class="processing-stats">
+                        <div class="stat-item">
+                          <ClockCircleOutlined />
+                          <span>Processing Time: {{ knowledgeTime }}</span>
+                        </div>
+                      </div>
+
+                      <!-- 进度提示 -->
+                      <div class="processing-tips">
+                        <InfoCircleOutlined />
+                        <span>This process may take several minutes. You'll be notified once it's complete.</span>
                       </div>
                     </div>
-
-                    <!-- 进度提示 -->
-                    <div class="processing-tips">
-                      <InfoCircleOutlined />
-                      <span>This process may take several minutes. You'll be notified once it's complete.</span>
-                    </div>
-                  </div>
-                </a-card>
-              </template>
+                  </a-card>
+                </template>
                 <div v-if="!knowledgeLoading && !processingKnowledge">
                   <!-- Knowledge Base Content -->
                   <div class="knowledge-base-container">
@@ -369,8 +370,8 @@
                       </div>
                       <div class="knowledge-grid">
                         <div v-for="(articles, label) in groupedArticles" 
-                             :key="label"
-                             class="category-card"
+                              :key="label"
+                              class="category-card"
                         >
                           <div class="category-header">
                             <h2>{{ label }}</h2>
@@ -391,10 +392,10 @@
                           <!-- 文章列表 -->
                           <div class="articles-list">
                             <div v-for="article in articles" 
-                                 :key="article.contentId"
-                                 class="article-item"
-                                 :class="getQualityClass(article.grade)"
-                                 @click="selectArticle(article)"
+                                  :key="article.contentId"
+                                  class="article-item"
+                                  :class="getQualityClass(article.grade)"
+                                  @click="selectArticle(article)"
                             >
                               <div class="article-content" @click="selectArticle(article)">
                                 <h3>{{ article.title }}</h3>
@@ -431,6 +432,7 @@
                     </template>
                   </div>
                 </div>
+              </a-spin>
             </template>
             <!-- Header Section -->
             <template v-else-if="activeTab === 'header'">
@@ -438,11 +440,6 @@
                 <a-spin :spinning="headerLoading">
                   <div v-if="!headerLoading" class="settings-section">
                     <div class="preview-section">
-                      <div class="preview-header">
-                        <div class="preview-header-content">
-                          <h4>Header Preview</h4>
-                        </div>
-                      </div>
                       <div class="preview-container">
                         <HeaderTemplate 
                           :initialData="headerConfig"
@@ -460,11 +457,6 @@
                 <a-spin :spinning="footerLoading">
                   <div v-if="!footerLoading" class="settings-section">
                     <div class="preview-section">
-                      <div class="preview-header">
-                        <div class="preview-header-content">
-                          <h4>Footer Preview</h4>
-                        </div>
-                      </div>
                       <div class="preview-container">
                         <FooterTemplate 
                           :initial-data="footerConfig"
@@ -638,315 +630,313 @@
                 </div>
               </div>
             </template>
-          </a-spin>
-        </div>
-      </div>
-      <!-- Preview Modal -->
-      <a-modal
-        v-model:open="previewVisible"  
-        :footer="null"
-        width="800px"
-        class="preview-modal"
-        @cancel="closePreview"
-        :closable="false"
-      >
-        <img 
-          v-if="selectedAsset?.type === 'image'"
-          :src="selectedAsset?.url"
-          class="preview-image"
-          alt="Preview"
-        >
-        <video
-          v-else-if="selectedAsset?.type === 'video'"
-          :src="selectedAsset?.url"
-          controls
-          class="preview-video"
-        ></video>
-      </a-modal>
-
-      <!-- Upload Modal -->
-      <a-modal
-        v-model:open="uploadModalVisible"
-        :title="`Upload ${activeTab === 'images' ? 'Images' : 'Videos'}`"
-        @ok="handleUploadOk"
-        @cancel="handleUploadCancel"
-        :okButtonProps="{ 
-          disabled: !uploadFile || !isMediaFormValid,
-          loading: uploading
-        }"
-      >
-        <div class="upload-container">
-          <div v-if="!uploadFile" class="upload-area" @click="triggerFileInput">
-            <upload-outlined class="upload-icon" />
-            <p>Click or drag file to upload</p>
-            <p class="upload-hint">
-              {{ activeTab === 'images' ? 'Supports JPG, PNG, WebP formats' : 'Supports MP4 format' }}
-            </p>
           </div>
-          
-          <template v-else>
-            <div class="preview-container">
-              <div class="preview-wrapper">
-                <img
-                  v-if="activeTab === 'images' && uploadFile"
-                  :src="previewUrl"
-                  class="upload-preview"
-                />
-                <video
-                  v-if="activeTab === 'videos' && uploadFile"
-                  :src="previewUrl"
-                  controls
-                  class="upload-preview"
-                ></video>
+        </div>
+        <!-- Preview Modal -->
+        <a-modal
+          v-model:open="previewVisible"  
+          :footer="null"
+          width="800px"
+          class="preview-modal"
+          @cancel="closePreview"
+          :closable="false"
+        >
+          <img 
+            v-if="selectedAsset?.type === 'image'"
+            :src="selectedAsset?.url"
+            class="preview-image"
+            alt="Preview"
+          >
+          <video
+            v-else-if="selectedAsset?.type === 'video'"
+            :src="selectedAsset?.url"
+            controls
+            class="preview-video"
+          ></video>
+        </a-modal>
+        <!-- Upload Modal -->
+        <a-modal
+          v-model:open="uploadModalVisible"
+          :title="`Upload ${activeTab === 'images' ? 'Images' : 'Videos'}`"
+          @ok="handleUploadOk"
+          @cancel="handleUploadCancel"
+          :okButtonProps="{ 
+            disabled: !uploadFile || !isMediaFormValid,
+            loading: uploading
+          }"
+        >
+          <div class="upload-container">
+            <div v-if="!uploadFile" class="upload-area" @click="triggerFileInput">
+              <upload-outlined class="upload-icon" />
+              <p>Click or drag file to upload</p>
+              <p class="upload-hint">
+                {{ activeTab === 'images' ? 'Supports JPG, PNG, WebP formats' : 'Supports MP4 format' }}
+              </p>
+            </div>
+            
+            <template v-else>
+              <div class="preview-container">
+                <div class="preview-wrapper">
+                  <img
+                    v-if="activeTab === 'images' && uploadFile"
+                    :src="previewUrl"
+                    class="upload-preview"
+                  />
+                  <video
+                    v-if="activeTab === 'videos' && uploadFile"
+                    :src="previewUrl"
+                    controls
+                    class="upload-preview"
+                  ></video>
+                </div>
+              </div>
+
+              <!-- Add form for name and description -->
+              <a-form
+                :model="mediaForm"
+                :rules="mediaFormRules"
+                ref="mediaFormRef"
+                layout="vertical"
+                class="media-form"
+              >
+                <a-form-item 
+                  name="mediaName" 
+                  label="Name"
+                  :validateTrigger="['blur', 'change']"
+                >
+                  <a-input 
+                    v-model:value="mediaForm.mediaName" 
+                    placeholder="Enter file name"
+                    :maxLength="50"
+                  />
+                </a-form-item>
+                
+                <a-form-item 
+                  name="description" 
+                  label="Description"
+                >
+                  <a-textarea 
+                    v-model:value="mediaForm.description" 
+                    placeholder="Enter description (optional)"
+                    :maxLength="200"
+                    :rows="3"
+                  />
+                </a-form-item>
+              </a-form>
+
+              <div class="preview-actions">
+                <a-button type="primary" danger @click="removeUpload">
+                  <delete-outlined /> Remove
+                </a-button>
+              </div>
+            </template>
+            
+            <input
+              type="file"
+              ref="fileInput"
+              :accept="activeTab === 'images' ? 'image/*' : 'video/mp4'"
+              style="display: none"
+              @change="handleFileChange"
+            />
+          </div>
+        </a-modal>
+        <!-- Add Link Modal -->
+        <a-modal
+          v-model:open="linkModalVisible"
+          :title="(activeTab === 'button-links' ? 'Button ' : 'Internal ') + (editingLink || editingButtonLink ? 'Edit' : 'Add') + ' Link'"
+          @ok="handleLinkModalOk" 
+          @cancel="handleLinkModalCancel"
+          :okButtonProps="{ 
+            disabled: !isLinkFormValid,
+            loading: linkSubmitting
+          }"
+        >
+          <a-form
+            :model="linkForm"
+            :rules="linkFormRules"
+            ref="linkFormRef"
+            layout="vertical"
+          >
+            <!-- Name field -->
+            <a-form-item 
+              name="name" 
+              label="Name"
+              :validateTrigger="['blur', 'change']"
+            >
+              <a-input 
+                v-model:value="linkForm.name" 
+                placeholder="Enter link name"
+                :maxLength="50"
+              />
+            </a-form-item>
+            
+            <!-- Link URL field -->
+            <a-form-item 
+              name="link" 
+              label="Link URL"
+              :validateTrigger="['blur', 'change']"
+            >
+              <a-input 
+                v-model:value="linkForm.link" 
+                placeholder="Enter link URL"
+                :maxLength="200"
+              />
+            </a-form-item>
+            
+            <!-- Description field -->
+            <a-form-item 
+              name="description" 
+              label="Description"
+              :validateTrigger="['blur', 'change']"
+            >
+              <a-textarea 
+                v-model:value="linkForm.description" 
+                placeholder="Enter link description"
+                :maxLength="500"
+                :rows="3"
+              />
+            </a-form-item>
+            
+            <!-- Category field - only show for internal links -->
+            <a-form-item 
+              v-if="activeTab === 'links'"
+              name="category" 
+              label="Category"
+              :validateTrigger="['blur', 'change']"
+            >
+              <a-select
+                v-model:value="linkForm.category"
+                placeholder="Select category"
+              >
+                <a-select-option 
+                  v-for="category in linkCategories" 
+                  :key="category" 
+                  :value="category"
+                >
+                  {{ category }}
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-form>
+        </a-modal>
+        <!-- Add Edit Modal -->
+        <a-modal
+          v-model:open="editModalVisible"
+          title="Edit Asset"
+          @ok="handleEditOk"
+          @cancel="handleEditCancel"
+          :okButtonProps="{ 
+            disabled: !isEditFormValid,
+            loading: editSubmitting
+          }"
+        >
+          <a-form
+            :model="editForm"
+            :rules="mediaFormRules"
+            ref="editFormRef"
+            layout="vertical"
+            class="media-form"
+          >
+            <a-form-item 
+              name="mediaName" 
+              label="Name"
+              :validateTrigger="['blur', 'change']"
+            >
+              <a-input 
+                v-model:value="editForm.mediaName" 
+                placeholder="Enter file name"
+                :maxLength="50"
+              />
+            </a-form-item>
+            
+            <a-form-item 
+              name="description" 
+              label="Description"
+            >
+              <a-textarea 
+                v-model:value="editForm.description" 
+                placeholder="Enter description (optional)"
+                :maxLength="200"
+                :rows="3"
+              />
+            </a-form-item>
+          </a-form>
+        </a-modal>
+        <!-- Knowledge Edit Modal -->
+        <a-modal
+          v-model:visible="knowledgeModalVisible"
+          :title="currentArticle?.contentId ? 'Edit Knowledge Content' : 'Add Knowledge Content'"
+          :width="1400"
+          @ok="handleKnowledgeSave"
+          @cancel="handleKnowledgeCancel"
+          :confirmLoading="knowledgeSaving"
+        >
+          <template v-if="currentArticle">
+            <!-- Article Info Section -->
+            <div class="article-info-section">
+              <div class="info-row">
+                <div class="info-item">
+                  <div class="info-label">Title</div>
+                  <div class="info-value">
+                    <a-input 
+                      v-if="!currentArticle.contentId"
+                      v-model:value="currentArticle.title"
+                      placeholder="Enter article title"
+                    />
+                    <template v-else>
+                      {{ currentArticle.title }}
+                    </template>
+                  </div>
+                </div>
+                <!-- 只在编辑模式显示 grade -->
+                <div class="info-item" v-if="currentArticle.contentId">
+                  <div class="info-label">Quality Grade</div>
+                  <div class="info-value" :class="getQualityClass(currentArticle.grade)">
+                    {{ currentArticle.grade }}
+                  </div>
+                </div>
+              </div>
+              <!-- source 只在编辑模式显示 -->
+              <div class="info-row" v-if="currentArticle.contentId">
+                <div class="info-item">
+                  <div class="info-label">Category</div>
+                  <div class="info-value">{{ currentArticle.label }}</div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Source</div>
+                  <div class="info-value">
+                    {{ currentArticle.source || 'Not specified' }}
+                  </div>
+                </div>
+              </div>
+              <!-- 新增模式只显示 Category -->
+              <div class="info-row" v-else>
+                <div class="info-item">
+                  <div class="info-label">Category</div>
+                  <div class="info-value">{{ currentArticle.label }}</div>
+                </div>
               </div>
             </div>
 
-            <!-- Add form for name and description -->
-            <a-form
-              :model="mediaForm"
-              :rules="mediaFormRules"
-              ref="mediaFormRef"
-              layout="vertical"
-              class="media-form"
-            >
-              <a-form-item 
-                name="mediaName" 
-                label="Name"
-                :validateTrigger="['blur', 'change']"
-              >
-                <a-input 
-                  v-model:value="mediaForm.mediaName" 
-                  placeholder="Enter file name"
-                  :maxLength="50"
-                />
-              </a-form-item>
-              
-              <a-form-item 
-                name="description" 
-                label="Description"
-              >
-                <a-textarea 
-                  v-model:value="mediaForm.description" 
-                  placeholder="Enter description (optional)"
-                  :maxLength="200"
-                  :rows="3"
-                />
-              </a-form-item>
-            </a-form>
-
-            <div class="preview-actions">
-              <a-button type="primary" danger @click="removeUpload">
-                <delete-outlined /> Remove
-              </a-button>
+            <!-- Content Editor -->
+            <div class="content-editor">
+              <div class="editor-label">Content</div>
+              <a-textarea
+                v-model:value="editableContent"
+                :rows="20"  
+                placeholder="Enter knowledge content here..."
+                :maxLength="5000"
+                show-count
+                class="large-textarea" 
+              />
             </div>
           </template>
-          
-          <input
-            type="file"
-            ref="fileInput"
-            :accept="activeTab === 'images' ? 'image/*' : 'video/mp4'"
-            style="display: none"
-            @change="handleFileChange"
-          />
-        </div>
-      </a-modal>
-
-      <!-- Add Link Modal -->
-      <a-modal
-        v-model:open="linkModalVisible"
-        :title="(activeTab === 'button-links' ? 'Button ' : 'Internal ') + (editingLink || editingButtonLink ? 'Edit' : 'Add') + ' Link'"
-        @ok="handleLinkModalOk" 
-        @cancel="handleLinkModalCancel"
-        :okButtonProps="{ 
-          disabled: !isLinkFormValid,
-          loading: linkSubmitting
-        }"
-      >
-        <a-form
-          :model="linkForm"
-          :rules="linkFormRules"
-          ref="linkFormRef"
-          layout="vertical"
-        >
-          <!-- Name field -->
-          <a-form-item 
-            name="name" 
-            label="Name"
-            :validateTrigger="['blur', 'change']"
-          >
-            <a-input 
-              v-model:value="linkForm.name" 
-              placeholder="Enter link name"
-              :maxLength="50"
-            />
-          </a-form-item>
-          
-          <!-- Link URL field -->
-          <a-form-item 
-            name="link" 
-            label="Link URL"
-            :validateTrigger="['blur', 'change']"
-          >
-            <a-input 
-              v-model:value="linkForm.link" 
-              placeholder="Enter link URL"
-              :maxLength="200"
-            />
-          </a-form-item>
-          
-          <!-- Description field -->
-          <a-form-item 
-            name="description" 
-            label="Description"
-            :validateTrigger="['blur', 'change']"
-          >
-            <a-textarea 
-              v-model:value="linkForm.description" 
-              placeholder="Enter link description"
-              :maxLength="500"
-              :rows="3"
-            />
-          </a-form-item>
-          
-          <!-- Category field - only show for internal links -->
-          <a-form-item 
-            v-if="activeTab === 'links'"
-            name="category" 
-            label="Category"
-            :validateTrigger="['blur', 'change']"
-          >
-            <a-select
-              v-model:value="linkForm.category"
-              placeholder="Select category"
-            >
-              <a-select-option 
-                v-for="category in linkCategories" 
-                :key="category" 
-                :value="category"
-              >
-                {{ category }}
-              </a-select-option>
-            </a-select>
-          </a-form-item>
-        </a-form>
-      </a-modal>
-
-      <!-- Add Edit Modal -->
-      <a-modal
-        v-model:open="editModalVisible"
-        title="Edit Asset"
-        @ok="handleEditOk"
-        @cancel="handleEditCancel"
-        :okButtonProps="{ 
-          disabled: !isEditFormValid,
-          loading: editSubmitting
-        }"
-      >
-        <a-form
-          :model="editForm"
-          :rules="mediaFormRules"
-          ref="editFormRef"
-          layout="vertical"
-          class="media-form"
-        >
-          <a-form-item 
-            name="mediaName" 
-            label="Name"
-            :validateTrigger="['blur', 'change']"
-          >
-            <a-input 
-              v-model:value="editForm.mediaName" 
-              placeholder="Enter file name"
-              :maxLength="50"
-            />
-          </a-form-item>
-          
-          <a-form-item 
-            name="description" 
-            label="Description"
-          >
-            <a-textarea 
-              v-model:value="editForm.description" 
-              placeholder="Enter description (optional)"
-              :maxLength="200"
-              :rows="3"
-            />
-          </a-form-item>
-        </a-form>
-      </a-modal>
-
-      <!-- Knowledge Edit Modal -->
-      <a-modal
-        v-model:visible="knowledgeModalVisible"
-        :title="currentArticle?.contentId ? 'Edit Knowledge Content' : 'Add Knowledge Content'"
-        :width="1400"
-        @ok="handleKnowledgeSave"
-        @cancel="handleKnowledgeCancel"
-        :confirmLoading="knowledgeSaving"
-      >
-        <template v-if="currentArticle">
-          <!-- Article Info Section -->
-          <div class="article-info-section">
-            <div class="info-row">
-              <div class="info-item">
-                <div class="info-label">Title</div>
-                <div class="info-value">
-                  <a-input 
-                    v-if="!currentArticle.contentId"
-                    v-model:value="currentArticle.title"
-                    placeholder="Enter article title"
-                  />
-                  <template v-else>
-                    {{ currentArticle.title }}
-                  </template>
-                </div>
-              </div>
-              <!-- 只在编辑模式显示 grade -->
-              <div class="info-item" v-if="currentArticle.contentId">
-                <div class="info-label">Quality Grade</div>
-                <div class="info-value" :class="getQualityClass(currentArticle.grade)">
-                  {{ currentArticle.grade }}
-                </div>
-              </div>
-            </div>
-            <!-- source 只在编辑模式显示 -->
-            <div class="info-row" v-if="currentArticle.contentId">
-              <div class="info-item">
-                <div class="info-label">Category</div>
-                <div class="info-value">{{ currentArticle.label }}</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Source</div>
-                <div class="info-value">
-                  {{ currentArticle.source || 'Not specified' }}
-                </div>
-              </div>
-            </div>
-            <!-- 新增模式只显示 Category -->
-            <div class="info-row" v-else>
-              <div class="info-item">
-                <div class="info-label">Category</div>
-                <div class="info-value">{{ currentArticle.label }}</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Content Editor -->
-          <div class="content-editor">
-            <div class="editor-label">Content</div>
-            <a-textarea
-              v-model:value="editableContent"
-              :rows="20"  
-              placeholder="Enter knowledge content here..."
-              :maxLength="5000"
-              show-count
-              class="large-textarea" 
-            />
-          </div>
-        </template>
-      </a-modal>
+        </a-modal>
       </template>
-    <no-site-configured v-if="!domainConfigured && !loading" />
+      <template v-else>
+        <no-site-configured v-if="!loading"/>
+      </template>
+    </a-spin>
   </page-layout>
 </template>
 
@@ -1126,7 +1116,6 @@ export default {
     watch(activeTab, async (newValue) => {
       if (!domainConfigured.value) return;
       
-      loading.value = true;
       try {
         switch (newValue) {
           case 'images':
@@ -1153,7 +1142,6 @@ export default {
       } catch (error) {
         console.error(`Failed to fetch data for ${newValue} tab:`, error);
       } finally {
-        loading.value = false;
       }
     });
 
