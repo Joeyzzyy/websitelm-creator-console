@@ -1012,12 +1012,6 @@ import {
   FileExcelOutlined,
   FileAddOutlined,
 } from '@ant-design/icons-vue'
-import {
-  tableColumns,
-  competitorColumns,
-  tableData,
-  recommendedKeywords as importedRecommendedKeywords
-} from '../data/keywordPlanningData'
 import { message } from 'ant-design-vue'
 import api from '../api/api'
 import { useRouter } from 'vue-router'
@@ -1414,8 +1408,6 @@ export default defineComponent({
     const isGenerating = ref(false)
 
     const hasGenerated = ref(false)
-
-    const filteredKeywords = ref(tableData)
 
     const getRankClass = (rank) => {
       if (rank <= 3) return 'top-3'
@@ -3115,7 +3107,6 @@ export default defineComponent({
       recommendedKeywords,
       savedPresets: ref(savedPresets),
       columns,
-      competitorColumns: computed(() => competitorColumns),
       rowSelection,
       pagination,
       handleTableChange,
@@ -3136,7 +3127,6 @@ export default defineComponent({
       isGeneratingTitles,
       isGeneratingOutline,
       hasGenerated,
-      filteredKeywords,
       getRankClass,
       handleKeywordSelect,
       addFilter,

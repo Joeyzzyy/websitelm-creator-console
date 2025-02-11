@@ -1,23 +1,17 @@
 import axios from 'axios';
 
-// const apiClient = axios.create({
-//   baseURL: 'https://strapi.sheet2email.com/v1', // 替换为实际的 API 基础地址
-//   timeout: 20000,
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-// });
+const isProd = import.meta.env.VITE_APP_ENV === 'production';
 
-// const knowledgeApiClient = axios.create({
-//   baseURL: 'https://strapi.sheet2email.com', // 替换为实际的 API 基础地址
-//   timeout: 20000,
-//   headers: {
-//     'Content-Type': 'application/json',
-//   },
-// });
+const API_BASE_URL = isProd 
+  ? 'https://api.websitelm.com/v1'
+  : 'https://strapi.sheet2email.com/v1';
+
+const KNOWLEDGE_BASE_URL = isProd
+  ? 'https://api.websitelm.com'
+  : 'https://strapi.sheet2email.com';
 
 const apiClient = axios.create({
-  baseURL: 'https://api.websitelm.com/v1', // 替换为实际的 API 基础地址
+  baseURL: API_BASE_URL,
   timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
@@ -25,12 +19,28 @@ const apiClient = axios.create({
 });
 
 const knowledgeApiClient = axios.create({
-  baseURL: 'https://api.websitelm.com', // 替换为实际的 API 基础地址
+  baseURL: KNOWLEDGE_BASE_URL,
   timeout: 20000,
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+// const apiClient = axios.create({
+//   baseURL: 'https://api.websitelm.com/v1', // 替换为实际的 API 基础地址
+//   timeout: 20000,
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
+
+// const knowledgeApiClient = axios.create({
+//   baseURL: 'https://api.websitelm.com', // 替换为实际的 API 基础地址
+//   timeout: 20000,
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
 
 const vercelApiClient = axios.create({
   baseURL: 'https://api.vercel.com',

@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "description": "A Vue.js project with Vuetify and Pinia",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "vite --mode development",
+    "online": "vite --mode production",
+    "build": "vite build --mode production",
+    "build:dev": "vite build --mode development",
     "serve": "vite preview"
   },
   "dependencies": {

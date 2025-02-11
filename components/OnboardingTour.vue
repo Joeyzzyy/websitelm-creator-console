@@ -23,20 +23,9 @@
             </div>
           </div>
           
-          <div class="resource-links">
-            <a v-if="currentStep.docsLink" 
-               :href="currentStep.docsLink" 
-               target="_blank"
-               class="resource-link docs-link"
-            >
-              <FileTextOutlined />
-              Read Documentation
-            </a>
-          </div>
-          
           <div v-if="currentStep.features" class="feature-list">
             <div class="feature-list-title">
-              What you'll learn in the documentation:
+              Tutorials of this section:
             </div>
             <div v-for="(feature, index) in currentStep.features" 
                  :key="index" 
@@ -48,7 +37,7 @@
                 target="_blank" 
                 class="feature-link"
               >
-                How to setup {{ feature.title }}
+                How to set up {{ feature.title }}
               </a>
             </div>
           </div>
@@ -74,8 +63,8 @@
 <script>
 import { defineComponent } from 'vue'
 import { FileTextOutlined, BulbOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
-import { tutorialConfig } from '../config/tutorials'
 import apiClient from '../api/api'
+import { tourConfig } from '../config/tutorials'
 
 export default defineComponent({
   name: 'OnboardingTour',
@@ -89,7 +78,13 @@ export default defineComponent({
     return {
       visible: false,
       currentStepIndex: 0,
-      steps: Object.values(tutorialConfig)
+      steps: [
+        tourConfig.onboarding,
+        tourConfig.assetManagement,
+        tourConfig.keywordPlanning,
+        tourConfig.taskManagement,
+        tourConfig.settings
+      ]
     }
   },
   
