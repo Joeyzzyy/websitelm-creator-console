@@ -16,243 +16,107 @@
       emoji="⚙️"
     />
 
-    <a-tabs 
-      class="main-tabs"
-      v-model:activeKey="activeTab"
-    >
-      <a-tab-pane key="domains" tab="Domains" />
-      <a-tab-pane key="login-email" tab="Login Email" />
-    </a-tabs>
-
-    <div class="page-content">
+    <!-- 添加域名未配置的提示 -->
+    <template v-if="!domainConfigured && !loading">
+      <no-site-configured />
+    </template>
+    
+    <template v-else>
       <div class="settings-content">
-        <template v-if="activeTab === 'domains'">
-          <a-spin :spinning="domainLoading" tip="Loading...">
-            <div class="settings-container">
-              <div v-if="!domainLoading">
-                <template v-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
-                  <no-site-configured />
-                </template>
-                <template v-else>
-                  <div class="domain-settings">
-                    <div class="current-domain">
-                      <h3>Current Site</h3>
-                      <p class="website-url">{{ productInfo.projectWebsite }}</p>
-                    </div>
-                    
-                   
+        <a-tabs 
+          class="main-tabs"
+          v-model:activeKey="activeTab"
+        >
+          <a-tab-pane key="domains" tab="Domains" />
+          <a-tab-pane key="login-email" tab="Login Email" />
+        </a-tabs>
 
-                    <div class="deployment-settings">
-                      <h3>Deployment Settings</h3>
-                      <a-form
-                        :model="deploymentForm"
-                        layout="vertical"
-                      >
-                        <a-form-item label="Choose how you want to deploy your content">
-                          <div class="deployment-options">
-                            <div 
-                              class="deployment-option"
-                              :class="{ active: deploymentForm.method === 'subdomain' }"
-                              @click="deploymentForm.method = 'subdomain'"
-                            >
-                              <div class="option-header">
-                                <div class="radio-wrapper">
-                                  <a-radio :checked="deploymentForm.method === 'subdomain'" />
-                                </div>
-                                <h4>Subdomain</h4>
-                              </div>
-                              <p class="option-description">
-                                Deploy your content on a subdomain (e.g., blog.yourdomain.com)
-                              </p>
-                            </div>
-
-                            <div 
-                              class="deployment-option"
-                              :class="{ active: deploymentForm.method === 'subfolder' }"
-                              @click="deploymentForm.method = 'subfolder'"
-                            >
-                              <div class="option-header">
-                                <div class="radio-wrapper">
-                                  <a-radio :checked="deploymentForm.method === 'subfolder'" />
-                                </div>
-                                <h4>Subfolder</h4>
-                              </div>
-                              <p class="option-description">
-                                Deploy your content in a subfolder (e.g., yourdomain.com/blog)
-                              </p>
-                            </div>
-                          </div>
-                        </a-form-item>
-
-                        <div class="input-section" v-if="deploymentForm.method === 'subfolder'">
-                          <a-spin :spinning="subfolderLoading">
-                            <div class="current-domain">
-                              <h3>Current Site</h3>
-                              <div class="domain-verification">
-                                <p class="website-url">{{ productInfo.projectWebsite }}</p>
-                                <a-button 
-                                  v-if="!subfolderDomainConfig"
-                                  type="primary"
-                                  @click="startVerifyingSubfolder"
-                                  :loading="verifyingSubfolder"
-                                >
-                                  Start Verifying
-                                </a-button>
-                              </div>
-                            </div>
-
-                            <div class="verification-status" v-if="subfolderDomainConfig">
-                              <div class="domains-header">
-                                <h3>Domain Verification</h3>
-                                <div class="domain-actions">
-                                  <a-button 
-                                    type="link"
-                                    class="refresh-btn"
-                                    :loading="refreshingSubfolder"
-                                    @click="handleSubfolderRefresh"
-                                  >
-                                    <reload-outlined />
-                                  </a-button>
-                                </div>
-                              </div>
-                              
-                              <template v-if="subfolderDomainConfig.misconfigured">
-                                <div class="dns-config-alert">
-                                  <a-alert
-                                    type="warning"
-                                    show-icon
-                                    message="DNS Configuration Required"
-                                    description="Please add the following DNS record to your domain provider:"
-                                  />
-                                  <div class="dns-table-wrapper">
-                                    <a-table
-                                      :dataSource="[{
-                                        type: 'A',
-                                        name: '@',
-                                        value: '76.76.21.21'
-                                      }]"
-                                      :columns="dnsColumnsWithActions"
-                                      :pagination="false"
-                                      size="small"
-                                      class="dns-table"
-                                    />
-                                  </div>
-                                </div>
-                              </template>
-                              <template v-else>
-                                <div class="verification-header">
-                                  <a-alert
-                                    type="success"
-                                    show-icon
-                                    message="Domain Verified"
-                                    description="Your domain has been successfully verified"
-                                    class="success-alert"
-                                  >
-                                    <template #message>
-                                      <div class="alert-content">
-                                        <span>Domain Verified</span>
-                                      </div>
-                                    </template>
-                                    <template #action>
-                                      <a-button 
-                                        type="link" 
-                                        danger
-                                        @click="showDeleteSubfolderDomainConfirm"
-                                        class="delete-btn"
-                                      >
-                                        <delete-outlined />
-                                      </a-button>
-                                    </template>
-                                  </a-alert>
-                                </div>
-                              </template>
-                            </div>
-
-                            <template v-if="subfolderDomainConfig">
-                              <div class="verification-status">
-                                <!-- ... 验证状态显示部分保持不变 ... -->
-                              </div>
-
-                              <!-- 只在域名验证成功(非misconfigured)时显示子文件夹管理部分 -->
-                              <template v-if="!subfolderDomainConfig.misconfigured">
-                                <div class="section-header">
-                                  <h3>Subfolder Management</h3>
-                                  <a-button type="primary" @click="showSubfolderModal = true">
-                                    Add Subfolder
-                                  </a-button>
-                                </div>
-
-                                <div class="subfolder-list">
-                                  <a-table 
-                                    :dataSource="subfolders" 
-                                    :columns="subfolderColumns" 
-                                    :pagination="false"
-                                  >
-                                    <template #bodyCell="{ column, text, record, index }">
-                                      <template v-if="column.key === 'action'">
-                                        <a-button type="link" danger @click="confirmDeleteSubfolder(index)">
-                                          Delete
-                                        </a-button>
-                                      </template>
-                                      <template v-if="column.key === 'preview'">
-                                        <span>{{ productInfo?.projectWebsite }}/{{ text }}</span>
-                                      </template>
-                                    </template>
-                                  </a-table>
-                                </div>
-                              </template>
-                            </template>
-                          </a-spin>
+        <div class="page-content">
+          <div class="settings-content">
+            <template v-if="activeTab === 'domains'">
+              <a-spin :spinning="domainLoading" tip="Loading...">
+                <div class="settings-container">
+                  <div v-if="!domainLoading">
+                      <div class="domain-settings">
+                        <div class="current-domain">
+                          <h3>Current Site</h3>
+                          <p class="website-url">{{ productInfo?.projectWebsite }}</p>
                         </div>
-                        <div class="input-section" v-if="deploymentForm.method === 'subdomain'">
-                          <a-form-item 
-                            label="Enter your subdomain"
-                            required
+                        <div class="deployment-settings">
+                          <h3>Deployment Settings</h3>
+                          <a-form
+                            :model="deploymentForm"
+                            layout="vertical"
                           >
-                            <div class="url-preview">
-                              <a-input
-                                v-model:value="deploymentForm.prefix"
-                                placeholder="blog"
-                                :disabled="saving"
-                                class="custom-input"
-                              />
-                              <span class="url-separator">.</span>
-                              <span class="base-domain">{{ productInfo.projectWebsite }}</span>
-                            </div>
-                          </a-form-item>
-                          <a-form-item>
-                            <a-button 
-                              type="primary"
-                              :loading="saving"
-                              @click="saveDeploymentSettings"
-                              class="save-btn"
-                            >
-                              Add
-                            </a-button>
-                          </a-form-item>
-
-                          <a-spin :spinning="subdomainLoading">
-                            <div class="configured-domains" v-if="currentDomainConfigs?.length > 0">
-                              <div class="domains-header">
-                                <h3>Added Subdomains</h3>
-                                <a-button 
-                                  type="link"
-                                  class="refresh-btn"
-                                  :loading="refreshing"
-                                  @click="handleRefresh"
+                            <a-form-item label="Choose how you want to deploy your content">
+                              <div class="deployment-options">
+                                <div 
+                                  class="deployment-option"
+                                  :class="{ active: deploymentForm.method === 'subdomain' }"
+                                  @click="deploymentForm.method = 'subdomain'"
                                 >
-                                  <reload-outlined />
-                                </a-button>
-                              </div>
-                              <div class="domain-list">
-                                <div v-for="domain in currentDomainConfigs" :key="domain.name" class="domain-item">
-                                  <div class="domain-info">
-                                    <span class="domain-name">{{ domain.name }}</span>
-                                    <a-tag :color="getDomainStatusColor(domain)">
-                                      {{ getDomainStatusText(domain) }}
-                                    </a-tag>
+                                  <div class="option-header">
+                                    <div class="radio-wrapper">
+                                      <a-radio :checked="deploymentForm.method === 'subdomain'" />
+                                    </div>
+                                    <h4>Subdomain</h4>
                                   </div>
-                                  <template v-if="domain.configDetails?.misconfigured">
+                                  <p class="option-description">
+                                    Deploy your content on a subdomain (e.g., blog.yourdomain.com)
+                                  </p>
+                                </div>
+
+                                <div 
+                                  class="deployment-option"
+                                  :class="{ active: deploymentForm.method === 'subfolder' }"
+                                  @click="deploymentForm.method = 'subfolder'"
+                                >
+                                  <div class="option-header">
+                                    <div class="radio-wrapper">
+                                      <a-radio :checked="deploymentForm.method === 'subfolder'" />
+                                    </div>
+                                    <h4>Subfolder</h4>
+                                  </div>
+                                  <p class="option-description">
+                                    Deploy your content in a subfolder (e.g., yourdomain.com/blog)
+                                  </p>
+                                </div>
+                              </div>
+                            </a-form-item>
+
+                            <div class="input-section" v-if="deploymentForm.method === 'subfolder'">
+                              <a-spin :spinning="subfolderLoading">
+                                <div class="current-domain">
+                                  <h3>Current Site</h3>
+                                  <div class="domain-verification">
+                                    <p class="website-url">{{ productInfo?.projectWebsite }}</p>
+                                    <a-button 
+                                      v-if="!subfolderDomainConfig"
+                                      type="primary"
+                                      @click="startVerifyingSubfolder"
+                                      :loading="verifyingSubfolder"
+                                    >
+                                      Start Verifying
+                                    </a-button>
+                                  </div>
+                                </div>
+
+                                <div class="verification-status" v-if="subfolderDomainConfig">
+                                  <div class="domains-header">
+                                    <h3>Domain Verification</h3>
+                                    <div class="domain-actions">
+                                      <a-button 
+                                        type="link"
+                                        class="refresh-btn"
+                                        :loading="refreshingSubfolder"
+                                        @click="handleSubfolderRefresh"
+                                      >
+                                        <reload-outlined />
+                                      </a-button>
+                                    </div>
+                                  </div>
+                                  
+                                  <template v-if="subfolderDomainConfig.misconfigured">
                                     <div class="dns-config-alert">
                                       <a-alert
                                         type="warning"
@@ -263,143 +127,280 @@
                                       <div class="dns-table-wrapper">
                                         <a-table
                                           :dataSource="[{
-                                            type: 'CNAME',
-                                            name: domain.name.split('.')[0],
-                                            value: 'cname.vercel-dns.com.'
+                                            type: 'A',
+                                            name: '@',
+                                            value: '76.76.21.21'
                                           }]"
-                                          :columns="dnsColumns"
+                                          :columns="dnsColumnsWithActions"
                                           :pagination="false"
                                           size="small"
                                           class="dns-table"
-                                        >
-                                        </a-table>
+                                        />
                                       </div>
                                     </div>
                                   </template>
-                                  <div class="domain-actions">
-                                    <span class="domain-date">Added on {{ new Date(domain.createdAt).toLocaleDateString() }}</span>
+                                  <template v-else>
+                                    <div class="verification-header">
+                                      <a-alert
+                                        type="success"
+                                        show-icon
+                                        message="Domain Verified"
+                                        description="Your domain has been successfully verified"
+                                        class="success-alert"
+                                      >
+                                        <template #message>
+                                          <div class="alert-content">
+                                            <span>Domain Verified</span>
+                                          </div>
+                                        </template>
+                                        <template #action>
+                                          <a-button 
+                                            type="link" 
+                                            danger
+                                            @click="showDeleteSubfolderDomainConfirm"
+                                            class="delete-btn"
+                                          >
+                                            <delete-outlined />
+                                          </a-button>
+                                        </template>
+                                      </a-alert>
+                                    </div>
+                                  </template>
+                                </div>
+
+                                <template v-if="subfolderDomainConfig">
+                                  <div class="verification-status">
+                                    <!-- ... 验证状态显示部分保持不变 ... -->
+                                  </div>
+
+                                  <!-- 只在域名验证成功(非misconfigured)时显示子文件夹管理部分 -->
+                                  <template v-if="!subfolderDomainConfig.misconfigured">
+                                    <div class="section-header">
+                                      <h3>Subfolder Management</h3>
+                                      <a-button type="primary" @click="showSubfolderModal = true">
+                                        Add Subfolder
+                                      </a-button>
+                                    </div>
+
+                                    <div class="subfolder-list">
+                                      <a-table 
+                                        :dataSource="subfolders" 
+                                        :columns="subfolderColumns" 
+                                        :pagination="false"
+                                      >
+                                        <template #bodyCell="{ column, text, record, index }">
+                                          <template v-if="column.key === 'action'">
+                                            <a-button type="link" danger @click="confirmDeleteSubfolder(index)">
+                                              Delete
+                                            </a-button>
+                                          </template>
+                                          <template v-if="column.key === 'preview'">
+                                            <span>{{ productInfo?.projectWebsite }}/{{ text }}</span>
+                                          </template>
+                                        </template>
+                                      </a-table>
+                                    </div>
+                                  </template>
+                                </template>
+                              </a-spin>
+                            </div>
+                            <div class="input-section" v-if="deploymentForm.method === 'subdomain'">
+                              <a-form-item 
+                                label="Enter your subdomain"
+                                required
+                              >
+                                <div class="url-preview">
+                                  <a-input
+                                    v-model:value="deploymentForm.prefix"
+                                    placeholder="blog"
+                                    :disabled="saving"
+                                    class="custom-input"
+                                  />
+                                  <span class="url-separator">.</span>
+                                  <span class="base-domain">{{ productInfo?.projectWebsite }}</span>
+                                </div>
+                              </a-form-item>
+                              <a-form-item>
+                                <a-button 
+                                  type="primary"
+                                  :loading="saving"
+                                  @click="saveDeploymentSettings"
+                                  class="save-btn"
+                                >
+                                  Add
+                                </a-button>
+                              </a-form-item>
+
+                              <a-spin :spinning="subdomainLoading">
+                                <div class="configured-domains" v-if="currentDomainConfigs?.length > 0">
+                                  <div class="domains-header">
+                                    <h3>Added Subdomains</h3>
                                     <a-button 
-                                      type="link" 
-                                      danger
-                                      @click="showDeleteConfirm(domain.name)"
+                                      type="link"
+                                      class="refresh-btn"
+                                      :loading="refreshing"
+                                      @click="handleRefresh"
                                     >
-                                      <delete-outlined />
+                                      <reload-outlined />
                                     </a-button>
                                   </div>
+                                  <div class="domain-list">
+                                    <div v-for="domain in currentDomainConfigs" :key="domain.name" class="domain-item">
+                                      <div class="domain-info">
+                                        <span class="domain-name">{{ domain.name }}</span>
+                                        <a-tag :color="getDomainStatusColor(domain)">
+                                          {{ getDomainStatusText(domain) }}
+                                        </a-tag>
+                                      </div>
+                                      <template v-if="domain.configDetails?.misconfigured">
+                                        <div class="dns-config-alert">
+                                          <a-alert
+                                            type="warning"
+                                            show-icon
+                                            message="DNS Configuration Required"
+                                            description="Please add the following DNS record to your domain provider:"
+                                          />
+                                          <div class="dns-table-wrapper">
+                                            <a-table
+                                              :dataSource="[{
+                                                type: 'CNAME',
+                                                name: domain.name.split('.')[0],
+                                                value: 'cname.vercel-dns.com.'
+                                              }]"
+                                              :columns="dnsColumns"
+                                              :pagination="false"
+                                              size="small"
+                                              class="dns-table"
+                                            >
+                                            </a-table>
+                                          </div>
+                                        </div>
+                                      </template>
+                                      <div class="domain-actions">
+                                        <span class="domain-date">Added on {{ new Date(domain.createdAt).toLocaleDateString() }}</span>
+                                        <a-button 
+                                          type="link" 
+                                          danger
+                                          @click="showDeleteConfirm(domain.name)"
+                                        >
+                                          <delete-outlined />
+                                        </a-button>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
-                              </div>
+                              </a-spin>
                             </div>
-                          </a-spin>
+                          </a-form>
                         </div>
-                      </a-form>
-                    </div>
 
-                    <a-modal
-                      v-model:visible="showSubfolderModal"
-                      title="Add Subfolder"
-                      @ok="handleAddSubfolder"
-                      :confirmLoading="savingSubfolders"
-                      :okButtonProps="{ disabled: !newSubfolder }"
-                    >
-                      <div class="subfolder-input">
-                        <span class="base-url">{{ productInfo?.projectWebsite }}/</span>
-                        <a-input v-model:value="newSubfolder" placeholder="Enter subfolder name" />
+                        <a-modal
+                          v-model:visible="showSubfolderModal"
+                          title="Add Subfolder"
+                          @ok="handleAddSubfolder"
+                          :confirmLoading="savingSubfolders"
+                          :okButtonProps="{ disabled: !newSubfolder }"
+                        >
+                          <div class="subfolder-input">
+                            <span class="base-url">{{ productInfo?.projectWebsite }}/</span>
+                            <a-input v-model:value="newSubfolder" placeholder="Enter subfolder name" />
+                          </div>
+                        </a-modal>
                       </div>
-                    </a-modal>
                   </div>
-                </template>
-              </div>
-            </div>
-          </a-spin>
-        </template>
+                </div>
+              </a-spin>
+            </template>
 
-        <template v-if="activeTab === 'login-email'">
-          <div class="account-settings">
-            <div class="current-email-section">
-              <h3>Current Login Email</h3>
-              <div class="email-display">
-                <a-input
-                  v-model:value="currentEmail"
-                  disabled
-                  class="current-email-input"
-                />
-                <a-button 
-                  type="primary"
-                  @click="showChangeEmailForm"
-                  v-if="!showEmailForm"
-                  class="change-email-btn"
-                >
-                  Change Login Email
-                </a-button>
-              </div>
-            </div>
-
-            <div class="email-change-section" v-if="showEmailForm">
-              <div class="section-header">
-                <h3>Change Login Email</h3>
-                <a-button 
-                  @click="cancelEmailChange"
-                  class="cancel-btn"
-                >
-                  <close-outlined />
-                </a-button>
-              </div>
-              <div class="email-change-form">
-                <a-form
-                  :model="emailForm"
-                  layout="vertical"
-                >
-                  <a-form-item 
-                    label="New Email Address"
-                    required
-                  >
-                    <div class="email-input-group">
-                      <a-input
-                        v-model:value="emailForm.newEmail"
-                        placeholder="Enter new email address"
-                        class="custom-input"
-                      />
-                      <a-button 
-                        type="primary"
-                        :loading="sendingCode"
-                        :disabled="!isValidEmail || cooldown > 0"
-                        @click="sendVerificationCode"
-                        class="send-code-btn"
-                      >
-                      {{ cooldown > 0 ? `${cooldown}s` : 'Send Code' }}
-                      </a-button>
-                    </div>
-                  </a-form-item>
-
-                  <a-form-item 
-                    label="Verification Code"
-                    required
-                  >
+            <template v-if="activeTab === 'login-email'">
+              <div class="account-settings">
+                <div class="current-email-section">
+                  <h3>Current Login Email</h3>
+                  <div class="email-display">
                     <a-input
-                      v-model:value="emailForm.code"
-                      placeholder="Enter verification code"
-                      class="custom-input"
+                      v-model:value="currentEmail"
+                      disabled
+                      class="current-email-input"
                     />
-                  </a-form-item>
-
-                  <a-form-item>
                     <a-button 
                       type="primary"
-                      :loading="changing"
-                      @click="confirmEmailChange"
-                      :disabled="!canSubmit"
-                      class="save-btn"
+                      @click="showChangeEmailForm"
+                      v-if="!showEmailForm"
+                      class="change-email-btn"
                     >
-                      Change Now
+                      Change Login Email
                     </a-button>
-                  </a-form-item>
-                </a-form>
+                  </div>
+                </div>
+
+                <div class="email-change-section" v-if="showEmailForm">
+                  <div class="section-header">
+                    <h3>Change Login Email</h3>
+                    <a-button 
+                      @click="cancelEmailChange"
+                      class="cancel-btn"
+                    >
+                      <close-outlined />
+                    </a-button>
+                  </div>
+                  <div class="email-change-form">
+                    <a-form
+                      :model="emailForm"
+                      layout="vertical"
+                    >
+                      <a-form-item 
+                        label="New Email Address"
+                        required
+                      >
+                        <div class="email-input-group">
+                          <a-input
+                            v-model:value="emailForm.newEmail"
+                            placeholder="Enter new email address"
+                            class="custom-input"
+                          />
+                          <a-button 
+                            type="primary"
+                            :loading="sendingCode"
+                            :disabled="!isValidEmail || cooldown > 0"
+                            @click="sendVerificationCode"
+                            class="send-code-btn"
+                          >
+                          {{ cooldown > 0 ? `${cooldown}s` : 'Send Code' }}
+                          </a-button>
+                        </div>
+                      </a-form-item>
+
+                      <a-form-item 
+                        label="Verification Code"
+                        required
+                      >
+                        <a-input
+                          v-model:value="emailForm.code"
+                          placeholder="Enter verification code"
+                          class="custom-input"
+                        />
+                      </a-form-item>
+
+                      <a-form-item>
+                        <a-button 
+                          type="primary"
+                          :loading="changing"
+                          @click="confirmEmailChange"
+                          :disabled="!canSubmit"
+                          class="save-btn"
+                        >
+                          Change Now
+                        </a-button>
+                      </a-form-item>
+                    </a-form>
+                  </div>
+                </div>
               </div>
-            </div>
+            </template>
           </div>
-        </template>
+        </div>
       </div>
-    </div>
+    </template>
   </page-layout>
 </template>
 
@@ -641,15 +642,21 @@ export default {
       });
     };
 
+    // 添加域名配置状态
+    const domainConfigured = ref(false);
+    const loading = ref(false);
+
     // 加载产品信息
     const loadProductInfo = async () => {
-      domainLoading.value = true;
+      loading.value = true;
       try {
         const customerId = localStorage.getItem('currentCustomerId');
         const response = await apiClient.getProductsByCustomerId(customerId);
         
         if (response?.code === 200 && response.data) {
           productInfo.value = response.data;
+          // 修改为与 AssetsPage 一致的判断逻辑
+          domainConfigured.value = response.data?.domainStatus || false;
           // 重置表单状态
           deploymentForm.value = {
             method: 'subdomain',
@@ -657,15 +664,19 @@ export default {
             suffix: '',
           };
           // 加载 Vercel 域名信息
-          await loadVercelDomainInfo();
+          if (domainConfigured.value) {
+            await loadVercelDomainInfo();
+          }
         } else {
           productInfo.value = null;
+          domainConfigured.value = false;
         }
       } catch (error) {
         console.error('Failed to load product information:', error);
         productInfo.value = null;
+        domainConfigured.value = false;
       } finally {
-        domainLoading.value = false;
+        loading.value = false;
       }
     };
 
@@ -1136,6 +1147,8 @@ export default {
       showDeleteSubfolderDomainConfirm,
       dnsColumnsWithActions,
       bannerTheme,
+      domainConfigured,
+      loading,
     };
   }
 }
@@ -1152,7 +1165,6 @@ export default {
   flex: 1;
   background: white;
   border-radius: 16px;
-  padding: 24px;
   min-height: calc(100vh - 200px);
   position: relative;
 }
@@ -1176,6 +1188,7 @@ export default {
 }
 
 .current-domain {
+  margin-top: 12px;
   margin-bottom: 24px;
   padding: 24px;
   background: #f9fafb;
