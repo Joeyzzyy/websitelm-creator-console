@@ -4,7 +4,7 @@
       v-model:collapsed="collapsed"
       :width="180"
       :collapsed-width="80"
-      style="background: linear-gradient(165deg, #111827 0%, #1F2937 100%); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);"
+      style="background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F6 100%); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);"
     >
       <!-- 添加折叠按钮 -->
       <div class="collapse-trigger" @click="toggleCollapse">
@@ -51,12 +51,7 @@
           >
             <template #icon>
               <span class="menu-icon">
-                {{ item.view === 'TaskManagementPage' ? '📝' : 
-                   item.view === 'DashboardPage' ? '📊' :
-                   item.view === 'KeywordsPlanningPage' ? '🔍' :
-                   item.view === 'KnowledgeBasePage' ? '📚' :
-                   item.view === 'AssetsPage' ? '🏷️' :
-                   '🔗' }}
+                <component :is="getMenuIcon(item.view)" />
               </span>
             </template>
             {{ item.title }}
@@ -274,14 +269,14 @@ html, body, #app {
 .user-profile-section {
   text-align: center;
   padding: 32px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
   background: linear-gradient(to bottom, 
-    rgba(255, 255, 255, 0.03) 0%,
-    rgba(255, 255, 255, 0.01) 100%
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(255, 255, 255, 0.6) 100%
   );
 }
 
@@ -297,56 +292,38 @@ html, body, #app {
   border: none;
 }
 
-:deep(.ant-menu-item) {
-  background: rgba(255, 255, 255, 0.02);
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
-  border-radius: 12px;
-  margin: 8px 0;
-  border-left: 3px solid transparent;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  box-shadow: none !important;
-}
-
-.menu-icon {
-  font-size: 18px;
-  margin-right: 8px;
-  opacity: 0.95;
-}
-
 :deep(.ant-menu) {
   background: transparent;
+  color: #64748B;
+  border-inline-end: none !important;
 }
 
-:deep(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.15) 0%, rgba(24, 144, 255, 0.05) 100%) !important;
-  color: #1890ff !important;
-  border-left-color: #1890ff !important;
-  box-shadow: 0 4px 15px rgba(24, 144, 255, 0.1) !important;
+:deep(.ant-menu-item) {
+  color: #64748B;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  border-inline-end: none !important;
+  margin-inline-end: 0 !important;
 }
 
 :deep(.ant-menu-item:hover) {
-  background: rgba(255, 255, 255, 0.05) !important;
-  color: #fff !important;
-  border-left-color: rgba(24, 144, 255, 0.5);
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #6366F1 !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
 }
 
-.nav-item--active {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.15) 0%, rgba(24, 144, 255, 0.05) 100%) !important;
-  color: #1890ff !important;
-  border-left-color: #1890ff !important;
-  box-shadow: 0 4px 15px rgba(24, 144, 255, 0.1);
+:deep(.ant-menu-item-selected) {
+  background: white !important;
+  color: #6366F1 !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15) !important;
 }
 
-:deep(.ant-btn-primary:hover) {
-  background: #6366F1 !important;
-  border-color: #6366F1 !important;
+.menu-icon {
+  color: #64748B;
 }
 
-:deep(.ant-btn-primary:active) {
-  background: #4338CA !important;
-  border-color: #4338CA !important;
+:deep(.ant-menu-item:hover .menu-icon) {
+  color: #6366F1;
 }
 
 /* 添加过渡效果 */
@@ -370,13 +347,13 @@ html, body, #app {
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
   transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(8px);
 }
 
 .collapse-trigger:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .collapse-icon-btn {
@@ -389,7 +366,7 @@ html, body, #app {
 }
 
 .collapse-icon-btn:hover .anticon {
-  color: #3B82F6 !important;
+  color: #6366F1 !important;
 }
 
 .logout-section {
@@ -640,9 +617,9 @@ html, body, #app {
   right: 0;
   padding: 16px;
   background: linear-gradient(to bottom, 
-    rgba(17, 24, 39, 0) 0%,
-    rgba(17, 24, 39, 0.95) 50%,
-    #111827 100%
+    rgba(248, 250, 252, 0) 0%,
+    rgba(248, 250, 252, 0.95) 50%,
+    #F8FAFC 100%
   );
   display: flex;
   flex-direction: column;
@@ -652,7 +629,7 @@ html, body, #app {
 .bottom-action-btn {
   width: 100%;
   text-align: left;
-  color: rgba(255, 255, 255, 0.85);
+  color: #64748B;
   padding: 8px 12px;
   height: auto;
   transition: all 0.3s ease;
@@ -661,14 +638,14 @@ html, body, #app {
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .bottom-action-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
-  transform: translateY(-1px);
+  background: white;
+  color: #6366F1;
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
 /* 添加分隔线 */
@@ -676,9 +653,9 @@ html, body, #app {
   height: 1px;
   background: linear-gradient(
     to right,
-    rgba(255, 255, 255, 0.02),
-    rgba(255, 255, 255, 0.08),
-    rgba(255, 255, 255, 0.02)
+    rgba(0, 0, 0, 0.02),
+    rgba(0, 0, 0, 0.06),
+    rgba(0, 0, 0, 0.02)
   );
   margin: 8px 0;
 }
@@ -689,25 +666,13 @@ html, body, #app {
   font-size: 18px;
 }
 
-.user-profile-section {
-  text-align: center;
-  padding: 32px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  background: linear-gradient(to bottom, 
-    rgba(255, 255, 255, 0.03) 0%,
-    rgba(255, 255, 255, 0.01) 100%
-  );
-  position: relative;
-}
-
 .welcome-text {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.65);
+  color: #64748B;
   margin-bottom: 8px;
   font-weight: 500;
   letter-spacing: 0.5px;
   text-transform: uppercase;
-  animation: fadeIn 0.5s ease;
 }
 
 .user-info-container {
@@ -719,17 +684,17 @@ html, body, #app {
 
 .user-email {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.85);
+  color: #1F2937;
   padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.03);
   border-radius: 6px;
 }
 
 .subscription-link {
   font-size: 12px;
-  color: #1890ff;
+  color: #6366F1;
   padding: 4px 12px;
-  background: rgba(24, 144, 255, 0.1);
+  background: rgba(99, 102, 241, 0.1);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -739,202 +704,15 @@ html, body, #app {
 }
 
 .subscription-link:hover {
-  background: rgba(24, 144, 255, 0.2);
+  background: rgba(99, 102, 241, 0.15);
   transform: translateY(-1px);
-}
-
-.subscription-link i {
-  font-size: 10px;
-}
-
-/* Modal Styles */
-.subscription-info {
-  padding: 16px;
-}
-
-.current-plan {
-  text-align: center;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-}
-
-.current-plan h3 {
-  font-size: 24px;
-  margin-bottom: 4px;
-}
-
-.plan-period {
-  padding: 2px 12px;
-  font-size: 12px;
-}
-
-.usage-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.usage-column {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.usage-item {
-  background: #f8f9fa;
-  padding: 12px;
-  border-radius: 8px;
-}
-
-.usage-header {
-  margin-bottom: 8px;
-}
-
-.usage-label {
-  font-size: 13px;
-  margin-bottom: 2px;
-}
-
-.usage-description {
-  font-size: 11px;
-  line-height: 1.4;
-}
-
-.usage-bar {
-  height: 6px;
-  background: #f0f0f0;
-  border-radius: 4px;
-  overflow: hidden;
-  margin-bottom: 6px;
-}
-
-.usage-progress {
-  height: 100%;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-}
-
-/* 进度条颜色状态 */
-.usage-progress {
-  background: #1890ff;  /* 默认蓝色 */
-}
-
-.usage-progress[style*="width: 100%"] {
-  background: #52c41a !important;  /* 无限制时显示绿色 */
-}
-
-.usage-progress[style*="width: 90%"],
-.usage-progress[style*="width: 91%"],
-.usage-progress[style*="width: 92%"],
-.usage-progress[style*="width: 93%"],
-.usage-progress[style*="width: 94%"],
-.usage-progress[style*="width: 95%"],
-.usage-progress[style*="width: 96%"],
-.usage-progress[style*="width: 97%"],
-.usage-progress[style*="width: 98%"],
-.usage-progress[style*="width: 99%"] {
-  background: #ff4d4f !important;  /* 使用量超过90%时显示红色 */
-}
-
-/* 确保进度条动画平滑 */
-.usage-progress {
-  transition: width 0.3s ease, background-color 0.3s ease;
-}
-
-.usage-stats {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 4px;
-}
-
-.usage-numbers {
-  font-size: 11px;
-}
-
-.upgrade-btn {
-  height: 38px;
-  font-size: 14px;
-  margin-top: 4px;
-}
-
-.subscription-modal {
-  :deep(.ant-modal-header) {
-    padding: 16px 24px;
-  }
-
-  :deep(.ant-modal-body) {
-    padding: 16px;
-  }
-
-  :deep(.ant-modal-title) {
-    font-size: 18px;
-  }
-}
-
-/* 添加动画效果 */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 适配折叠状态 */
-:deep(.ant-layout-sider.ant-layout-sider-collapsed) {
-  .welcome-text {
-    display: none;
-  }
-  
-  .user-info-container {
-    flex-direction: row;
-    align-items: center;
-  }
-  
-  .user-email {
-    font-size: 14px;
-    padding: 4px 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 60px;
-  }
-}
-
-/* 添加响应式阴影效果 */
-.user-profile-section::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(to right, 
-    rgba(22, 119, 255, 0.1), 
-    rgba(22, 119, 255, 0.3), 
-    rgba(22, 119, 255, 0.1)
-  );
 }
 
 .user-avatar {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #1677ff;
+  background: #6366F1;
   color: white;
   display: flex;
   align-items: center;
@@ -943,111 +721,12 @@ html, body, #app {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  border: 2px solid rgba(99, 102, 241, 0.2);
 }
 
 .user-avatar:hover {
   transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(22, 119, 255, 0.25);
-}
-
-/* 调整折叠状态下的样式 */
-:deep(.ant-layout-sider.ant-layout-sider-collapsed) {
-  .user-profile-section {
-    padding: 16px;
-  }
-  
-  .welcome-text {
-    display: none;
-  }
-}
-
-/* 更新 View Guide 按钮样式 */
-.bottom-action-btn.view-guide-btn {
-  background: rgba(147, 51, 234, 0.2);
-  border: 1px solid rgba(168, 85, 247, 0.4);
-  animation: pulseGlow 2s infinite;
-  position: relative;
-  overflow: hidden;
-  color: rgb(216, 180, 254) !important;
-}
-
-.bottom-action-btn.view-guide-btn:hover {
-  background: rgba(168, 85, 247, 0.3);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
-}
-
-/* 更新脉冲发光动画 */
-@keyframes pulseGlow {
-  0% {
-    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.6);
-  }
-  70% {
-    box-shadow: 0 0 0 12px rgba(168, 85, 247, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
-  }
-}
-
-/* 更新光晕效果 */
-.bottom-action-btn.view-guide-btn::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    to bottom right,
-    rgba(216, 180, 254, 0) 0%,
-    rgba(216, 180, 254, 0.2) 50%,
-    rgba(216, 180, 254, 0) 100%
-  );
-  transform: rotate(45deg);
-  animation: shimmer 3s infinite;
-}
-
-/* 更新按钮中的图标颜色 */
-.bottom-action-btn.view-guide-btn .anticon {
-  color: rgb(216, 180, 254) !important;
-  font-size: 16px;
-}
-
-/* 添加渐变边框效果 */
-.bottom-action-btn.view-guide-btn::before {
-  content: '';
-  position: absolute;
-  top: -1px;
-  left: -1px;
-  right: -1px;
-  bottom: -1px;
-  border-radius: 8px;
-  background: linear-gradient(45deg, 
-    rgba(236, 72, 153, 0.4),  /* 粉色 */
-    rgba(168, 85, 247, 0.4),  /* 紫色 */
-    rgba(236, 72, 153, 0.4)   /* 粉色 */
-  );
-  z-index: -1;
-  animation: borderGlow 3s infinite;
-}
-
-@keyframes borderGlow {
-  0%, 100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%) rotate(45deg);
-  }
-  100% {
-    transform: translateX(100%) rotate(45deg);
-  }
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
 }
 
 /* 选择模式对话框样式 */
@@ -1239,6 +918,13 @@ import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import OnboardingTour from './OnboardingTour.vue'
 import { tutorialConfig } from '../config/tutorials'
 import apiClient from '../api/api'
+import {
+  DashboardOutlined,
+  SearchOutlined,
+  FileTextOutlined,
+  PictureOutlined,
+  SettingOutlined
+} from '@ant-design/icons-vue'
 
 export default {
   name: 'Home',
@@ -1251,7 +937,12 @@ export default {
     RightOutlined,
     LeftOutlined,
     QuestionCircleOutlined,
-    OnboardingTour
+    OnboardingTour,
+    DashboardOutlined,
+    SearchOutlined,
+    FileTextOutlined,
+    PictureOutlined,
+    SettingOutlined
   },
   setup() {
     const router = useRouter();
@@ -1292,8 +983,8 @@ export default {
     const currentCustomerEmail = localStorage.getItem('currentCustomerEmail');
     return {
       mainNavItems: [
-        { title: 'Home', view: 'DashboardPage' },
-        { title: 'Planner', view: 'KeywordsPlanningPage' },
+        { title: 'Dashboard', view: 'DashboardPage' },
+        { title: 'Keywords', view: 'KeywordsPlanningPage' },
         { title: 'Pages', view: 'TaskManagementPage' },
         { title: 'Assets', view: 'AssetsPage' },
         { title: 'Settings', view: 'SettingsPage' },
@@ -1660,6 +1351,18 @@ export default {
         console.error('初始化失败:', error);
         this.$message.error('系统初始化失败，请刷新页面重试');
       }
+    },
+
+    // 添加获取图标的方法
+    getMenuIcon(view) {
+      const iconMap = {
+        'DashboardPage': DashboardOutlined,
+        'KeywordsPlanningPage': SearchOutlined,
+        'TaskManagementPage': FileTextOutlined,
+        'AssetsPage': PictureOutlined,
+        'SettingsPage': SettingOutlined
+      };
+      return iconMap[view];
     },
   },
   watch: {
