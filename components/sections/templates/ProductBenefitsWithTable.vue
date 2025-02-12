@@ -2,9 +2,6 @@
   <div class="section-wrapper">
     <!-- 编辑区域 -->
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">Product Benefits With Table</h2>
-      </div>
       <div class="editor-content">
         <a-row :gutter="24">
           <!-- 左侧表格内容 -->

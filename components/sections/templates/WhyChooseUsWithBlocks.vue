@@ -2,9 +2,6 @@
   <div class="section-wrapper">
     <!-- 编辑区域 -->
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">Why Choose Us With Blocks</h2>
-      </div>
       <div class="editor-content">
         <!-- 顶部内容 -->
         <div class="top-content">

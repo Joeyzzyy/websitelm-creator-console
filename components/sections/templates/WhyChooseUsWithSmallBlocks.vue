@@ -1,9 +1,6 @@
 <template>
   <div class="section-wrapper">
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">Why Choose Us With Small Blocks</h2>
-      </div>
       <div class="editor-content">
         <a-form layout="vertical">
           <!-- Top Content -->

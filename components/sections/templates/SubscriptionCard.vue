@@ -2,9 +2,6 @@
   <div class="section-wrapper">
     <!-- 编辑区域 -->
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">Subscription Card</h2>
-      </div>
       <div class="editor-content">
         <a-form layout="vertical">
           <!-- 标题和副标题 -->

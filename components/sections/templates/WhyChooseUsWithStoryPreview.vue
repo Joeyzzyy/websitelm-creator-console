@@ -53,36 +53,36 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-white rounded-lg w-full h-full min-h-full p-4 relative">
-    <div class="max-w-3xl mx-auto w-full h-full">
-      <!-- 标题部分 -->
-      <div v-if="section.title" class="text-center mb-4">
-        <h2 class="text-lg font-bold text-gray-900 mb-1">
-          {{ section.title }}
-        </h2>
-        <p v-if="section.description" 
-           class="text-xs text-gray-600 max-w-xl mx-auto">
-          {{ section.description }}
-        </p>
-      </div>
-      
-      <!-- 主要内容区域 -->
-      <div class="grid grid-cols-[200px_1fr] gap-6 w-full h-full" ref="containerRef">
+  <div class="bg-white rounded-lg w-full p-12 py-16">
+    <!-- 标题部分 -->
+    <div v-if="section.title" class="text-center mb-16">
+      <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+        {{ section.title }}
+      </h2>
+      <p v-if="section.description" 
+         class="text-base text-gray-600 max-w-xl mx-auto">
+        {{ section.description }}
+      </p>
+    </div>
+    
+    <!-- 主要内容区域 -->
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="grid grid-cols-[280px_1fr] gap-8" ref="containerRef">
         <!-- 左侧固定部分 -->
-        <div class="relative w-[200px]">
-          <div ref="stickyRef" class="sticky top-16 inline-block" style="width: 200px">
+        <div class="relative w-[280px]">
+          <div ref="stickyRef" class="sticky top-64 inline-block" style="width: 280px">
             <!-- 个人信息卡片 -->
-            <div class="bg-gray-50 p-4 rounded-lg">
-              <div class="text-center mb-3">
+            <div class="bg-gray-50 p-8 rounded-lg">
+              <div class="mb-6">
                 <img 
                   :src="section.leftContent.avatarUrl" 
                   :alt="section.leftContent.name"
-                  class="w-16 h-16 rounded-full mx-auto mb-2 object-cover"
+                  class="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
                 />
-                <h3 class="text-sm font-bold mb-1">{{ section.leftContent.name }}</h3>
-                <p class="text-xs text-gray-600">{{ section.leftContent.title }}</p>
+                <h3 class="text-base font-bold mb-2 text-center">{{ section.leftContent.name }}</h3>
+                <p class="text-sm text-gray-600 text-center">{{ section.leftContent.title }}</p>
               </div>
-              <div class="text-gray-700 text-xs leading-relaxed whitespace-pre-line">
+              <div class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">
                 {{ section.leftContent.introduction }}
               </div>
             </div>
@@ -92,14 +92,14 @@ onUnmounted(() => {
         <!-- 右侧内容区域 -->
         <div>
           <main class="main-content">
-            <article class="article max-w-[400px] pr-2">
+            <article class="article max-w-[900px] pr-4 py-8 md:py-12">
               <div v-for="(content, index) in section.rightContent" 
                    :key="index" 
-                   class="mb-4 last:mb-0">
-                <h3 class="text-sm font-semibold mb-2 text-gray-800">
+                   class="mb-8 last:mb-0">
+                <h3 class="text-lg font-bold mb-4 text-gray-800">
                   {{ content.contentTitle }}
                 </h3>
-                <div class="text-xs leading-[1.6] text-gray-700 whitespace-pre-line">
+                <div class="text-sm md:text-base leading-[1.6] text-gray-700 whitespace-pre-line">
                   {{ content.contentText }}
                 </div>
               </div>
