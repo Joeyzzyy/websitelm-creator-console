@@ -711,13 +711,6 @@
                 description: 'SEO-optimized page creation'
               },
               {
-                label: 'Free Page Deployment',
-                used: packageData.freeDeploymentPageUsage || 0,
-                total: packageData.freeDeploymentPageLimit || 999999999,
-                unit: 'times/year',
-                description: 'Number of pages that can be deployed'
-              },
-              {
                 label: 'Internal Links Storage',
                 used: packageData.internalLinkStorageUsage || 0,
                 total: packageData.internalLinkStorageLimit || 999999999,
@@ -725,12 +718,19 @@
                 description: 'Store and manage internal link structure'
               },
               {
+                label: 'Free Page Deployment',
+                used: packageData.freeDeploymentPageUsage || 0,
+                total: packageData.freeDeploymentPageLimit || 999999999,
+                unit: 'times/year',
+                description: 'Number of pages that can be deployed'
+              },
+              {
                 label: 'Image Storage',
                 used: packageData.imageStorageUsage || 0,
                 total: packageData.imageStorageLimit || 999999999,
                 unit: 'images',
                 description: 'Store and optimize images'
-              }
+              },
             ];
           }
         } catch (error) {

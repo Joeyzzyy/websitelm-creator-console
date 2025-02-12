@@ -22,14 +22,10 @@
         <div class="welcome-text" v-if="!collapsed">Welcome back!</div>
         <div v-if="!collapsed" class="user-info-container">
           <div class="user-email">{{ currentCustomerEmail }}</div>
-          <div class="subscription-link" @click="showSubscriptionInfo">
-            View Plan Usage <i class="fas fa-chart-pie"></i>
-          </div>
         </div>
         <a-tooltip v-else :title="currentCustomerEmail" placement="right">
           <div 
             class="user-avatar"
-            @click="showSubscriptionInfo"
           >
             {{ getEmailInitial(currentCustomerEmail) }}
           </div>
@@ -177,90 +173,6 @@
                 Read Documentation 
                 <span class="transform transition-transform group-hover:translate-x-1">→</span>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </a-modal>
-
-  <!-- Subscription Info Modal -->
-  <a-modal
-    v-model:visible="subscriptionModalVisible"
-    title="Current Plan Usage"
-    :footer="null"
-    width="800px"
-    class="subscription-modal"
-  >
-    <div class="subscription-info">
-      <div class="current-plan">
-        <h3>{{ currentPlan.name }} Plan</h3>
-        <div class="plan-period">
-          {{ currentPlan.period === 'monthly' ? 'Monthly Billing' : 'Annual Billing' }}
-        </div>
-      </div>
-      
-      <div class="usage-grid">
-        <div class="usage-column">
-          <div 
-            v-for="(usage, index) in usageInfo.slice(0, Math.ceil(usageInfo.length/2))" 
-            :key="index"
-            class="usage-item"
-          >
-            <div class="usage-header">
-              <div class="usage-label">{{ usage.label }}</div>
-              <div class="usage-description text-sm text-gray-500">{{ usage.description }}</div>
-            </div>
-            <div class="usage-stats">
-              <div class="usage-numbers">
-                <span class="font-medium">
-                  {{ usage.total === 999999999 ? 'Unlimited' : `${usage.used}/${usage.total}` }}
-                </span>
-              </div>
-              <div class="usage-period text-sm text-gray-500">
-                {{ usage.total === 999999999 ? '' : usage.unit }}
-              </div>
-            </div>
-            <div class="usage-bar" v-if="usage.total !== 999999999">
-              <div 
-                class="usage-progress"
-                :style="{ 
-                  width: `${(usage.used / usage.total) * 100}%`,
-                  background: usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff'
-                }"
-              ></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="usage-column">
-          <div 
-            v-for="(usage, index) in usageInfo.slice(Math.ceil(usageInfo.length/2))" 
-            :key="index"
-            class="usage-item"
-          >
-            <div class="usage-header">
-              <div class="usage-label">{{ usage.label }}</div>
-              <div class="usage-description text-sm text-gray-500">{{ usage.description }}</div>
-            </div>
-            <div class="usage-stats">
-              <div class="usage-numbers">
-                <span class="font-medium">
-                  {{ usage.total === 999999999 ? 'Unlimited' : `${usage.used}/${usage.total}` }}
-                </span>
-              </div>
-              <div class="usage-period text-sm text-gray-500">
-                {{ usage.total === 999999999 ? '' : usage.unit }}
-              </div>
-            </div>
-            <div class="usage-bar" v-if="usage.total !== 999999999">
-              <div 
-                class="usage-progress"
-                :style="{ 
-                  width: `${(usage.used / usage.total) * 100}%`,
-                  background: usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff'
-                }"
-              ></div>
             </div>
           </div>
         </div>
@@ -698,24 +610,6 @@ html, body, #app {
   border-radius: 6px;
 }
 
-.subscription-link {
-  font-size: 12px;
-  color: #6366F1;
-  padding: 4px 12px;
-  background: rgba(99, 102, 241, 0.1);
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.subscription-link:hover {
-  background: rgba(99, 102, 241, 0.15);
-  transform: translateY(-1px);
-}
-
 .user-avatar {
   width: 32px;
   height: 32px;
@@ -912,95 +806,6 @@ html, body, #app {
   }
 }
 
-/* Subscription Modal Styles */
-.subscription-modal {
-  :deep(.ant-modal-content) {
-    border-radius: 12px;
-    background: linear-gradient(165deg, #ffffff 0%, #f8f9fa 100%);
-  }
-}
-
-.subscription-info {
-  padding: 20px;
-}
-
-.current-plan {
-  margin-bottom: 24px;
-  padding: 16px;
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
-  border-radius: 12px;
-  border: 1px solid rgba(24, 144, 255, 0.2);
-}
-
-.current-plan h3 {
-  color: #1890ff;
-  font-size: 20px;
-  margin-bottom: 8px;
-}
-
-.plan-period {
-  color: #666;
-  font-size: 14px;
-}
-
-.usage-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-}
-
-.usage-column {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.usage-item {
-  padding: 16px;
-  background: white;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.usage-header {
-  margin-bottom: 12px;
-}
-
-.usage-label {
-  font-weight: 500;
-  color: #1f2937;
-  margin-bottom: 4px;
-}
-
-.usage-bar {
-  height: 8px;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: 4px;
-  overflow: hidden;
-  margin: 8px 0;
-}
-
-.usage-progress {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.usage-stats {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-}
-
-.usage-numbers {
-  color: #1f2937;
-}
-
-.usage-period {
-  color: #6b7280;
-}
-
 /* 更新底部按钮样式 */
 .account-btn {
   background: rgba(24, 144, 255, 0.1) !important;
@@ -1114,73 +919,6 @@ export default {
       guideModeVisible: false,
       tutorialLibraryVisible: false,
       tutorials: tutorialConfig,
-      subscriptionModalVisible: false,
-      currentPlan: {
-        name: 'Professional',
-        period: 'yearly',
-        price: {
-          monthly: '129',
-          yearly: '99'
-        }
-      },
-      usageInfo: [
-        {
-          label: 'AI Keyword Recommendation',
-          used: 45,
-          total: 100,
-          unit: 'times/month',
-          description: 'Monthly AI-powered keyword analysis and suggestions'
-        },
-        {
-          label: 'Indexing Page Generation',
-          used: 68,
-          total: 100,
-          unit: 'pages/month',
-          description: 'SEO-optimized page creation'
-        },
-        {
-          label: 'Free Page Deployment',
-          used: 650,
-          total: 1000,
-          unit: 'pages/year',
-          description: 'Number of pages that can be deployed'
-        },
-        {
-          label: 'Internal Links Storage',
-          used: 980,
-          total: 1500,
-          unit: 'links',
-          description: 'Store and manage internal link structure'
-        },
-        {
-          label: 'Image Storage',
-          used: 1100,
-          total: 1500,
-          unit: 'images',
-          description: 'Store and optimize images'
-        },
-        {
-          label: 'Video Storage',
-          used: 850,
-          total: 1000,
-          unit: 'videos',
-          description: 'Store and manage video content'
-        },
-        {
-          label: 'GSC Data Tracking',
-          used: 'Unlimited',
-          total: 'Unlimited',
-          unit: '',
-          description: 'Google Search Console data integration'
-        },
-        {
-          label: 'Onboarding Support',
-          used: 'Unlimited',
-          total: 'Unlimited',
-          unit: 'calls',
-          description: 'One-on-one onboarding sessions'
-        }
-      ]
     };
   },
   computed: {
@@ -1338,91 +1076,6 @@ export default {
     startInteractiveGuide() {
       this.guideModeVisible = false; // 确保选择对话框是关闭的
       this.startStepByStepTour(); // 直接开始交互式引导
-    },
-
-    async showSubscriptionInfo() {
-      try {
-        const response = await apiClient.getCustomerPackage()
-        
-        if (!response?.data) {
-          message.error('Failed to fetch package information')
-          return
-        }
-        
-        const packageData = response.data
-        
-        // 检查套餐状态
-        if (packageData.customerPackageStatus !== 1) {
-          message.warning('Your subscription has expired. Please renew your plan.')
-          this.$router.push('/subscription')
-          return
-        }
-        
-        // 更新当前套餐信息
-        this.currentPlan = {
-          name: packageData.packageName?.trim() || 'Professional',
-          period: packageData.packageName?.toLowerCase().includes('monthly') ? 'monthly' : 'yearly',
-          endDate: packageData.packageEndTime,
-          remainingDays: packageData.remainingDays
-        }
-        
-        // 更新使用量信息到现有的 usageInfo 数组
-        this.usageInfo = [
-          {
-            label: 'Outline Generator',
-            used: packageData.outlineGeneratorUsage || 0,
-            total: packageData.outlineGeneratorLimit,
-            unit: `${packageData.outlineGeneratorLimit} in total per month`,
-            description: 'AI-powered outline generation'
-          },
-          {
-            label: 'Page Generator',
-            used: packageData.pageGeneratorUsage || 0,
-            total: packageData.pageGeneratorLimit,
-            unit: `${packageData.pageGeneratorLimit} in total per month`,
-            description: 'SEO-optimized page creation'
-          },
-          {
-            label: 'Free Page Deployment',
-            used: packageData.freeDeploymentPageUsage || 0,
-            total: packageData.freeDeploymentPageLimit,
-            unit: `${packageData.freeDeploymentPageLimit} in total per year`,
-            description: 'Number of pages that can be deployed'
-          },
-          {
-            label: 'Internal Links Storage',
-            used: packageData.internalLinkStorageUsage || 0,
-            total: packageData.internalLinkStorageLimit,
-            unit: `${packageData.internalLinkStorageLimit} links in total`,
-            description: 'Store and manage internal link structure'
-          },
-          {
-            label: 'Image Storage',
-            used: packageData.imageStorageUsage || 0,
-            total: packageData.imageStorageLimit,
-            unit: `${packageData.imageStorageLimit} images in total`,
-            description: 'Store and optimize images'
-          }
-        ]
-        
-        // 显示现有的 Modal
-        this.subscriptionModalVisible = true
-        
-      } catch (error) {
-        console.error('Failed to fetch package information:', error)
-        message.error('Failed to load subscription details')
-      }
-    },
-
-    goToSubscriptionPage() {
-      this.subscriptionModalVisible = false;
-      this.$router.push('/subscription');
-    },
-
-    handleImageError(event, tutorial) {
-      console.error(`Failed to load image for tutorial: ${tutorial.title}`);
-      // 可以设置一个默认的占位图
-      event.target.src = '/path/to/default-placeholder.png';  // 替换成你的默认图片路径
     },
 
     // 添加初始化方法

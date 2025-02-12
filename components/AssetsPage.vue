@@ -346,20 +346,11 @@
                                   </div>
                                 </div>
                                 <div class="alert-message">
-                                  <warning-filled class="alert-icon" />
                                   <div class="message-content">
                                     <p class="message-title">Action Required</p>
-                                    <p class="message-text">Please optimize content with C and D grades. Low-quality content may significantly impact AI-generated results.</p>
-                                  </div>
-                                </div>
-                                <div class="quality-tips">
-                                  <div class="tip-item">
-                                    <check-circle-outlined class="tip-icon" />
-                                    <span>Review and enhance content marked as C or D grade</span>
-                                  </div>
-                                  <div class="tip-item">
-                                    <bulb-outlined class="tip-icon" />
-                                    <span>Better content quality leads to more accurate AI page generation</span>
+                                    <p class="message-text">
+                                      Please optimize content with C and D grades. Low-quality content may significantly impact AI-generated results. Review and enhance these contents to ensure more accurate AI page generation.
+                                    </p>
                                   </div>
                                 </div>
                               </div>
@@ -4046,20 +4037,10 @@ export default {
   transition: width 0.3s ease;
 }
 
-.bar-segment.excellent { background-color: #52c41a; }
-.bar-segment.good { background-color: #1890ff; }
-.bar-segment.fair { background-color: #faad14; }
-.bar-segment.poor { background-color: #ff4d4f; }
-
 .quality-icon {
   font-size: 16px;
   margin-right: 8px;
 }
-
-.quality-icon.excellent { color: #52c41a; }
-.quality-icon.good { color: #1890ff; }
-.quality-icon.fair { color: #faad14; }
-.quality-icon.poor { color: #ff4d4f; }
 
 .article-item {
   display: flex;
@@ -4116,10 +4097,49 @@ export default {
 }
 
 .alert-title {
+  color: #374151;  /* 深灰色 */
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.message-title {
+  color: #374151;  /* 深灰色 */
   font-size: 15px;
   font-weight: 600;
-  color: #1f2937;
-  margin: 0 0 12px 0;
+  margin-bottom: 8px;
+}
+
+.message-text {
+  color: #4B5563;  /* 中灰色 */
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.quality-tips {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #E5E7EB;
+}
+
+.tip-item {
+  color: #4B5563;  /* 中灰色 */
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.tip-item:last-child {
+  margin-bottom: 0;
+}
+
+.alert-message {
+  display: flex;
+  gap: 12px;
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  padding: 16px;
+  border-radius: 8px;
 }
 
 .quality-stats {
@@ -4152,19 +4172,20 @@ export default {
   color: #1f2937;
 }
 
-.excellent { background: #52c41a; }
-.good { background: #1890ff; }
-.fair { background: #faad14; }
-.poor { background: #ff4d4f; }
+.excellent {
+  background: linear-gradient(135deg, #34D399, #6EE7B7); /* 柔和的薄荷绿渐变 */
+}
 
-.alert-message {
-  display: flex;
-  gap: 12px;
-  background: #fff2f0;
-  border: 1px solid #ffccc7;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
+.good {
+  background: linear-gradient(135deg, #60A5FA, #93C5FD); /* 淡雅的天空蓝渐变 */
+}
+
+.fair {
+  background: linear-gradient(135deg, #FBBF24, #FCD34D); /* 温暖的向日葵黄渐变 */
+}
+
+.poor {
+  background: linear-gradient(135deg, #F87171, #FCA5A5); /* 柔和的珊瑚红渐变 */
 }
 
 .alert-icon {
@@ -4230,14 +4251,6 @@ export default {
 
 :deep(.ant-collapse-arrow) {
   color: #ff4d4f !important;
-}
-
-/* 添加质量统计条相关样式 */
-.quality-stats {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 8px;
 }
 
 .quality-bar {
