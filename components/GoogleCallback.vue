@@ -232,18 +232,24 @@
             localStorage.setItem('currentCustomerEmail', response.data.email);
             localStorage.setItem('currentCustomerId', response.data.customerId);
           }
+
+          this.$notification.success({
+            message: 'Welcome!',
+            description: 'Successfully logged in with Google'
+          });
+          this.$router.push('/dashboard');
   
-          // 检查是否是首次登录
-          if (response.data.firstLogin) {
-            this.loading = false;
-            this.showSetPasswordForm = true;
-          } else {
-            this.$notification.success({
-              message: 'Welcome!',
-              description: 'Successfully logged in with Google'
-            });
-            this.$router.push('/dashboard');
-          }
+          // // 检查是否是首次登录
+          // if (response.data.firstLogin) {
+          //   this.loading = false;
+          //   this.showSetPasswordForm = true;
+          // } else {
+          //   this.$notification.success({
+          //     message: 'Welcome!',
+          //     description: 'Successfully logged in with Google'
+          //   });
+          //   this.$router.push('/dashboard');
+          // }
         } else {
           throw new Error(response?.message || 'Authentication failed');
         }
