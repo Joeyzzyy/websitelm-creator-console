@@ -318,7 +318,7 @@
       v-model:open="onboardingModalVisible"
       :maskClosable="false"
       :closable="!!formState.productId"
-      :width="800"
+      :width="1000"
       :footer="null"
       :class="['product-modal']"
     >
@@ -354,15 +354,13 @@
             placeholder="Enter your product name"
             :maxLength="50"
           />
-          <p class="help-text">This name will be used throughout your content generation.</p>
         </a-form-item>
-
         <!-- Website info and domain verification -->
         <a-form-item 
           label="Official Website" 
           name="website"
         >
-          <p class="step-description">Enter your product's website URL to help us better understand and promote your product.</p>
+          <p class="step-description">Enter your product's website URL to help us better understand and fetch your product content.</p>
           <a-input-group compact>
             <span 
               style="
@@ -390,12 +388,6 @@
           </a-input-group>
           <template v-if="formState.productId">
             <template v-if="(!productInfo.domainStatus || formState.website !== productInfo.projectWebsite?.replace('https://', '')) && formState.website">
-              <a-typography-text type="secondary" class="mt-3 d-block">
-                Make sure to enter the main domain of your product (e.g. example.com).
-                <br/>
-                Domain verification required for automatic sitemap and content fetching.
-              </a-typography-text>
-              
               <div class="mt-3">
                 <template v-if="!showVerifyRecord">
                   <a-button 
@@ -457,11 +449,17 @@
                     </div>
                     
                     <div class="verify-record-help">
-                      <ul>
-                        <li>Choose the appropriate Host format based on your DNS provider</li>
-                        <li>DNS changes may take up to several minutes to propagate</li>
-                        <li>Make sure to copy the exact value without any modifications</li>
-                      </ul>
+                      <!-- Remove the basic tips and only keep the important warning -->
+                      <div class="important-warning">
+                        <ExclamationCircleFilled />
+                        <div class="warning-content">
+                          <strong>IMPORTANT: If verification keeps failing</strong>
+                          <p>
+                            Try removing the existing TXT record from your DNS provider and add it again as a new record. 
+                            This often resolves persistent verification issues!
+                          </p>
+                        </div>
+                      </div>
                     </div>
                     
                     <a-button 
@@ -766,6 +764,7 @@ import {
   CheckSquareOutlined,
   AppstoreOutlined,
   ThunderboltOutlined,
+  ExclamationCircleFilled,
 } from '@ant-design/icons-vue'
 import apiClient from '../api/api'
 import { Modal, message } from 'ant-design-vue'
@@ -791,6 +790,7 @@ export default defineComponent({
     CheckSquareOutlined,
     AppstoreOutlined,
     ThunderboltOutlined,
+    ExclamationCircleFilled,
   },
   data() {
     return {
@@ -1887,19 +1887,56 @@ export default defineComponent({
 
 .verify-record-help {
   margin: 12px 0;
-  padding: 8px 12px;
-  background: #f0f7ff;
+  /* Remove the blue background and padding */
+}
+
+.important-warning {
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-left: 4px solid #ff4d4f;
   border-radius: 4px;
-  font-size: 12px;
-  color: #666;
+  padding: 12px;
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
   
-  ul {
-    margin: 0;
-    padding-left: 16px;
+  .anticon {
+    color: #ff4d4f;
+    font-size: 18px;
+    margin-top: 2px;
+  }
+  
+  .warning-content {
+    flex: 1;
     
-    li {
-      margin: 4px 0;
+    strong {
+      display: block;
+      color: #ff4d4f;
+      font-size: 14px;
+      margin-bottom: 4px;
     }
+    
+    p {
+      color: #434343;
+      margin: 0;
+      line-height: 1.5;
+    }
+  }
+  
+  /* Add subtle pulsing animation to draw attention */
+  animation: warningPulse 2s infinite;
+}
+
+@keyframes warningPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0.2);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(255, 77, 79, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 77, 79, 0);
   }
 }
 
