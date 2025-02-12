@@ -64,7 +64,7 @@
         <a-button 
           type="link" 
           class="bottom-action-btn account-btn" 
-          @click="$router.push('/account')"
+          @click="handleAccountClick"
         >
           <user-outlined />
           <span v-if="!collapsed">Account Setting</span>
@@ -1276,6 +1276,7 @@ export default {
         '/keywords': 'KeywordsPlanningPage',
         '/task-management': 'TaskManagementPage',
         '/assets': 'AssetsPage',
+        '/account': 'AccountPage',
       };
       return routeToView[this.$route.path] || 'DashboardPage';
     },
@@ -1481,6 +1482,11 @@ export default {
       };
       return iconMap[view];
     },
+
+    handleAccountClick() {
+      this.currentView = 'AccountPage';
+      this.$router.push('/account');
+    }
   },
   watch: {
     '$route'(to) {
@@ -1490,6 +1496,7 @@ export default {
         '/keywords': 'KeywordsPlanningPage',
         '/task-management': 'TaskManagementPage',
         '/assets': 'AssetsPage',
+        '/account': 'AccountPage',
       };
       this.currentView = routeToView[to.path] || 'DashboardPage';
     }

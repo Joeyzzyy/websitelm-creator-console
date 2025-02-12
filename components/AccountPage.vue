@@ -5,7 +5,18 @@
       icon="⚙️"
     >
       <smart-banner
-        :theme="bannerTheme"
+        :theme="{
+          primary: '#7C3AED',
+          secondary: '#EC4899',
+          background: 'linear-gradient(135deg, #F5F3FF, #FCE7F3)',
+          textColor: '#2D3748',
+          descriptionColor: '#4A5568',
+          badgeColor: '#6B7280',
+          badgeBackground: 'rgba(124, 58, 237, 0.1)',
+          badgeHoverBackground: 'rgba(236, 72, 153, 0.1)',
+          badgeHoverColor: '#EC4899',
+          iconBackground: 'rgba(124, 58, 237, 0.1)',
+        }"
         title="Account Setting"
         description="Configure your account settings, manage login email and password."
         :badges="[
@@ -958,6 +969,7 @@
   
   .custom-input {
     width: 100%;
+    max-width: 400px;
   }
   
   .custom-input :deep(.ant-input) {
@@ -1097,6 +1109,7 @@
     border-radius: 12px;
     border: 1px solid #e5e7eb;
     margin-bottom: 24px;
+    margin-top: 24px;
   }
   
   .current-email-section h3 {
@@ -1153,6 +1166,7 @@
     display: flex;
     gap: 12px;
     align-items: center;
+    max-width: 400px;
   }
   
   .email-input-group .custom-input {
@@ -1217,7 +1231,7 @@
   }
   
   .password-form {
-    max-width: 300px;
+    max-width: 400px;
   }
   
   .current-email {
@@ -1259,5 +1273,16 @@
   
   .strength-strong {
     color: #52c41a;
+  }
+  
+  /* 确保验证码输入框组的响应式布局 */
+  @media (max-width: 500px) {
+    .email-input-group {
+      flex-direction: column;
+    }
+    
+    .send-code-btn {
+      width: 100%;
+    }
   }
   </style> 
