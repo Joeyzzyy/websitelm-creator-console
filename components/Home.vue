@@ -201,7 +201,17 @@
               <div class="usage-label">{{ usage.label }}</div>
               <div class="usage-description text-sm text-gray-500">{{ usage.description }}</div>
             </div>
-            <div class="usage-bar">
+            <div class="usage-stats">
+              <div class="usage-numbers">
+                <span class="font-medium">
+                  {{ usage.total === 999999999 ? 'Unlimited' : `${usage.used}/${usage.total}` }}
+                </span>
+              </div>
+              <div class="usage-period text-sm text-gray-500">
+                {{ usage.total === 999999999 ? '' : usage.unit }}
+              </div>
+            </div>
+            <div class="usage-bar" v-if="usage.total !== 999999999">
               <div 
                 class="usage-progress"
                 :style="{ 
@@ -209,14 +219,6 @@
                   background: usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff'
                 }"
               ></div>
-            </div>
-            <div class="usage-stats">
-              <div class="usage-numbers">
-                <span class="font-medium">{{ usage.used }}/{{ usage.total }}</span>
-              </div>
-              <div class="usage-period text-sm text-gray-500">
-                {{ usage.unit }}
-              </div>
             </div>
           </div>
         </div>
@@ -231,7 +233,17 @@
               <div class="usage-label">{{ usage.label }}</div>
               <div class="usage-description text-sm text-gray-500">{{ usage.description }}</div>
             </div>
-            <div class="usage-bar">
+            <div class="usage-stats">
+              <div class="usage-numbers">
+                <span class="font-medium">
+                  {{ usage.total === 999999999 ? 'Unlimited' : `${usage.used}/${usage.total}` }}
+                </span>
+              </div>
+              <div class="usage-period text-sm text-gray-500">
+                {{ usage.total === 999999999 ? '' : usage.unit }}
+              </div>
+            </div>
+            <div class="usage-bar" v-if="usage.total !== 999999999">
               <div 
                 class="usage-progress"
                 :style="{ 
@@ -239,14 +251,6 @@
                   background: usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff'
                 }"
               ></div>
-            </div>
-            <div class="usage-stats">
-              <div class="usage-numbers">
-                <span class="font-medium">{{ usage.used }}/{{ usage.total }}</span>
-              </div>
-              <div class="usage-period text-sm text-gray-500">
-                {{ usage.unit }}
-              </div>
             </div>
           </div>
         </div>
@@ -902,6 +906,95 @@ html, body, #app {
       max-height: 80vh;
     }
   }
+}
+
+/* Subscription Modal Styles */
+.subscription-modal {
+  :deep(.ant-modal-content) {
+    border-radius: 12px;
+    background: linear-gradient(165deg, #ffffff 0%, #f8f9fa 100%);
+  }
+}
+
+.subscription-info {
+  padding: 20px;
+}
+
+.current-plan {
+  margin-bottom: 24px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
+  border-radius: 12px;
+  border: 1px solid rgba(24, 144, 255, 0.2);
+}
+
+.current-plan h3 {
+  color: #1890ff;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.plan-period {
+  color: #666;
+  font-size: 14px;
+}
+
+.usage-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.usage-column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.usage-item {
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.usage-header {
+  margin-bottom: 12px;
+}
+
+.usage-label {
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.usage-bar {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+
+.usage-progress {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.usage-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.usage-numbers {
+  color: #1f2937;
+}
+
+.usage-period {
+  color: #6b7280;
 }
 </style>
 

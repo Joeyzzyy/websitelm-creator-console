@@ -9,7 +9,6 @@
         { text: 'Publishing Tools' },
         { text: 'Status Tracking' }
       ]"
-      emoji="📄"
     />
 
     <a-spin :spinning="loading" class="centered-spin">
@@ -19,7 +18,6 @@
           <div class="header">
             <div class="header-left">
               <div class="header-top">
-                <h3>Page List</h3>
                 <a-space>
                   <a-button 
                     class="action-button secondary-btn"
@@ -58,18 +56,6 @@
                     <span>Manual Add Page</span>
                   </a-button>
                 </a-space>
-              </div>
-              
-              <div class="header-bottom">
-                <span v-show="verifiedDomains.length === 0" class="domain-label">
-                  No verified sub-domain available - <router-link to="/settings">click here to add sub-domain</router-link>
-                </span>
-                <span v-show="verifiedDomains.length > 0" class="domain-label">Pages could be published to:</span>
-                <div class="domain-tags">
-                  <a-tag v-for="domain in verifiedDomains" :key="domain" color="success">
-                    {{ domain }}
-                  </a-tag>
-                </div>
               </div>
             </div>
             <div class="header-right">
@@ -330,7 +316,6 @@
     >
       {{ modalConfig.content }}
     </a-modal>
-  
   </page-layout>
 </template>
 
@@ -513,15 +498,24 @@ export default {
     const loadVerifiedDomains = async () => {
       try {
         const projectId = VERCEL_CONFIG.PROJECT_ID;
-        // 1. 首先获取域名列表
+        // 1. 获取域名列表
         const response = await apiClient.getVercelDomainInfo(projectId);
         console.log('API Response domains:', response?.domains);
         
-        // 2. 过滤并检查域名 - 移除了根域名过滤条件
+        // 2. 获取当前项目的根域名
+        const rootDomain = productInfo.value?.projectWebsite;
+        if (!rootDomain) {
+          console.warn('No root domain configured');
+          verifiedDomains.value = [];
+          return;
+        }
+
+        // 3. 过滤并检查域名 - 只保留以根域名结尾的域名
         const verifiedDomainsPromises = response?.domains
           ?.filter(domain => 
             domain.verified && 
-            !domain.name.includes('vercel.app') // 只过滤 vercel.app 域名
+            !domain.name.includes('vercel.app') && // 过滤 vercel.app 域名
+            (domain.name === rootDomain || domain.name.endsWith(`.${rootDomain}`)) // 只保留根域名相关的域名
           )
           ?.map(async domain => {
             try {
@@ -533,25 +527,26 @@ export default {
             }
           }) || [];
 
-        // 3. 等待所有配置检查完成
+        // 4. 等待所有配置检查完成
         const verifiedDomainsList = (await Promise.all(verifiedDomainsPromises))
           .filter(Boolean);
 
         await loadSubfolders();
         
+        console.log('Root domain:', rootDomain);
         console.log('Verified domains before merge:', verifiedDomainsList);
-        console.log('Project website:', productInfo.value?.projectWebsite);
         console.log('Subfolders:', subfolders.value);
         
-        // 4. 合并验证过的域名和子文件夹
+        // 5. 合并验证过的域名和子文件夹路径
         verifiedDomains.value = [
           ...verifiedDomainsList,
-          ...(subfolders.value.map(subfolder => `${productInfo.value?.projectWebsite}/${subfolder}`))
+          ...(subfolders.value.map(subfolder => `${rootDomain}/${subfolder}`))
         ];
         
         console.log('Final verified domains:', verifiedDomains.value);
       } catch (error) {
         console.error('Failed to load domain info:', error);
+        verifiedDomains.value = [];
       }
     };
 

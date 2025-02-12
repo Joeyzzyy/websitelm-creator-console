@@ -9,7 +9,6 @@
         { text: 'Video Storage' },
         { text: 'Asset Analytics' }
       ]"
-      emoji="📁"
     />
 
     <a-spin 

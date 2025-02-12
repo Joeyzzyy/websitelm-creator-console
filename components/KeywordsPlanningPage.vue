@@ -9,7 +9,6 @@
         { text: 'SEO Optimized' },
         { text: 'Keyword Metrics' }
       ]"
-      emoji="🎯"
     />
     
     <a-spin 

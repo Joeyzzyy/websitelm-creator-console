@@ -13,7 +13,6 @@
         { text: 'Deployment Options' },
         { text: 'Login Settings' }
       ]"
-      emoji="⚙️"
     />
 
     <a-spin 
@@ -1162,14 +1161,14 @@ export default {
         
         // 3. 加载验证配置
         await loadSubfolderDomainConfig();
-        message.success('验证请求已提交，请按照说明配置 DNS 记录');
+        message.success('Verification request submitted, please configure DNS records as instructed');
         
       } catch (error) {
-        console.error('开始域名验证失败:', error);
+        console.error('Failed to start domain verification:', error);
         if (error.response?.data?.error?.code === 'domain_already_in_use') {
-          message.info('该域名已提交验证。请按照说明添加 DNS 记录，然后等待验证完成。');
+          message.info('This domain has already been submitted. Please add the DNS records as instructed, then click the verify button.');
         } else {
-          message.error('开始域名验证失败');
+          message.error('Failed to start domain verification');
         }
       } finally {
         verifyingSubfolder.value = false;
@@ -1187,8 +1186,8 @@ export default {
         };
         
       } catch (error) {
-        console.error('加载域名配置失败:', error);
-        message.error('加载域名配置失败');
+        console.error('Failed to load domain configuration:', error);
+        message.error('Failed to load domain configuration');
       }
     };
 

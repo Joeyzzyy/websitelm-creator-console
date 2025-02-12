@@ -311,6 +311,7 @@
           </a-card>
         </a-col>
       </a-row>
+
     </div>
 
     <!-- Add onboarding modal -->
