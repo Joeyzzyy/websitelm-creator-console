@@ -942,16 +942,21 @@ export default defineComponent({
 
       try {
         this.goStartVerifying = true;
-        const domain = this.formState.website.replace(/^https?:\/\//, '');
         const customerId = localStorage.getItem('currentCustomerId');
         const response = await apiClient.getDomain({
           customerId,
-          domainName: domain
         });
-        if (response?.code === 200 && response.data?.textRecord) {
-          // 如果存在TXT记录,显示验证记录
-          this.verifyRecord = JSON.parse(response.data.textRecord);
-          this.showVerifyRecord = true;
+
+        if (response?.code === 200) {
+          if (response.data?.textRecord) {
+            // 如果存在TXT记录，显示验证记录
+            this.verifyRecord = JSON.parse(response.data.textRecord);
+            this.showVerifyRecord = true;
+          } else {
+            // 如果不存在TXT记录，重置状态
+            this.showVerifyRecord = false;
+            this.verifyRecord = null;
+          }
         }
       } catch (error) {
         console.error('Failed to check domain verification status:', error);
@@ -967,7 +972,8 @@ export default defineComponent({
       this.editProductInfo(); // 用现的编方法
     },
 
-    editProductInfo() {
+    // 修改 editProductInfo 方法，添加 async 关键字
+    async editProductInfo() {
       this.originalDomainStatus = this.productInfo?.domainStatus;
       this.originalWebsite = this.productInfo?.projectWebsite?.replace('https://', '');
       this.formState = {
@@ -978,6 +984,12 @@ export default defineComponent({
         competitors: this.competitors,
         domainStatus: this.productInfo.domainStatus
       };
+      
+      // 如果域名未验证，检查是否有验证记录
+      if (!this.productInfo.domainStatus && this.formState.website) {
+        await this.checkDomainVerification();
+      }
+      
       this.onboardingModalVisible = true;
     },
     
@@ -1219,46 +1231,25 @@ export default defineComponent({
         })
       }
     },
-    handleWebsiteChange(e) {
+    async handleWebsiteChange(e) {
       const newWebsite = e.target.value.trim();
-      const currentDomain = this.productInfo?.projectWebsite?.replace(/^https?:\/\//, '');
       
-      // 立即重置所有相关状态
-      if (newWebsite !== currentDomain) {
-        // 立即重置所有验证相关的状态
+      // 更新 formState 中的 website
+      this.formState = {
+        ...this.formState,
+        website: newWebsite,
+        // 如果是新域名，重置验证状态
+        domainStatus: newWebsite === this.originalWebsite ? this.originalDomainStatus : false
+      };
+      
+      // 如果域名变更，重置验证相关状态，显示 Start Verify 按钮
+      if (newWebsite !== this.originalWebsite) {
         this.showVerifyRecord = false;
         this.verifyRecord = null;
-        
-        // 立即更新 formState
-        this.formState = {
-          ...this.formState,
-          website: newWebsite,
-          domainStatus: false
-        };
-        
-        // 立即更新 productInfo
-        if (this.productInfo) {
-          this.productInfo = {
-            ...this.productInfo,
-            projectWebsite: newWebsite,
-            domainStatus: false
-          };
-        }
-      } else {
-        // 如果改回原来的域名，使用保存的原始状态
-        this.formState = {
-          ...this.formState,
-          website: newWebsite,
-          domainStatus: this.originalDomainStatus
-        };
-        
-        if (this.productInfo) {
-          this.productInfo = {
-            ...this.productInfo,
-            projectWebsite: newWebsite,
-            domainStatus: this.originalDomainStatus
-          };
-        }
+      }
+      // 如果改回原域名且未验证，恢复之前的验证记录状态
+      else if (!this.originalDomainStatus) {
+        await this.checkDomainVerification();
       }
     },
     handleSuccessModalClose() {
