@@ -2,9 +2,6 @@
   <div class="section-wrapper">
     <!-- 编辑区域 -->
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">Page List Card</h2>
-      </div>
       <div class="editor-content">
         <a-form layout="vertical">
           <!-- 添加区域的标题和副标题 -->

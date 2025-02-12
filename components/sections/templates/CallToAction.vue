@@ -2,9 +2,6 @@
   <div class="section-wrapper">
     <!-- 编辑区域 -->
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">Call To Action</h2>
-      </div>
       <div class="editor-content">
         <a-form layout="vertical">
           <a-form-item label="Title">

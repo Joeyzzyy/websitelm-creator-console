@@ -2,9 +2,6 @@
   <div class="section-wrapper">
     <!-- 编辑区域 -->
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">Key Results With Image</h2>
-      </div>
       <div class="editor-content">
         <!-- 原有的表单内容 -->
         <a-form layout="vertical">

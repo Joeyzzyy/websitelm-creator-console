@@ -1,9 +1,6 @@
 <template>
   <div class="section-wrapper">
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">Title Section With Image</h2>
-      </div>
       <div class="editor-content">
         <a-form layout="vertical" class="title-section-form">
           <!-- 主要内容区域分为两列 -->

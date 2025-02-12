@@ -1,9 +1,6 @@
 <template>
   <div class="section-wrapper">
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">FAQs</h2>
-      </div>
       <div class="editor-content">
         <a-form layout="vertical">
           <div v-for="(faq, index) in localSection.topContent" :key="index">

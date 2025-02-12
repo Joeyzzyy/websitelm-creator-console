@@ -1,26 +1,9 @@
 <template>
   <div class="section-wrapper">
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">Key Results With Text Block</h2>
-      </div>
       <div class="editor-content">
         <!-- 顶部内容 -->
-        <div class="top-content">
-          <a-form layout="vertical">
-            <a-form-item label="Section Title">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.contentTitle }}</span>
-                <a-input
-                  v-model:value="localSection.title"
-                  :disabled="disabled"
-                  placeholder="Enter section title"
-                  @change="handleChange"
-                />
-              </div>
-            </a-form-item>
-          </a-form>
-        </div>
+        
 
         <!-- 左侧指标部分 -->
         <div class="left-content">

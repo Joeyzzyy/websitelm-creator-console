@@ -1,9 +1,6 @@
 <template>
   <div class="section-wrapper">
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">Product Benefits With Blocks</h2>
-      </div>
       <div class="editor-content">
         <a-row :gutter="24">
           <!-- 原有的编辑表单内容 -->

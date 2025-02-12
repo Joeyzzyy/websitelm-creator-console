@@ -1935,10 +1935,14 @@ export default defineComponent({
 /* 放相样式 */
 .section-wrapper {
   position: relative;
-  transition: all 0.3s ease;
   width: 100%;
-  max-width: 100%;
-  padding-top: 10px;
+  background: white;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #e5e7eb;
+  /* 移除多余的阴影和overflow */
+  box-shadow: none;
+  overflow: visible;
 }
 
 .section-wrapper[data-drag-over="true"]::after {
@@ -3098,7 +3102,12 @@ export default defineComponent({
 }
 
 .section-content-wrapper {
-  transition: all 0.3s ease;
+  position: relative;
+  width: 100%;
+  background: white;
+  border-radius: 0 0 12px 12px;
+  /* 移除可能存在的重叠背景和阴影 */
+  box-shadow: none;
 }
 
 .immersive-overlay {
@@ -3180,5 +3189,37 @@ export default defineComponent({
   .anticon {
     font-size: 14px;
   }
+}
+
+/* 添加 Page Information 固定项样式 */
+.page-info-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f0f9ff; /* 使用略微不同的背景色以示区分 */
+  border: 1px solid #38BDF8;
+  border-radius: 8px;
+  margin-bottom: 16px; /* 与其他项之间留出间距 */
+}
+
+.page-info-name {
+  font-size: 14px;
+  color: #0284C7;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-info-icon {
+  color: #38BDF8;
+}
+
+/* 添加分隔线 */
+.components-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 8px 0 16px;
 }
 </style>

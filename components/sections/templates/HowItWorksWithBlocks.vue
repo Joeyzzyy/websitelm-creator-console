@@ -2,9 +2,6 @@
   <div class="section-wrapper">
     <!-- 编辑区域 -->
     <div class="editor-area">
-      <div class="editor-header">
-        <h2 class="component-title">How It Works With Blocks</h2>
-      </div>
       <div class="editor-content">
         <!-- 移除 Row 和 Col 布局，改用单列 -->
         <a-form layout="vertical">
