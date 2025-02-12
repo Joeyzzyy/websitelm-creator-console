@@ -69,7 +69,15 @@
           </div>
 
           <div class="content-item">
-            <div class="editor-wrapper">
+            <div :class="['editor-wrapper', { 'fullscreen-editor': isFullscreen }]">
+              <!-- 全屏模式的头部 -->
+              <div v-if="isFullscreen" class="fullscreen-header">
+                <h2>Editor</h2>
+                <a-button type="text" @click="toggleFullscreen">
+                  <fullscreen-exit-outlined />
+                </a-button>
+              </div>
+
               <!-- 工具栏 -->
               <div class="editor-toolbar">
                 <a-button-group>
@@ -109,8 +117,21 @@
                     <link-outlined />
                   </a-button>
                 </a-button-group>
+
+                <a-divider type="vertical" />
+
+                <!-- 全屏按钮 -->
+                <a-button 
+                  type="text"
+                  @click="toggleFullscreen"
+                  :class="{ active: isFullscreen }"
+                >
+                  <fullscreen-outlined v-if="!isFullscreen" />
+                  <fullscreen-exit-outlined v-else />
+                </a-button>
               </div>
 
+              <!-- 编辑器内容 -->
               <editor-content 
                 :editor="editor" 
                 class="content-textarea"
@@ -180,7 +201,7 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import KeyResultsWithTextBlockPreview from './KeyResultsWithTextBlockPreview.vue'
 import themeConfig from '../../../assets/config/themeConfig'
-import { LinkOutlined, DeleteOutlined, PictureOutlined, CloseOutlined, VideoCameraOutlined, BoldOutlined, ItalicOutlined, FontSizeOutlined } from '@ant-design/icons-vue'
+import { LinkOutlined, DeleteOutlined, PictureOutlined, CloseOutlined, VideoCameraOutlined, BoldOutlined, ItalicOutlined, FontSizeOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons-vue'
 import ImageLibrary from '../common/ImageLibrary.vue'
 import VideoLibrary from '../common/VideoLibrary.vue'
 import { debounce } from 'lodash'
@@ -265,7 +286,9 @@ export default {
     BoldOutlined,
     ItalicOutlined,
     FontSizeOutlined,
-    EditorContent
+    EditorContent,
+    FullscreenOutlined,
+    FullscreenExitOutlined
   },
   computed: {
     tags() {
@@ -289,6 +312,7 @@ export default {
       selectedImage: null,
       selectedVideo: null,
       editorContent: '', // 添加这个属性
+      isFullscreen: false,
     }
   },
   created() {
@@ -479,6 +503,10 @@ export default {
         this.localSection.rightContent = this.editorContent
         this.debouncedHandleChange()
       }
+    },
+
+    toggleFullscreen() {
+      this.isFullscreen = !this.isFullscreen;
     },
   }
 }
@@ -917,7 +945,8 @@ export default {
   margin-top: 8px;
   display: flex;
   flex-direction: column;
-  height: 400px;
+  height: 500px;
+  transition: all 0.3s ease;
 }
 
 .editor-toolbar {
@@ -943,9 +972,9 @@ export default {
 }
 
 .content-textarea {
-  padding: 12px;
   flex: 1;
   overflow-y: auto;
+  padding: 16px;
 }
 
 .content-textarea :deep(.ProseMirror) {
@@ -1099,6 +1128,7 @@ export default {
   border-radius: 4px;
   color: #334155;
   width: 100%;
+  min-height: 300px; /* 添加最小高度 */
 }
 
 /* 添加子标题样式 */
@@ -1108,5 +1138,61 @@ export default {
   color: #374151;
   display: inline-block;
   line-height: 1.4;
+}
+
+/* 更新全屏模式样式 */
+.editor-wrapper.fullscreen-editor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: white;
+  z-index: 1000;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.fullscreen-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  background: white;
+}
+
+.fullscreen-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* 全屏模式下的特殊样式 */
+.fullscreen-editor .content-textarea {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.fullscreen-editor .editor-toolbar {
+  padding: 12px 24px;
+}
+
+/* 添加过渡动画 */
+.editor-wrapper {
+  transition: all 0.3s ease;
+}
+
+.fullscreen-editor {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 </style> 

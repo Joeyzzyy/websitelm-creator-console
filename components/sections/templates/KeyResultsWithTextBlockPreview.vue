@@ -311,7 +311,19 @@ const parseContent = (content) => {
       // 处理段落
       if (tagName === 'p') {
         const processedNodes = Array.from(node.childNodes).flatMap(processNode);
-        return processedNodes;
+        // 检查是否为空段落
+        if (processedNodes.length === 0 || 
+            (processedNodes.length === 1 && 
+             processedNodes[0].type === 'text' && 
+             processedNodes[0].content.trim() === '')) {
+          // 空段落产生空行
+          return [{ type: 'text', content: '\n\n' }];
+        }
+        // 非空段落只在开头添加换行
+        return [
+          { type: 'text', content: '\n' },
+          ...processedNodes
+        ];
       }
       
       // 处理换行
@@ -323,10 +335,10 @@ const parseContent = (content) => {
       if (['h1', 'h2', 'h3'].includes(tagName) || 
           (tagName === 'span' && node.classList.contains('content-subtitle'))) {
         const processedNodes = Array.from(node.childNodes).flatMap(processNode);
+        // 标题只在开头添加换行
         return [
           { type: 'text', content: '\n' },
-          { type: 'bold', content: node.textContent },
-          { type: 'text', content: '\n' }
+          { type: 'bold', content: node.textContent }
         ];
       }
       
@@ -391,11 +403,35 @@ const parseContent = (content) => {
   
   const results = Array.from(doc.body.childNodes).flatMap(processNode);
   
-  // 移除末尾多余的换行
+  // 清理多余的换行
+  // 1. 移除开头的换行
+  while (results.length > 0 && 
+         results[0].type === 'text' && 
+         results[0].content.trim() === '') {
+    results.shift();
+  }
+  
+  // 2. 移除结尾的换行
   while (results.length > 0 && 
          results[results.length - 1].type === 'text' && 
          results[results.length - 1].content.trim() === '') {
     results.pop();
+  }
+  
+  // 3. 合并连续的换行，但保留空段落产生的双换行
+  for (let i = results.length - 2; i >= 0; i--) {
+    const current = results[i];
+    const next = results[i + 1];
+    if (current.type === 'text' && next.type === 'text') {
+      const currentIsNewline = current.content.trim() === '';
+      const nextIsNewline = next.content.trim() === '';
+      if (currentIsNewline && nextIsNewline) {
+        // 如果不是双换行（空行标记），则合并
+        if (current.content !== '\n\n' && next.content !== '\n\n') {
+          results.splice(i, 1);
+        }
+      }
+    }
   }
   
   return results;
