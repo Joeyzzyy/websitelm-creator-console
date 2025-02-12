@@ -22,6 +22,7 @@
         :badges="[
           { text: 'Login Email' },
           { text: 'Password' },
+          { text: 'Plan Usage' },
         ]"
       />
         <div class="settings-content">
@@ -31,6 +32,7 @@
             >
                 <a-tab-pane key="login-email" tab="Login Email Setting" />
                 <a-tab-pane key="password" tab="Password Setting" />
+                <a-tab-pane key="plan-usage" tab="Plan Usage" />
             </a-tabs>
 
             <div class="page-content">
@@ -275,6 +277,87 @@
                         </template>
                     </div>
                 </template>
+
+                <template v-if="activeTab === 'plan-usage'">
+                    <div class="subscription-info">
+                        <div class="current-plan">
+                            <h3>{{ currentPlan.name }} Plan</h3>
+                            <div class="plan-period">
+                                {{ currentPlan.period === 'monthly' ? 'Monthly Billing' : 'Annual Billing' }}
+                            </div>
+                            <div class="plan-expiry" v-if="currentPlan.endDate">
+                                <span>Expires: {{ formatDate(currentPlan.endDate) }}</span>
+                                <span class="remaining-days">({{ currentPlan.remainingDays }} days remaining)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="usage-grid">
+                            <div class="usage-column">
+                                <div 
+                                    v-for="(usage, index) in usageInfo.slice(0, Math.ceil(usageInfo.length/2))" 
+                                    :key="index"
+                                    class="usage-item"
+                                >
+                                    <div class="usage-header">
+                                        <div class="usage-label">{{ usage.label }}</div>
+                                        <div class="usage-description">{{ usage.description }}</div>
+                                    </div>
+                                    <div class="usage-stats">
+                                        <div class="usage-numbers">
+                                            <span class="font-medium">
+                                                {{ usage.total === 999999999 ? 'Unlimited' : `${usage.used}/${usage.total}` }}
+                                            </span>
+                                        </div>
+                                        <div class="usage-period">
+                                            {{ usage.total === 999999999 ? '' : usage.unit }}
+                                        </div>
+                                    </div>
+                                    <div class="usage-bar" v-if="usage.total !== 999999999">
+                                        <div 
+                                            class="usage-progress"
+                                            :style="{ 
+                                                width: `${(usage.used / usage.total) * 100}%`,
+                                                background: usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff'
+                                            }"
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="usage-column">
+                                <div 
+                                    v-for="(usage, index) in usageInfo.slice(Math.ceil(usageInfo.length/2))" 
+                                    :key="index"
+                                    class="usage-item"
+                                >
+                                    <div class="usage-header">
+                                        <div class="usage-label">{{ usage.label }}</div>
+                                        <div class="usage-description">{{ usage.description }}</div>
+                                    </div>
+                                    <div class="usage-stats">
+                                        <div class="usage-numbers">
+                                            <span class="font-medium">
+                                                {{ usage.total === 999999999 ? 'Unlimited' : `${usage.used}/${usage.total}` }}
+                                            </span>
+                                        </div>
+                                        <div class="usage-period">
+                                            {{ usage.total === 999999999 ? '' : usage.unit }}
+                                        </div>
+                                    </div>
+                                    <div class="usage-bar" v-if="usage.total !== 999999999">
+                                        <div 
+                                            class="usage-progress"
+                                            :style="{ 
+                                                width: `${(usage.used / usage.total) * 100}%`,
+                                                background: usage.used/usage.total > 0.9 ? '#ff4d4f' : '#1890ff'
+                                            }"
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
                 </div>
             </div>
         </div>
@@ -292,6 +375,7 @@
   import { VERCEL_CONFIG } from '../config/vercelConfig';
   import NoSiteConfigured from './common/NoSiteConfigured.vue'
   import SmartBanner from './common/SmartBanner.vue'
+  import dayjs from 'dayjs';
   
   
   export default {
@@ -588,6 +672,7 @@
       // 在组件挂载时加载产品信息
       onMounted(() => {
         loadProductInfo();
+        loadPackageInfo();
       });
   
       onBeforeUnmount(() => {
@@ -595,6 +680,64 @@
           clearInterval(cooldownTimer.value);
         }
       });
+  
+      // 添加加载套餐信息的方法
+      const loadPackageInfo = async () => {
+        try {
+          const response = await apiClient.getCustomerPackage();
+          if (response?.data) {
+            const packageData = response.data;
+            
+            currentPlan.value = {
+              name: packageData.packageName?.trim() || 'Professional',
+              period: packageData.packageName?.toLowerCase().includes('monthly') ? 'monthly' : 'yearly',
+              endDate: packageData.packageEndTime,
+              remainingDays: packageData.remainingDays
+            };
+            
+            usageInfo.value = [
+              {
+                label: 'Outline Generator',
+                used: packageData.outlineGeneratorUsage || 0,
+                total: packageData.outlineGeneratorLimit || 999999999,
+                unit: 'times/month',
+                description: 'AI-powered outline generation'
+              },
+              {
+                label: 'Page Generator',
+                used: packageData.pageGeneratorUsage || 0,
+                total: packageData.pageGeneratorLimit || 999999999,
+                unit: 'times/month',
+                description: 'SEO-optimized page creation'
+              },
+              {
+                label: 'Free Page Deployment',
+                used: packageData.freeDeploymentPageUsage || 0,
+                total: packageData.freeDeploymentPageLimit || 999999999,
+                unit: 'times/year',
+                description: 'Number of pages that can be deployed'
+              },
+              {
+                label: 'Internal Links Storage',
+                used: packageData.internalLinkStorageUsage || 0,
+                total: packageData.internalLinkStorageLimit || 999999999,
+                unit: 'links',
+                description: 'Store and manage internal link structure'
+              },
+              {
+                label: 'Image Storage',
+                used: packageData.imageStorageUsage || 0,
+                total: packageData.imageStorageLimit || 999999999,
+                unit: 'images',
+                description: 'Store and optimize images'
+              }
+            ];
+          }
+        } catch (error) {
+          console.error('Failed to load package information:', error);
+          message.error('Failed to load subscription details');
+        }
+      };
   
       // 部署设置相关方法
       const saveDeploymentSettings = async () => {
@@ -780,6 +923,19 @@
         }
       };
   
+      const currentPlan = ref({
+        name: '',
+        period: 'monthly',
+        endDate: null,
+        remainingDays: 0
+      });
+
+      const usageInfo = ref([]);
+
+      const formatDate = (date) => {
+        return dayjs(date).format('YYYY-MM-DD');
+      };
+  
       return {
         cooldown,
         goToDashboard,
@@ -812,6 +968,9 @@
         handleSetPassword,
         handleChangePassword,
         sendResetCode,
+        currentPlan,
+        usageInfo,
+        formatDate,
       };
     }
   }
@@ -1283,6 +1442,113 @@
     
     .send-code-btn {
       width: 100%;
+    }
+  }
+
+  .subscription-info {
+    padding: 24px;
+  }
+
+  .current-plan {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(24, 144, 255, 0.1) 0%, rgba(24, 144, 255, 0.05) 100%);
+    border-radius: 12px;
+    border: 1px solid rgba(24, 144, 255, 0.2);
+  }
+
+  .current-plan h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1890ff;
+  }
+
+  .plan-period {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .plan-expiry {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .remaining-days {
+    margin-left: 8px;
+    color: #ff4d4f;
+  }
+
+  .usage-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .usage-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .usage-item {
+    padding: 16px;
+    background: white;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+  }
+
+  .usage-header {
+    margin-bottom: 12px;
+  }
+
+  .usage-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .usage-description {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+  }
+
+  .usage-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .usage-numbers {
+    font-size: 14px;
+    color: #333;
+  }
+
+  .usage-period {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .usage-bar {
+    height: 4px;
+    background: #f0f0f0;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .usage-progress {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  @media (max-width: 768px) {
+    .usage-grid {
+      grid-template-columns: 1fr;
     }
   }
   </style> 
