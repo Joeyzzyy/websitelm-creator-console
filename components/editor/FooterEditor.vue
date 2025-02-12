@@ -145,69 +145,7 @@
 
         <!-- 右列 -->
         <a-col :span="12">
-          <!-- 功能列表 -->
-          <div class="section">
-            <h3 class="section-title">Features Section</h3>
-            <a-form-item label="Section Title">
-              <div class="input-with-color">
-                <a-input v-model:value="footerData.features.title" />
-                <div 
-                  class="color-picker"
-                  :style="{ background: footerData.colors.featuresTitle }"
-                  @click="toggleColorPicker('featuresTitle', $event)"
-                ></div>
-              </div>
-            </a-form-item>
-
-            <!-- Features 列表 -->
-            <a-form-item label="Feature Links">
-              <div class="feature-links-header">
-                <span>Links</span>
-                <div 
-                  class="color-picker"
-                  :style="{ background: footerData.colors.featureLinks }"
-                  @click="toggleColorPicker('featureLinks', $event)"
-                ></div>
-              </div>
-              
-              <div class="feature-links-list">
-                <div 
-                  v-for="(feature, index) in footerData.features.items" 
-                  :key="index"
-                  class="feature-link-item"
-                >
-                  <a-input 
-                    v-model:value="feature.title" 
-                    placeholder="Link text"
-                    style="flex: 1"
-                  />
-                  <a-input 
-                    v-model:value="feature.href" 
-                    placeholder="URL"
-                    style="flex: 2"
-                  />
-                  <a-button 
-                    type="text" 
-                    danger 
-                    @click="removeFeature(index)"
-                  >
-                    <delete-outlined />
-                  </a-button>
-                </div>
-              </div>
-
-              <a-button 
-                type="dashed" 
-                block 
-                @click="addFeature" 
-                style="margin-top: 8px"
-              >
-                <plus-outlined /> Add Feature Link
-              </a-button>
-            </a-form-item>
-          </div>
-
-          <!-- 添加社交媒体设置部分 -->
+          <!-- 保留社交媒体部分 -->
           <div class="section">
             <div class="section-header">
               <h3 class="section-title">Social Media</h3>
@@ -301,6 +239,77 @@
         </a-col>
       </a-row>
     </a-form>
+
+    <div class="section">
+      <div class="section-header">
+        <h3 class="section-title">Navigation Sections</h3>
+      </div>
+
+      <div v-for="(section, sIndex) in footerData.sections" :key="sIndex" class="nav-section">
+        <div class="section-header">
+          <div class="input-with-color">
+            <a-input
+              v-model:value="section.title"
+              placeholder="Section Title"
+              class="section-title-input"
+            />
+            <div 
+              class="color-picker"
+              :style="{ background: section.colors.title }"
+              @click="toggleColorPicker(`sectionTitle_${sIndex}`, $event)"
+            ></div>
+          </div>
+          <a-button type="text" danger @click="removeSection(sIndex)">
+            <delete-outlined />
+          </a-button>
+        </div>
+
+        <div class="section-links">
+          <div 
+            v-for="(link, lIndex) in section.links" 
+            :key="lIndex"
+            class="link-item"
+          >
+            <a-input
+              v-model:value="link.label"
+              placeholder="Link Label"
+              style="width: 200px"
+            />
+            <a-input
+              v-model:value="link.url"
+              placeholder="URL"
+              style="flex: 1"
+            />
+            <div 
+              class="color-picker"
+              :style="{ background: section.colors.links }"
+              @click="toggleColorPicker(`sectionLinks_${sIndex}`, $event)"
+            ></div>
+            <a-button type="text" danger @click="removeLink(sIndex, lIndex)">
+              <delete-outlined />
+            </a-button>
+          </div>
+
+          <a-button 
+            type="dashed" 
+            block 
+            @click="addLink(sIndex)"
+            style="margin-top: 8px"
+          >
+            <plus-outlined /> Add Link
+          </a-button>
+        </div>
+      </div>
+
+      <a-button 
+        type="dashed" 
+        block 
+        @click="addSection"
+        style="margin-top: 16px"
+      >
+        <plus-outlined /> Add Navigation Section
+      </a-button>
+    </div>
   </div>
 
   <!-- Color picker popup -->
@@ -356,13 +365,10 @@ const props = defineProps({
 const footerData = ref({
   companyName: props.initialData.companyName,
   description: props.initialData.description,
-  features: props.initialData.features,
   copyright: props.initialData.copyright,
   colors: {
     companyName: '#FFFFFF',
     description: '#9CA3AF',
-    featuresTitle: '#FFFFFF',
-    featureLinks: '#9CA3AF',
     copyright: '#9CA3AF',
     ...props.initialData?.colors
   },
@@ -370,29 +376,19 @@ const footerData = ref({
     iconSize: props.initialData.socialMedia?.iconSize || 24,
     iconColor: props.initialData.socialMedia?.iconColor || '#9CA3AF',
     links: props.initialData.socialMedia?.links?.links || props.initialData.socialMedia?.links || []
-  }
+  },
+  sections: Array.isArray(props.initialData?.sections) ? props.initialData.sections : []
 })
 
 watch(() => props.initialData, (newValue) => {
-  footerData.value = { ...newValue }
+  if (newValue?.sections) {
+    footerData.value.sections = newValue.sections
+  }
 }, { deep: true })
 
 watch(footerData, (newValue) => {
   emit('update', newValue)
 }, { deep: true })
-
-// Features 相关方法
-const addFeature = () => {
-  footerData.value.features.items.push({
-    title: '',
-    href: '',
-    isExternal: false
-  })
-}
-
-const removeFeature = (index) => {
-  footerData.value.features.items.splice(index, 1)
-}
 
 // 添加 footer 样式配置
 const footerStyles = ref({
@@ -414,6 +410,14 @@ const presetColors = [
 ]
 
 const getCurrentColor = () => {
+  if (activeColorField.value?.startsWith('sectionTitle')) {
+    const [_, index] = activeColorField.value.split('_')
+    return footerData.value.sections[index].colors.title
+  }
+  if (activeColorField.value?.startsWith('sectionLinks')) {
+    const [_, index] = activeColorField.value.split('_')
+    return footerData.value.sections[index].colors.links
+  }
   if (activeColorField.value === 'background') {
     return footerStyles.value.backgroundColor
   } else if (activeColorField.value === 'start') {
@@ -428,6 +432,16 @@ const getCurrentColor = () => {
 
 const handleColorChange = (event) => {
   const newColor = event.target.value
+  if (activeColorField.value?.startsWith('sectionTitle')) {
+    const [_, index] = activeColorField.value.split('_')
+    footerData.value.sections[index].colors.title = newColor
+    return
+  }
+  if (activeColorField.value?.startsWith('sectionLinks')) {
+    const [_, index] = activeColorField.value.split('_')
+    footerData.value.sections[index].colors.links = newColor
+    return
+  }
   if (activeColorField.value === 'background') {
     footerStyles.value.backgroundColor = newColor
   } else if (activeColorField.value === 'start') {
@@ -442,6 +456,18 @@ const handleColorChange = (event) => {
 }
 
 const selectColor = (color) => {
+  if (activeColorField.value?.startsWith('sectionTitle')) {
+    const [_, index] = activeColorField.value.split('_')
+    footerData.value.sections[index].colors.title = color
+    showColorPicker.value = false
+    return
+  }
+  if (activeColorField.value?.startsWith('sectionLinks')) {
+    const [_, index] = activeColorField.value.split('_')
+    footerData.value.sections[index].colors.links = color
+    showColorPicker.value = false
+    return
+  }
   if (activeColorField.value === 'background') {
     footerStyles.value.backgroundColor = color
   } else if (activeColorField.value === 'start') {
@@ -478,7 +504,6 @@ const saving = ref(false)
 const saveConfig = async () => {
   try {
     saving.value = true
-
     // 确保 socialMedia 的数据结构正确
     const socialMediaData = {
       iconColor: footerData.value.socialMedia.iconColor,
@@ -517,11 +542,11 @@ const closeColorPicker = (event) => {
 }
 
 onMounted(() => {
-  console.log('Initial props data:', props.initialData)
-  console.log('Props socialMedia:', props.initialData.socialMedia)
-  console.log('Props socialMedia links:', props.initialData.socialMedia?.links)
-  console.log('Footer data socialMedia:', footerData.value.socialMedia)
-  console.log('Footer data socialMedia links:', footerData.value.socialMedia?.links)
+  console.log('Raw initialData:', props.initialData)
+  console.log('Raw sections:', props.initialData?.sections)
+  console.log('Sections type:', typeof props.initialData?.sections)
+  console.log('Is sections array:', Array.isArray(props.initialData?.sections))
+  console.log('Footer data sections:', footerData.value.sections)
   document.addEventListener('click', closeColorPicker)
 })
 
@@ -561,14 +586,40 @@ watch(() => footerData.value.socialMedia, (newValue) => {
 watch(() => props.initialData, (newValue) => {
   console.log('Props initialData changed:', newValue)
 }, { deep: true })
+
+// Add new methods for section management
+const addSection = () => {
+  footerData.value.sections.push({
+    title: 'New Section',
+    colors: {
+      title: 'black',
+      links: '#9CA3AF'
+    },
+    links: []
+  })
+}
+
+const removeSection = (index) => {
+  footerData.value.sections.splice(index, 1)
+}
+
+const addLink = (sectionIndex) => {
+  footerData.value.sections[sectionIndex].links.push({
+    label: '',
+    url: ''
+  })
+}
+
+const removeLink = (sectionIndex, linkIndex) => {
+  footerData.value.sections[sectionIndex].links.splice(linkIndex, 1)
+}
 </script>
 
 <style scoped>
 .editor-container {
   background: white;
   border-radius: 8px;
-  padding-top: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 24px;
   width: 100%;
 }
 
@@ -579,18 +630,6 @@ watch(() => props.initialData, (newValue) => {
   background: #f9fafb;
   border: 2px dashed #e5e7eb;
   position: relative;
-}
-
-.preview-section::before {
-  content: 'Preview';
-  position: absolute;
-  top: -12px;
-  left: 16px;
-  background: white;
-  padding: 0 8px;
-  font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
 }
 
 .editor-title {
@@ -953,5 +992,56 @@ watch(() => props.initialData, (newValue) => {
   background: linear-gradient(45deg, #065f46, #047857);  /* 点击时的颜色 */
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+/* 新增样式 */
+.links-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.links-count {
+  font-size: 12px;
+  color: #666;
+}
+
+.link-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
+}
+
+.add-link-btn {
+  margin-top: 12px;
+}
+
+.add-section-btn {
+  margin: 24px 0;
+}
+
+.nav-section {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #f8fafc;
+}
+
+.section-title-input {
+  flex: 1;
+}
+
+.section-links {
+  margin-top: 12px;
+}
+
+.link-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  align-items: center;
 }
 </style> 

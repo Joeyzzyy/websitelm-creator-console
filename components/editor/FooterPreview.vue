@@ -13,25 +13,37 @@
           </p>
         </div>
 
-        <!-- 功能特性部分 -->
-        <div class="grid-section">
-          <h4 class="section-title" :style="{ color: data.colors?.featuresTitle }">
-            {{ data?.features?.title || 'Features' }}
-          </h4>
-          <ul class="features-list">
-            <li v-for="(feature, index) in data?.features?.items" :key="index">
-              <a 
-                :href="feature.href" 
-                class="feature-link"
-                :style="{ color: data.colors?.featureLinks }"
-                target="_blank"
-                rel="noopener noreferrer"
+        <!-- Navigation Sections -->
+        <template v-if="data?.sections && data.sections.length > 0">
+          <div 
+            v-for="(section, index) in data.sections" 
+            :key="index"
+            class="grid-section nav-section"
+          >
+            <h4 
+              class="section-title" 
+              :style="{ color: section.colors?.title }"
+            >
+              {{ section.title }}
+            </h4>
+            <ul class="nav-links">
+              <li 
+                v-for="(link, linkIndex) in section.links" 
+                :key="linkIndex"
               >
-                {{ feature.title }}
-              </a>
-            </li>
-          </ul>
-        </div>
+                <a 
+                  :href="link.url" 
+                  class="nav-link"
+                  :style="{ color: section.colors?.links }"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ link.label }}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </template>
 
         <!-- 订阅部分 -->
         <div 
@@ -357,5 +369,26 @@ const getSocialIcon = (platform) => {
   .footer-bottom-left {
     justify-content: center;
   }
+}
+
+.nav-section {
+  padding: 0 16px;
+}
+
+.nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-link {
+  display: block;
+  text-decoration: none;
+  padding: 4px 0;
+  transition: opacity 0.2s;
+}
+
+.nav-link:hover {
+  opacity: 0.8;
 }
 </style> 

@@ -723,7 +723,7 @@ const handleMenuDragEnd = (event) => {
 .editor-container {
   background: white;
   border-radius: 8px;
-  padding-top: 12px;
+  padding: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   width: 100%;
 }
@@ -735,18 +735,8 @@ const handleMenuDragEnd = (event) => {
   background: #f9fafb;
   border: 2px dashed #e5e7eb;
   position: relative;
-}
-
-.preview-section::before {
-  content: 'Preview';
-  position: absolute;
-  top: -12px;
-  left: 16px;
-  background: white;
-  padding: 0 8px;
-  font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
+  width: 100%;
+  overflow: hidden;
 }
 
 .editor-header {

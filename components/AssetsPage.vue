@@ -1980,10 +1980,7 @@ export default {
             footerConfig.value = {
               companyName: footerData.companyName || '',
               description: footerData.description || '',
-              features: {
-                title: footerData.features?.title || 'Features',  // 添加标题文本
-                items: Array.isArray(footerData.features?.items) ? footerData.features.items : []
-              },
+              sections: Array.isArray(footerData.sections) ? footerData.sections : [],
               socialMedia: {
                 iconSize: footerData.socialMedia?.iconSize || 24,
                 iconColor: footerData.socialMedia?.iconColor || '#9CA3AF',
@@ -3696,7 +3693,6 @@ export default {
 .header-footer-content {
   background: white;
   border-radius: 12px;
-  padding: 24px;
 }
 
 .settings-section {
@@ -4526,7 +4522,7 @@ export default {
 }
 
 .preview-section {
-  padding: 24px;
+  padding: 12px;
 }
 
 .section-header {
@@ -4704,10 +4700,8 @@ export default {
 /* 添加放大镜效果相关样式 */
 .preview-container {
   position: relative;
-  display: flex;
   align-items: center;
   justify-content: center;
-  margin: 16px 0;
 }
 
 .icon-wrapper {
