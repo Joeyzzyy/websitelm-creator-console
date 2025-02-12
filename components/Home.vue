@@ -60,24 +60,34 @@
       </div>
       <!-- 底部操作区 -->
       <div class="bottom-actions">
-        <!-- Logout 按钮 -->
-        <a-button type="link" class="bottom-action-btn" @click="handleLogout">
-          <LogoutOutlined />
-          <span v-if="!collapsed">Logout</span>
+        <!-- Account Setting 按钮 -->
+        <a-button 
+          type="link" 
+          class="bottom-action-btn account-btn" 
+          @click="$router.push('/account')"
+        >
+          <user-outlined />
+          <span v-if="!collapsed">Account Setting</span>
         </a-button>
-        
-        <!-- 添加分隔线 -->
-        <div class="bottom-divider"></div>
         
         <!-- View Guide 按钮 -->
         <a-button 
           type="link" 
-          class="bottom-action-btn view-guide-btn"
+          class="bottom-action-btn guide-btn"
           @click="startTour"
           data-tour="restart-tour"
         >
           <QuestionCircleOutlined style="color: #1890ff" />
           <span v-if="!collapsed">View Guide</span>
+        </a-button>
+        
+        <!-- 添加分隔线 -->
+        <div class="bottom-divider"></div>
+        
+        <!-- Logout 按钮 -->
+        <a-button type="link" class="bottom-action-btn logout-btn" @click="handleLogout">
+          <logout-outlined style="color: #ff4d4f" />
+          <span v-if="!collapsed">Logout</span>
         </a-button>
       </div>
     </a-layout-sider>
@@ -379,30 +389,24 @@ html, body, #app {
 }
 
 .logout-btn {
-  width: 100%;
-  text-align: left;
-  color: #4A4875;
-  padding: 8px 12px;
-  height: auto;
-  transition: all 0.3s ease;
-  border-radius: 8px;
-  font-size: 12px;
+  color: #ff4d4f !important;
+  background: rgba(255, 77, 79, 0.05) !important;
+  border: 1px solid rgba(255, 77, 79, 0.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
 }
 
 .logout-btn:hover {
-  color: #6357FF;
-  background: rgba(99, 87, 255, 0.15);
+  color: #ff4d4f !important;
+  background: rgba(255, 77, 79, 0.1) !important;
+  border-color: rgba(255, 77, 79, 0.2) !important;
 }
 
-:deep(.ant-layout-sider.ant-layout-sider-collapsed) {
-  .logout-btn span {
-    display: none;
-  }
-  
-  .logout-btn {
-    padding: 8px;
-    text-align: center;
-  }
+/* 确保折叠时图标居中 */
+:deep(.ant-layout-sider-collapsed) .logout-btn {
+  justify-content: center !important;
 }
 
 .setup-form {
@@ -996,6 +1000,27 @@ html, body, #app {
 .usage-period {
   color: #6b7280;
 }
+
+/* 更新底部按钮样式 */
+.account-btn {
+  background: rgba(24, 144, 255, 0.1) !important;
+  border: 1px solid rgba(24, 144, 255, 0.2) !important;
+}
+
+.account-btn:hover {
+  background: rgba(24, 144, 255, 0.15) !important;
+  border-color: rgba(24, 144, 255, 0.3) !important;
+}
+
+.guide-btn {
+  background: rgba(24, 144, 255, 0.05) !important;
+  border: 1px solid rgba(24, 144, 255, 0.15) !important;
+}
+
+.guide-btn:hover {
+  background: rgba(24, 144, 255, 0.1) !important;
+  border-color: rgba(24, 144, 255, 0.25) !important;
+}
 </style>
 
 <script>
@@ -1004,7 +1029,7 @@ import TaskManagementPage from './TaskManagementPage.vue';
 import DashboardPage from './DashboardPage.vue';
 import KeywordsPlanningPage from './KeywordsPlanningPage.vue';
 import AssetsPage from './AssetsPage.vue';
-import { LogoutOutlined, RightOutlined, LeftOutlined, QuestionCircleOutlined } from '@ant-design/icons-vue'
+import { LogoutOutlined, RightOutlined, LeftOutlined, QuestionCircleOutlined, UserOutlined } from '@ant-design/icons-vue'
 import { createVNode } from 'vue'
 import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
@@ -1016,7 +1041,7 @@ import {
   SearchOutlined,
   FileTextOutlined,
   PictureOutlined,
-  SettingOutlined
+  SettingOutlined,
 } from '@ant-design/icons-vue'
 
 export default {
@@ -1035,7 +1060,8 @@ export default {
     SearchOutlined,
     FileTextOutlined,
     PictureOutlined,
-    SettingOutlined
+    SettingOutlined,
+    UserOutlined
   },
   setup() {
     const router = useRouter();
@@ -1080,7 +1106,6 @@ export default {
         { title: 'Keywords', view: 'KeywordsPlanningPage' },
         { title: 'Pages', view: 'TaskManagementPage' },
         { title: 'Assets', view: 'AssetsPage' },
-        { title: 'Settings', view: 'SettingsPage' },
       ],
       currentView: this.getViewFromRoute(),
       selectedUser: currentCustomerId,
@@ -1200,7 +1225,7 @@ export default {
         'KeywordsPlanningPage': '/keywords',
         'TaskManagementPage': '/task-management',
         'AssetsPage': '/assets',
-        'SettingsPage': '/settings',
+        'AccountPage': '/account',
       };
       
       if (routeMap[key]) {
@@ -1251,7 +1276,6 @@ export default {
         '/keywords': 'KeywordsPlanningPage',
         '/task-management': 'TaskManagementPage',
         '/assets': 'AssetsPage',
-        '/settings': 'SettingsPage',
       };
       return routeToView[this.$route.path] || 'DashboardPage';
     },
@@ -1453,7 +1477,7 @@ export default {
         'KeywordsPlanningPage': SearchOutlined,
         'TaskManagementPage': FileTextOutlined,
         'AssetsPage': PictureOutlined,
-        'SettingsPage': SettingOutlined
+        'AccountPage': UserOutlined,
       };
       return iconMap[view];
     },
@@ -1466,7 +1490,6 @@ export default {
         '/keywords': 'KeywordsPlanningPage',
         '/task-management': 'TaskManagementPage',
         '/assets': 'AssetsPage',
-        '/settings': 'SettingsPage',
       };
       this.currentView = routeToView[to.path] || 'DashboardPage';
     }

@@ -54,12 +54,12 @@
                 <div class="quick-link-content">
                   <div class="quick-link-header">
                     <span class="quick-link-title">
-                      3. Instantly Update Your Product Profile
+                      3. Instantly Update Your Product Assets
                     </span>
                   </div>
                   <div class="quick-link-desc">Complete product details from all angles</div>
                   <router-link to="/assets" class="action-link">
-                    Complete Profile <RightOutlined />
+                    Add Assets <RightOutlined />
                   </router-link>
                 </div>
               </div>

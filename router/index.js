@@ -40,11 +40,6 @@ const routes = [
         component: () => import('../components/AssetsPage.vue'),
       },
       {
-        path: 'settings',
-        name: 'Settings',
-        component: () => import('../components/SettingsPage.vue'),
-      },
-      {
         path: 'keywords',
         name: 'KeywordsTopics',
         component: () => import('../components/KeywordsPlanningPage.vue')
@@ -53,6 +48,11 @@ const routes = [
         path: 'task-management',
         name: 'TaskManagement',
         component: () => import('../components/TaskManagementPage.vue')
+      },
+      {
+        path: 'account',
+        name: 'Account',
+        component: () => import('../components/AccountPage.vue'),
       },
       {
         path: '',

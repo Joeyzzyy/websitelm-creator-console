@@ -24,7 +24,6 @@
                     :loading="loading" 
                     @click="handleRefresh"
                   >
-                    <template #icon><ReloadOutlined /></template>
                     <span>Refresh</span>
                   </a-button>
                   
@@ -33,7 +32,6 @@
                     @click="collectPublishedUrls"
                     :disabled="!tasks.length"
                   >
-                    <template #icon><GlobalOutlined /></template>
                     <span>Submit Sitemap</span>
                   </a-button>
 
@@ -43,7 +41,6 @@
                     :disabled="!selectedRowKeys.length"
                     @click="handleBatchDelete"
                   >
-                    <template #icon><DeleteOutlined /></template>
                     <span>Delete Selected ({{ selectedRowKeys.length }})</span>
                   </a-button>
 
@@ -52,8 +49,14 @@
                     @click="handleAddPage"
                     class="generate-btn action-button"
                   >
-                    <template #icon><PlusOutlined /></template>
                     <span>Manual Add Page</span>
+                  </a-button>
+
+                  <a-button 
+                    class="action-button secondary-btn"
+                    @click="showSettings"
+                  >
+                    <span>Publish Domain Settings</span>
                   </a-button>
                 </a-space>
               </div>
@@ -316,6 +319,11 @@
     >
       {{ modalConfig.content }}
     </a-modal>
+
+    <!-- 添加设置弹窗 -->
+    <settings-modal
+      v-model:visible="settingsVisible"
+    />
   </page-layout>
 </template>
 
@@ -333,7 +341,8 @@ import {
   PlusOutlined,
   EyeOutlined,
   EllipsisOutlined,
-  GlobalOutlined
+  GlobalOutlined,
+  SettingOutlined
 } from '@ant-design/icons-vue'
 import PageLayout from './layout/PageLayout.vue'
 import apiClient from '../api/api'
@@ -341,6 +350,7 @@ import config from '../config/settings'
 import { VERCEL_CONFIG } from '../config/vercelConfig'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
 import SmartBanner from './common/SmartBanner.vue'
+import SettingsModal from './SettingsDomainModal.vue'
 
 export default {
   name: 'TaskManagementPage',
@@ -359,7 +369,9 @@ export default {
     EllipsisOutlined,
     GlobalOutlined,
     NoSiteConfigured,
-    SmartBanner
+    SmartBanner,
+    SettingOutlined,
+    SettingsModal
   },
 
   setup() {
@@ -1044,6 +1056,13 @@ export default {
       modalConfig.data = selectedRowKeys.value
     }
 
+    // 添加设置弹窗的状态控制
+    const settingsVisible = ref(false);
+    
+    const showSettings = () => {
+      settingsVisible.value = true;
+    };
+
     onMounted(async () => {
       await loadProductInfo()
       // 只有在域名已配置的情况下才执行其他操作
@@ -1105,6 +1124,8 @@ export default {
       onSelectChange,
       getCheckboxProps,
       handleBatchDelete,
+      settingsVisible,
+      showSettings,
     }
   }
 }
@@ -1935,5 +1956,12 @@ export default {
 
 .centered-spin :deep(.ant-spin-spinning) {
   max-height: none;
+}
+
+/* 添加设置按钮样式 */
+.action-button.secondary-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 </style>
