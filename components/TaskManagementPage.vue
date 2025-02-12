@@ -26,6 +26,13 @@
                   >
                     <span>Refresh</span>
                   </a-button>
+
+                  <a-button 
+                    class="action-button secondary-btn"
+                    @click="showSettings"
+                  >
+                    <span>Publish Domain Settings</span>
+                  </a-button>
                   
                   <a-button 
                     class="action-button secondary-btn"
@@ -41,7 +48,7 @@
                     :disabled="!selectedRowKeys.length"
                     @click="handleBatchDelete"
                   >
-                    <span>Delete Selected ({{ selectedRowKeys.length }})</span>
+                    <span>Delete Selected Pages ({{ selectedRowKeys.length }})</span>
                   </a-button>
 
                   <a-button 
@@ -49,15 +56,10 @@
                     @click="handleAddPage"
                     class="generate-btn action-button"
                   >
-                    <span>Manual Add Page</span>
+                    <span>Add Page From Scratch</span>
                   </a-button>
 
-                  <a-button 
-                    class="action-button secondary-btn"
-                    @click="showSettings"
-                  >
-                    <span>Publish Domain Settings</span>
-                  </a-button>
+                  
                 </a-space>
               </div>
             </div>

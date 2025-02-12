@@ -199,28 +199,26 @@
                         </div>
                       </a-form-item>
                       <a-form-item>
-                        <a-button 
-                          type="primary"
-                          :loading="saving"
-                          @click="saveDeploymentSettings"
-                          class="save-btn"
-                        >
-                          Add
-                        </a-button>
+                        <div class="button-group">
+                          <a-button 
+                            type="primary"
+                            :loading="saving"
+                            @click="saveDeploymentSettings"
+                            class="save-btn"
+                          >
+                            Add
+                          </a-button>
+                          <a-button 
+                            :loading="refreshing"
+                            @click="handleRefresh"
+                          >
+                            Refresh
+                          </a-button>
+                        </div>
                       </a-form-item>
 
                       <a-spin :spinning="subdomainLoading">
                         <div class="configured-domains" v-if="currentDomainConfigs?.length > 0">
-                          <div class="domains-header">
-                            <a-button 
-                              type="link"
-                              class="refresh-btn"
-                              :loading="refreshing"
-                              @click="handleRefresh"
-                            >
-                              <reload-outlined />
-                            </a-button>
-                          </div>
                           <div class="domain-list">
                             <div v-for="domain in currentDomainConfigs" :key="domain.name" class="domain-item">
                               <div class="domain-info">
@@ -1017,10 +1015,6 @@ export default {
   max-width: 200px;
 }
 
-.save-btn {
-  margin-top: 16px;
-}
-
 .configured-domains {
   margin-top: 16px;
 }
@@ -1153,5 +1147,11 @@ export default {
 :deep(.ant-modal) {
   width: 900px !important;
   max-width: 95vw;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 </style> 
