@@ -427,7 +427,6 @@ export default {
     };
   },
   setup() {
-    const cooldown = ref(0);
     const cooldownTimer = ref(null);
     onBeforeUnmount(() => {
       if (cooldownTimer.value) {
@@ -703,14 +702,15 @@ export default {
             localStorage.removeItem('rememberedCredentials');
           }
           
-          if (response.data.firstLogin) {
-            // 如果是首次登录,显示设置密码弹窗
-            this.showSetPasswordModal = true;
-            localStorage.setItem('accessToken', response.accessToken);
-          } else {
-            // 正常登录流程
-            this.$router.push('/dashboard');
-          }
+          this.$router.push('/dashboard');
+
+          // if (response.data.firstLogin) {
+          //   this.showSetPasswordModal = true;
+          //   localStorage.setItem('accessToken', response.accessToken);
+          // } else {
+          //   // 正常登录流程
+          //   this.$router.push('/dashboard');
+          // }
         }
       } catch (error) {
         console.error('Login failed:', error);
@@ -740,7 +740,7 @@ export default {
       if (!value) {
         return Promise.reject('Please confirm your password!');
       }
-      if (value !== this.registerForm.passwsord) {
+      if (value !== this.registerForm.password) {
         return Promise.reject('The two passwords do not match!');
       }
       return Promise.resolve();
@@ -767,7 +767,6 @@ export default {
           return;
         }
 
-        // 开始倒计时
         this.cooldown = 60;
         this.cooldownTimer = setInterval(() => {
           this.cooldown--;
