@@ -420,14 +420,14 @@ export default {
         title: 'Title',
         dataIndex: 'title',
         key: 'title',
-        width: '22%',
+        width: '30%',
         ellipsis: true
       },
       {
         title: 'Page Type',
         dataIndex: 'pageType',
         key: 'pageType',
-        width: '8%',
+        width: '10%',
         ellipsis: true
       },
       {
@@ -463,7 +463,7 @@ export default {
       {
         title: 'Actions',
         key: 'actions',
-        width: 80,
+        width: '5%',
         fixed: 'right'
       }
     ]
