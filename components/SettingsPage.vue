@@ -28,7 +28,8 @@
             v-model:activeKey="activeTab"
           >
             <a-tab-pane key="domains" tab="Domains" />
-            <a-tab-pane key="login-email" tab="Login Email" />
+            <a-tab-pane key="login-email" tab="Login Email Setting" />
+            <a-tab-pane key="password" tab="Password Setting" />
           </a-tabs>
 
           <div class="page-content">
@@ -317,11 +318,9 @@
                   <div class="current-email-section">
                     <h3>Current Login Email</h3>
                     <div class="email-display">
-                      <a-input
-                        v-model:value="currentEmail"
-                        disabled
-                        class="current-email-input"
-                      />
+                      <p class="current-email-text">
+                        {{ currentEmail }}
+                      </p>
                       <a-button 
                         type="primary"
                         @click="showChangeEmailForm"
@@ -396,6 +395,165 @@
                     </div>
                   </div>
                 </div>
+              </template>
+
+              <template v-if="activeTab === 'password'">
+                <a-spin :spinning="loading" tip="Loading...">
+                  <div class="settings-container">
+                    <template v-if="productInfo?.isFirstLogin">
+                      <!-- 首次设置密码 -->
+                      <div class="current-email-section">
+                        <h3>Set Your Password</h3>
+                        <div class="email-display">
+                          <p class="current-email-text">
+                            {{ currentEmail }}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div class="email-change-section">
+                        <h3>Create Password</h3>
+                        <div class="email-change-form">
+                          <a-form
+                            :model="passwordForm"
+                            layout="vertical"
+                            class="password-form"
+                          >
+                            <a-form-item 
+                              label="New Password"
+                              :rules="[
+                                { required: true, message: 'Please input new password!' },
+                                { validator: validatePassword }
+                              ]"
+                            >
+                              <a-input-password
+                                v-model:value="passwordForm.newPassword"
+                                placeholder="Please input new password"
+                                class="custom-input"
+                              />
+                              <div class="password-strength" v-if="passwordForm.newPassword">
+                                Password Strength:
+                                <span :class="passwordStrengthClass">{{ passwordStrength }}</span>
+                              </div>
+                            </a-form-item>
+
+                            <a-form-item 
+                              label="Confirm Password"
+                              :rules="[
+                                { required: true, message: 'Please confirm your password!' },
+                                { validator: validateConfirmPassword }
+                              ]"
+                            >
+                              <a-input-password
+                                v-model:value="passwordForm.confirmPassword"
+                                placeholder="Please confirm your password"
+                                class="custom-input"
+                              />
+                            </a-form-item>
+
+                            <a-form-item>
+                              <a-button
+                                type="primary"
+                                :loading="submitLoading"
+                                @click="handleSetPassword"
+                                class="change-email-btn"
+                              >
+                                Set Password
+                              </a-button>
+                            </a-form-item>
+                          </a-form>
+                        </div>
+                      </div>
+                    </template>
+
+                    <template v-else>
+                      <!-- 修改密码 -->
+                      <div class="current-email-section">
+                        <h3>Change Your Password For</h3>
+                        <div class="email-display">
+                          <p class="current-email-text">
+                            {{ currentEmail }}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div class="email-change-section">
+                        <h3>Verify Identity</h3>
+                        <div class="email-change-form">
+                          <a-form
+                            :model="passwordForm"
+                            layout="vertical"
+                            class="password-form"
+                          >
+                            <a-form-item 
+                              label="Verification Code"
+                              :rules="[{ required: true, message: 'Please input verification code!' }]"
+                            >
+                              <div class="email-input-group">
+                                <a-input 
+                                  v-model:value="passwordForm.code" 
+                                  placeholder="Please input verification code"
+                                  class="custom-input"
+                                />
+                                <a-button 
+                                  type="primary"
+                                  @click="sendResetCode" 
+                                  :disabled="cooldown > 0"
+                                  class="send-code-btn"
+                                >
+                                  {{ cooldown > 0 ? `${cooldown}s` : 'Send Code' }}
+                                </a-button>
+                              </div>
+                            </a-form-item>
+
+                            <a-form-item 
+                              label="New Password"
+                              :rules="[
+                                { required: true, message: 'Please input new password!' },
+                                { validator: validatePassword }
+                              ]"
+                            >
+                              <a-input-password
+                                v-model:value="passwordForm.newPassword"
+                                placeholder="Please input new password"
+                                class="custom-input"
+                              />
+                              <div class="password-strength" v-if="passwordForm.newPassword">
+                                Password Strength:
+                                <span :class="passwordStrengthClass">{{ passwordStrength }}</span>
+                              </div>
+                            </a-form-item>
+
+                            <a-form-item 
+                              label="Confirm Password"
+                              :rules="[
+                                { required: true, message: 'Please confirm your password!' },
+                                { validator: validateConfirmPassword }
+                              ]"
+                            >
+                              <a-input-password
+                                v-model:value="passwordForm.confirmPassword"
+                                placeholder="Please confirm your password"
+                                class="custom-input"
+                              />
+                            </a-form-item>
+
+                            <a-form-item>
+                              <a-button
+                                type="primary"
+                                :loading="submitLoading"
+                                @click="handleChangePassword"
+                                class="change-email-btn"
+                              >
+                                Change Password
+                              </a-button>
+                            </a-form-item>
+                          </a-form>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </a-spin>
               </template>
             </div>
           </div>
@@ -1101,6 +1259,123 @@ export default {
       iconBackground: 'rgba(255, 255, 255, 0.15)',
     }
 
+    const passwordForm = ref({
+      newPassword: '',
+      confirmPassword: '',
+      code: ''
+    });
+    const submitLoading = ref(false);
+    const passwordStrength = ref('');
+    const passwordStrengthClass = computed(() => {
+      const password = passwordForm.value.newPassword;
+      if (!password) return '';
+      
+      let strength = 0;
+      if (password.length >= 8) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[a-z]/.test(password)) strength++;
+      if (/\d/.test(password)) strength++;
+      
+      switch(strength) {
+        case 4: return 'Strong';
+        case 3: return 'Medium';
+        default: return 'Weak';
+      }
+    });
+
+    const validatePassword = (rule, value) => {
+      const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
+      if (!value) {
+        return Promise.reject('Please input your password!');
+      }
+      if (!passwordRegex.test(value)) {
+        return Promise.reject('Password must contain at least one uppercase letter, one lowercase letter, and one number');
+      }
+      return Promise.resolve();
+    };
+
+    const validateConfirmPassword = (rule, value) => {
+      if (!value) {
+        return Promise.reject('Please confirm your password!');
+      }
+      if (value !== passwordForm.value.newPassword) {
+        return Promise.reject('The two passwords do not match!');
+      }
+      return Promise.resolve();
+    };
+
+    const handleSetPassword = async () => {
+      if (!passwordForm.value.newPassword || !passwordForm.value.confirmPassword) {
+        message.error('Please fill in all fields');
+        return;
+      }
+
+      submitLoading.value = true;
+      try {
+        const response = await apiClient.changePassword({
+          newPassword: passwordForm.value.newPassword,
+          confirmPassword: passwordForm.value.confirmPassword
+        });
+
+        if (response?.code === 200) {
+          message.success('Password set successfully');
+          await loadProductInfo();
+        }
+      } catch (error) {
+        message.error('Failed to set password');
+      } finally {
+        submitLoading.value = false;
+      }
+    };
+
+    const handleChangePassword = async () => {
+      if (!passwordForm.value.code || !passwordForm.value.newPassword || !passwordForm.value.confirmPassword) {
+        message.error('Please fill in all fields');
+        return;
+      }
+
+      submitLoading.value = true;
+      try {
+        const response = await apiClient.resetPassword({
+          email: productInfo.value.email,
+          code: passwordForm.value.code,
+          newPassword: passwordForm.value.newPassword,
+          confirmPassword: passwordForm.value.confirmPassword
+        });
+
+        if (response?.code === 200) {
+          message.success('Password changed successfully');
+          passwordForm.value = {
+            code: '',
+            newPassword: '',
+            confirmPassword: ''
+          };
+        }
+      } catch (error) {
+        message.error('Failed to change password');
+      } finally {
+        submitLoading.value = false;
+      }
+    };
+
+    const sendResetCode = async () => {
+      try {
+        await apiClient.sendEmailCode(productInfo.value.email, 'reset_password');
+        
+        cooldown.value = 60;
+        cooldownTimer.value = setInterval(() => {
+          cooldown.value--;
+          if (cooldown.value <= 0) {
+            clearInterval(cooldownTimer.value);
+          }
+        }, 1000);
+
+        message.success('Verification code has been sent to your email');
+      } catch (error) {
+        message.error('Failed to send verification code');
+      }
+    };
+
     return {
       cooldown,
       goToDashboard,
@@ -1156,6 +1431,15 @@ export default {
       bannerTheme,
       domainConfigured,
       loading,
+      passwordForm,
+      submitLoading,
+      passwordStrength,
+      passwordStrengthClass,
+      validatePassword,
+      validateConfirmPassword,
+      handleSetPassword,
+      handleChangePassword,
+      sendResetCode,
     };
   }
 }
@@ -1312,7 +1596,7 @@ export default {
 }
 
 .custom-input {
-  width: 200px;
+  width: 100%;
 }
 
 .custom-input :deep(.ant-input) {
@@ -1588,17 +1872,11 @@ export default {
   align-items: center;
 }
 
-.current-email-input {
-  flex: 1;
-  max-width: 400px;
-}
-
-.current-email-input :deep(.ant-input) {
-  background-color: #f9fafb;
-  color: #374151;
+.current-email-text {
   font-size: 15px;
-  border-radius: 8px;
-  border-color: #d1d5db;
+  color: #374151;
+  margin: 0;
+  padding: 8px 0;
 }
 
 .change-email-btn {
@@ -1747,5 +2025,54 @@ export default {
 .delete-btn {
   padding: 4px 8px;
   height: auto;
+}
+
+.password-notice {
+  margin-bottom: 24px;
+}
+
+.password-form {
+  max-width: 300px;
+}
+
+.current-email {
+  margin-bottom: 24px;
+}
+
+.current-email h3 {
+  margin-bottom: 8px;
+  color: #1f2937;
+}
+
+.current-email p {
+  color: #374151;
+  font-size: 16px;
+}
+
+.email-verify-group {
+  display: flex;
+  gap: 12px;
+}
+
+.verify-code-btn {
+  min-width: 100px;
+}
+
+.password-strength {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #666;
+}
+
+.strength-weak {
+  color: #ff4d4f;
+}
+
+.strength-medium {
+  color: #faad14;
+}
+
+.strength-strong {
+  color: #52c41a;
 }
 </style> 
