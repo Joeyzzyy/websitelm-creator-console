@@ -1429,6 +1429,17 @@ const getDomainFavicon = async (domainName) => {
   }
 };
 
+// 新增：获取用户信息的方法
+const getUserInfo = async () => {
+  try {
+    const response = await apiClient.get('/customer/info');
+    return response.data;
+  } catch (error) {
+    console.error('获取用户信息失败:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1532,5 +1543,6 @@ export default {
   createKnowledge,
   uploadFavicon,
   getMediaByCustomer,
+  getUserInfo,
   getDomainFavicon
 };

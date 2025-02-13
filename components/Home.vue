@@ -19,17 +19,18 @@
       </div>
       <!-- 头像部分 -->
       <div class="user-profile-section">
-        <div class="welcome-text" v-if="!collapsed">Welcome back!</div>
+        <div class="logo-container" v-if="!collapsed">
+          <img src="../assets/images/websitelm-logo.png" alt="WebsiteLM Logo" class="logo-image">
+        </div>
+        <div class="logo-container" v-else>
+          <img src="../assets/images/websitelm-logo-single.png" alt="WebsiteLM Icon" class="logo-image-small">
+        </div>
+        <div class="welcome-text" v-if="!collapsed">
+          Welcome back!
+        </div>
         <div v-if="!collapsed" class="user-info-container">
           <div class="user-email">{{ currentCustomerEmail }}</div>
         </div>
-        <a-tooltip v-else :title="currentCustomerEmail" placement="right">
-          <div 
-            class="user-avatar"
-          >
-            {{ getEmailInitial(currentCustomerEmail) }}
-          </div>
-        </a-tooltip>
       </div>
       <!-- 菜单部分 -->
       <div class="menu-section">
@@ -587,12 +588,26 @@ html, body, #app {
 }
 
 .welcome-text {
-  font-size: 14px;
-  color: #64748B;
-  margin-bottom: 8px;
+  font-size: 16px;
   font-weight: 500;
+  margin: 12px 0;
+  background: linear-gradient(135deg, #1890ff 0%, #6366F1 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
   letter-spacing: 0.5px;
-  text-transform: uppercase;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .user-info-container {
@@ -608,27 +623,6 @@ html, body, #app {
   padding: 6px 12px;
   background: rgba(0, 0, 0, 0.03);
   border-radius: 6px;
-}
-
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: #6366F1;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid rgba(99, 102, 241, 0.2);
-}
-
-.user-avatar:hover {
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
 }
 
 /* 选择模式对话框样式 */
@@ -826,6 +820,27 @@ html, body, #app {
   background: rgba(24, 144, 255, 0.1) !important;
   border-color: rgba(24, 144, 255, 0.25) !important;
 }
+
+/* 更新logo相关样式 */
+.logo-container {
+  margin-bottom: 12px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-image {
+  max-width: 140px;
+  height: auto;
+  object-fit: contain;
+}
+
+.logo-image-small {
+  max-width: 40px;
+  height: auto;
+  object-fit: contain;
+}
 </style>
 
 <script>
@@ -1017,10 +1032,6 @@ export default {
         '/account': 'AccountPage',
       };
       return routeToView[this.$route.path] || 'DashboardPage';
-    },
-
-    getEmailInitial(email) {
-      return email ? email.charAt(0).toUpperCase() : '?';
     },
 
     startTour() {

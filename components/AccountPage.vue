@@ -659,17 +659,29 @@
       };
   
       // 监听 activeTab 变化
-      watch(activeTab, (newValue) => {
+      watch(activeTab, async (newValue) => {
         if (newValue === 'login-email') {
           showEmailForm.value = false;
           emailForm.value = {
             newEmail: '',
             code: ''
           };
+        } else if (newValue === 'password') {
+          try {
+            const response = await apiClient.getUserInfo();
+            if (response?.code === 200) {
+              productInfo.value = {
+                ...productInfo.value,
+                isFirstLogin: response.data.firstLogin
+              };
+            }
+          } catch (error) {
+            console.error('获取用户信息失败:', error);
+            message.error('获取用户信息失败');
+          }
         }
       });
   
-      // 在组件挂载时加载产品信息
       onMounted(() => {
         loadProductInfo();
         loadPackageInfo();
