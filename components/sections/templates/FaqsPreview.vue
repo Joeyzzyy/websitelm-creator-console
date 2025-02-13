@@ -4,7 +4,7 @@
       <!-- 标题部分 -->
       <div class="text-center mb-12">
         <h2 class="text-2xl font-bold text-gray-900">
-          FAQ
+          Frequently Asked Questions
         </h2>
       </div>
 

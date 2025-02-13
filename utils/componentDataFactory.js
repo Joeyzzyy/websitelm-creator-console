@@ -16,11 +16,21 @@ export const createCleanComponentData = (componentType) => {
       title: '[DEMO] Enter Title Here',
       subTitle: '[DEMO] Enter Subtitle Here',
       leftContent: {
-        author: '[SAMPLE] Author Name',
-        publishDate: new Date().toISOString().split('T')[0]
+        author: 'Author Name',
+        publishDate: new Date().toISOString().split('T')[0],
+        breadcrumbs: [
+          {
+            text: 'Blog',
+            link: '/blog'
+          },
+          {
+            text: 'Category',
+            link: '#'
+          }
+        ]
       },
       rightContent: {
-        imageUrl: '/assets/images/placeholder.png',
+        imageUrl: 'https://picsum.photos/1200/600',
         imageAlt: '[SAMPLE] Image Description'
       }
     },

@@ -11,7 +11,8 @@ export const SECTION_TAGS = {
     author: 'span',
     publishDate: 'time',
     image: 'img',
-    imageAlt: 'alt'
+    imageAlt: 'alt',
+    breadcrumb: 'nav'
   },
   HeroSectionWithVideo: {
     title: 'h2',

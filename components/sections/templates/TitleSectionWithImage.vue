@@ -57,6 +57,33 @@
                   </div>
                 </a-form-item>
               </div>
+
+              <!-- 新增面包屑输入区域 -->
+              <div class="breadcrumbs-group">
+                <a-form-item 
+                  v-for="(crumb, index) in localSection.leftContent.breadcrumbs"
+                  :key="index"
+                  :label="`Breadcrumb ${index + 1}`"
+                >
+                  <div class="input-with-tag">
+                    <span class="html-tag">{{ tags.breadcrumb }}</span>
+                    <a-input
+                      v-model:value="crumb.text"
+                      :disabled="disabled"
+                      placeholder="Text"
+                      style="width: 45%"
+                      @change="handleChange"
+                    />
+                    <a-input
+                      v-model:value="crumb.link"
+                      :disabled="disabled"
+                      placeholder="Link"
+                      style="width: 45%"
+                      @change="handleChange"
+                    />
+                  </div>
+                </a-form-item>
+              </div>
             </div>
 
             <!-- 右列：图片相关信息 -->
@@ -168,7 +195,8 @@ export default {
         subTitle: '',
         leftContent: {
           author: '',
-          publishDate: ''
+          publishDate: '',
+          breadcrumbs: []
         },
         rightContent: {
           imageUrl: '',
@@ -352,6 +380,10 @@ export default {
 
 .change-image-btn {
   flex-shrink: 0;
+}
+
+.breadcrumbs-group {
+  margin-top: 16px;
 }
 
 </style>
