@@ -4287,7 +4287,6 @@ export default {
 
 .knowledge-intro {
   padding: 0 24px;
-  margin-bottom: 20px;
 }
 
 .intro-header {
@@ -4310,34 +4309,80 @@ export default {
 }
 
 .quality-alert {
-  background: #fff;
-  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  background-color: #fafafa;
+  margin-bottom: 20px;
 }
 
 .alert-main {
   margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .alert-title {
-  color: #374151;  /* 深灰色 */
-  font-size: 16px;
   font-weight: 600;
+  color: #1f1f1f;
   margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.quality-stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-grade {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
+}
+
+.stat-value {
+  font-size: 14px;
+  color: #1f1f1f;
+  font-weight: 500;
+}
+
+.excellent { background-color: #52c41a; }
+.good { background-color: #1890ff; }
+.fair { background-color: #faad14; }
+.poor { background-color: #ff4d4f; }
+
+.alert-message {
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  border-radius: 4px;
+  padding: 12px 16px;
 }
 
 .message-title {
-  color: #374151;  /* 深灰色 */
-  font-size: 15px;
+  color: #cf1322;
   font-weight: 600;
   margin-bottom: 8px;
+  font-size: 14px;
 }
 
 .message-text {
-  color: #4B5563;  /* 中灰色 */
+  color: #434343;
   font-size: 14px;
   line-height: 1.5;
+  margin: 0;
 }
 
 .quality-tips {
@@ -4347,7 +4392,7 @@ export default {
 }
 
 .tip-item {
-  color: #4B5563;  /* 中灰色 */
+  color: #434343;
   font-size: 14px;
   line-height: 1.5;
   margin-bottom: 8px;
