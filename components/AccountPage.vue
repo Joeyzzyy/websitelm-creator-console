@@ -824,8 +824,7 @@
         code: ''
       });
       const submitLoading = ref(false);
-      const passwordStrength = ref('');
-      const passwordStrengthClass = computed(() => {
+      const passwordStrength = computed(() => {
         const password = passwordForm.value.newPassword;
         if (!password) return '';
         
@@ -839,6 +838,15 @@
           case 4: return 'Strong';
           case 3: return 'Medium';
           default: return 'Weak';
+        }
+      });
+  
+      const passwordStrengthClass = computed(() => {
+        switch(passwordStrength.value) {
+          case 'Strong': return 'strength-strong';
+          case 'Medium': return 'strength-medium';
+          case 'Weak': return 'strength-weak';
+          default: return '';
         }
       });
   
@@ -919,7 +927,7 @@
   
       const sendResetCode = async () => {
         try {
-          await apiClient.sendEmailCode(productInfo.value.email, 'reset_password');
+          await apiClient.sendEmailCode(productInfo.value.email, 'forgot_password');
           
           cooldown.value = 60;
           cooldownTimer.value = setInterval(() => {
