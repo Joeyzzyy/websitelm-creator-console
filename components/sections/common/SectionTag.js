@@ -96,12 +96,13 @@ export const SECTION_TAGS = {
   },
   ProductBenefitsWithTable: {
     title: 'h2',
-    subTitle: 'p',
+    description: 'p',
     buttonText: 'button',
-    icon: 'span',
+    buttonLink: 'a',
+    imageUrl: 'img',
+    imageAlt: 'alt',
     contentTitle: 'h3',
-    content: 'p',
-    buttonLink: 'a'
+    content: 'p'
   },
   UserReviewsWithMovingCards: {
     title: 'h2',

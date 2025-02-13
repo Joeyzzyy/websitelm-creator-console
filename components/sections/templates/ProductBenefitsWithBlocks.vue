@@ -92,7 +92,7 @@
                       <a-form-item label="Icon">
                         <div class="input-with-tag">
                           <span class="html-tag">{{ tags.moduleIcon }}</span>
-                          <div class="emoji-input-wrapper">
+                          <div class="icon-input-wrapper">
                             <a-input
                               v-model:value="module.icon"
                               :disabled="disabled"
@@ -100,11 +100,15 @@
                             />
                             <a-button
                               v-if="!disabled"
-                              class="emoji-trigger"
-                              @click="(e) => showEmojiPicker(e, index)"
+                              type="primary"
+                              class="change-icon-btn"
+                              @click="openIconPicker(index)"
                             >
-                              😊
+                              Change
                             </a-button>
+                          </div>
+                          <div v-if="module.icon" class="icon-preview">
+                            <Icon :icon="module.icon" width="24" height="24" />
                           </div>
                         </div>
                       </a-form-item>
@@ -113,16 +117,6 @@
                           <span class="html-tag">{{ tags.moduleTitle }}</span>
                           <a-input
                             v-model:value="module.title"
-                            :disabled="disabled"
-                            @change="handleChange"
-                          />
-                        </div>
-                      </a-form-item>
-                      <a-form-item label="Sub Title">
-                        <div class="input-with-tag">
-                          <span class="html-tag">{{ tags.moduleSubTitle }}</span>
-                          <a-input
-                            v-model:value="module.subTitle"
                             :disabled="disabled"
                             @change="handleChange"
                           />
@@ -164,19 +158,53 @@
       </div>
     </div>
     
-    <!-- Emoji Picker Modal -->
+    <!-- Icon Picker Modal -->
     <a-modal
-      v-model:visible="emojiPickerVisible[currentModuleIndex]"
+      v-model:visible="iconPickerVisible"
+      title="Select Icon"
+      @ok="handleIconSelect"
+      @cancel="closeIconPicker"
+      width="800px"
       :footer="null"
-      :closable="false"
-      :width="350"
-      centered
-      class="emoji-picker-modal"
-      @cancel="closeEmojiPicker"
+      class="icon-picker-modal"
     >
-      <EmojiPicker
-        @select="onEmojiSelect"
-      />
+      <div class="icon-picker-container">
+        <div class="icon-search">
+          <a-input
+            v-model:value="iconSearch"
+            placeholder="Search icons..."
+            @input="handleIconSearch"
+          >
+            <template #prefix>
+              <search-outlined />
+            </template>
+          </a-input>
+        </div>
+        <div class="icon-collections">
+          <div 
+            class="collection" 
+            v-for="collection in filteredIconCollections" 
+            :key="collection.name"
+          >
+            <h3>{{ collection.name }}</h3>
+            <div class="icons-grid">
+              <div
+                v-for="icon in collection.icons"
+                :key="icon"
+                class="icon-item"
+                :class="{ active: selectedIcon === `${collection.prefix}:${icon}` }"
+                @click="selectIcon(`${collection.prefix}:${icon}`)"
+              >
+                <Icon :icon="`${collection.prefix}:${icon}`" width="24" height="24" />
+                <span class="icon-name">{{ icon }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-if="showNoResults" class="no-results">
+            No icons found matching "{{ iconSearch }}"
+          </div>
+        </div>
+      </div>
     </a-modal>
   </div>
 </template>
@@ -186,9 +214,8 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import themeConfig from '../../../assets/config/themeConfig'
 import ProductBenefitsWithBlocksPreview from './ProductBenefitsWithBlocksPreview.vue'
-import { DeleteOutlined } from '@ant-design/icons-vue'
-import EmojiPicker from 'vue3-emoji-picker'
-import 'vue3-emoji-picker/css'
+import { DeleteOutlined, SearchOutlined } from '@ant-design/icons-vue'
+import { Icon } from '@iconify/vue'
 
 export default {
   name: 'ProductBenefitsWithFourBlocks',
@@ -196,12 +223,33 @@ export default {
   components: {
     ProductBenefitsWithBlocksPreview,
     DeleteOutlined,
-    EmojiPicker
+    SearchOutlined,
+    Icon
   },
   emits: ['update'],
   computed: {
     tags() {
       return SECTION_TAGS.ProductBenefitsWithBlocks
+    },
+    filteredIconCollections() {
+      if (!this.iconSearch) {
+        return this.iconCollections;
+      }
+
+      const searchTerm = this.iconSearch.toLowerCase();
+      return this.iconCollections.map(collection => {
+        const filteredIcons = collection.icons.filter(icon => 
+          icon.toLowerCase().includes(searchTerm)
+        );
+        
+        return filteredIcons.length ? {
+          ...collection,
+          icons: filteredIcons
+        } : null;
+      }).filter(Boolean);
+    },
+    showNoResults() {
+      return this.iconSearch && this.filteredIconCollections.length === 0;
     }
   },
   data() {
@@ -218,7 +266,89 @@ export default {
       },
       styles: themeConfig.normal,
       currentModuleIndex: null,
-      emojiPickerVisible: {}
+      iconPickerVisible: false,
+      iconSearch: '',
+      selectedIcon: null,
+      iconCollections: [
+        {
+          name: 'Material Design Icons',
+          prefix: 'mdi',
+          icons: [
+            // 通用/基础
+            'home', 'account', 'cog', 'bell', 'star', 'heart', 'magnify', 'plus', 'minus', 'close',
+            'check', 'alert', 'information', 'help', 'settings', 'menu', 'refresh', 'sync', 'download', 'upload',
+            
+            // 文件/文档
+            'file', 'folder', 'folder-open', 'document', 'pdf', 'image', 'video', 'music', 'archive', 'download',
+            
+            // 通信/社交
+            'email', 'message', 'chat', 'phone', 'video-call', 'share', 'send', 'twitter', 'facebook', 'linkedin',
+            
+            // 商务/金融
+            'bank', 'credit-card', 'cash', 'cart', 'store', 'tag', 'gift', 'wallet', 'currency-usd', 'chart-line',
+            
+            // 设备/技术
+            'laptop', 'desktop', 'tablet', 'phone', 'printer', 'keyboard', 'mouse', 'wifi', 'bluetooth', 'battery',
+            
+            // 用户界面
+            'view-grid', 'view-list', 'dots-vertical', 'dots-horizontal', 'menu', 'arrow-left', 'arrow-right', 'chevron-up', 'chevron-down', 'play',
+            
+            // 安全/隐私
+            'shield', 'lock', 'unlock', 'key', 'eye', 'eye-off', 'fingerprint', 'security', 'incognito', 'alert-circle'
+          ]
+        },
+        {
+          name: 'Phosphor Icons',
+          prefix: 'ph',
+          icons: [
+            // 基础图标
+            'house', 'user', 'gear', 'bell', 'star', 'heart', 'magnifying-glass', 'plus', 'minus', 'x',
+            'check', 'warning', 'info', 'question', 'wrench', 'list', 'arrows-clockwise', 'cloud', 'download', 'upload',
+            
+            // 文件管理
+            'file', 'folder', 'folder-open', 'file-text', 'file-pdf', 'image-square', 'video', 'music-notes', 'archive', 'cloud-arrow-down',
+            
+            // 通信工具
+            'envelope', 'chat', 'phone', 'video-camera', 'share', 'paper-plane', 'twitter-logo', 'facebook-logo', 'linkedin-logo', 'instagram-logo',
+            
+            // 商业/电商
+            'shopping-cart', 'storefront', 'tag', 'gift', 'credit-card', 'money', 'bank', 'trend-up', 'chart-line', 'calculator',
+            
+            // 设备/硬件
+            'device-mobile', 'device-tablet', 'desktop', 'printer', 'keyboard', 'mouse', 'wifi-high', 'bluetooth', 'battery-full', 'plug',
+            
+            // 界面元素
+            'grid-four', 'list-bullets', 'dots-three', 'dots-nine', 'caret-up', 'caret-down', 'arrow-left', 'arrow-right', 'play', 'pause',
+            
+            // 安全/验证
+            'shield', 'lock', 'lock-open', 'key', 'eye', 'eye-slash', 'fingerprint', 'password', 'user-focus', 'check-circle'
+          ]
+        },
+        {
+          name: 'Carbon Icons',
+          prefix: 'carbon',
+          icons: [
+            // 基础图标
+            'home', 'user', 'settings', 'notification', 'star', 'favorite', 'search', 'add', 'subtract', 'close',
+            'checkmark', 'warning', 'information', 'help', 'tool', 'menu', 'refresh', 'sync', 'download', 'upload',
+            
+            // 数据/分析
+            'chart-line', 'chart-bar', 'chart-pie', 'chart-bubble', 'data-table', 'analytics', 'report', 'dashboard', 'forecast', 'data-vis',
+            
+            // 企业/商务
+            'enterprise', 'finance', 'growth', 'strategy', 'partnership', 'portfolio', 'investment', 'market', 'trade', 'optimization',
+            
+            // 技术/开发
+            'code', 'development', 'api', 'cloud', 'security', 'data-base', 'network', 'container', 'terminal', 'function',
+            
+            // 协作/团队
+            'collaboration', 'group', 'partnership', 'meeting', 'presentation', 'share', 'connect', 'chat', 'email', 'calendar',
+            
+            // 工业/制造
+            'industry', 'factory', 'assembly', 'manufacturing', 'inventory', 'shipping', 'tools', 'machine', 'equipment', 'production'
+          ]
+        }
+      ]
     }
   },
   created() {
@@ -258,7 +388,6 @@ export default {
       this.localSection.rightContent.push({
         icon: '',
         title: '',
-        subTitle: '',
         content: ''
       })
       this.handleChange()
@@ -267,31 +396,33 @@ export default {
       this.localSection.rightContent.splice(index, 1)
       this.handleChange()
     },
-    showEmojiPicker(e, index) {
-      e.stopPropagation()
+    openIconPicker(index) {
       this.currentModuleIndex = index
-      this.emojiPickerVisible = {
-        ...this.emojiPickerVisible,
-        [index]: true
-      }
+      this.iconPickerVisible = true
+      this.selectedIcon = this.localSection.rightContent[index].icon
     },
-    
-    closeEmojiPicker() {
-      if (this.currentModuleIndex !== null) {
-        this.emojiPickerVisible = {
-          ...this.emojiPickerVisible,
-          [this.currentModuleIndex]: false
-        }
-        this.currentModuleIndex = null
-      }
+    closeIconPicker() {
+      this.iconPickerVisible = false
+      this.currentModuleIndex = null
+      this.selectedIcon = null
+      this.clearIconSearch()
     },
-    
-    onEmojiSelect(emoji) {
+    selectIcon(iconId) {
+      this.selectedIcon = iconId
       if (this.currentModuleIndex !== null) {
-        this.localSection.rightContent[this.currentModuleIndex].icon = emoji.i
-        this.closeEmojiPicker()
+        this.localSection.rightContent[this.currentModuleIndex].icon = iconId
         this.handleChange()
       }
+      this.closeIconPicker()
+    },
+    handleIconSearch() {
+      const collectionsElement = this.$el.querySelector('.icon-collections');
+      if (collectionsElement) {
+        collectionsElement.scrollTop = 0;
+      }
+    },
+    clearIconSearch() {
+      this.iconSearch = '';
     }
   }
 }
@@ -494,46 +625,146 @@ export default {
   color: inherit;
 }
 
-.emoji-input-wrapper {
+.icon-input-wrapper {
   display: flex;
   gap: 8px;
   flex: 1;
 }
 
-.emoji-trigger {
+.change-icon-btn {
   padding: 0 8px;
 }
 
-:deep(.emoji-picker-popover) .ant-popover-inner-content {
-  padding: 0;
+.icon-preview {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-left: 8px;
 }
 
-:deep(.v3-emoji-picker) {
-  --ep-color-bg: #ffffff;
-  --ep-color-border: #e4e7ea;
-  --ep-color-hover: #f7f9fa;
+.icon-picker-container {
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.emoji-picker-popover :deep(.ant-popover-inner-content) {
-  padding: 0;
+.icon-search {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
 }
 
-:deep(.emoji-picker-modal) {
-  .ant-modal-content {
-    padding: 12px;
-    border-radius: 8px;
+.icons-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.icon-item {
+  position: relative;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.icon-item:hover {
+  background: #f4f4f5;
+}
+
+.icon-item.active {
+  background: #e6f7ff;
+  border: 1px solid #91d5ff;
+}
+
+.icon-name {
+  font-size: 12px;
+  color: #4b5563;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  padding: 0 4px;
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+}
+
+.collection h3 {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 16px;
+  margin: 0;
+  font-size: 16px;
+  color: #1f2937;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 1;
+}
+
+.icons-grid {
+  padding: 16px;
+  background: white;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .icons-grid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
   }
   
-  .ant-modal-body {
-    padding: 0;
+  .icon-item {
+    min-height: 60px;
   }
 }
 
-:deep(.v3-emoji-picker) {
-  --ep-color-bg: #ffffff;
-  --ep-color-border: #e4e7ea;
-  --ep-color-hover: #f7f9fa;
-  border: none;
-  box-shadow: none;
+.icon-collections {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  max-height: 500px;
+}
+
+.icon-collections::-webkit-scrollbar {
+  width: 6px;
+}
+
+.icon-collections::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.icon-collections::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.icon-collections::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.no-results {
+  padding: 32px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin: 16px;
 }
 </style>

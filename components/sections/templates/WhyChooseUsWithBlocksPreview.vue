@@ -34,7 +34,7 @@ const handleRedirect = (e) => {
         class="flex flex-col md:flex-row gap-6 md:gap-10 mb-10 last:mb-0 items-center"
       >
         <template v-if="index % 2 === 0">
-          <div class="w-full md:w-2/5 flex flex-col h-full justify-between">
+          <div class="w-full md:w-2/5 flex flex-col h-full justify-between md:pl-10">
             <div>
               <h3 class="text-sm md:text-base font-semibold text-gray-900 mb-3">
                 {{ content.title }}
@@ -45,7 +45,7 @@ const handleRedirect = (e) => {
             </div>
             <button 
               @click="handleRedirect"
-              class="w-fit px-6 py-2 mt-8 rounded-3xl text-2xs md:text-xs font-semibold transition-all duration-200 border-2 border-[#3374FF] text-[#3374FF] hover:bg-[#3374FF] hover:text-white"
+              class="inline-flex items-center px-4 py-2 mt-12 text-[10px] bg-[#3374FF] text-white rounded-full font-medium hover:bg-blue-700 transition-colors duration-300 w-fit"
             >
               {{ content.buttonText }}
             </button>
@@ -66,7 +66,7 @@ const handleRedirect = (e) => {
               class="w-full h-auto object-contain rounded-lg border border-gray-100"
             />
           </div>
-          <div class="w-full md:w-2/5 flex flex-col h-full justify-between">
+          <div class="w-full md:w-2/5 flex flex-col h-full justify-between md:pr-10">
             <div>
               <h3 class="text-sm md:text-base font-semibold text-gray-900 mb-3">
                 {{ content.title }}
@@ -77,7 +77,7 @@ const handleRedirect = (e) => {
             </div>
             <button 
               @click="handleRedirect"
-              class="w-fit px-6 py-2 mt-8 rounded-3xl text-2xs md:text-xs font-semibold transition-all duration-200 border-2 border-[#3374FF] text-[#3374FF] hover:bg-[#3374FF] hover:text-white"
+              class="inline-flex items-center px-4 py-2 mt-12 text-[10px] bg-[#3374FF] text-white rounded-full font-medium hover:bg-blue-700 transition-colors duration-300 w-fit"
             >
               {{ content.buttonText }}
             </button>

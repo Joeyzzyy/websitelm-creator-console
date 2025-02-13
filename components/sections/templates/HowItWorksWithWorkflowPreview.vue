@@ -4,14 +4,14 @@
       <div class="flex flex-col md:flex-row gap-6 items-center">
         <!-- Left Section -->
         <div class="w-full md:w-1/2">
-          <h2 class="text-xl font-bold text-gray-900 mb-1">
+          <h2 class="text-sm font-bold text-gray-900 mb-1">
             {{ topContent.title }}
           </h2>
-          <h3 v-if="topContent.subTitle" class="text-lg text-gray-600 leading-relaxed mb-4">
+          <h3 v-if="topContent.subTitle" class="text-xs text-gray-600 leading-relaxed mb-4">
             {{ topContent.subTitle }}
           </h3>
           <!-- Example Image -->
-          <div class="mb-4 aspect-[4/3] overflow-hidden rounded-lg">
+          <div class="mb-8 aspect-[4/3] overflow-hidden rounded-lg">
             <img 
               :src="topContent.imageUrl"
               :alt="topContent.imageAlt"
@@ -25,7 +25,7 @@
               :href="topContent.buttonLink"
               target="_blank"
               rel="noopener noreferrer"
-              class="px-4 py-2 rounded-full bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors duration-300 text-center"
+              class="px-4 py-2 rounded-full bg-[#3374FF] text-white text-xs font-medium hover:bg-blue-700 transition-colors duration-300 text-center"
             >
               {{ topContent.buttonText }}
             </a>
@@ -34,7 +34,7 @@
               :href="topContent.ctaButtonLink"
               target="_blank"
               rel="noopener noreferrer"
-              class="px-4 py-2 text-blue-600 text-sm font-medium hover:text-blue-700 transition-colors duration-300 flex items-center"
+              class="px-4 py-2 text-[#3374FF] text-xs font-medium hover:text-blue-700 transition-colors duration-300 flex items-center"
             >
               {{ topContent.ctaButtonText }}
               <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,21 +46,21 @@
 
         <!-- Right Section -->
         <div class="w-full md:w-1/2">
-          <div class="flex flex-col divide-y divide-gray-200">
+          <div class="flex flex-col divide-y divide-[#dfdfdf]">
             <div v-for="(block, index) in bottomContent" 
               :key="block.number"
-              class="flex gap-3 py-3 first:pt-0 last:pb-0">
-              <div class="text-xs font-medium text-gray-900 shrink-0 w-6">
+              class="flex gap-3 py-6 first:pt-0 last:pb-0">
+              <div class="text-[10px] font-medium text-gray-900 shrink-0 w-6">
                 {{ block.number }}
               </div>
               <div>
-                <h4 v-if="block.title" class="text-xs font-semibold mb-0.5 tracking-wide">
+                <h4 v-if="block.title" class="text-[10px] font-semibold mb-0.5 tracking-wide">
                   {{ block.title }}
                 </h4>
-                <h5 v-if="block.subTitle" class="text-xs text-gray-500 mb-0.5">
+                <h5 v-if="block.subTitle" class="text-[10px] text-gray-500 mb-0.5">
                   {{ block.subTitle }}
                 </h5>
-                <p class="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
+                <p class="text-[10px] text-gray-600 leading-relaxed whitespace-pre-line">
                   {{ block.content }}
                 </p>
               </div>

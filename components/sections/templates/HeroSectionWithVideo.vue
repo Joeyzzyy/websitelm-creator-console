@@ -266,10 +266,9 @@ export default {
 .preview-area {
   background: #f8fafc;
   min-width: 768px;
-  overflow-x: auto;
-  display: flex;
-  flex-direction: column;
+  border-radius: 8px;
   padding: 24px;
+  height: fit-content;
 }
 
 .preview-header {
@@ -278,21 +277,14 @@ export default {
   align-items: center;
   margin-bottom: 16px;
   padding: 0 16px;
-  background: #f8fafc;
-  border-radius: 8px;
-  height: 48px;
 }
 
 .preview-content {
   background: white;
   border-radius: 8px;
-  flex: 1;
-  padding: 16px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  max-height: 600px;
-  overflow-y: auto;
+  padding: 24px;
+  height: fit-content;
+  flex: 0 0 auto;
 }
 
 /* 添加编辑区域和预览区域的共同样式 */

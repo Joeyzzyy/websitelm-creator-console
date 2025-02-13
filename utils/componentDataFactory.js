@@ -79,7 +79,7 @@ export const createCleanComponentData = (componentType) => {
     WhyChooseUsWithBlocks: {
       topContent: {
         title: 'Our Advantages',
-        description: 'What sets us apart',
+        description: 'What sets us apart, and why you should choose us',
       },
       bottomContent: [
         { 
@@ -88,7 +88,7 @@ export const createCleanComponentData = (componentType) => {
           content: 'Extended content for feature 1',
           buttonText: 'Learn More',
           buttonLink: '#',
-          imageUrl: '/assets/images/placeholder.png',
+          imageUrl: 'https://picsum.photos/1200/600',
           imageAlt: 'Feature 1 illustration'
         },
         { 
@@ -97,7 +97,7 @@ export const createCleanComponentData = (componentType) => {
           content: 'Extended content for feature 2',
           buttonText: 'Learn More',
           buttonLink: '#',
-          imageUrl: '/assets/images/placeholder.png',
+          imageUrl: 'https://picsum.photos/1200/600',
           imageAlt: 'Feature 2 illustration'
         }
       ]
@@ -113,26 +113,26 @@ export const createCleanComponentData = (componentType) => {
         ctaButtonLink: '#',
         showButton: true,
         showCtaButton: true,
-        imageUrl: '/assets/images/placeholder.png',
+        imageUrl: 'https://picsum.photos/1200/600',
         imageAlt: 'Workflow Diagram Example'
       },
       bottomContent: [
         {
-          number: 'Step 1',
-          title: 'Sign Up',
-          subTitle: 'Create Your Account',
+          number: '01',
+          title: '[DEMO] Sign Up',
+          subTitle: '[DEMO] Create Your Account',
           content: 'Get started by creating your account in just a few minutes. No credit card required.'
         },
         {
-          number: 'Step 2',
-          title: 'Configure',
-          subTitle: 'Set Your Preferences',
+          number: '02',
+          title: '[DEMO] Configure',
+          subTitle: '[DEMO] Set Your Preferences',
           content: 'Customize your settings and preferences to match your specific needs and requirements.'
         },
         {
-          number: 'Step 3',
-          title: 'Launch',
-          subTitle: 'Start Using Platform',
+          number: '03',
+          title: '[DEMO] Launch',
+          subTitle: '[DEMO] Start Using Platform',
           content: 'Begin using the platform immediately and see results. Our intuitive interface makes it easy to get started.'
         }
       ]
@@ -140,7 +140,6 @@ export const createCleanComponentData = (componentType) => {
 
     HowItWorksWithBlocks: {
       leftContent: {
-        icon: '🚀',
         title: '[DEMO] How It Works',
         subTitle: '[SAMPLE] Enter your process description here',
         buttonText: '[DEMO] Start Now',
@@ -148,71 +147,48 @@ export const createCleanComponentData = (componentType) => {
       },
       rightContent: [
         {
-          icon: '📝',
-          contentTitle: '[DEMO] Step 1',
+          contentTitle: '[DEMO] 01',
           content: '[SAMPLE] Description of step 1'
         },
         {
-          icon: '🎨',
-          contentTitle: '[DEMO] Step 2',
+          contentTitle: '[DEMO] 02',
           content: '[SAMPLE] Description of step 2'
         },
         {
-          icon: '🌐',
-          contentTitle: '[DEMO] Step 3',
+          contentTitle: '[DEMO] 03',
           content: '[SAMPLE] Description of step 3'
         }
       ]
     },
     
     ProductBenefitsWithBlocks: {
-      leftContent: {
-        title: 'Product Benefits',
-        description: 'Discover the advantages of our solution',
-        buttonText: 'Learn More',
-        buttonLink: '#'
+      "leftContent": {
+          "buttonLink": "#",
+          "buttonText": "Learn More",
+          "description": "Discover the advantages of our solution",
+          "title": "Product Benefits"
       },
-      rightContent: [
-        { 
-          icon: '🚀',
-          title: 'Benefit 1', 
-          subTitle: 'Subtitle of benefit 1',
-          content: 'Description of benefit 1',
-          buttonText: 'Learn More',
-          buttonLink: '#',
-          imageUrl: '/assets/images/placeholder.png',
-          imageAlt: 'Benefit 1 illustration'
-        },
-        { 
-          icon: '🚀',
-          title: 'Benefit 2', 
-          subTitle: 'Subtitle of benefit 2',
-          content: 'Description of benefit 2',
-          buttonText: 'Learn More',
-          buttonLink: '#',
-          imageUrl: '/assets/images/placeholder.png',
-          imageAlt: 'Benefit 2 illustration'
-        },
-        { 
-          icon: '🚀',
-          title: 'Benefit 3', 
-          subTitle: 'Subtitle of benefit 2',
-          content: 'Description of benefit 3',
-          buttonText: 'Learn More',
-          buttonLink: '#',
-          imageUrl: '/assets/images/placeholder.png',
-          imageAlt: 'Benefit 3 illustration'
-        },
-        { 
-          icon: '🚀',
-          title: 'Benefit 4', 
-          subTitle: 'Subtitle of benefit 4',
-          content: 'Description of benefit 4',
-          buttonText: 'Learn More',
-          buttonLink: '#',
-          imageUrl: '/assets/images/placeholder.png',
-          imageAlt: 'Benefit 4 illustration'
-        }
+      "rightContent": [
+          {
+              "content": "Description of benefit 1",
+              "icon": "mdi:check",
+              "title": "Benefit 1"
+          },
+          {
+              "content": "Description of benefit 2",
+              "icon": "mdi:close",
+              "title": "Benefit 2"
+          },
+          {
+              "content": "Description of benefit 3",
+              "icon": "mdi:download",
+              "title": "Benefit 3"
+          },
+          {
+              "content": "Description of benefit 4",
+              "icon": "mdi:heart",
+              "title": "Benefit 4"
+          }
       ]
     },
 
@@ -502,34 +478,37 @@ export const createCleanComponentData = (componentType) => {
     },
 
     ProductBenefitsWithTable: {
-      leftContent: [
-        {
-          icon: '🎥',
-          contentTitle: '[DEMO] Feature 1',
-          content: '[SAMPLE] Description of feature 1'
-        },
-        {
-          icon: '🌍',
-          contentTitle: '[DEMO] Feature 2',
-          content: '[SAMPLE] Description of feature 2'
-        },
-        {
-          icon: '⚡',
-          contentTitle: '[DEMO] Feature 3',
-          content: '[SAMPLE] Description of feature 3'
-        },
-        {
-          icon: '💰',
-          contentTitle: '[DEMO] Feature 4',
-          content: '[SAMPLE] Description of feature 4'
-        }
+      "leftContent": {
+          "imageAlt": "Abstract image",
+          "imageUrl": "https://picsum.photos/1080/720"
+      },
+      "rightContent": [
+          {
+              "content": "Generate professional videos automatically",
+              "contentTitle": "AI Video Creation",
+              "icon": "mdi:help"
+          },
+          {
+              "content": "Support for 40+ languages",
+              "contentTitle": "Global Reach",
+              "icon": "mdi:heart"
+          },
+          {
+              "content": "Complete videos in minutes",
+              "contentTitle": "Fast Processing",
+              "icon": "mdi:sync"
+          },
+          {
+              "content": "Save up to 90% on video production",
+              "contentTitle": "Cost Effective",
+              "icon": "mdi:document"
+          }
       ],
-      rightContent: {
-        icon: '🚀',
-        title: '[DEMO] Main Call to Action',
-        subTitle: '[SAMPLE] Engaging subtitle for your call to action',
-        buttonText: '[DEMO] Start Now',
-        buttonLink: '#'
+      "topContent": {
+          "buttonLink": "https://websitelm.com",
+          "buttonText": "Start Free Trial",
+          "description": "Discover the benefits of using our product",
+          "title": "Product Benefits"
       }
     },
 

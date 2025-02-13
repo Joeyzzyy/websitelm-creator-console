@@ -240,6 +240,7 @@ export default {
   overflow-x: auto;
   display: flex;
   flex-direction: column;
+  height: fit-content;
 }
 
 .preview-header {
@@ -256,10 +257,10 @@ export default {
 .preview-content {
   background: white;
   border-radius: 8px;
-  flex: 1;
   padding: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 300px;
 }
 </style>

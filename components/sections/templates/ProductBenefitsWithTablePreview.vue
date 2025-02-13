@@ -1,72 +1,62 @@
 <template>
-  <div :class="[theme === 'tech' ? 'bg-gray-900' : 'bg-white', 'py-10 px-8']">
-    <div class="max-w-6xl mx-auto">
-      <div class="flex flex-col md:flex-row gap-6">
-        <!-- 左侧内容 -->
+  <div class="bg-white py-8 md:py-12">
+    <div class="w-[85%] mx-auto">
+      <!-- 顶部内容 -->
+      <div class="text-center mb-6">
+        <h2 class="text-base md:text-xl font-bold mb-3 text-gray-900">
+          {{ section.topContent.title }}
+        </h2>
+        <p class="text-2xs md:text-xs mb-4 text-gray-600">
+          {{ section.topContent.description }}
+        </p>
+        <a
+          :href="formatUrl(section.topContent.buttonLink)"
+          class="inline-block px-6 py-2 rounded-3xl text-sm font-semibold bg-[#3374FF] text-white hover:bg-blue-700"
+        >
+          {{ section.topContent.buttonText }}
+        </a>
+      </div>
+
+      <!-- 主要内容区域 -->
+      <div class="flex flex-col md:flex-row gap-8 items-center">
+        <!-- 左侧图片 -->
         <div class="w-full md:w-1/2">
-          <div class="grid border border-gray-200 rounded-lg">
-            <div
-              v-for="(item, index) in section.leftContent"
-              :key="index"
-              :class="[
-                'flex items-center gap-4 p-4 border-b last:border-b-0',
-                theme === 'tech'
-                  ? 'bg-gray-800 hover:bg-gray-700/80 transition-colors'
-                  : 'bg-white hover:bg-gray-50/80 transition-colors'
-              ]"
-            >
-              <div 
-                :class="[
-                  'w-12 py-2 flex-shrink-0 text-center border-r',
-                  theme === 'tech' ? 'text-blue-400 border-gray-700' : 'text-blue-600 border-gray-200'
-                ]"
-              >
-                {{ item.icon }}
-              </div>
-              <div class="flex-1 pl-4">
-                <h3 
-                  :class="[
-                    'text-base font-bold mb-1',
-                    theme === 'tech' ? 'text-white' : 'text-gray-900'
-                  ]"
-                >
-                  {{ item.contentTitle }}
-                </h3>
-                <p :class="[theme === 'tech' ? 'text-gray-300' : 'text-gray-600', 'text-xs']">
-                  {{ item.content }}
-                </p>
-              </div>
-            </div>
+          <div class="aspect-[4/3] overflow-hidden rounded-xl">
+            <img 
+              :src="section.leftContent.imageUrl"
+              :alt="section.leftContent.imageAlt"
+              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            />
           </div>
         </div>
 
         <!-- 右侧内容 -->
         <div class="w-full md:w-1/2">
-          <div :class="[theme === 'tech' ? 'text-blue-400' : 'text-blue-600', 'text-2xl mb-3']">
-            {{ section.rightContent.icon }}
+          <div class="grid bg-transparent">
+            <div
+              v-for="(item, index) in section.rightContent"
+              :key="index"
+              class="flex items-start gap-4 p-4 hover:bg-gray-50/80 transition-colors"
+            >
+              <div class="w-6 h-6 flex-shrink-0 rounded-lg flex items-center justify-center bg-gray-100">
+                <Icon 
+                  v-if="item.icon"
+                  :icon="item.icon"
+                  class="text-gray-600"
+                  width="16"
+                  height="16"
+                />
+              </div>
+              <div class="flex-1">
+                <h3 class="text-xs md:text-sm font-semibold mb-1 text-gray-900">
+                  {{ item.contentTitle }}
+                </h3>
+                <p class="text-[10px] md:text-2xs text-gray-600">
+                  {{ item.content }}
+                </p>
+              </div>
+            </div>
           </div>
-          <h2 
-            :class="[
-              'text-xl md:text-2xl font-bold mb-2',
-              theme === 'tech' ? 'text-white' : 'text-gray-900'
-            ]"
-          >
-            {{ section.rightContent.title }}
-          </h2>
-          <p :class="[theme === 'tech' ? 'text-gray-300' : 'text-gray-600', 'text-xs mb-4']">
-            {{ section.rightContent.subTitle }}
-          </p>
-          <a
-            :href="formatUrl(section.rightContent.buttonLink)"
-            :class="[
-              'inline-block px-6 py-2 rounded-3xl text-sm font-semibold',
-              theme === 'tech'
-                ? 'bg-transparent border-2 border-blue-400 text-blue-400 hover:bg-blue-400 hover:text-white'
-                : 'bg-transparent border-2 border-[#3374FF] text-[#3374FF] hover:bg-[#3374FF] hover:text-white'
-            ]"
-          >
-            {{ section.rightContent.buttonText }}
-          </a>
         </div>
       </div>
     </div>
@@ -74,8 +64,13 @@
 </template>
 
 <script>
+import { Icon } from '@iconify/vue'
+
 export default {
   name: 'ProductBenefitsWithTablePreview',
+  components: {
+    Icon
+  },
   props: {
     section: {
       type: Object,
@@ -90,3 +85,24 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+/* 添加图标容器的悬停效果 */
+.icon-container {
+  transition: all 0.3s ease;
+}
+
+.icon-container:hover {
+  background-color: #f3f4f6;
+  transform: scale(1.05);
+}
+
+/* 优化图标显示 */
+:deep(.iconify) {
+  transition: transform 0.3s ease;
+}
+
+.flex:hover :deep(.iconify) {
+  transform: scale(1.1);
+}
+</style>

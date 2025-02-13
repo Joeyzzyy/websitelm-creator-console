@@ -7,27 +7,6 @@
         <a-form layout="vertical">
           <!-- 左侧内容部分 -->
           <div class="form-section">
-            <a-form-item label="Icon">
-              <div class="input-with-tag">
-                <span class="html-tag">{{ tags.icon }}</span>
-                <div class="emoji-input-wrapper">
-                  <a-input
-                    v-model:value="localSection.leftContent.icon"
-                    :disabled="disabled"
-                    placeholder="Emoji"
-                    @change="handleChange"
-                  />
-                  <a-button
-                    v-if="!disabled"
-                    class="emoji-trigger"
-                    @click="(e) => showEmojiPicker('leftContent')"
-                  >
-                    😊
-                  </a-button>
-                </div>
-              </div>
-            </a-form-item>
-  
             <a-form-item label="Title">
               <div class="input-with-tag">
                 <span class="html-tag">{{ tags.title }}</span>
@@ -91,27 +70,6 @@
                     </a-button>
                   </div>
   
-                  <a-form-item label="Icon">
-                    <div class="input-with-tag">
-                      <span class="html-tag">{{ tags.icon }}</span>
-                      <div class="emoji-input-wrapper">
-                        <a-input
-                          v-model:value="module.icon"
-                          :disabled="disabled"
-                          placeholder="Emoji"
-                          @change="handleChange"
-                        />
-                        <a-button
-                          v-if="!disabled"
-                          class="emoji-trigger"
-                          @click="(e) => showEmojiPicker('rightContent', index)"
-                        >
-                          😊
-                        </a-button>
-                      </div>
-                    </div>
-                  </a-form-item>
-  
                   <a-form-item label="Title">
                     <div class="input-with-tag">
                       <span class="html-tag">{{ tags.contentTitle }}</span>
@@ -162,21 +120,6 @@
         />
       </div>
     </div>
-
-    <!-- 添加 Emoji Picker Modal -->
-    <a-modal
-      v-model:visible="emojiPickerVisible"
-      :footer="null"
-      :closable="false"
-      :width="350"
-      centered
-      class="emoji-picker-modal"
-      @cancel="closeEmojiPicker"
-    >
-      <EmojiPicker
-        @select="onEmojiSelect"
-      />
-    </a-modal>
   </div>
 </template>
 
@@ -185,16 +128,13 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import HowItWorksWithBlocksPreview from './HowItWorksWithBlocksPreview.vue'
 import { DeleteOutlined } from '@ant-design/icons-vue'
-import EmojiPicker from 'vue3-emoji-picker'
-import 'vue3-emoji-picker/css'
 
 export default {
   name: 'HowItWorksWithBlocks',
   extends: BaseSection,
   components: {
     DeleteOutlined,
-    HowItWorksWithBlocksPreview,
-    EmojiPicker
+    HowItWorksWithBlocksPreview
   },
   computed: {
     tags() {
@@ -205,23 +145,18 @@ export default {
     return {
       localSection: {
         leftContent: {
-          icon: '',
           title: '',
           subTitle: '',
           buttonText: '',
           buttonLink: ''
         },
         rightContent: []
-      },
-      emojiPickerVisible: false,
-      currentEmojiTarget: null,
-      currentModuleIndex: null
+      }
     }
   },
   created() {
     this.localSection = Object.assign({
       leftContent: {
-        icon: '',
         title: '',
         subTitle: '',
         buttonText: '',
@@ -239,7 +174,6 @@ export default {
       handler(newVal) {
         this.localSection = Object.assign({
           leftContent: {
-            icon: '',
             title: '',
             subTitle: '',
             buttonText: '',
@@ -261,7 +195,6 @@ export default {
     },
     addModule() {
       this.localSection.rightContent.push({
-        icon: '',
         contentTitle: '',
         content: ''
       })
@@ -269,25 +202,6 @@ export default {
     },
     removeModule(index) {
       this.localSection.rightContent.splice(index, 1)
-      this.handleChange()
-    },
-    showEmojiPicker(target, index) {
-      this.emojiPickerVisible = true
-      this.currentEmojiTarget = target
-      this.currentModuleIndex = index
-    },
-    closeEmojiPicker() {
-      this.emojiPickerVisible = false
-      this.currentEmojiTarget = null
-      this.currentModuleIndex = null
-    },
-    onEmojiSelect(emoji) {
-      if (this.currentEmojiTarget === 'leftContent') {
-        this.localSection.leftContent.icon = emoji.i
-      } else if (this.currentEmojiTarget === 'rightContent' && this.currentModuleIndex !== null) {
-        this.localSection.rightContent[this.currentModuleIndex].icon = emoji.i
-      }
-      this.closeEmojiPicker()
       this.handleChange()
     }
   }
@@ -476,34 +390,5 @@ export default {
 .module-header :deep(.anticon) {
   font-size: 14px;
   color: inherit;
-}
-
-.emoji-input-wrapper {
-  display: flex;
-  gap: 8px;
-  flex: 1;
-}
-
-.emoji-trigger {
-  padding: 0 8px;
-}
-
-:deep(.emoji-picker-modal) {
-  .ant-modal-content {
-    padding: 12px;
-    border-radius: 8px;
-  }
-  
-  .ant-modal-body {
-    padding: 0;
-  }
-}
-
-:deep(.v3-emoji-picker) {
-  --ep-color-bg: #ffffff;
-  --ep-color-border: #e4e7ea;
-  --ep-color-hover: #f7f9fa;
-  border: none;
-  box-shadow: none;
 }
 </style>

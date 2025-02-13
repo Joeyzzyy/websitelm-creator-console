@@ -3,13 +3,96 @@
     <!-- 编辑区域 -->
     <div class="editor-area">
       <div class="editor-content">
-        <a-row :gutter="24">
-          <!-- 左侧表格内容 -->
-          <a-col :span="12">
+        <a-row :gutter="[24, 24]">
+          <!-- 顶部内容 -->
+          <a-col :span="24" class="mb-6">
+            <a-form layout="vertical">
+              <a-form-item label="Top Content">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.title }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.title"
+                    :disabled="disabled"
+                    placeholder="Title"
+                    @change="handleChange"
+                  />
+                </div>
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.description }}</span>
+                  <a-textarea
+                    v-model:value="localSection.topContent.description"
+                    :disabled="disabled"
+                    :rows="2"
+                    placeholder="Description"
+                    @change="handleChange"
+                  />
+                </div>
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.buttonText }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.buttonText"
+                    :disabled="disabled"
+                    placeholder="Button Text"
+                    @change="handleChange"
+                  />
+                </div>
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.buttonLink }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.buttonLink"
+                    :disabled="disabled"
+                    placeholder="Button Link"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+            </a-form>
+          </a-col>
+
+          <!-- 左侧图片内容 -->
+          <a-col :span="24">
+            <a-form layout="vertical">
+              <a-form-item label="Image Content">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.imageUrl }}</span>
+                  <div class="image-input-wrapper">
+                    <a-input
+                      v-model:value="localSection.leftContent.imageUrl"
+                      :disabled="disabled"
+                      placeholder="Image URL"
+                      @change="handleChange"
+                    />
+                    <a-button 
+                      type="primary"
+                      class="change-image-btn"
+                      @click="openImageLibrary"
+                    >
+                      Change
+                    </a-button>
+                  </div>
+                </div>
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.imageAlt }}</span>
+                  <a-input
+                    v-model:value="localSection.leftContent.imageAlt"
+                    :disabled="disabled"
+                    placeholder="Image Alt Text"
+                    @change="handleChange"
+                  />
+                </div>
+                <div class="image-preview" v-if="localSection.leftContent.imageUrl">
+                  <a-image :src="localSection.leftContent.imageUrl" :width="200" />
+                </div>
+              </a-form-item>
+            </a-form>
+          </a-col>
+
+          <!-- 右侧表格内容 -->
+          <a-col :span="24">
             <div style="margin-bottom: 12px; color: #666;">
-              Table Content Area - Maximum 4 items allowed
+              Content Items - Maximum 4 items allowed
             </div>
-            <div v-for="(item, index) in localSection.leftContent" :key="index">
+            <div v-for="(item, index) in localSection.rightContent" :key="index">
               <a-form layout="vertical">
                 <a-form-item>
                   <div class="flex justify-between items-center mb-2">
@@ -18,29 +101,30 @@
                       v-if="!disabled" 
                       type="text" 
                       class="delete-btn" 
-                      @click="removeLeftItem(index)"
+                      @click="removeRightItem(index)"
                     >
-                      <template #icon>
-                        <delete-outlined />
-                      </template>
+                      <template #icon><delete-outlined /></template>
                     </a-button>
                   </div>
-                  <div class="input-with-tag">
-                    <span class="html-tag">{{ tags.icon }}</span>
-                    <div class="emoji-input-wrapper">
+                  <div class="input-with-tag mb-4">
+                    <span class="html-tag">icon</span>
+                    <div class="icon-input-wrapper">
                       <a-input
                         v-model:value="item.icon"
                         :disabled="disabled"
-                        placeholder="Icon"
+                        placeholder="Icon identifier"
                         @change="handleChange"
                       />
-                      <a-button
-                        v-if="!disabled"
-                        class="emoji-trigger"
-                        @click="(e) => showEmojiPicker(e, index, 'left')"
+                      <a-button 
+                        type="primary"
+                        class="change-icon-btn"
+                        @click="openIconPicker(index)"
                       >
-                        😊
+                        Change
                       </a-button>
+                    </div>
+                    <div v-if="item.icon" class="icon-preview">
+                      <Icon :icon="item.icon" width="24" height="24" />
                     </div>
                   </div>
                   <div class="input-with-tag">
@@ -67,83 +151,14 @@
             </div>
             
             <a-button 
-              v-if="!disabled && localSection.leftContent.length < 4" 
+              v-if="!disabled && localSection.rightContent.length < 4" 
               type="dashed" 
               block 
               class="add-item-btn"
-              @click="addLeftItem"
+              @click="addRightItem"
             >
               Add Item
             </a-button>
-          </a-col>
-    
-          <!-- 右侧标题内容 -->
-          <a-col :span="12">
-            <a-form layout="vertical">
-              <a-form-item label="Icon">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.icon }}</span>
-                  <div class="emoji-input-wrapper">
-                    <a-input
-                      v-model:value="localSection.rightContent.icon"
-                      :disabled="disabled"
-                      @change="handleChange"
-                    />
-                    <a-button
-                      v-if="!disabled"
-                      class="emoji-trigger"
-                      @click="(e) => showEmojiPicker(e, 0, 'right')"
-                    >
-                      😊
-                    </a-button>
-                  </div>
-                </div>
-              </a-form-item>
-    
-              <a-form-item label="Title">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.title }}</span>
-                  <a-input
-                    v-model:value="localSection.rightContent.title"
-                    :disabled="disabled"
-                    @change="handleChange"
-                  />
-                </div>
-              </a-form-item>
-    
-              <a-form-item label="Subtitle">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.subTitle }}</span>
-                  <a-input
-                    v-model:value="localSection.rightContent.subTitle"
-                    :disabled="disabled"
-                    @change="handleChange"
-                  />
-                </div>
-              </a-form-item>
-    
-              <a-form-item label="Button Text">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.buttonText }}</span>
-                  <a-input
-                    v-model:value="localSection.rightContent.buttonText"
-                    :disabled="disabled"
-                    @change="handleChange"
-                  />
-                </div>
-              </a-form-item>
-    
-              <a-form-item label="Button Link">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.buttonLink }}</span>
-                  <a-input
-                    v-model:value="localSection.rightContent.buttonLink"
-                    :disabled="disabled"
-                    @change="handleChange"
-                  />
-                </div>
-              </a-form-item>
-            </a-form>
           </a-col>
         </a-row>
       </div>
@@ -177,6 +192,70 @@
         @select="onEmojiSelect"
       />
     </a-modal>
+
+    <!-- 添加图片库模态框 -->
+    <a-modal
+      v-model:visible="imageLibraryVisible"
+      title="Select Image"
+      @ok="handleImageSelect"
+      @cancel="closeImageLibrary"
+      width="800px"
+    >
+      <image-library
+        v-if="imageLibraryVisible"
+        @select="onImageSelect"
+        @close="closeImageLibrary"
+      />
+    </a-modal>
+
+    <!-- 添加图标选择器模态框 -->
+    <a-modal
+      v-model:visible="iconPickerVisible"
+      title="Select Icon"
+      @ok="handleIconSelect"
+      @cancel="closeIconPicker"
+      width="800px"
+      :footer="null"
+      class="icon-picker-modal"
+    >
+      <div class="icon-picker-container">
+        <div class="icon-search">
+          <a-input
+            v-model:value="iconSearch"
+            placeholder="Search icons..."
+            @input="handleIconSearch"
+          >
+            <template #prefix>
+              <search-outlined />
+            </template>
+          </a-input>
+        </div>
+        <div class="icon-collections">
+          <div 
+            class="collection" 
+            v-for="collection in filteredIconCollections" 
+            :key="collection.name"
+          >
+            <h3>{{ collection.name }}</h3>
+            <div class="icons-grid">
+              <div
+                v-for="icon in collection.icons"
+                :key="icon"
+                class="icon-item"
+                :class="{ active: selectedIcon === `${collection.prefix}:${icon}` }"
+                @click="selectIcon(`${collection.prefix}:${icon}`)"
+              >
+                <Icon :icon="`${collection.prefix}:${icon}`" width="24" height="24" />
+                <span class="icon-name">{{ icon }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-if="showNoResults" class="no-results">
+            No icons found matching "{{ iconSearch }}"
+          </div>
+        </div>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -185,9 +264,11 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import themeConfig from '../../../assets/config/themeConfig'
 import ProductBenefitsWithTablePreview from './ProductBenefitsWithTablePreview.vue'
-import { DeleteOutlined } from '@ant-design/icons-vue'
+import { DeleteOutlined, SearchOutlined } from '@ant-design/icons-vue'
 import EmojiPicker from 'vue3-emoji-picker'
 import 'vue3-emoji-picker/css'
+import ImageLibrary from '../common/ImageLibrary.vue'
+import { Icon } from '@iconify/vue'
 
 export default {
   name: 'ProductBenefitsWithTable',
@@ -195,7 +276,10 @@ export default {
   components: {
     ProductBenefitsWithTablePreview,
     DeleteOutlined,
-    EmojiPicker
+    EmojiPicker,
+    ImageLibrary,
+    Icon,
+    SearchOutlined
   },
   computed: {
     tags() {
@@ -205,21 +289,44 @@ export default {
       return `${this.styles.button.base} ${this.styles.button.variants.secondary}`
     },
     getButtonLink() {
-      const link = this.localSection.rightContent.buttonLink
+      const link = this.localSection.topContent.buttonLink
       return link?.startsWith('http') ? link : `https://${link}`
+    },
+    filteredIconCollections() {
+      if (!this.iconSearch) {
+        return this.iconCollections;
+      }
+
+      const searchTerm = this.iconSearch.toLowerCase();
+      return this.iconCollections.map(collection => {
+        const filteredIcons = collection.icons.filter(icon => 
+          icon.toLowerCase().includes(searchTerm)
+        );
+        
+        return filteredIcons.length ? {
+          ...collection,
+          icons: filteredIcons
+        } : null;
+      }).filter(Boolean);
+    },
+    showNoResults() {
+      return this.iconSearch && this.filteredIconCollections.length === 0;
     }
   },
   data() {
     return {
       localSection: {
-        leftContent: [],
-        rightContent: {
-          icon: '',
+        topContent: {
           title: '',
-          subTitle: '',
+          description: '',
           buttonText: '',
           buttonLink: ''
         },
+        leftContent: {
+          imageUrl: '',
+          imageAlt: ''
+        },
+        rightContent: [],
         ...JSON.parse(JSON.stringify(this.section || {}))
       },
       styles: themeConfig.normal,
@@ -227,7 +334,93 @@ export default {
       currentTarget: {
         index: null,
         side: null // 'left' 或 'right'
-      }
+      },
+      imageLibraryVisible: false,
+      selectedImage: null,
+      iconPickerVisible: false,
+      iconSearch: '',
+      currentItemIndex: null,
+      selectedIcon: null,
+      iconCollections: [
+        {
+          name: 'Material Design Icons',
+          prefix: 'mdi',
+          icons: [
+            // 通用/基础
+            'home', 'account', 'cog', 'bell', 'star', 'heart', 'magnify', 'plus', 'minus', 'close',
+            'check', 'alert', 'information', 'help', 'settings', 'menu', 'refresh', 'sync', 'download', 'upload',
+            
+            // 文件/文档
+            'file', 'folder', 'folder-open', 'document', 'pdf', 'image', 'video', 'music', 'archive', 'download',
+            
+            // 通信/社交
+            'email', 'message', 'chat', 'phone', 'video-call', 'share', 'send', 'twitter', 'facebook', 'linkedin',
+            
+            // 商务/金融
+            'bank', 'credit-card', 'cash', 'cart', 'store', 'tag', 'gift', 'wallet', 'currency-usd', 'chart-line',
+            
+            // 设备/技术
+            'laptop', 'desktop', 'tablet', 'phone', 'printer', 'keyboard', 'mouse', 'wifi', 'bluetooth', 'battery',
+            
+            // 用户界面
+            'view-grid', 'view-list', 'dots-vertical', 'dots-horizontal', 'menu', 'arrow-left', 'arrow-right', 'chevron-up', 'chevron-down', 'play',
+            
+            // 安全/隐私
+            'shield', 'lock', 'unlock', 'key', 'eye', 'eye-off', 'fingerprint', 'security', 'incognito', 'alert-circle'
+          ]
+        },
+        {
+          name: 'Phosphor Icons',
+          prefix: 'ph',
+          icons: [
+            // 基础图标
+            'house', 'user', 'gear', 'bell', 'star', 'heart', 'magnifying-glass', 'plus', 'minus', 'x',
+            'check', 'warning', 'info', 'question', 'wrench', 'list', 'arrows-clockwise', 'cloud', 'download', 'upload',
+            
+            // 文件管理
+            'file', 'folder', 'folder-open', 'file-text', 'file-pdf', 'image-square', 'video', 'music-notes', 'archive', 'cloud-arrow-down',
+            
+            // 通信工具
+            'envelope', 'chat', 'phone', 'video-camera', 'share', 'paper-plane', 'twitter-logo', 'facebook-logo', 'linkedin-logo', 'instagram-logo',
+            
+            // 商业/电商
+            'shopping-cart', 'storefront', 'tag', 'gift', 'credit-card', 'money', 'bank', 'trend-up', 'chart-line', 'calculator',
+            
+            // 设备/硬件
+            'device-mobile', 'device-tablet', 'desktop', 'printer', 'keyboard', 'mouse', 'wifi-high', 'bluetooth', 'battery-full', 'plug',
+            
+            // 界面元素
+            'grid-four', 'list-bullets', 'dots-three', 'dots-nine', 'caret-up', 'caret-down', 'arrow-left', 'arrow-right', 'play', 'pause',
+            
+            // 安全/验证
+            'shield', 'lock', 'lock-open', 'key', 'eye', 'eye-slash', 'fingerprint', 'password', 'user-focus', 'check-circle'
+          ]
+        },
+        {
+          name: 'Carbon Icons',
+          prefix: 'carbon',
+          icons: [
+            // 基础图标
+            'home', 'user', 'settings', 'notification', 'star', 'favorite', 'search', 'add', 'subtract', 'close',
+            'checkmark', 'warning', 'information', 'help', 'tool', 'menu', 'refresh', 'sync', 'download', 'upload',
+            
+            // 数据/分析
+            'chart-line', 'chart-bar', 'chart-pie', 'chart-bubble', 'data-table', 'analytics', 'report', 'dashboard', 'forecast', 'data-vis',
+            
+            // 企业/商务
+            'enterprise', 'finance', 'growth', 'strategy', 'partnership', 'portfolio', 'investment', 'market', 'trade', 'optimization',
+            
+            // 技术/开发
+            'code', 'development', 'api', 'cloud', 'security', 'data-base', 'network', 'container', 'terminal', 'function',
+            
+            // 协作/团队
+            'collaboration', 'group', 'partnership', 'meeting', 'presentation', 'share', 'connect', 'chat', 'email', 'calendar',
+            
+            // 工业/制造
+            'industry', 'factory', 'assembly', 'manufacturing', 'inventory', 'shipping', 'tools', 'machine', 'equipment', 'production'
+          ]
+        }
+      ]
     }
   },
   watch: {
@@ -244,12 +437,9 @@ export default {
         this.emitUpdate(this.localSection)
       })
     },
-    addLeftItem() {
-      if (!Array.isArray(this.localSection.leftContent)) {
-        this.localSection.leftContent = []
-      }
-      if (this.localSection.leftContent.length < 4) {
-        this.localSection.leftContent.push({
+    addRightItem() {
+      if (this.localSection.rightContent.length < 4) {
+        this.localSection.rightContent.push({
           icon: '',
           contentTitle: '',
           content: ''
@@ -257,8 +447,8 @@ export default {
         this.handleChange()
       }
     },
-    removeLeftItem(index) {
-      this.localSection.leftContent.splice(index, 1)
+    removeRightItem(index) {
+      this.localSection.rightContent.splice(index, 1)
       this.handleChange()
     },
     showEmojiPicker(e, index, side) {
@@ -272,13 +462,59 @@ export default {
     },
     onEmojiSelect(emoji) {
       const { index, side } = this.currentTarget
-      if (side === 'left') {
-        this.localSection.leftContent[index].icon = emoji.i
-      } else if (side === 'right') {
-        this.localSection.rightContent.icon = emoji.i
+      if (side === 'right') {
+        this.localSection.rightContent[index].contentTitle = emoji.i
       }
       this.closeEmojiPicker()
       this.handleChange()
+    },
+    openImageLibrary() {
+      this.imageLibraryVisible = true
+    },
+    closeImageLibrary() {
+      this.imageLibraryVisible = false
+      this.selectedImage = null
+    },
+    onImageSelect(image) {
+      this.selectedImage = image
+    },
+    handleImageSelect() {
+      if (this.selectedImage) {
+        this.localSection.leftContent.imageUrl = this.selectedImage.url
+        this.handleChange()
+      }
+      this.closeImageLibrary()
+    },
+    openIconPicker(index) {
+      this.currentItemIndex = index
+      this.iconPickerVisible = true
+      this.selectedIcon = this.localSection.rightContent[index].icon
+    },
+    closeIconPicker() {
+      this.iconPickerVisible = false
+      this.currentItemIndex = null
+      this.selectedIcon = null
+      this.clearIconSearch()
+    },
+    selectIcon(iconId) {
+      this.selectedIcon = iconId
+      if (this.currentItemIndex !== null) {
+        this.localSection.rightContent[this.currentItemIndex].icon = iconId
+        this.handleChange()
+      }
+      this.closeIconPicker()
+    },
+    handleIconSearch() {
+      const collectionsElement = this.$el.querySelector('.icon-collections');
+      if (collectionsElement) {
+        collectionsElement.scrollTop = 0;
+      }
+    },
+    clearIconSearch() {
+      this.iconSearch = '';
+    },
+    handleIconSelect() {
+      // 实现图标选择逻辑
     }
   }
 }
@@ -407,6 +643,8 @@ export default {
   position: relative;
   border-radius: 8px;
   padding: 24px;
+  max-height: none;
+  overflow-y: auto;
 }
 
 .editor-header {
@@ -564,5 +802,280 @@ export default {
   --ep-color-hover: #f7f9fa;
   border: none;
   box-shadow: none;
+}
+
+.image-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.change-image-btn {
+  background: linear-gradient(135deg, #1890ff, #1890ff);
+  border: none;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: white;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.change-image-btn:hover {
+  background: linear-gradient(135deg, #4338CA, #6D28D9);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+}
+
+.image-preview {
+  margin-top: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.icon-picker-container {
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.icon-search {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+}
+
+.icon-search :deep(.ant-input-affix-wrapper) {
+  border-radius: 6px;
+}
+
+.icon-search :deep(.anticon) {
+  color: #999;
+}
+
+.icon-collections {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  max-height: 500px;
+}
+
+.collection {
+  margin-bottom: 24px;
+}
+
+.collection h3 {
+  margin-bottom: 16px;
+  color: #1f2937;
+  font-size: 16px;
+}
+
+.icons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+}
+
+.icon-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.icon-item:hover {
+  background: #f4f4f5;
+}
+
+.icon-item.active {
+  background: #e6f7ff;
+  border: 1px solid #91d5ff;
+}
+
+.icon-name {
+  font-size: 12px;
+  color: #4b5563;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.icon-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.change-icon-btn {
+  background: linear-gradient(135deg, #1890ff, #1890ff);
+  border: none;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: white;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.icon-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #f8fafc;
+  border-radius: 6px;
+  margin-left: 8px;
+}
+
+.icon-preview :deep(.iconify) {
+  color: #6B7280; /* 与 Preview 组件中的图标颜色保持一致 */
+  font-size: 20px;
+}
+
+/* 添加滚动条样式 */
+.icon-collections::-webkit-scrollbar {
+  width: 6px;
+}
+
+.icon-collections::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.icon-collections::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.icon-collections::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.no-results {
+  padding: 32px;
+  text-align: center;
+  color: #666;
+  font-size: 14px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin: 16px;
+}
+
+/* 优化图标显示 */
+.icon-item {
+  position: relative;
+  min-height: 80px;
+}
+
+.icon-item:hover {
+  background: #f4f4f5;
+}
+
+.icon-item.active {
+  background: #e6f7ff;
+  border: 1px solid #91d5ff;
+}
+
+.icon-name {
+  font-size: 12px;
+  color: #4b5563;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+  padding: 0 4px;
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+}
+
+/* 添加加载状态样式 */
+.icon-collections {
+  position: relative;
+  min-height: 200px;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* 优化滚动条样式 */
+.icon-collections {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+.icon-collections::-webkit-scrollbar {
+  width: 6px;
+}
+
+.icon-collections::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.icon-collections::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.icon-collections::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* 集合标题样式优化 */
+.collection h3 {
+  position: sticky;
+  top: 0;
+  background: white;
+  padding: 16px;
+  margin: 0;
+  font-size: 16px;
+  color: #1f2937;
+  border-bottom: 1px solid #f0f0f0;
+  z-index: 1;
+}
+
+/* 图标网格容器样式优化 */
+.icons-grid {
+  padding: 16px;
+  background: white;
+}
+
+/* 添加响应式布局 */
+@media (max-width: 640px) {
+  .icons-grid {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  }
+  
+  .icon-item {
+    min-height: 60px;
+  }
 }
 </style>

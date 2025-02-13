@@ -1,7 +1,7 @@
 <template>
   <div class="w-full transition-all duration-200 bg-white">
     <header class="w-full">
-      <div class="content-wrapper text-center py-12 md:py-16">
+      <div class="content-wrapper text-center py-4 md:py-8">
         <h1 
           v-if="section.title" 
           class="text-xl md:text-2xl font-bold text-gray-900 mb-4"
@@ -11,27 +11,25 @@
         
         <h2
           v-if="section.subTitle"
-          class="text-lg md:text-xl font-bold text-gray-900 mb-6"
+          class="text-lg md:text-xl text-gray-500 mb-6"
         >
           {{ section.subTitle }}
         </h2>
 
-        <div class="flex justify-center gap-8">
-          <div v-if="section.bottomContent?.author">
-            <span class="text-xs text-gray-600 block mb-1 font-medium">
+        <div class="flex justify-center items-center gap-4">
+          <div v-if="section.bottomContent?.author" class="flex items-center">
+            <span class="text-xs text-gray-600 font-medium">
               {{ authorLabel }}
             </span>
-            <span class="text-xs text-gray-600">
+            <span class="text-xs text-gray-600 ml-1">
               {{ section.bottomContent.author }}
             </span>
           </div>
 
-          <div v-if="section.bottomContent?.publishDate">
-            <span class="text-xs text-gray-600 block mb-1 font-medium">
-              {{ dateLabel }}
-            </span>
+          <div v-if="section.bottomContent?.publishDate" class="flex items-center">
+            <div class="h-4 w-px bg-gray-300 mx-4"></div>
             <span class="text-xs text-gray-600">
-              {{ section.bottomContent.publishDate }}
+              {{ section.bottomContent.publishDate }} · 5 mins read
             </span>
           </div>
         </div>
@@ -62,10 +60,10 @@ export default {
       return /[\u4e00-\u9fa5]/.test(this.section?.title || '')
     },
     authorLabel() {
-      return this.isChineseTitle ? '作者' : 'WRITTEN BY'
+      return this.isChineseTitle ? '作者' : 'By'
     },
     dateLabel() {
-      return this.isChineseTitle ? '发布日期' : 'PUBLISHED ON'
+      return this.isChineseTitle ? '发布日期' : ''
     }
   }
 }
