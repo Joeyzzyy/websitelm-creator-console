@@ -103,31 +103,25 @@
                 </div>
             </div>
               <!-- Media Asset Content -->
-            <template v-if="activeTab === 'images' || activeTab === 'videos'">
-              <a-spin :spinning="mediaLoading">
-                <div class="assets-grid" v-if="!mediaLoading">
-                  <template v-if="!showEmptyState">
+            <template v-if="activeTab === 'images'">
+              <a-spin :spinning="imagesLoading">
+                <div class="assets-grid" v-if="!imagesLoading">
+                  <template v-if="images.length > 0">
                     <a-row :gutter="[16, 16]">
                       <a-col 
-                        v-for="asset in filteredAssets" 
-                        :key="asset.id" 
+                        v-for="image in images" 
+                        :key="image.id" 
                         :xs="24" 
                         :sm="12" 
                         :md="8" 
                         :lg="6"
                       >
                         <div class="asset-card">
-                          <div class="asset-preview" @click="previewAsset(asset)">
+                          <div class="asset-preview" @click="previewAsset(image)">
                             <img 
-                              v-if="asset.type === 'image'" 
-                              :src="asset.url" 
-                              :alt="asset.name"
+                              :src="image.url" 
+                              :alt="image.name"
                             >
-                            <video 
-                              v-else-if="asset.type === 'video'" 
-                              :src="asset.url" 
-                              controls
-                            ></video>
                             <div class="asset-overlay">
                               <eye-outlined class="preview-icon" />
                             </div>
@@ -136,7 +130,7 @@
                                 title="Are you sure you want to delete this file?"
                                 ok-text="Delete"
                                 cancel-text="Cancel"
-                                @confirm="deleteAsset(asset)"
+                                @confirm="deleteAsset(image)"
                                 ok-type="primary"
                                 :ok-button-props="{
                                   style: {
@@ -158,43 +152,135 @@
                           </div>
                           <div class="asset-info">
                             <div class="asset-name-container">
-                              <h4 class="asset-name" :title="asset.name">{{ asset.name }}</h4>
-                              <a-button type="link" class="edit-btn" @click="startEditing(asset)">
+                              <h4 class="asset-name" :title="image.name">{{ image.name }}</h4>
+                              <a-button type="link" class="edit-btn" @click="startEditing(image)">
                                 <edit-outlined />
                               </a-button>
                             </div>
-                            <p class="asset-description" :title="asset.description">
-                              {{ asset.description || 'No description' }}
+                            <p class="asset-description" :title="image.description">
+                              {{ image.description || 'No description' }}
                             </p>
                           </div>
                         </div>
                       </a-col>
                     </a-row>
-
-                    <!-- 添加分页组件 -->
+                    
                     <div class="pagination-wrapper">
                       <a-pagination
-                        v-model:current="currentPage"
-                        :total="total"
-                        :pageSize="pageSize"
+                        :current="imagesPagination.currentPage"
+                        :total="imagesPagination.total"
+                        :pageSize="imagesPagination.pageSize"
                         show-size-changer
-                        @change="handlePageChange"
-                        @showSizeChange="handleSizeChange"
+                        @change="handleImagesPageChange"
+                        @showSizeChange="handleImagesSizeChange"
                       />
                     </div>
                   </template>
                   
-                  <div v-else-if="showEmptyState && activeTab !== 'links'" class="empty-state">
+                  <div v-else class="empty-state">
                     <h3 class="empty-state-title">Your creative canvas awaits! 🎨</h3>
                     <p class="empty-state-description">
-                      Ready to bring your brand to life? Upload your first {{ activeTab === 'images' ? 'image' : 'video' }} and let's make something amazing together.
+                      Ready to bring your brand to life? Upload your first image and let's make something amazing together.
                     </p>
                     <a-button 
                       type="primary" 
                       class="upload-btn-empty" 
                       @click="showUploadModal"
                     >
-                      Upload {{ activeTab === 'images' ? 'Images' : 'Videos' }}
+                      Upload Images
+                    </a-button>
+                  </div>
+                </div>
+              </a-spin>
+            </template>
+            <template v-else-if="activeTab === 'videos'">
+              <a-spin :spinning="videosLoading">
+                <div class="assets-grid" v-if="!videosLoading">
+                  <template v-if="videos.length > 0">
+                    <a-row :gutter="[16, 16]">
+                      <a-col 
+                        v-for="video in videos" 
+                        :key="video.id" 
+                        :xs="24" 
+                        :sm="12" 
+                        :md="8" 
+                        :lg="6"
+                      >
+                        <div class="asset-card">
+                          <div class="asset-preview" @click="previewAsset(video)">
+                            <video 
+                              :src="video.url" 
+                              controls
+                              preload="metadata"
+                            >
+                              <p>Your browser doesn't support HTML5 video.</p>
+                            </video>
+                            <div class="asset-overlay">
+                              <eye-outlined class="preview-icon" />
+                            </div>
+                            <div class="asset-actions">
+                              <a-popconfirm
+                                title="Are you sure you want to delete this file?"
+                                ok-text="Delete"
+                                cancel-text="Cancel"
+                                @confirm="deleteAsset(video)"
+                                ok-type="primary"
+                                :ok-button-props="{
+                                  style: {
+                                    background: 'linear-gradient(135deg, #1890ff, #3B82F6)',
+                                    border: 'none'
+                                  }
+                                }"
+                              >
+                                <a-button 
+                                  type="link" 
+                                  danger 
+                                  class="delete-btn"
+                                  @click.stop
+                                >
+                                  <delete-outlined />
+                                </a-button>
+                              </a-popconfirm>
+                            </div>
+                          </div>
+                          <div class="asset-info">
+                            <div class="asset-name-container">
+                              <h4 class="asset-name" :title="video.name">{{ video.name }}</h4>
+                              <a-button type="link" class="edit-btn" @click="startEditing(video)">
+                                <edit-outlined />
+                              </a-button>
+                            </div>
+                            <p class="asset-description" :title="video.description">
+                              {{ video.description || 'No description' }}
+                            </p>
+                          </div>
+                        </div>
+                      </a-col>
+                    </a-row>
+                    
+                    <div class="pagination-wrapper">
+                      <a-pagination
+                        :current="videosPagination.currentPage"
+                        :total="videosPagination.total"
+                        :pageSize="videosPagination.pageSize"
+                        show-size-changer
+                        @change="handleVideosPageChange"
+                        @showSizeChange="handleVideosSizeChange"
+                      />
+                    </div>
+                  </template>
+                  
+                  <div v-else class="empty-state">
+                    <h3 class="empty-state-title">Your video gallery awaits! 🎬</h3>
+                    <p class="empty-state-description">
+                      Ready to showcase your content? Upload your first video and start engaging your audience.
+                    </p>
+                    <a-button 
+                      type="primary" 
+                      class="upload-btn-empty" 
+                      @click="showUploadModal"
+                    >
+                      Upload Videos
                     </a-button>
                   </div>
                 </div>
@@ -2517,6 +2603,132 @@ export default {
 
     const faviconLoading = ref(false);
 
+    // 分别存储图片和视频数据
+    const images = ref([])
+    const videos = ref([])
+
+    // 分别存储图片和视频的加载状态
+    const imagesLoading = ref(false)
+    const videosLoading = ref(false)
+
+    // 分别存储图片和视频的分页数据
+    const imagesPagination = ref({
+      currentPage: 1,
+      pageSize: 12,
+      total: 0
+    })
+
+    const videosPagination = ref({
+      currentPage: 1,
+      pageSize: 12,
+      total: 0
+    })
+
+    // 分别获取图片和视频数据
+    const fetchImages = async () => {
+      imagesLoading.value = true;
+      try {
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.getMedia(
+          customerId,
+          'image',
+          selectedCategory.value === 'all' ? null : selectedCategory.value,
+          imagesPagination.value.currentPage,
+          imagesPagination.value.pageSize
+        );
+        
+        if (response.data) {
+          images.value = response.data.map(item => ({
+            id: item.mediaId,
+            type: 'image',
+            name: item.mediaName,
+            url: item.mediaUrl,
+            categoryId: item.categoryId,
+            description: item.description,
+            categoryName: item.categoryName,
+            uploadTime: new Date().toISOString(),
+            size: 0,
+          }));
+          imagesPagination.value.total = response.TotalCount || 0;
+        }
+      } catch (error) {
+        console.error('Failed to fetch images:', error);
+        message.error('Failed to load images');
+      } finally {
+        imagesLoading.value = false;
+      }
+    };
+
+    const fetchVideos = async () => {
+      videosLoading.value = true;
+      try {
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.getMedia(
+          customerId,
+          'video',
+          selectedCategory.value === 'all' ? null : selectedCategory.value,
+          videosPagination.value.currentPage,
+          videosPagination.value.pageSize
+        );
+        
+        if (response.data) {
+          videos.value = response.data.map(item => ({
+            id: item.mediaId,
+            type: 'video',
+            name: item.mediaName,
+            url: item.mediaUrl,
+            categoryId: item.categoryId,
+            description: item.description,
+            categoryName: item.categoryName,
+            uploadTime: new Date().toISOString(),
+            size: 0,
+            duration: 0
+          }));
+          videosPagination.value.total = response.TotalCount || 0;
+        }
+      } catch (error) {
+        console.error('Failed to fetch videos:', error);
+        message.error('Failed to load videos');
+      } finally {
+        videosLoading.value = false;
+      }
+    };
+
+    // 分页处理方法
+    const handleImagesPageChange = (page, size) => {
+      imagesPagination.value.currentPage = page;
+      imagesPagination.value.pageSize = size || imagesPagination.value.pageSize;
+      fetchImages();
+    };
+
+    const handleVideosPageChange = (page, size) => {
+      videosPagination.value.currentPage = page;
+      videosPagination.value.pageSize = size || videosPagination.value.pageSize;
+      fetchVideos();
+    };
+
+    const handleImagesSizeChange = (current, size) => {
+      imagesPagination.value.currentPage = 1;
+      imagesPagination.value.pageSize = size;
+      fetchImages();
+    };
+
+    const handleVideosSizeChange = (current, size) => {
+      videosPagination.value.currentPage = 1;
+      videosPagination.value.pageSize = size;
+      fetchVideos();
+    };
+
+    // 监听标签页切换
+    watch(activeTab, (newValue) => {
+      if (newValue === 'images') {
+        fetchImages();
+      } else if (newValue === 'videos') {
+        fetchVideos();
+      }
+      // ... 其他标签页的处理 ...
+    });
+
     return {
       domainConfigured,
       loading,
@@ -2639,6 +2851,18 @@ export default {
       taskbarInput,
       iosInput,
       faviconLoading,
+      images,
+      imagesLoading,
+      videos,
+      videosLoading,
+      imagesPagination,
+      videosPagination,
+      fetchImages,
+      fetchVideos,
+      handleImagesPageChange,
+      handleVideosPageChange,
+      handleImagesSizeChange,
+      handleVideosSizeChange,
     }
   }
 }
