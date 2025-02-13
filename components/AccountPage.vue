@@ -138,16 +138,22 @@
                             <h3>Create Password</h3>
                             <div class="email-change-form">
                             <a-form
+                                ref="formRef"
                                 :model="passwordForm"
                                 layout="vertical"
                                 class="password-form"
+                                :rules="{
+                                  newPassword: [
+                                    { required: true, validator: validatePassword, trigger: 'change' }
+                                  ],
+                                  confirmPassword: [
+                                    { required: true, validator: validateConfirmPassword, trigger: 'change' }
+                                  ]
+                                }"
                             >
                                 <a-form-item 
+                                name="newPassword"
                                 label="New Password"
-                                :rules="[
-                                    { required: true, message: 'Please input new password!' },
-                                    { validator: validatePassword }
-                                ]"
                                 >
                                 <a-input-password
                                     v-model:value="passwordForm.newPassword"
@@ -161,11 +167,8 @@
                                 </a-form-item>
 
                                 <a-form-item 
+                                name="confirmPassword"
                                 label="Confirm Password"
-                                :rules="[
-                                    { required: true, message: 'Please confirm your password!' },
-                                    { validator: validateConfirmPassword }
-                                ]"
                                 >
                                 <a-input-password
                                     v-model:value="passwordForm.confirmPassword"
@@ -204,12 +207,22 @@
                             <h3>Verify Identity</h3>
                             <div class="email-change-form">
                             <a-form
+                                ref="formRef"
                                 :model="passwordForm"
                                 layout="vertical"
                                 class="password-form"
+                                :rules="{
+                                  newPassword: [
+                                    { required: true, validator: validatePassword, trigger: 'change' }
+                                  ],
+                                  confirmPassword: [
+                                    { required: true, validator: validateConfirmPassword, trigger: 'change' }
+                                  ]
+                                }"
                             >
                                 <a-form-item 
                                 label="Verification Code"
+                                name="code"
                                 :rules="[{ required: true, message: 'Please input verification code!' }]"
                                 >
                                 <div class="email-input-group">
@@ -230,11 +243,8 @@
                                 </a-form-item>
 
                                 <a-form-item 
+                                name="newPassword"
                                 label="New Password"
-                                :rules="[
-                                    { required: true, message: 'Please input new password!' },
-                                    { validator: validatePassword }
-                                ]"
                                 >
                                 <a-input-password
                                     v-model:value="passwordForm.newPassword"
@@ -248,11 +258,8 @@
                                 </a-form-item>
 
                                 <a-form-item 
+                                name="confirmPassword"
                                 label="Confirm Password"
-                                :rules="[
-                                    { required: true, message: 'Please confirm your password!' },
-                                    { validator: validateConfirmPassword }
-                                ]"
                                 >
                                 <a-input-password
                                     v-model:value="passwordForm.confirmPassword"
@@ -818,6 +825,7 @@
         return 'Pending';
       };
   
+      const formRef = ref();
       const passwordForm = ref({
         newPassword: '',
         confirmPassword: '',
@@ -850,76 +858,105 @@
         }
       });
   
-      const validatePassword = (rule, value) => {
-        const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
+      const validatePassword = async (_rule, value) => {
         if (!value) {
-          return Promise.reject('Please input your password!');
+          throw new Error('Please input your password!');
         }
-        if (!passwordRegex.test(value)) {
-          return Promise.reject('Password must contain at least one uppercase letter, one lowercase letter, and one number');
+        if (value.length < 8) {
+          throw new Error('Password must be at least 8 characters!');
         }
-        return Promise.resolve();
+        if (!/[A-Z]/.test(value)) {
+          throw new Error('Password must contain at least one uppercase letter!');
+        }
+        if (!/[a-z]/.test(value)) {
+          throw new Error('Password must contain at least one lowercase letter!');
+        }
+        if (!/\d/.test(value)) {
+          throw new Error('Password must contain at least one number!');
+        }
       };
   
-      const validateConfirmPassword = (rule, value) => {
+      const validateConfirmPassword = async (_rule, value) => {
         if (!value) {
-          return Promise.reject('Please confirm your password!');
+          throw new Error('Please confirm your password!');
         }
         if (value !== passwordForm.value.newPassword) {
-          return Promise.reject('The two passwords do not match!');
+          throw new Error('The two passwords do not match!');
         }
-        return Promise.resolve();
       };
   
       const handleSetPassword = async () => {
-        if (!passwordForm.value.newPassword || !passwordForm.value.confirmPassword) {
-          message.error('Please fill in all fields');
-          return;
-        }
-  
-        submitLoading.value = true;
         try {
+          await formRef.value.validate();
+          submitLoading.value = true;
+          
           const response = await apiClient.changePassword({
             newPassword: passwordForm.value.newPassword,
             confirmPassword: passwordForm.value.confirmPassword
           });
-  
+
           if (response?.code === 200) {
             message.success('Password set successfully');
             await loadProductInfo();
+          } else {
+            // 处理错误响应
+            message.error(response.message || 'Failed to set password');
           }
         } catch (error) {
-          message.error('Failed to set password');
+          // 处理 API 调用错误
+          if (error.response?.data) {
+            message.error(error.response.data.message || 'Failed to set password');
+          } else {
+            message.error('Failed to set password');
+          }
         } finally {
           submitLoading.value = false;
         }
       };
   
       const handleChangePassword = async () => {
-        if (!passwordForm.value.code || !passwordForm.value.newPassword || !passwordForm.value.confirmPassword) {
-          message.error('Please fill in all fields');
-          return;
-        }
-  
-        submitLoading.value = true;
         try {
+          await formRef.value.validate();
+          submitLoading.value = true;
+          
           const response = await apiClient.resetPassword({
-            email: productInfo.value.email,
+            email: currentEmail.value,
             code: passwordForm.value.code,
             newPassword: passwordForm.value.newPassword,
             confirmPassword: passwordForm.value.confirmPassword
           });
-  
+
           if (response?.code === 200) {
             message.success('Password changed successfully');
+            // 清空表单
             passwordForm.value = {
               code: '',
               newPassword: '',
               confirmPassword: ''
             };
+            // 清除倒计时
+            cooldown.value = 0;
+            if (cooldownTimer.value) {
+              clearInterval(cooldownTimer.value);
+              cooldownTimer.value = null;
+            }
+          } else {
+            // 处理错误响应
+            if (response?.code === 400) {
+              if (response.message === 'Invalid verification code') {
+                message.error('The verification code is incorrect');
+              } else {
+                message.error(response.message || 'Failed to change password');
+              }
+            }
           }
         } catch (error) {
-          message.error('Failed to change password');
+          // 处理 API 调用错误
+          if (error.response?.data) {
+            message.error(error.response.data.message || 'Failed to change password');
+          } else {
+            message.error('Failed to change password');
+          }
         } finally {
           submitLoading.value = false;
         }
@@ -927,7 +964,7 @@
   
       const sendResetCode = async () => {
         try {
-          await apiClient.sendEmailCode(productInfo.value.email, 'forgot_password');
+          await apiClient.sendEmailCode(currentEmail.value, 'forgot_password');
           
           cooldown.value = 60;
           cooldownTimer.value = setInterval(() => {
@@ -991,6 +1028,7 @@
         currentPlan,
         usageInfo,
         formatDate,
+        formRef,
       };
     }
   }
