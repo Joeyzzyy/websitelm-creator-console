@@ -891,23 +891,28 @@
           submitLoading.value = true;
           
           const response = await apiClient.changePassword({
+            currentPassword: '', 
             newPassword: passwordForm.value.newPassword,
-            confirmPassword: passwordForm.value.confirmPassword
+            confirmPassword: passwordForm.value.confirmPassword,
+            isInitPassword: true
           });
 
           if (response?.code === 200) {
             message.success('Password set successfully');
             await loadProductInfo();
+            passwordForm.value = {
+              newPassword: '',
+              confirmPassword: '',
+              code: ''
+            };
           } else {
-            // 处理错误响应
-            message.error(response.message || 'Failed to set password');
+            message.error(response.message || 'Password setting failed');
           }
         } catch (error) {
-          // 处理 API 调用错误
           if (error.response?.data) {
-            message.error(error.response.data.message || 'Failed to set password');
+            message.error(error.response.data.message || 'Password setting failed');
           } else {
-            message.error('Failed to set password');
+            message.error('Password setting failed');
           }
         } finally {
           submitLoading.value = false;
