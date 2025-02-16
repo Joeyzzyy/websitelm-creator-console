@@ -367,59 +367,61 @@
                       <!-- Outline 内容部分 -->
                       <div class="plan-section">
                         <!-- Update task progress section -->
-                        <div class="task-progress-section">
-                          <a-alert
-                            :type="outlineGenerationStatus === 'failed' ? 'error' : 'info'"
-                            class="task-alert"
-                            :class="[outlineGenerationStatus]"
-                          >
-                            <template #icon>
-                              <LoadingOutlined v-if="outlineGenerationStatus === 'processing'" spin />
-                              <CheckCircleOutlined v-else-if="outlineGenerationStatus === 'finished'" style="color: #52c41a" />
-                              <CloseCircleOutlined v-else-if="outlineGenerationStatus === 'failed'" style="color: #ff4d4f" />
-                            </template>
-                            <template #message>
-                              <div class="task-progress-content">
-                                <div class="task-info">
-                                  <template v-if="isLoadingTaskInfo">
-                                    <div class="loading-task-info">
-                                      <a-spin size="small" />
-                                      <span class="loading-text">Loading task information...</span>
-                                    </div>
-                                  </template>
-                                  <template v-else>
-                                    <div class="status-header">
-                                      <span class="task-status" :style="statusColor">
-                                        <template v-if="outlineGenerationStatus === 'processing'">
-                                          🚀 Generating Content Plans...
+                        <template v-if="shouldShowTaskStatus">
+                          <div class="task-progress-section">
+                            <a-alert
+                              :type="outlineGenerationStatus === 'failed' ? 'error' : 'info'"
+                              class="task-alert"
+                              :class="[outlineGenerationStatus]"
+                            >
+                              <template #icon>
+                                <LoadingOutlined v-if="outlineGenerationStatus === 'processing'" spin />
+                                <CheckCircleOutlined v-else-if="outlineGenerationStatus === 'finished'" style="color: #52c41a" />
+                                <CloseCircleOutlined v-else-if="outlineGenerationStatus === 'failed'" style="color: #ff4d4f" />
+                              </template>
+                              <template #message>
+                                <div class="task-progress-content">
+                                  <div class="task-info">
+                                    <template v-if="isLoadingTaskInfo">
+                                      <div class="loading-task-info">
+                                        <a-spin size="small" />
+                                        <span class="loading-text">Loading task information...</span>
+                                      </div>
+                                    </template>
+                                    <template v-else>
+                                      <div class="status-header">
+                                        <span class="task-status" :style="statusColor">
+                                          <template v-if="outlineGenerationStatus === 'processing'">
+                                            🚀 Generating Content Plans...
+                                          </template>
+                                          <template v-else-if="outlineGenerationStatus === 'finished'">
+                                            ✅ Generation Completed
+                                          </template>
+                                          <template v-else-if="outlineGenerationStatus === 'failed'">
+                                            ❌ Generation Failed
+                                          </template>
+                                        </span>
+                                        <a-tag :color="getStatusTagColor(outlineGenerationStatus)">
+                                          {{ taskDescription }}
+                                        </a-tag>
+                                      </div>
+                                      <div class="timing-info">
+                                        <template v-if="taskStartTime">
+                                          <span class="time-label">Started:</span>
+                                          <span class="time-value">{{ formatTime(taskStartTime) }}</span>
                                         </template>
-                                        <template v-else-if="outlineGenerationStatus === 'finished'">
-                                          ✅ Generation Completed
+                                        <template v-if="outlineGenerationStatus === 'finished' && taskEndTime">
+                                          <span class="time-label">Completed:</span>
+                                          <span class="time-value">{{ formatTime(taskEndTime) }}</span>
                                         </template>
-                                        <template v-else-if="outlineGenerationStatus === 'failed'">
-                                          ❌ Generation Failed
-                                        </template>
-                                      </span>
-                                      <a-tag :color="getStatusTagColor(outlineGenerationStatus)">
-                                        {{ taskDescription }}
-                                      </a-tag>
-                                    </div>
-                                    <div class="timing-info">
-                                      <template v-if="taskStartTime">
-                                        <span class="time-label">Started:</span>
-                                        <span class="time-value">{{ formatTime(taskStartTime) }}</span>
-                                      </template>
-                                      <template v-if="outlineGenerationStatus === 'finished' && taskEndTime">
-                                        <span class="time-label">Completed:</span>
-                                        <span class="time-value">{{ formatTime(taskEndTime) }}</span>
-                                      </template>
-                                    </div>
-                                  </template>
+                                      </div>
+                                    </template>
+                                  </div>
                                 </div>
-                              </div>
-                            </template>
-                          </a-alert>
-                        </div>
+                              </template>
+                            </a-alert>
+                          </div>
+                        </template>
 
                         <a-tabs 
                           v-model:activeKey="contentPlanTab" 
@@ -451,23 +453,26 @@
                               
                               <div v-else-if="contentPlans.length === 0" class="empty-outlines-state">
                                 <div class="empty-content">
-                                  <RobotOutlined class="empty-icon" />
-                                  <h3>No Content Plans Yet</h3>
-                                  <p>Let AI help you select the best keywords and generate content plans</p>
-                                  <a-tooltip :title="getAIButtonTooltip">
-                                    <a-button 
-                                      @click="showAISelectionConfirm"
-                                      :loading="isAISelecting"
-                                      class="generate-btn ai-autopilot-btn"
-                                      :disabled="isGenerating || outlineGenerationStatus === 'processing'"
-                                    >
-                                      <template #icon>
-                                        <ThunderboltOutlined />
-                                      </template>
-                                      <span class="btn-text">AI Autopilot</span>
-                                      <span class="ai-badge">Recommended</span>
-                                    </a-button>
-                                  </a-tooltip>
+                                  <FileSearchOutlined class="empty-icon" />
+                                  <h3>No Content Outlines Yet</h3>
+                                  <p>Use AI Autopilot to generate content outlines based on your selected keywords</p>
+                                  
+                                  <div class="action-buttons" style="justify-content: center;">
+                                    <a-tooltip :title="getAIButtonTooltip">
+                                      <a-button 
+                                        @click="showAISelectionConfirm"
+                                        class="generate-btn ai-autopilot-btn"
+                                        :loading="isAISelecting"
+                                        :disabled="isGenerating || outlineGenerationStatus === 'processing'"
+                                      >
+                                        <template #icon>
+                                          <ThunderboltOutlined />
+                                        </template>
+                                        <span class="btn-text">AI Autopilot</span>
+                                        <span class="ai-badge">Recommended</span>
+                                      </a-button>
+                                    </a-tooltip>
+                                  </div>
                                 </div>
                               </div>
 
@@ -1047,7 +1052,8 @@ import {
   RocketOutlined,
   UpOutlined,
   DownOutlined,
-  GiftOutlined
+  GiftOutlined,
+  FileSearchOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import api from '../api/api'
@@ -1109,7 +1115,8 @@ export default defineComponent({
     RocketOutlined,
     UpOutlined,
     DownOutlined,
-    GiftOutlined
+    GiftOutlined,
+    FileSearchOutlined
   },
   setup() {
     const selectedKeywords = ref([])
@@ -1736,15 +1743,27 @@ export default defineComponent({
       try {
         const response = await api.getAnalysisStatus('composite_generator')
         
-        if (response?.code === 200 && response?.data) {
-          outlineGenerationStatus.value = response.data.status
-          taskStartTime.value = response.data.startTime
-          taskEndTime.value = response.data.endTime
-          taskDescription.value = formatTaskDescription(response.data.description)
-          
-          if (response.data.status === 'finished') {
-            clearInterval(pollingInterval.value)
-            hasGenerated.value = true
+        if (response?.code === 200) {
+          // 处理 data 为 null 的情况
+          if (!response.data) {
+            // 如果 data 为 null，使用 analysisStatus
+            outlineGenerationStatus.value = response.analysisStatus
+            
+            if (response.analysisStatus === 'not_started') {
+              clearInterval(pollingInterval.value)
+              hasGenerated.value = true
+            }
+          } else {
+            // 原有的 data 处理逻辑
+            outlineGenerationStatus.value = response.data.status
+            taskStartTime.value = response.data.startTime
+            taskEndTime.value = response.data.endTime
+            taskDescription.value = formatTaskDescription(response.data.description)
+            
+            if (response.data.status === 'finished') {
+              clearInterval(pollingInterval.value)
+              hasGenerated.value = true
+            }
           }
         }
         return response
@@ -3229,6 +3248,12 @@ export default defineComponent({
       isKrsExpanded.value = !isKrsExpanded.value
     }
 
+    // 在 setup 中添加计算属性
+    const shouldShowTaskStatus = computed(() => {
+      return outlineGenerationStatus.value !== 'not_started' && 
+             outlineGenerationStatus.value !== null;
+    })
+
     return {
       taskStartTime,
       taskEndTime,
@@ -3409,7 +3434,8 @@ export default defineComponent({
       packageStatusSection,
       handleUpgrade,
       isKrsExpanded,
-      toggleKrsInfo
+      toggleKrsInfo,
+      shouldShowTaskStatus
     }
   }
 })
@@ -4276,6 +4302,16 @@ export default defineComponent({
 .empty-content p {
   color: #8c8c8c;
   margin-bottom: 24px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  position: relative;
+  overflow: visible !important;
+  justify-content: center; /* 确保按钮居中 */
+  width: 100%; /* 确保容器占满宽度 */
 }
 
 /* AI Autopilot 按钮样式 */
