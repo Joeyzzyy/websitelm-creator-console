@@ -1045,7 +1045,8 @@ import {
   FileAddOutlined,
   RocketOutlined,
   UpOutlined,
-  DownOutlined
+  DownOutlined,
+  GiftOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import api from '../api/api'
@@ -1106,7 +1107,8 @@ export default defineComponent({
     FileAddOutlined,
     RocketOutlined,
     UpOutlined,
-    DownOutlined
+    DownOutlined,
+    GiftOutlined
   },
   setup() {
     const selectedKeywords = ref([])
@@ -3190,7 +3192,34 @@ export default defineComponent({
 
     // Add upgrade handler
     const handleUpgrade = () => {
-      router.push('/account/billing')
+      Modal.info({
+        title: 'Free Pro Package Upgrade',
+        content: h('div', {}, [
+          h('p', { style: 'margin-bottom: 16px;' }, 
+            'Our package upgrade feature is coming soon! To ensure the best experience for you, we will:'
+          ),
+          h('ul', { style: 'margin-bottom: 16px; padding-left: 20px;' }, [
+            h('li', { style: 'margin-bottom: 8px;' }, 
+              'Upgrade your account to Pro Package for free'
+            ),
+            h('li', { style: 'margin-bottom: 8px;' }, 
+              'Provide full access to premium keyword data'
+            ),
+            h('li', 
+              'Complete the upgrade within 24-48 hours'
+            )
+          ]),
+          h('p', { style: 'color: #8c8c8c; font-size: 13px;' },
+            'Please wait patiently while we process your upgrade. Thank you for your understanding!'
+          )
+        ]),
+        width: 500,
+        okText: 'Got it',
+        icon: h(GiftOutlined, { style: 'color: #2563eb; font-size: 22px;' }),
+        centered: true,
+        maskClosable: true,
+        class: 'upgrade-modal'
+      })
     }
 
     const isKrsExpanded = ref(true)
