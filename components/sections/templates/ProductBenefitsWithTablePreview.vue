@@ -38,13 +38,13 @@
               :key="index"
               class="flex items-start gap-4 p-4 hover:bg-gray-50/80 transition-colors"
             >
-              <div class="w-6 h-6 flex-shrink-0 rounded-lg flex items-center justify-center bg-gray-100">
+              <div class="w-4 h-4 flex-shrink-0 rounded-lg flex items-center justify-center bg-gray-100">
                 <Icon 
                   v-if="item.icon"
                   :icon="item.icon"
                   class="text-gray-600"
-                  width="16"
-                  height="16"
+                  width="12"
+                  height="12"
                 />
               </div>
               <div class="flex-1">

@@ -87,6 +87,35 @@
                 </div>
               </div>
 
+              <!-- Add Package Status Section -->
+              <div v-if="packageStatusSection" class="package-status-section">
+                <div 
+                  class="status-card"
+                  :style="{
+                    background: packageStatusSection.bgColor,
+                    borderColor: packageStatusSection.borderColor
+                  }"
+                >
+                  <component 
+                    :is="packageStatusSection.icon" 
+                    class="status-icon"
+                    :style="{ color: packageStatusSection.iconColor }"
+                  />
+                  <div class="status-content">
+                    <h4>{{ packageStatusSection.title }}</h4>
+                    <p>{{ packageStatusSection.description }}</p>
+                    <a-button 
+                      v-if="packageStatusSection.showUpgradeButton"
+                      type="primary"
+                      class="upgrade-btn"
+                      @click="handleUpgrade"
+                    >
+                      Upgrade Now
+                    </a-button>
+                  </div>
+                </div>
+              </div>
+
               <!-- 添加新的按钮区域 -->
               <div class="navigation-actions">
                 <a-button 
@@ -196,11 +225,15 @@
                   >
                     <a-tab-pane key="ai" tab="AI Recommendations">
                       <div class="krs-info-card">
-                        <div class="krs-header">
+                        <div class="krs-header" @click="toggleKrsInfo">
                           <TrophyOutlined class="krs-icon" />
                           <h3>Keyword Ranking Score (KRS)</h3>
+                          <a-button type="link" class="toggle-btn">
+                            <component :is="isKrsExpanded ? 'UpOutlined' : 'DownOutlined'" />
+                          </a-button>
                         </div>
-                        <div class="krs-content">
+                        
+                        <div class="krs-content" v-show="isKrsExpanded">
                           <p class="krs-description">
                             Our AI-powered KRS system analyzes competitor performance and market opportunities to rank keywords from P1 to P5.
                           </p>
@@ -1010,6 +1043,9 @@ import {
   DownloadOutlined,
   FileExcelOutlined,
   FileAddOutlined,
+  RocketOutlined,
+  UpOutlined,
+  DownOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import api from '../api/api'
@@ -1068,6 +1104,9 @@ export default defineComponent({
     QuestionCircleOutlined,
     Tag,
     FileAddOutlined,
+    RocketOutlined,
+    UpOutlined,
+    DownOutlined
   },
   setup() {
     const selectedKeywords = ref([])
@@ -1187,7 +1226,10 @@ export default defineComponent({
     onMounted(async () => {
       loading.value = true
       try {
-        await checkDomainStatus()
+        await Promise.all([
+          checkDomainStatus(),
+          fetchUserPackage()
+        ])
 
         if (domainConfigured.value) {
           await checkAnalysisStatus()
@@ -3093,6 +3135,70 @@ export default defineComponent({
       return typeColors[pageType] || 'default';
     };
 
+    // Add new refs
+    const userPackage = ref(null)
+    const isProfessional = computed(() => {
+      return userPackage.value?.name?.includes('Professional')
+    })
+    const isStandard = computed(() => {
+      return userPackage.value?.name?.includes('Standard')
+    })
+
+    // Add method to fetch package info
+    const fetchUserPackage = async () => {
+      try {
+        const response = await api.getCustomerPackage()
+        if (response?.data) {
+          userPackage.value = {
+            name: response.data.packageName?.trim() || 'Professional',
+            period: response.data.packageName?.toLowerCase().includes('monthly') ? 'monthly' : 'yearly',
+            endDate: response.data.packageEndTime,
+            remainingDays: response.data.remainingDays
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch user package:', error)
+      }
+    }
+
+    // Add package status section
+    const packageStatusSection = computed(() => {
+      if (!userPackage.value) return null
+
+      if (isProfessional.value) {
+        return {
+          icon: 'CheckCircleOutlined',
+          iconColor: '#52c41a',
+          title: 'Professional Plan Activated!',
+          description: 'You already have full access to premium keyword data from all keyword channels.',
+          bgColor: '#f6ffed',
+          borderColor: '#b7eb8f'
+        }
+      } else if (isStandard.value) {
+        return {
+          icon: 'RocketOutlined',
+          iconColor: '#1890ff',
+          title: 'Unlock More Keywords',
+          description: 'Upgrade to Professional to access tens of thousands of keyword data from Semrush and Ahrefs freely!',
+          bgColor: '#e6f7ff',
+          borderColor: '#91d5ff',
+          showUpgradeButton: true
+        }
+      }
+      return null
+    })
+
+    // Add upgrade handler
+    const handleUpgrade = () => {
+      router.push('/account/billing')
+    }
+
+    const isKrsExpanded = ref(true)
+    
+    const toggleKrsInfo = () => {
+      isKrsExpanded.value = !isKrsExpanded.value
+    }
+
     return {
       taskStartTime,
       taskEndTime,
@@ -3267,6 +3373,13 @@ export default defineComponent({
       getAIButtonTooltip,
       handleSinglePageGeneration,
       getPageTypeColor,
+      userPackage,
+      isProfessional,
+      isStandard,
+      packageStatusSection,
+      handleUpgrade,
+      isKrsExpanded,
+      toggleKrsInfo
     }
   }
 })
@@ -4291,7 +4404,6 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 12px;
 }
 
 .krs-icon {
@@ -4679,5 +4791,71 @@ export default defineComponent({
 
 .action-buttons .ant-btn[disabled] {
   cursor: not-allowed;
+}
+
+.package-status-section {
+  margin: 16px 0;
+  padding: 0 12px;
+}
+
+.status-card {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid;
+  transition: all 0.3s ease;
+}
+
+.status-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.status-content {
+  margin-top: 12px;
+}
+
+.status-content h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.status-content p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #595959;
+}
+
+.upgrade-btn {
+  margin-top: 12px;
+  font-size: 12px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 4px;
+}
+
+.krs-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+}
+
+.krs-header:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.toggle-btn {
+  margin-left: auto;
+  padding: 4px;
+}
+
+.krs-content {
+  padding-top: 12px;
+  transition: all 0.3s;
 }
 </style>
