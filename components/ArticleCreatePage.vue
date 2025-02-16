@@ -723,7 +723,6 @@ export default defineComponent({
       }
     };
 
-    // 添加新响���式变量来跟踪拖拽的源引
     const dragSourceIndex = ref(null);
 
     // 添加组件到文章

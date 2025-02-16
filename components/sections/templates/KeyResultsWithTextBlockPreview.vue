@@ -162,58 +162,6 @@ const props = defineProps({
 const containerRef = ref(null)
 const stickyRef = ref(null)
 
-const parseHtmlContent = (htmlString) => {
-  if (!htmlString) return []
-  
-  const result = []
-  let currentIndex = 0
-  const tagRegex = /<(a|i|b)(?:\s+(?:[^>]*?\s+)?href="([^"]*)")?[^>]*>(.*?)<\/\1>/g
-  
-  let match
-  while ((match = tagRegex.exec(htmlString)) !== null) {
-    if (match.index > currentIndex) {
-      result.push({
-        type: 'text',
-        content: htmlString.slice(currentIndex, match.index)
-      })
-    }
-    
-    const tagType = match[1]
-    if (tagType === 'a') {
-      let href = match[2]
-      if (!href.match(/^https?:\/\//)) {
-        href = `https://${href}`
-      }
-      result.push({
-        type: 'link',
-        href: href,
-        content: match[3]
-      })
-    } else if (tagType === 'i') {
-      result.push({
-        type: 'italic',
-        content: match[3]
-      })
-    } else if (tagType === 'b') {
-      result.push({
-        type: 'bold',
-        content: match[3]
-      })
-    }
-    
-    currentIndex = match.index + match[0].length
-  }
-  
-  if (currentIndex < htmlString.length) {
-    result.push({
-      type: 'text',
-      content: htmlString.slice(currentIndex)
-    })
-  }
-  
-  return result
-}
-
 const handleScroll = () => {
   if (!containerRef.value || !stickyRef.value) return
   
@@ -403,8 +351,6 @@ const parseContent = (content) => {
   
   const results = Array.from(doc.body.childNodes).flatMap(processNode);
   
-  // 清理多余的换行
-  // 1. 移除开头的换行
   while (results.length > 0 && 
          results[0].type === 'text' && 
          results[0].content.trim() === '') {

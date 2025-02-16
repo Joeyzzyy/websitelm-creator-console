@@ -2,50 +2,6 @@
   <div class="section-wrapper">
     <div class="editor-area">
       <div class="editor-content">
-        <!-- 顶部内容 -->
-        
-
-        <!-- 左侧指标部分 -->
-        <div class="left-content">
-          <a-form layout="vertical">
-            <div v-for="(item, index) in localSection.leftContent" :key="index">
-              <a-form-item :label="`Result ${index + 1}`">
-                <div class="display-switch">
-                  <span class="switch-label">Display Or Not:</span>
-                  <a-switch
-                    v-model:checked="item.display"
-                    :disabled="disabled"
-                    @change="handleChange"
-                  />
-                </div>
-                
-                <div class="input-with-tag" v-show="item.display">
-                  <span class="html-tag">{{ tags.percentage }}</span>
-                  <a-input
-                    v-model:value="item.percentage"
-                    :disabled="disabled"
-                    placeholder="Achievement percentage"
-                    @change="handleChange"
-                  />
-                </div>
-                
-                <div class="input-with-tag" v-show="item.display">
-                  <span class="html-tag">{{ tags.description }}</span>
-                  <a-textarea
-                    v-model:value="item.description"
-                    :disabled="disabled"
-                    :rows="4"
-                    placeholder="Metric description"
-                    @change="handleChange"
-                    :style="{ minHeight: '60px' }"
-                  />
-                </div>
-              </a-form-item>
-            </div>
-          </a-form>
-        </div>
-
-        <!-- 右侧内容部分 - 简化为单个编辑器 -->
         <div class="right-content">
           <div class="content-header-with-button">
             <span>Blog Content</span>
@@ -783,11 +739,6 @@ export default {
 
 .left-content {
   margin-bottom: 32px;
-}
-
-.right-content {
-  border-top: 1px solid #f0f0f0;
-  padding-top: 24px;
 }
 
 .content-header-with-button {

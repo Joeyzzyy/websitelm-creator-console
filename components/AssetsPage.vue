@@ -53,7 +53,7 @@
             >
               <span class="btn-content">
                 <sync-outlined :spin="regrabLoading" />
-                <span>Regrab Info</span>
+                <span>Rebuild Knowledge Base</span>
               </span>
             </a-button>
           </template>

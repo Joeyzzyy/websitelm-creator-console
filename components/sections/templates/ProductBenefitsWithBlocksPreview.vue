@@ -43,12 +43,12 @@ const handleRedirect = (e) => {
           :key="index"
           class="p-4 rounded-lg border border-gray-100 transition-all duration-200 hover:shadow-sm bg-white"
         >
-          <div v-if="module.icon" class="w-6 h-6 flex items-center justify-center rounded-lg bg-gray-100 mb-2">
+          <div v-if="module.icon" class="w-4 h-4 flex items-center justify-center rounded-lg bg-gray-100 mb-2">
             <Icon 
               :icon="module.icon"
               class="text-gray-600"
-              width="16"
-              height="16"
+              width="12"
+              height="12"
             />
           </div>
           <h3 class="text-sm font-semibold text-gray-900 mb-1.5">

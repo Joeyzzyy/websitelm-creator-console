@@ -214,9 +214,22 @@ const getSocialIcon = (platform) => {
 
 .main-content {
   display: grid;
-  grid-template-columns: 2fr 1fr 2fr;
-  gap: 32px;
+  grid-template-columns: 1.5fr repeat(3, 1fr);
+  gap: 24px;
   flex: 1;
+}
+
+.company-section {
+  grid-column: 1;
+}
+
+.nav-section {
+  padding: 0 16px;
+  min-width: 0; /* 防止内容溢出 */
+}
+
+.newsletter-section {
+  grid-column: 4;
 }
 
 .footer-bottom {
@@ -284,10 +297,6 @@ const getSocialIcon = (platform) => {
 
 .feature-link:hover {
   color: #ffffff;
-}
-
-.newsletter-section {
-  grid-column: 3;
 }
 
 .newsletter-desc {
@@ -369,10 +378,6 @@ const getSocialIcon = (platform) => {
   .footer-bottom-left {
     justify-content: center;
   }
-}
-
-.nav-section {
-  padding: 0 16px;
 }
 
 .nav-links {
