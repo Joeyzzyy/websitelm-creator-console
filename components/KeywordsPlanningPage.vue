@@ -136,14 +136,15 @@
                   <a-tooltip :title="getAIButtonTooltip">
                     <a-button 
                       @click="showAISelectionConfirm"
-                      class="generate-btn"
+                      class="generate-btn ai-autopilot-btn"
                       :loading="isAISelecting"
                       :disabled="isGenerating || outlineGenerationStatus === 'processing'"
                     >
                       <template #icon>
                         <ThunderboltOutlined />
                       </template>
-                      AI Autopilot
+                      <span class="btn-text">AI Autopilot</span>
+                      <span class="ai-badge">Recommended</span>
                     </a-button>
                   </a-tooltip>
 
@@ -455,16 +456,16 @@
                                   <p>Let AI help you select the best keywords and generate content plans</p>
                                   <a-tooltip :title="getAIButtonTooltip">
                                     <a-button 
-                                      type="primary"
                                       @click="showAISelectionConfirm"
                                       :loading="isAISelecting"
-                                      class="generate-btn"
+                                      class="generate-btn ai-autopilot-btn"
                                       :disabled="isGenerating || outlineGenerationStatus === 'processing'"
                                     >
                                       <template #icon>
                                         <ThunderboltOutlined />
                                       </template>
-                                      AI Autopilot
+                                      <span class="btn-text">AI Autopilot</span>
+                                      <span class="ai-badge">Recommended</span>
                                     </a-button>
                                   </a-tooltip>
                                 </div>
@@ -490,7 +491,7 @@
                                           Rec.Pub: {{ formatDate(plan.recommendedReleaseTime) }}
                                         </span>
                                       </div>
-                                      <div class="action-buttons">
+                                      <div class="action-buttons" style="position: relative; overflow: visible;">
                                         <a-button 
                                           type="primary"
                                           ghost
@@ -601,7 +602,7 @@
                                           Rec.Pub: {{ formatDate(plan.recommendedReleaseTime) }}
                                         </span>
                                       </div>
-                                      <div class="action-buttons">
+                                      <div class="action-buttons" style="position: relative; overflow: visible;">
                                         <a-button 
                                           type="primary"
                                           ghost
@@ -4812,6 +4813,8 @@ export default defineComponent({
   display: flex;
   gap: 8px;
   align-items: center;
+  position: relative;
+  overflow: visible !important; /* 确保溢出内容可见 */
 }
 
 .action-buttons .ant-btn {
@@ -4886,5 +4889,98 @@ export default defineComponent({
 .krs-content {
   padding-top: 12px;
   transition: all 0.3s;
+}
+
+.ai-autopilot-btn {
+  position: relative;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  font-weight: 600;
+  padding: 0 24px;
+  height: 40px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  animation: pulse 2s infinite;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  /* 增加右侧内边距，为 badge 留出空间 */
+  padding-right: 32px;
+  overflow: visible !important; /* 确保按钮的溢出内容可见 */
+}
+
+.ai-autopilot-btn:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+
+.ai-autopilot-btn:active {
+  transform: translateY(0);
+}
+
+.ai-autopilot-btn .anticon {
+  font-size: 16px;
+}
+
+.ai-badge {
+  position: absolute;
+  top: -10px;
+  right: -30px;
+  background: #22c55e;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+  animation: bounce 1s infinite;
+  white-space: nowrap;
+  z-index: 10; /* 提高 z-index */
+  pointer-events: none; /* 防止badge影响按钮点击 */
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* 禁用状态样式 */
+.ai-autopilot-btn[disabled] {
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  color: rgba(255, 255, 255, 0.8);
+  box-shadow: none;
+  animation: none;
+}
+
+.ai-autopilot-btn[disabled] .ai-badge {
+  background: #94a3b8;
+  animation: none;
+}
+
+/* 确保所有可能的父容器都不会裁剪内容 */
+:deep(.ant-btn) {
+  overflow: visible !important;
+}
+
+:deep(.ant-tooltip) {
+  overflow: visible !important;
 }
 </style>
