@@ -13,7 +13,7 @@ const props = defineProps({
       <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-3 leading-tight">
         {{ section.title }}
       </h2>
-      <p class="text-base font-semibold text-gray-900 mb-4 leading-relaxed max-w-2xl mx-auto">
+      <p class="text-base font-semibold text-[#2f3337] mb-4 leading-relaxed max-w-2xl mx-auto text-sm">
         {{ section.subTitle }}
       </p>
       <a 

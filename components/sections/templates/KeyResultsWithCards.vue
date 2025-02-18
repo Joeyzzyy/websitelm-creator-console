@@ -4,6 +4,29 @@
     <div class="editor-area">
       <div class="editor-content">
         <a-form layout="vertical">
+          <!-- Section Title & subTitle -->
+          <a-form-item>
+            <div class="input-with-tag">
+              <span class="html-tag">{{ tags.title }}</span>
+              <a-input
+                v-model:value="localSection.title"
+                :disabled="disabled"
+                placeholder="Enter section title"
+                @change="handleChange"
+              />
+            </div>
+            <div class="input-with-tag mt-2">
+              <span class="html-tag">{{ tags.subTitle }}</span>
+              <a-input
+                v-model:value="localSection.subTitle"
+                :disabled="disabled"
+                placeholder="Enter section subTitle"
+                @change="handleChange"
+              />
+            </div>
+          </a-form-item>
+
+          <!-- Cards -->
           <div v-for="(item, index) in localSection.bottomContent" :key="index">
             <a-form-item>
               <div class="card-header">
@@ -18,14 +41,69 @@
                   <DeleteOutlined />
                 </a-button>
               </div>
+
+              <!-- Competitor Name -->
+              <a-form-item label="Name">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.competitorName }}</span>
+                  <a-input
+                    v-model:value="item.competitorName"
+                    :disabled="disabled"
+                    placeholder="Enter competitor name"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+
+              <!-- Percentage -->
+              <a-form-item label="Percentage">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.percentage }}</span>
+                  <a-input
+                    v-model:value="item.percentage"
+                    :disabled="disabled"
+                    placeholder="Enter percentage value"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+
+              <!-- Metric -->
+              <a-form-item label="Metric">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.metric }}</span>
+                  <a-input
+                    v-model:value="item.metric"
+                    :disabled="disabled"
+                    placeholder="Enter metric description"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+
+              <!-- Description -->
+              <a-form-item label="Description">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.description }}</span>
+                  <a-textarea
+                    v-model:value="item.description"
+                    :disabled="disabled"
+                    :rows="4"
+                    placeholder="Enter detailed description"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+
+              <!-- Logo -->
               <a-form-item label="Logo">
                 <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.logo }}</span>
+                  <span class="html-tag">{{ tags.competitorLogo }}</span>
                   <div class="image-input-wrapper">
                     <a-input
                       v-model:value="item.competitorLogo"
                       :disabled="disabled"
-                      placeholder="Image path"
+                      placeholder="Enter logo URL"
                       @change="handleChange"
                     />
                     <a-button 
@@ -37,65 +115,25 @@
                     </a-button>
                   </div>
                 </div>
-              </a-form-item>
-
-              <a-form-item label="Name">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.competitorName }}</span>
+                <div class="input-with-tag mt-2">
+                  <span class="html-tag">{{ tags.competitorLogoAlt }}</span>
                   <a-input
-                    v-model:value="item.competitorName"
+                    v-model:value="item.competitorLogoAlt"
                     :disabled="disabled"
-                    placeholder="Competitor category name"
+                    placeholder="Enter logo alt text"
                     @change="handleChange"
                   />
                 </div>
               </a-form-item>
 
-              <a-form-item label="Percentage">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.percentage }}</span>
-                  <a-input
-                    v-model:value="item.percentage"
-                    :disabled="disabled"
-                    placeholder="Improvement percentage"
-                    @change="handleChange"
-                  />
-                </div>
-              </a-form-item>
-
-              <a-form-item label="Metric">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.metric }}</span>
-                  <a-input
-                    v-model:value="item.metric"
-                    :disabled="disabled"
-                    placeholder="Measurement category"
-                    @change="handleChange"
-                  />
-                </div>
-              </a-form-item>
-
-              <a-form-item label="Description">
-                <div class="input-with-tag">
-                  <span class="html-tag">{{ tags.description }}</span>
-                  <a-textarea
-                    v-model:value="item.description"
-                    :disabled="disabled"
-                    :rows="4"
-                    placeholder="Detailed comparison explanation"
-                    @change="handleChange"
-                    :style="{ minHeight: '120px' }"
-                  />
-                </div>
-              </a-form-item>
-
+              <!-- Button -->
               <a-form-item label="Button">
                 <div class="input-with-tag">
                   <span class="html-tag">{{ tags.buttonText }}</span>
                   <a-input
                     v-model:value="item.buttonText"
                     :disabled="disabled"
-                    placeholder="Button text (e.g. Read Case Study)"
+                    placeholder="Enter button text"
                     @change="handleChange"
                   />
                 </div>
@@ -104,23 +142,24 @@
                   <a-input
                     v-model:value="item.buttonLink"
                     :disabled="disabled"
-                    placeholder="Button link URL"
+                    placeholder="Enter button URL"
                     @change="handleChange"
                   />
                 </div>
               </a-form-item>
             </a-form-item>
           </div>
-        </a-form>
 
-        <a-button 
-          v-if="!disabled"
-          type="primary" 
-          class="add-card-btn"
-          @click="addCard"
-        >
-          Add Card
-        </a-button>
+          <!-- Add Card Button -->
+          <a-button 
+            v-if="!disabled"
+            type="primary" 
+            class="add-card-btn"
+            @click="addCard"
+          >
+            Add Card
+          </a-button>
+        </a-form>
       </div>
     </div>
 
@@ -137,7 +176,7 @@
       </div>
     </div>
 
-    <!-- 添加图片库模态框 -->
+    <!-- Image Library Modal -->
     <a-modal
       v-model:visible="imageLibraryVisible"
       title="Select Image"

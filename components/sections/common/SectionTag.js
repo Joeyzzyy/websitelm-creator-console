@@ -192,7 +192,9 @@ export const SECTION_TAGS = {
     metric: 'span',
     description: 'p',
     buttonText: 'button',
-    buttonLink: 'a'
+    buttonLink: 'a',
+    title: 'h2',
+    subTitle: 'p'
   },
   Faqs: {
     question: 'h3',

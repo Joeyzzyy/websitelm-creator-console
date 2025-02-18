@@ -58,7 +58,7 @@ export const createCleanComponentData = (componentType) => {
         highlightWordCount: 2,
         enableProductHunt: false,
         productHuntId: '',
-        bannerImage: '/assets/images/placeholder.png'
+        bannerImage: 'https://picsum.photos/1200/600'
       }
     },
     
@@ -208,7 +208,7 @@ export const createCleanComponentData = (componentType) => {
           {
             name: "[SAMPLE] John Smith",
             position: "[SAMPLE] Position - Company",
-            avatarUrl: '/assets/images/placeholder.png',
+            avatarUrl: 'https://picsum.photos/1200/600',
             avatarAlt: "[SAMPLE] User avatar",
             title: "[DEMO] Review Title",
             content: "[SAMPLE] Enter your customer review content here"
@@ -216,7 +216,7 @@ export const createCleanComponentData = (componentType) => {
           {
             name: "David Miller",
             position: "Innovation Director - FutureCorp",
-            avatarUrl: '/assets/images/placeholder.png',
+            avatarUrl: 'https://picsum.photos/1200/600',
             avatarAlt: "David Miller's avatar",
             title: "Revolutionary Content Creation",
             content: "websitelm AI has completely transformed our approach to video marketing. The AI-driven content generation is not just fast - it's incredibly intelligent and adaptable."
@@ -224,7 +224,7 @@ export const createCleanComponentData = (componentType) => {
           {
             name: "Alexandra Peters",
             position: "Global Marketing Head - TechVision",
-            avatarUrl: '/assets/images/placeholder.png',
+            avatarUrl: 'https://picsum.photos/1200/600',
             avatarAlt: "Sarah Chen's avatar",
             title: "Exceptional Marketing Results",
             content: "The versatility and speed of websitelm AI's video generation have given us a competitive edge. Our marketing campaigns are now more dynamic and engaging than ever."
@@ -232,7 +232,7 @@ export const createCleanComponentData = (componentType) => {
           {
             name: "Thomas Wright",
             position: "Digital Strategy Lead - MediaPro",
-            avatarUrl: '/assets/images/placeholder.png',
+            avatarUrl: 'https://picsum.photos/1200/600',
             avatarAlt: "Sarah Chen's avatar",
             title: "Game-Changing Efficiency",
             content: "What used to take our team weeks now happens in minutes. The quality and consistency of the AI-generated videos have exceeded all our expectations."
@@ -240,7 +240,7 @@ export const createCleanComponentData = (componentType) => {
           {
             name: "Caroline Foster",
             position: "Brand Director - GlobalBrands",
-            avatarUrl: '/assets/images/placeholder.png',
+            avatarUrl: 'https://picsum.photos/1200/600',
             avatarAlt: "Sarah Chen's avatar",
             title: "Perfect for Brand Building",
             content: "websitelm AI maintains our brand consistency across all markets while allowing for local customization. It's the perfect balance of efficiency and brand control."
@@ -248,7 +248,7 @@ export const createCleanComponentData = (componentType) => {
           {
             name: "Richard Martinez",
             position: "Operations Manager - ScaleUp Inc",
-            avatarUrl: '/assets/images/placeholder.png',
+            avatarUrl: 'https://picsum.photos/1200/600',
             avatarAlt: "Sarah Chen's avatar",
             title: "Streamlined Production Process",
             content: "The automated workflow and intelligent content generation have revolutionized our video production. We're creating more content with better results and lower costs."
@@ -324,7 +324,7 @@ export const createCleanComponentData = (componentType) => {
       title: '[DEMO] Why Choose Us Story',
       description: '[SAMPLE] Display founder story and company introduction',
       leftContent: {
-        avatarUrl: '/assets/images/placeholder.png',
+        avatarUrl: 'https://picsum.photos/1200/600',
         avatarAlt: '[SAMPLE] Founder Photo',
         name: '[SAMPLE] John Smith',
         title: '[SAMPLE] Founder & CEO',
@@ -358,7 +358,7 @@ export const createCleanComponentData = (componentType) => {
           tabName: '[DEMO] Feature 1',
           title: '[DEMO] Feature 1 Title',
           description: '[SAMPLE] Description of feature 1 benefits',
-          imageUrl: '/assets/images/placeholder.png',
+          imageUrl: 'https://picsum.photos/1200/600',
           imageAlt: '[SAMPLE] Feature 1 illustration',
           buttonText: '[DEMO] Learn More',
           buttonLink: '#',
@@ -368,7 +368,7 @@ export const createCleanComponentData = (componentType) => {
           tabName: '[DEMO] Feature 2',
           title: '[DEMO] Feature 2 Title',
           description: '[SAMPLE] Description of feature 2 benefits',
-          imageUrl: '/assets/images/placeholder.png',
+          imageUrl: 'https://picsum.photos/1200/600',
           imageAlt: '[SAMPLE] Feature 2 illustration',
           buttonText: '[DEMO] Learn More',
           buttonLink: '#',
@@ -378,7 +378,7 @@ export const createCleanComponentData = (componentType) => {
           tabName: '[DEMO] Feature 3',
           title: '[DEMO] Feature 3 Title',
           description: '[SAMPLE] Description of feature 3 benefits',
-          imageUrl: '/assets/images/placeholder.png',
+          imageUrl: 'https://picsum.photos/1200/600',
           imageAlt: '[SAMPLE] Feature 3 illustration',
           buttonText: '[DEMO] Learn More',
           buttonLink: '#'
@@ -387,7 +387,7 @@ export const createCleanComponentData = (componentType) => {
           tabName: '[DEMO] Feature 4',
           title: '[DEMO] Feature 4 Title',
           description: '[SAMPLE] Description of feature 4 benefits',
-          imageUrl: '/assets/images/placeholder.png',
+          imageUrl: 'https://picsum.photos/1200/600',
           imageAlt: '[SAMPLE] Feature 4 illustration',
           buttonText: '[DEMO] Learn More',
           buttonLink: '#'
@@ -406,7 +406,7 @@ export const createCleanComponentData = (componentType) => {
           name: '[SAMPLE] John Smith',
           title: '[SAMPLE] Chief Executive Officer',
           description: '[SAMPLE] 15+ years of industry experience. Expert in business strategy and innovation.',
-          avatarUrl: '/assets/images/placeholder.png',
+          avatarUrl: 'https://picsum.photos/1200/600',
           avatarAlt: '[SAMPLE] CEO Photo',
           socials: []
         },
@@ -414,7 +414,7 @@ export const createCleanComponentData = (componentType) => {
           name: '[SAMPLE] Sarah Johnson',
           title: '[SAMPLE] Product Director',
           description: '[SAMPLE] 10+ years in product management. Specialized in user experience design.',
-          avatarUrl: '/assets/images/placeholder.png',
+          avatarUrl: 'https://picsum.photos/1200/600',
           avatarAlt: '[SAMPLE] Product Director Photo',
           socials: []
         },
@@ -422,7 +422,7 @@ export const createCleanComponentData = (componentType) => {
           name: '[SAMPLE] David Brown',
           title: '[SAMPLE] Technical Director',
           description: '[SAMPLE] Expert in AI and machine learning. Leading technical innovation.',
-          avatarUrl: '/assets/images/placeholder.png',
+          avatarUrl: 'https://picsum.photos/1200/600',
           avatarAlt: '[SAMPLE] Tech Director Photo',
           socials: []
         }
@@ -538,35 +538,37 @@ export const createCleanComponentData = (componentType) => {
     },
 
     KeyResultsWithCards: {
+      title: '[DEMO] Key Performance Metrics',
+      subTitle: '[DEMO] Comparison with Industry Standards',
       bottomContent: [
         {
-          competitorLogo: '/assets/images/placeholder.png',
-          competitorLogoAlt: '[SAMPLE] Competitor 1',
-          competitorName: '[DEMO] Traditional Method',
+          competitorName: '[DEMO] Market Average',
           percentage: 85,
-          metric: '[DEMO] Efficiency Gain',
-          description: '[SAMPLE] Description of improvement compared to traditional methods',
-          buttonText: '[DEMO] View Details',
+          metric: '[DEMO] Customer Satisfaction Rate',
+          description: '[SAMPLE] Industry benchmark for customer satisfaction based on recent market research',
+          competitorLogo: 'https://picsum.photos/1200/600',
+          competitorLogoAlt: '[SAMPLE] Market Average Logo',
+          buttonText: 'View Details',
           buttonLink: '#'
         },
         {
-          competitorLogo: '/assets/images/placeholder.png',
-          competitorLogoAlt: '[SAMPLE] Competitor 2',
-          competitorName: '[DEMO] Manual Process',
-          percentage: 90,
-          metric: '[DEMO] Time Saved',
-          description: '[SAMPLE] Description of time savings compared to manual process',
-          buttonText: '[DEMO] View Details',
+          competitorName: '[DEMO] Leading Competitor',
+          percentage: 92,
+          metric: '[DEMO] Service Reliability',
+          description: '[SAMPLE] Top competitor performance metrics in service uptime and reliability',
+          competitorLogo: 'https://picsum.photos/1200/600',
+          competitorLogoAlt: '[SAMPLE] Competitor Logo',
+          buttonText: 'Learn More',
           buttonLink: '#'
         },
         {
-          competitorLogo: '/assets/images/placeholder.png',
-          competitorLogoAlt: '[SAMPLE] Competitor 3',
-          competitorName: '[DEMO] Basic Tools',
-          percentage: 73,
-          metric: '[DEMO] Performance Boost',
-          description: '[SAMPLE] Description of performance improvements over basic tools',
-          buttonText: '[DEMO] View Details',
+          competitorName: '[DEMO] Our Solution',
+          percentage: 97,
+          metric: '[DEMO] Performance Score',
+          description: '[SAMPLE] Our platform consistently outperforms industry standards',
+          competitorLogo: 'https://picsum.photos/1200/600',
+          competitorLogoAlt: '[SAMPLE] Our Solution Logo',
+          buttonText: 'See Case Study',
           buttonLink: '#'
         }
       ]
@@ -577,21 +579,21 @@ export const createCleanComponentData = (componentType) => {
       subTitle: '[DEMO] Featured Content',
       bottomContent: [
         {
-          imageUrl: '/assets/images/placeholder.png',
+          imageUrl: 'https://picsum.photos/1200/600',
           imageAlt: '[SAMPLE] Content Image 1',
           tag: '[SAMPLE] Category 1',
           title: '[DEMO] Sample Article Title 1',
           targetUrl: '#'
         },
         {
-          imageUrl: '/assets/images/placeholder.png',
+          imageUrl: 'https://picsum.photos/1200/600',
           imageAlt: '[SAMPLE] Content Image 2',
           tag: '[SAMPLE] Category 2',
           title: '[DEMO] Sample Article Title 2',
           targetUrl: '#'
         },
         {
-          imageUrl: '/assets/images/placeholder.png',
+          imageUrl: 'https://picsum.photos/1200/600',
           imageAlt: '[SAMPLE] Content Image 3',
           tag: '[SAMPLE] Category 3',
           title: '[DEMO] Sample Article Title 3',

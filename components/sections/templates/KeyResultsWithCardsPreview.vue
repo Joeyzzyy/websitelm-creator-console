@@ -1,52 +1,58 @@
 <template>
   <div class="w-full bg-white">
     <div class="max-w-6xl mx-auto px-8">
-      <h2
-        v-if="section.title"
-        class="text-xl md:text-2xl font-bold text-gray-900 text-center mb-12"
-      >
-        {{ section.title }}
-      </h2>
+      <!-- Header section with title and subtitle -->
+      <div class="flex justify-between items-center mb-12">
+        <h2 class="text-sm font-bold text-gray-900">
+          {{ section.title }}
+        </h2>
+        <p class="text-[10px] text-[#2f3337]">{{ section.subTitle }}</p>
+      </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Cards grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 divide-x divide-gray-200">
         <div
-          v-for="(comparison, index) in section.bottomContent"
+          v-for="(card, index) in section.bottomContent"
           :key="index"
-          class="bg-white rounded-lg p-4 border border-gray-100 hover:border-gray-200 hover:shadow-sm flex flex-col h-full"
+          class="flex flex-col px-6"
+          :class="{ 'pl-0': index === 0, 'pr-0': index === section.bottomContent.length - 1 }"
         >
-          <div class="mb-3 text-left h-20">
-            <img
-              v-if="comparison.competitorLogo"
-              :src="comparison.competitorLogo"
-              :alt="comparison.competitorLogoAlt || ''"
-              class="h-6 w-auto mb-2 mr-auto"
-            />
-            <h4
-              v-if="comparison.competitorName"
-              class="text-base font-bold text-gray-900 mb-2 line-clamp-2"
-            >
-              {{ comparison.competitorName }}
-            </h4>
+          <!-- Card title -->
+          <h4 class="text-[10px] font-semibold text-gray-900 mb-4">
+            {{ card.competitorName }}
+          </h4>
+
+          <!-- Numbers and metrics -->
+          <div class="mb-4">
+            <div class="text-sm font-bold text-blue-600 mb-2">
+              {{ card.percentage }}%
+            </div>
+            <div class="text-[10px] text-gray-700">
+              {{ card.metric }}
+            </div>
           </div>
 
-          <div class="mb-3">
-            <div class="text-xl md:text-2xl font-bold text-blue-600 mb-2">
-              {{ comparison.percentage }}%
-            </div>
-            <div class="text-sm text-gray-900 mb-2">
-              {{ comparison.metric }}
-            </div>
-            <p class="text-xs text-gray-600">
-              {{ comparison.description }}
-            </p>
-          </div>
+          <!-- Description -->
+          <p class="text-[10px] text-gray-600 mb-4 leading-relaxed">
+            {{ card.description }}
+          </p>
 
-          <button class="mt-auto flex items-center text-xs text-blue-600 font-medium">
-            {{ comparison.buttonText }}
-            <svg class="w-2.5 h-2.5 ml-1 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+          <!-- Image -->
+          <img
+            v-if="card.competitorLogo"
+            :src="card.competitorLogo"
+            :alt="card.competitorLogoAlt || ''"
+            class="w-full h-auto mt-auto mb-4"
+          />
+
+          <!-- Button -->
+          <a
+            v-if="card.buttonText && card.buttonLink"
+            :href="card.buttonLink"
+            class="text-[10px] text-blue-600 hover:text-blue-700 font-medium"
+          >
+            {{ card.buttonText }}
+          </a>
         </div>
       </div>
     </div>
@@ -59,7 +65,12 @@ export default {
   props: {
     section: {
       type: Object,
-      required: true
+      required: true,
+      validator: function(obj) {
+        return obj.title !== undefined && 
+               obj.subtitle !== undefined && 
+               obj.bottomContent !== undefined
+      }
     }
   }
 }
