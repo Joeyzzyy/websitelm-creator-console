@@ -63,7 +63,7 @@
                 </a-space>
               </div>
             </div>
-            <div class="header-right">
+            <!-- <div class="header-right">
               <a-input
                 v-model:value="searchQuery"
                 placeholder="Search by page title..."
@@ -74,7 +74,7 @@
                   <SearchOutlined />
                 </template>
               </a-input>
-            </div>
+            </div> -->
           </div>
 
           <!-- Task List -->
@@ -1190,6 +1190,7 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  margin-top: 8px;
   overflow: visible; /* 确保内容可见 */
 }
 
