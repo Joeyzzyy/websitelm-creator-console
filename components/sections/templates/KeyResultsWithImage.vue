@@ -3,8 +3,30 @@
     <!-- 编辑区域 -->
     <div class="editor-area">
       <div class="editor-content">
-        <!-- 原有的表单内容 -->
+        <!-- 添加标题和副标题编辑区域 -->
         <a-form layout="vertical">
+          <a-form-item>
+            <div class="input-with-tag">
+              <span class="html-tag">{{ tags.title }}</span>
+              <a-input
+                v-model:value="localSection.title"
+                :disabled="disabled"
+                placeholder="Enter section title"
+                @change="handleContentChange"
+              />
+            </div>
+            <div class="input-with-tag mt-3">
+              <span class="html-tag">{{ tags.subTitle }}</span>
+              <a-input
+                v-model:value="localSection.subTitle"
+                :disabled="disabled"
+                placeholder="Enter section subTitle"
+                @change="handleContentChange"
+              />
+            </div>
+          </a-form-item>
+
+          <!-- 原有的表单内容 -->
           <div class="results-container">
             <div v-for="(item, index) in localSection.leftContent" :key="index" class="result-card">
               <div class="result-header">
@@ -138,13 +160,19 @@ export default {
   },
   computed: {
     tags() {
-      return SECTION_TAGS.KeyResultsWithImage
+      return {
+        ...SECTION_TAGS.KeyResultsWithImage,
+        title: '<title>',
+        subTitle: '<subTitle>'
+      }
     }
   },
   data() {
     return {
       localSection: {
         ...JSON.parse(JSON.stringify(this.section)),
+        title: this.section.title || '',
+        subTitle: this.section.subTitle || '',
         rightContent: {
           imageUrl: this.section.rightContent?.imageUrl || '',
           imageAlt: this.section.rightContent?.imageAlt || ''
@@ -205,6 +233,8 @@ export default {
       handler(newVal) {
         this.localSection = {
           ...JSON.parse(JSON.stringify(newVal)),
+          title: newVal.title || '',
+          subTitle: newVal.subTitle || '',
           rightContent: {
             imageUrl: newVal.rightContent?.imageUrl || '',
             imageAlt: newVal.rightContent?.imageAlt || ''

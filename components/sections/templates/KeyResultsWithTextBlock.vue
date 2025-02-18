@@ -238,6 +238,7 @@ export default {
     return {
       localSection: {
         title: '',
+        subTitle: '',
         leftContent: [],
         rightContent: '' // 直接使用字符串
       },
@@ -257,6 +258,7 @@ export default {
   created() {
     this.localSection = Object.assign({
       title: '',
+      subTitle: '',
       leftContent: [],
       rightContent: '' // 直接使用字符串
     }, JSON.parse(JSON.stringify(this.section)))

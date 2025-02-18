@@ -9,38 +9,40 @@ defineProps({
 
 <template>
   <div class="bg-white py-20">
-    <div class="max-w-6xl mx-auto px-8">
-      <h2
-        v-if="section?.title"
-        class="text-xl md:text-2xl font-bold text-gray-900 text-center mb-12"
-      >
-        {{ section.title }}
-      </h2>
-      
+    <div class="max-w-6xl mx-auto px-8 w-[85%]">
       <div class="flex flex-col md:flex-row items-center gap-12 md:gap-16 lg:gap-20">
+        <!-- 左侧内容 -->
         <div class="w-full md:w-1/2">
-          <div class="grid grid-cols-2 gap-8 md:gap-10">
+          <h2 v-if="section?.title" class="text-sm font-bold text-gray-900 mb-1">
+            {{ section.title }}
+          </h2>
+          <p v-if="section?.subTitle" class="text-xs text-gray-600 mb-8">
+            {{ section.subTitle }}
+          </p>
+          
+          <div class="flex flex-col gap-4">
             <div
               v-for="(item, index) in section?.leftContent || []"
               :key="index"
-              class="flex flex-col"
+              class="px-4 py-3 border border-gray-200 rounded-lg"
             >
-              <div class="text-2xl md:text-3xl xl:text-4xl font-bold mb-3 text-blue-600">
+              <div class="text-sm font-bold mb-1" style="color: #3374ff">
                 {{ item.percentage }}%
               </div>
-              <p class="text-xs text-gray-600 max-w-[280px]">
+              <p class="text-[10px] text-gray-600">
                 {{ item.description }}
               </p>
             </div>
           </div>
         </div>
         
+        <!-- 右侧图片 -->
         <div class="w-full md:w-1/2">
-          <div class="relative w-full pt-[75%] rounded-lg overflow-hidden bg-white border border-gray-100 hover:border-gray-200 hover:shadow-sm">
+          <div class="relative w-full pt-[85%] rounded-lg overflow-hidden bg-white border border-gray-100">
             <img 
               :src="section?.rightContent?.imageUrl"
               :alt="section?.rightContent?.imageAlt"
-              class="absolute inset-0 w-full h-full object-cover"
+              class="absolute inset-0 w-full h-full object-cover hover:scale-105 transition-transform duration-300"
             />
           </div>
         </div>

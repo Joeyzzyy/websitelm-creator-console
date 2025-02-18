@@ -9,7 +9,7 @@
     <div class="max-w-6xl mx-auto px-4">
       <div class="grid grid-cols-[280px_1fr] gap-8" ref="containerRef">
         <div class="relative w-[280px]">
-          <div ref="stickyRef" class="sticky top-64 inline-block" style="width: 280px">
+          <div ref="stickyRef" class="sticky top-4" style="width: 280px">
             <div class="bg-gray-50 p-8 rounded-lg mb-4 w-full">
               <h3 class="text-base font-bold mb-4">
                 {{ isChineseContent(props.section.rightContent) ? '目录' : 'Table of Contents' }}
@@ -27,28 +27,12 @@
                 </template>
               </ul>
             </div>
-
-            <div v-if="shouldShowKeyResults" class="bg-gray-50 p-8 rounded-lg">
-              <h3 class="text-base font-bold mb-6">
-                {{ isChineseContent(props.section.rightContent) ? '关键指标' : 'Key Results' }}
-              </h3>
-              <div v-for="(result, index) in displayedResults" 
-                   :key="index"
-                   class="mb-8 last:mb-0">
-                <div class="text-4xl font-bold mb-2 text-blue-600">
-                  {{ result.percentage }}%
-                </div>
-                <p class="text-xs text-gray-600 whitespace-pre-line">
-                  {{ result.description }}
-                </p>
-              </div>
-            </div>
           </div>
         </div>
 
         <div>
           <main class="main-content">
-            <article class="article max-w-[900px] pr-4 py-8 md:py-12">
+            <article class="article max-w-[900px] pr-4">
               <div :id="`section-0`" class="mb-4">
                 <div class="text-sm md:text-base leading-[1.2] text-gray-700 [&>p]:mb-1 whitespace-pre-line space-y-1">
                   <template v-for="(part, i) in parseContent(props.section.rightContent)" :key="i">
@@ -168,33 +152,11 @@ const handleScroll = () => {
   const container = containerRef.value
   const sticky = stickyRef.value
   const containerRect = container.getBoundingClientRect()
-  const stickyHeight = sticky.offsetHeight
-  const windowHeight = window.innerHeight
   
-  const containerTop = containerRect.top
-  const containerBottom = containerRect.bottom
-  
-  if (containerBottom <= windowHeight) {
-    // 当容器底部进入视窗时
-    sticky.style.position = 'absolute'
-    sticky.style.bottom = '0'
-    sticky.style.top = 'auto'
-  } else if (containerTop > 0) {
-    // 当容器顶部还未进入固定区域时
-    sticky.style.position = 'sticky'
-    sticky.style.top = '64px'
-    sticky.style.bottom = 'auto'
-  } else if (containerBottom < stickyHeight + 64) {
-    // 当容器底部接近时
-    sticky.style.position = 'absolute'
-    sticky.style.bottom = '0'
-    sticky.style.top = 'auto'
-  } else {
-    // 正常固定状态
-    sticky.style.position = 'sticky'
-    sticky.style.top = '64px'
-    sticky.style.bottom = 'auto'
-  }
+  // 简化滚动逻辑，只需保持在顶部固定即可
+  sticky.style.position = 'sticky'
+  sticky.style.top = '1rem' // 对应 top-4 的样式
+  sticky.style.bottom = 'auto'
 }
 
 onMounted(() => {
@@ -226,18 +188,6 @@ const isChineseContent = (content) => {
   if (!content) return false;
   return /[\u4e00-\u9fa5]/.test(content);
 }
-
-// 计算属性
-const shouldShowKeyResults = computed(() => {
-  if (!props.section.leftContent || !Array.isArray(props.section.leftContent)) {
-    return false
-  }
-  return props.section.leftContent.some(result => result.display === true)
-})
-
-const displayedResults = computed(() => {
-  return props.section.leftContent?.filter(result => result.display) || []
-})
 
 const parseContent = (content) => {
   if (!content) return [];

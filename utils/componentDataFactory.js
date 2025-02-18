@@ -467,23 +467,6 @@ export const createCleanComponentData = (componentType) => {
     },
 
     KeyResultsWithTextBlock: {
-      leftContent: [
-        {
-          percentage: 90,
-          description: '[SAMPLE] Achievement metric description 1',
-          display: true
-        },
-        {
-          percentage: 40,
-          description: '[SAMPLE] Achievement metric description 2',
-          display: true
-        },
-        {
-          percentage: 70,
-          description: '[SAMPLE] Achievement metric description 3',
-          display: true
-        }
-      ],
       rightContent: '<p><strong><span class="content-subtitle">Introduction Of Our Available Plans</span></strong></p><p>WebsiteLM currently provides two plans that can be directly subscribed and purchased. <br>One of them is the standard version with the price of $45/mo. for monthly payment and $36/mo. for annual payment.</p><p>Another one is the professional version with the price of $129/mo. for monthly payment and $99/mo. for annual payment.</p><p></p><p>The key differences between those plans are:<br>1. Times you can use our AI keywords planning feature (30 times compared with 100times)<br>2. Pages you can generated with our AI page generation feature (30 indexed-ready page compared with 100 pages.)</p><p></p><p>We strongly recommended you to started with a standard version with a monthly payment. You will have a 15-day cash-back guarantee and you can update you plan smoothly any time if you are satisfied with WebsiteLM.<br><br>To know more about our pricing plans, <a target="_blank" rel="noopener noreferrer nofollow" class="content-link" href="https://websitelm.com/pricing"><strong>click here!</strong></a><br></p>'
     },
 
@@ -532,6 +515,8 @@ export const createCleanComponentData = (componentType) => {
     },
 
     KeyResultsWithImage: {
+      title: '[DEMO] Key Results',
+      subTitle: '[SAMPLE] Supporting text for your key results',
       leftContent: [
         {
           percentage: 95,
@@ -547,7 +532,7 @@ export const createCleanComponentData = (componentType) => {
         }
       ],
       rightContent: {
-        imageUrl: '/assets/images/placeholder.png',
+        imageUrl: 'https://picsum.photos/1200/600',
         imageAlt: '[SAMPLE] Results Illustration',
       }
     },

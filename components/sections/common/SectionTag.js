@@ -181,7 +181,9 @@ export const SECTION_TAGS = {
     percentage: 'strong',
     description: 'p',
     image: 'img',
-    imageAlt: 'alt'
+    imageAlt: 'alt',
+    title: 'h2',
+    subTitle: 'p'
   },
   KeyResultsWithCards: {
     logo: 'img',
