@@ -322,9 +322,10 @@
       {{ modalConfig.content }}
     </a-modal>
 
-    <!-- 添加设置弹窗 -->
+    <!-- 修改 SettingsModal，传入 productInfo -->
     <settings-modal
       v-model:visible="settingsVisible"
+      :product-info="productInfo"
     />
   </page-layout>
 </template>

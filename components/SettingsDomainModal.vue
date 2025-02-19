@@ -69,10 +69,8 @@
                           <div class="domain-verification">
                             <p class="website-url">{{ productInfo?.projectWebsite }}</p>
                             <a-button 
-                              v-if="!subfolderDomainConfig"
-                              type="primary"
-                              @click="startVerifyingSubfolder"
-                              :loading="verifyingSubfolder"
+                              v-if="showStartVerifying"
+                              @click="handleStartVerifying"
                             >
                               Start Verifying
                             </a-button>
@@ -84,12 +82,10 @@
                             <h3>Domain Verification</h3>
                             <div class="domain-actions">
                               <a-button 
-                                type="link"
-                                class="refresh-btn"
                                 :loading="refreshingSubfolder"
                                 @click="handleSubfolderRefresh"
                               >
-                                <reload-outlined />
+                                Refresh
                               </a-button>
                             </div>
                           </div>
@@ -147,11 +143,6 @@
                         </div>
 
                         <template v-if="subfolderDomainConfig">
-                          <div class="verification-status">
-                            <!-- ... 验证状态显示部分保持不变 ... -->
-                          </div>
-
-                          <!-- 只在域名验证成功(非misconfigured)时显示子文件夹管理部分 -->
                           <template v-if="!subfolderDomainConfig.misconfigured">
                             <div class="section-header">
                               <h3>Subfolder Management</h3>
@@ -160,20 +151,38 @@
                               </a-button>
                             </div>
 
+                            <!-- 添加子文件夹的模态框 -->
+                            <a-modal
+                              v-model:visible="showSubfolderModal"
+                              title="Add Subfolder"
+                              @ok="handleAddSubfolder"
+                              :confirmLoading="savingSubfolders"
+                            >
+                              <a-form-item label="Subfolder Name">
+                                <a-input
+                                  v-model:value="newSubfolder"
+                                  placeholder="Enter subfolder name"
+                                />
+                              </a-form-item>
+                            </a-modal>
+
                             <div class="subfolder-list">
                               <a-table 
                                 :dataSource="subfolders" 
                                 :columns="subfolderColumns" 
                                 :pagination="false"
                               >
-                                <template #bodyCell="{ column, text, record, index }">
+                                <template #bodyCell="{ column, record }">
+                                  <template v-if="column.key === 'text'">
+                                    <span>{{ record }}</span>
+                                  </template>
                                   <template v-if="column.key === 'action'">
-                                    <a-button type="link" danger @click="confirmDeleteSubfolder(index)">
+                                    <a-button type="link" danger @click="confirmDeleteSubfolder(record)">
                                       Delete
                                     </a-button>
                                   </template>
                                   <template v-if="column.key === 'preview'">
-                                    <span>{{ productInfo?.projectWebsite }}/{{ text }}</span>
+                                    <span>{{ productInfo?.projectWebsite }}/{{ record }}</span>
                                   </template>
                                 </template>
                               </a-table>
@@ -309,6 +318,10 @@ export default {
     visible: {
       type: Boolean,
       default: false
+    },
+    productInfo: {
+      type: Object,
+      default: () => ({})
     }
   },
   emits: ['update:visible'],
@@ -334,7 +347,6 @@ export default {
       suffix: '',
     });
     const saving = ref(false);
-    const productInfo = ref(null);
     const vercelDomainInfo = ref(null);
     const currentDomainConfigs = ref([]);
     const dnsColumns = [
@@ -417,7 +429,7 @@ export default {
         const response = await apiClient.getProductsByCustomerId(customerId);
         
         if (response?.code === 200 && response.data) {
-          productInfo.value = response.data;
+          props.productInfo = response.data;
           domainConfigured.value = response.data?.domainStatus || false;
           
           // 重置表单状态
@@ -430,17 +442,15 @@ export default {
           // 如果配置了域名,加载 Vercel 域名信息
           if (domainConfigured.value) {
             await loadVercelDomainInfo();
-            if (deploymentForm.value.method === 'subfolder') {
-              await loadSubfolders();
-            }
+            await loadSubfolders();
           }
         } else {
-          productInfo.value = null;
+          props.productInfo = null;
           domainConfigured.value = false;
         }
       } catch (error) {
         console.error('Failed to load product information:', error);
-        productInfo.value = null;
+        props.productInfo = null;
         domainConfigured.value = false;
       } finally {
         loading.value = false;
@@ -449,12 +459,12 @@ export default {
 
     // 处理 Vercel 域名信息
     const processVercelDomainInfo = async (response) => {
-      if (!response?.domains || !productInfo.value?.projectWebsite) {
+      if (!response?.domains || !props.productInfo?.projectWebsite) {
         currentDomainConfigs.value = [];
         return;
       }
 
-      const currentDomain = productInfo.value.projectWebsite;
+      const currentDomain = props.productInfo.projectWebsite;
       
       // 过滤匹配的域名，排除主域名
       const matchingDomains = response.domains.filter(domain => {
@@ -516,11 +526,7 @@ export default {
         subfolderLoading.value = true;
         const response = await apiClient.getSubfolders();
         if (response?.code === 200 && response?.data) {
-          // 直接将字符串数组转换为所需的对象格式
-          subfolders.value = response.data.map(subfolder => ({
-            text: subfolder,
-            preview: subfolder  // 这里的 preview 会在表格中显示完整路径
-          }));
+          subfolders.value = response.data;
         } else {
           subfolders.value = [];
         }
@@ -569,7 +575,7 @@ export default {
         const projectId = PROJECT_ID;
 
         const domainData = {
-          name: `${deploymentForm.value.prefix}.${productInfo.value.projectWebsite}`
+          name: `${deploymentForm.value.prefix}.${props.productInfo.projectWebsite}`
         };
 
         const response = await apiClient.addVercelDomain(projectId, domainData);
@@ -619,23 +625,21 @@ export default {
     const subfolderColumns = [
       {
         title: 'Subfolder',
-        dataIndex: 'text',
+        dataIndex: '',
         key: 'text',
+        render: (text) => text
       },
       {
         title: 'Preview',
-        dataIndex: 'preview',
         key: 'preview',
-        customRender: ({ text }) => `${productInfo.value?.projectWebsite}/${text}`
       },
       {
         title: 'Action',
         key: 'action',
-        width: 100,
       },
     ];
 
-    const confirmDeleteSubfolder = (index) => {
+    const confirmDeleteSubfolder = (subfolder) => {
       Modal.confirm({
         title: 'Delete Subfolder',
         content: `Are you sure you want to delete this subfolder?`,
@@ -644,12 +648,9 @@ export default {
         cancelText: 'Cancel',
         async onOk() {
           try {
-            const subfoldersToSave = [...subfolders.value];
-            subfoldersToSave.splice(index, 1);
-            
-            // 直接保存更新后的数组
-            await apiClient.updateSubfolders(subfoldersToSave.map(item => item.text));
-            subfolders.value = subfoldersToSave;
+            const subfoldersToSave = subfolders.value.filter(item => item !== subfolder);
+            await apiClient.updateSubfolders(subfoldersToSave);
+            await loadSubfolders(); // 重新加载数据
             message.success('Subfolder deleted successfully');
           } catch (error) {
             console.error('Failed to delete subfolder:', error);
@@ -668,7 +669,7 @@ export default {
       // 检查是否已存在相同的子文件夹
       const normalizedNewSubfolder = newSubfolder.value.toLowerCase().trim();
       const exists = subfolders.value.some(item => 
-        item.text.toLowerCase().trim() === normalizedNewSubfolder
+        item.toLowerCase().trim() === normalizedNewSubfolder
       );
 
       if (exists) {
@@ -678,16 +679,10 @@ export default {
 
       try {
         savingSubfolders.value = true;
-        const newSubfolders = [
-          ...subfolders.value,
-          {
-            text: newSubfolder.value.trim(),
-            preview: newSubfolder.value.trim()
-          }
-        ];
+        const newSubfolders = [...subfolders.value, newSubfolder.value.trim()];
 
-        await apiClient.updateSubfolders(newSubfolders.map(item => item.text));
-        subfolders.value = newSubfolders;
+        await apiClient.updateSubfolders(newSubfolders);
+        await loadSubfolders(); // 重新加载数据
         newSubfolder.value = '';
         showSubfolderModal.value = false;
         message.success('Subfolder added successfully');
@@ -731,7 +726,7 @@ export default {
         
         // 1. 向 Vercel 发送主域名验证请求
         const domainData = {
-          name: productInfo.value.projectWebsite // 使用主域名
+          name: props.productInfo.projectWebsite // 使用主域名
         };
         
         // 2. 调用 Vercel API 进行域名验证
@@ -756,7 +751,7 @@ export default {
     const loadSubfolderDomainConfig = async () => {
       try {
         // 获取主域名的验证状态
-        const config = await apiClient.getVercelDomainConfig(productInfo.value.projectWebsite);
+        const config = await apiClient.getVercelDomainConfig(props.productInfo.projectWebsite);
         
         subfolderDomainConfig.value = {
           ...config,
@@ -773,9 +768,9 @@ export default {
       refreshingSubfolder.value = true;
       try {
         await loadSubfolderDomainConfig();
-        message.success('刷新成功');
+        message.success('Refresh successful');
       } catch (error) {
-        message.error('刷新失败');
+        message.error('Refresh failed');
       } finally {
         refreshingSubfolder.value = false;
       }
@@ -784,20 +779,20 @@ export default {
     // 删除子文件夹域名验证
     const showDeleteSubfolderDomainConfirm = () => {
       Modal.confirm({
-        title: '删除域名验证',
-        content: `确定要删除 ${productInfo.value.projectWebsite} 的域名验证吗？`,
-        okText: '删除',
+        title: 'Delete Domain Verification',
+        content: `Are you sure you want to delete the domain verification for ${props.productInfo.projectWebsite}?`,
+        okText: 'Delete',
         okType: 'danger',
-        cancelText: '取消',
+        cancelText: 'Cancel',
         async onOk() {
           try {
             const projectId = PROJECT_ID;
-            await apiClient.deleteVercelDomain(projectId, productInfo.value.projectWebsite);
-            message.success('域名验证已删除');
-            subfolderDomainConfig.value = null; // 清除验证配置
+            await apiClient.deleteVercelDomain(projectId, props.productInfo.projectWebsite);
+            message.success('Domain verification has been deleted');
+            subfolderDomainConfig.value = null;
           } catch (error) {
-            console.error('删除域名验证失败:', error);
-            message.error('删除域名验证失败');
+            console.error('Failed to delete domain verification:', error);
+            message.error('Failed to delete domain verification');
           }
         },
       });
@@ -848,7 +843,7 @@ export default {
 
     const sendResetCode = async () => {
       try {
-        await apiClient.sendEmailCode(productInfo.value.email, 'reset_password');
+        await apiClient.sendEmailCode(props.productInfo.email, 'reset_password');
         
         cooldown.value = 60;
         cooldownTimer.value = setInterval(() => {
@@ -869,6 +864,44 @@ export default {
       emit('update:visible', false);
     };
 
+    // 修改检查当前站点配置的方法
+    const checkCurrentSiteConfig = async (domain) => {
+      try {
+        const config = await apiClient.getVercelDomainConfig(domain);
+        // 同时更新 subfolderDomainConfig
+        subfolderDomainConfig.value = {
+          ...config,
+          verified: !config.misconfigured
+        };
+        return !config?.misconfigured;
+      } catch (error) {
+        console.error(`Failed to get config for domain ${domain}:`, error);
+        subfolderDomainConfig.value = null;
+        return false;
+      }
+    };
+
+    // 添加计算属性来控制 Start Verifying 按钮的显示
+    const showStartVerifying = ref(false);
+    
+    // 监听模式切换
+    watch(
+      () => deploymentForm.value.method,
+      async (newMode) => {
+        if (newMode === 'subfolder') {
+          const currentSite = props.productInfo?.projectWebsite;
+          if (currentSite) {
+            const isConfigured = await checkCurrentSiteConfig(currentSite);
+            showStartVerifying.value = !isConfigured;
+          }
+        } else {
+          // 切换到其他模式时重置状态
+          subfolderDomainConfig.value = null;
+          showStartVerifying.value = false;
+        }
+      }
+    );
+
     return {
       cooldown,
       goToDashboard,
@@ -879,9 +912,6 @@ export default {
       domainForm,
       deploymentForm,
       saving,
-      productInfo,
-      saveDeploymentSettings,
-      loadProductInfo,
       vercelDomainInfo,
       loadVercelDomainInfo,
       currentDomainConfigs,
@@ -921,6 +951,7 @@ export default {
       passwordForm,
       submitLoading,
       handleCancel,
+      showStartVerifying,
     };
   }
 }
