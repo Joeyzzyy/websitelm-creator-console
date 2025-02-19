@@ -14,17 +14,6 @@
             </h2>
           </div>
   
-          <div v-if="loading" class="status-content">
-            <a-spin :spinning="true" size="large">
-              <div class="status-message">
-                <div class="status-title">Verifying Login...</div>
-                <div class="status-description">
-                  Please wait while we complete your Google authentication
-                </div>
-              </div>
-            </a-spin>
-          </div>
-  
           <a-form v-if="showSetPasswordForm" layout="vertical" @submit.prevent="handleSetPassword">
             <a-form-item
               label="New Password"
@@ -86,7 +75,6 @@
     name: 'GoogleCallback',
     data() {
       return {
-        loading: true,
         showSetPasswordForm: false,
         setPasswordLoading: false,
         setPasswordForm: {
@@ -252,18 +240,6 @@
             description: 'Successfully logged in with Google'
           });
           this.$router.push('/dashboard');
-  
-          // // 检查是否是首次登录
-          // if (response.data.firstLogin) {
-          //   this.loading = false;
-          //   this.showSetPasswordForm = true;
-          // } else {
-          //   this.$notification.success({
-          //     message: 'Welcome!',
-          //     description: 'Successfully logged in with Google'
-          //   });
-          //   this.$router.push('/dashboard');
-          // }
         } else {
           throw new Error(response?.message || 'Authentication failed');
         }
@@ -296,11 +272,6 @@
         setTimeout(() => {
           this.$router.push('/login');
         }, 2000);
-      } finally {
-        // 如果不是显示设置密码表单，则结束加载状态
-        if (!this.showSetPasswordForm) {
-          this.loading = false;
-        }
       }
     }
   }
@@ -345,30 +316,11 @@
   
   .status-content {
     text-align: center;
-    padding: 40px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 200px;  /* 确保有足够的空间显示 */
-  }
-  
-  :deep(.ant-spin) {
-    max-height: none !important;  /* 覆盖 Ant Design 默认最大高度限制 */
-  }
-  
-  :deep(.ant-spin-container) {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    padding: 20px 0;
   }
   
   .status-message {
-    margin-top: 32px;  /* 增加与spin的间距 */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;  /* 标题和描述文字之间的间距 */
+    margin-top: 24px;
   }
   
   .status-title {
@@ -386,6 +338,10 @@
   
   :deep(.ant-spin-dot-item) {
     background-color: #4B89FF;
+  }
+  
+  :deep(.ant-spin) {
+    color: #4B89FF;
   }
   
   /* 添加密码强度相关样式 */
