@@ -391,6 +391,7 @@
 <script>
 import apiClient from '../api/api';
 import { onBeforeUnmount, ref} from 'vue';
+import { initIntercom, initAnonymousIntercom, shutdownIntercom } from '../utils/intercom';
 
 export default {
   name: 'LoginPage',
@@ -443,6 +444,8 @@ export default {
         localStorage.removeItem('accessToken');
       }
     }
+    // 初始化匿名访客模式
+    initAnonymousIntercom();
   },
   computed: {
     forgotPasswordStrength() {
@@ -659,7 +662,6 @@ export default {
       try {
         const response = await apiClient.login(email, password);
         if (response) {
-          // 添加对响应code的判断
           if (response.code === 401 && response.message === 'Password incorrect') {
             this.$notification.error({
               message: 'Login Failed',
@@ -676,7 +678,6 @@ export default {
             return;
           }
 
-          // 替换 localStorage.clear() 为：
           const keysToRemove = [
             'accessToken',
             'intelickIsLoggedIn',
@@ -685,7 +686,6 @@ export default {
           ];
           keysToRemove.forEach(key => localStorage.removeItem(key));
           
-          // Store only necessary login information
           localStorage.setItem('intelickIsLoggedIn', 'true');
           localStorage.setItem('accessToken', response.accessToken);
           
@@ -694,7 +694,19 @@ export default {
             localStorage.setItem('currentCustomerId', response.data.customerId);
           }
           
-          // Remember password functionality
+          // 先关闭匿名模式
+          shutdownIntercom();
+          
+          // 初始化用户模式
+          const user = {
+            id: response.data.customerId,
+            email: response.data.email,
+            name: response.data.name || response.data.email,
+            createdAt: Math.floor(new Date(response.data.createdAt).getTime() / 1000)
+          };
+          
+          initIntercom(user);
+          
           if (this.rememberMe) {
             const credentials = { email, password };
             localStorage.setItem('rememberedCredentials', this.encodeCredentials(credentials));
@@ -703,14 +715,6 @@ export default {
           }
           
           this.$router.push('/dashboard');
-
-          // if (response.data.firstLogin) {
-          //   this.showSetPasswordModal = true;
-          //   localStorage.setItem('accessToken', response.accessToken);
-          // } else {
-          //   // 正常登录流程
-          //   this.$router.push('/dashboard');
-          // }
         }
       } catch (error) {
         console.error('Login failed:', error);
@@ -907,6 +911,12 @@ export default {
       } finally {
         this.setPasswordLoading = false;
       }
+    },
+    // 在登出时也需要处理 Intercom
+    async handleLogout() {
+      shutdownIntercom();
+      initAnonymousIntercom();
+      // ... other logout logic ...
     }
   },
   beforeUnmount() {
