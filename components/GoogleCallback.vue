@@ -80,6 +80,7 @@
   
   <script>
   import apiClient from '../api/api';
+  import { initIntercom, shutdownIntercom } from '../utils/intercom';
   
   export default {
     name: 'GoogleCallback',
@@ -232,6 +233,19 @@
             localStorage.setItem('currentCustomerEmail', response.data.email);
             localStorage.setItem('currentCustomerId', response.data.customerId);
           }
+
+          // 先关闭之前的 Intercom
+          shutdownIntercom();
+          
+          // 初始化用户的 Intercom
+          const user = {
+            id: response.data.customerId,
+            email: response.data.email,
+            name: response.data.name || response.data.email,
+            createdAt: Math.floor(new Date(response.data.createdAt).getTime() / 1000)
+          };
+          
+          initIntercom(user);
 
           this.$notification.success({
             message: 'Welcome!',
