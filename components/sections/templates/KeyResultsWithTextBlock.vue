@@ -428,7 +428,7 @@ export default {
       }
 
       this.handleCancelLink()
-      this.$message.success('链接添加成功')
+      this.$message.success('Successfully added link')
     },
 
     handleCancelLink() {

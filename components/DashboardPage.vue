@@ -529,15 +529,30 @@
 
         <!-- Bottom buttons -->
         <a-form-item>
-          <a-button 
-            type="primary" 
-            html-type="submit"
-            :loading="loading"
-            :disabled="!formState.productName"
-            block
-          >
-            {{ formState.productId ? 'Save Changes' : 'Start Using WebsiteLM' }}
-          </a-button>
+          <div class="form-bottom-actions">
+            <a-button 
+              type="primary" 
+              html-type="submit"
+              :loading="loading"
+              :disabled="!formState.productName"
+              block
+            >
+              {{ formState.productId ? 'Save Changes' : 'Start Using WebsiteLM' }}
+            </a-button>
+            
+            <!-- 添加登出按钮到底部 -->
+            <template v-if="!formState.productId">
+              <div class="switch-account-wrapper">
+                <a-button 
+                  type="link" 
+                  class="switch-account-btn" 
+                  @click="handleLogout"
+                >
+                  Login with another account
+                </a-button>
+              </div>
+            </template>
+          </div>
         </a-form-item>
       </a-form>
     </a-modal>
@@ -766,10 +781,11 @@ import {
   AppstoreOutlined,
   ThunderboltOutlined,
   ExclamationCircleFilled,
+  ExclamationCircleOutlined
 } from '@ant-design/icons-vue'
 import apiClient from '../api/api'
 import { Modal, message } from 'ant-design-vue'
-import * as echarts from 'echarts'
+import { createVNode } from 'vue'
 
 export default defineComponent({
   components: {
@@ -938,6 +954,23 @@ export default defineComponent({
     }
   },
   methods: {
+    handleLogout() {
+      Modal.confirm({
+        title: 'Are you sure you want to logout?',
+        icon: createVNode(ExclamationCircleOutlined),
+        content: 'Are you sure you want to logout?',
+        okText: 'Yes',
+        cancelText: 'No',
+        onOk: () => {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('intelickIsLoggedIn');
+          localStorage.removeItem('currentCustomer');
+          localStorage.removeItem('currentCustomerId');
+          this.$router.push('/login');
+          message.success('Successfully logged out');
+        }
+      });
+    },
     async checkDomainVerification() {
       if (!this.formState.website) return;
 
@@ -1095,45 +1128,32 @@ export default defineComponent({
         // 使用保存的原始域名进行对比
         const isWebsiteChanged = this.formState.website !== this.originalWebsite;
         
-        console.log('Domain comparison:', {
-          formStateWebsite: this.formState.website,
-          originalWebsite: this.originalWebsite,
-          isWebsiteChanged,
-          comparison: `'${this.formState.website}' !== '${this.originalWebsite}'`
-        });
-        
-        if (isWebsiteChanged) {
-          // 添加初始状态日志
-          console.log('Domain change detected, preparing to reset verification');
-          // 先调用 startVerify 接口重置域名
+        // 准备表单数据
+        const formData = {
+          ...this.prepareFormData(),
+          // 如果域名没变，保持原有验证状态
+          domainStatus: isWebsiteChanged ? false : this.productInfo.domainStatus
+        };
+
+        // 只有在域名改变且之前未验证的情况下才重新创建验证记录
+        if (isWebsiteChanged && !this.productInfo.domainStatus) {
           const domain = this.formState.website.replace(/^https?:\/\//, '');
-          console.log('Domain to verify:', domain);
-          
           const verifyResponse = await apiClient.createDomainWithTXT({
             customerId: localStorage.getItem('currentCustomerId'),
             domainName: domain
           });
           
-          if (verifyResponse?.code !== 200) {
-            throw new Error('Failed to initialize domain verification');
+          if (verifyResponse?.code === 200) {
+            this.verifyRecord = JSON.parse(verifyResponse.data.txt);
+            this.showVerifyRecord = true;
           }
-          
-          // 更新验证记录状态
-          this.verifyRecord = JSON.parse(verifyResponse.data.txt);
-          this.showVerifyRecord = true;
         }
-
-        // 准备表单数据，确保域名变更时重置验证状态
-        const formData = {
-          ...this.prepareFormData(),
-          domainStatus: isWebsiteChanged ? false : this.formState.domainStatus
-        };
 
         const response = await apiClient.updateProduct(this.formState.productId, formData);
         
         if (response?.code === 200) {
-          // 如果域名已变更，显示验证提示
-          if (isWebsiteChanged) {
+          // 如果域名已变更且之前未验证，显示验证提示
+          if (isWebsiteChanged && !this.productInfo.domainStatus) {
             this.$notification.info({
               message: 'Domain Verification Required',
               description: 'Please verify your new domain to enable all features.',
@@ -3596,5 +3616,28 @@ export default defineComponent({
       color: #ff7875;
     }
   }
+}
+
+/* 更新样式 */
+.form-bottom-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.switch-account-wrapper {
+  text-align: center;
+}
+
+.switch-account-btn {
+  font-size: 13px;
+  padding: 0;
+  height: auto;
+  color: #8c8c8c;
+}
+
+.switch-account-btn:hover {
+  color: #1890ff;
 }
 </style>
