@@ -116,6 +116,7 @@
             >
               Preview Page
             </a-button>
+            
             <a-tooltip :title="getPublishTooltip(articleData)">
               <a-button
                 :type="articleData.publishStatus === 'publish' ? 'default' : 'primary'"
@@ -127,6 +128,7 @@
                 {{ articleData.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
               </a-button>
             </a-tooltip>
+            
             <a-button 
               type="primary"
               @click="() => handleSave(false)"
@@ -146,6 +148,15 @@
               Save Page
             </a-button>
           </template>
+
+          <!-- 添加分析按钮 -->
+          <a-button
+            type="default"
+            @click="showAnalysisModal"
+            :style="{ height: '36px' }"
+          >
+            Page Analysis
+          </a-button>
         </div>
       </div>
 
@@ -360,15 +371,23 @@
         </div>
       </div>
 
-      <!-- 修改 FloatingStats 组件的条件渲染和默认状态 -->
-      <FloatingStats 
-        v-if="isEditMode"
-        :keywords-stats="articleData.pageStats"
-        :sections="articleData.sections"
-        @refresh="handleRefreshMetrics"
-        :default-collapsed="true"
-        class="floating-stats-enhanced"
-      />
+      <!-- 添加分析弹窗 -->
+      <a-modal
+        v-model:open="analysisModal.visible"
+        title="Page Analysis"
+        :width="800"
+        :footer="null"
+        @cancel="hideAnalysisModal"
+      >
+        <div class="analysis-content">
+          <FloatingStats
+            :keywords-stats="articleData.pageStats"
+            :sections="articleData.sections"
+            @refresh="handleRefreshMetrics"
+            :is-modal="true"
+          />
+        </div>
+      </a-modal>
 
       <!-- Preview modal -->
       <a-modal
@@ -474,7 +493,8 @@ import {
   EyeOutlined,
   LeftOutlined,
   ExpandOutlined,
-  CompressOutlined
+  CompressOutlined,
+  BarChartOutlined
 } from '@ant-design/icons-vue';
 import SectionWrapper from './sections/index.vue';
 import { useRouter, useRoute } from 'vue-router';
@@ -554,6 +574,7 @@ export default defineComponent({
     LeftOutlined,
     ExpandOutlined,
     CompressOutlined,
+    BarChartOutlined,
     SectionWrapper,
     FloatingStats,
     TitleSection,
@@ -1677,6 +1698,21 @@ export default defineComponent({
       }
     };
 
+    // 添加分析弹窗相关的响应式变量
+    const analysisModal = ref({
+      visible: false
+    });
+    
+    // 显示分析弹窗
+    const showAnalysisModal = () => {
+      analysisModal.value.visible = true;
+    };
+    
+    // 隐藏分析弹窗
+    const hideAnalysisModal = () => {
+      analysisModal.value.visible = false;
+    };
+
     return {
       loading,
       saving,
@@ -1739,6 +1775,9 @@ export default defineComponent({
       toggleImmersiveMode,
       exitImmersiveMode,
       handleViewPublished,
+      analysisModal,
+      showAnalysisModal,
+      hideAnalysisModal,
     };
   }
 });
@@ -3220,5 +3259,29 @@ export default defineComponent({
   height: 1px;
   background: #e5e7eb;
   margin: 8px 0 16px;
+}
+
+/* 添加分析弹窗内容样式 */
+.analysis-content {
+  padding: 16px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.analysis-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.analysis-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.analysis-content::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+
+.analysis-content::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
 }
 </style>

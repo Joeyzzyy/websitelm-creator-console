@@ -1,9 +1,8 @@
 <template>
-  <div class="floating-stats" :class="{ 'is-collapsed': isCollapsed }">
+  <div class="stats-container" :class="{ 'in-modal': isModal }">
     <div class="stats-header">
-      <h3 class="section-title" v-if="!isCollapsed">Content Analysis</h3>
+      <h3 class="section-title">Content Analysis</h3>
       <a-button 
-        v-if="!isCollapsed"
         type="text" 
         size="small"
         :loading="refreshing"
@@ -11,13 +10,9 @@
       >
         <template #icon><ReloadOutlined /></template>
       </a-button>
-      <div class="toggle-button" @click="toggleCollapse">
-        <BarChartOutlined v-if="isCollapsed" />
-        <CloseOutlined v-else />
-      </div>
     </div>
 
-    <div class="stats-content" v-show="!isCollapsed">
+    <div class="stats-content">
       <div class="metrics-grid">
         <!-- Word Count Card -->
         <div class="metric-card word-count-card">
@@ -166,16 +161,15 @@ export default defineComponent({
       type: Array,
       default: () => []
     },
-    defaultCollapsed: {
+    isModal: {
       type: Boolean,
-      default: true  // 默认为折叠状态
+      default: false
     }
   },
 
   emits: ['refresh'],
 
   setup(props, { emit }) {
-    const isCollapsed = ref(props.defaultCollapsed);
     const refreshing = ref(false);
 
     const keywordsCoverage = computed(() => {
@@ -202,34 +196,24 @@ export default defineComponent({
       return density.toFixed(2);
     };
 
-    const toggleCollapse = () => {
-      isCollapsed.value = !isCollapsed.value;
-    };
-
     const handleRefreshConfirm = () => {
-      // 使用 ant-design-vue 的 Modal.confirm
       Modal.confirm({
-        title: 'Refresh Page',
-        content: 'Refreshing will reload the current page. Please make sure you have saved your changes.',
+        title: 'Refresh Analysis',
+        content: 'Do you want to refresh the content analysis?',
         okText: 'Refresh',
         cancelText: 'Cancel',
         async onOk() {
           refreshing.value = true;
           try {
-            window.location.reload();
+            emit('refresh');
           } catch (error) {
-            console.error('Failed to refresh page:', error);
+            console.error('Failed to refresh analysis:', error);
           } finally {
             refreshing.value = false;
           }
         }
       });
     };
-
-    // 修改 watch，移除 console.log
-    watch(() => props.keywordsStats, (newStats) => {
-      // 移除 console.log
-    }, { deep: true });
 
     const headingStats = computed(() => {
       const stats = {
@@ -244,8 +228,6 @@ export default defineComponent({
         const sectionType = section.componentName;
         const sectionTags = SECTION_TAGS[sectionType] || {};
         
-        // 移除 console.log
-
         // 检查 topContent
         if (section.topContent) {
           Object.entries(section.topContent).forEach(([field, value]) => {
@@ -297,8 +279,6 @@ export default defineComponent({
         const componentName = section.componentName;
         const sectionTags = SECTION_TAGS[componentName] || {};
         
-        // 移除 console.log
-
         // 初始化该组件的统计
         if (!stats[componentName]) {
           stats[componentName] = {
@@ -370,9 +350,7 @@ export default defineComponent({
     });
 
     return {
-      isCollapsed,
       refreshing,
-      toggleCollapse,
       handleRefreshConfirm,
       keywordsCoverage,
       missingKeywords,
@@ -389,48 +367,24 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.floating-stats {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  width: 420px;
-  max-height: calc(100vh - 180px);
+.stats-container {
+  width: 100%;
   background: white;
   border-radius: 12px;
-  border: 1px solid #e5e7eb;
-  z-index: 1000;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
 }
 
-.floating-stats.is-collapsed {
-  width: 48px;
-  height: 48px;
-  border-radius: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #4F46E5, #38BDF8);
-  box-shadow: 0 0 20px rgba(79, 70, 229, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-}
-
-.floating-stats.is-collapsed .stats-header {
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+.stats-container.in-modal {
+  border: none;
+  box-shadow: none;
 }
 
 .stats-header {
   display: flex;
   align-items: center;
-  padding: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
   gap: 8px;
 }
 
@@ -442,32 +396,10 @@ export default defineComponent({
   flex-grow: 1;
 }
 
-.toggle-button {
-  cursor: pointer;
-  color: #666;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-}
-
-.floating-stats.is-collapsed .toggle-button {
-  color: #ffffff;
-}
-
-.floating-stats.is-collapsed:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 25px rgba(79, 70, 229, 0.4);
-  background: linear-gradient(135deg, #6366F1, #60A5FA);
-}
-
 .stats-content {
   flex: 1;
   overflow-y: auto;
-  padding: 0 16px 16px;
-  max-height: calc(100vh - 280px);
+  padding: 16px;
 }
 
 .metrics-grid {
@@ -692,5 +624,32 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* 添加滚动条样式 */
+.stats-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.stats-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.stats-content::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+
+.stats-content::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+/* 调整弹窗中的样式 */
+.in-modal .stats-header {
+  background: #f8fafc;
+}
+
+.in-modal .stats-content {
+  max-height: calc(80vh - 120px);
 }
 </style>
