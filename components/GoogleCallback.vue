@@ -345,11 +345,30 @@
   
   .status-content {
     text-align: center;
-    padding: 20px 0;
+    padding: 40px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;  /* 确保有足够的空间显示 */
+  }
+  
+  :deep(.ant-spin) {
+    max-height: none !important;  /* 覆盖 Ant Design 默认最大高度限制 */
+  }
+  
+  :deep(.ant-spin-container) {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
   
   .status-message {
-    margin-top: 24px;
+    margin-top: 32px;  /* 增加与spin的间距 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;  /* 标题和描述文字之间的间距 */
   }
   
   .status-title {
@@ -367,10 +386,6 @@
   
   :deep(.ant-spin-dot-item) {
     background-color: #4B89FF;
-  }
-  
-  :deep(.ant-spin) {
-    color: #4B89FF;
   }
   
   /* 添加密码强度相关样式 */
