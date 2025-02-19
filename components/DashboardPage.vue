@@ -2442,23 +2442,23 @@ export default defineComponent({
 .setup-progress-panel {
   position: fixed;
   bottom: 24px;
-  right: 24px;
+  right: 88px; /* 修改这里，从24px改为88px，给Intercom留出空间 */
   width: 320px;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12),
               0 0 0 1px rgba(24, 144, 255, 0.1),
-              0 0 20px rgba(24, 144, 255, 0.2); /* 添加蓝色发光效果 */
+              0 0 20px rgba(24, 144, 255, 0.2);
   padding: 16px;
   z-index: 1000;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: pulse 2s infinite; /* 添加脉冲动画 */
+  animation: pulse 2s infinite;
   
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15),
                 0 0 0 1px rgba(24, 144, 255, 0.2),
-                0 0 30px rgba(24, 144, 255, 0.3); /* 悬停时加强发光效果 */
+                0 0 30px rgba(24, 144, 255, 0.3);
   }
 }
 
