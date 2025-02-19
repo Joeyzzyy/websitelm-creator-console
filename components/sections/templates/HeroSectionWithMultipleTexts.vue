@@ -120,6 +120,29 @@
               </a-form-item>
             </template>
 
+            <!-- Discord 社区设置 -->
+            <a-form-item label="Enable Discord Community">
+              <a-switch
+                v-model:checked="localSection.topContent.enableDiscord"
+                :disabled="disabled"
+                @change="handleChange"
+              />
+            </a-form-item>
+
+            <template v-if="localSection.topContent.enableDiscord">
+              <a-form-item label="Discord Invite Link">
+                <div class="input-with-tag">
+                  <span class="html-tag">{{ tags.discordLink }}</span>
+                  <a-input
+                    v-model:value="localSection.topContent.discordLink"
+                    :disabled="disabled"
+                    placeholder="e.g. https://discord.gg/your-invite-link"
+                    @change="handleChange"
+                  />
+                </div>
+              </a-form-item>
+            </template>
+
             <!-- 添加图片上传区域 -->
             <a-form-item label="Banner Image">
               <div class="input-with-tag">
@@ -236,7 +259,9 @@
             ctaButtonLink: '#',
             showCtaButton: true,
             enableProductHunt: false,
-            productHuntId: ''
+            productHuntId: '',
+            enableDiscord: false,
+            discordLink: ''
           }
         },
         styles: themeConfig.normal,
@@ -262,7 +287,9 @@
               ctaButtonLink: '#',
               showCtaButton: true,
               enableProductHunt: false,
-              productHuntId: ''
+              productHuntId: '',
+              enableDiscord: false,
+              discordLink: ''
             }
           }
         },

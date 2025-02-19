@@ -58,6 +58,8 @@ export const createCleanComponentData = (componentType) => {
         highlightWordCount: 2,
         enableProductHunt: false,
         productHuntId: '',
+        enableDiscord: false,
+        discordLink: '',
         bannerImage: 'https://picsum.photos/1200/600'
       }
     },
