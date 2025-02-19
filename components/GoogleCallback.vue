@@ -14,54 +14,11 @@
             </h2>
           </div>
   
-          <a-form v-if="showSetPasswordForm" layout="vertical" @submit.prevent="handleSetPassword">
-            <a-form-item
-              label="New Password"
-              :rules="[
-                { required: true, message: 'Please enter a new password!' },
-                { validator: validatePassword }
-              ]"
-            >
-              <a-input-password
-                v-model:value="setPasswordForm.newPassword"
-                placeholder="Enter new password"
-                size="large"
-                class="custom-input"
-              />
-              <div class="password-strength" v-if="setPasswordForm.newPassword">
-                Password Strength:
-                <span :class="setPasswordStrengthClass">{{ setPasswordStrength }}</span>
-              </div>
-            </a-form-item>
-  
-            <a-form-item
-              label="Confirm Password"
-              :rules="[
-                { required: true, message: 'Please confirm your password!' },
-                { validator: validateConfirmPassword }
-              ]"
-            >
-              <a-input-password
-                v-model:value="setPasswordForm.confirmPassword"
-                placeholder="Confirm your password"
-                size="large"
-                class="custom-input"
-              />
-            </a-form-item>
-  
-            <a-form-item>
-              <a-button
-                type="primary"
-                block
-                size="large"
-                @click="handleSetPassword"
-                class="login-button"
-                :loading="setPasswordLoading"
-              >
-                {{ setPasswordLoading ? 'Setting...' : 'Set Password' }}
-              </a-button>
-            </a-form-item>
-          </a-form>
+          <div class="redirect-message">
+            <h3 class="redirect-title">Welcome aboard!</h3>
+            <p class="redirect-text">Successfully authenticated with Google</p>
+            <p class="redirect-subtext">Redirecting you to dashboard...</p>
+          </div>
         </div>
       </a-layout-content>
     </a-layout>
@@ -74,128 +31,7 @@
   export default {
     name: 'GoogleCallback',
     data() {
-      return {
-        showSetPasswordForm: false,
-        setPasswordLoading: false,
-        setPasswordForm: {
-          newPassword: '',
-          confirmPassword: ''
-        }
-      };
-    },
-    computed: {
-      setPasswordStrength() {
-        const password = this.setPasswordForm.newPassword;
-        if (!password) return '';
-        
-        let strength = 0;
-        if (password.length >= 8) strength++;
-        if (/[A-Z]/.test(password)) strength++;
-        if (/[a-z]/.test(password)) strength++;
-        if (/\d/.test(password)) strength++;
-        
-        switch(strength) {
-          case 4: return 'Strong';
-          case 3: return 'Medium';
-          default: return 'Weak';
-        }
-      },
-      setPasswordStrengthClass() {
-        const strengthMap = {
-          'Strong': 'strength-strong',
-          'Medium': 'strength-medium',
-          'Weak': 'strength-weak'
-        };
-        return strengthMap[this.setPasswordStrength] || '';
-      }
-    },
-    methods: {
-      validatePassword(rule, value) {
-        if (!value) {
-          return Promise.reject('Please enter a new password!');
-        }
-        if (value.length < 8) {
-          return Promise.reject('Password must be at least 8 characters long');
-        }
-        if (!/\d/.test(value)) {
-          return Promise.reject('Password must contain at least one number');
-        }
-        if (!/[A-Z]/.test(value)) {
-          return Promise.reject('Password must contain at least one uppercase letter');
-        }
-        if (!/[a-z]/.test(value)) {
-          return Promise.reject('Password must contain at least one lowercase letter');
-        }
-        if (this.setPasswordForm.confirmPassword && value !== this.setPasswordForm.confirmPassword) {
-          return Promise.reject('The two passwords do not match');
-        }
-        return Promise.resolve();
-      },
-      validateConfirmPassword(rule, value) {
-        if (!value) {
-          return Promise.reject('Please confirm your password!');
-        }
-        if (value !== this.setPasswordForm.newPassword) {
-          return Promise.reject('The two passwords do not match!');
-        }
-        return Promise.resolve();
-      },
-      async handleSetPassword() {
-        const { newPassword, confirmPassword } = this.setPasswordForm;
-        
-        // Validate password format before submission
-        const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/;
-        if (!passwordRegex.test(newPassword)) {
-          this.$notification.error({
-            message: 'Error',
-            description: 'Password format is incorrect, please re-enter'
-          });
-          return;
-        }
-        
-        if (!newPassword || !confirmPassword) {
-          this.$notification.error({
-            message: 'Error',
-            description: 'Please fill in all fields'
-          });
-          return;
-        }
-        
-        this.setPasswordLoading = true;
-        try {
-          const response = await apiClient.changePassword({
-            currentPassword: '', // Empty for first-time login
-            newPassword,
-            confirmPassword,
-            isInitPassword: true // Add flag to indicate initial password setup
-          });
-          
-          if (response.code === 200) {
-            this.$notification.success({
-              message: 'Success',
-              description: 'Password set successfully'
-            });
-            this.$router.push('/dashboard');
-          } else if (response.code === 400 && response.message === 'Passwords do not match') {
-            this.$notification.error({
-              message: 'Error',
-              description: 'The two passwords do not match'
-            });
-          } else {
-            this.$notification.error({
-              message: 'Error',
-              description: response.message || 'Password setting failed'
-            });
-          }
-        } catch (error) {
-          this.$notification.error({
-            message: 'Error',
-            description: 'Network error, please try again'
-          });
-        } finally {
-          this.setPasswordLoading = false;
-        }
-      }
+      return {};
     },
     async created() {
       try {
@@ -222,10 +58,8 @@
             localStorage.setItem('currentCustomerId', response.data.customerId);
           }
 
-          // 先关闭之前的 Intercom
           shutdownIntercom();
           
-          // 初始化用户的 Intercom
           const user = {
             id: response.data.customerId,
             email: response.data.email,
@@ -244,20 +78,15 @@
           throw new Error(response?.message || 'Authentication failed');
         }
       } catch (error) {
-        // 根据不同的错误类型显示不同的提示
         let errorMessage = 'Failed to complete Google authentication';
         
         if (error.response) {
           switch (error.response.data?.code) {
             case 401:
-              if (error.response.data.message === 'Password incorrect') {
-                errorMessage = 'Password is incorrect, please try again';
-              } else if (error.response.data.message === 'User not find') {
-                errorMessage = 'User does not exist, please register first';
-              }
+              errorMessage = 'Authentication failed. Please try again';
               break;
             case 404:
-              errorMessage = 'User does not exist, please register first';
+              errorMessage = 'User not found. Please try again';
               break;
             default:
               errorMessage = error.response.data?.message || 'Google login failed';
@@ -388,5 +217,29 @@
   .login-button:active {
     background: #3A78FF !important;
     transform: translateY(1px);
+  }
+  
+  .redirect-message {
+    text-align: center;
+    padding: 20px 0;
+  }
+  
+  .redirect-title {
+    font-size: 24px;
+    color: #4B89FF;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  
+  .redirect-text {
+    font-size: 16px;
+    color: #5C7299;
+    margin-bottom: 8px;
+  }
+  
+  .redirect-subtext {
+    font-size: 14px;
+    color: #8BA2C9;
+    font-style: italic;
   }
   </style>
