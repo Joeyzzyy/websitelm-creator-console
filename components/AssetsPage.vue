@@ -34,14 +34,13 @@
               </span>
             </a-button>
             <a-button 
-              v-else-if="activeTab === 'links' || activeTab === 'button-links'"
+              v-else-if="activeTab === 'links'"
               type="primary"
               class="ai-analyze-btn" 
               @click="showAddLinkModal"
             >
               <span class="btn-content">
-                <span>Add {{ activeTab === 'links' ? 'Link' : 'Button Link' }}</span>
-                
+                <span>Add Link</span>
               </span>
             </a-button>
             <a-button
@@ -75,12 +74,7 @@
           </a-tab-pane>
           <a-tab-pane key="links">
             <template #tab>
-              <span class="links-tab">Internal Links</span>
-            </template>
-          </a-tab-pane>
-          <a-tab-pane key="button-links">
-            <template #tab>
-              <span class="button-links-tab">Button Links</span>
+              <span class="links-tab">Links</span>
             </template>
           </a-tab-pane>
           <a-tab-pane key="header" tab="Header">
@@ -290,11 +284,10 @@
             <template v-else-if="activeTab === 'links'">
               <a-spin :spinning="linksLoading">
                 <template v-if="!linksLoading">
-                  <!-- 添加空状态显示 -->
                   <div v-if="internalLinks.length === 0" class="empty-state">
-                    <h3 class="empty-state-title">No Internal Links Found 🔗</h3>
+                    <h3 class="empty-state-title">No Links Found 🔗</h3>
                     <p class="empty-state-description">
-                      Start adding internal links to improve your site's navigation and SEO.
+                      Start adding links to improve your site's navigation and SEO.
                     </p>
                     <a-button 
                       type="primary" 
@@ -305,7 +298,6 @@
                     </a-button>
                   </div>
                   
-                  <!-- 现有的表格组件 -->
                   <a-table
                     v-else
                     :columns="linkColumns" 
@@ -543,63 +535,6 @@
                   </div>
                 </a-spin>
               </div>
-            </template>
-            <!-- Button Links Content -->
-            <template v-else-if="activeTab === 'button-links'">
-              <a-spin :spinning="buttonLinksLoading">
-                <template v-if="!buttonLinksLoading">
-                  <!-- Empty state display -->
-                  <div v-if="buttonLinks.length === 0" class="empty-state">
-                    <h3 class="empty-state-title">No Button Links Found 🔗</h3>
-                    <p class="empty-state-description">
-                      Start adding button links to enhance your site's call-to-actions.
-                    </p>
-                    <a-button 
-                      type="primary" 
-                      class="upload-btn-empty" 
-                      @click="showAddLinkModal"
-                    >
-                      Add First Button Link
-                    </a-button>
-                  </div>
-                  
-                  <!-- Button links table -->
-                  <a-table
-                    v-else
-                    :columns="buttonLinkColumns" 
-                    :dataSource="buttonLinks" 
-                    :pagination="{ 
-                      pageSize: 10,
-                      showSizeChanger: true,
-                      showTotal: (total) => `Total ${total} items`
-                    }"
-                    :rowKey="record => record.id"
-                  >
-                    <template #bodyCell="{ column, record }">
-                      <template v-if="column.key === 'operation'">
-                        <a-space>
-                          <a-button type="link" @click="editButtonLink(record)">
-                            <edit-outlined />
-                          </a-button>
-                          <a-popconfirm
-                            title="Are you sure you want to delete this button link?"
-                            @confirm="() => deleteButtonLink(record)"
-                            ok-text="Delete"
-                            cancel-text="Cancel"
-                          >
-                            <a-button type="link" danger>
-                              <delete-outlined />
-                            </a-button>
-                          </a-popconfirm>
-                        </a-space>
-                      </template>
-                      <template v-if="column.key === 'link'">
-                        <a :href="record.link" target="_blank">{{ record.link }}</a>
-                      </template>
-                    </template>
-                  </a-table>
-                </template>
-              </a-spin>
             </template>
             <!-- Favicon Content -->
             <template v-else-if="activeTab === 'favicon'">
@@ -1705,50 +1640,25 @@ export default {
       category: undefined
     });
     
-    const linkFormRules = computed(() => {
-      if (activeTab.value === 'button-links') {
-        return {
-          name: [  // 添加 name 字段的验证规则
-            { required: true, message: 'Please enter the link name' },
-            { max: 50, message: 'Name cannot exceed 50 characters' }
-          ],
-          link: [
-            { required: true, message: 'Please enter the link URL' },
-            { type: 'url', message: 'Please enter a valid URL' }
-          ],
-          description: [
-            { required: true, message: 'Please enter the link description' },
-            { max: 500, message: 'Description cannot exceed 500 characters' }
-          ]
-        };
-      } else {
-        return {
-          link: [
-            { required: true, message: 'Please enter the link URL' },
-            { type: 'url', message: 'Please enter a valid URL' }
-          ],
-          description: [
-            { required: true, message: 'Please enter the link description' },
-            { max: 500, message: 'Description cannot exceed 500 characters' }
-          ],
-          category: [
-            { required: true, message: 'Please select a category' }
-          ]
-        };
-      }
-    });
+    const linkFormRules = computed(() => ({
+      link: [
+        { required: true, message: 'Please enter the link URL' },
+        { type: 'url', message: 'Please enter a valid URL' }
+      ],
+      description: [
+        { required: true, message: 'Please enter the link description' },
+        { max: 500, message: 'Description cannot exceed 500 characters' }
+      ],
+      category: [
+        { required: true, message: 'Please select a category' }
+      ]
+    }));
     
     const isLinkFormValid = computed(() => {
-      if (activeTab.value === 'button-links') {
-        return linkForm.value.name && 
-               linkForm.value.link && 
-               linkForm.value.description
-      } else {
-        return linkForm.value.link && 
-               linkForm.value.description && 
-               linkForm.value.category
-      }
-    })
+      return linkForm.value.link && 
+             linkForm.value.description && 
+             linkForm.value.category;
+    });
     
     const resetLinkForm = () => {
       linkForm.value = {
@@ -4799,11 +4709,10 @@ export default {
   background: white;
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin: 24px;
 }
 
 .preview-section {
-  padding: 12px;
+  padding: 24px;
 }
 
 .section-header {
