@@ -1536,7 +1536,7 @@ export default defineComponent({
             ).join(','),
             website: domain,
             sitemap: '',
-            domainStatus: false // 确保新域名的验证状态为 false
+            domainStatus: false
           };
 
           const updateResponse = await apiClient.updateProduct(this.formState.productId, formData);
@@ -1544,7 +1544,6 @@ export default defineComponent({
             throw new Error('Failed to update product information');
           }
 
-          // 重新加载产品信息
           await this.loadProductInfo();
         }
 
@@ -1553,11 +1552,14 @@ export default defineComponent({
           domainName: domain
         });
         
+        if (response?.code === 10042) {
+          throw new Error(response.message || 'This domain is already taken. Please choose another domain.');
+        }
+        
         if (response?.code === 200) {
           this.verifyRecord = JSON.parse(response.data.txt);
           this.showVerifyRecord = true;
           
-          // 确保产品信息中的验证状态为 false
           if (this.productInfo) {
             this.productInfo = {
               ...this.productInfo,
@@ -1568,8 +1570,10 @@ export default defineComponent({
           throw new Error('Failed to get verification record');
         }
       } catch (error) {
-        this.$message.error('Failed to start verification: ' + (error.message || 'Unknown error'));
-        // 确保在失败时也重置验证状态
+        // 显示错误消息
+        this.$message.error(error.message || 'Failed to start verification');
+        
+        // 确保在失败时重置验证状态
         if (this.productInfo) {
           this.productInfo = {
             ...this.productInfo,
