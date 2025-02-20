@@ -228,7 +228,7 @@
                       <div class="krs-info-card">
                         <div class="krs-header" @click="toggleKrsInfo">
                           <TrophyOutlined class="krs-icon" />
-                          <h3>Keyword Ranking Score (KRS)</h3>
+                          <h3>Keyword Priority Score</h3>
                           <a-button type="link" class="toggle-btn">
                             <component :is="isKrsExpanded ? 'UpOutlined' : 'DownOutlined'" />
                           </a-button>
@@ -236,22 +236,8 @@
                         
                         <div class="krs-content" v-show="isKrsExpanded">
                           <p class="krs-description">
-                            Our AI-powered KRS system analyzes competitor performance and market opportunities to rank keywords from P1 to P5.
+                            We analyze and prioritize keywords based on their <span class="highlight-text">Search Volume</span> and <span class="highlight-text">Competition Difficulty</span>, helping you identify the most valuable opportunities first.
                           </p>
-                          <div class="krs-benefits">
-                            <div class="benefit-item">
-                              <CheckCircleOutlined />
-                              <span>The higher the KRS score (0-10), the better chance to rank</span>
-                            </div>
-                            <div class="benefit-item">
-                              <RiseOutlined />
-                              <span>P1 keywords (KRS ≥ 8.0) represent immediate ranking opportunities</span>
-                            </div>
-                            <div class="benefit-item">
-                              <BarChartOutlined />
-                              <span>Strategic balance of competition and search volume</span>
-                            </div>
-                          </div>
                         </div>
                       </div>
                       <!-- 原来的 AI 推荐内容 -->
@@ -1154,27 +1140,27 @@ export default defineComponent({
     const priorities = [
       {
         level: '1',
-        label: 'P1 - Quick Wins',
+        label: 'P1 - High Volume, Low Competition',
         color: '#f50'
       },
       {
         level: '2',
-        label: 'P2 - High Priority',
+        label: 'P2 - Good Volume, Medium Competition',
         color: '#fa8c16' 
       },
       {
         level: '3',
-        label: 'P3 - Medium Priority',
+        label: 'P3 - Medium Volume & Competition',
         color: '#1890ff'
       },
       {
         level: '4',
-        label: 'P4 - Low Priority',
+        label: 'P4 - Lower Volume, Higher Competition',
         color: '#52c41a'
       },
       {
         level: '5',
-        label: 'P5 - Monitor',
+        label: 'P5 - Monitor & Long-term',
         color: '#722ed1'
       }
     ]
@@ -1238,7 +1224,6 @@ export default defineComponent({
       try {
         await Promise.all([
           checkDomainStatus(),
-          fetchUserPackage()
         ])
 
         if (domainConfigured.value) {
@@ -3157,103 +3142,6 @@ export default defineComponent({
       return typeColors[pageType] || 'default';
     };
 
-    // Add new refs
-    const userPackage = ref(null)
-    const isProfessional = computed(() => {
-      return userPackage.value?.name?.includes('Professional')
-    })
-    const isStandard = computed(() => {
-      return userPackage.value?.name?.includes('Standard')
-    })
-
-    // Add method to fetch package info
-    const fetchUserPackage = async () => {
-      try {
-        const response = await api.getCustomerPackage()
-        if (response?.data) {
-          userPackage.value = {
-            name: response.data.packageName?.trim() || 'Professional',
-            period: response.data.packageName?.toLowerCase().includes('monthly') ? 'monthly' : 'yearly',
-            endDate: response.data.packageEndTime,
-            remainingDays: response.data.remainingDays
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch user package:', error)
-      }
-    }
-
-    // Add package status section
-    const packageStatusSection = computed(() => {
-      if (!userPackage.value) return null
-
-      if (isProfessional.value) {
-        return {
-          icon: 'CheckCircleOutlined',
-          iconColor: '#52c41a',
-          title: 'Professional Plan Activated!',
-          description: 'You already have full access to premium keyword data from all keyword channels.',
-          bgColor: '#f6ffed',
-          borderColor: '#b7eb8f'
-        }
-      } else if (isStandard.value) {
-        return {
-          icon: 'RocketOutlined',
-          iconColor: '#1890ff',
-          title: 'Unlock More Keywords',
-          description: 'Upgrade to Professional to access tens of thousands of keyword data from Semrush and Ahrefs freely!',
-          bgColor: '#e6f7ff',
-          borderColor: '#91d5ff',
-          showUpgradeButton: true
-        }
-      }
-      return null
-    })
-
-    // Add upgrade handler
-    const handleUpgrade = () => {
-      Modal.info({
-        title: 'Free Pro Package Upgrade',
-        content: h('div', {}, [
-          h('p', { style: 'margin-bottom: 16px;' }, 
-            'Our package upgrade feature is coming soon! To ensure the best experience for you, we will:'
-          ),
-          h('ul', { style: 'margin-bottom: 16px; padding-left: 20px;' }, [
-            h('li', { style: 'margin-bottom: 8px;' }, 
-              'Upgrade your account to Pro Package for free'
-            ),
-            h('li', { style: 'margin-bottom: 8px;' }, 
-              'Provide full access to premium keyword data'
-            ),
-            h('li', 
-              'Complete the upgrade within 24-48 hours'
-            )
-          ]),
-          h('p', { style: 'color: #8c8c8c; font-size: 13px;' },
-            'Please wait patiently while we process your upgrade. Thank you for your understanding!'
-          )
-        ]),
-        width: 500,
-        okText: 'Got it',
-        icon: h(GiftOutlined, { style: 'color: #2563eb; font-size: 22px;' }),
-        centered: true,
-        maskClosable: true,
-        class: 'upgrade-modal'
-      })
-    }
-
-    const isKrsExpanded = ref(true)
-    
-    const toggleKrsInfo = () => {
-      isKrsExpanded.value = !isKrsExpanded.value
-    }
-
-    // 在 setup 中添加计算属性
-    const shouldShowTaskStatus = computed(() => {
-      return outlineGenerationStatus.value !== 'not_started' && 
-             outlineGenerationStatus.value !== null;
-    })
-
     return {
       taskStartTime,
       taskEndTime,
@@ -3427,15 +3315,7 @@ export default defineComponent({
       showTemplateInfo,
       getAIButtonTooltip,
       handleSinglePageGeneration,
-      getPageTypeColor,
-      userPackage,
-      isProfessional,
-      isStandard,
-      packageStatusSection,
-      handleUpgrade,
-      isKrsExpanded,
-      toggleKrsInfo,
-      shouldShowTaskStatus
+      getPageTypeColor
     }
   }
 })
@@ -5036,5 +4916,12 @@ export default defineComponent({
 
 :deep(.ant-tooltip) {
   overflow: visible !important;
+}
+
+.krs-content {
+  .highlight-text {
+    color: #1890ff; 
+    font-weight: 500; 
+  }
 }
 </style>
