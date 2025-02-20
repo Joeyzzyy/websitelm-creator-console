@@ -38,15 +38,11 @@
                 <div class="loading-content">
                   <LoadingOutlined class="analysis-icon" spin />
                   <h2>Analysis in Progress</h2>
-                  
-                  <!-- Show current tasks -->
                   <div v-for="task in currentTasks" :key="task.taskName" class="task-item">
                     <div class="task-header">
                       <span>{{ task.taskName }}</span>
                       <span>{{ task.status }}</span>
                     </div>
-                    
-                    <!-- Show timing info -->
                     <div class="task-timing">
                       <span>Started: {{ formatTime(task.startTime) }}</span>
                       <span v-if="task.endTime">Completed: {{ formatTime(task.endTime) }}</span>
@@ -225,21 +221,7 @@
                     @change="handleModeChange"
                   >
                     <a-tab-pane key="ai" tab="AI Recommendations">
-                      <div class="krs-info-card">
-                        <div class="krs-header" @click="toggleKrsInfo">
-                          <TrophyOutlined class="krs-icon" />
-                          <h3>Keyword Priority Score</h3>
-                          <a-button type="link" class="toggle-btn">
-                            <component :is="isKrsExpanded ? 'UpOutlined' : 'DownOutlined'" />
-                          </a-button>
-                        </div>
-                        
-                        <div class="krs-content" v-show="isKrsExpanded">
-                          <p class="krs-description">
-                            We analyze and prioritize keywords based on their <span class="highlight-text">Search Volume</span> and <span class="highlight-text">Competition Difficulty</span>, helping you identify the most valuable opportunities first.
-                          </p>
-                        </div>
-                      </div>
+
                       <!-- 原来的 AI 推荐内容 -->
                       <div class="beginner-mode">
                         <a-row :gutter="[24, 24]" class="beginner-content">
@@ -1140,27 +1122,27 @@ export default defineComponent({
     const priorities = [
       {
         level: '1',
-        label: 'P1 - High Volume, Low Competition',
+        label: 'P1\nHigh Volume, Low Competition',
         color: '#f50'
       },
       {
-        level: '2',
-        label: 'P2 - Good Volume, Medium Competition',
-        color: '#fa8c16' 
+        level: '2', 
+        label: 'P2\nGood Volume, Medium Competition',
+        color: '#fa8c16'
       },
       {
         level: '3',
-        label: 'P3 - Medium Volume & Competition',
+        label: 'P3\nMedium Volume & Competition',
         color: '#1890ff'
       },
       {
         level: '4',
-        label: 'P4 - Lower Volume, Higher Competition',
+        label: 'P4\nLower Volume, Higher Competition',
         color: '#52c41a'
       },
       {
         level: '5',
-        label: 'P5 - Monitor & Long-term',
+        label: 'P5\nMonitor & Long-term',
         color: '#722ed1'
       }
     ]
@@ -4334,53 +4316,6 @@ export default defineComponent({
 .action-button.generate-btn :deep(.anticon) {
   font-size: 14px;
   margin-right: 6px;
-}
-
-/* Add these styles */
-.krs-info-card {
-  background: linear-gradient(145deg, #ffffff 0%, #f8faff 100%);
-  border: 1px solid #e6f0fd;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
-}
-
-.krs-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.krs-icon {
-  font-size: 20px;
-  color: #2563eb;
-  background: rgba(37, 99, 235, 0.1);
-  padding: 6px;
-  border-radius: 6px;
-}
-
-.krs-header h3 {
-  font-size: 16px;
-  color: #1f2937;
-  margin: 0;
-  font-weight: 600;
-}
-
-.krs-description {
-  color: #4b5563;
-  font-size: 13px;
-  line-height: 1.4;
-  margin-bottom: 12px;
-}
-
-.krs-benefits {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  padding: 8px;
-  background: rgba(37, 99, 235, 0.02);
-  border-radius: 6px;
 }
 
 .benefit-item {
