@@ -4929,27 +4929,45 @@ export default defineComponent({
 
 .ai-autopilot-btn {
   position: relative;
+  overflow: hidden;
+  border-radius: 6px;
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  color: white;
-  font-weight: 600;
-  padding: 0 24px;
-  height: 40px;
-  border: none;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-  animation: pulse 2s infinite;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  /* 增加右侧内边距，为 badge 留出空间 */
-  padding-right: 32px;
-  overflow: visible !important; /* 确保按钮的溢出内容可见 */
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    );
+    animation: subtle-rotate 8s linear infinite;
+    z-index: 0;
+  }
+
+  .btn-text {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@keyframes subtle-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .ai-autopilot-btn:hover {
   background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-  color: white;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
 }
 
 .ai-autopilot-btn:active {
