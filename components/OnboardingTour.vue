@@ -83,7 +83,6 @@ export default defineComponent({
         tourConfig.assetManagement,
         tourConfig.keywordPlanning,
         tourConfig.taskManagement,
-        tourConfig.settings
       ]
     }
   },

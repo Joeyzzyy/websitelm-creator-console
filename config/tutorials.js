@@ -143,23 +143,5 @@ export const tourConfig = {
         link: 'https://websitelm.com/tutorials/websitelm-tutorial-manage-page-generation'
       },
     ]
-  },
-
-  settings: {
-    title: 'Settings',
-    content: 'Configure the sub-domain or sub-directory for your pages to be deployed.',
-    target: '[data-tour="settingspage"]',
-    placement: 'right',
-    badge: 'Final Step',
-    features: [
-      {
-        title: 'Domain configuration',
-        link: 'https://websitelm.com/tutorials/websitelm-tutorial-subdomain-subdirectory'
-      },
-      {
-        title: 'Deployment settings',
-        link: 'https://websitelm.com/tutorials/websitelm-publish-unpublish-pages'
-      }
-    ]
   }
 } 
