@@ -1283,9 +1283,9 @@ export default {
     const handleFileChange = (e) => {
       const file = e.target.files[0];
       if (file) {
-        const maxSize = activeTab.value === 'images' ? 1024 * 1024 : 50 * 1024 * 1024;
+        const maxSize = activeTab.value === 'images' ? 2 * 1024 * 1024 : 50 * 1024 * 1024; // 修改为2MB
         if (file.size > maxSize) {
-          message.error(`File size exceeds ${activeTab.value === 'images' ? '1MB' : '50MB'} limit`);
+          message.error(`File size exceeds ${activeTab.value === 'images' ? '2MB' : '50MB'} limit`);
           if (fileInput.value) {
             fileInput.value.value = '';
           }
@@ -1346,7 +1346,13 @@ export default {
         message.success('Upload successful');
         uploadModalVisible.value = false;
         removeUpload();
-        fetchAssets();
+        
+        // 根据当前标签页刷新对应的媒体列表
+        if (activeTab.value === 'images') {
+          await fetchImages();
+        } else if (activeTab.value === 'videos') {
+          await fetchVideos();
+        }
       } catch (error) {
         console.error('Upload failed:', error);
         if (error.response?.status === 413) {

@@ -11,11 +11,11 @@
             {{ topContent.subTitle }}
           </h3>
           <!-- Example Image -->
-          <div class="mb-8 aspect-[4/3] overflow-hidden rounded-lg">
+          <div class="mb-8 rounded-lg">
             <img 
               :src="topContent.imageUrl"
               :alt="topContent.imageAlt"
-              class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              class="w-full hover:scale-105 transition-transform duration-300"
             />
           </div>
           <!-- Button Group -->
