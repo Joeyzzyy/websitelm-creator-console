@@ -1,7 +1,7 @@
 <template>
   <a-modal
     :visible="visible"
-    title="Settings"
+    title="Publish Domain Setting"
     :width="800"
     :footer="null"
     @update:visible="$emit('update:visible', $event)"
@@ -21,7 +21,6 @@
                   <p class="website-url">{{ productInfo?.projectWebsite }}</p>
                 </div>
                 <div class="deployment-settings">
-                  <h3>Deployment Settings</h3>
                   <a-form
                     :model="deploymentForm"
                     layout="vertical"
@@ -145,7 +144,6 @@
                         <template v-if="subfolderDomainConfig">
                           <template v-if="!subfolderDomainConfig.misconfigured">
                             <div class="section-header">
-                              <h3>Subfolder Management</h3>
                               <a-button type="primary" @click="showSubfolderModal = true">
                                 Add Subfolder
                               </a-button>
@@ -959,95 +957,216 @@ export default {
 
 <style scoped>
 .settings-content {
-  padding: 0;
-  background: white;
-  border-radius: 8px;
-  min-height: auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .settings-container {
   width: 100%;
   min-height: auto;
-  padding: 16px;
+  padding: 0;
 }
 
 .domain-settings {
-  margin-bottom: 16px;
+  margin-bottom: 32px;
 }
 
 .current-domain {
-  margin-bottom: 16px;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 24px;
+}
+
+.current-domain h3 {
+  color: #1f2937;
+  font-size: 16px;
+  margin-bottom: 12px;
+  font-weight: 600;
 }
 
 .website-url {
-  font-size: 16px;
-  color: #1890ff;
+  font-size: 18px;
+  color: #2563eb;
   margin: 0;
-}
-
-.deployment-settings {
-  margin-top: 16px;
+  font-weight: 500;
+  word-break: break-all;
 }
 
 .deployment-options {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .deployment-option {
-  border: 1px solid #d9d9d9;
-  border-radius: 8px;
-  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.2s ease;
+  background: #ffffff;
 }
 
 .deployment-option:hover {
-  border-color: #1890ff;
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .deployment-option.active {
-  border-color: #1890ff;
-  background-color: #e6f7ff;
+  border-color: #2563eb;
+  background-color: #eff6ff;
 }
 
 .option-header {
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
-.radio-wrapper {
-  margin-right: 12px;
+.option-header h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
 }
 
 .option-description {
-  color: #666;
+  color: #6b7280;
+  font-size: 14px;
   margin: 0;
 }
 
 .url-preview {
   display: flex;
   align-items: center;
-  gap: 4px;
-}
-
-.url-separator {
-  color: #666;
+  gap: 8px;
+  background: #f8fafc;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
 }
 
 .base-domain {
-  color: #666;
+  color: #4b5563;
+  font-weight: 500;
 }
 
-.custom-input {
-  max-width: 200px;
+.domain-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.configured-domains {
+.domain-item {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+}
+
+.domain-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.domain-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.domain-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.dns-config-alert {
+  margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dns-table-wrapper {
   margin-top: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.domain-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.domain-date {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.save-btn {
+  min-width: 100px;
+}
+
+:deep(.ant-modal-content) {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+:deep(.ant-modal-header) {
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f8fafc;
+}
+
+:deep(.ant-modal-title) {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+:deep(.ant-modal-body) {
+  padding: 0;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+:deep(.ant-table-small) {
+  font-size: 14px;
+}
+
+:deep(.ant-table-small .ant-table-thead > tr > th) {
+  background: #f8fafc;
+  padding: 12px 16px;
+}
+
+:deep(.ant-table-small .ant-table-tbody > tr > td) {
+  padding: 12px 16px;
+}
+
+.centered-spin {
+  min-height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.verification-status {
+  margin: 24px 0;
 }
 
 .domains-header {
@@ -1057,68 +1176,21 @@ export default {
   margin-bottom: 16px;
 }
 
-.domain-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.domain-item {
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  padding: 12px;
-}
-
-.domain-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.domain-name {
+.domains-header h3 {
   font-size: 16px;
-  font-weight: 500;
-}
-
-.dns-config-alert {
-  margin: 12px 0;
-}
-
-.dns-table-wrapper {
-  margin-top: 12px;
-}
-
-.dns-table {
-  background: #fafafa;
-}
-
-.domain-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 12px;
-}
-
-.domain-date {
-  color: #666;
-  font-size: 14px;
-}
-
-.refresh-btn {
-  padding: 4px 8px;
-}
-
-.verification-status {
-  margin-top: 16px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
 }
 
 .verification-header {
-  margin-bottom: 16px;
+  margin: 16px 0;
 }
 
-.success-alert {
-  margin-bottom: 16px;
+:deep(.success-alert) {
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
 }
 
 .alert-content {
@@ -1127,62 +1199,26 @@ export default {
   gap: 8px;
 }
 
-.delete-btn {
-  margin-left: auto;
-}
-
 .section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  margin: 24px 0;
 }
 
 .subfolder-list {
-  margin-top: 16px;
+  margin-top: 24px;
 }
 
-:deep(.ant-modal-content) {
-  border-radius: 12px;
-  overflow: hidden;
+:deep(.ant-alert) {
+  margin-bottom: 16px;
 }
 
-:deep(.ant-modal-header) {
-  border-bottom: 1px solid #f0f0f0;
-  padding: 16px 24px;
-}
-
-:deep(.ant-modal-body) {
-  padding: 0;
-  max-height: calc(100vh - 200px);
-  overflow-y: auto;
-}
-
-:deep(.ant-modal-close) {
-  top: 16px;
-}
-
-.centered-spin {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 200px;
+:deep(.ant-alert-with-description) {
+  padding: 16px;
 }
 
 .domain-verification {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-:deep(.ant-modal) {
-  width: 900px !important;
-  max-width: 95vw;
-}
-
-.button-group {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+  gap: 16px;
 }
 </style> 
