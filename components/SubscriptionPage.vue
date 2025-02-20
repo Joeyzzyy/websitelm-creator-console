@@ -30,19 +30,19 @@
             <div class="flex-1 space-y-4 text-center md:text-left">
               <div class="space-y-2">
                 <div class="flex items-center justify-center md:justify-start space-x-3">
-                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                    Coming Soon
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Free Trial
                   </span>
-                  <span class="animate-pulse text-blue-600 font-semibold">
-                    Live on Product Hunt 🚀
+                  <span class="animate-pulse text-green-600 font-semibold">
+                    Limited Time Offer! 🎁
                   </span>
                 </div>
                 <h2 class="text-2xl font-bold text-gray-900">
-                  February 25th Launch Day
+                  Free Access Until March 25th
                 </h2>
               </div>
               <p class="text-gray-600 max-w-2xl">
-                WebsiteLM is currently in exclusive early access. Join our pioneering users and start experiencing the future of AI-powered content management today!
+                Experience WebsiteLM with full Pro plan benefits at no cost until March 25th. Start exploring our AI-powered content management system today - no access code needed!
               </p>
             </div>
             
@@ -50,24 +50,15 @@
             <div class="flex-shrink-0 w-full md:w-auto">
               <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                  Early Access Portal ✨
+                  Start Your Free Pro Trial ✨
                 </h3>
                 <div class="space-y-3">
-                  <input
-                    v-model="secretCode"
-                    type="text"
-                    placeholder="Enter your access code"
-                    class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                    :disabled="verifyingCode"
-                    @keyup.enter="verifySecretCode"
-                  />
                   <button 
                     class="early-access-btn w-full"
-                    :class="{ 'verifying': verifyingCode }"
-                    @click="verifySecretCode"
+                    @click="handleSelectPlan('pro')"
                   >
                     <span class="flex items-center justify-center">
-                      <span>{{ verifyingCode ? 'Verifying...' : 'Activate Early Access' }}</span>
+                      <span>Activate Pro Plan Now</span>
                       <i class="fas fa-arrow-right ml-2"></i>
                     </span>
                   </button>

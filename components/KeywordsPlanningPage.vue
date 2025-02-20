@@ -2220,43 +2220,19 @@ export default defineComponent({
         title: 'Keyword',
         dataIndex: 'keyword',
         key: 'keyword',
-        width: '20%'
-      },
-      {
-        title: 'Source',
-        dataIndex: 'keywordType',
-        key: 'keywordType',
-        width: '15%',
-        customRender: ({ text }) => {
-          const sourceMap = {
-            'absence': 'Absence',
-            'top_page': 'Top Page',
-            'semrush': 'SEMrush',
-            'ahrefs': 'Ahrefs',
-            'google': 'Google',
-            'manual': 'Manual',
-            'import': 'Import'
-          }
-          return sourceMap[text] || text
-        }
-      },
-      {
-        title: 'KRS',
-        dataIndex: 'krs',
-        key: 'krs',
-        width: '10%'
+        width: '35%'
       },
       {
         title: 'KD',
         dataIndex: 'kd',
         key: 'kd',
-        width: '10%'
+        width: '15%'
       },
       {
         title: 'Volume',
         dataIndex: 'volume',
         key: 'volume',
-        width: '10%'
+        width: '15%'
       },
       {
         title: 'Has Related Outlines',
@@ -2273,7 +2249,7 @@ export default defineComponent({
       {
         title: 'Manual Actions',
         key: 'actions',
-        width: '10%'
+        width: '15%'
       }
     ])
 
