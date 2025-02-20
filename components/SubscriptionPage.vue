@@ -74,10 +74,10 @@
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div class="text-center">
         <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-          Choose the Perfect Plan for Your Growth
+          While You Enjoy Your Free Pro Trial, Explore Our Plans
         </h1>
         <p class="mt-4 text-lg text-[#5C7299]">
-          Select a plan that suits your needs. Start now with a 14-day cash-back guarantee.
+          Compare our plans and features to see how Pro plan benefits can help grow your business.
         </p>
 
         <!-- Billing Toggle -->
@@ -763,20 +763,20 @@ html {
 }
 
 .early-access-btn {
-  @apply px-6 py-3 bg-gradient-to-r from-[#4B89FF] to-[#6C9AFF] text-white font-medium rounded-lg transition-all duration-300;
+  @apply px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-medium rounded-lg transition-all duration-300;
   min-width: 180px;
-  box-shadow: 0 4px 12px rgba(75, 137, 255, 0.25);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
 }
 
 .early-access-btn:hover {
-  @apply from-[#5C95FF] to-[#7CA5FF];
+  @apply from-emerald-600 to-green-600;
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(75, 137, 255, 0.35);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
 }
 
 .early-access-btn:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 8px rgba(75, 137, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
 }
 
 .early-access-btn.verifying {
