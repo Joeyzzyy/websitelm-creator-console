@@ -67,10 +67,14 @@ export default {
       type: Object,
       required: true,
       validator: function(obj) {
-        return obj.title !== undefined && 
-               obj.subtitle !== undefined && 
-               obj.bottomContent !== undefined
+        return obj?.title !== undefined && 
+               obj?.subTitle !== undefined && 
+               Array.isArray(obj?.bottomContent)
       }
+    },
+    styles: {
+      type: Object,
+      required: true
     }
   }
 }

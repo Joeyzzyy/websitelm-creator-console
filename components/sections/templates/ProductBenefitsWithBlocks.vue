@@ -423,6 +423,13 @@ export default {
     },
     clearIconSearch() {
       this.iconSearch = '';
+    },
+    handleIconSelect() {
+      if (this.selectedIcon && this.currentModuleIndex !== null) {
+        this.localSection.rightContent[this.currentModuleIndex].icon = this.selectedIcon
+        this.handleChange()
+        this.closeIconPicker()
+      }
     }
   }
 }

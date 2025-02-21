@@ -108,12 +108,10 @@ export default {
     },
     titleClasses() {
       const { fontSize, fontWeight, color } = this.styles.typography.h1
-      console.log('Title classes:', { fontSize, fontWeight, color })
       return [fontSize, fontWeight, color]
     }
   },
   created() {
-    console.log('Styles:', this.styles)
     if (this.localSection.bottomContent.publishDate === "") {
       this.localSection.bottomContent.publishDate = new Date().toISOString().split('T')[0];
     }
@@ -133,11 +131,6 @@ export default {
     }
 
     const typography = this.styles.typography.h1
-    console.log('Typography h1 values:', {
-      fontSize: typography.fontSize,
-      fontWeight: typography.fontWeight,
-      color: typography.color
-    })
   },
   watch: {
     section: {
@@ -152,10 +145,6 @@ export default {
       this.emitUpdate(this.localSection)
     }
   },
-  mounted() {
-    console.log('Complete styles config:', this.styles)
-    console.log('Typography styles:', this.styles.typography.h1)
-  }
 }
 </script>
 

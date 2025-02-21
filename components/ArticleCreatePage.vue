@@ -864,8 +864,6 @@ export default defineComponent({
             numberOfWords: 2000
           };
           
-          console.log('Saving page data:', pageUpdateData);
-          
           updatePromises.push(
             apiClient.updatePage(pageId.value, pageUpdateData)
           );
@@ -1514,19 +1512,16 @@ export default defineComponent({
       try {
         // Check if slug contains spaces
         if (articleData.value.slug && articleData.value.slug.includes(' ')) {
-          console.log('Slug contains spaces, skipping auto-save');
           return;
         }
 
         // 检查是否满足自动保存条件
         if (!checkRequiredFields()) {
-          console.log('Required fields not filled, skipping auto-save');
           return;
         }
 
         // 检查是否有内容sections
         if (!articleData.value.sections || articleData.value.sections.length === 0) {
-          console.log('No sections to save, skipping auto-save');
           return;
         }
 
@@ -1535,13 +1530,11 @@ export default defineComponent({
         
         // 新增: 检查 slug 是否有效
         if (!isSlugValid.value) {
-          console.log('Invalid slug, skipping auto-save');
           return;
         }
 
         const customerId = localStorage.getItem('currentCustomerId');
         if (!customerId) {
-          console.log('Customer ID not found, skipping auto-save');
           return;
         }
 
@@ -1578,7 +1571,6 @@ export default defineComponent({
         await Promise.all(updatePromises);
 
         lastAutoSaveTime.value = new Date();
-        console.log('Auto-saved successfully at:', lastAutoSaveTime.value);
         
         message.success({
           content: 'Auto-saved successfully',
@@ -1606,7 +1598,6 @@ export default defineComponent({
     // 监听文章数据变化
     watch(() => articleData.value, () => {
       // 当数据发生变化时，可以在这里添加额外的逻辑
-      console.log('Article data changed, next auto-save scheduled');
     }, { deep: true });
 
     // 添加 getPreviewPublishUrl 计算属性
