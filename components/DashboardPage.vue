@@ -116,7 +116,7 @@
                   <div class="website-content">
                     <a :href="'https://' + productInfo?.projectWebsite" target="_blank" class="website-link">
                       {{ productInfo?.projectWebsite }}
-                      <icon-external-link />
+                      <LinkOutlined />
                     </a>
                     <!-- 添加条件渲染的验证按钮 -->
                     <template v-if="!productInfo?.domainStatus">
@@ -314,26 +314,17 @@
 
     </div>
 
-    <!-- Add onboarding modal -->
     <a-modal
       v-model:open="onboardingModalVisible"
       :maskClosable="false"
-      :closable="!!formState.productId"
+      :closable="true"
       :width="1000"
       :footer="null"
       :class="['product-modal']"
     >
       <template #title>
         <div class="modal-title">
-          <template v-if="!formState.productId">
-            <div class="welcome-title">
-              <span class="beta-tag">BETA</span>
-              <span class="title-text">Welcome to WebsiteLM!</span>
-            </div>
-          </template>
-          <template v-else>
-            <span>✏️ Edit Product Information</span>
-          </template>
+          <span>✏️ Edit Product Information</span>
         </div>
       </template>
 
@@ -356,130 +347,118 @@
             :maxLength="50"
           />
         </a-form-item>
+
         <!-- Website info and domain verification -->
         <a-form-item 
           label="Official Website" 
           name="website"
         >
           <p class="step-description">Enter your product's website URL to help us better understand and fetch your product content.</p>
-          <a-input-group compact>
-            <span 
-              style="
-                display: inline-flex;
-                align-items: center;
-                padding: 0 11px;
-                width: 90px;
-                height: 32px;
-                color: rgba(0, 0, 0, 0.88);
-                background-color: rgb(245, 245, 245);
-                border: 1px solid #d9d9d9;
-                border-right: none;
-                border-radius: 6px 0 0 6px;
-              "
-            >
-              https://
-            </span>
-            <a-input 
-              v-model:value="formState.website" 
-              style="width: calc(100% - 90px); border-radius: 0 6px 6px 0;"
-              placeholder="example.com"
-              @change="handleWebsiteChange"
-              :disabled="verifying"
-            />
-          </a-input-group>
-          <template v-if="formState.productId">
-            <template v-if="(!productInfo.domainStatus || formState.website !== productInfo.projectWebsite?.replace('https://', '')) && formState.website">
-              <div class="mt-3">
-                <template v-if="!showVerifyRecord">
-                  <a-button 
-                    type="primary" 
-                    @click="startVerify"
-                    :disabled="!formState.website"
-                    :loading="startVerifying"
-                  >
-                    Start Verifying
-                  </a-button>
-                </template>
-                <template v-else>
-                  <div class="verify-record-container">
-                    <div class="verify-record-title">
-                      Please add the following TXT record to your DNS settings:
-                    </div>
-                    <div class="verify-record-table">
-                      <div class="verify-record-row">
-                        <div class="verify-record-cell">
-                          <span class="verify-label">Type:</span>
-                          <a-typography-text>TXT</a-typography-text>
-                        </div>
+          <div class="website-input-group">
+            <a-input-group compact>
+              <div class="website-prefix">https://</div>
+              <a-input 
+                v-model:value="formState.website" 
+                class="website-input"
+                placeholder="example.com"
+                @change="handleWebsiteChange"
+                :disabled="verifying"
+              />
+            </a-input-group>
+            <!-- Add domain status tag -->
+            <div class="domain-status" v-if="formState.website">
+              <a-tag v-if="productInfo?.domainStatus" color="success">Verified</a-tag>
+              <a-tag v-else color="warning">Unverified</a-tag>
+            </div>
+          </div>
+          
+          <!-- Domain verification section -->
+          <template v-if="(!productInfo.domainStatus || formState.website !== productInfo.projectWebsite?.replace('https://', '')) && formState.website">
+            <div class="mt-3">
+              <template v-if="!showVerifyRecord">
+                <a-button 
+                  type="primary" 
+                  @click="startVerify"
+                  :disabled="!formState.website"
+                  :loading="startVerifying"
+                >
+                  Start Verifying
+                </a-button>
+              </template>
+              <template v-else>
+                <div class="verify-record-container">
+                  <div class="verify-record-title">
+                    Please add the following TXT record to your DNS settings:
+                  </div>
+                  <div class="verify-record-table">
+                    <div class="verify-record-row">
+                      <div class="verify-record-cell">
+                        <span class="verify-label">Type:</span>
+                        <a-typography-text>TXT</a-typography-text>
                       </div>
-                      
-                      <!-- Combined Host row with horizontal layout -->
-                      <div class="verify-record-row">
-                        <div class="verify-record-cell">
-                          <span class="verify-label">Host:</span>
-                          <div class="record-value-container horizontal">
-                            <div class="host-option">
-                              <a-typography-text code copyable class="record-value">
-                                {{ verifyRecord?.host || '_' }}
-                              </a-typography-text>
-                              <span class="record-note">For most DNS providers</span>
-                            </div>
-                            
-                            <div class="host-divider">
-                              <span class="divider-text">OR</span>
-                            </div>
-                            
-                            <div class="host-option">
-                              <a-typography-text code copyable class="record-value">
-                                {{ verifyRecord?.host?.split('.' + formState.website)[0] || '_' }}
-                              </a-typography-text>
-                              <span class="record-note">For Namecheap, Aliyun, etc.</span>
-                            </div>
+                    </div>
+                    
+                    <!-- Combined Host row with horizontal layout -->
+                    <div class="verify-record-row">
+                      <div class="verify-record-cell">
+                        <span class="verify-label">Host:</span>
+                        <div class="record-value-container horizontal">
+                          <div class="host-option">
+                            <a-typography-text code copyable class="record-value">
+                              {{ verifyRecord?.host || '_' }}
+                            </a-typography-text>
+                            <span class="record-note">For most DNS providers</span>
+                          </div>
+                          
+                          <div class="host-divider">
+                            <span class="divider-text">OR</span>
+                          </div>
+                          
+                          <div class="host-option">
+                            <a-typography-text code copyable class="record-value">
+                              {{ verifyRecord?.host?.split('.' + formState.website)[0] || '_' }}
+                            </a-typography-text>
+                            <span class="record-note">For Namecheap, Aliyun, etc.</span>
                           </div>
                         </div>
                       </div>
-                      
-                      <div class="verify-record-row">
-                        <div class="verify-record-cell">
-                          <span class="verify-label">Value:</span>
-                          <a-typography-text code copyable class="record-value">
-                            {{ verifyRecord?.value || '_' }}
-                          </a-typography-text>
-                        </div>
-                      </div>
                     </div>
                     
-                    <div class="verify-record-help">
-                      <!-- Remove the basic tips and only keep the important warning -->
-                      <div class="important-warning">
-                        <ExclamationCircleFilled />
-                        <div class="warning-content">
-                          <strong>IMPORTANT: If verification keeps failing</strong>
-                          <p>
-                            Try removing the existing TXT record from your DNS provider and add it again as a new record. 
-                            This often resolves persistent verification issues!
-                          </p>
-                        </div>
+                    <div class="verify-record-row">
+                      <div class="verify-record-cell">
+                        <span class="verify-label">Value:</span>
+                        <a-typography-text code copyable class="record-value">
+                          {{ verifyRecord?.value || '_' }}
+                        </a-typography-text>
                       </div>
                     </div>
-                    
-                    <a-button 
-                      type="primary" 
-                      @click="verifyNow"
-                      :loading="verifying"
-                      class="mt-3"
-                    >
-                      Verify Now
-                    </a-button>
                   </div>
-                </template>
-              </div>
-            </template>
-            <template v-else-if="productInfo.domainStatus && formState.website === productInfo.projectWebsite?.replace('https://', '')">
-              <a-tag color="success" class="mt-3">
-              Domain Verified
-              </a-tag>
-            </template>
+                  
+                  <div class="verify-record-help">
+                    <!-- Remove the basic tips and only keep the important warning -->
+                    <div class="important-warning">
+                      <ExclamationCircleFilled />
+                      <div class="warning-content">
+                        <strong>IMPORTANT: If verification keeps failing</strong>
+                        <p>
+                          Try removing the existing TXT record from your DNS provider and add it again as a new record. 
+                          This often resolves persistent verification issues!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <a-button 
+                    type="primary" 
+                    @click="verifyNow"
+                    :loading="verifying"
+                    class="mt-3"
+                  >
+                    Verify Now
+                  </a-button>
+                </div>
+              </template>
+            </div>
           </template>
         </a-form-item>
 
@@ -537,21 +516,8 @@
               :disabled="!formState.productName"
               block
             >
-              {{ formState.productId ? 'Save Changes' : 'Start Using WebsiteLM' }}
+              Save Changes
             </a-button>
-            
-            <!-- 添加登出按钮到底部 -->
-            <template v-if="!formState.productId">
-              <div class="switch-account-wrapper">
-                <a-button 
-                  type="link" 
-                  class="switch-account-btn" 
-                  @click="handleLogout"
-                >
-                  Login with another account
-                </a-button>
-              </div>
-            </template>
           </div>
         </a-form-item>
       </a-form>
@@ -569,54 +535,6 @@
         <div class="success-icon"></div>
         <h3>Connected Successfully!</h3>
         <p>Please close this window and refresh the page</p>
-      </div>
-    </a-modal>
-
-    <a-modal
-      v-model:visible="successModalVisible"
-      title="Welcome to WebsiteLM!"
-      :footer="null"
-      :maskClosable="false"
-    >
-      <div class="success-content">
-        <div class="success-icon">🎉</div>
-        <p>Your product has been set up successfully. Here are the next steps:</p>
-        
-        <div class="todo-list">
-          <div class="todo-item">
-            <div class="todo-info">
-              <span class="todo-title">1. Verify Your Domain</span>
-              <span class="todo-desc">Enable automatic sitemap and content fetching</span>
-            </div>
-            <a-button type="primary" @click="handleVerifyDomain">
-              Start Verify
-            </a-button>
-          </div>
-
-          <div class="todo-item">
-            <div class="todo-info">
-              <span class="todo-title">2. Connect Google Search Console</span>
-              <span class="todo-desc">Track your website performance</span>
-            </div>
-            <a-button type="primary" @click="connectGSC">
-              Connect Now
-            </a-button>
-          </div>
-
-          <div class="todo-item">
-            <div class="todo-info">
-              <span class="todo-title">3. Explore Features</span>
-              <span class="todo-desc">Learn about all available features</span>
-            </div>
-            <a-button type="primary" @click="handleExploreTour">
-              Start Tour
-            </a-button>
-          </div>
-        </div>
-
-        <div class="skip-action">
-          <a-button @click="handleSuccessModalClose">Skip for now</a-button>
-        </div>
       </div>
     </a-modal>
 
@@ -808,21 +726,19 @@ export default defineComponent({
     AppstoreOutlined,
     ThunderboltOutlined,
     ExclamationCircleFilled,
+    // 添加 LinkOutlined 作为外部链接图标的替代
   },
   data() {
     return {
       productInfo: null,
       onboardingModalVisible: false,
       loading: false,
-      websitePrefix: 'https://',
       formState: {
         productId: undefined,
         productName: '',
         website: '',
-        coreFeatures: '',
         competitors: []
       },
-      successModalVisible: false,
       newCompetitor: {
         name: '',
         url: ''
@@ -851,7 +767,6 @@ export default defineComponent({
       submitLoading: false,
       publishedUrls: [],
       pagesDashboard: null,
-      isDomainVerified: false,
       expandedKeys: [], // 添加新的数据属性
       hasTourCompleted: false, // 添加新的数据属性
       originalWebsite: '', // 新增：保存原始域名
@@ -1028,50 +943,80 @@ export default defineComponent({
     },
     
     async loadProductInfo() {
-      console.log('loadProductInfo called from:', new Error().stack);
       try {
-        const response = await apiClient.getProductsByCustomerId()
+        // 添加更详细的日志
+        console.log('Start loading product info');
         
-        if (response?.code === 200) {
-          this.productInfo = response.data
+        const response = await apiClient.getProductsByCustomerId();
+        
+        if (!response) {
+          throw new Error('API response is empty');
+        }
+
+        if (response.code === 200) {
+          this.productInfo = response.data;
+          
           if (!response.data) {
-            // 只保留新用户设置产品的逻辑
-            this.currentStep = 0;
+            console.log('No product info found, showing new user setup interface');
+            // 重置表单状态
             this.formState = {
               productId: undefined,
               productName: '',
               website: '',
               coreFeatures: '',
               competitors: []
-            }
-            this.onboardingModalVisible = true
-          } else {
-            // 加载所有必要数据
-            await Promise.all([
-              this.checkGscStatus(),
-              this.loadPagesDashboard()
-            ]);
+            };
+            this.onboardingModalVisible = true;
+            return;
+          }
 
-            if (this.productInfo.domainStatus) {
+          console.log('Product info loaded successfully, starting to load related data');
+          
+          // 使用 Promise.allSettled 替代 Promise.all,避免一个请求失败影响其他请求
+          const results = await Promise.allSettled([
+            this.checkGscStatus(),
+            this.loadPagesDashboard()
+          ]);
+
+          // 检查每个请求的结果
+          results.forEach((result, index) => {
+            if (result.status === 'rejected') {
+              console.error(`Data loading failed ${index}:`, result.reason);
+            }
+          });
+
+          if (this.productInfo.domainStatus) {
+            try {
               await this.getSitemap();
               
               if (this.isGscConnected) {
                 await this.loadGscData();
               }
+            } catch (error) {
+              console.error('Failed to load sitemap or GSC data:', error);
             }
-
-            // 所有数据加载完成后，再设置面板就绪状态
-            this.$nextTick(() => {
-              this.isPanelReady = true;
-            });
           }
+
+          // 所有数据加载完成后设置面板状态
+          this.$nextTick(() => {
+            this.isPanelReady = true;
+          });
+        } else {
+          throw new Error(`API returned error code: ${response.code}`);
         }
       } catch (error) {
-        console.error('Failed to load product information:', error);
+        console.error('Failed to load product info:', error);
+        
+        // 显示用户友好的错误提示
         this.$notification.error({
-          message: 'Failed to Load Product',
-          description: 'An error occurred while loading product information. Please try again later.'
+          message: 'Load Failed',
+          description: 'Failed to load product info, please try again later',
+          duration: 5
         });
+
+        // 重置关键状态
+        this.productInfo = null;
+        this.isPanelReady = false;
       }
     },
     handleCompetitorChange(value) {
@@ -1082,89 +1027,16 @@ export default defineComponent({
       }
     },
     async handleFormSubmit() {
-      if (this.formState.productId) {
-        await this.handleProductEdit();
-      } else {
-        await this.handleOnboarding();
-      }
-    },
-
-    // 处理新用户 onboarding
-    async handleOnboarding() {
       this.loading = true;
       try {
         const formData = this.prepareFormData();
-        const response = await apiClient.createProduct(formData);
-        
-        if (response?.code === 200) {
-          console.log('API 调用成功，准备显示 modal');
-          this.onboardingModalVisible = false;
-          await this.$nextTick();
-          
-          // 延迟显示 success modal
-          setTimeout(() => {
-            this.successModalVisible = true;
-            console.log('设置 successModalVisible:', this.successModalVisible);
-          }, 100);
-          
-          this.resetFormState();
-          await this.loadProductInfo();
-        }
-      } catch (error) {
-        console.error('Error during onboarding:', error);
-        this.$notification.error({
-          message: 'Onboarding Failed',
-          description: error.message || 'Failed to create product'
-        });
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    // 处理产品编辑
-    async handleProductEdit() {
-      this.loading = true;
-      try {
-        // 使用保存的原始域名进行对比
-        const isWebsiteChanged = this.formState.website !== this.originalWebsite;
-        
-        // 准备表单数据
-        const formData = {
-          ...this.prepareFormData(),
-          // 如果域名没变，保持原有验证状态
-          domainStatus: isWebsiteChanged ? false : this.productInfo.domainStatus
-        };
-
-        // 只有在域名改变且之前未验证的情况下才重新创建验证记录
-        if (isWebsiteChanged && !this.productInfo.domainStatus) {
-          const domain = this.formState.website.replace(/^https?:\/\//, '');
-          const verifyResponse = await apiClient.createDomainWithTXT({
-            customerId: localStorage.getItem('currentCustomerId'),
-            domainName: domain
-          });
-          
-          if (verifyResponse?.code === 200) {
-            this.verifyRecord = JSON.parse(verifyResponse.data.txt);
-            this.showVerifyRecord = true;
-          }
-        }
-
         const response = await apiClient.updateProduct(this.formState.productId, formData);
         
         if (response?.code === 200) {
-          // 如果域名已变更且之前未验证，显示验证提示
-          if (isWebsiteChanged && !this.productInfo.domainStatus) {
-            this.$notification.info({
-              message: 'Domain Verification Required',
-              description: 'Please verify your new domain to enable all features.',
-              duration: 0
-            });
-          } else {
-            this.$notification.success({
-              message: 'Product Updated',
-              description: 'Product information has been updated successfully.'
-            });
-          }
+          this.$notification.success({
+            message: 'Product Updated',
+            description: 'Product information has been updated successfully.'
+          });
           
           this.onboardingModalVisible = false;
           await this.loadProductInfo();
@@ -1196,20 +1068,6 @@ export default defineComponent({
         // 域名变更时一定重置验证状态
         domainStatus: isWebsiteChanged ? false : this.formState.domainStatus
       };
-    },
-
-    // 重置表单状态的方法
-    resetFormState() {
-      this.formState = {
-        productId: undefined,
-        productName: '',
-        website: '',
-        coreFeatures: '',
-        competitors: [],
-        domainStatus: false
-      };
-      this.showVerifyRecord = false;
-      this.verifyRecord = null;
     },
 
     async deleteProduct() {
@@ -1272,10 +1130,6 @@ export default defineComponent({
       else if (!this.originalDomainStatus) {
         await this.checkDomainVerification();
       }
-    },
-    handleSuccessModalClose() {
-      console.log('关闭 success modal');
-      this.successModalVisible = false;
     },
     addCompetitor() {
       if (this.newCompetitor.name && this.newCompetitor.url) {
@@ -1630,42 +1484,11 @@ export default defineComponent({
         this.verifying = false;
       }
     },
-    watch: {
-      onboardingModalVisible(newVal) {
-        if (newVal) {
-          // Reset to first step whenever modal is opened
-          this.currentStep = 0;
-        }
-      },
-      successModalVisible: {
-        handler(newVal) {
-          console.log('successModalVisible 变化:', newVal);
-        },
-        immediate: true
-      },
-      // 添加对 productInfo 的监听
-      'productInfo.onboarding': {
-        immediate: true,
-        handler(newVal) {
-          if (this.productInfo) {
-            this.hasTourCompleted = !!newVal;
-            
-            // 这里的逻辑可能有问题，让我们移除它
-            // if (!newVal && this.productInfo.productId) {
-            //   this.$nextTick(() => {
-            //     this.openGuideModeDialog();
-            //   });
-            // }
-          }
-        }
-      },
-      // 监听影响面板显示的关键状态变化
-      'productInfo.domainStatus'() {
-        this.handleStateChange();
-      },
-      isGscConnected() {
-        this.handleStateChange();
-      }
+    handleStateChange() {
+      this.resetPanelState();
+      this.$nextTick(() => {
+        this.isPanelReady = true;
+      });
     },
     async handleRefreshSitemap(e) {
       // 阻止事件冒泡
@@ -1703,18 +1526,6 @@ export default defineComponent({
         const fullUrl = url.startsWith('http') ? url : `https://${url}`;
         window.open(fullUrl, '_blank');
       }
-    },
-    
-    // 处理验证域名
-    handleVerifyDomain() {
-      console.log('验证域名');
-      this.successModalVisible = false;
-    },
-    
-    // 处理功能导览
-    handleExploreTour() {
-      this.successModalVisible = false;
-      this.openGuideModeDialog();
     },
 
     openGuideModeDialog() {
@@ -1816,6 +1627,27 @@ export default defineComponent({
       await this.$nextTick();
       this.isPanelReady = true;
     },
+    
+    // 将 watch 移动到这里作为方法
+    handleModalVisibleChange(newVal) {
+      if (newVal) {
+        this.currentStep = 0;
+      }
+    },
+    
+    handleProductInfoChange(newVal) {
+      if (this.productInfo) {
+        this.hasTourCompleted = !!newVal;
+      }
+    },
+    
+    handleDomainStatusChange() {
+      this.handleStateChange();
+    },
+    
+    handleGscConnectedChange() {
+      this.handleStateChange(); 
+    }
   },
 
   emits: ['open-guide-mode'],
@@ -2401,8 +2233,6 @@ export default defineComponent({
 /* 优化表单间距 */
 .product-modal {
   :deep(.ant-form-item) {
-    margin-bottom: 16px;
-    
     .ant-form-item-label {
       padding-bottom: 4px;
     }
@@ -3643,5 +3473,50 @@ export default defineComponent({
 
 .switch-account-btn:hover {
   color: #1890ff;
+}
+
+/* Update existing styles */
+.website-input-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.website-prefix {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 11px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  background-color: #fafafa;
+  border: 1px solid #d9d9d9;
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+}
+
+.website-input {
+  width: calc(100% - 90px) !important;
+  
+  :deep(.ant-input) {
+    border-radius: 0 6px 6px 0;
+    height: 32px;
+  }
+}
+
+.domain-status {
+  display: flex;
+  align-items: center;
+  
+  :deep(.ant-tag) {
+    margin: 0;
+    font-size: 12px;
+    line-height: 20px;
+    height: 22px;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+  }
 }
 </style>

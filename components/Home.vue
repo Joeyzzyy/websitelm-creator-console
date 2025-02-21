@@ -910,7 +910,7 @@ export default {
         }
         return true;
       } catch (error) {
-        console.error('检查套餐状态失败:', error);
+        console.error('Failed to check subscription status:', error);
         return false;
       }
     };
@@ -1040,13 +1040,7 @@ export default {
 
     async checkAndStartOnboarding() {
       try {
-        // 只检查后端的 onboarding 状态
         const response = await apiClient.getProductsByCustomerId()
-        
-        console.log('Product Info:', response?.data);
-        console.log('Onboarding Status:', response?.data?.onboarding);
-        
-        // 只有当后端明确返回 onboarding 为 false 时才显示导览
         if (response?.data && !response?.data.onboarding && this.$refs.onboardingTour) {
           console.log('Starting onboarding tour...');
           this.$nextTick(() => {

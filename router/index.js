@@ -71,6 +71,15 @@ const routes = [
     name: 'PaymentSuccess',
     component: () => import('../components/PaymentSuccess.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/onboarding',
+    name: 'Onboarding',
+    component: () => import('../components/OnboardingPage.vue'),
+    meta: { 
+      requiresAuth: true,
+      hideNavigation: true
+    }
   }
 ];
 
