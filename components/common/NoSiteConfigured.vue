@@ -2,10 +2,11 @@
   <div class="domain-notice">
     <div class="notice-content">
       <exclamation-circle-outlined class="notice-icon" />
-      <h2>No Site Configured</h2>
-      <p>Please add and verify your site first</p>
+      <h2>Domain Verification Required</h2>
+      <p class="main-text">To unlock all features, please verify your domain ownership</p>
+      <p class="sub-text">Domain verification helps ensure secure and authorized access to advanced functionality</p>
       <a-button type="primary" @click="goToDashboard">
-        Configure Domain
+        Verify Domain
       </a-button>
     </div>
   </div>
@@ -56,14 +57,21 @@ export default {
 }
 
 .notice-content h2 {
-  font-size: 24px;
+  font-size: 28px;
   color: #1a1a1a;
   margin-bottom: 16px;
+  font-weight: 600;
 }
 
-.notice-content p {
-  font-size: 16px;
-  color: #666;
+.main-text {
+  font-size: 18px;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.sub-text {
+  font-size: 14px;
+  color: #6B7280;
   margin-bottom: 24px;
 }
 
