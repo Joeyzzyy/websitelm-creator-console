@@ -29,7 +29,7 @@
           Welcome back!
         </div>
         <div v-if="!collapsed" class="user-info-container">
-          <div class="user-email">{{ currentCustomerEmail }}</div>
+          <div class="user-name">{{ userDisplayName }}</div>
         </div>
       </div>
       <!-- 菜单部分 -->
@@ -615,14 +615,28 @@ html, body, #app {
   flex-direction: column;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  padding: 0 8px;
+}
+
+.user-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1F2937;
+  margin-bottom: 4px;
 }
 
 .user-email {
-  font-size: 14px;
-  color: #1F2937;
-  padding: 6px 12px;
+  font-size: 13px;
+  color: #64748B;
+  padding: 4px 10px;
   background: rgba(0, 0, 0, 0.03);
   border-radius: 6px;
+  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: help;
 }
 
 /* 选择模式对话框样式 */
@@ -968,6 +982,11 @@ export default {
         });
       });
       return groups;
+    },
+    userDisplayName() {
+      return this.currentCustomerEmail 
+        ? this.currentCustomerEmail.split('@')[0]
+        : 'User';
     }
   },
   methods: {
