@@ -198,7 +198,8 @@ export default {
       }
       this.closeVideoLibrary()
     }
-  }
+  },
+  emits: ['update']
 }
 </script>
 

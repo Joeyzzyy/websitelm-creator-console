@@ -41,7 +41,9 @@
                     class="component-item"
                     draggable="true"
                     @dragstart="handleDragStart($event, component)"
-                    @click="showComponentPreview(component)"
+                    @click="addComponent(component)"
+                    @mouseenter="showComponentPreview(component)"
+                    @mouseleave="hideComponentPreview"
                   >
                     <span>{{ component.label }}</span>
                   </div>
@@ -102,7 +104,7 @@
             <!-- 修改查看已发布页面的按钮 -->
             <a-button
               v-if="articleData.publishStatus === 'publish'"
-              type="default"
+              type="default"showComponentPreview
               @click="handleViewPublished"
               :style="{ height: '36px' }"
             >
@@ -389,32 +391,20 @@
         </div>
       </a-modal>
 
-      <!-- Preview modal -->
-      <a-modal
-        v-model:open="previewModal.visible"
-        :title="previewModal.title"
-        :width="1200"
-        :footer="null"
-        centered
-        @cancel="handlePreviewCancel"
+      <!-- 添加悬浮预览组件 -->
+      <div 
+        v-if="hoverPreview.visible" 
+        class="hover-preview"
+        :style="hoverPreview.position"
       >
-        <div class="preview-modal-content">
-          <!-- Preview content area -->
-          <div class="preview-component-wrapper">
-            <component 
-              :is="`${previewModal.componentName}Preview`"
-              :section="previewModal.componentData"
-              :styles="themeConfig.normal"
-            />
-          </div>
-          
-          <!-- Footer action buttons -->
-          <div class="preview-modal-footer">
-            <a-button @click="handlePreviewCancel">Cancel</a-button>
-            <a-button type="primary" @click="handlePreviewAdd">Add Component</a-button>
-          </div>
+        <div class="preview-content">
+          <component 
+            :is="`${hoverPreview.componentName}Preview`"
+            :section="hoverPreview.componentData"
+            :styles="themeConfig.normal"
+          />
         </div>
-      </a-modal>
+      </div>
 
       <!-- 修改发布确认弹窗 -->
       <a-modal
@@ -628,6 +618,9 @@ export default defineComponent({
     FeatureComparisonTable,
     FeatureComparisonTablePreview
   },
+
+  // 添加 emits 声明
+  emits: ['update'],
 
   setup() {
     const route = useRoute();
@@ -1367,14 +1360,36 @@ export default defineComponent({
       selectedComponent: null
     });
 
-    // 显示组件预览
-    const showComponentPreview = (component) => {
-      previewModal.visible = true;
-      previewModal.title = `Preview: ${component.label}`;
-      previewModal.componentName = component.type;
-      previewModal.componentData = createCleanComponentData(component.type);
-      previewModal.selectedComponent = component;
+    // 添加防抖函数
+    const debounce = (fn, delay) => {
+      let timer = null;
+      return function (...args) {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+          fn.apply(this, args);
+        }, delay);
+      };
     };
+
+    // 修改显示预览的方法
+    const showComponentPreview = debounce((component, event) => {
+      const componentData = createCleanComponentData(component.type);
+      
+      hoverPreview.value = {
+        visible: true,
+        componentName: component.type,
+        componentData,
+        position: {
+          top: `${window.innerHeight / 2}px`,
+          left: `${window.innerWidth / 2}px`
+        }
+      };
+    }, 100); // 100ms 的防抖延迟
+
+    // 修改隐藏预览的方法
+    const hideComponentPreview = debounce(() => {
+      hoverPreview.value.visible = false;
+    }, 200); // 稍微长一点的延迟，防止鼠标移动时闪烁
 
     // 处理预览取消
     const handlePreviewCancel = () => {
@@ -1713,6 +1728,17 @@ export default defineComponent({
       analysisModal.value.visible = false;
     };
 
+    // 替换原有的预览相关变量
+    const hoverPreview = ref({
+      visible: false,
+      componentName: '',
+      componentData: null,
+      position: {
+        top: '0px',
+        left: '0px'
+      }
+    });
+
     return {
       loading,
       saving,
@@ -1778,6 +1804,8 @@ export default defineComponent({
       analysisModal,
       showAnalysisModal,
       hideAnalysisModal,
+      hoverPreview,
+      hideComponentPreview
     };
   }
 });
@@ -3283,5 +3311,70 @@ export default defineComponent({
 
 .analysis-content::-webkit-scrollbar-thumb:hover {
   background: #d1d5db;
+}
+
+/* 添加悬浮预览样式 */
+.hover-preview {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* 居中定位 */
+  z-index: 1000;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  width: 1000px; /* 参考 TitleSectionPreview 的宽度设置 */
+  max-width: 90vw; /* 防止在小屏幕上溢出 */
+  max-height: 80vh;
+  overflow: auto;
+  border: 1px solid #e5e7eb;
+  pointer-events: none; /* 添加这行，使预览框不影响鼠标事件 */
+}
+
+.preview-content {
+  width: 100%;
+  padding: 32px;
+  background: white;
+  transition: all 0.2s;
+}
+
+/* 内容包装器样式，参考 TitleSectionPreview */
+.content-wrapper {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* 添加滚动条样式 */
+.hover-preview::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.hover-preview::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hover-preview::-webkit-scrollbar-thumb {
+  background: #e5e7eb;
+  border-radius: 3px;
+}
+
+.hover-preview::-webkit-scrollbar-thumb:hover {
+  background: #d1d5db;
+}
+
+/* 添加预览遮罩层 */
+.preview-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+  pointer-events: none; /* 添加这行，使遮罩层不影响鼠标事件 */
 }
 </style>
