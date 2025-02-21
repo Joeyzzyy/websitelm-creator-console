@@ -944,9 +944,7 @@ export default defineComponent({
     
     async loadProductInfo() {
       try {
-        // 添加更详细的日志
         console.log('Start loading product info');
-        
         const response = await apiClient.getProductsByCustomerId();
         
         if (!response) {
@@ -954,6 +952,14 @@ export default defineComponent({
         }
 
         if (response.code === 200) {
+          // 检查返回的数据是否为空
+          if (!response.data) {
+            console.log('No product info found, redirecting to onboarding');
+            // 重定向到 onboarding 页面
+            this.$router.push('/onboarding');
+            return;
+          }
+
           this.productInfo = response.data;
           
           if (!response.data) {
@@ -1009,9 +1015,8 @@ export default defineComponent({
         
         // 显示用户友好的错误提示
         this.$notification.error({
-          message: 'Load Failed',
-          description: 'Failed to load product info, please try again later',
-          duration: 5
+          message: '加载失败',
+          description: '无法加载产品信息，请稍后重试'
         });
 
         // 重置关键状态
@@ -1093,15 +1098,9 @@ export default defineComponent({
             message: 'Delete Successful',
             description: 'Product information has been deleted successfully'
           })
-          this.productInfo = null
-          this.formState = {
-            productId: undefined,
-            productName: '',
-            website: '',
-            coreFeatures: '',
-            competitors: []
-          }
-          this.onboardingModalVisible = true
+          
+          // 删除成功后直接重定向到 onboarding 页面
+          this.$router.push('/onboarding');
         }
       } catch (error) {
         this.$notification.error({

@@ -132,7 +132,7 @@
                 />
               </div>
               <div class="message">
-                Excellent! Lastly, who are your main competitors? This helps me understand your market better. 📊
+                Please share the websites of your successful competitors or industry peers. We'll analyze their SEO keywords to help you identify gaps, optimize your keyword strategy, and accelerate your traffic growth! 🚀
                 <div class="text-sm text-gray-500 mt-2">
                   Add up to 4 competitors. Press Enter after each one.
                 </div>
@@ -178,9 +178,11 @@
                   <!-- 提示信息和完成按钮 -->
                   <div class="flex items-center justify-between mt-4">
                     <div class="text-base text-gray-500">
-                      {{ formData.competitors.length < 4 
-                        ? `Press Enter to add competitor (${4 - formData.competitors.length} more can be added)` 
-                        : 'Maximum competitors reached' }}
+                      {{ formData.competitors.length === 0 
+                        ? 'At least 1 competitor is required. Press Enter to add.' 
+                        : formData.competitors.length < 4 
+                          ? `Press Enter to add competitor (${4 - formData.competitors.length} more can be added)` 
+                          : 'Maximum competitors reached' }}
                     </div>
                     <button 
                       v-if="formData.competitors.length > 0"
@@ -192,6 +194,29 @@
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <!-- 显示已添加的竞争对手信息 -->
+            <div v-if="messages.includes('competitors')" class="chat-message user">
+              <div class="message-wrapper">
+                <div class="message">
+                  <div class="competitors-summary">
+                    Added competitors:
+                    <div class="competitor-list-summary">
+                      <div v-for="(comp, index) in formData.competitors" :key="index" class="competitor-item">
+                        {{ comp.name }} ({{ comp.url }})
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button 
+                  @click="editField('competitors')" 
+                  class="edit-button"
+                  title="Edit competitors"
+                >
+                  <i class="fas fa-pencil-alt"></i>
+                </button>
               </div>
             </div>
 
@@ -222,29 +247,6 @@
                     <span></span>
                     <span></span>
                   </span>
-                </button>
-              </div>
-            </div>
-
-            <!-- 显示已添加的竞争对手信息 -->
-            <div v-if="messages.includes('competitors')" class="chat-message user">
-              <div class="message-wrapper">
-                <div class="message">
-                  <div class="competitors-summary">
-                    Added competitors:
-                    <div class="competitor-list-summary">
-                      <div v-for="(comp, index) in formData.competitors" :key="index" class="competitor-item">
-                        {{ comp.name }} ({{ comp.url }})
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <button 
-                  @click="editField('competitors')" 
-                  class="edit-button"
-                  title="Edit competitors"
-                >
-                  <i class="fas fa-pencil-alt"></i>
                 </button>
               </div>
             </div>
@@ -379,6 +381,9 @@ const handleCompetitor = async () => {
   newCompetitor.name = ''
   newCompetitor.url = ''
   
+  // 滚动到底部
+  await scrollToBottom()
+  
   // 如果达到最大数量，自动完成
   if (formData.competitors.length === 4) {
     await completeCompetitors()
@@ -393,7 +398,7 @@ const handleCompetitor = async () => {
 // 完成竞争对手添加
 const completeCompetitors = async () => {
   if (formData.competitors.length === 0) {
-    message.warning('Please add at least one competitor')
+    message.warning('Please add at least one competitor to continue')
     return
   }
   
@@ -556,7 +561,7 @@ watch(messages, () => {
   min-width: 320px;
   background: white;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
@@ -565,6 +570,26 @@ watch(messages, () => {
   font-size: 1.05rem;
   border-top-left-radius: 16px;
   border-bottom-left-radius: 16px;
+}
+
+.website-input-group :deep(.ant-input) {
+  height: 56px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+  border: 2px solid #e2e8f0;
+  border-left: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.website-input-group :deep(.ant-input:focus) {
+  box-shadow: 0 0 0 2px rgba(75, 137, 255, 0.2);
+  border-color: #4B89FF;
+}
+
+.website-input-group :deep(.ant-input:focus) ~ .website-prefix {
+  border-color: #4B89FF;
 }
 
 .competitor-input-group {

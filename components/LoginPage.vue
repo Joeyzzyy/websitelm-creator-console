@@ -714,7 +714,9 @@ export default {
             localStorage.removeItem('rememberedCredentials');
           }
           
-          this.$router.push('/dashboard');
+          // 检查 onboarding 状态并决定跳转路径
+          const redirectPath = response.data.onboarding ? '/dashboard' : '/onboarding';
+          this.$router.push(redirectPath);
         }
       } catch (error) {
         console.error('Login failed:', error);

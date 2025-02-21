@@ -73,7 +73,10 @@
             message: 'Welcome!',
             description: 'Successfully logged in with Google'
           });
-          this.$router.push('/dashboard');
+
+          // 检查 onboarding 状态并决定跳转路径
+          const redirectPath = response.data.onboarding ? '/dashboard' : '/onboarding';
+          this.$router.push(redirectPath);
         } else {
           throw new Error(response?.message || 'Authentication failed');
         }
