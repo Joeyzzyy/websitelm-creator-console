@@ -37,7 +37,7 @@
               <template v-if="analysisState === 'processing'">
                 <div class="loading-content">
                   <LoadingOutlined class="analysis-icon" spin />
-                  <h2>Analysis in Progress</h2>
+                  <h2>Keywords Analysis in Progress</h2>
                   <div v-for="task in currentTasks" :key="task.taskName" class="task-item">
                     <div class="task-header">
                       <span>{{ task.taskName }}</span>
