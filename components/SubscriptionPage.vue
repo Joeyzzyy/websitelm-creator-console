@@ -393,9 +393,28 @@ const plans = [
   }
 ]
 
+// 添加固定的免费试用码
+const FREE_TRIAL_CODE = 'pWNc71896e'
+
 // Methods
-const handleSelectPlan = (planId: string) => {
-  console.log('Selected plan:', planId)
+const handleSelectPlan = async (planId: string) => {
+  if (planId === 'pro') {
+    try {
+      const response = await apiClient.activateTrialPackage(FREE_TRIAL_CODE)
+      
+      if (response?.code === 200) {
+        message.success('Successfully activated a one-month Pro package trial!')
+        router.push('/dashboard')
+      } else {
+        message.error(response?.message || 'Activation failed, please try again later')
+      }
+    } catch (error) {
+      console.error('Activation failed:', error)
+      message.error('Activation failed, please try again later')
+    }
+  } else {
+    console.log('Selected plan:', planId)
+  }
 }
 
 const handleLogout = () => {

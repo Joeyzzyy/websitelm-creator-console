@@ -40,18 +40,75 @@
           @click="handleMenuClick"
           class="custom-menu"
         >
+          <!-- Dashboard -->
           <a-menu-item
-            v-for="item in mainNavItems"
-            :key="item.view"
-            :data-tour="item.view.toLowerCase()"
-            :class="{ 'nav-item--active': currentView === item.view }"
+            key="DashboardPage"
+            data-tour="dashboard"
+            :class="{ 'nav-item--active': currentView === 'DashboardPage' }"
           >
             <template #icon>
               <span class="menu-icon">
-                <component :is="getMenuIcon(item.view)" />
+                <DashboardOutlined />
               </span>
             </template>
-            {{ item.title }}
+            Dashboard
+          </a-menu-item>
+
+          <!-- 分隔线 -->
+          <div class="menu-divider"></div>
+
+          <!-- Keywords和Pages组合 -->
+          <div class="workflow-group">
+            <a-menu-item
+              key="KeywordsPlanningPage"
+              data-tour="keywords"
+              :class="{ 'nav-item--active': currentView === 'KeywordsPlanningPage' }"
+            >
+              <template #icon>
+                <span class="menu-icon">
+                  <SearchOutlined />
+                </span>
+              </template>
+              <div class="menu-item-content">
+                <span>Keywords</span>
+              </div>
+            </a-menu-item>
+            
+            <div class="workflow-arrow">
+              <DownOutlined />
+            </div>
+            
+            <a-menu-item
+              key="TaskManagementPage"
+              data-tour="pages"
+              :class="{ 'nav-item--active': currentView === 'TaskManagementPage' }"
+            >
+              <template #icon>
+                <span class="menu-icon">
+                  <FileTextOutlined />
+                </span>
+              </template>
+              <div class="menu-item-content">
+                <span>Pages</span>
+              </div>
+            </a-menu-item>
+          </div>
+
+          <!-- 分隔线 -->
+          <div class="menu-divider"></div>
+
+          <!-- Assets -->
+          <a-menu-item
+            key="AssetsPage"
+            data-tour="assets"
+            :class="{ 'nav-item--active': currentView === 'AssetsPage' }"
+          >
+            <template #icon>
+              <span class="menu-icon">
+                <PictureOutlined />
+              </span>
+            </template>
+            Assets
           </a-menu-item>
         </a-menu>
       </div>
@@ -855,6 +912,70 @@ html, body, #app {
   height: auto;
   object-fit: contain;
 }
+
+/* 添加分隔线样式 */
+.menu-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.02),
+    rgba(0, 0, 0, 0.06),
+    rgba(0, 0, 0, 0.02)
+  );
+  margin: 16px 0;
+}
+
+/* 工作流组合样式 */
+.workflow-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  margin: 4px 0;
+  position: relative;
+}
+
+.workflow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1890ff;
+  font-size: 14px;
+  padding: 4px 0;
+}
+
+/* 添加菜单项内容布局 */
+.menu-item-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* 添加可选标签样式 */
+.optional-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(24, 144, 255, 0.1);
+  color: #1890ff;
+  margin-left: 8px;
+}
+
+/* 开始标签特殊样式 */
+.optional-badge:contains("Start here") {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+}
+
+/* 调整菜单项内边距以适应新的布局 */
+.workflow-group :deep(.ant-menu-item) {
+  padding: 12px !important;
+  height: auto !important;
+  line-height: 1.5 !important;
+}
 </style>
 
 <script>
@@ -877,6 +998,7 @@ import {
   PictureOutlined,
   SettingOutlined,
 } from '@ant-design/icons-vue'
+import { DownOutlined } from '@ant-design/icons-vue'
 
 export default {
   name: 'Home',
@@ -895,7 +1017,8 @@ export default {
     FileTextOutlined,
     PictureOutlined,
     SettingOutlined,
-    UserOutlined
+    UserOutlined,
+    DownOutlined
   },
   setup() {
     const router = useRouter();
