@@ -54,6 +54,20 @@
             Product
           </a-menu-item>
 
+           <!-- Assets -->
+           <a-menu-item
+            key="AssetsPage"
+            data-tour="assets"
+            :class="{ 'nav-item--active': currentView === 'AssetsPage' }"
+          >
+            <template #icon>
+              <span class="menu-icon">
+                <PictureOutlined />
+              </span>
+            </template>
+            Assets
+          </a-menu-item>
+
           <!-- 分隔线 -->
           <div class="menu-divider"></div>
 
@@ -97,19 +111,7 @@
           <!-- 分隔线 -->
           <div class="menu-divider"></div>
 
-          <!-- Assets -->
-          <a-menu-item
-            key="AssetsPage"
-            data-tour="assets"
-            :class="{ 'nav-item--active': currentView === 'AssetsPage' }"
-          >
-            <template #icon>
-              <span class="menu-icon">
-                <PictureOutlined />
-              </span>
-            </template>
-            Assets
-          </a-menu-item>
+         
         </a-menu>
       </div>
       <!-- 底部操作区 -->
@@ -283,23 +285,23 @@ html, body, #app {
 }
 
 :deep(.ant-menu-item) {
-  color: #64748B;
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(8px);
-  border-inline-end: none !important;
-  margin-inline-end: 0 !important;
+  background: white !important;
+  border: 1px solid rgba(24, 144, 255, 0.15) !important;
+  margin: 4px 0 !important;
+  transition: all 0.3s ease !important;
+  border-radius: 8px !important;
 }
 
 :deep(.ant-menu-item:hover) {
-  background: rgba(255, 255, 255, 0.9) !important;
-  color: #6366F1 !important;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+  background: rgba(24, 144, 255, 0.05) !important;
+  border-color: rgba(24, 144, 255, 0.3) !important;
+  transform: translateX(4px);
 }
 
 :deep(.ant-menu-item-selected) {
-  background: white !important;
-  color: #6366F1 !important;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15) !important;
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), rgba(24, 144, 255, 0.05)) !important;
+  border-color: #1890ff !important;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15) !important;
 }
 
 .menu-icon {
@@ -931,10 +933,12 @@ html, body, #app {
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(24, 144, 255, 0.05);
+  border: 1px solid rgba(24, 144, 255, 0.1);
   border-radius: 12px;
   margin: 4px 0;
   position: relative;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.05);
 }
 
 .workflow-arrow {
@@ -943,7 +947,71 @@ html, body, #app {
   justify-content: center;
   color: #1890ff;
   font-size: 14px;
-  padding: 4px 0;
+  padding: 8px 0;
+  position: relative;
+}
+
+.workflow-arrow::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, rgba(24, 144, 255, 0.1), rgba(24, 144, 255, 0.3));
+  transform: translateX(-50%);
+  z-index: 0;
+}
+
+.workflow-arrow .anticon {
+  background: white;
+  border-radius: 50%;
+  padding: 4px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.1);
+}
+
+.workflow-group :deep(.ant-menu-item) {
+  background: white !important;
+  border: 1px solid rgba(24, 144, 255, 0.15) !important;
+  margin: 4px 0 !important;
+  transition: all 0.3s ease !important;
+}
+
+.workflow-group :deep(.ant-menu-item:hover) {
+  background: rgba(24, 144, 255, 0.05) !important;
+  border-color: rgba(24, 144, 255, 0.3) !important;
+  transform: translateX(4px);
+}
+
+.workflow-group :deep(.ant-menu-item-selected) {
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), rgba(24, 144, 255, 0.05)) !important;
+  border-color: #1890ff !important;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15) !important;
+}
+
+.workflow-group::before {
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  background: #1890ff;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  z-index: 1;
+}
+
+.workflow-group :deep(.menu-icon) {
+  color: #1890ff !important;
+  font-size: 16px !important;
+}
+
+.workflow-group :deep(.ant-menu-item:hover .menu-icon) {
+  transform: scale(1.1);
+  transition: transform 0.3s ease;
 }
 
 /* 添加菜单项内容布局 */
