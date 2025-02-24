@@ -226,7 +226,7 @@ const parseContent = (content) => {
       
       // 处理换行
       if (tagName === 'br') {
-        return [{ type: 'text', content: '\n' }];
+        return [{ type: 'text', content: '\n\n' }];
       }
       
       // 处理标题和子标题

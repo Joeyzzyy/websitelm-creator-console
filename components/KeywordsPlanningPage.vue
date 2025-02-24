@@ -3374,6 +3374,8 @@ export default defineComponent({
   background: white;
   border-radius: 8px;
   padding: 0 24px 24px 24px;
+  display: flex; /* 添加弹性布局 */
+  flex-direction: column; /* 垂直方向排列 */
 }
 
 .content-toolbar {
@@ -3628,6 +3630,7 @@ export default defineComponent({
   gap: 16px;
   max-width: 100%;
   margin: 0 auto;
+  padding-bottom: 24px; /* 添加底部间距 */
   
   @media (min-width: 992px) {
     grid-template-columns: repeat(3, 1fr);
@@ -4149,7 +4152,6 @@ export default defineComponent({
   position: relative;
   overflow: visible !important;
   justify-content: center; /* 确保按钮居中 */
-  width: 100%; /* 确保容器占满宽度 */
 }
 
 /* AI Autopilot 按钮样式 */
@@ -4834,5 +4836,32 @@ export default defineComponent({
     color: #1890ff; 
     font-weight: 500; 
   }
+}
+
+/* 修改分页器容器样式 */
+:deep(.ant-pagination) {
+  margin: 24px 0 !important; /* 添加上下间距 */
+  padding: 16px 0; /* 添加内边距 */
+  text-align: center; /* 居中对齐 */
+  border-top: 1px solid #f0f0f0; /* 添加顶部分隔线 */
+}
+
+/* 确保内容区域有足够的底部间距 */
+.main-content {
+  flex: 1;
+  min-width: 0;
+  background: white;
+  border-radius: 8px;
+  padding: 0 24px 24px 24px;
+  display: flex; /* 添加弹性布局 */
+  flex-direction: column; /* 垂直方向排列 */
+}
+
+/* 添加内容和分页器之间的间距容器 */
+.content-container {
+  flex: 1; /* 占用剩余空间 */
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* 确保内容可以滚动 */
 }
 </style>
