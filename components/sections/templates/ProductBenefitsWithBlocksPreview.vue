@@ -37,7 +37,14 @@ const handleRedirect = (e) => {
       </div>
 
       <!-- 四个模块的网格布局 -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="grid gap-4 max-w-screen-lg mx-auto"
+        :class="{
+          'grid-cols-1 sm:grid-cols-1': section.rightContent.length === 1,
+          'grid-cols-1 sm:grid-cols-2': section.rightContent.length === 2,
+          'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3': section.rightContent.length === 3,
+          'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4': section.rightContent.length === 4
+        }"
+      >
         <div
           v-for="(module, index) in section.rightContent"
           :key="index"
