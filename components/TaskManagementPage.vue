@@ -43,8 +43,7 @@
                   </a-button>
 
                   <a-button 
-                    class="action-button secondary-btn"
-                    danger
+                    class="action-button secondary-btn danger-btn"
                     :disabled="!selectedRowKeys.length"
                     @click="handleBatchDelete"
                   >
@@ -1967,5 +1966,24 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+/* 添加危险按钮样式 */
+.danger-btn {
+  background: #fff1f0;
+  border-color: #ff4d4f;
+  color: #ff4d4f;
+}
+
+.danger-btn:hover {
+  background: #fff1f0;
+  border-color: #ff7875;
+  color: #ff7875;
+}
+
+.danger-btn:disabled {
+  background: #f5f5f5;
+  border-color: #d9d9d9;
+  color: rgba(0, 0, 0, 0.25);
 }
 </style>
