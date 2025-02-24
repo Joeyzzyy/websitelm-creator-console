@@ -1,13 +1,5 @@
 export const tutorialConfig = [
   {
-    "description": "The Future of AI-Powered Content Creation",
-    "imageAlt": "websitelm-how-to-get-onboard",
-    "imageUrl": "https://strapi.sheet2email.com/media/6768df5eb828c9bcfbec07af/tutorial-cover.png",
-    "tag": "Get Onboard",
-    "targetUrl": "https://websitelm.com/tutorials/get-onboard-with-websitelm",
-    "title": "How To Get WebsiteLM Account"
-  },
-  {
     "imageAlt": "page-cover-image-of-websitelm-pricing-plans-choosing-guide",
     "imageUrl": "https://strapi.sheet2email.com/media/6768df5eb828c9bcfbec07af/WX20250203-204657@2x.png",
     "tag": "Get Onboard",
