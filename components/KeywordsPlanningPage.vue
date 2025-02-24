@@ -1158,18 +1158,14 @@ export default defineComponent({
       return {
         id: item.keywordId,
         keyword: item.keyword,
-        selected: false,
+        kd: item.kd || 0,
+        volume: item.volume || 0,
+        cpc: Number(item.cpc || 0).toFixed(2),
         favorited: item.status === 'selected',
-        krs: Number(item.krsScore).toFixed(2),
-        kd: item.kd,
-        volume: item.volume,
-        cpc: Number(item.cpc).toFixed(2),
-        status: getKeywordStatus(item),
-        grade: item.grade,
-        reason: item.reasoning || 'No specific reason provided',
         relatedOutlines: item.relatedOutlines || [],
-        source: item.source || 'manual',        // 添加 source 字段
-        keywordType: item.keywordType || 'manual'  // 添加 keywordType 字段
+        keywordType: item.keywordType,
+        status: item.status,
+        priority: item.priority
       }
     }
 
@@ -1184,9 +1180,13 @@ export default defineComponent({
         })
         
         if (response?.data) {
+          // 确保在设置数据之前打印转换后的数据
           const transformedData = response.data.map(transformKeywordData)
+          console.log('Transformed data:', transformedData)
+          
           recommendedKeywords.value = transformedData
-          recommendedPagination.value.total = response.totalCount
+          recommendedPagination.value.total = response.totalCount || 0
+          console.log('Updated recommendedKeywords:', recommendedKeywords.value)
         }
       } catch (error) {
         console.error('Failed to get keywords:', error)
@@ -1269,18 +1269,27 @@ export default defineComponent({
     }
 
     const getKeywordsByPriority = (keywords, priority) => {
-      if (!keywords || !keywords.length) return []
-      
-      const priorityToGrade = {
-        '1': '1',
-        '2': '2',
-        '3': '3',
-        '4': '4',
-        '5': '5'
+      console.log('Getting keywords by priority:', { 
+        priority,
+        totalKeywords: keywords?.length,
+        keywords: keywords
+      });
+
+      if (!keywords || !keywords.length) {
+        console.log('No keywords available');
+        return [];
       }
       
-      const grade = priorityToGrade[priority]
-      return keywords.filter(k => k.grade === grade)
+      // 修改过滤逻辑，直接使用 priority 属性
+      const filteredKeywords = keywords.filter(k => k.priority === Number(priority));
+      
+      console.log('Filtered keywords:', {
+        priority,
+        filteredCount: filteredKeywords.length,
+        filteredKeywords
+      });
+      
+      return filteredKeywords;
     }
 
     const filters = ref([
@@ -4843,7 +4852,6 @@ export default defineComponent({
   margin: 24px 0 !important; /* 添加上下间距 */
   padding: 16px 0; /* 添加内边距 */
   text-align: center; /* 居中对齐 */
-  border-top: 1px solid #f0f0f0; /* 添加顶部分隔线 */
 }
 
 /* 确保内容区域有足够的底部间距 */
