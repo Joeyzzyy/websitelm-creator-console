@@ -51,7 +51,7 @@
                 <DashboardOutlined />
               </span>
             </template>
-            Dashboard
+            Product
           </a-menu-item>
 
           <!-- 分隔线 -->

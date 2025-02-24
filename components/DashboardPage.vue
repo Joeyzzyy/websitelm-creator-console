@@ -4,69 +4,26 @@
     description="Manage your product and track your performance"
     icon="📊"
   >
+    <!-- Discord Banner -->
+    <div class="discord-banner">
+      <div class="banner-content">
+        <div class="banner-left">
+          <img src="assets/images/discord-logo.svg" alt="Discord" class="discord-logo" />
+          <div class="banner-text">
+            <div class="banner-title">Join our AI SEO community</div>
+            <div class="banner-subtitle">Connect with other AI creators and share your experiences and inspirations</div>
+          </div>
+        </div>
+        <a href="https://discord.gg/zZkAy9Kp" target="_blank" class="discord-button">
+          <ThunderboltOutlined />
+          Join Discord
+        </a>
+      </div>
+    </div>
+
     <!-- Rest of the content -->
     <div class="dashboard-content">
-      <a-card class="quick-access-panel">
-            <template #title>
-              <span class="quick-access-title">
-                Once you have set up your product and domain verification, please check the following steps:
-              </span>
-            </template>
-            <div class="quick-links-row">
-              <div class="quick-link-item horizontal">
-                <div class="quick-link-icon planner">
-                  <CalendarOutlined />
-                </div>
-                <div class="quick-link-content">
-                  <div class="quick-link-header">
-                    <span class="quick-link-title">
-                      1. Use Our Smart SEO Keywords Planner
-                    </span>
-                  </div>
-                  <div class="quick-link-desc">AI-powered keywords pick and outline generation</div>
-                  <router-link to="/keywords" class="action-link">
-                    Start Planning <RightOutlined />
-                  </router-link>
-                </div>
-              </div>
-
-              <div class="quick-link-item horizontal">
-                <div class="quick-link-icon manager">
-                  <CheckSquareOutlined />
-                </div>
-                <div class="quick-link-content">
-                  <div class="quick-link-header">
-                    <span class="quick-link-title">
-                      2. Use Our Content Manager
-                    </span>
-                  </div>
-                  <div class="quick-link-desc">To generate, review & publish content in one place</div>
-                  <router-link to="/task-management" class="action-link">
-                    Manage Content <RightOutlined />
-                  </router-link>
-                </div>
-              </div>
-
-              <div class="quick-link-item horizontal">
-                <div class="quick-link-icon profile">
-                  <AppstoreOutlined />
-                </div>
-                <div class="quick-link-content">
-                  <div class="quick-link-header">
-                    <span class="quick-link-title">
-                      3. Instantly Update Your Product Assets
-                    </span>
-                  </div>
-                  <div class="quick-link-desc">Complete product details from all angles</div>
-                  <router-link to="/assets" class="action-link">
-                    Add Assets <RightOutlined />
-                  </router-link>
-                </div>
-              </div>
-            </div>
-          </a-card>
-
-      <!-- Quick Access Panel and Sitemap Row -->
+      <!-- 直接从 a-row 开始 -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
         <a-col :span="12">
           <a-card class="product-info-card">
@@ -1663,6 +1620,101 @@ export default defineComponent({
 </script>
 
 <style scoped>
+/* Discord Banner Styles */
+.discord-banner {
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #2b2d31 0%, #1e1f22 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  /* 添加微妙的光效 */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(88, 101, 242, 0.1) 0%, transparent 70%);
+    animation: rotateGradient 10s linear infinite;
+  }
+}
+
+.banner-content {
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 0; /* 移除 gap,使用 margin-right 控制间距 */
+}
+
+.discord-logo {
+  width: 140px; /* 增加 logo 尺寸 */
+  height: auto; /* 保持宽高比 */
+  filter: brightness(0) invert(1); /* 保持白色 */
+  margin-right: 24px; /* 增加与文字的间距 */
+}
+
+.banner-text {
+  color: white;
+}
+
+.banner-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  background: linear-gradient(90deg, #fff, #b8b9bf);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.banner-subtitle {
+  font-size: 13px;
+  color: #b8b9bf;
+}
+
+.discord-button {
+  background: #5865f2;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  &:hover {
+    background: #4752c4;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+  }
+  
+  .anticon {
+    font-size: 16px;
+  }
+}
+
+@keyframes rotateGradient {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .dashboard-content {
   display: flex;
   flex-direction: column;
@@ -2520,167 +2572,6 @@ export default defineComponent({
 
 .traffic-analytics-content {
   padding: 24px;
-}
-
-/* Quick Access Panel Styles */
-.quick-access-panel {
-  border-radius: 12px;
-  background: linear-gradient(145deg, #f6f9fe, #edf3fc); 
-  border: 1px solid rgba(24, 144, 255, 0.1);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 16px rgba(24, 144, 255, 0.08);
-    border-color: rgba(24, 144, 255, 0.2);
-  }
-
-  :deep(.ant-card-head) {
-    padding: 16px 20px;
-    background: linear-gradient(135deg, #1677ff, #4096ff);
-    border-radius: 12px 12px 0 0;
-    border: none;
-    position: relative;
-    overflow: hidden;
-    
-    &::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-      animation: rotateGradient 8s linear infinite;
-    }
-    
-    .ant-card-head-title {
-      color: white;
-      font-size: 16px;
-      padding: 4px 0;
-    }
-  }
-
-  :deep(.ant-card-body) {
-    padding: 16px;
-  }
-}
-
-.quick-links-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  padding: 4px;
-}
-
-.quick-link-item.horizontal {
-  background: white;
-  border-radius: 8px;
-  padding: 16px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(24, 144, 255, 0.08);
-  
-  /* 添加重点突出的背景效果 */
-  background: linear-gradient(
-    145deg,
-    white,
-    rgba(24, 144, 255, 0.02)
-  );
-  
-  &:hover {
-    transform: translateY(-2px);
-    border-color: rgba(24, 144, 255, 0.2);
-    background: linear-gradient(
-      145deg,
-      white,
-      rgba(24, 144, 255, 0.05)
-    );
-    
-    .quick-link-icon {
-      transform: scale(1.05);
-    }
-  }
-  
-  /* 优化装饰性背景 */
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 80px;
-    height: 80px;
-    background: radial-gradient(circle, rgba(24,144,255,0.03) 0%, transparent 70%);
-    transform: translate(30%, -30%);
-  }
-}
-
-.quick-link-icon {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  transition: all 0.3s ease;
-  margin-bottom: 12px;
-  
-  &.planner {
-    background: linear-gradient(135deg, #f6ffed, #d9f7be);
-    color: #389e0d;
-  }
-  
-  &.manager {
-    background: linear-gradient(135deg, #e6f7ff, #bae7ff);
-    color: #096dd9;
-  }
-  
-  &.profile {
-    background: linear-gradient(135deg, #f9f0ff, #efdbff);
-    color: #531dab;
-  }
-}
-
-.quick-link-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.quick-link-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #262626;
-  line-height: 1.4;
-}
-
-.quick-link-desc {
-  color: #666;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.action-link {
-  margin-top: 12px;
-  color: #1890ff;
-  font-size: 13px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    gap: 6px;
-    
-    .anticon {
-      transform: translateX(2px);
-    }
-  }
 }
 
 :deep(.ant-tag) {
