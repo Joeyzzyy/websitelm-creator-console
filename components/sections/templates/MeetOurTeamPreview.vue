@@ -48,57 +48,61 @@ const socialIcons = {
 </script>
 
 <template>
-  <div class="bg-white py-12 md:py-16">
-    <div class="max-w-5xl mx-auto px-4">
+  <div class="bg-white py-6 md:py-8">
+    <div class="max-w-[90%] mx-auto px-2">
       <!-- 顶部内容 -->
-      <div class="text-center mb-12">
-        <p class="text-xs text-gray-600 mb-2">
-          {{ section.topContent.subtitle }}
-        </p>
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
+      <div class="text-center mb-6">
+        <h2 class="text-[10px] text-blue-600 font-semibold mb-1">
+          Our Team
+        </h2>
+        <h3 class="text-sm font-bold text-gray-900 mb-1">
           {{ section.topContent.title }}
-        </h1>
-        <p class="text-base text-gray-600 max-w-2xl mx-auto">
+        </h3>
+        <p class="text-[8px] text-gray-600 max-w-xl mx-auto">
           {{ section.topContent.description }}
         </p>
       </div>
 
       <!-- 团队成员网格 -->
-      <div class="grid grid-cols-1 gap-12 lg:grid-cols-3 mt-12">
-        <div 
-          v-for="(member, index) in section.bottomContent"
-          :key="index"
-          class="bg-white rounded-lg shadow-sm overflow-hidden hover:bg-blue-50/50 transition-colors duration-200"
-        >
-          <div class="aspect-w-1 aspect-h-1 relative">
-            <img
-              :src="member.avatarUrl"
-              :alt="member.avatarAlt"
-              class="w-full h-full object-cover"
-            />
-          </div>
-          <div class="p-6 text-center">
-            <h3 class="text-base md:text-lg font-semibold text-gray-900 mb-2 hover:text-[#3374FF]">
-              {{ member.name }}
-            </h3>
-            <p class="text-xs text-gray-600">
-              {{ member.title }}
-            </p>
-            <p class="text-[10px] text-gray-600 mb-6 leading-relaxed whitespace-pre-line text-left">
-              {{ member.description }}
-            </p>
-            <div class="flex justify-center space-x-6">
-              <template v-for="social in member.socials" :key="social.platform">
-                <a
-                  v-if="social.url"
-                  :href="social.url"
-                  class="text-gray-600 hover:text-[#3374FF] transition-colors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <component :is="socialIcons[social.platform]" class="text-xl" />
-                </a>
-              </template>
+      <div class="w-full mx-auto flex justify-center">
+        <div class="flex flex-wrap gap-2 justify-center">
+          <div 
+            v-for="(member, index) in section.bottomContent"
+            :key="index"
+            class="bg-white rounded-lg shadow-sm overflow-hidden hover:bg-blue-50/50 hover:border-blue-200 border border-transparent transition-colors duration-200 w-[140px] cursor-pointer"
+          >
+            <div class="w-full h-[100px] relative pt-2">
+              <img
+                :src="member.avatarUrl"
+                :alt="member.avatarAlt"
+                class="w-full h-full object-contain"
+              />
+            </div>
+            <div class="p-2 flex flex-col h-[120px]">
+              <div class="flex-grow">
+                <h3 class="text-[11px] font-semibold text-gray-900 mb-0.5 hover:text-[#3374FF] text-left">
+                  {{ member.name }}
+                </h3>
+                <p class="text-[8px] text-gray-600 mb-2 text-left">
+                  {{ member.title }}
+                </p>
+                <p class="text-gray-600 mb-2 text-[8px] leading-relaxed whitespace-pre-line text-left line-clamp-4">
+                  {{ member.description }}
+                </p>
+              </div>
+              <div class="flex space-x-2">
+                <template v-for="social in member.socials" :key="social.platform">
+                  <a
+                    v-if="social.url"
+                    :href="social.url"
+                    class="text-black hover:text-gray-700 transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <component :is="socialIcons[social.platform]" class="text-xs" />
+                  </a>
+                </template>
+              </div>
             </div>
           </div>
         </div>

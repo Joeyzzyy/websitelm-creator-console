@@ -25,11 +25,11 @@ const activeContent = computed(() =>
 <template>
   <section class="w-full transition-all duration-200 py-10 px-8">
     <!-- 标题部分 -->
-    <header class="text-center mb-6">
-      <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-3">
+    <header class="text-center mb-10">
+      <h2 class="text-lg md:text-xl font-bold text-gray-900 mb-3">
         {{ section.title }}
       </h2>
-      <p class="text-xs text-gray-600 max-w-xl mx-auto">
+      <p class="text-[11px] text-gray-600 max-w-xl mx-auto">
         {{ section.description }}
       </p>
     </header>
@@ -42,7 +42,7 @@ const activeContent = computed(() =>
           :key="`${tab.tabName}-${index}`"
           @click="activeTab = tab.tabName"
           :class="[
-            'px-4 py-2 border-b-2 transition-colors duration-200 text-sm',
+            'px-3 py-1.5 border-b-2 transition-colors duration-200 text-xs',
             activeTab === tab.tabName
               ? 'border-[#3374FF] text-[#3374FF] font-medium'
               : 'border-transparent text-gray-600 hover:text-gray-700 hover:border-gray-300'
@@ -55,28 +55,28 @@ const activeContent = computed(() =>
 
     <!-- 内容区域 -->
     <div 
-      class="flex flex-col md:flex-row items-center justify-center gap-6"
+      class="flex flex-col md:flex-row items-center justify-center gap-6 max-w-4xl mx-auto"
       :class="{ 'md:flex-row-reverse': !activeContent?.imageOnRight }"
     >
-      <div class="w-full md:w-1/3 space-y-3">
-        <h3 class="text-base font-semibold text-gray-900">
+      <div class="w-full md:w-1/2 space-y-1.5">
+        <h3 class="text-xs font-semibold text-gray-900">
           {{ activeContent?.title }}
         </h3>
-        <p class="text-xs text-gray-600 whitespace-pre-line">
+        <p class="text-[11px] text-gray-600 whitespace-pre-line">
           {{ activeContent?.description }}
         </p>
         <button 
-          class="px-4 py-2 text-sm rounded-3xl font-semibold transition-all duration-200 bg-[#3374FF] text-white hover:bg-[#2861E5]"
+          class="px-4 py-2 text-[11px] rounded-3xl font-semibold transition-all duration-200 bg-[#3374FF] text-white hover:bg-[#2861E5]"
         >
           {{ activeContent.buttonText }}
         </button>
       </div>
-      <div class="w-full md:w-1/3">
+      <div class="w-full md:w-1/2">
         <div class="rounded-lg transition-all duration-200 bg-white shadow-sm">
           <img 
             :src="activeContent?.imageUrl" 
             :alt="activeContent?.imageAlt"
-            class="w-full h-auto max-w-sm mx-auto object-cover"
+            class="w-full h-auto object-cover"
           />
         </div>
       </div>
