@@ -8,7 +8,7 @@
     <div class="discord-banner">
       <div class="banner-content">
         <div class="banner-left">
-          <img src="assets/images/discord-logo.svg" alt="Discord" class="discord-logo" />
+          <img src="/discord-logo.svg" alt="Discord" class="discord-logo" />
           <div class="banner-text">
             <div class="banner-title">Join our AI SEO community</div>
             <div class="banner-subtitle">Connect with other AI creators and share your experiences and inspirations</div>
