@@ -1283,10 +1283,10 @@ export default {
     const handleFileChange = (e) => {
       const file = e.target.files[0];
       if (file) {
-        // 修改视频文件大小限制为 200MB，图片保持 2MB
-        const maxSize = activeTab.value === 'images' ? 2 * 1024 * 1024 : 200 * 1024 * 1024; 
+        // 修改视频文件大小限制为 50MB，图片保持 2MB
+        const maxSize = activeTab.value === 'images' ? 2 * 1024 * 1024 : 50 * 1024 * 1024; 
         if (file.size > maxSize) {
-          message.error(`File size exceeds ${activeTab.value === 'images' ? '2MB' : '200MB'} limit`);
+          message.error(`File size exceeds ${activeTab.value === 'images' ? '2MB' : '50MB'} limit`);
           if (fileInput.value) {
             fileInput.value.value = '';
           }
