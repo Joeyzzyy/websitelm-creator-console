@@ -1187,7 +1187,7 @@ export default {
         'KnowledgeBasePage': '/knowledge',
         'KeywordsPlanningPage': '/keywords',
         'TaskManagementPage': '/task-management',
-        'AssetsPage': '/assets',
+        'AssetsPage': '/product-assets',
         'AccountPage': '/account',
       };
       
@@ -1238,7 +1238,7 @@ export default {
         '/knowledge': 'KnowledgeBasePage',
         '/keywords': 'KeywordsPlanningPage',
         '/task-management': 'TaskManagementPage',
-        '/assets': 'AssetsPage',
+        '/product-assets': 'AssetsPage',
         '/account': 'AccountPage',
       };
       return routeToView[this.$route.path] || 'DashboardPage';
@@ -1363,7 +1363,7 @@ export default {
         '/knowledge': 'KnowledgeBasePage',
         '/keywords': 'KeywordsPlanningPage',
         '/task-management': 'TaskManagementPage',
-        '/assets': 'AssetsPage',
+        '/product-assets': 'AssetsPage',
         '/account': 'AccountPage',
       };
       this.currentView = routeToView[to.path] || 'DashboardPage';

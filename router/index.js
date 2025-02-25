@@ -35,8 +35,8 @@ const routes = [
         component: () => import('../components/DashboardPage.vue') 
       },
       {
-        path: 'assets',
-        name: 'Assets',
+        path: 'product-assets',
+        name: 'ProductAssets',
         component: () => import('../components/AssetsPage.vue'),
       },
       {
