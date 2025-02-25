@@ -1369,25 +1369,36 @@ export default defineComponent({
       };
     };
 
-    // 修改显示预览的方法
-    const showComponentPreview = debounce((component, event) => {
-      const componentData = createCleanComponentData(component.type);
+    // 修改 hoverPreview 的初始状态
+    const hoverPreview = ref({
+      visible: false,
+      componentName: '',
+      componentData: null,
+      position: {
+        top: '0px',
+        left: '0px'
+      }
+    });
+
+    // 简化预览显示逻辑
+    const showComponentPreview = (component) => {
+      const newComponentData = createCleanComponentData(component.type);
       
       hoverPreview.value = {
         visible: true,
         componentName: component.type,
-        componentData,
+        componentData: newComponentData,
         position: {
           top: `${window.innerHeight / 2}px`,
           left: `${window.innerWidth / 2}px`
         }
       };
-    }, 100); // 100ms 的防抖延迟
+    };
 
-    // 修改隐藏预览的方法
-    const hideComponentPreview = debounce(() => {
+    // 简化预览隐藏逻辑
+    const hideComponentPreview = () => {
       hoverPreview.value.visible = false;
-    }, 200); // 稍微长一点的延迟，防止鼠标移动时闪烁
+    };
 
     // 处理预览取消
     const handlePreviewCancel = () => {
@@ -1600,17 +1611,6 @@ export default defineComponent({
     const hideAnalysisModal = () => {
       analysisModal.value.visible = false;
     };
-
-    // 替换原有的预览相关变量
-    const hoverPreview = ref({
-      visible: false,
-      componentName: '',
-      componentData: null,
-      position: {
-        top: '0px',
-        left: '0px'
-      }
-    });
 
     return {
       loading,
