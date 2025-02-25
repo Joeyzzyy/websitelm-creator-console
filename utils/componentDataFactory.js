@@ -60,7 +60,8 @@ export const createCleanComponentData = (componentType) => {
         productHuntId: '',
         enableDiscord: false,
         discordLink: '',
-        bannerImage: 'https://picsum.photos/1200/600'
+        bannerMedia: 'https://picsum.photos/1200/600',
+        bannerMediaType: 'image'
       }
     },
     

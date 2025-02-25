@@ -1467,10 +1467,6 @@ export default defineComponent({
       }
     };
 
-    // 添加自动保存相关的响应式变量
-    const autoSaveInterval = ref(null);
-    const lastAutoSaveTime = ref(null);
-
     // 检查必填字段是否都已填写
     const checkRequiredFields = () => {
       const requiredFields = {
@@ -1501,104 +1497,6 @@ export default defineComponent({
 
       return true;
     };
-
-    // 修改自动保存方法
-    const autoSave = async () => {
-      // 如果不是编辑模式,直接返回
-      if (!isEditMode.value) {
-        return;
-      }
-
-      try {
-        // Check if slug contains spaces
-        if (articleData.value.slug && articleData.value.slug.includes(' ')) {
-          return;
-        }
-
-        // 检查是否满足自动保存条件
-        if (!checkRequiredFields()) {
-          return;
-        }
-
-        // 检查是否有内容sections
-        if (!articleData.value.sections || articleData.value.sections.length === 0) {
-          return;
-        }
-
-        // 新增: 主动触发 slug 检查
-        await handleSlugBlur();
-        
-        // 新增: 检查 slug 是否有效
-        if (!isSlugValid.value) {
-          return;
-        }
-
-        const customerId = localStorage.getItem('currentCustomerId');
-        if (!customerId) {
-          return;
-        }
-
-        // 处理关键词
-        const processedKeywords = Array.isArray(articleData.value.keywords)
-          ? articleData.value.keywords.filter(k => k).join(',')
-          : (articleData.value.keywords || '');
-
-        // 编辑模式下的自动保存
-        const updatePromises = [];
-
-        const pageUpdateData = {
-          title: articleData.value.title,
-          subTitle: articleData.value.subTitle,
-          description: articleData.value.description,
-          summary: articleData.value.summary,
-          topic: articleData.value.topic,
-          pageType: articleData.value.pageType,
-          slug: articleData.value.slug,
-          author: articleData.value.author,
-          publishUrl: articleData.value.publishUrl,
-          relatedKeyword: processedKeywords,
-          numberOfWords: 2000
-        };
-
-        updatePromises.push(
-          apiClient.updatePage(pageId.value, pageUpdateData)
-        );
-
-        updatePromises.push(
-          apiClient.updateFullSections(pageId.value, {sections: articleData.value.sections})
-        );
-
-        await Promise.all(updatePromises);
-
-        lastAutoSaveTime.value = new Date();
-        
-        message.success({
-          content: 'Auto-saved successfully',
-          duration: 2,
-          class: 'auto-save-message'
-        });
-
-      } catch (error) {
-        console.error('Auto-save failed:', error);
-        message.error({
-          content: 'Auto-save failed',
-          duration: 2
-        });
-      }
-    };
-
-    // 将多个 onUnmounted 合并为一个
-    onUnmounted(() => {
-      // 清除自动保存定时器
-      if (autoSaveInterval.value) {
-        clearInterval(autoSaveInterval.value);
-      }
-    });
-
-    // 监听文章数据变化
-    watch(() => articleData.value, () => {
-      // 当数据发生变化时，可以在这里添加额外的逻辑
-    }, { deep: true });
 
     // 添加 getPreviewPublishUrl 计算属性
     const getPreviewPublishUrl = computed(() => {
@@ -1636,22 +1534,6 @@ export default defineComponent({
       }
       
       return fields;
-    });
-
-    // 添加启动自动保存的逻辑
-    onMounted(() => {
-      // 只在编辑模式下启动自动保存
-      if (isEditMode.value) {
-        // 设置 5 分钟自动保存一次
-        autoSaveInterval.value = setInterval(autoSave, 1 * 60 * 1000);
-        
-        // 监听页面关闭事件
-        window.addEventListener('beforeunload', () => {
-          if (autoSaveInterval.value) {
-            clearInterval(autoSaveInterval.value);
-          }
-        });
-      }
     });
 
     // 添加沉浸式模式相关的响应式变量
@@ -1784,7 +1666,6 @@ export default defineComponent({
       slugStatus,
       slugError,
       handleSlugBlur,
-      lastAutoSaveTime,
       getPreviewPublishUrl,
       getCategoryHeader, // 添加到返回对象中
       requiredFields,

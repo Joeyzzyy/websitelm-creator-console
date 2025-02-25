@@ -67,13 +67,28 @@
             </a>
           </div>
 
-          <!-- 修改 banner 图片区域，使用动态的图片 URL -->
+          <!-- 修改 banner 媒体区域，支持图片和视频 -->
           <div class="mt-12 w-full flex justify-center">
-            <img 
-              :src="section.topContent.bannerImage || 'https://picsum.photos/1200/600'"
-              alt="Banner"
-              class="w-[95%] h-auto object-cover rounded-2xl shadow-lg"
-            />
+            <div class="media-container w-[95%] relative">
+              <template v-if="section.topContent.bannerMediaType === 'video'">
+                <video
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  class="w-full h-full object-cover rounded-2xl shadow-lg"
+                >
+                  <source src="https://samplelib.com/lib/preview/mp4/sample-5s.mp4" type="video/mp4" />
+                </video>
+              </template>
+              <template v-else>
+                <img 
+                  :src="section.topContent.bannerMedia || 'https://picsum.photos/1200/600'"
+                  alt="Banner"
+                  class="w-full h-full object-cover rounded-2xl shadow-lg"
+                />
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -94,6 +109,17 @@ export default {
       required: true
     }
   },
+  data() {
+    return {
+      defaultVideos: [
+        // 使用更短和更可靠的视频源
+        'https://samplelib.com/lib/preview/mp4/sample-5s.mp4',
+        'https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4',
+        'https://file-examples.com/storage/fe8c7eef0c6364f6c9504cc/2017/04/file_example_MP4_480_1_5MG.mp4'
+      ],
+      currentVideoIndex: 0
+    }
+  },
   computed: {
     titleFirstPart() {
       const words = (this.section.topContent?.title || '').split(' ')
@@ -104,6 +130,9 @@ export default {
       const words = (this.section.topContent?.title || '').split(' ')
       const highlightCount = this.section.topContent?.highlightWordCount || 2
       return words.slice(-highlightCount).join(' ')
+    },
+    defaultVideo() {
+      return this.defaultVideos[this.currentVideoIndex]
     }
   },
   methods: {
@@ -112,6 +141,26 @@ export default {
         window.open(this.section.topContent.buttonLink || 'https://calendly.com/joey-techacc/30min', '_blank')
       } else {
         window.open(this.section.topContent.ctaButtonLink || 'https://app.websitelm.com', '_blank')
+      }
+    },
+    handleVideoError() {
+      console.log('Video failed to load, trying next source...')
+      // 尝试下一个视频源
+      this.currentVideoIndex = (this.currentVideoIndex + 1) % this.defaultVideos.length
+      
+      // 如果视频元素存在，重新加载
+      if (this.$refs.videoPlayer) {
+        this.$refs.videoPlayer.load()
+      }
+    }
+  },
+  watch: {
+    'section.topContent.bannerMediaType': {
+      immediate: true,
+      handler(newVal) {
+        if (newVal === 'video') {
+          this.currentVideoIndex = 0 // 重置为第一个视频源
+        }
       }
     }
   }
@@ -127,5 +176,36 @@ export default {
 .ph-widget-preview:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.media-container {
+  aspect-ratio: 16 / 9;
+  background-color: #f3f4f6;
+  border-radius: 1rem;
+  overflow: hidden;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.media-container video,
+.media-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 1rem;
+}
+
+/* 添加加载状态样式 */
+.media-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #f3f4f6;
+  z-index: -1;
 }
 </style> 

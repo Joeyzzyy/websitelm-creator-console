@@ -30,7 +30,7 @@ export const SECTION_TAGS = {
     buttonLink: 'a',
     ctaButtonLink: 'a',
     highlightWordCount: 'span',
-    bannerImage: 'img',
+    bannerMedia: 'media',
     discordLink: 'a'
   },
   WhyChooseUsWithSmallBlocks: {

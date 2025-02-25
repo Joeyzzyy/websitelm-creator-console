@@ -210,9 +210,6 @@
 
               <!-- 步骤内容 -->
               <div v-show="currentStep === '0'" class="step-panel">
-                <!-- Add KRS Info Card -->
-               
-
                 <!-- 添加模式选择的 Tabs -->
                 <div class="keywords-selection">
                   <a-tabs 
@@ -336,56 +333,34 @@
                       <div class="plan-section">
                         <!-- Update task progress section -->
                         <template v-if="shouldShowTaskStatus">
-                          <div class="task-progress-section">
+                          <div class="task-status-container">
                             <a-alert
                               :type="outlineGenerationStatus === 'failed' ? 'error' : 'info'"
+                              :style="statusColor"
                               class="task-alert"
-                              :class="[outlineGenerationStatus]"
                             >
-                              <template #icon>
-                                <LoadingOutlined v-if="outlineGenerationStatus === 'processing'" spin />
-                                <CheckCircleOutlined v-else-if="outlineGenerationStatus === 'finished'" style="color: #52c41a" />
-                                <CloseCircleOutlined v-else-if="outlineGenerationStatus === 'failed'" style="color: #ff4d4f" />
-                              </template>
                               <template #message>
-                                <div class="task-progress-content">
-                                  <div class="task-info">
-                                    <template v-if="isLoadingTaskInfo">
-                                      <div class="loading-task-info">
-                                        <a-spin size="small" />
-                                        <span class="loading-text">Loading task information...</span>
-                                      </div>
-                                    </template>
-                                    <template v-else>
-                                      <div class="status-header">
-                                        <span class="task-status" :style="statusColor">
-                                          <template v-if="outlineGenerationStatus === 'processing'">
-                                            🚀 Generating Content Plans...
-                                          </template>
-                                          <template v-else-if="outlineGenerationStatus === 'finished'">
-                                            ✅ Generation Completed
-                                          </template>
-                                          <template v-else-if="outlineGenerationStatus === 'failed'">
-                                            ❌ Generation Failed
-                                          </template>
-                                        </span>
-                                        <a-tag :color="getStatusTagColor(outlineGenerationStatus)">
-                                          {{ taskDescription }}
-                                        </a-tag>
-                                      </div>
-                                      <div class="timing-info">
-                                        <template v-if="taskStartTime">
-                                          <span class="time-label">Started:</span>
-                                          <span class="time-value">{{ formatTime(taskStartTime) }}</span>
-                                        </template>
-                                        <template v-if="outlineGenerationStatus === 'finished' && taskEndTime">
-                                          <span class="time-label">Completed:</span>
-                                          <span class="time-value">{{ formatTime(taskEndTime) }}</span>
-                                        </template>
-                                      </div>
-                                    </template>
-                                  </div>
+                                <div class="status-header">
+                                  <span class="task-status">{{ getTaskStatusText(outlineGenerationStatus) }}</span>
+                                  <a-tag class="workflow-tag" :color="getStatusTagColor(outlineGenerationStatus)">
+                                    {{ outlineGenerationStatus }}
+                                  </a-tag>
                                 </div>
+                                <div class="timing-info" v-if="taskStartTime">
+                                  <span class="time-label">Started:</span>
+                                  <span class="time-value">{{ formatTime(taskStartTime) }}</span>
+                                  <span class="time-label" v-if="taskEndTime">Completed:</span>
+                                  <span class="time-value" v-if="taskEndTime">{{ formatTime(taskEndTime) }}</span>
+                                </div>
+                                <div class="task-description" v-if="taskDescription">
+                                  {{ formatTaskDescription(taskDescription) }}
+                                </div>
+                                <a-progress
+                                  v-if="outlineGenerationStatus === 'processing'"
+                                  :percent="taskProgress || 0"
+                                  :status="getProgressStatus(outlineGenerationStatus)"
+                                  size="small"
+                                />
                               </template>
                             </a-alert>
                           </div>
@@ -1717,35 +1692,50 @@ export default defineComponent({
     const checkOutlineGenerationStatus = async () => {
       isLoadingTaskInfo.value = true
       try {
-        const response = await api.getAnalysisStatus('composite_generator')
+        // 分别查询两个任务的状态
+        const [compositeResponse, autoPilotResponse] = await Promise.all([
+          api.getAnalysisStatus('composite_generator'),
+          api.getAnalysisStatus('auto_pilot')
+        ])
         
-        if (response?.code === 200) {
-          // 处理 data 为 null 的情况
-          if (!response.data) {
-            // 如果 data 为 null，使用 analysisStatus
-            outlineGenerationStatus.value = response.analysisStatus
+        // 处理 composite_generator 任务
+        if (compositeResponse?.code === 200) {
+          if (compositeResponse.data) {
+            outlineGenerationStatus.value = compositeResponse.data.status
+            taskStartTime.value = compositeResponse.data.startTime
+            taskEndTime.value = compositeResponse.data.endTime
+            taskDescription.value = formatTaskDescription(compositeResponse.data.description)
             
-            if (response.analysisStatus === 'not_started') {
-              clearInterval(pollingInterval.value)
-              hasGenerated.value = true
-            }
-          } else {
-            // 原有的 data 处理逻辑
-            outlineGenerationStatus.value = response.data.status
-            taskStartTime.value = response.data.startTime
-            taskEndTime.value = response.data.endTime
-            taskDescription.value = formatTaskDescription(response.data.description)
-            
-            if (response.data.status === 'finished') {
-              clearInterval(pollingInterval.value)
-              hasGenerated.value = true
+            if (compositeResponse.data.status === 'processing') {
+              return compositeResponse // 返回正在处理的任务响应
             }
           }
         }
-        return response
+        
+        // 处理 auto_pilot 任务
+        if (autoPilotResponse?.code === 200) {
+          if (autoPilotResponse.data) {
+            outlineGenerationStatus.value = autoPilotResponse.data.status
+            taskStartTime.value = autoPilotResponse.data.startTime
+            taskEndTime.value = autoPilotResponse.data.endTime
+            taskDescription.value = formatTaskDescription(autoPilotResponse.data.description)
+            
+            if (autoPilotResponse.data.status === 'processing') {
+              return autoPilotResponse // 返回正在处理的任务响应
+            }
+          }
+        }
+        
+        // 如果两个任务都不在处理中,清除轮询并设置生成完成状态
+        clearInterval(pollingInterval.value)
+        hasGenerated.value = true
+        
+        // 返回最后一个有效的响应
+        return compositeResponse?.data ? compositeResponse : autoPilotResponse
+        
       } catch (error) {
-        console.error('Failed to check outline status:', error)
-        message.error('Failed to check outline status')
+        console.error('Failed to check task status:', error)
+        message.error('Failed to check task status')
         return null
       } finally {
         isLoadingTaskInfo.value = false
@@ -2285,14 +2275,11 @@ export default defineComponent({
       iconBackground: 'rgba(37, 99, 235, 0.15)',
     }
 
-    const getStatusTagColor = (status) => {
-      const statusColors = {
-        processing: 'blue',
-        finished: 'green',
-        failed: 'red'
-      }
-      return statusColors[status] || 'default'
-    }
+    const shouldShowTaskStatus = computed(() => {
+      return outlineGenerationStatus.value && 
+             ['processing', 'finished', 'failed'].includes(outlineGenerationStatus.value) &&
+             currentStep.value === '1'; // 只在第二步显示
+    });
 
     const statusColor = computed(() => {
       return {
@@ -2302,7 +2289,16 @@ export default defineComponent({
           failed: '#ff4d4f'
         }[outlineGenerationStatus.value]
       }
-    })
+    });
+
+    const getStatusTagColor = (status) => {
+      const statusColors = {
+        processing: 'blue',
+        finished: 'green',
+        failed: 'red'
+      }
+      return statusColors[status] || 'default'
+    }
 
     const formatOutlineTree = (outline) => {
       return outline.map((item, index) => {

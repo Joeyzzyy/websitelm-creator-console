@@ -143,20 +143,27 @@
               </a-form-item>
             </template>
 
-            <!-- 添加图片上传区域 -->
-            <a-form-item label="Banner Image">
+            <!-- 修改图片上传区域为媒体上传区域 -->
+            <a-form-item label="Banner Media">
               <div class="input-with-tag">
-                <span class="html-tag">{{ tags.bannerImage }}</span>
+                <span class="html-tag">{{ tags.bannerMedia }}</span>
                 <a-input
-                  v-model:value="localSection.topContent.bannerImage"
+                  v-model:value="localSection.topContent.bannerMedia"
                   :disabled="disabled"
-                  placeholder="Enter image URL or upload"
+                  placeholder="Enter media URL or upload"
                   @change="handleChange"
                 />
+                <a-select
+                  v-model:value="localSection.topContent.bannerMediaType"
+                  style="width: 120px; margin: 0 8px"
+                  @change="handleChange"
+                >
+                  <a-select-option value="image">Image</a-select-option>
+                  <a-select-option value="video">Video</a-select-option>
+                </a-select>
                 <a-button 
                   type="primary"
-                  style="margin-left: 8px"
-                  @click="openImageLibrary"
+                  @click="openMediaLibrary"
                 >
                   Upload
                 </a-button>
@@ -228,6 +235,12 @@
       VideoLibrary,
       ImageLibrary  
     },
+    created() {
+      if (!this.localSection.topContent.bannerMediaType) {
+        this.localSection.topContent.bannerMediaType = 'image'
+        this.handleChange()
+      }
+    },
     computed: {
       tags() {
         return SECTION_TAGS.HeroSectionWithMultipleTexts
@@ -261,7 +274,9 @@
             enableProductHunt: false,
             productHuntId: '',
             enableDiscord: false,
-            discordLink: ''
+            discordLink: '',
+            bannerMedia: '',
+            bannerMediaType: 'image',
           }
         },
         styles: themeConfig.normal,
@@ -277,7 +292,7 @@
         handler(newVal) {
           this.localSection = {
             ...JSON.parse(JSON.stringify(newVal)),
-            topContent: newVal.topContent || {
+            topContent: {
               title: '',
               subTitle: '',
               buttonText: '',
@@ -289,7 +304,10 @@
               enableProductHunt: false,
               productHuntId: '',
               enableDiscord: false,
-              discordLink: ''
+              discordLink: '',
+              bannerMedia: '',
+              bannerMediaType: 'image',
+              ...newVal.topContent,
             }
           }
         },
@@ -312,7 +330,8 @@
       },
       handleVideoSelect() {
         if (this.selectedVideo) {
-          this.localSection.topContent.videoUrl = this.selectedVideo.url
+          this.localSection.topContent.bannerMedia = this.selectedVideo.url
+          this.localSection.topContent.bannerMediaType = 'video'
           this.handleChange()
         }
         this.closeVideoLibrary()
@@ -329,10 +348,18 @@
       },
       handleImageSelect() {
         if (this.selectedImage) {
-          this.localSection.topContent.bannerImage = this.selectedImage.url
+          this.localSection.topContent.bannerMedia = this.selectedImage.url
+          this.localSection.topContent.bannerMediaType = 'image'
           this.handleChange()
         }
         this.closeImageLibrary()
+      },
+      openMediaLibrary() {
+        if (this.localSection.topContent.bannerMediaType === 'image') {
+          this.openImageLibrary()
+        } else {
+          this.openVideoLibrary()
+        }
       }
     }
   }
