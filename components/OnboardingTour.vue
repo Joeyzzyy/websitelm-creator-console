@@ -79,10 +79,10 @@ export default defineComponent({
       visible: false,
       currentStepIndex: 0,
       steps: [
-        tourConfig.onboarding,
-        tourConfig.assetManagement,
         tourConfig.keywordPlanning,
         tourConfig.taskManagement,
+        tourConfig.onboarding,
+        tourConfig.assetManagement,
       ]
     }
   },
@@ -154,11 +154,10 @@ export default defineComponent({
       const viewportWidth = window.innerWidth
       const viewportHeight = window.innerHeight
 
-      // 基础位置设置 - 调整垂直位置计算
+      // 基础位置设置 - 优先显示在右侧
       let position = {
         position: 'fixed',
         left: `${rect.right + margin}px`,
-        // 将弹窗垂直居中对齐目标元素，但确保不超出视口边界
         top: `${Math.max(margin, Math.min(
           rect.top + (rect.height - cardHeight) / 2,
           viewportHeight - cardHeight - margin
@@ -169,65 +168,51 @@ export default defineComponent({
       // 检查右侧空间
       if (rect.right + cardWidth + margin > viewportWidth) {
         // 如果右侧空间不足，尝试左侧
-        position.left = `${rect.left - cardWidth - margin}px`
-        
-        // 如果左侧也不行，尝试上方或下方
-        if (rect.left - cardWidth - margin < 0) {
-          // 优先尝试下方
-          if (rect.bottom + cardHeight + margin < viewportHeight) {
-            position = {
-              position: 'fixed',
-              left: `${Math.max(margin, Math.min(rect.left, viewportWidth - cardWidth - margin))}px`,
-              top: `${rect.bottom + margin}px`,
-              transform: 'none'
-            }
-          } 
-          // 否则放在上方
-          else {
-            position = {
-              position: 'fixed',
-              left: `${Math.max(margin, Math.min(rect.left, viewportWidth - cardWidth - margin))}px`,
-              top: `${rect.top - cardHeight - margin}px`,
-              transform: 'none'
-            }
-          }
-        }
+        position.left = `${Math.max(margin, rect.left - cardWidth - margin)}px`
+        position.arrowPosition = 'right'
+      } else {
+        position.arrowPosition = 'left'
       }
 
       return position
     },
     
     updatePosition() {
-      this.$nextTick(() => {
-        const position = this.calculatePosition(this.currentStep)
-        Object.assign(this.$refs.tourCard.style, position)
-        this.updateArrowPosition(position)
-        this.highlightCurrentStep()
-      })
+      if (!this.visible || !this.currentStep) return
+      
+      const position = this.calculatePosition(this.currentStep)
+      
+      if (this.$refs.tourCard) {
+        Object.keys(position).forEach(key => {
+          if (key !== 'arrowPosition') {
+            this.$refs.tourCard.style[key] = position[key]
+          }
+        })
+        
+        // 更新箭头位置
+        this.updateArrowPosition(position.arrowPosition)
+      }
     },
     
-    // 新增：更新箭头位置
     updateArrowPosition(position) {
       const arrow = this.$refs.tourCard.querySelector('.arrow')
       if (!arrow) return
-
-      // 根据提示框位置调整箭头
-      if (position.left.includes('-')) {
-        // 提示框在左侧
-        arrow.style.right = '-8px'
-        arrow.style.left = 'auto'
-        arrow.style.transform = 'rotate(180deg)'
-      } else if (position.top && !position.transform) {
-        // 提示框在上方或下方
-        arrow.style.left = '50%'
-        arrow.style.top = position.bottom ? 'auto' : '-8px'
-        arrow.style.bottom = position.bottom ? '-8px' : 'auto'
-        arrow.style.transform = position.bottom ? 'rotate(180deg)' : 'rotate(-90deg)'
-      } else {
-        // 提示框在右侧（默认）
+      
+      // 重置所有样式
+      arrow.style.top = ''
+      arrow.style.bottom = ''
+      arrow.style.left = ''
+      arrow.style.right = ''
+      
+      // 根据位置设置箭头
+      if (position === 'left') {
         arrow.style.left = '-8px'
-        arrow.style.right = 'auto'
-        arrow.style.transform = 'none'
+        arrow.style.top = '50%'
+        arrow.style.transform = 'translateY(-50%) rotate(45deg)'
+      } else if (position === 'right') {
+        arrow.style.right = '-8px'
+        arrow.style.top = '50%'
+        arrow.style.transform = 'translateY(-50%) rotate(45deg)'
       }
     },
     
@@ -248,22 +233,27 @@ export default defineComponent({
     
     navigateToStep(step) {
       const routeMap = {
-        '[data-tour="dashboardpage"]': '/dashboard',
-        '[data-tour="assetspage"]': '/assets',
-        '[data-tour="keywordsplanningpage"]': '/keywords',
-        '[data-tour="taskmanagementpage"]': '/task-management',
-        '[data-tour="settingspage"]': '/settings'
+        '[data-tour="dashboard"]': '/dashboard',
+        '[data-tour="keywords"]': '/keywords',
+        '[data-tour="pages"]': '/task-management',
+        '[data-tour="assets"]': '/product-assets',
       }
       
       const route = routeMap[step.target]
       if (route && this.$router.currentRoute.value.path !== route) {
         this.$router.push(route).then(() => {
           this.$nextTick(() => {
-            this.updatePosition()
+            setTimeout(() => {
+              this.updatePosition()
+            }, 300) // 添加延迟以确保DOM已完全更新
           })
         })
       } else {
-        this.updatePosition()
+        this.$nextTick(() => {
+          setTimeout(() => {
+            this.updatePosition()
+          }, 300)
+        })
       }
     }
   }
@@ -334,16 +324,15 @@ export default defineComponent({
   border-radius: 0 0 12px 12px;
 }
 
-/* 添加箭头指示器 */
-.onboarding-card::before {
-  content: '';
+/* 箭头样式 */
+.arrow {
   position: absolute;
-  left: -8px;
-  top: 50%;
-  transform: translateY(-50%);
-  border-style: solid;
-  border-width: 8px 8px 8px 0;
-  border-color: transparent white transparent transparent;
+  width: 16px;
+  height: 16px;
+  background: white;
+  transform: rotate(45deg);
+  z-index: 1;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
 }
 
 .resource-links {
@@ -404,6 +393,9 @@ export default defineComponent({
   color: #1890ff;
   font-size: 20px;
   padding-top: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .content-text {

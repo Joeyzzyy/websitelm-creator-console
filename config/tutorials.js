@@ -73,12 +73,40 @@ export const tutorialConfig = [
 
 // 保留原有的配置对象，以防其他地方还在使用
 export const tourConfig = {
-  onboarding: {
-    title: 'How To Get Onboard',
-    content: 'This is the place to get your domain verified and connect your Google Search Console to WebsiteLM',
-    target: '[data-tour="dashboardpage"]',
+  keywordPlanning: {
+    title: 'Keywords',
+    content: 'We provide Keywords Difference Analysis service and Your Competitors\' Top Pages\' keywords ananlysis for all plans!',
+    target: '[data-tour="keywords"]',
     placement: 'right',
-    badge: 'Start Here',
+    badge: 'Step 1',
+    features: [
+      {
+        title: 'AI Keyword, Outline Planner',
+        link: 'https://websitelm.com/tutorials/websitelm-keywords-planner-tutorial'
+      }
+    ]
+  },
+
+  taskManagement: {
+    title: 'Pages',
+    content: 'Manage your SEO page generation tasks here, publishment, modification, or create a page from scratch!',
+    target: '[data-tour="pages"]',
+    placement: 'right',
+    badge: 'Step 2',
+    features: [
+      {
+        title: 'Manage Page Generation Task',
+        link: 'https://websitelm.com/tutorials/websitelm-tutorial-manage-page-generation'
+      },
+    ]
+  },
+  
+  onboarding: {
+    title: 'Product',
+    content: 'Manage your product information, domain verification, google search console and competitors here',
+    target: '[data-tour="dashboard"]',
+    placement: 'right',
+    badge: 'Step 3',
     features: [
       {
         title: 'Domain verification',
@@ -92,11 +120,11 @@ export const tourConfig = {
   },
   
   assetManagement: {
-    title: 'Asset Management',
+    title: 'Assets',
     content: 'This is the place to manage your assets, images, videos, internal link and more, all in one place and will be used for auto SEO page generation later.',
-    target: '[data-tour="assetspage"]',
+    target: '[data-tour="assets"]',
     placement: 'right',
-    badge: 'Step 2',
+    badge: 'Step 4',
     features: [
       {
         title: 'Assets Management',
@@ -106,34 +134,6 @@ export const tourConfig = {
         title: 'Enrich Knowledge Base We Build For You',
         link: 'https://websitelm.com/tutorials/websitelm-tutorial-enrich-knowledge'
       }
-    ]
-  },
-
-  keywordPlanning: {
-    title: 'Keyword Planning',
-    content: 'We provide Keywords Difference Analysis service and Your Competitors\' Top Pages\' keywords ananlysis for all plans!',
-    target: '[data-tour="keywordsplanningpage"]',
-    placement: 'right',
-    badge: 'Step 3',
-    features: [
-      {
-        title: 'AI Keyword, Outline Planner',
-        link: 'https://websitelm.com/tutorials/websitelm-keywords-planner-tutorial'
-      }
-    ]
-  },
-
-  taskManagement: {
-    title: 'Task Management',
-    content: 'Manage your SEO page generation tasks here, publishment, modification, or create a page from scratch!',
-    target: '[data-tour="taskmanagementpage"]',
-    placement: 'right',
-    badge: 'Step 4',
-    features: [
-      {
-        title: 'Manage Page Generation Task',
-        link: 'https://websitelm.com/tutorials/websitelm-tutorial-manage-page-generation'
-      },
     ]
   }
 } 
