@@ -4,22 +4,6 @@
     description="Manage your product and track your performance"
     icon="📊"
   >
-    <!-- Discord Banner -->
-    <div class="discord-banner">
-      <div class="banner-content">
-        <div class="banner-left">
-          <img src="/discord-logo.svg" alt="Discord" class="discord-logo" />
-          <div class="banner-text">
-            <div class="banner-title">Join our AI SEO community</div>
-            <div class="banner-subtitle">Connect with other AI creators and share your experiences and inspirations</div>
-          </div>
-        </div>
-        <a href="https://discord.gg/zZkAy9Kp" target="_blank" class="discord-button">
-          <ThunderboltOutlined />
-          Join Discord
-        </a>
-      </div>
-    </div>
 
     <!-- Rest of the content -->
     <div class="dashboard-content">
@@ -51,6 +35,7 @@
                 </div>
               </div>
             </template>
+            
             <div class="info-grid">
               <div class="info-item">
                 <div class="info-label">
@@ -148,6 +133,26 @@
                     </template>
                   </div>
                 </div>
+              </div>
+            </div>
+            
+            <!-- 将Discord横幅移到最下面 -->
+            <div class="discord-banner">
+              <div class="banner-content">
+                <div class="banner-text-container">
+                  <div class="banner-title">Join our AI SEO community</div>
+                  <div class="banner-subtitle">Connect with other AI creators and share your experiences and inspirations</div>
+                  <div class="banner-actions">
+                    <a href="https://discord.gg/zZkAy9Kp" target="_blank" class="discord-button">
+                      <ThunderboltOutlined />
+                      Join Discord
+                    </a>
+                    <a href="https://www.producthunt.com/posts/websitelm?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-websitelm" target="_blank" class="producthunt-button">
+                      <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=902867&theme=light&t=1740546322118" alt="WebsiteLM - All-in-One AI SEO workstation: elevate your rankings | Product Hunt" />
+                    </a>
+                  </div>
+                </div>
+                <img src="/discord-logo.svg" alt="Discord" class="discord-logo" />
               </div>
             </div>
           </a-card>
@@ -1622,12 +1627,13 @@ export default defineComponent({
 <style scoped>
 /* Discord Banner Styles */
 .discord-banner {
-  margin-bottom: 16px;
+  margin-top: 16px;
   background: linear-gradient(135deg, #2b2d31 0%, #1e1f22 100%);
   border-radius: 12px;
   overflow: hidden;
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  height: 160px; /* 增加高度 */
   
   /* 添加微妙的光效 */
   &::before {
@@ -1643,43 +1649,47 @@ export default defineComponent({
 }
 
 .banner-content {
-  padding: 16px 24px;
+  padding: 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
   z-index: 1;
+  height: 100%;
 }
 
-.banner-left {
+.banner-text-container {
   display: flex;
-  align-items: center;
-  gap: 0; /* 移除 gap,使用 margin-right 控制间距 */
+  flex-direction: column;
+  gap: 8px;
 }
 
 .discord-logo {
-  width: 140px; /* 增加 logo 尺寸 */
-  height: auto; /* 保持宽高比 */
-  filter: brightness(0) invert(1); /* 保持白色 */
-  margin-right: 24px; /* 增加与文字的间距 */
-}
-
-.banner-text {
-  color: white;
+  width: 140px;
+  height: auto;
+  filter: brightness(0) invert(1);
 }
 
 .banner-title {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   background: linear-gradient(90deg, #fff, #b8b9bf);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .banner-subtitle {
-  font-size: 13px;
+  font-size: 14px;
   color: #b8b9bf;
+  margin-bottom: 16px;
+}
+
+/* 添加banner-actions容器样式 */
+.banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .discord-button {
@@ -1689,11 +1699,12 @@ export default defineComponent({
   border-radius: 8px;
   font-weight: 600;
   font-size: 14px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  width: fit-content;
   
   &:hover {
     background: #4752c4;
@@ -1706,6 +1717,23 @@ export default defineComponent({
   }
 }
 
+/* 添加ProductHunt按钮样式 */
+.producthunt-button {
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  
+  img {
+    height: 36px;
+    width: auto;
+  }
+  
+  &:hover {
+    transform: translateY(-1px);
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+  }
+}
+
 @keyframes rotateGradient {
   from {
     transform: rotate(0deg);
@@ -1715,11 +1743,14 @@ export default defineComponent({
   }
 }
 
+/* 主容器样式 */
 .dashboard-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 0 0 24px;
+  height: calc(100vh - 64px); /* 减去顶部导航栏高度 */
+  overflow: hidden; /* 防止外部容器出现滚动条 */
+  padding: 16px;
+  box-sizing: border-box; /* 确保padding不会增加总高度 */
 }
 
 .card-title {
@@ -1936,21 +1967,26 @@ export default defineComponent({
 
 .sitemap-card {
   height: 100%;
-  max-height: 600px; /* 设置最大高度 */
+  display: flex;
+  flex-direction: column;
   
   :deep(.ant-card-body) {
     height: calc(100% - 57px); /* 减去卡片头部高度 */
     padding: 0 !important; /* 移除默认内边距 */
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-height: 450px; /* 增加最小高度 */
   }
 }
 
 /* 添加树容器样式 */
 .tree-container {
   flex: 1;
-  overflow-y: auto;
+  overflow: auto;
   padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
   
   /* 优化滚动条样式 */
   &::-webkit-scrollbar {
@@ -1998,11 +2034,59 @@ export default defineComponent({
 
 /* 确保行布局正确 */
 .ant-row {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   margin: 0 -8px;
-  
-  .ant-col {
-    padding: 0 8px;
-  }
+}
+
+.ant-col {
+  display: flex;
+  flex: 1;
+  padding: 0 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+:deep(.ant-card) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+}
+
+:deep(.ant-card-head) {
+  flex: 0 0 auto;
+}
+
+:deep(.ant-card-body) {
+  flex: 1 1 auto; /* 占据卡片中所有剩余空间 */
+  height: 0; /* 关键：强制内容区域收缩 */
+  min-height: 0; /* 允许内容区域收缩 */
+  overflow: auto; /* 内容过多时可滚动 */
+  display: flex;
+  flex-direction: column;
+  padding: 16px; /* 减小内边距 */
+}
+
+.info-grid,
+.tree-container {
+  flex: 1 1 auto; /* 占据所有可用空间 */
+  min-height: 0; /* 关键：允许内容区域收缩 */
+  overflow: auto; /* 内容过多时可滚动 */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 信息项 - 可能需要防止它们撑开容器 */
+.info-item {
+  flex-shrink: 0; /* 防止项目被压缩 */
+  /* 其他样式保持不变 */
 }
 
 /* 标签样式优化 */
@@ -2859,12 +2943,17 @@ export default defineComponent({
 }
 
 .product-info-card {
-  max-height: 600px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
   
   :deep(.ant-card-body) {
     height: calc(100% - 57px);
     padding: 16px;
     overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -2872,6 +2961,7 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1; /* 添加这一行，让内容区域填充可用空间 */
 }
 
 .info-card-header {
@@ -3277,7 +3367,7 @@ export default defineComponent({
 
 .sitemap-content {
   overflow-y: auto;
-  height: 500px;
+  height: 800px;
 }
 
 /* 优化过渡动画 */
@@ -3408,5 +3498,83 @@ export default defineComponent({
     display: flex;
     align-items: center;
   }
+}
+
+/* 主容器样式 */
+.dashboard-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: calc(100vh - 64px); /* 减去顶部导航栏高度 */
+}
+
+/* Discord横幅样式 */
+.discord-banner {
+  flex: 0 0 auto; /* 不伸缩，保持原始大小 */
+  margin-bottom: 16px;
+}
+
+/* 主要内容区域 - 卡片行，占据所有剩余空间 */
+.card-row {
+  display: flex;
+  flex: 1 1 0; /* 占据所有剩余空间，可伸缩，基础大小为0 */
+  min-height: 0; /* 关键：允许flex项在容器内收缩 */
+  overflow: hidden; /* 防止溢出 */
+  margin: 0 -8px; /* 抵消内部padding */
+}
+
+/* 卡片列样式 */
+.card-col {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0; /* 平均分配空间，可伸缩 */
+  min-width: 0; /* 允许内容在必要时收缩 */
+  padding: 0 8px;
+  height: 100%; /* 确保高度填满父容器 */
+}
+
+/* 卡片样式 - 确保填满整个列高度 */
+.product-info-card,
+.sitemap-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto; /* 填满可用空间 */
+  height: 100%; /* 确保高度填满父容器 */
+  overflow: hidden; /* 防止内容溢出 */
+}
+
+/* 卡片头部样式 - 固定高度 */
+:deep(.ant-card-head) {
+  flex: 0 0 auto; /* 不伸缩，保持原始大小 */
+  min-height: 56px; /* 固定头部高度 */
+}
+
+/* 卡片内容区域 - 可滚动 */
+:deep(.ant-card-body) {
+  flex: 1 1 auto; /* 占据卡片中所有剩余空间 */
+  height: 0; /* 关键：强制内容区域收缩并允许滚动 */
+  min-height: 0; /* 允许内容区域收缩 */
+  overflow: auto; /* 内容过多时可滚动 */
+  display: flex;
+  flex-direction: column;
+}
+
+/* 树容器和信息网格 - 可滚动内容区域 */
+.tree-container,
+.info-grid {
+  flex: 1 1 auto; /* 占据所有可用空间 */
+  min-height: 0; /* 允许内容区域收缩 */
+  overflow: auto; /* 内容过多时可滚动 */
+}
+
+/* 移除可能导致额外高度的边距 */
+.info-grid {
+  margin: 0;
+  padding: 0;
+}
+
+/* 确保所有子元素不会导致父容器溢出 */
+* {
+  box-sizing: border-box;
 }
 </style>
