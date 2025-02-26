@@ -55,6 +55,30 @@
                 </div>
               </div>
 
+              <div class="info-item">
+                <div class="info-label">
+                  Competitors
+                </div>
+                <div class="info-content">
+                  <div class="competitors-stats-horizontal">
+                    <template v-if="competitors.length">
+                      <a-tag 
+                        v-for="comp in competitors" 
+                        :key="comp.url"
+                        class="competitor-tag"
+                      >
+                        <a :href="`https://${comp.url}`" target="_blank" class="competitor-link">
+                          {{ comp.name }}
+                        </a>
+                      </a-tag>
+                    </template>
+                    <template v-else>
+                      <span class="no-competitors">No competitors added</span>
+                    </template>
+                  </div>
+                </div>
+              </div>
+
               <!-- GSC 单独一行 -->
               <div class="info-item">
                 <div class="info-label">
@@ -109,30 +133,6 @@
                       <span class="stat-label">Indexed</span>
                       <span class="stat-value enlarged">{{ pagesDashboard?.indexedCount || 0 }}</span>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="info-item">
-                <div class="info-label">
-                  Competitors
-                </div>
-                <div class="info-content">
-                  <div class="competitors-stats-horizontal">
-                    <template v-if="competitors.length">
-                      <a-tag 
-                        v-for="comp in competitors" 
-                        :key="comp.url"
-                        class="competitor-tag"
-                      >
-                        <a :href="`https://${comp.url}`" target="_blank" class="competitor-link">
-                          {{ comp.name }}
-                        </a>
-                      </a-tag>
-                    </template>
-                    <template v-else>
-                      <span class="no-competitors">No competitors added</span>
-                    </template>
                   </div>
                 </div>
               </div>
@@ -2932,8 +2932,9 @@ export default defineComponent({
 .info-item {
   background: #fafafa;
   border-radius: 8px;
-  padding: 16px;
+  padding: 20px; /* 增加内边距 */
   transition: all 0.3s ease;
+  margin-bottom: 8px; /* 增加底部间距 */
 }
 
 .info-item:hover {
@@ -2944,13 +2945,17 @@ export default defineComponent({
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 500;
+  font-weight: 600; /* 加粗标签 */
+  font-size: 16px; /* 增加标签字号 */
   color: #262626;
-  margin-bottom: 12px;
+  margin-bottom: 16px; /* 增加与内容的间距 */
 }
 
 .info-content {
-  color: #595959;
+  font-size: 18px; /* 进一步增加字体大小 */
+  font-weight: 500;
+  line-height: 1.6; /* 增加行高 */
+  color: #262626; /* 加深颜色提高对比度 */
 }
 
 .website-content {
@@ -2958,6 +2963,8 @@ export default defineComponent({
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  line-height: 1.6; /* 增加行高 */
+  font-size: 16px; /* 增加字号 */
 }
 
 .website-link {
@@ -2965,6 +2972,8 @@ export default defineComponent({
   align-items: center;
   gap: 4px;
   color: #1890ff;
+  font-size: 16px; /* 增加链接字号 */
+  font-weight: 500;
 }
 
 .pages-stats-horizontal {
@@ -2993,17 +3002,23 @@ export default defineComponent({
 .competitors-stats-horizontal {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px; /* 增加间距 */
 }
 
 .competitor-tag {
   margin: 0;
+  font-size: 16px; /* 进一步增加竞争对手标签的字体大小 */
+  padding: 6px 14px; /* 增加内边距使标签更大 */
+  line-height: 1.6; /* 增加行高 */
 }
 
 .competitor-link {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  font-weight: 500;
+  font-size: 16px; /* 增加链接字号 */
+  line-height: 1.6; /* 增加行高 */
 }
 
 .no-competitors {
@@ -3047,9 +3062,11 @@ export default defineComponent({
 }
 
 .features-text {
-  max-height: 80px;
+  max-height: 120px; /* 增加最大高度 */
   overflow-y: auto;
   padding-right: 8px;
+  line-height: 1.6; /* 增加行高 */
+  font-size: 16px; /* 增加字号 */
   
   &::-webkit-scrollbar {
     width: 4px;
@@ -3064,7 +3081,7 @@ export default defineComponent({
 .competitors-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 12px; /* 增加间距 */
 }
 
 .competitor-tag {
@@ -3371,5 +3388,19 @@ export default defineComponent({
 :deep(.ant-divider-vertical) {
   height: 40px;  /* 增加高度 */
   margin: 0 24px;  /* 增加左右间距 */
+}
+
+/* 添加产品名称和竞争对手的字号放大样式 */
+.info-content {
+  font-size: 16px; /* 增加字体大小 */
+  font-weight: 500; /* 增加字重 */
+}
+
+.competitor-tag {
+  font-size: 14px; /* 增加竞争对手标签的字体大小 */
+}
+
+.competitor-link {
+  font-weight: 500; /* 增加链接的字重 */
 }
 </style>
