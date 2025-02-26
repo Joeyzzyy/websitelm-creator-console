@@ -35,17 +35,36 @@
               </template>
 
               <template v-if="analysisState === 'processing'">
-                <div class="loading-content">
-                  <LoadingOutlined class="analysis-icon" spin />
-                  <h2>Keywords Analysis in Progress</h2>
-                  <div v-for="task in currentTasks" :key="task.taskName" class="task-item">
-                    <div class="task-header">
-                      <span>{{ task.taskName }}</span>
-                      <span>{{ task.status }}</span>
+                <div class="analysis-loading-card" style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+                  <div class="processing-analysis-content">
+                    <div class="analysis-icon-container">
+                      <LoadingOutlined class="analysis-icon pulse" spin />
                     </div>
-                    <div class="task-timing">
-                      <span>Started: {{ formatTime(task.startTime) }}</span>
-                      <span v-if="task.endTime">Completed: {{ formatTime(task.endTime) }}</span>
+                    <h2 class="analysis-title">Keywords Analysis in Progress</h2>
+                    <p class="analysis-description">
+                      Your keyword database has been successfully created! We're now analyzing and prioritizing your keywords for maximum impact.
+                    </p>
+                    <div class="analysis-status">
+                      <div v-for="task in currentTasks" :key="task.taskName" class="task-item">
+                        <div class="task-header">
+                          <span class="task-name">{{ task.taskName }}</span>
+                          <span class="task-status" :class="task.status">{{ task.status }}</span>
+                        </div>
+                        <a-progress 
+                          :percent="getProgressPercent(task.progress)" 
+                          :status="task.status === 'finished' ? 'success' : 'active'"
+                          :strokeColor="{ from: '#108ee9', to: '#87d068' }"
+                          size="small"
+                        />
+                        <div class="task-timing">
+                          <span>Started: {{ formatTime(task.startTime) }}</span>
+                          <span v-if="task.endTime">Completed: {{ formatTime(task.endTime) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="notification-message">
+                      <MailOutlined class="mail-icon" />
+                      <span>You'll receive an email notification when the analysis is complete!</span>
                     </div>
                   </div>
                 </div>
@@ -961,7 +980,8 @@ import {
   UpOutlined,
   DownOutlined,
   GiftOutlined,
-  FileSearchOutlined
+  FileSearchOutlined,
+  MailOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import api from '../api/api'
@@ -1024,7 +1044,8 @@ export default defineComponent({
     UpOutlined,
     DownOutlined,
     GiftOutlined,
-    FileSearchOutlined
+    FileSearchOutlined,
+    MailOutlined
   },
   setup() {
     const selectedKeywords = ref([])
@@ -4843,5 +4864,45 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   min-height: 0; /* 确保内容可以滚动 */
+}
+
+.processing-analysis-content {
+  text-align: center;
+}
+
+.analysis-icon-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+@keyframes ripple {
+  0% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.65);
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.notification-message {
+  margin-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(24, 144, 255, 0.1);
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.mail-icon {
+  color: #1890ff;
+  font-size: 18px;
+  margin-right: 8px;
 }
 </style>
