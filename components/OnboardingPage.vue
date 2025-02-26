@@ -441,6 +441,9 @@ const submitForm = async () => {
     if (response?.code === 200) {
       message.success('Setup completed successfully!')
       router.push('/dashboard')
+    } else {
+      // 处理非200状态码
+      message.error(response?.message || 'Failed to complete setup. Please try again.')
     }
   } catch (error) {
     console.error('Setup failed:', error)

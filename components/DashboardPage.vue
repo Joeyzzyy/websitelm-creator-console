@@ -9,101 +9,105 @@
     <div class="dashboard-content">
       <!-- 直接从 a-row 开始 -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
-        <a-col :span="12">
+        <a-col :span="24">
           <a-card class="product-info-card">
             <template #title>
-              <div class="info-card-header">
-                <div class="info-card-title">
-                  Product Information
-                </div>
+              <div class="card-title">
+                <span>Product Information</span>
                 <div class="header-actions">
-                  <a-button 
-                    type="link"
-                    @click="editProductInfo"
-                    size="small"
-                  >
+                  <a-button type="primary" size="small" @click="openEditWithBasicInfo">
                     Edit
-                  </a-button>
-                  <a-button 
-                    type="link" 
-                    @click="deleteProduct"
-                    size="small"
-                    danger
-                  >
-                    Delete
                   </a-button>
                 </div>
               </div>
             </template>
             
             <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">
-                  <AppstoreOutlined />
-                  <span>Product Name</span>
+              <div class="info-row">
+                <div class="info-item">
+                  <div class="info-label">
+                    <span>Product Name</span>
+                  </div>
+                  <div class="info-content">
+                    {{ productInfo?.productName || 'Not set' }}
+                  </div>
                 </div>
-                <div class="info-content">
-                  {{ productInfo?.productName || 'Not set' }}
-                </div>
-              </div>
 
-              <div class="info-item">
-                <div class="info-label">
-                  <GlobalOutlined />
-                  Website
-                  <a-tag v-if="productInfo?.domainStatus" color="success" class="status-tag">Verified</a-tag>
-                  <a-tag v-else color="warning" class="status-tag">Unverified</a-tag>
-                </div>
-                <div class="info-content">
+                <div class="info-item">
+                  <div class="info-label">
+                    Website
+                  </div>
                   <div class="website-content">
-                    <a :href="'https://' + productInfo?.projectWebsite" target="_blank" class="website-link">
-                      {{ productInfo?.projectWebsite }}
-                      <LinkOutlined />
+                    <a
+                      :href="productInfo?.projectWebsite ? `https://${productInfo.projectWebsite.replace(/^https?:\/\//, '')}` : '#'"
+                      target="_blank"
+                      class="website-link"
+                    >
+                      {{ productInfo?.projectWebsite ? productInfo.projectWebsite.replace(/^https?:\/\//, '') : 'Not set' }}
                     </a>
-                    <!-- 添加条件渲染的验证按钮 -->
-                    <template v-if="!productInfo?.domainStatus">
-                      <a-button 
-                        type="primary"
-                        size="small"
-                        @click="openEditWithBasicInfoToVerify"
-                        :loading="goStartVerifying"
-                      >
-                        Go Verify
-                      </a-button>
-                    </template>
-                    <template v-else>
-                      <a-button 
-                        type="primary"
-                        size="small"
-                        @click="showGscData"
-                      >
-                        View Traffic Data
-                      </a-button>
-                    </template>
+                    <a-tag v-if="productInfo?.domainStatus" color="success">
+                      Verified
+                    </a-tag>
+                    <a-tag v-else color="warning">
+                      Not Verified
+                    </a-tag>
                   </div>
                 </div>
               </div>
 
-              <div class="info-item compact">
+              <!-- GSC 单独一行 -->
+              <div class="info-item">
                 <div class="info-label">
-                  <FileTextOutlined />
+                  Google Search Console
+                </div>
+                <div class="website-content">
+                  <!-- 根据GSC连接状态显示不同按钮 -->
+                  <a-button 
+                    v-if="isGscConnected" 
+                    type="primary" 
+                    @click="showGscData"
+                  >
+                    View Traffic Data
+                  </a-button>
+                  <a-button 
+                    v-else 
+                    type="primary" 
+                    @click="connectGSC"
+                  >
+                    Connect GSC
+                  </a-button>
+                  
+                  <!-- 添加查看网站结构按钮 -->
+                  <a-button 
+                    v-if="isGscConnected && productInfo?.domainStatus" 
+                    @click="showSitemapModal"
+                    style="margin-left: 8px;"
+                  >
+                    View Site Map
+                  </a-button>
+                </div>
+              </div>
+
+              <!-- Pages Overview 单独一行 -->
+              <div class="info-item">
+                <div class="info-label">
                   Pages Overview
                 </div>
                 <div class="info-content">
                   <div class="pages-stats-horizontal">
                     <div class="stat-item">
                       <span class="stat-label">Generated</span>
-                      <span class="stat-value">{{ pagesDashboard?.generatorCount || 0 }}</span>
+                      <span class="stat-value enlarged">{{ pagesDashboard?.generatorCount || 0 }}</span>
                     </div>
                     <a-divider type="vertical" />
                     <div class="stat-item">
                       <span class="stat-label">Published</span>
-                      <span class="stat-value">{{ pagesDashboard?.publishCount || 0 }}</span>
+                      <span class="stat-value enlarged">{{ pagesDashboard?.publishCount || 0 }}</span>
                     </div>
                     <a-divider type="vertical" />
                     <div class="stat-item">
                       <span class="stat-label">Indexed</span>
-                      <span class="stat-value">{{ pagesDashboard?.indexedCount || 0 }}</span>
+                      <span class="stat-value enlarged">{{ pagesDashboard?.indexedCount || 0 }}</span>
                     </div>
                   </div>
                 </div>
@@ -111,7 +115,6 @@
 
               <div class="info-item">
                 <div class="info-label">
-                  <NodeIndexOutlined />
                   Competitors
                 </div>
                 <div class="info-content">
@@ -124,7 +127,6 @@
                       >
                         <a :href="`https://${comp.url}`" target="_blank" class="competitor-link">
                           {{ comp.name }}
-                          <RightOutlined />
                         </a>
                       </a-tag>
                     </template>
@@ -134,142 +136,23 @@
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <!-- 将Discord横幅移到最下面 -->
-            <div class="discord-banner">
-              <div class="banner-content">
-                <div class="banner-text-container">
-                  <div class="banner-title">Join our AI SEO community</div>
-                  <div class="banner-subtitle">Connect with other AI creators and share your experiences and inspirations</div>
-                  <div class="banner-actions">
-                    <a href="https://discord.gg/zZkAy9Kp" target="_blank" class="discord-button">
-                      <ThunderboltOutlined />
-                      Join Discord
-                    </a>
-                    <a href="https://www.producthunt.com/posts/websitelm?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-websitelm" target="_blank" class="producthunt-button">
-                      <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=902867&theme=light&t=1740546322118" alt="WebsiteLM - All-in-One AI SEO workstation: elevate your rankings | Product Hunt" />
-                    </a>
+              
+              <!-- Discord横幅紧跟在Competitors后面 -->
+              <div class="discord-banner">
+                <div class="banner-content">
+                  <div class="banner-text-container">
+                    <div class="banner-title">Join Our Discord Community</div>
+                    <div class="banner-subtitle">Get help, share feedback, and connect with other users</div>
+                    <div class="banner-actions">
+                      <a href="https://discord.gg/yourlink" target="_blank" class="discord-button">
+                        Join Discord
+                      </a>
+                    </div>
                   </div>
+                  <img src="/discord-logo.svg" alt="Discord" class="discord-logo" />
                 </div>
-                <img src="/discord-logo.svg" alt="Discord" class="discord-logo" />
               </div>
             </div>
-          </a-card>
-        </a-col>
-
-        <a-col :span="12">
-          <!-- Website Structure -->
-          <a-card class="sitemap-card">
-            <template #title>
-              <div class="card-title">
-                <span>Website Structure (Sitemap)</span>
-                <a-space>
-                  <a-button 
-                    type="link" 
-                    size="small"
-                    @click="handleRefreshSitemap"
-                    :loading="loadingSitemap"
-                  >
-                    Refresh
-                  </a-button>
-                  <!-- 添加 Disconnect 按钮 -->
-                  <a-button
-                    type="link"
-                    size="small"
-                    danger
-                    @click="disconnectGSC"
-                    v-if="isGscConnected"
-                  >
-                    Disconnect Google Search Console
-                  </a-button>
-                </a-space>
-              </div>
-            </template>
-
-            <!-- Loading skeleton -->
-            <template v-if="loadingSitemap || checkingGscStatus">
-              <a-skeleton active :paragraph="{ rows: 2 }" />
-            </template>
-
-            <!-- Content -->
-            <template v-else>
-              <!-- 第一步：检查网站是否添加和验证 -->
-              <template v-if="!productInfo?.projectWebsite || !productInfo?.domainStatus">
-                <a-empty 
-                  description="Add and verify your site to get sitemap automatically"
-                  class="centered-empty-state"
-                >
-                  <template #extra>
-                    <a-button type="primary" @click="openEditWithBasicInfoToVerify">
-                      Add Your Site
-                    </a-button>
-                  </template>
-                </a-empty>
-              </template>
-              <!-- 第二步：检查 GSC 是否连接 -->
-              <template v-else-if="!isGscConnected">
-                <a-empty 
-                  description="Connect Google Search Console to manage sitemap and analytics"
-                  class="centered-empty-state"
-                >
-                  <a-button type="primary" @click="connectGSC">
-                    Connect Google Search Console
-                  </a-button>
-                </a-empty>
-              </template>
-              <!-- 第三步：显示 sitemap 数据 -->
-              <template v-else-if="sitemapData?.length">
-                <div class="sitemap-content">
-                  <a-tree
-                    :tree-data="sitemapData"
-                    :default-expanded-keys="expandedKeys"
-                    class="sitemap-tree"
-                    @select="handleTreeSelect"
-                  >
-                    <template #title="{ title, key }">
-                      <div class="tree-node-title">
-                        <span>{{ title }}</span>
-                        <a-space>
-                          <a-button
-                            v-if="!key.includes('folder_')"
-                            :href="getVisitUrl(key)"
-                            target="_blank"
-                            class="visit-link"
-                            @click.stop
-                            type="link"
-                            size="small"
-                          >
-                            <GlobalOutlined /> Visit
-                          </a-button>
-                          <a-spin v-if="loadingUrls[key]" size="small" />
-                          <template v-if="nodeUrls[key]">
-                            <a-button
-                              v-for="url in nodeUrls[key]"
-                              :key="url"
-                              :href="url"
-                              target="_blank"
-                              type="link"
-                              size="small"
-                              class="url-link"
-                            >
-                              <LinkOutlined />
-                            </a-button>
-                          </template>
-                        </a-space>
-                      </div>
-                    </template>
-                  </a-tree>
-                </div>
-              </template>
-              <!-- 最后：如果都满足条件但没有数据 -->
-              <template v-else>
-                <a-empty 
-                  description="No pages found" 
-                  class="centered-empty-state"
-                />
-              </template>
-            </template>
           </a-card>
         </a-col>
       </a-row>
@@ -546,7 +429,6 @@
             </div>
           </div>
 
-          <!-- GSC Connection -->
           <div 
             class="progress-step"
             :class="{ 'completed': isGscConnected }"
@@ -634,6 +516,70 @@
       </div>
       <div v-else class="centered-empty-state">
         No data available
+      </div>
+    </a-modal>
+
+    <!-- 添加 Sitemap 弹窗 -->
+    <a-modal
+      v-model:visible="sitemapModalVisible"
+      title="Website Structure"
+      width="800px"
+      :footer="null"
+    >
+      <div class="card-title">
+        <a-space>
+          <a-button 
+            type="link" 
+            size="small"
+            @click="handleRefreshSitemap"
+            :loading="loadingSitemap"
+          >
+            Refresh
+          </a-button>
+          <!-- 添加 Disconnect 按钮 -->
+          <a-button
+            type="link"
+            size="small"
+            danger
+            @click="disconnectGSC"
+            v-if="isGscConnected"
+          >
+            Disconnect Google Search Console
+          </a-button>
+        </a-space>
+      </div>
+
+      <div v-if="loadingSitemap" class="centered-empty-state">
+        <a-spin size="large" />
+      </div>
+      <div v-else-if="sitemapData && sitemapData.length > 0" class="sitemap-content">
+        <a-tree
+          class="sitemap-tree"
+          :tree-data="sitemapData"
+          :expanded-keys="expandedKeys"
+          @select="handleTreeSelect"
+        >
+          <template #title="{ title, key }">
+            <div class="tree-node-title">
+              <span>{{ title }}</span>
+              <div>
+                <a-button
+                  v-if="key !== 'empty' && !key.startsWith('folder_')"
+                  type="link"
+                  size="small"
+                  class="visit-link"
+                  @click.stop="openPreview(key)"
+                >
+                  <template #icon><link-outlined /></template>
+                  Visit
+                </a-button>
+              </div>
+            </div>
+          </template>
+        </a-tree>
+      </div>
+      <div v-else class="centered-empty-state">
+        No sitemap data available
       </div>
     </a-modal>
   </page-layout>
@@ -764,6 +710,7 @@ export default defineComponent({
       ],
       checkingGscStatus: false, // 添加新的状态
       isPanelReady: false, // 添加新的状态控制面板是否准备好显示
+      sitemapModalVisible: false, // 添加这个控制Sitemap弹窗的显示
     }
   },
   created() {
@@ -1608,7 +1555,16 @@ export default defineComponent({
     
     handleGscConnectedChange() {
       this.handleStateChange(); 
-    }
+    },
+    
+    // 添加显示Sitemap弹窗的方法
+    showSitemapModal() {
+      this.sitemapModalVisible = true;
+      // 如果还没有加载过sitemap数据，则加载
+      if (!this.sitemapData || this.sitemapData.length === 0) {
+        this.getSitemap();
+      }
+    },
   },
 
   emits: ['open-guide-mode'],
@@ -2960,27 +2916,99 @@ export default defineComponent({
 .info-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  flex: 1; /* 添加这一行，让内容区域填充可用空间 */
+  gap: 16px;
 }
 
-.info-card-header {
+.info-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  gap: 16px;
 }
 
-.info-card-title {
+.info-row .info-item {
+  flex: 1;
+  min-width: 0; /* 确保flex项目可以缩小到比内容更小 */
+}
+
+.info-item {
+  background: #fafafa;
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.info-item:hover {
+  background: #f0f0f0;
+}
+
+.info-label {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 12px;
+}
+
+.info-content {
+  color: #595959;
+}
+
+.website-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.website-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #1890ff;
+}
+
+.pages-stats-horizontal {
+  display: flex;
+  align-items: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.stat-value {
   font-size: 16px;
   font-weight: 500;
   color: #262626;
-  
-  :deep(.anticon) {
-    color: #1890ff;
-  }
+}
+
+.competitors-stats-horizontal {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.competitor-tag {
+  margin: 0;
+}
+
+.competitor-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.no-competitors {
+  color: #8c8c8c;
+  font-style: italic;
 }
 
 .edit-button {
@@ -3005,77 +3033,6 @@ export default defineComponent({
   
   :deep(.anticon) {
     font-size: 14px;
-  }
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  background: #fafafa;
-  border-radius: 8px;
-  width: 100%;
-}
-
-.info-item.full-width {
-  width: 100%;
-}
-
-.info-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  color: #1f2937;
-  font-weight: 600;
-  font-size: 14px;
-  letter-spacing: 0.01em;
-  
-  :deep(.anticon) {
-    color: #1890ff;
-    font-size: 16px;
-    opacity: 0.9;
-  }
-}
-
-.info-content {
-  color: #374151;
-  font-size: 14px;
-  line-height: 1.6;
-  letter-spacing: 0.01em;
-}
-
-.website-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.website-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #1890ff;
-  font-weight: 500;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: rgba(24, 144, 255, 0.06);
-  transition: all 0.3s;
-  
-  &:hover {
-    background: rgba(24, 144, 255, 0.1);
-    text-decoration: none;
-    transform: translateX(2px);
-    
-    .anticon {
-      transform: translateX(2px);
-    }
-  }
-  
-  .anticon {
-    font-size: 14px;
-    transition: transform 0.3s;
   }
 }
 
@@ -3146,223 +3103,6 @@ export default defineComponent({
 
 :deep(.ant-card-body) {
   padding: 24px;
-}
-
-.pages-stats-horizontal {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 0;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-}
-
-.stat-label {
-  color: #8c8c8c;
-  font-size: 13px;
-  margin-bottom: 4px;
-}
-
-.stat-value {
-  font-size: 16px;
-  font-weight: 500;
-  color: #262626;
-}
-
-:deep(.ant-divider-vertical) {
-  height: 32px;
-  margin: 0 16px;
-}
-
-.competitors-content {
-  display: flex;
-  align-items: center;
-  min-height: 40px; /* 确保有最小高度以便垂直居中 */
-}
-
-.competitors-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  width: 100%;
-  padding: 4px 0;
-}
-
-.competitor-tag {
-  margin: 0 !important;
-  height: 32px !important; /* 增加标签高度 */
-  line-height: 30px !important; /* 调整行高以配合新高度 */
-  padding: 0 12px !important; /* 增加水平内边距 */
-  border-radius: 6px !important; /* 稍微增加圆角 */
-  background: #f5f5f5 !important;
-  border: 1px solid #e8e8e8 !important;
-  
-  &:hover {
-    background: #f0f0f0 !important;
-    border-color: #d9d9d9 !important;
-  }
-}
-
-.competitor-link {
-  color: #595959;
-  font-size: 14px; /* 增加字体大小 */
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  
-  &:hover {
-    color: #1890ff;
-  }
-  
-  .anticon {
-    font-size: 12px;
-  }
-}
-
-.no-competitors {
-  color: #8c8c8c;
-  font-size: 14px;
-}
-
-.competitors-stats-horizontal {
-  display: flex;
-  align-items: center; /* 垂直居中 */
-  flex-wrap: wrap;
-  gap: 12px; /* 统一的间距 */
-  min-height: 48px; /* 与 Pages Overview 保持一致的高度 */
-  padding: 8px 0;
-}
-
-.competitor-tag {
-  margin: 0 !important;
-  height: 32px !important;
-  line-height: 30px !important;
-  padding: 0 16px !important;
-  border-radius: 6px !important;
-  background: #f5f5f5 !important;
-  border: 1px solid #e8e8e8 !important;
-  
-  &:hover {
-    background: #f0f0f0 !important;
-    border-color: #d9d9d9 !important;
-  }
-}
-
-.competitor-link {
-  color: #595959;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  
-  &:hover {
-    color: #1890ff;
-  }
-  
-  .anticon {
-    font-size: 12px;
-  }
-}
-
-.no-competitors {
-  color: #8c8c8c;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  height: 32px; /* 与标签高度保持一致 */
-}
-
-.record-value-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 1;
-}
-
-.host-divider {
-  position: relative;
-  text-align: center;
-  margin: 8px 0;
-}
-
-.divider-text {
-  background: white;
-  padding: 0 12px;
-  color: #999;
-  font-size: 12px;
-  position: relative;
-  z-index: 1;
-}
-
-.host-divider::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: #f0f0f0;
-  z-index: 0;
-}
-
-.record-note {
-  font-size: 12px;
-  color: #666;
-  font-style: italic;
-  margin-top: -4px;
-}
-
-.record-value {
-  font-family: monospace;
-  background: #f5f5f5;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.verify-record-help ul {
-  margin: 0;
-  padding-left: 16px;
-}
-
-.verify-record-help li {
-  margin: 4px 0;
-}
-
-.verify-record-cell {
-  padding: 12px;
-}
-
-.verify-record-row {
-  border-bottom: 1px solid #f0f0f0;
-  
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.record-value-container.horizontal {
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-}
-
-.host-option {
-  flex: 1;
-}
-
-.website-content {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.gsc-data-container {
-  padding: 8px;
 }
 
 .sitemap-content {
@@ -3573,8 +3313,63 @@ export default defineComponent({
   padding: 0;
 }
 
-/* 确保所有子元素不会导致父容器溢出 */
 * {
   box-sizing: border-box;
+}
+
+/* 添加到样式部分 */
+.stat-value.enlarged {
+  font-size: 24px;  /* 放大数字 */
+  font-weight: 600;
+  color: #1890ff;  /* 使用主题蓝色 */
+}
+
+.pages-stats-horizontal {
+  display: flex;
+  justify-content: space-around;  /* 均匀分布 */
+  width: 100%;
+  padding: 8px 0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px;  /* 增加左右内边距 */
+}
+
+.stat-label {
+  font-size: 14px;  /* 稍微放大标签 */
+  color: #8c8c8c;
+  margin-bottom: 8px;  /* 增加与数值的间距 */
+}
+
+/* 产品信息卡片标题区域样式 */
+:deep(.ant-card-head) {
+  display: flex;
+  align-items: center;
+}
+
+:deep(.ant-card-head-title) {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+:deep(.ant-card-extra) {
+  display: flex;
+  align-items: center;
+}
+
+/* 编辑按钮样式 */
+:deep(.ant-card-extra .ant-btn) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 垂直分隔线样式 */
+:deep(.ant-divider-vertical) {
+  height: 40px;  /* 增加高度 */
+  margin: 0 24px;  /* 增加左右间距 */
 }
 </style>

@@ -1,34 +1,19 @@
 <template>
   <a-layout style="height: 100vh;">
     <a-layout-sider
-      v-model:collapsed="collapsed"
       :width="180"
       :collapsed-width="80"
       style="background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F6 100%); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);"
     >
-      <!-- 添加折叠按钮 -->
-      <div class="collapse-trigger" @click="toggleCollapse">
-        <a-button type="text" class="collapse-icon-btn">
-          <template v-if="collapsed">
-            <RightOutlined style="color: #1890ff;" />
-          </template>
-          <template v-else>
-            <LeftOutlined style="color: #1890ff;" />
-          </template>
-        </a-button>
-      </div>
       <!-- 头像部分 -->
       <div class="user-profile-section">
-        <div class="logo-container" v-if="!collapsed">
+        <div class="logo-container">
           <img src="../assets/images/websitelm-logo.png" alt="WebsiteLM Logo" class="logo-image">
         </div>
-        <div class="logo-container" v-else>
-          <img src="../assets/images/websitelm-logo-single.png" alt="WebsiteLM Icon" class="logo-image-small">
-        </div>
-        <div class="welcome-text" v-if="!collapsed">
+        <div class="welcome-text">
           Welcome back!
         </div>
-        <div v-if="!collapsed" class="user-info-container">
+        <div class="user-info-container">
           <div class="user-name">{{ userDisplayName }}</div>
         </div>
       </div>
@@ -254,9 +239,9 @@ html, body, #app {
 /* 用户资料部分 */
 .user-profile-section {
   text-align: center;
-  padding: 32px 24px;
+  padding: 24px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -649,7 +634,7 @@ html, body, #app {
 .welcome-text {
   font-size: 16px;
   font-weight: 500;
-  margin: 12px 0;
+  margin: 8px 0;
   background: linear-gradient(135deg, #1890ff 0%, #6366F1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -673,7 +658,7 @@ html, body, #app {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   width: 100%;
   padding: 0 8px;
 }
@@ -682,7 +667,7 @@ html, body, #app {
   font-size: 16px;
   font-weight: 500;
   color: #1F2937;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .user-email {
@@ -896,7 +881,7 @@ html, body, #app {
 
 /* 更新logo相关样式 */
 .logo-container {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   width: 100%;
   display: flex;
   justify-content: center;
