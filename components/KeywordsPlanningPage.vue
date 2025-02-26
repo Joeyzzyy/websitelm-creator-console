@@ -331,41 +331,6 @@
                     <div class="workspace-layout">
                       <!-- Outline 内容部分 -->
                       <div class="plan-section">
-                        <!-- Update task progress section -->
-                        <template v-if="shouldShowTaskStatus">
-                          <div class="task-status-container">
-                            <a-alert
-                              :type="outlineGenerationStatus === 'failed' ? 'error' : 'info'"
-                              :style="statusColor"
-                              class="task-alert"
-                            >
-                              <template #message>
-                                <div class="status-header">
-                                  <span class="task-status">{{ getTaskStatusText(outlineGenerationStatus) }}</span>
-                                  <a-tag class="workflow-tag" :color="getStatusTagColor(outlineGenerationStatus)">
-                                    {{ outlineGenerationStatus }}
-                                  </a-tag>
-                                </div>
-                                <div class="timing-info" v-if="taskStartTime">
-                                  <span class="time-label">Started:</span>
-                                  <span class="time-value">{{ formatTime(taskStartTime) }}</span>
-                                  <span class="time-label" v-if="taskEndTime">Completed:</span>
-                                  <span class="time-value" v-if="taskEndTime">{{ formatTime(taskEndTime) }}</span>
-                                </div>
-                                <div class="task-description" v-if="taskDescription">
-                                  {{ formatTaskDescription(taskDescription) }}
-                                </div>
-                                <a-progress
-                                  v-if="outlineGenerationStatus === 'processing'"
-                                  :percent="taskProgress || 0"
-                                  :status="getProgressStatus(outlineGenerationStatus)"
-                                  size="small"
-                                />
-                              </template>
-                            </a-alert>
-                          </div>
-                        </template>
-
                         <a-tabs 
                           v-model:activeKey="contentPlanTab" 
                           class="content-plan-tabs"
@@ -1701,24 +1666,30 @@ export default defineComponent({
         // 处理 composite_generator 任务
         if (compositeResponse?.code === 200) {
           if (compositeResponse.data) {
+            // 使用data.status而不是analysisStatus
             outlineGenerationStatus.value = compositeResponse.data.status
             taskStartTime.value = compositeResponse.data.startTime
             taskEndTime.value = compositeResponse.data.endTime
             taskDescription.value = formatTaskDescription(compositeResponse.data.description)
             
-            if (compositeResponse.data.status === 'processing') {
-              return compositeResponse // 返回正在处理的任务响应
-            }
+            // 由于没有progress字段，我们根据状态设置进度
+            taskProgress.value = compositeResponse.data.status === 'finished' ? 100 : 
+                                compositeResponse.data.status === 'processing' ? 50 : 0
           }
         }
         
         // 处理 auto_pilot 任务
         if (autoPilotResponse?.code === 200) {
           if (autoPilotResponse.data) {
+            // 使用data.status而不是analysisStatus
             outlineGenerationStatus.value = autoPilotResponse.data.status
             taskStartTime.value = autoPilotResponse.data.startTime
             taskEndTime.value = autoPilotResponse.data.endTime
             taskDescription.value = formatTaskDescription(autoPilotResponse.data.description)
+            
+            // 由于没有progress字段，我们根据状态设置进度
+            taskProgress.value = autoPilotResponse.data.status === 'finished' ? 100 : 
+                                autoPilotResponse.data.status === 'processing' ? 50 : 0
             
             if (autoPilotResponse.data.status === 'processing') {
               return autoPilotResponse // 返回正在处理的任务响应
@@ -1727,8 +1698,12 @@ export default defineComponent({
         }
         
         // 如果两个任务都不在处理中,清除轮询并设置生成完成状态
-        clearInterval(pollingInterval.value)
-        hasGenerated.value = true
+        if (pollingInterval.value && 
+            (!compositeResponse?.data?.status || compositeResponse.data.status !== 'processing') && 
+            (!autoPilotResponse?.data?.status || autoPilotResponse.data.status !== 'processing')) {
+          clearInterval(pollingInterval.value)
+          hasGenerated.value = true
+        }
         
         // 返回最后一个有效的响应
         return compositeResponse?.data ? compositeResponse : autoPilotResponse
@@ -2276,6 +2251,7 @@ export default defineComponent({
     }
 
     const shouldShowTaskStatus = computed(() => {
+      // 直接检查outlineGenerationStatus.value，不依赖于analysisStatus
       return outlineGenerationStatus.value && 
              ['processing', 'finished', 'failed'].includes(outlineGenerationStatus.value) &&
              currentStep.value === '1'; // 只在第二步显示

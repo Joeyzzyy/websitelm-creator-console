@@ -346,10 +346,10 @@ const handleWebsite = async () => {
     return
   }
   
-  // 验证网址格式
-  const urlPattern = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/
+  // 验证网址格式 - 确保域名格式正确（包含至少一个点，只有英文字母、数字和连字符）
+  const urlPattern = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](\.[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9])*\.[a-zA-Z]{2,}$/
   if (!urlPattern.test(formData.website.trim())) {
-    message.warning('Please enter a valid website URL')
+    message.warning('Please enter a valid domain name, for example: example.com')
     return
   }
 
@@ -367,7 +367,14 @@ const handleWebsite = async () => {
 // 处理竞争对手
 const handleCompetitor = async () => {
   if (!newCompetitor.name.trim() || !newCompetitor.url.trim()) {
-    message.warning('Please fill in both competitor name and URL')
+    message.warning('Please enter both competitor name and URL')
+    return
+  }
+  
+  // 验证竞争对手网址格式
+  const urlPattern = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9](\.[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9])*\.[a-zA-Z]{2,}$/
+  if (!urlPattern.test(newCompetitor.url.trim())) {
+    message.warning('Please enter a valid competitor domain name, for example: competitor.com')
     return
   }
   
