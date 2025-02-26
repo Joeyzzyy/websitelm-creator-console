@@ -346,6 +346,25 @@
 
               <div v-show="currentStep === '1'" class="step-panel">
                 <div class="outline-generation">
+                  <!-- 添加任务状态显示区域 -->
+                  <div v-if="outlineGenerationStatus === 'processing'" class="task-status-card">
+                    <div class="task-status-content">
+                      <div class="task-status-icon">
+                        <LoadingOutlined spin class="status-icon" />
+                      </div>
+                      <div class="task-status-info">
+                        <h3 class="task-status-title">Content Plan Generation in Progress</h3>
+                        <p class="task-status-description">
+                          Our AI is analyzing your keywords and creating optimized content plans. This process typically takes 3-5 minutes to complete.
+                        </p>
+                        <div class="task-timing">
+                          <span>Started: {{ formatTime(taskStartTime) }}</span>
+                          <span v-if="taskEndTime">Completed: {{ formatTime(taskEndTime) }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
                   <div class="step-two-content">
                     <div class="workspace-layout">
                       <!-- Outline 内容部分 -->
@@ -474,7 +493,7 @@
                                         :key="keyword"
                                         color="blue"
                                       >
-                                        {{ keyword }}
+                                        {{ keyword.length > 25 ? keyword.substring(0, 25) + '...' : keyword }}
                                       </a-tag>
                                       <a-tag v-if="plan.keywords.split(', ').length > 3" class="more-tag">
                                         +{{ plan.keywords.split(', ').length - 3 }}
@@ -590,7 +609,7 @@
                                         :key="keyword"
                                         color="blue"
                                       >
-                                        {{ keyword }}
+                                        {{ keyword.length > 25 ? keyword.substring(0, 25) + '...' : keyword }}
                                       </a-tag>
                                       <a-tag v-if="plan.keywords.split(', ').length > 3" class="more-tag">
                                         +{{ plan.keywords.split(', ').length - 3 }}
@@ -1684,57 +1703,75 @@ export default defineComponent({
           api.getAnalysisStatus('auto_pilot')
         ])
         
+        let activeResponse = null;
+        let wasProcessing = outlineGenerationStatus.value === 'processing';
+        let nowFinished = false;
+        
         // 处理 composite_generator 任务
-        if (compositeResponse?.code === 200) {
-          if (compositeResponse.data) {
-            // 使用data.status而不是analysisStatus
-            outlineGenerationStatus.value = compositeResponse.data.status
-            taskStartTime.value = compositeResponse.data.startTime
-            taskEndTime.value = compositeResponse.data.endTime
-            taskDescription.value = formatTaskDescription(compositeResponse.data.description)
-            
-            // 由于没有progress字段，我们根据状态设置进度
-            taskProgress.value = compositeResponse.data.status === 'finished' ? 100 : 
-                                compositeResponse.data.status === 'processing' ? 50 : 0
+        if (compositeResponse?.code === 200 && compositeResponse.data) {
+          // 如果是composite任务在处理中，则它是活动任务
+          if (compositeResponse.data.status === 'processing') {
+            activeResponse = compositeResponse;
+            outlineGenerationStatus.value = 'processing';
+            taskStartTime.value = compositeResponse.data.startTime;
+            taskEndTime.value = compositeResponse.data.endTime;
+            taskDescription.value = formatTaskDescription(compositeResponse.data.description);
+            taskProgress.value = 50;
+          } 
+          // 如果composite任务已完成，且之前状态是处理中，则标记为需要刷新
+          else if (compositeResponse.data.status === 'finished' && wasProcessing) {
+            nowFinished = true;
+            outlineGenerationStatus.value = 'finished';
+            taskStartTime.value = compositeResponse.data.startTime;
+            taskEndTime.value = compositeResponse.data.endTime;
+            taskDescription.value = formatTaskDescription(compositeResponse.data.description);
+            taskProgress.value = 100;
           }
         }
         
         // 处理 auto_pilot 任务
-        if (autoPilotResponse?.code === 200) {
-          if (autoPilotResponse.data) {
-            // 使用data.status而不是analysisStatus
-            outlineGenerationStatus.value = autoPilotResponse.data.status
-            taskStartTime.value = autoPilotResponse.data.startTime
-            taskEndTime.value = autoPilotResponse.data.endTime
-            taskDescription.value = formatTaskDescription(autoPilotResponse.data.description)
-            
-            // 由于没有progress字段，我们根据状态设置进度
-            taskProgress.value = autoPilotResponse.data.status === 'finished' ? 100 : 
-                                autoPilotResponse.data.status === 'processing' ? 50 : 0
-            
-            if (autoPilotResponse.data.status === 'processing') {
-              return autoPilotResponse // 返回正在处理的任务响应
-            }
+        if (autoPilotResponse?.code === 200 && autoPilotResponse.data) {
+          // 如果是auto_pilot任务在处理中，则它是活动任务
+          if (autoPilotResponse.data.status === 'processing') {
+            activeResponse = autoPilotResponse;
+            outlineGenerationStatus.value = 'processing';
+            taskStartTime.value = autoPilotResponse.data.startTime;
+            taskEndTime.value = autoPilotResponse.data.endTime;
+            taskDescription.value = formatTaskDescription(autoPilotResponse.data.description);
+            taskProgress.value = 50;
+          } 
+          // 如果auto_pilot任务已完成，且之前状态是处理中，则标记为需要刷新
+          else if (autoPilotResponse.data.status === 'finished' && wasProcessing) {
+            nowFinished = true;
+            outlineGenerationStatus.value = 'finished';
+            taskStartTime.value = autoPilotResponse.data.startTime;
+            taskEndTime.value = autoPilotResponse.data.endTime;
+            taskDescription.value = formatTaskDescription(autoPilotResponse.data.description);
+            taskProgress.value = 100;
           }
         }
         
-        // 如果两个任务都不在处理中,清除轮询并设置生成完成状态
-        if (pollingInterval.value && 
-            (!compositeResponse?.data?.status || compositeResponse.data.status !== 'processing') && 
-            (!autoPilotResponse?.data?.status || autoPilotResponse.data.status !== 'processing')) {
-          clearInterval(pollingInterval.value)
-          hasGenerated.value = true
+        // 只有当任务状态从processing变为finished时才刷新大纲列表
+        if (nowFinished) {
+          await fetchContentPlans();
+          hasGenerated.value = true;
         }
         
-        // 返回最后一个有效的响应
-        return compositeResponse?.data ? compositeResponse : autoPilotResponse
+        // 如果没有任务在处理中，清除轮询
+        if (pollingInterval.value && !activeResponse) {
+          clearInterval(pollingInterval.value);
+          pollingInterval.value = null;
+        }
+        
+        // 返回活动任务的响应（如果有）
+        return activeResponse || (compositeResponse?.data ? compositeResponse : autoPilotResponse);
         
       } catch (error) {
-        console.error('Failed to check task status:', error)
-        message.error('Failed to check task status')
-        return null
+        console.error('Failed to check task status:', error);
+        message.error('Failed to check task status');
+        return null;
       } finally {
-        isLoadingTaskInfo.value = false
+        isLoadingTaskInfo.value = false;
       }
     }
 
@@ -4904,5 +4941,50 @@ export default defineComponent({
   color: #1890ff;
   font-size: 18px;
   margin-right: 8px;
+}
+
+/* 添加任务状态显示区域 */
+.task-status-card {
+  margin-bottom: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  border: 1px solid #e8e8e8;
+}
+
+.task-status-content {
+  display: flex;
+  align-items: center;
+}
+
+.task-status-icon {
+  margin-right: 20px;
+}
+
+.status-icon {
+  font-size: 32px;
+  color: #1890ff;
+}
+
+.task-status-info {
+  flex: 1;
+}
+
+.task-status-title {
+  margin-bottom: 8px;
+  color: #262626;
+}
+
+.task-status-description {
+  margin-bottom: 12px;
+  color: #595959;
+}
+
+.task-timing {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  color: #8c8c8c;
+  font-size: 12px;
 }
 </style>
