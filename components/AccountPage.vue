@@ -124,7 +124,7 @@
                 <template v-if="activeTab === 'password'">
                     <div class="settings-container">
                         <template v-if="productInfo?.isFirstLogin">
-                        <!-- 首次设置密码 -->
+                        <!-- First time password setup -->
                         <div class="current-email-section">
                             <h3>Set Your Password</h3>
                             <div class="email-display">
@@ -193,7 +193,7 @@
                         </template>
 
                         <template v-else>
-                        <!-- 修改密码 -->
+                        <!-- Change password -->
                         <div class="current-email-section">
                             <h3>Change Your Password For</h3>
                             <div class="email-display">
@@ -716,11 +716,18 @@
             
             usageInfo.value = [
               {
-                label: 'Outline Generator',
-                used: packageData.outlineGeneratorUsage || 0,
-                total: packageData.outlineGeneratorLimit || 999999999,
+                label: 'AI Outline Generator',
+                used: packageData.aiOutlineGeneratorUsage || 0,
+                total: packageData.aiOutlineGeneratorLimit || 999999999,
                 unit: 'times/month',
-                description: 'AI-powered outline generation'
+                description: 'AI-driven outline generation'
+              },
+              {
+                label: 'Manual Outline Generator',
+                used: packageData.manual_outline_generator_usage || 0,
+                total: packageData.manual_outline_generator_limit || 999999999,
+                unit: 'times/month',
+                description: 'Manually create and edit outlines'
               },
               {
                 label: 'Page Generator',
@@ -730,7 +737,7 @@
                 description: 'SEO-optimized page creation'
               },
               {
-                label: 'Internal Links Storage',
+                label: 'Internal Link Storage',
                 used: packageData.internalLinkStorageUsage || 0,
                 total: packageData.internalLinkStorageLimit || 999999999,
                 unit: 'links',
@@ -750,11 +757,18 @@
                 unit: 'images',
                 description: 'Store and optimize images'
               },
+              {
+                label: 'Video Storage',
+                used: packageData.videosStorageUsage || 0,
+                total: packageData.videosStorageLimit || 999999999,
+                unit: 'videos',
+                description: 'Store and manage videos'
+              }
             ];
           }
         } catch (error) {
-          console.error('Failed to load package information:', error);
-          message.error('Failed to load subscription details');
+          console.error('加载套餐信息失败:', error);
+          message.error('加载订阅详情失败');
         }
       };
   

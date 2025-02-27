@@ -4,6 +4,12 @@ import SubscriptionPage from '../components/SubscriptionPage.vue';
 
 const routes = [
   {
+    path: '/auth',
+    name: 'Auth',
+    component: () => import('../components/Auth.vue'),
+    meta: { hideNavigation: true }
+  },
+  {
     path: '/login',
     name: 'LoginPage',
     component: () => import('../components/LoginPage.vue'),

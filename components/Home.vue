@@ -1189,7 +1189,7 @@ export default {
         okText: 'OK',
         cancelText: 'Cancel',
         onOk: () => {
-          localStorage.removeItem('authToken');
+          localStorage.removeItem('accessToken');
           localStorage.removeItem('intelickIsLoggedIn');
           localStorage.removeItem('currentCustomer');
           localStorage.removeItem('currentCustomerId');
