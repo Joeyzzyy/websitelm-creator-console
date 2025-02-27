@@ -973,14 +973,6 @@ export default defineComponent({
         }
       } catch (error) {
         console.error('Failed to load product info:', error);
-        
-        // 显示用户友好的错误提示
-        this.$notification.error({
-          message: '加载失败',
-          description: '无法加载产品信息，请稍后重试'
-        });
-
-        // 重置关键状态
         this.productInfo = null;
         this.isPanelReady = false;
       }
