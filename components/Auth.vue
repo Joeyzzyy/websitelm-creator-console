@@ -14,7 +14,7 @@ export default {
   name: 'Auth',
   data() {
     return {
-      message: '认证中，请稍候...'
+      message: 'Authenticating, please wait...'
     };
   },
   created() {
@@ -22,12 +22,13 @@ export default {
   },
   methods: {
     processToken() {
-      // 从 URL 获取 token
+      // Get token from URL
       const token = this.$route.query.token;
       const customerId = this.$route.query.customerId;
+      const customerEmail = this.$route.query.customerEmail;
       
       if (!token) {
-        this.message = '未找到有效的认证信息';
+        this.message = 'No valid authentication information found';
         setTimeout(() => {
           this.$router.replace('/login');
         }, 1500);
@@ -35,55 +36,60 @@ export default {
       }
       
       try {
-        // 存储 token
+        // Store token
         localStorage.setItem('accessToken', token);
         localStorage.setItem('intelickIsLoggedIn', 'true');
         
-        // 如果有 customerId，也存储它
+        // Store customerId and customerEmail if available
         if (customerId) {
           localStorage.setItem('currentCustomerId', customerId);
         }
         
-        // 验证 token 是否有效（可选）
+        if (customerEmail) {
+          localStorage.setItem('customerEmail', customerEmail);
+        }
+        
+        // Validate token
         this.validateTokenAndRedirect();
       } catch (error) {
-        console.error('处理认证信息时出错:', error);
-        this.message = '认证过程中出现错误';
+        console.error('Error processing authentication:', error);
+        this.message = 'Error during authentication process';
         setTimeout(() => {
           this.$router.replace('/login');
         }, 1500);
       }
     },
     
-    // 可选：验证 token 是否有效
+    // Optional: Validate token
     async validateTokenAndRedirect() {
       try {
-        // 可以调用一个简单的 API 来验证 token
-        // 例如获取用户信息或其他不敏感的数据
+        // Call API to validate token
         const userInfo = await api.getUserInfo();
         
         if (userInfo) {
-          // token 有效，重定向到 dashboard
+          // Token is valid, redirect to dashboard
           this.$router.replace('/dashboard');
         } else {
-          // token 无效
-          this.message = '认证信息无效';
+          // Token is invalid
+          this.message = 'Authentication information is invalid';
           localStorage.removeItem('accessToken');
           localStorage.removeItem('intelickIsLoggedIn');
           localStorage.removeItem('currentCustomerId');
+          localStorage.removeItem('customerEmail');
           
           setTimeout(() => {
             this.$router.replace('/login');
           }, 1500);
         }
       } catch (error) {
-        // API 调用失败，可能是 token 无效
-        console.error('验证 token 时出错:', error);
-        this.message = '认证信息验证失败';
+        // API call failed, token might be invalid
+        console.error('Error validating token:', error);
+        this.message = 'Failed to validate authentication';
         
         localStorage.removeItem('accessToken');
         localStorage.removeItem('intelickIsLoggedIn');
         localStorage.removeItem('currentCustomerId');
+        localStorage.removeItem('customerEmail');
         
         setTimeout(() => {
           this.$router.replace('/login');
