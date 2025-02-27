@@ -959,6 +959,7 @@ digital marketing strategy"
       :maskClosable="false"
       class="ai-selection-modal"
       :bodyStyle="{ padding: '0' }"
+      :closeIcon="null"
     >
       <div class="ai-selection-modal-content">
         <!-- Premium visual header -->
@@ -1023,7 +1024,13 @@ digital marketing strategy"
               <a-button class="btn-cancel" @click="aiSelectionModalVisible = false">
                 Cancel
               </a-button>
-              <a-button class="btn-start" type="primary" :loading="isAISelecting" @click="handleAISelection">
+              <a-button 
+                class="btn-start" 
+                type="primary" 
+                :loading="isAISelecting" 
+                @click="handleAISelection"
+                style="min-width: 220px;"
+              >
                 <ThunderboltOutlined />
                 <span>Start AI Generation</span>
               </a-button>

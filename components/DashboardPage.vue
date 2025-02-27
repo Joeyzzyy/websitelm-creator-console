@@ -55,60 +55,61 @@
                 </div>
               </div>
 
-              <div class="info-item">
-                <div class="info-label">
-                  Competitors
-                </div>
-                <div class="info-content">
-                  <div class="competitors-stats-horizontal">
-                    <template v-if="competitors.length">
-                      <a-tag 
-                        v-for="comp in competitors" 
-                        :key="comp.url"
-                        class="competitor-tag"
-                      >
-                        <a :href="`https://${comp.url}`" target="_blank" class="competitor-link">
-                          {{ comp.name }}
-                        </a>
-                      </a-tag>
-                    </template>
-                    <template v-else>
-                      <span class="no-competitors">No competitors added</span>
-                    </template>
+              <div class="info-row">
+                <div class="info-item">
+                  <div class="info-label">
+                    Competitors
+                  </div>
+                  <div class="info-content">
+                    <div class="competitors-stats-horizontal">
+                      <template v-if="competitors.length">
+                        <a-tag 
+                          v-for="comp in competitors" 
+                          :key="comp.url"
+                          class="competitor-tag"
+                        >
+                          <a :href="`https://${comp.url}`" target="_blank" class="competitor-link">
+                            {{ comp.name }}
+                          </a>
+                        </a-tag>
+                      </template>
+                      <template v-else>
+                        <span class="no-competitors">No competitors added</span>
+                      </template>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- GSC 单独一行 -->
-              <div class="info-item">
-                <div class="info-label">
-                  Google Search Console
-                </div>
-                <div class="website-content">
-                  <!-- 根据GSC连接状态显示不同按钮 -->
-                  <a-button 
-                    v-if="isGscConnected" 
-                    type="primary" 
-                    @click="showGscData"
-                  >
-                    View Traffic Data
-                  </a-button>
-                  <a-button 
-                    v-else 
-                    type="primary" 
-                    @click="connectGSC"
-                  >
-                    Connect GSC
-                  </a-button>
-                  
-                  <!-- 添加查看网站结构按钮 -->
-                  <a-button 
-                    v-if="isGscConnected && productInfo?.domainStatus" 
-                    @click="showSitemapModal"
-                    style="margin-left: 8px;"
-                  >
-                    View Site Map
-                  </a-button>
+                <div class="info-item">
+                  <div class="info-label">
+                    Google Search Console
+                  </div>
+                  <div class="website-content">
+                    <!-- 根据GSC连接状态显示不同按钮 -->
+                    <a-button 
+                      v-if="isGscConnected" 
+                      type="primary" 
+                      @click="showGscData"
+                    >
+                      View Traffic Data
+                    </a-button>
+                    <a-button 
+                      v-else 
+                      type="primary" 
+                      @click="connectGSC"
+                    >
+                      Connect GSC
+                    </a-button>
+                    
+                    <!-- 添加查看网站结构按钮 -->
+                    <a-button 
+                      v-if="isGscConnected && productInfo?.domainStatus" 
+                      @click="showSitemapModal"
+                      style="margin-left: 8px;"
+                    >
+                      View Site Map
+                    </a-button>
+                  </div>
                 </div>
               </div>
 
@@ -492,7 +493,7 @@
       v-model:visible="gscDataModalVisible"
       title="Google Search Console Data"
       :footer="null"
-      width="600px"
+      width="1000px"
     >
       <div v-if="loadingGscData" class="centered-empty-state">
         <a-spin />
@@ -501,16 +502,42 @@
         <a-table 
           :dataSource="gscData" 
           :columns="columns"
-          :pagination="false"
+          :pagination="{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['10', '15'] }"
           size="small"
+          :scroll="{ y: 400, x: 820 }"
         >
           <template #bodyCell="{ column, record }">
             <template v-if="column.dataIndex === 'date'">
               {{ formatDate(record.keys[1]) }}
             </template>
-            <template v-else-if="column.dataIndex === 'ctr'">
-              {{ (record.ctr * 100).toFixed(2) }}%
+            <template v-else-if="column.dataIndex === 'url'">
+              <a-tooltip :title="record.keys[0]">
+                {{ truncateUrl(record.keys[0]) }}
+              </a-tooltip>
             </template>
+            <template v-else-if="column.dataIndex === 'ctr'">
+              {{ record.ctr ? (record.ctr * 100).toFixed(2) + '%' : '-' }}
+            </template>
+            <template v-else-if="column.dataIndex === 'clicks'">
+              {{ record.clicks || '-' }}
+            </template>
+            <template v-else-if="column.dataIndex === 'impressions'">
+              {{ record.impressions || '-' }}
+            </template>
+            <template v-else-if="column.dataIndex === 'position'">
+              {{ record.position || '-' }}
+            </template>
+          </template>
+          
+          <!-- Add a summary row at the bottom -->
+          <template #footer>
+            <div class="table-summary">
+              <div><strong>Date Range:</strong> {{ dateRange }}</div>
+              <div><strong>Clicks:</strong> {{ totalClicks }}</div>
+              <div><strong>Impressions:</strong> {{ totalImpressions }}</div>
+              <div><strong>CTR:</strong> {{ averageCtr }}%</div>
+              <div><strong>Position:</strong> {{ averagePosition }}</div>
+            </div>
           </template>
         </a-table>
       </div>
@@ -685,32 +712,57 @@ export default defineComponent({
         {
           title: 'Date',
           dataIndex: 'date',
-          width: '100px',
+          key: 'date',
+          width: 100,
+        },
+        {
+          title: 'URL',
+          dataIndex: 'url',
+          key: 'url',
+          ellipsis: true,
+          width: 400,
         },
         {
           title: 'Clicks',
           dataIndex: 'clicks',
-          width: '80px',
+          key: 'clicks',
+          sorter: (a, b) => (a.clicks || 0) - (b.clicks || 0),
+          width: 80,
+          align: 'center',
         },
         {
-          title: 'Impressions',
+          title: 'Impr.',
           dataIndex: 'impressions',
-          width: '100px',
+          key: 'impressions',
+          sorter: (a, b) => (a.impressions || 0) - (b.impressions || 0),
+          width: 80,
+          align: 'center',
         },
         {
           title: 'CTR',
           dataIndex: 'ctr',
-          width: '80px',
+          key: 'ctr',
+          sorter: (a, b) => (a.ctr || 0) - (b.ctr || 0),
+          width: 80,
+          align: 'center',
         },
         {
-          title: 'Position',
+          title: 'Pos.',
           dataIndex: 'position',
-          width: '80px',
+          key: 'position',
+          sorter: (a, b) => (a.position || 0) - (b.position || 0),
+          width: 80,
+          align: 'center',
         },
       ],
       checkingGscStatus: false, // 添加新的状态
       isPanelReady: false, // 添加新的状态控制面板是否准备好显示
       sitemapModalVisible: false, // 添加这个控制Sitemap弹窗的显示
+      totalClicks: 0,
+      totalImpressions: 0,
+      averageCtr: 0,
+      averagePosition: 0,
+      dateRange: '',
     }
   },
   created() {
@@ -1514,13 +1566,62 @@ export default defineComponent({
         );
         
         if (response?.code === 200) {
-          this.gscData = response.data;
+          // Sort data by date in descending order (newest first)
+          this.gscData = response.data.sort((a, b) => {
+            const dateA = new Date(a.keys[1]);
+            const dateB = new Date(b.keys[1]);
+            return dateB - dateA;
+          });
+          
+          this.calculateSummaryData();
         }
       } catch (error) {
         console.error('Failed to load GSC data:', error);
         this.$message.error('Failed to load GSC data');
       } finally {
         this.loadingGscData = false;
+      }
+    },
+
+    calculateSummaryData() {
+      if (!this.gscData || !this.gscData.length) {
+        this.totalClicks = 0;
+        this.totalImpressions = 0;
+        this.averageCtr = 0;
+        this.averagePosition = 0;
+        this.dateRange = '';
+        return;
+      }
+      
+      let totalClicks = 0;
+      let totalImpressions = 0;
+      let totalCtr = 0;
+      let totalPosition = 0;
+      let validDataPoints = 0;
+      
+      this.gscData.forEach(item => {
+        if (item.clicks) totalClicks += item.clicks;
+        if (item.impressions) totalImpressions += item.impressions;
+        if (item.ctr) {
+          totalCtr += item.ctr;
+          validDataPoints++;
+        }
+        if (item.position) {
+          totalPosition += item.position;
+          if (!item.ctr) validDataPoints++;
+        }
+      });
+      
+      this.totalClicks = totalClicks;
+      this.totalImpressions = totalImpressions;
+      this.averageCtr = validDataPoints ? ((totalCtr / validDataPoints) * 100).toFixed(2) : 0;
+      this.averagePosition = validDataPoints ? (totalPosition / validDataPoints).toFixed(2) : 0;
+      
+      // Calculate date range
+      if (this.gscData.length > 0) {
+        const startDate = this.formatDate(this.gscData[this.gscData.length - 1].keys[1]);
+        const endDate = this.formatDate(this.gscData[0].keys[1]);
+        this.dateRange = `${startDate} - ${endDate}`;
       }
     },
 
@@ -1564,6 +1665,17 @@ export default defineComponent({
       if (!this.sitemapData || this.sitemapData.length === 0) {
         this.getSitemap();
       }
+    },
+    
+    truncateUrl(url) {
+      if (!url) return '';
+      // Remove protocol and www
+      let cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '');
+      // If URL is too long, truncate it
+      if (cleanUrl.length > 60) {
+        return cleanUrl.substring(0, 57) + '...';
+      }
+      return cleanUrl;
     },
   },
 
@@ -3402,5 +3514,29 @@ export default defineComponent({
 
 .competitor-link {
   font-weight: 500; /* 增加链接的字重 */
+}
+
+.table-summary {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: #f9f9f9;
+  border-radius: 4px;
+  flex-wrap: wrap;
+}
+
+.table-summary > div {
+  margin-right: 16px;
+  margin-bottom: 4px;
+}
+
+/* 确保URL列不会占用太多空间 */
+:deep(.ant-table-thead > tr > th.ant-table-column-has-sorters:hover) {
+  background: #f5f5f5;
+}
+
+:deep(.ant-table-column-title) {
+  flex: 1;
+  min-width: 0;
 }
 </style>
