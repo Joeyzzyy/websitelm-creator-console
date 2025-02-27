@@ -46,7 +46,7 @@ export default {
         }
         
         if (customerEmail) {
-          localStorage.setItem('customerEmail', customerEmail);
+          localStorage.setItem('currentCustomerEmail', customerEmail);
         }
         
         // Validate token
@@ -75,7 +75,7 @@ export default {
           localStorage.removeItem('accessToken');
           localStorage.removeItem('intelickIsLoggedIn');
           localStorage.removeItem('currentCustomerId');
-          localStorage.removeItem('customerEmail');
+          localStorage.removeItem('currentCustomerEmail');
           
           setTimeout(() => {
             this.$router.replace('/login');
@@ -89,7 +89,7 @@ export default {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('intelickIsLoggedIn');
         localStorage.removeItem('currentCustomerId');
-        localStorage.removeItem('customerEmail');
+        localStorage.removeItem('currentCustomerEmail');
         
         setTimeout(() => {
           this.$router.replace('/login');
