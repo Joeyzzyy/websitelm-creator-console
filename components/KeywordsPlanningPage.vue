@@ -947,6 +947,91 @@ digital marketing strategy"
         />
       </div>
     </a-modal>
+
+    <!-- 在 template 部分添加模态框组件 -->
+    <a-modal
+      v-model:visible="aiSelectionModalVisible"
+      :title="null"
+      @ok="handleAISelection"
+      :footer="null"
+      :width="1200"
+      :centered="true"
+      :maskClosable="false"
+      class="ai-selection-modal"
+      :bodyStyle="{ padding: '0' }"
+    >
+      <div class="ai-selection-modal-content">
+        <!-- Premium visual header -->
+        <div class="ai-selection-visual">
+          <div class="ai-visual-glow"></div>
+          <div class="ai-visual-particles"></div>
+          <div class="ai-visual-icon">
+            <ThunderboltFilled />
+          </div>
+          <h2 class="ai-visual-title">AI-Powered Content Strategy</h2>
+          <p class="ai-visual-subtitle">Unlock your content potential with intelligent automation</p>
+        </div>
+        
+        <!-- Main content area -->
+        <div class="ai-selection-body">
+          <!-- Feature highlights -->
+          <div class="ai-feature-grid">
+            <div class="ai-feature-card">
+              <div class="feature-icon feature-discover">
+                <CompassOutlined />
+              </div>
+              <div class="feature-content">
+                <h4>Step 1: Discover Keywords</h4>
+                <p>Automatically identify high-potential keywords for your content strategy</p>
+              </div>
+            </div>
+            
+            <div class="ai-feature-card">
+              <div class="feature-icon feature-analyze">
+                <BarChartOutlined />
+              </div>
+              <div class="feature-content">
+                <h4>Step 2: Analyze Competition</h4>
+                <p>Evaluate ranking difficulty and competitive landscape</p>
+              </div>
+            </div>
+            
+            <div class="ai-feature-card">
+              <div class="feature-icon feature-create">
+                <FileTextOutlined />
+              </div>
+              <div class="feature-content">
+                <h4>Step 3: Generate Outlines</h4>
+                <p>Create comprehensive content structures optimized for search</p>
+              </div>
+            </div>
+            
+            <div class="ai-feature-card">
+              <div class="feature-icon feature-prioritize">
+                <FundOutlined />
+              </div>
+              <div class="feature-content">
+                <h4>Step 4: Publish Content</h4>
+                <p>Transform outlines into fully-optimized pages ready to rank</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Action buttons -->
+          <div class="ai-action-buttons" style="display: flex; justify-content: flex-end; width: 100%;">
+            <div class="button-group" style="display: flex; justify-content: flex-end;">
+              <a-button class="btn-cancel" @click="aiSelectionModalVisible = false">
+                Cancel
+              </a-button>
+              <a-button class="btn-start" type="primary" :loading="isAISelecting" @click="handleAISelection">
+                <ThunderboltOutlined />
+                <span>Start AI Generation</span>
+              </a-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a-modal>
   </PageLayout>
 </template>
 
@@ -1000,7 +1085,11 @@ import {
   DownOutlined,
   GiftOutlined,
   FileSearchOutlined,
-  MailOutlined
+  MailOutlined,
+  ThunderboltFilled,
+  FundOutlined,
+  CheckCircleFilled,
+  StarFilled
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import api from '../api/api'
@@ -1064,7 +1153,11 @@ export default defineComponent({
     DownOutlined,
     GiftOutlined,
     FileSearchOutlined,
-    MailOutlined
+    MailOutlined,
+    ThunderboltFilled,
+    FundOutlined,
+    CheckCircleFilled,
+    StarFilled
   },
   setup() {
     const selectedKeywords = ref([])
@@ -2362,22 +2455,7 @@ export default defineComponent({
     const isAISelecting = ref(false)
     
     const showAISelectionConfirm = () => {
-      Modal.confirm({
-        title: 'Auto Generate with AI',
-        content: h('div', {}, [
-          h('p', 'Leverage AI to automatically identify and prioritize the top 5 most impactful untapped keywords from your repository, instantly transforming them into strategically optimized content outlines.'),
-        ]),
-        okText: 'Start Generation',
-        cancelText: 'Cancel',
-        onOk: handleAISelection,
-        okButtonProps: {
-          type: 'primary',
-          danger: false
-        },
-        width: 500,
-        centered: true,
-        maskClosable: false
-      })
+      aiSelectionModalVisible.value = true
     }
 
     const handleAISelection = async () => {
@@ -3139,6 +3217,8 @@ export default defineComponent({
       return typeColors[pageType] || 'default';
     };
 
+    const aiSelectionModalVisible = ref(false)
+
     return {
       taskStartTime,
       taskEndTime,
@@ -3312,7 +3392,8 @@ export default defineComponent({
       showTemplateInfo,
       getAIButtonTooltip,
       handleSinglePageGeneration,
-      getPageTypeColor
+      getPageTypeColor,
+      aiSelectionModalVisible
     }
   }
 })
@@ -4987,4 +5068,443 @@ export default defineComponent({
   color: #8c8c8c;
   font-size: 12px;
 }
+
+.ai-selection-modal-content {
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ai-selection-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.ai-visual-icon {
+  font-size: 48px;
+  color: #1890ff;
+  margin-bottom: 16px;
+}
+
+.ai-visual-rays {
+  width: 100px;
+  height: 100px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 10.01%);
+  background-size: 200% 200%;
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.ai-selection-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.ai-selection-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1890ff;
+  margin-right: 16px;
+}
+
+.ai-selection-description {
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.ai-value-proposition {
+  margin-bottom: 24px;
+}
+
+.ai-value-proposition h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.ai-value-proposition p {
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.ai-feature-grid {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.ai-feature-card {
+  flex: 1;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.ai-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.feature-icon {
+  font-size: 32px;
+  color: #1890ff;
+  margin-bottom: 16px;
+}
+
+.feature-content {
+  text-align: center;
+}
+
+.feature-content h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.feature-content p {
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.ai-social-proof {
+  display: flex;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.proof-icon {
+  font-size: 24px;
+  color: #28a745;
+  margin-right: 16px;
+}
+
+.ai-social-proof p {
+  font-size: 16px;
+  color: #6b7280;
+}
+
+.btn-cancel, .btn-start {
+  flex: 1;
+  height: 40px;
+  border-radius: 6px;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+
+.btn-cancel {
+  background: #f0f7ff;
+  border: 1px solid #1890ff;
+  color: #1890ff;
+}
+
+.btn-cancel:hover {
+  background: #e6f3ff;
+  border-color: #40a9ff;
+}
+
+.btn-start {
+  background: linear-gradient(135deg, #28a745 0%, #4caf50 100%);
+  border: none;
+  color: white;
+}
+
+.btn-start:hover {
+  background: linear-gradient(135deg, #38b249 0%, #45a049 100%);
+}
+
+/* AI Selection Modal Styles */
+.ai-selection-modal .ant-modal-content {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2);
+}
+
+.ai-selection-modal-content {
+  position: relative;
+}
+
+/* Premium visual header */
+.ai-selection-visual {
+  position: relative;
+  height: 160px;
+  background: linear-gradient(135deg, #1a2a6c 0%, #b21f1f 50%, #fdbb2d 100%);
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  color: white;
+}
+
+.ai-visual-glow {
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  animation: pulse 8s infinite alternate;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; transform: scale(1); }
+  100% { opacity: 0.8; transform: scale(1.2); }
+}
+
+.ai-visual-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 2%),
+    radial-gradient(circle at 50% 70%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 3%),
+    radial-gradient(circle at 80% 40%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 2%),
+    radial-gradient(circle at 10% 60%, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 2%),
+    radial-gradient(circle at 70% 80%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 3%);
+}
+
+.ai-visual-icon {
+  position: absolute;
+  top: 30px;
+  right: 48px;
+  width: 56px;
+  height: 56px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.ai-visual-title {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.ai-visual-subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+  margin: 0;
+  max-width: 80%;
+  line-height: 1.5;
+}
+
+/* Main content area */
+.ai-selection-body {
+  padding: 32px 40px;
+  background: linear-gradient(to bottom, #ffffff, #f8fafc);
+}
+
+/* Feature grid */
+.ai-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.ai-feature-card {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+.ai-feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+.ai-feature-card:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: inherit;
+}
+
+.feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.feature-discover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.feature-analyze {
+  background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%);
+  color: white;
+}
+
+.feature-create {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  color: white;
+}
+
+.feature-prioritize {
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+  color: white;
+}
+
+.feature-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-content h4 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #1a202c;
+}
+
+.feature-content p {
+  font-size: 14px;
+  color: #4a5568;
+  margin: 0 0 auto 0;
+  line-height: 1.5;
+  flex-grow: 1; /* 确保所有卡片的描述文本区域高度一致 */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 63px; /* 固定高度，确保所有卡片描述区域一致 */
+}
+
+.feature-metric {
+  display: flex;
+  align-items: baseline;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+.metric-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-right: 6px;
+}
+
+.metric-label {
+  font-size: 13px;
+  color: #718096;
+}
+
+/* Action buttons */
+.ai-action-buttons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.proof-rating {
+  display: flex;
+  align-items: center;
+}
+
+.proof-rating .anticon {
+  color: #f6ad55;
+  font-size: 14px;
+  margin-right: 2px;
+}
+
+.rating-text {
+  margin-left: 8px;
+  color: #718096;
+  font-size: 14px;
+}
+
+.button-group {
+  display: flex;
+  gap: 16px;
+}
+
+.btn-cancel {
+  min-width: 100px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn-start {
+  position: relative;
+  min-width: 200px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%) !important;
+  border: none !important;
+  box-shadow: 0 8px 16px rgba(71, 118, 230, 0.3) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  /* 移除 overflow: hidden 以避免光影效果被截断 */
+}
+
+.btn-start:hover {
+  background: linear-gradient(135deg, #5985f7 0%, #9d63fa 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px rgba(71, 118, 230, 0.4) !important;
+}
+
+.btn-start:active {
+  transform: translateY(0);
+  box-shadow: 0 8px 12px rgba(71, 118, 230, 0.3) !important;
+}
+
+/* 移除光影效果，因为它会溢出按钮 */
 </style>
