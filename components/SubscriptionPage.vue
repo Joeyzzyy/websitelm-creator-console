@@ -6,7 +6,6 @@
         <div class="flex justify-between h-16 items-center">
           <div class="flex items-center space-x-4">
             <router-link to="/" class="text-gray-800 hover:text-gray-600">
-              <i class="fas fa-home text-xl"></i>
             </router-link>
           </div>
           <div class="flex items-center space-x-4">
@@ -48,13 +47,19 @@
             
             <!-- Access Code Input -->
             <div class="flex-shrink-0 w-full md:w-auto">
-              <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">
-                  Start Your Free Pro Trial ✨
+              <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 relative overflow-hidden">
+                <!-- 添加背景装饰 -->
+                <div class="absolute -top-10 -right-10 w-20 h-20 bg-yellow-300 rounded-full opacity-20"></div>
+                <div class="absolute -bottom-10 -left-10 w-20 h-20 bg-green-300 rounded-full opacity-20"></div>
+                
+                <h3 class="text-lg font-bold text-gray-900 mb-4 relative">
+                  <span class="bg-gradient-to-r from-emerald-500 to-green-500 bg-clip-text text-transparent">
+                    Start Your Free Pro Trial ✨
+                  </span>
                 </h3>
-                <div class="space-y-3">
+                <div class="space-y-3 relative">
                   <button 
-                    class="early-access-btn w-full"
+                    class="super-cta-btn w-full"
                     @click="handleSelectPlan('pro')"
                   >
                     <span class="flex items-center justify-center">
@@ -62,6 +67,13 @@
                       <i class="fas fa-arrow-right ml-2"></i>
                     </span>
                   </button>
+                  <div class="text-center mt-2 text-xs text-emerald-600 font-medium animate-bounce">
+                    Limited Time Offer - Click Now!
+                  </div>
+                  <!-- 添加无需信用卡强调 -->
+                  <div class="absolute -right-3 -top-6 bg-yellow-400 text-yellow-800 font-bold text-xs px-3 py-1 rounded-full shadow-md transform rotate-6 border-2 border-white">
+                    No Credit Card Required!
+                  </div>
                 </div>
               </div>
             </div>
@@ -785,6 +797,8 @@ html {
   @apply px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-medium rounded-lg transition-all duration-300;
   min-width: 180px;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
 }
 
 .early-access-btn:hover {
@@ -802,9 +816,46 @@ html {
   @apply opacity-75 cursor-not-allowed;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+/* 添加脉冲动画效果 */
+.pulse-animation {
+  animation: pulse-glow 2s infinite;
+  position: relative;
+}
+
+.pulse-animation::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 8px;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes pulse-glow {
+  0% {
+    filter: brightness(100%);
+  }
+  50% {
+    filter: brightness(110%);
+  }
+  100% {
+    filter: brightness(100%);
+  }
 }
 
 /* Modal 自定义样式 */
@@ -882,5 +933,53 @@ html {
 
 .portal-verify-btn.verifying {
   background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+}
+
+/* 超级醒目的CTA按钮 */
+.super-cta-btn {
+  @apply px-6 py-4 text-white font-bold rounded-lg transition-all duration-300 text-lg relative;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  box-shadow: 0 6px 0 #047857, 0 8px 20px rgba(16, 185, 129, 0.4);
+  transform: translateY(-2px);
+  letter-spacing: 0.03em;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  animation: attention-pulse 2s infinite, shake 5s infinite 3s;
+}
+
+.super-cta-btn:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  transform: translateY(0);
+  box-shadow: 0 4px 0 #047857, 0 6px 16px rgba(16, 185, 129, 0.5);
+}
+
+.super-cta-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #047857, 0 4px 8px rgba(16, 185, 129, 0.3);
+}
+
+@keyframes attention-pulse {
+  0%, 100% {
+    filter: brightness(100%) saturate(100%);
+    transform: translateY(-2px) scale(1);
+  }
+  50% {
+    filter: brightness(110%) saturate(110%);
+    transform: translateY(-2px) scale(1.03);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateY(-2px);
+  }
+  1%, 5% {
+    transform: translateY(-2px) translateX(-2px);
+  }
+  2%, 4% {
+    transform: translateY(-2px) translateX(2px);
+  }
+  3% {
+    transform: translateY(-2px) translateX(-2px);
+  }
 }
 </style>
