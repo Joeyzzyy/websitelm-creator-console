@@ -2406,6 +2406,50 @@ export default defineComponent({
       font-size: 14px;
     }
   }
+
+  /* 修改编辑模态框中的域名验证标签 */
+  :deep(.domain-status .ant-tag) {
+    margin: 0;
+    font-size: 14px;
+    line-height: 24px;
+    height: 26px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    border-radius: 4px;
+    
+    /* 增强验证标签的可见性 */
+    &.ant-tag-success {
+      background: #52c41a;
+      color: white;
+      font-weight: 600;
+      border: none;
+      box-shadow: 0 2px 6px rgba(82, 196, 26, 0.3);
+      animation: pulseSuccess 2s infinite;
+    }
+    
+    /* 未验证标签也增强显示 */
+    &.ant-tag-warning {
+      background: #faad14;
+      color: white;
+      font-weight: 600;
+      border: none;
+      box-shadow: 0 2px 6px rgba(250, 173, 20, 0.3);
+    }
+  }
+}
+
+/* 添加成功标签的脉冲动画 */
+@keyframes pulseSuccess {
+  0% {
+    box-shadow: 0 2px 6px rgba(82, 196, 26, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 8px rgba(82, 196, 26, 0.5);
+  }
+  100% {
+    box-shadow: 0 2px 6px rgba(82, 196, 26, 0.3);
+  }
 }
 
 /* 更新欢迎标题样式 */
