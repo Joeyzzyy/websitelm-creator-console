@@ -27,6 +27,7 @@ import ProductBenefitsWithTable from './templates/ProductBenefitsWithTable.vue'
 import PageListCard from './templates/PageListCard.vue'
 import SubscriptionCard from './templates/SubscriptionCard.vue'
 import FeatureComparisonTable from './templates/FeatureComparisonTable.vue'
+import ProductComparison from './templates/ProductComparison.vue'
 
 // 组件映射表
 const SECTION_COMPONENTS = {
@@ -47,7 +48,8 @@ const SECTION_COMPONENTS = {
   ProductBenefitsWithTable: ProductBenefitsWithTable,
   PageListCard: PageListCard,
   SubscriptionCard: SubscriptionCard,
-  FeatureComparisonTable: FeatureComparisonTable
+  FeatureComparisonTable: FeatureComparisonTable,
+  ProductComparison: ProductComparison
 }
 
 export default {

@@ -540,6 +540,8 @@ import PageListCard from './sections/templates/PageListCard.vue';
 import PageListCardPreview from './sections/templates/PageListCardPreview.vue';
 import FeatureComparisonTable from './sections/templates/FeatureComparisonTable.vue';
 import FeatureComparisonTablePreview from './sections/templates/FeatureComparisonTablePreview.vue';
+import ProductComparison from './sections/templates/ProductComparison.vue';
+import ProductComparisonPreview from './sections/templates/ProductComparisonPreview.vue';
 import { VERCEL_CONFIG } from '../config/vercelConfig';
 import { createCleanComponentData } from '../utils/componentDataFactory';
 import { availableComponents } from '../config/availableComponents';
@@ -616,7 +618,9 @@ export default defineComponent({
     SubscriptionCardPreview,
     SubscriptionCard,
     FeatureComparisonTable,
-    FeatureComparisonTablePreview
+    FeatureComparisonTablePreview,
+    ProductComparison,
+    ProductComparisonPreview
   },
 
   // 添加 emits 声明

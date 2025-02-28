@@ -54,6 +54,7 @@
                     type="primary"
                     @click="handleAddPage"
                     class="generate-btn action-button"
+                    v-if="currentCustomerId === '67a9fabf538eb88a2247b5be'"
                   >
                     <span>Add Page From Scratch</span>
                   </a-button>
@@ -381,6 +382,7 @@ export default {
     const loading = ref(false)
     const verifiedDomains = ref([])
     const subfolders = ref([])
+    const currentCustomerId = ref(localStorage.getItem('currentCustomerId') || '')
     const pagination = reactive({
       current: 1,
       pageSize: 10,
@@ -1128,6 +1130,7 @@ export default {
       handleBatchDelete,
       settingsVisible,
       showSettings,
+      currentCustomerId,
     }
   }
 }

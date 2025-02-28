@@ -361,6 +361,19 @@ const componentValidationRules = {
         'bottomContent.columns',
         'bottomContent.featureGroups'
       ]
+    },
+    ProductComparison: {
+      requiredFields: [
+        'title',
+        'topContent.companies',
+        'bottomContent'
+      ],
+      allowedFields: [
+        'title',
+        'topContent.title',
+        'topContent.companies',
+        'bottomContent'
+      ]
     }
   };
 

@@ -231,6 +231,14 @@ export const SECTION_TAGS = {
     groupName: 'h4',
     featureName: 'li',
     featureValue: 'span'
+  },
+  ProductComparison: {
+    title: 'h2',
+    topContentTitle: 'h2',
+    competitorName: 'th',
+    usName: 'th',
+    featureName: 'span',
+    buttonText: 'button'
   }
 }
   

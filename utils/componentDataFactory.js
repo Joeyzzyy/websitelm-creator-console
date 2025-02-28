@@ -731,6 +731,44 @@ export const createCleanComponentData = (componentType) => {
           }
         ]
       }
+    },
+    
+    ProductComparison: {
+      title: '[DEMO] Product Comparison',
+      topContent: {
+        title: '',
+        companies: {
+          competitor: 'Competitor',
+          us: 'Our Solution'
+        }
+      },
+      bottomContent: [
+        {
+          name: 'AI-Powered Content Generation',
+          competitor: false,
+          us: true
+        },
+        {
+          name: 'Real-time Collaboration',
+          competitor: true,
+          us: true
+        },
+        {
+          name: 'Advanced Analytics',
+          competitor: false,
+          us: true
+        },
+        {
+          name: 'Custom Templates',
+          competitor: true,
+          us: true
+        },
+        {
+          name: '24/7 Customer Support',
+          competitor: false,
+          us: true
+        }
+      ]
     }
   };
 

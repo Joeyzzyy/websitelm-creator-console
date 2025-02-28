@@ -206,6 +206,12 @@ export const availableComponents = [
         label: 'Feature Comparison Table',
         template: createCleanComponentData('FeatureComparisonTable'),
         description: "A detailed feature comparison table for comparing different plans or products."
+      },
+      {
+        type: 'ProductComparison',
+        label: 'Product Comparison',
+        template: createCleanComponentData('ProductComparison'),
+        description: "A simple product comparison table to highlight differences between your product and competitors."
       }
     ]
   }
