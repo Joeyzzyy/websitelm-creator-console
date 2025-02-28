@@ -28,7 +28,7 @@
                   </a-button>
 
                   <a-button 
-                    class="action-button secondary-btn"
+                    class="action-button secondary-btn highlight-btn"
                     @click="showSettings"
                   >
                     <span>Publish Domain Settings</span>
@@ -258,8 +258,34 @@
                 {{ getFullPublishUrl({...publishModal.data, publishURL: publishModal.publishUrl}) }}
               </div>
             </div>
+            
+            <a-alert
+              v-if="verifiedDomains.length === 0"
+              type="warning"
+              show-icon
+              message="No publish domains available"
+              description="You need to configure a domain before publishing pages."
+              style="margin-top: 12px"
+            />
           </a-form-item>
         </a-form>
+      </template>
+      
+      <!-- 添加自定义底部按钮 -->
+      <template #footer>
+        <a-button @click="handlePublishCancel">
+          Cancel
+        </a-button>
+        <a-button @click="handleConfigDomain">
+          Configure Publish Domain
+        </a-button>
+        <a-button 
+          type="primary" 
+          :loading="publishModal.loading"
+          @click="handlePublishConfirm"
+        >
+          {{ publishModal.data?.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
+        </a-button>
       </template>
     </a-modal>
 
@@ -1067,6 +1093,14 @@ export default {
       settingsVisible.value = true;
     };
 
+    // 添加配置域名的方法
+    const handleConfigDomain = () => {
+      // 关闭发布弹窗
+      publishModal.value.visible = false;
+      // 打开域名设置弹窗
+      settingsVisible.value = true;
+    };
+
     onMounted(async () => {
       await loadProductInfo()
       // 只有在域名已配置的情况下才执行其他操作
@@ -1131,6 +1165,7 @@ export default {
       settingsVisible,
       showSettings,
       currentCustomerId,
+      handleConfigDomain,
     }
   }
 }
@@ -1194,7 +1229,7 @@ export default {
   flex-direction: column;
   min-height: 0;
   margin-top: 8px;
-  overflow: visible; /* 确保内容可见 */
+  overflow: visible; /* 修改这个 */
 }
 
 /* Empty state styles */
@@ -1988,5 +2023,51 @@ export default {
   background: #f5f5f5;
   border-color: #d9d9d9;
   color: rgba(0, 0, 0, 0.25);
+}
+
+/* 突出显示 Publish Domain Settings 按钮 */
+.highlight-btn {
+  background: #e6f7ff;
+  border-color: #1890ff;
+  color: #1890ff;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
+}
+
+.highlight-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  z-index: -1;
+  animation: shine 3s infinite;
+}
+
+.highlight-btn:hover {
+  background: #bae7ff;
+  border-color: #096dd9;
+  color: #096dd9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+@keyframes shine {
+  0% {
+    left: -100%;
+  }
+  20%, 100% {
+    left: 100%;
+  }
 }
 </style>

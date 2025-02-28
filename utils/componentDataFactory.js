@@ -742,33 +742,37 @@ export const createCleanComponentData = (componentType) => {
           us: 'Our Solution'
         }
       },
-      bottomContent: [
-        {
-          name: 'AI-Powered Content Generation',
-          competitor: false,
-          us: true
-        },
-        {
-          name: 'Real-time Collaboration',
-          competitor: true,
-          us: true
-        },
-        {
-          name: 'Advanced Analytics',
-          competitor: false,
-          us: true
-        },
-        {
-          name: 'Custom Templates',
-          competitor: true,
-          us: true
-        },
-        {
-          name: '24/7 Customer Support',
-          competitor: false,
-          us: true
-        }
-      ]
+      bottomContent: {
+        features: [
+          {
+            name: 'AI-Powered Content Generation',
+            competitor: false,
+            us: true
+          },
+          {
+            name: 'Real-time Collaboration',
+            competitor: true,
+            us: true
+          },
+          {
+            name: 'Advanced Analytics',
+            competitor: false,
+            us: true
+          },
+          {
+            name: 'Custom Templates',
+            competitor: true,
+            us: true
+          },
+          {
+            name: '24/7 Customer Support',
+            competitor: false,
+            us: true
+          }
+        ],
+        buttonText: 'Know More',
+        buttonLink: '#'
+      }
     }
   };
 

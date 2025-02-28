@@ -53,7 +53,7 @@
           <div class="features-section">
             <h3>Features Comparison</h3>
             
-            <div v-for="(feature, index) in localSection.bottomContent" :key="index" class="feature-item">
+            <div v-for="(feature, index) in localSection.bottomContent.features" :key="index" class="feature-item">
               <div class="feature-header">
                 <h4>Feature {{ index + 1 }}</h4>
                 <div class="feature-actions">
@@ -67,7 +67,7 @@
                   <a-button 
                     type="text" 
                     @click="moveFeature(index, 'down')"
-                    :disabled="disabled || index === localSection.bottomContent.length - 1"
+                    :disabled="disabled || index === localSection.bottomContent.features.length - 1"
                   >
                     <arrow-down-outlined />
                   </a-button>
@@ -169,10 +169,22 @@
               <div class="input-with-tag">
                 <span class="html-tag">{{ tags.buttonText }}</span>
                 <a-input
-                  v-model:value="localSection.buttonText"
+                  v-model:value="localSection.bottomContent.buttonText"
                   :disabled="disabled"
                   @change="handleChange"
                   placeholder="Learn More"
+                />
+              </div>
+            </a-form-item>
+            
+            <a-form-item label="Button Link">
+              <div class="input-with-tag">
+                <span class="html-tag">{{ tags.buttonLink }}</span>
+                <a-input
+                  v-model:value="localSection.bottomContent.buttonLink"
+                  :disabled="disabled"
+                  @change="handleChange"
+                  placeholder="https://example.com"
                 />
               </div>
             </a-form-item>
@@ -223,8 +235,11 @@ export default {
             us: 'Us'
           }
         },
-        bottomContent: [],
-        buttonText: '了解更多',
+        bottomContent: {
+          features: [],
+          buttonText: 'Know More',
+          buttonLink: '#'
+        },
         ...JSON.parse(JSON.stringify(this.section))
       },
       theme: 'normal'
@@ -237,7 +252,8 @@ export default {
         competitorName: '<th>',
         usName: '<th>',
         featureName: '<span>',
-        buttonText: '<button>'
+        buttonText: '<button>',
+        buttonLink: '<a>'
       }
     }
   },
@@ -245,6 +261,35 @@ export default {
     section: {
       handler(newVal) {
         this.localSection = JSON.parse(JSON.stringify(newVal))
+        
+        // 确保bottomContent存在并有正确的结构
+        if (!this.localSection.bottomContent) {
+          this.localSection.bottomContent = {
+            features: [],
+            buttonText: 'Know More',
+            buttonLink: '#'
+          }
+        } else if (!this.localSection.bottomContent.features) {
+          // 如果bottomContent是数组，将其转换为对象
+          if (Array.isArray(this.localSection.bottomContent)) {
+            const features = [...this.localSection.bottomContent];
+            this.localSection.bottomContent = {
+              features: features,
+              buttonText: 'Know More',
+              buttonLink: '#'
+            }
+          } else {
+            this.localSection.bottomContent.features = []
+          }
+        }
+        
+        // 确保按钮属性存在
+        if (this.localSection.bottomContent.buttonText === undefined) {
+          this.localSection.bottomContent.buttonText = 'Know More'
+        }
+        if (this.localSection.bottomContent.buttonLink === undefined) {
+          this.localSection.bottomContent.buttonLink = '#'
+        }
         
         // 确保topContent和bottomContent存在
         if (!this.localSection.topContent) {
@@ -262,20 +307,23 @@ export default {
             us: 'Us'
           }
         }
-        
-        if (!this.localSection.bottomContent) {
-          this.localSection.bottomContent = []
-        }
       },
       deep: true
     }
   },
   methods: {
     handleChange() {
-      this.emitUpdate(this.localSection)
+      // 创建一个新对象，确保所有字段都被包含
+      const updatedSection = {
+        ...this.localSection,
+        buttonLink: this.localSection.bottomContent.buttonLink || '',
+        buttonText: this.localSection.bottomContent.buttonText || ''
+      };
+      
+      this.emitUpdate(updatedSection);
     },
     addFeature() {
-      this.localSection.bottomContent.push({
+      this.localSection.bottomContent.features.push({
         name: '',
         competitor: false,
         us: true,
@@ -287,12 +335,12 @@ export default {
       this.handleChange()
     },
     removeFeature(index) {
-      this.localSection.bottomContent.splice(index, 1)
+      this.localSection.bottomContent.features.splice(index, 1)
       this.handleChange()
     },
     moveFeature(index, direction) {
       const newIndex = direction === 'up' ? index - 1 : index + 1
-      const features = this.localSection.bottomContent
+      const features = this.localSection.bottomContent.features
       const temp = features[index]
       features[index] = features[newIndex]
       features[newIndex] = temp

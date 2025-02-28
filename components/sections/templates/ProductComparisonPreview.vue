@@ -19,9 +19,9 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
-            <template v-if="section.bottomContent && section.bottomContent.length > 0">
+            <template v-if="section.bottomContent && section.bottomContent.features && section.bottomContent.features.length > 0">
               <tr 
-                v-for="(feature, index) in section.bottomContent" 
+                v-for="(feature, index) in section.bottomContent.features" 
                 :key="index" 
                 :class="[
                   'hover:bg-gray-50',
@@ -83,9 +83,9 @@
         </table>
         
         <div class="table-footer">
-          <button class="action-button">
-            {{ section.buttonText || '了解更多' }}
-          </button>
+          <a :href="section.bottomContent?.buttonLink || '#'" class="action-button">
+            {{ section.bottomContent?.buttonText || 'Know More' }}
+          </a>
         </div>
       </div>
     </div>

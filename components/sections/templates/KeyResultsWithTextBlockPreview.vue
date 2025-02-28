@@ -33,97 +33,8 @@
         <div>
           <main class="main-content">
             <article class="article max-w-[900px] pr-4">
-              <div :id="`section-0`" class="mb-4">
-                <div class="text-sm md:text-base leading-[1.2] text-gray-700 [&>p]:mb-1 whitespace-pre-line space-y-1">
-                  <template v-for="(part, i) in parseContent(props.section.rightContent)" :key="i">
-                    <img 
-                      v-if="part.type === 'image'"
-                      :src="part.src"
-                      :alt="part.alt"
-                      class="max-w-full h-auto my-4 rounded-lg shadow-sm"
-                      style="margin-left: 0; margin-right: 0;"
-                    />
-                    <a
-                      v-else-if="part.type === 'link'"
-                      :href="part.href"
-                      class="text-blue-500 hover:text-blue-700 hover:underline font-bold"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >{{ part.content }}</a>
-                    <div 
-                      v-else-if="part.type === 'video'"
-                      class="video-container my-4"
-                    >
-                      <video
-                        :src="part.src"
-                        :controls="part.controls"
-                        :preload="part.preload"
-                        class="embedded-video w-full rounded-lg"
-                      ></video>
-                    </div>
-                    <i v-else-if="part.type === 'italic' || part.type === 'em'" class="italic">
-                      <template v-if="part.nested">
-                        <template v-for="(child, j) in part.children" :key="j">
-                          <img 
-                            v-if="child.type === 'image'"
-                            :src="child.src"
-                            :alt="child.alt"
-                            class="max-w-full h-auto my-4 rounded-lg shadow-sm inline-block"
-                            style="margin-left: 0; margin-right: 0;"
-                          />
-                          <b v-else-if="child.type === 'bold'" class="font-bold">
-                            <template v-if="child.nested">
-                              <template v-for="(grandChild, k) in child.children" :key="k">
-                                <img 
-                                  v-if="grandChild.type === 'image'"
-                                  :src="grandChild.src"
-                                  :alt="grandChild.alt"
-                                  class="max-w-full h-auto my-4 rounded-lg shadow-sm inline-block"
-                                  style="margin-left: 0; margin-right: 0;"
-                                />
-                                <span v-else>{{ grandChild.content }}</span>
-                              </template>
-                            </template>
-                            <template v-else>{{ child.content }}</template>
-                          </b>
-                          <span v-else>{{ child.content }}</span>
-                        </template>
-                      </template>
-                      <template v-else>{{ part.content }}</template>
-                    </i>
-                    <b v-else-if="part.type === 'bold'" class="font-bold">
-                      <template v-if="part.nested">
-                        <template v-for="(child, j) in part.children" :key="j">
-                          <img 
-                            v-if="child.type === 'image'"
-                            :src="child.src"
-                            :alt="child.alt"
-                            class="max-w-full h-auto my-4 rounded-lg shadow-sm inline-block"
-                            style="margin-left: 0; margin-right: 0;"
-                          />
-                          <i v-else-if="child.type === 'italic'" class="italic">
-                            <template v-if="child.nested">
-                              <template v-for="(grandChild, k) in child.children" :key="k">
-                                <img 
-                                  v-if="grandChild.type === 'image'"
-                                  :src="grandChild.src"
-                                  :alt="grandChild.alt"
-                                  class="max-w-full h-auto my-4 rounded-lg shadow-sm inline-block"
-                                  style="margin-left: 0; margin-right: 0;"
-                                />
-                                <span v-else>{{ grandChild.content }}</span>
-                              </template>
-                            </template>
-                            <template v-else>{{ child.content }}</template>
-                          </i>
-                          <span v-else>{{ child.content }}</span>
-                        </template>
-                      </template>
-                      <template v-else>{{ part.content }}</template>
-                    </b>
-                    <span v-else>{{ part.content }}</span>
-                  </template>
-                </div>
+              <div :id="`section-0`" class="mb-4 article-content">
+                <div v-html="props.section.rightContent" class="text-sm md:text-base leading-[1.2] text-gray-700"></div>
               </div>
             </article>
           </main>
@@ -189,151 +100,6 @@ const isChineseContent = (content) => {
   return /[\u4e00-\u9fa5]/.test(content);
 }
 
-const parseContent = (content) => {
-  if (!content) return [];
-  
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(content, 'text/html');
-  
-  const processNode = (node) => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      return node.textContent ? [{
-        type: 'text',
-        content: node.textContent
-      }] : [];
-    }
-    
-    if (node.nodeType === Node.ELEMENT_NODE) {
-      const tagName = node.tagName.toLowerCase();
-      
-      // 处理段落
-      if (tagName === 'p') {
-        const processedNodes = Array.from(node.childNodes).flatMap(processNode);
-        // 检查是否为空段落
-        if (processedNodes.length === 0 || 
-            (processedNodes.length === 1 && 
-             processedNodes[0].type === 'text' && 
-             processedNodes[0].content.trim() === '')) {
-          // 空段落产生空行
-          return [{ type: 'text', content: '\n\n' }];
-        }
-        // 非空段落只在开头添加换行
-        return [
-          { type: 'text', content: '\n' },
-          ...processedNodes
-        ];
-      }
-      
-      // 处理换行
-      if (tagName === 'br') {
-        return [{ type: 'text', content: '\n\n' }];
-      }
-      
-      // 处理标题和子标题
-      if (['h1', 'h2', 'h3'].includes(tagName) || 
-          (tagName === 'span' && node.classList.contains('content-subtitle'))) {
-        const processedNodes = Array.from(node.childNodes).flatMap(processNode);
-        // 标题只在开头添加换行
-        return [
-          { type: 'text', content: '\n' },
-          { type: 'bold', content: node.textContent }
-        ];
-      }
-      
-      // 处理粗体
-      if (tagName === 'strong' || tagName === 'b') {
-        const children = Array.from(node.childNodes).flatMap(processNode);
-        return [{
-          type: 'bold',
-          nested: children.length > 1,
-          children,
-          content: node.textContent
-        }];
-      }
-      
-      // 处理斜体
-      if (tagName === 'em' || tagName === 'i') {
-        const children = Array.from(node.childNodes).flatMap(processNode);
-        return [{
-          type: 'italic',
-          nested: children.length > 1,
-          children,
-          content: node.textContent
-        }];
-      }
-      
-      // 处理链接
-      if (tagName === 'a') {
-        return [{
-          type: 'link',
-          href: node.getAttribute('href'),
-          content: node.textContent
-        }];
-      }
-      
-      // 处理图片
-      if (tagName === 'img') {
-        return [{
-          type: 'image',
-          src: node.getAttribute('src'),
-          alt: node.getAttribute('alt') || '',
-          class: node.getAttribute('class') || ''
-        }];
-      }
-      
-      // 处理视频
-      if (tagName === 'video') {
-        return [{
-          type: 'video',
-          src: node.getAttribute('src'),
-          controls: node.hasAttribute('controls'),
-          preload: 'metadata',
-          class: node.getAttribute('class') || ''
-        }];
-      }
-      
-      // 处理其他元素
-      return Array.from(node.childNodes).flatMap(processNode);
-    }
-    
-    return [];
-  };
-  
-  const results = Array.from(doc.body.childNodes).flatMap(processNode);
-  
-  while (results.length > 0 && 
-         results[0].type === 'text' && 
-         results[0].content.trim() === '') {
-    results.shift();
-  }
-  
-  // 2. 移除结尾的换行
-  while (results.length > 0 && 
-         results[results.length - 1].type === 'text' && 
-         results[results.length - 1].content.trim() === '') {
-    results.pop();
-  }
-  
-  // 3. 合并连续的换行，但保留空段落产生的双换行
-  for (let i = results.length - 2; i >= 0; i--) {
-    const current = results[i];
-    const next = results[i + 1];
-    if (current.type === 'text' && next.type === 'text') {
-      const currentIsNewline = current.content.trim() === '';
-      const nextIsNewline = next.content.trim() === '';
-      if (currentIsNewline && nextIsNewline) {
-        // 如果不是双换行（空行标记），则合并
-        if (current.content !== '\n\n' && next.content !== '\n\n') {
-          results.splice(i, 1);
-        }
-      }
-    }
-  }
-  
-  return results;
-};
-
-// 修改提取标题的函数
 const extractContentTitle = (content) => {
   if (!content) return [];
   
@@ -345,5 +111,54 @@ const extractContentTitle = (content) => {
 };
 </script>
 <style scoped>
-/* 如果需要任何额外的样式可以在这里添加 */
+/* 添加样式以匹配编辑器输出的HTML内容 */
+.article-content :deep(p) {
+  margin-bottom: 1em;
+}
+
+.article-content :deep(b), 
+.article-content :deep(strong) {
+  font-weight: bold;
+}
+
+.article-content :deep(i),
+.article-content :deep(em) {
+  font-style: italic;
+}
+
+.article-content :deep(a) {
+  color: #1890ff;
+  text-decoration: none;
+}
+
+.article-content :deep(a:hover) {
+  text-decoration: underline;
+}
+
+.article-content :deep(img.embedded-image) {
+  max-width: 100%;
+  height: auto;
+  margin: 1rem 0;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.article-content :deep(.video-container) {
+  margin: 1rem 0;
+}
+
+.article-content :deep(.embedded-video) {
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
+
+.article-content :deep(.content-subtitle) {
+  font-size: 1.25em;
+  font-weight: 600;
+  color: #374151;
+  display: inline-block;
+  line-height: 1.4;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
 </style>

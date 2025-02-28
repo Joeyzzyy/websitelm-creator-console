@@ -238,7 +238,8 @@ export const SECTION_TAGS = {
     competitorName: 'th',
     usName: 'th',
     featureName: 'span',
-    buttonText: 'button'
+    buttonText: 'button',
+    buttonLink: 'a'
   }
 }
   
