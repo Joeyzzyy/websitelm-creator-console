@@ -102,7 +102,14 @@
                 <span class="empty-row-hint">Empty row will hide the icon and checkmark</span>
               </a-form-item>
 
-              <div class="comparison-values" v-if="!feature.isEmpty">
+              <a-form-item label="Comparison Type" v-if="!feature.isEmpty">
+                <a-radio-group v-model:value="feature.type" @change="handleChange" style="margin-bottom: 12px">
+                  <a-radio :value="'boolean'" :disabled="disabled">Yes/No</a-radio>
+                  <a-radio :value="'text'" :disabled="disabled">Custom Text</a-radio>
+                </a-radio-group>
+              </a-form-item>
+
+              <div class="comparison-values" v-if="!feature.isEmpty && (!feature.type || feature.type === 'boolean')">
                 <a-form-item label="Competitor Has This Feature?">
                   <a-switch
                     v-model:checked="feature.competitor"
@@ -116,6 +123,26 @@
                     v-model:checked="feature.us"
                     :disabled="disabled"
                     @change="handleChange"
+                  />
+                </a-form-item>
+              </div>
+
+              <div class="comparison-text-values" v-if="!feature.isEmpty && feature.type === 'text'">
+                <a-form-item label="Competitor Value">
+                  <a-input
+                    v-model:value="feature.competitorText"
+                    :disabled="disabled"
+                    @change="handleChange"
+                    placeholder="Enter competitor details"
+                  />
+                </a-form-item>
+
+                <a-form-item label="Your Company Value">
+                  <a-input
+                    v-model:value="feature.usText"
+                    :disabled="disabled"
+                    @change="handleChange"
+                    placeholder="Enter your company details"
                   />
                 </a-form-item>
               </div>
@@ -252,7 +279,10 @@ export default {
         name: '',
         competitor: false,
         us: true,
-        isEmpty: false
+        isEmpty: false,
+        type: 'boolean',
+        competitorText: '',
+        usText: ''
       })
       this.handleChange()
     },
@@ -370,10 +400,18 @@ export default {
   gap: 8px;
 }
 
-.comparison-values {
+.comparison-values,
+.comparison-text-values {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+}
+
+.comparison-text-values {
+  background-color: #f0f5ff;
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 8px;
 }
 
 :deep(.ant-form-item) {

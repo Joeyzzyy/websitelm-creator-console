@@ -16,7 +16,6 @@ import ProductBenefitsWithBlocks from './templates/ProductBenefitsWithBlocks.vue
 import HowItWorksWithWorkflow from './templates/HowItWorksWithWorkflow.vue'
 import WhyChooseUsWithSmallBlocks from './templates/WhyChooseUsWithSmallBlocks.vue'
 import WhyChooseUsWithBlocks from './templates/WhyChooseUsWithBlocks.vue'
-import ProductComparisonTable from './templates/ProductComparisonTable.vue'
 import HeroSectionWithVideo from './templates/HeroSectionWithVideo.vue'
 import KeyResultsWithThreeCards from './templates/KeyResultsWithCards.vue'
 import KeyResultsWithTextBlock from './templates/KeyResultsWithTextBlock.vue'
@@ -38,7 +37,6 @@ const SECTION_COMPONENTS = {
   HowItWorksWithWorkflow: HowItWorksWithWorkflow,
   WhyChooseUsWithSixSmallBlocks: WhyChooseUsWithSmallBlocks,
   WhyChooseUsWithTwoHugeBlocks: WhyChooseUsWithBlocks,
-  ProductComparisonTable: ProductComparisonTable,
   HeroSectionWithVideo: HeroSectionWithVideo,
   KeyResultsWithThreeCards: KeyResultsWithThreeCards,
   KeyResultsWithTextBlock: KeyResultsWithTextBlock,

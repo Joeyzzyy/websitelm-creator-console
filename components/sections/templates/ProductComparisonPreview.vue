@@ -41,22 +41,34 @@
                   </div>
                 </td>
                 <td class="py-2 px-3 text-center border-t border-x border-gray-100">
-                  <i 
-                    v-if="!feature.isEmpty"
-                    :class="[
-                      feature.competitor ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500',
-                      'text-base'
-                    ]"
-                  ></i>
+                  <template v-if="!feature.isEmpty">
+                    <template v-if="!feature.type || feature.type === 'boolean'">
+                      <i 
+                        :class="[
+                          feature.competitor ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500',
+                          'text-base'
+                        ]"
+                      ></i>
+                    </template>
+                    <template v-else-if="feature.type === 'text'">
+                      <span class="text-xs">{{ feature.competitorText }}</span>
+                    </template>
+                  </template>
                 </td>
                 <td class="py-2 px-3 text-center border-t border-gray-100">
-                  <i 
-                    v-if="!feature.isEmpty"
-                    :class="[
-                      feature.us ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500',
-                      'text-base'
-                    ]"
-                  ></i>
+                  <template v-if="!feature.isEmpty">
+                    <template v-if="!feature.type || feature.type === 'boolean'">
+                      <i 
+                        :class="[
+                          feature.us ? 'fas fa-check-circle text-green-500' : 'fas fa-times-circle text-red-500',
+                          'text-base'
+                        ]"
+                      ></i>
+                    </template>
+                    <template v-else-if="feature.type === 'text'">
+                      <span class="text-xs">{{ feature.usText }}</span>
+                    </template>
+                  </template>
                 </td>
               </tr>
             </template>

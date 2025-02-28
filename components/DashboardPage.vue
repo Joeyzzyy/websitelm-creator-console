@@ -5,9 +5,17 @@
     icon="📊"
   >
 
-    <!-- Rest of the content -->
+    <!-- 添加骨架屏加载效果 -->
     <div class="dashboard-content">
-      <!-- 直接从 a-row 开始 -->
+      <a-skeleton active :loading="!productInfo" :paragraph="{ rows: 10 }" class="dashboard-skeleton">
+        <template #title>
+          <div class="skeleton-header">
+            <a-skeleton-input active style="width: 200px; height: 24px;" />
+          </div>
+        </template>
+      </a-skeleton>
+
+      <!-- 原有内容，只在数据加载完成后显示 -->
       <a-row :gutter="[16, 16]" v-if="productInfo?.productId">
         <a-col :span="24">
           <a-card class="product-info-card">
@@ -634,7 +642,7 @@ import {
   AppstoreOutlined,
   ThunderboltOutlined,
   ExclamationCircleFilled,
-  ExclamationCircleOutlined
+  ExclamationCircleOutlined,
 } from '@ant-design/icons-vue'
 import apiClient from '../api/api'
 import { Modal, message } from 'ant-design-vue'
@@ -661,7 +669,7 @@ export default defineComponent({
     AppstoreOutlined,
     ThunderboltOutlined,
     ExclamationCircleFilled,
-    // 添加 LinkOutlined 作为外部链接图标的替代
+    ExclamationCircleOutlined,
   },
   data() {
     return {
@@ -3530,5 +3538,37 @@ export default defineComponent({
 :deep(.ant-table-column-title) {
   flex: 1;
   min-width: 0;
+}
+
+/* 添加骨架屏样式 */
+.dashboard-skeleton {
+  width: 100%;
+  padding: 16px;
+}
+
+.skeleton-header {
+  margin-bottom: 16px;
+}
+
+:deep(.ant-skeleton-title) {
+  margin-bottom: 16px !important;
+}
+
+:deep(.ant-skeleton-paragraph li) {
+  height: 40px !important;  /* 减小高度，从80px改为40px */
+  margin-bottom: 12px !important;  /* 减小间距，从16px改为12px */
+  border-radius: 4px;  /* 添加圆角 */
+}
+
+:deep(.ant-skeleton-paragraph li:nth-child(2n)) {
+  width: 92% !important;  /* 让偶数行宽度不同，更自然 */
+}
+
+:deep(.ant-skeleton-paragraph li:nth-child(3n)) {
+  width: 88% !important;  /* 让第3的倍数行宽度不同，更自然 */
+}
+
+:deep(.ant-skeleton-paragraph li:last-child) {
+  width: 60% !important;  /* 最后一行宽度缩短，从100%改为60% */
 }
 </style>
