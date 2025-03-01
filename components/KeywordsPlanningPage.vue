@@ -1,16 +1,5 @@
 <template>
   <PageLayout>
-    <smart-banner
-      :theme="bannerTheme"
-      title="AI-Powered Content Planning"
-      description="Leverage advanced AI algorithms to analyze keywords, generate content outlines, and create comprehensive content plans tailored to your audience."
-      :badges="[
-        { text: 'AI Analysis' },
-        { text: 'SEO Optimized' },
-        { text: 'Keyword Metrics' }
-      ]"
-    />
-    
     <a-spin 
       :spinning="loading"
       class="centered-spin"
@@ -75,72 +64,23 @@
 
         <template v-else>
           <div class="planning-layout">
-            <!-- 左侧垂直步骤导航 -->
-            <div class="steps-navigation">
-              <div class="step-item" :class="{ active: currentStep === '0' }">
-                <div class="step-content" @click="currentStep = '0'">
-                  <div class="step-number">1</div>
-                  <div class="step-info">
-                    <div class="step-title">Select Keywords</div>
-                    <div class="step-desc">Choose and analyze keywords</div>
-                  </div>
+            <!-- 顶部横向步骤导航 -->
+            <div class="steps-navigation-horizontal">
+              <div class="step-item-horizontal" :class="{ active: currentStep === '0' }" @click="currentStep = '0'">
+                <div class="step-number-horizontal">1</div>
+                <div class="step-info-horizontal">
+                  <div class="step-title-horizontal">Select Keywords</div>
+                  <div class="step-desc-horizontal">Choose and analyze keywords</div>
                 </div>
-                <!-- 连接线 -->
-                <div class="step-connector">
-                  <div class="connector-line"></div>
-                  <div class="connector-arrow"></div>
-                </div>
+                <div class="step-connector-horizontal"></div>
               </div>
 
-              <div class="step-item" :class="{ active: currentStep === '1' }">
-                <div class="step-content" @click="currentStep = '1'">
-                  <div class="step-number">2</div>
-                  <div class="step-info">
-                    <div class="step-title">Check Intent & Outline</div>
-                    <div class="step-desc">Review and generate content plan</div>
-                  </div>
+              <div class="step-item-horizontal" :class="{ active: currentStep === '1' }" @click="currentStep = '1'">
+                <div class="step-number-horizontal">2</div>
+                <div class="step-info-horizontal">
+                  <div class="step-title-horizontal">Check Intent & Outline</div>
+                  <div class="step-desc-horizontal">Review and generate content plan</div>
                 </div>
-              </div>
-
-              <!-- Add Package Status Section -->
-              <div v-if="packageStatusSection" class="package-status-section">
-                <div 
-                  class="status-card"
-                  :style="{
-                    background: packageStatusSection.bgColor,
-                    borderColor: packageStatusSection.borderColor
-                  }"
-                >
-                  <component 
-                    :is="packageStatusSection.icon" 
-                    class="status-icon"
-                    :style="{ color: packageStatusSection.iconColor }"
-                  />
-                  <div class="status-content">
-                    <h4>{{ packageStatusSection.title }}</h4>
-                    <p>{{ packageStatusSection.description }}</p>
-                    <a-button 
-                      v-if="packageStatusSection.showUpgradeButton"
-                      type="primary"
-                      class="upgrade-btn"
-                      @click="handleUpgrade"
-                    >
-                      Upgrade Now
-                    </a-button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 添加新的按钮区域 -->
-              <div class="navigation-actions">
-                <a-button 
-                  type="default"
-                  block
-                  class="history-button"
-                  @click="showHistoryModal"
-                >
-                  <span>Keywords Selection History</span>
-                </a-button>
               </div>
             </div>
 
@@ -3409,100 +3349,97 @@ export default defineComponent({
 <style scoped>
 .planning-layout {
   display: flex;
-  height: 100%;
-  position: relative;
-  min-height: 400px; /* 设置最小高度以确保有足够空间显示 spin */
+  flex-direction: column;
+  width: 100%;
 }
 
-.steps-navigation {
-  flex: 0 0 180px;  /* 从 200px 进一步减少到 180px */
-  padding: 0 12px 24px 12px;  /* 进一步减小padding */
-}
-
-.step-item {
-  position: relative;
+.steps-navigation-horizontal {
+  display: flex;
+  width: 100%;
   margin-bottom: 24px;
-  cursor: pointer;
+  background: linear-gradient(90deg, rgba(15,23,42,0.02) 0%, rgba(30,58,138,0.05) 100%);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  position: relative;
+  overflow: hidden;
 }
 
-/* 添加连接线 */
-.step-item:not(:last-child)::after {
+.steps-navigation-horizontal::before {
   content: '';
   position: absolute;
-  left: 25px; /* 调整到数字圆圈中心 */
-  top: 40px; /* 从第一个步骤底部开始 */
-  width: 4px;
-  height: calc(100% - 16px);
-  background: #e5e7eb; /* 默认浅灰色 */
-  z-index: 1;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #2563EB 0%, #0EA5E9 100%);
 }
 
-/* 当步骤激活时，连接线变色 */
-.step-item.active::after {
-  background: #2563eb;
-}
-
-.step-content {
+.step-item-horizontal {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  border-radius: 8px;
-  background: white;
-  transition: all 0.3s;
-  border: 1px solid #e5e7eb;
   position: relative;
-  z-index: 2; /* 确保内容在连接线上层 */
+  padding: 8px 16px;
+  flex: 1;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 8px;
 }
 
-.step-number {
-  width: 28px;
-  height: 28px;
+.step-item-horizontal:hover {
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.step-item-horizontal.active {
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.step-number-horizontal {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563EB 0%, #0EA5E9 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 13px;
-  flex-shrink: 0;
-  position: relative; /* 确保数字在连接线上层 */
-  z-index: 2;
+  font-weight: bold;
+  margin-right: 12px;
+  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
 }
 
-.step-item:hover .step-content {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+.step-info-horizontal {
+  display: flex;
+  flex-direction: column;
 }
 
-.step-item.active .step-content {
-  background: #f0f7ff;
-  border: 1px solid #2563eb;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
+.step-title-horizontal {
+  font-weight: bold;
+  font-size: 16px;
+  color: #1f2937;
 }
 
-.step-title {
-  font-size: 13px;  /* 稍微减小字体大小 */
+.step-desc-horizontal {
+  font-size: 14px;
+  color: #6b7280;
 }
 
-.step-desc {
-  font-size: 11px;
+.step-connector-horizontal {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, #2563EB 0%, #0EA5E9 100%);
+  transform: translateY(-50%);
 }
 
-/* 修改连接线位置 */
-.step-connector {
-  left: 41px;  /* 根据新的布局调整连接线位置 */
+.step-item-horizontal:last-child .step-connector-horizontal {
+  display: none;
 }
 
 .main-content {
-  flex: 1;
-  min-width: 0;
-  background: white;
-  border-radius: 8px;
-  padding: 0 24px 24px 24px;
-  display: flex; /* 添加弹性布局 */
-  flex-direction: column; /* 垂直方向排列 */
+  width: 100%;
 }
 
 .content-toolbar {
@@ -3599,7 +3536,7 @@ export default defineComponent({
 }
 
 .step-panel {
-  height: 100%;
+  width: 100%;
 }
 
 /* 新增按钮样式 */

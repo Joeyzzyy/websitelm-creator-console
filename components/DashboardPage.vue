@@ -87,38 +87,6 @@
                     </div>
                   </div>
                 </div>
-
-                <div class="info-item">
-                  <div class="info-label">
-                    Google Search Console
-                  </div>
-                  <div class="website-content">
-                    <!-- 根据GSC连接状态显示不同按钮 -->
-                    <a-button 
-                      v-if="isGscConnected" 
-                      type="primary" 
-                      @click="showGscData"
-                    >
-                      View Traffic Data
-                    </a-button>
-                    <a-button 
-                      v-else 
-                      type="primary" 
-                      @click="connectGSC"
-                    >
-                      Connect GSC
-                    </a-button>
-                    
-                    <!-- 添加查看网站结构按钮 -->
-                    <a-button 
-                      v-if="isGscConnected && productInfo?.domainStatus" 
-                      @click="showSitemapModal"
-                      style="margin-left: 8px;"
-                    >
-                      View Site Map
-                    </a-button>
-                  </div>
-                </div>
               </div>
 
               <!-- Pages Overview 单独一行 -->
@@ -391,232 +359,6 @@
         <p>Please close this window and refresh the page</p>
       </div>
     </a-modal>
-
-    <transition name="panel">
-      <div class="setup-progress-panel" v-if="shouldShowSetupPanel && isPanelReady">
-        <div class="panel-header">
-          <div class="panel-title">
-            <CheckCircleOutlined v-if="allStepsCompleted" />
-            <ClockCircleOutlined v-else />
-            Setup Progress
-          </div>
-          <div class="progress-status">
-            {{ completedSteps }}/3
-          </div>
-        </div>
-        
-        <div class="progress-steps">
-          <!-- Domain Verification -->
-          <div 
-            class="progress-step"
-            :class="{ 'completed': productInfo?.domainStatus }"
-          >
-            <div 
-              class="step-icon"
-              :class="productInfo?.domainStatus ? 'completed' : 'pending'"
-            >
-              <GlobalOutlined />
-            </div>
-            <div class="step-content">
-              <div class="step-title">Verify Domain</div>
-              <div class="step-desc">Enable automatic sitemap</div>
-            </div>
-            <div class="step-action">
-              <template v-if="!productInfo?.domainStatus">
-                <a-button 
-                  type="link" 
-                  size="small"
-                  @click="openEditWithBasicInfoToVerify"
-                  :loading="goStartVerifying"
-                >
-                  Start
-                </a-button>
-              </template>
-              <template v-else>
-                <CheckCircleOutlined style="color: #52c41a" />
-              </template>
-            </div>
-          </div>
-
-          <div 
-            class="progress-step"
-            :class="{ 'completed': isGscConnected }"
-          >
-            <div 
-              class="step-icon"
-              :class="isGscConnected ? 'completed' : 'pending'"
-            >
-              <GoogleOutlined />
-            </div>
-            <div class="step-content">
-              <div class="step-title">Connect GSC</div>
-              <div class="step-desc">Track performance</div>
-            </div>
-            <div class="step-action">
-              <a-button 
-                type="link" 
-                size="small"
-                @click="connectGSC"
-                v-if="!isGscConnected"
-              >
-                Connect
-              </a-button>
-              <CheckCircleOutlined v-else style="color: #52c41a" />
-            </div>
-          </div>
-
-          <!-- Feature Tour -->
-          <div 
-            class="progress-step"
-            :class="{ 'completed': productInfo?.onboarding }"  
-          >
-            <div 
-              class="step-icon"
-              :class="productInfo?.onboarding ? 'completed' : 'pending'"
-            >
-              <CompassOutlined />
-            </div>
-            <div class="step-content">
-              <div class="step-title">Take a Tour</div>
-              <div class="step-desc">Learn key features</div>
-            </div>
-            <div class="step-action">
-              <a-button 
-                type="link" 
-                size="small"
-                @click="handleExploreTour"
-                v-if="!productInfo?.onboarding"
-              >
-                Start
-              </a-button>
-              <CheckCircleOutlined v-else style="color: #52c41a" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </transition>
-
-    <!-- 添加 GSC 数据弹窗 -->
-    <a-modal
-      v-model:visible="gscDataModalVisible"
-      title="Google Search Console Data"
-      :footer="null"
-      width="1000px"
-    >
-      <div v-if="loadingGscData" class="centered-empty-state">
-        <a-spin />
-      </div>
-      <div v-else-if="gscData && gscData.length" class="gsc-data-container">
-        <a-table 
-          :dataSource="gscData" 
-          :columns="columns"
-          :pagination="{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['10', '15'] }"
-          size="small"
-          :scroll="{ y: 400, x: 820 }"
-        >
-          <template #bodyCell="{ column, record }">
-            <template v-if="column.dataIndex === 'date'">
-              {{ formatDate(record.keys[1]) }}
-            </template>
-            <template v-else-if="column.dataIndex === 'url'">
-              <a-tooltip :title="record.keys[0]">
-                {{ truncateUrl(record.keys[0]) }}
-              </a-tooltip>
-            </template>
-            <template v-else-if="column.dataIndex === 'ctr'">
-              {{ record.ctr ? (record.ctr * 100).toFixed(2) + '%' : '-' }}
-            </template>
-            <template v-else-if="column.dataIndex === 'clicks'">
-              {{ record.clicks || '-' }}
-            </template>
-            <template v-else-if="column.dataIndex === 'impressions'">
-              {{ record.impressions || '-' }}
-            </template>
-            <template v-else-if="column.dataIndex === 'position'">
-              {{ record.position || '-' }}
-            </template>
-          </template>
-          
-          <!-- Add a summary row at the bottom -->
-          <template #footer>
-            <div class="table-summary">
-              <div><strong>Date Range:</strong> {{ dateRange }}</div>
-              <div><strong>Clicks:</strong> {{ totalClicks }}</div>
-              <div><strong>Impressions:</strong> {{ totalImpressions }}</div>
-              <div><strong>CTR:</strong> {{ averageCtr }}%</div>
-              <div><strong>Position:</strong> {{ averagePosition }}</div>
-            </div>
-          </template>
-        </a-table>
-      </div>
-      <div v-else class="centered-empty-state">
-        No data available
-      </div>
-    </a-modal>
-
-    <!-- 添加 Sitemap 弹窗 -->
-    <a-modal
-      v-model:visible="sitemapModalVisible"
-      title="Website Structure"
-      width="800px"
-      :footer="null"
-    >
-      <div class="card-title">
-        <a-space>
-          <a-button 
-            type="link" 
-            size="small"
-            @click="handleRefreshSitemap"
-            :loading="loadingSitemap"
-          >
-            Refresh
-          </a-button>
-          <!-- 添加 Disconnect 按钮 -->
-          <a-button
-            type="link"
-            size="small"
-            danger
-            @click="disconnectGSC"
-            v-if="isGscConnected"
-          >
-            Disconnect Google Search Console
-          </a-button>
-        </a-space>
-      </div>
-
-      <div v-if="loadingSitemap" class="centered-empty-state">
-        <a-spin size="large" />
-      </div>
-      <div v-else-if="sitemapData && sitemapData.length > 0" class="sitemap-content">
-        <a-tree
-          class="sitemap-tree"
-          :tree-data="sitemapData"
-          :expanded-keys="expandedKeys"
-          @select="handleTreeSelect"
-        >
-          <template #title="{ title, key }">
-            <div class="tree-node-title">
-              <span>{{ title }}</span>
-              <div>
-                <a-button
-                  v-if="key !== 'empty' && !key.startsWith('folder_')"
-                  type="link"
-                  size="small"
-                  class="visit-link"
-                  @click.stop="openPreview(key)"
-                >
-                  <template #icon><link-outlined /></template>
-                  Visit
-                </a-button>
-              </div>
-            </div>
-          </template>
-        </a-tree>
-      </div>
-      <div v-else class="centered-empty-state">
-        No sitemap data available
-      </div>
-    </a-modal>
   </page-layout>
 </template>
 
@@ -690,7 +432,6 @@ export default defineComponent({
       loadingSitemap: false,
       publishedPages: 0,
       isGscConnected: false,
-      gscSites: [],
       gscSuccessModalVisible: false,
       gscCheckInterval: null,
       showVerifyRecord: false,
@@ -698,11 +439,11 @@ export default defineComponent({
       verifying: false,
       startVerifying: false,
       goStartVerifying: false,
-      originalDomainStatus: null, // 新增：保存原始域名验证状态
-      chart: null, // 添加到 data 中，使其成为响应式数据
-      loadingUrls: {}, // 新增: 记录每个节点的加载状态
-      nodeUrls: {}, // 新增: 缓存每个节点的URLs
-      activeCollapseKeys: [], // 默认全部折叠
+      originalDomainStatus: null, 
+      chart: null, 
+      loadingUrls: {}, 
+      nodeUrls: {}, 
+      activeCollapseKeys: [], 
       sitemapModal: {
         visible: false,
         publishedUrls: []
@@ -710,67 +451,11 @@ export default defineComponent({
       submitLoading: false,
       publishedUrls: [],
       pagesDashboard: null,
-      expandedKeys: [], // 添加新的数据属性
-      hasTourCompleted: false, // 添加新的数据属性
-      originalWebsite: '', // 新增：保存原始域名
-      gscDataModalVisible: false,
-      gscData: null,
-      loadingGscData: false,
-      columns: [
-        {
-          title: 'Date',
-          dataIndex: 'date',
-          key: 'date',
-          width: 100,
-        },
-        {
-          title: 'URL',
-          dataIndex: 'url',
-          key: 'url',
-          ellipsis: true,
-          width: 400,
-        },
-        {
-          title: 'Clicks',
-          dataIndex: 'clicks',
-          key: 'clicks',
-          sorter: (a, b) => (a.clicks || 0) - (b.clicks || 0),
-          width: 80,
-          align: 'center',
-        },
-        {
-          title: 'Impr.',
-          dataIndex: 'impressions',
-          key: 'impressions',
-          sorter: (a, b) => (a.impressions || 0) - (b.impressions || 0),
-          width: 80,
-          align: 'center',
-        },
-        {
-          title: 'CTR',
-          dataIndex: 'ctr',
-          key: 'ctr',
-          sorter: (a, b) => (a.ctr || 0) - (b.ctr || 0),
-          width: 80,
-          align: 'center',
-        },
-        {
-          title: 'Pos.',
-          dataIndex: 'position',
-          key: 'position',
-          sorter: (a, b) => (a.position || 0) - (b.position || 0),
-          width: 80,
-          align: 'center',
-        },
-      ],
-      checkingGscStatus: false, // 添加新的状态
-      isPanelReady: false, // 添加新的状态控制面板是否准备好显示
-      sitemapModalVisible: false, // 添加这个控制Sitemap弹窗的显示
-      totalClicks: 0,
-      totalImpressions: 0,
-      averageCtr: 0,
-      averagePosition: 0,
-      dateRange: '',
+      expandedKeys: [], 
+      hasTourCompleted: false, 
+      originalWebsite: '', 
+      checkingGscStatus: false, 
+      isPanelReady: false,
     }
   },
   created() {
@@ -1193,38 +878,7 @@ export default defineComponent({
       
       return processedData;
     },
-    async handleTreeSelect(selectedKeys, { node }) {
-      if (!selectedKeys.length || !node?.key) return;
-      
-      // 设置加载状态
-      this.loadingUrls[node.key] = true;
 
-      try {
-        const customerId = localStorage.getItem('currentCustomerId');
-        const response = await apiClient.getSitemapUrls({
-          customerId,
-          websiteId: node.key, // 使用节点的 key 作为 websiteId
-          page: 1,
-          limit: 100,
-          folder: node.key
-        });
-
-        if (response?.code === 200) {
-          this.nodeUrls[node.key] = response.data;
-        }
-      } catch (error) {
-        console.error('Failed to get sitemap URLs:', error);
-        this.$message.error('Failed to load URLs');
-      } finally {
-        this.loadingUrls[node.key] = false;
-      }
-    },
-    formatDate(dateString) {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric'
-      });
-    },
     async connectGSC() {
       if (this.isGscConnected) {
         return // 如果已连接，不执行任何操作
@@ -1450,18 +1104,6 @@ export default defineComponent({
         this.isPanelReady = true;
       });
     },
-    async handleRefreshSitemap(e) {
-      // 阻止事件冒泡
-      e.stopPropagation();
-      
-      // 确保 sitemap 面板保持展开状态
-      if (!this.activeCollapseKeys.includes('sitemap')) {
-        this.activeCollapseKeys = ['sitemap'];
-      }
-      
-      // 执行刷新操作
-      await this.getSitemap(true);
-    },
 
     getVisitUrl(key) {
       if (key === 'root') {
@@ -1478,13 +1120,6 @@ export default defineComponent({
         }
       } catch (error) {
         console.error('Failed to load pages dashboard:', error);
-      }
-    },
-
-    openPreview(url) {
-      if (typeof window !== 'undefined') {
-        const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-        window.open(fullUrl, '_blank');
       }
     },
 
@@ -1539,92 +1174,6 @@ export default defineComponent({
       }
     },
 
-    async showGscData() {
-      this.gscDataModalVisible = true;
-      this.loadingGscData = true;
-      
-      try {
-        const customerId = localStorage.getItem('currentCustomerId');
-        const currentDomain = this.productInfo.projectWebsite;
-        
-        // 从 gscSites 中查找匹配的域名
-        const matchedSite = this.gscSites.find(site => {
-          const googleDomain = site.siteUrl.replace('sc-domain:', '');
-          return googleDomain === currentDomain;
-        });
-        
-        if (!matchedSite) {
-          this.$message.warning('This domain is not added to Google Search Console yet');
-          this.loadingGscData = false;
-          return;
-        }
-        
-        // 使用 Google 格式的域名请求数据
-        const response = await apiClient.getGscAnalytics(
-          customerId,
-          matchedSite.siteUrl  // 使用完整的 Google 格式域名
-        );
-        
-        if (response?.code === 200) {
-          // Sort data by date in descending order (newest first)
-          this.gscData = response.data.sort((a, b) => {
-            const dateA = new Date(a.keys[1]);
-            const dateB = new Date(b.keys[1]);
-            return dateB - dateA;
-          });
-          
-          this.calculateSummaryData();
-        }
-      } catch (error) {
-        console.error('Failed to load GSC data:', error);
-        this.$message.error('Failed to load GSC data');
-      } finally {
-        this.loadingGscData = false;
-      }
-    },
-
-    calculateSummaryData() {
-      if (!this.gscData || !this.gscData.length) {
-        this.totalClicks = 0;
-        this.totalImpressions = 0;
-        this.averageCtr = 0;
-        this.averagePosition = 0;
-        this.dateRange = '';
-        return;
-      }
-      
-      let totalClicks = 0;
-      let totalImpressions = 0;
-      let totalCtr = 0;
-      let totalPosition = 0;
-      let validDataPoints = 0;
-      
-      this.gscData.forEach(item => {
-        if (item.clicks) totalClicks += item.clicks;
-        if (item.impressions) totalImpressions += item.impressions;
-        if (item.ctr) {
-          totalCtr += item.ctr;
-          validDataPoints++;
-        }
-        if (item.position) {
-          totalPosition += item.position;
-          if (!item.ctr) validDataPoints++;
-        }
-      });
-      
-      this.totalClicks = totalClicks;
-      this.totalImpressions = totalImpressions;
-      this.averageCtr = validDataPoints ? ((totalCtr / validDataPoints) * 100).toFixed(2) : 0;
-      this.averagePosition = validDataPoints ? (totalPosition / validDataPoints).toFixed(2) : 0;
-      
-      // Calculate date range
-      if (this.gscData.length > 0) {
-        const startDate = this.formatDate(this.gscData[this.gscData.length - 1].keys[1]);
-        const endDate = this.formatDate(this.gscData[0].keys[1]);
-        this.dateRange = `${startDate} - ${endDate}`;
-      }
-    },
-
     // 添加重置面板状态的方法
     resetPanelState() {
       this.isPanelReady = false;
@@ -1658,25 +1207,6 @@ export default defineComponent({
       this.handleStateChange(); 
     },
     
-    // 添加显示Sitemap弹窗的方法
-    showSitemapModal() {
-      this.sitemapModalVisible = true;
-      // 如果还没有加载过sitemap数据，则加载
-      if (!this.sitemapData || this.sitemapData.length === 0) {
-        this.getSitemap();
-      }
-    },
-    
-    truncateUrl(url) {
-      if (!url) return '';
-      // Remove protocol and www
-      let cleanUrl = url.replace(/^(https?:\/\/)?(www\.)?/, '');
-      // If URL is too long, truncate it
-      if (cleanUrl.length > 60) {
-        return cleanUrl.substring(0, 57) + '...';
-      }
-      return cleanUrl;
-    },
   },
 
   emits: ['open-guide-mode'],
@@ -2032,22 +1562,6 @@ export default defineComponent({
   height: 100%;
   min-height: 400px; /* 添加最小高度 */
 }
-
-.sitemap-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  
-  :deep(.ant-card-body) {
-    height: calc(100% - 57px); /* 减去卡片头部高度 */
-    padding: 0 !important; /* 移除默认内边距 */
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 450px; /* 增加最小高度 */
-  }
-}
-
 /* 添加树容器样式 */
 .tree-container {
   flex: 1;
@@ -2187,56 +1701,6 @@ export default defineComponent({
   }
 }
 
-.tree-node-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 8px;
-}
-
-.visit-link {
-  opacity: 1 !important;
-  color: #1890ff;
-  
-  &:hover {
-    color: #40a9ff;
-  }
-}
-
-.url-link {
-  color: #52c41a;
-  
-  &:hover {
-    color: #73d13d;
-  }
-}
-
-/* 更新树节点样式 */
-.sitemap-tree {
-  :deep(.ant-tree) {
-    /* 设置合适的行高，避免节点太密集 */
-    .ant-tree-treenode {
-      padding: 4px 0;
-    }
-    
-    /* 优化展开/折叠图标的可点击区域 */
-    .ant-tree-switcher {
-      width: 24px;
-      height: 24px;
-      line-height: 24px;
-    }
-    
-    /* 优化节点内容的样式 */
-    .ant-tree-node-content-wrapper {
-      min-height: 24px;
-      line-height: 24px;
-      padding: 0 8px;
-    }
-  }
-}
-
-/* 添加新的样式 */
 .centered-empty-state {
   height: 400px;
   display: flex;
@@ -2319,38 +1783,6 @@ export default defineComponent({
   align-items: center;
 }
 
-/* 添加到现有样式中 */
-.sitemap-preview {
-  .preview-header {
-    margin-bottom: 16px;
-  }
-
-  .url-count {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 8px;
-  }
-
-  .url-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-  }
-
-  .url-text {
-    flex: 1;
-    margin-right: 16px;
-    word-break: break-all;
-  }
-}
-
-:deep(.url-list) {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-/* 添加一些辅助说明文字的样式 */
 .product-modal {
   .step-description {
     color: #666;  /* 改为灰色,区分于标题 */
@@ -3277,12 +2709,6 @@ export default defineComponent({
 :deep(.ant-card-body) {
   padding: 24px;
 }
-
-.sitemap-content {
-  overflow-y: auto;
-  height: 800px;
-}
-
 /* 优化过渡动画 */
 .panel-enter-active {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -3472,8 +2898,6 @@ export default defineComponent({
   flex-direction: column;
 }
 
-/* 树容器和信息网格 - 可滚动内容区域 */
-.tree-container,
 .info-grid {
   flex: 1 1 auto; /* 占据所有可用空间 */
   min-height: 0; /* 允许内容区域收缩 */

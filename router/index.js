@@ -41,6 +41,11 @@ const routes = [
         component: () => import('../components/DashboardPage.vue') 
       },
       {
+        path: 'analytics',
+        name: 'Analytics',
+        component: () => import('../components/AnalyticsPage.vue')
+      },
+      {
         path: 'product-assets',
         name: 'ProductAssets',
         component: () => import('../components/AssetsPage.vue'),
@@ -62,7 +67,7 @@ const routes = [
       },
       {
         path: '',
-        redirect: '/dashboard'
+        redirect: '/keywords'
       }
     ]
   },

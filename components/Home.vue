@@ -1,8 +1,8 @@
 <template>
   <a-layout style="height: 100vh;">
     <a-layout-sider
-      :width="180"
-      :collapsed-width="80"
+      :width="270"
+      :collapsed-width="120"
       style="background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F6 100%); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);"
     >
       <!-- 头像部分 -->
@@ -25,39 +25,35 @@
           @click="handleMenuClick"
           class="custom-menu"
         >
-          <!-- Dashboard -->
+          <!-- Analytics -->
           <a-menu-item
-            key="DashboardPage"
-            data-tour="dashboard"
-            :class="{ 'nav-item--active': currentView === 'DashboardPage' }"
+            key="AnalyticsPage"
+            data-tour="analytics"
+            :class="{ 'nav-item--active': currentView === 'AnalyticsPage' }"
           >
             <template #icon>
               <span class="menu-icon">
-                <DashboardOutlined />
+                <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
+                  <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
               </span>
             </template>
-            Product
-          </a-menu-item>
-
-           <!-- Assets -->
-           <a-menu-item
-            key="AssetsPage"
-            data-tour="assets"
-            :class="{ 'nav-item--active': currentView === 'AssetsPage' }"
-          >
-            <template #icon>
-              <span class="menu-icon">
-                <PictureOutlined />
-              </span>
-            </template>
-            Assets
+            Analytics
           </a-menu-item>
 
           <!-- 分隔线 -->
           <div class="menu-divider"></div>
 
-          <!-- Keywords和Pages组合 -->
+          <!-- Keywords和Pages组合 - AI Writer -->
           <div class="workflow-group">
+            <div class="workflow-group-title">
+              <span class="group-icon">
+                <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              AI Writer
+            </div>
             <a-menu-item
               key="KeywordsPlanningPage"
               data-tour="keywords"
@@ -65,17 +61,15 @@
             >
               <template #icon>
                 <span class="menu-icon">
-                  <SearchOutlined />
+                  <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
+                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </span>
               </template>
               <div class="menu-item-content">
                 <span>Keywords</span>
               </div>
             </a-menu-item>
-            
-            <div class="workflow-arrow">
-              <DownOutlined />
-            </div>
             
             <a-menu-item
               key="TaskManagementPage"
@@ -84,7 +78,9 @@
             >
               <template #icon>
                 <span class="menu-icon">
-                  <FileTextOutlined />
+                  <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
+                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
                 </span>
               </template>
               <div class="menu-item-content">
@@ -96,21 +92,73 @@
           <!-- 分隔线 -->
           <div class="menu-divider"></div>
 
-         
+          <!-- Product和Assets组合 - Settings -->
+          <div class="workflow-group">
+            <div class="workflow-group-title">
+              <span class="group-icon">
+                <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
+                  <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              Settings
+            </div>
+            <a-menu-item
+              key="DashboardPage"
+              data-tour="dashboard"
+              :class="{ 'nav-item--active': currentView === 'DashboardPage' }"
+            >
+              <template #icon>
+                <span class="menu-icon">
+                  <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
+                    <path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </template>
+              <div class="menu-item-content">
+                <span>Product Information</span>
+              </div>
+            </a-menu-item>
+            
+            <a-menu-item
+              key="AssetsPage"
+              data-tour="assets"
+              :class="{ 'nav-item--active': currentView === 'AssetsPage' }"
+            >
+              <template #icon>
+                <span class="menu-icon">
+                  <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
+                    <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </template>
+              <div class="menu-item-content">
+                <span>Product Assets</span>
+              </div>
+            </a-menu-item>
+            
+            <a-menu-item
+              key="AccountPage"
+              data-tour="account"
+              :class="{ 'nav-item--active': currentView === 'AccountPage' }"
+              @click="handleAccountClick"
+            >
+              <template #icon>
+                <span class="menu-icon">
+                  <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
+                    <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+              </template>
+              <div class="menu-item-content">
+                <span>Account</span>
+              </div>
+            </a-menu-item>
+          </div>
         </a-menu>
       </div>
       <!-- 底部操作区 -->
       <div class="bottom-actions">
-        <!-- Account Setting 按钮 -->
-        <a-button 
-          type="link" 
-          class="bottom-action-btn account-btn" 
-          @click="handleAccountClick"
-        >
-          <user-outlined />
-          <span v-if="!collapsed">Account Setting</span>
-        </a-button>
-        
         <!-- View Guide 按钮 -->
         <a-button 
           type="link" 
@@ -918,12 +966,46 @@ html, body, #app {
   flex-direction: column;
   gap: 8px;
   padding: 12px;
+  padding-top: 20px; /* 增加顶部内边距，为标题留出空间 */
   background: rgba(24, 144, 255, 0.05);
   border: 1px solid rgba(24, 144, 255, 0.1);
   border-radius: 12px;
   margin: 4px 0;
   position: relative;
   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.05);
+}
+
+/* 添加工作流组标题样式 */
+.workflow-group-title {
+  position: absolute;
+  top: -10px;
+  left: 16px;
+  background: #1890ff;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  z-index: 1;
+  height: auto; /* 确保高度自适应内容 */
+  line-height: 1.5; /* 增加行高 */
+  white-space: nowrap; /* 防止文本换行 */
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2); /* 添加阴影增强可见性 */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.group-icon {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+}
+
+.group-icon .gold-icon {
+  width: 16px;
+  height: 16px;
+  stroke: #FFD700;
 }
 
 .workflow-arrow {
@@ -1029,6 +1111,41 @@ html, body, #app {
   height: auto !important;
   line-height: 1.5 !important;
 }
+
+/* 添加金色图标样式 */
+.gold-icon {
+  width: 20px;
+  height: 20px;
+  stroke: #D4AF37; /* 金色 */
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 2px rgba(212, 175, 55, 0.3));
+  transition: all 0.3s ease;
+}
+
+.ant-menu-item:hover .gold-icon {
+  stroke: #F5D76E; /* 亮金色 */
+  filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.5));
+  transform: scale(1.1);
+}
+
+.ant-menu-item-selected .gold-icon {
+  stroke: #FFD700; /* 明亮的金色 */
+  filter: drop-shadow(0 2px 6px rgba(255, 215, 0, 0.5));
+}
+
+/* 修改工作流组标题图标颜色 */
+.workflow-group-title .group-icon svg path {
+  stroke: #FFD700 !important; /* 确保标题图标是金色的 */
+}
+
+.group-icon .gold-icon {
+  width: 16px;
+  height: 16px;
+  stroke: #FFD700 !important; /* 强制使用金色 */
+}
 </style>
 
 <script>
@@ -1050,6 +1167,7 @@ import {
   FileTextOutlined,
   PictureOutlined,
   SettingOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons-vue'
 import { DownOutlined } from '@ant-design/icons-vue'
 
@@ -1113,6 +1231,7 @@ export default {
     return {
       mainNavItems: [
         { title: 'Dashboard', view: 'DashboardPage' },
+        { title: 'Analytics', view: 'AnalyticsPage' },
         { title: 'Keywords', view: 'KeywordsPlanningPage' },
         { title: 'Pages', view: 'TaskManagementPage' },
         { title: 'Assets', view: 'AssetsPage' },
@@ -1174,6 +1293,7 @@ export default {
         'TaskManagementPage': '/task-management',
         'AssetsPage': '/product-assets',
         'AccountPage': '/account',
+        'AnalyticsPage': '/analytics',
       };
       
       if (routeMap[key]) {
@@ -1225,6 +1345,7 @@ export default {
         '/task-management': 'TaskManagementPage',
         '/product-assets': 'AssetsPage',
         '/account': 'AccountPage',
+        '/analytics': 'AnalyticsPage',
       };
       return routeToView[this.$route.path] || 'DashboardPage';
     },
@@ -1332,6 +1453,7 @@ export default {
         'TaskManagementPage': FileTextOutlined,
         'AssetsPage': PictureOutlined,
         'AccountPage': UserOutlined,
+        'AnalyticsPage': BarChartOutlined,
       };
       return iconMap[view];
     },
@@ -1350,6 +1472,7 @@ export default {
         '/task-management': 'TaskManagementPage',
         '/product-assets': 'AssetsPage',
         '/account': 'AccountPage',
+        '/analytics': 'AnalyticsPage',
       };
       this.currentView = routeToView[to.path] || 'DashboardPage';
     }
