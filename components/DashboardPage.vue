@@ -23,8 +23,8 @@
               <div class="card-title">
                 <span>Product Information</span>
                 <div class="header-actions">
-                  <a-button type="primary" size="small" @click="openEditWithBasicInfo">
-                    Edit
+                  <a-button type="primary" @click="openEditWithBasicInfo" class="edit-product-btn">
+                    Edit Product Information
                   </a-button>
                 </div>
               </div>
@@ -2784,13 +2784,52 @@ export default defineComponent({
 }
 
 /* 编辑按钮样式 */
-:deep(.ant-card-extra .ant-btn) {
+.edit-product-btn {
+  background: linear-gradient(135deg, #1677ff, #4096ff);
+  border: none;
+  border-radius: 6px;
+  padding: 0 16px;
+  height: 32px;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
+  transition: all 0.3s;
 }
 
-/* 垂直分隔线样式 */
+.edit-product-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(24, 144, 255, 0.3);
+  background: linear-gradient(135deg, #4096ff, #1677ff);
+}
+
+/* 移除旧的 edit-button 样式 */
+.edit-button {
+  display: none;
+}
+
+/* 更新卡片标题样式 */
+.card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.card-title span {
+  font-size: 16px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 :deep(.ant-divider-vertical) {
   height: 40px;  /* 增加高度 */
   margin: 0 24px;  /* 增加左右间距 */
