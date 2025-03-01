@@ -31,25 +31,37 @@
             </div>
             
             <div class="gsc-preview-overlay">
-                <img src="/images/gsc-preview.svg" alt="GSC Preview" class="gsc-preview-image" />
+                <div class="mock-data-background">
+                    <div class="mock-chart"></div>
+                    <div class="mock-table">
+                        <div class="mock-row" v-for="i in 8" :key="i"></div>
+                    </div>
+                    <div class="mock-sitemap">
+                        <div class="mock-node" v-for="i in 5" :key="i">
+                            <div class="mock-subnodes">
+                                <div class="mock-subnode" v-for="j in 3" :key="j"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="overlay-content">
-                <h3>Connect Google Search Console</h3>
-                <p>Get insights about your website's search performance, including:</p>
-                <ul>
-                    <li>Search traffic and impressions</li>
-                    <li>Keyword rankings and click-through rates</li>
-                    <li>Indexed pages and crawl status</li>
-                    <li>Mobile usability and page experience</li>
-                </ul>
-                <a-button 
-                    type="primary" 
-                    size="large"
-                    @click="connectGSC"
-                    class="connect-button"
-                >
-                    <GoogleOutlined />
-                    Connect Google Search Console
-                </a-button>
+                    <h3>Connect Google Search Console</h3>
+                    <p>Get insights about your website's search performance, including:</p>
+                    <ul>
+                        <li>Search traffic and impressions</li>
+                        <li>Keyword rankings and click-through rates</li>
+                        <li>Indexed pages and crawl status</li>
+                        <li>Mobile usability and page experience</li>
+                    </ul>
+                    <a-button 
+                        type="primary" 
+                        size="large"
+                        @click="connectGSC"
+                        class="connect-button"
+                    >
+                        <GoogleOutlined />
+                        Connect Google Search Console
+                    </a-button>
                 </div>
             </div>
             </div>
@@ -799,17 +811,114 @@ export default defineComponent({
   position: relative;
   border-radius: 8px;
   overflow: hidden;
-  min-height: 300px;
+  min-height: 400px;
   display: flex;
   justify-content: center;
   align-items: center;
   background: rgba(0, 0, 0, 0.03);
 }
 
-.gsc-preview-image {
+.mock-data-background {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: auto;
-  opacity: 0.1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  opacity: 0.15;
+}
+
+.mock-chart {
+  height: 120px;
+  background: linear-gradient(90deg, #4285f4 0%, #4285f4 20%, #0f9d58 40%, #0f9d58 60%, #f4b400 80%, #f4b400 100%);
+  border-radius: 4px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.mock-chart::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 200'%3E%3Cpath d='M0,150 Q250,50 500,100 T1000,80' fill='none' stroke='white' stroke-width='5'/%3E%3C/svg%3E") repeat-x;
+  background-size: contain;
+}
+
+.mock-table {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.mock-row {
+  height: 20px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  display: flex;
+}
+
+.mock-row::before {
+  content: '';
+  width: 70%;
+  height: 100%;
+  background: #4285f4;
+  border-radius: 4px 0 0 4px;
+}
+
+.mock-sitemap {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.mock-node {
+  height: 15px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  margin-left: 20px;
+  position: relative;
+}
+
+.mock-node::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 7px;
+  width: 20px;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.mock-subnodes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  margin-left: 40px;
+}
+
+.mock-subnode {
+  height: 10px;
+  background: #a0a0a0;
+  border-radius: 4px;
+  position: relative;
+}
+
+.mock-subnode::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 5px;
+  width: 20px;
+  height: 1px;
+  background: #a0a0a0;
 }
 
 .overlay-content {
@@ -825,6 +934,7 @@ export default defineComponent({
   padding: 32px;
   text-align: center;
   background: rgba(255, 255, 255, 0.9);
+  z-index: 1;
 }
 
 .overlay-content h3 {
