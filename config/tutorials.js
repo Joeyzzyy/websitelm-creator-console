@@ -101,7 +101,7 @@ export const tourConfig = {
     ]
   },
   
-  onboarding: {
+  productSetting: {
     title: 'Product',
     content: 'Manage your product information, domain verification, google search console and competitors here',
     target: '[data-tour="dashboard"]',
@@ -133,6 +133,20 @@ export const tourConfig = {
       {
         title: 'Enrich Knowledge Base We Build For You',
         link: 'https://websitelm.com/tutorials/websitelm-tutorial-enrich-knowledge'
+      }
+    ]
+  },
+  
+  analyticsView: {
+    title: 'Analytics',
+    content: 'Track your website performance, page views, and search rankings all in one place.',
+    target: '[data-tour="analytics"]',
+    placement: 'right',
+    badge: 'Step 5',
+    features: [
+      {
+        title: 'Monitor Your SEO Performance',
+        link: 'https://websitelm.com/tutorials/website-lm-submit-sitemap-google'
       }
     ]
   }

@@ -1189,6 +1189,28 @@ html, body, #app {
   height: 100%;
   overflow: visible; /* 改为可见，不使用滚动条 */
 }
+
+/* 修复 View Guide 文本的对齐问题 */
+.guide-btn :deep(.anticon) {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 确保所有按钮文本对齐 */
+.bottom-action-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  justify-content: flex-start !important;
+  height: 32px !important;
+  padding: 0 12px !important;
+  border-radius: 6px !important;
+}
+
+/* 确保所有按钮中的文本具有相同的起始位置 */
+.bottom-action-btn > span:nth-child(2) {
+  margin-left: 8px !important;
+}
 </style>
 
 <script>

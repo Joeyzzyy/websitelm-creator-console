@@ -81,8 +81,9 @@ export default defineComponent({
       steps: [
         tourConfig.keywordPlanning,
         tourConfig.taskManagement,
-        tourConfig.onboarding,
+        tourConfig.productSetting,
         tourConfig.assetManagement,
+        tourConfig.analyticsView
       ]
     }
   },
@@ -133,9 +134,9 @@ export default defineComponent({
         // 触发完成事件
         this.$emit('complete')
         
-        // 导航到 dashboard 页面
-        if (this.$router.currentRoute.value.path !== '/dashboard') {
-          await this.$router.push('/dashboard')
+        // 导航到 keywords 页面
+        if (this.$router.currentRoute.value.path !== '/keywords') {
+          await this.$router.push('/keywords')
         }
       } catch (error) {
         console.error('完成引导流程时出错:', error)
@@ -237,6 +238,7 @@ export default defineComponent({
         '[data-tour="keywords"]': '/keywords',
         '[data-tour="pages"]': '/task-management',
         '[data-tour="assets"]': '/product-assets',
+        '[data-tour="analytics"]': '/analytics',
       }
       
       const route = routeMap[step.target]
