@@ -301,9 +301,9 @@ html, body, #app {
 /* 用户资料部分 */
 .user-profile-section {
   text-align: center;
-  padding: 24px 16px;
+  padding: 20px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -316,7 +316,7 @@ html, body, #app {
 /* 菜单部分 */
 .menu-section {
   flex: 1;
-  padding: 24px 16px;
+  padding: 20px 16px;
   overflow: visible; /* 改为可见，不使用滚动条 */
   display: flex;
   flex-direction: column;
@@ -337,9 +337,13 @@ html, body, #app {
 :deep(.ant-menu-item) {
   background: white !important;
   border: 1px solid rgba(24, 144, 255, 0.15) !important;
-  margin: 4px 0 !important;
+  margin: 3px 0 !important;
   transition: all 0.3s ease !important;
   border-radius: 8px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 :deep(.ant-menu-item:hover) {
@@ -641,11 +645,11 @@ html, body, #app {
 
 /* 更新底部操作区样式 */
 .bottom-actions {
-  padding: 16px;
+  padding: 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   margin-top: auto;
   flex-shrink: 0; /* 防止底部区域被压缩 */
 }
@@ -655,7 +659,7 @@ html, body, #app {
   align-items: center !important;
   gap: 8px !important;
   justify-content: flex-start !important;
-  height: 36px !important;
+  height: 32px !important;
   padding: 0 12px !important;
   border-radius: 6px !important;
 }
@@ -663,7 +667,7 @@ html, body, #app {
 .bottom-divider {
   height: 1px;
   background: rgba(0, 0, 0, 0.06);
-  margin: 8px 0;
+  margin: 6px 0;
 }
 
 .guide-btn {
@@ -978,20 +982,20 @@ html, body, #app {
     rgba(0, 0, 0, 0.06),
     rgba(0, 0, 0, 0.02)
   );
-  margin: 16px 0;
+  margin: 12px 0;
 }
 
 /* 工作流组合样式 */
 .workflow-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  padding-top: 20px; /* 增加顶部内边距，为标题留出空间 */
+  gap: 6px;
+  padding: 10px;
+  padding-top: 18px;
   background: rgba(24, 144, 255, 0.05);
   border: 1px solid rgba(24, 144, 255, 0.1);
   border-radius: 12px;
-  margin: 4px 0;
+  margin: 3px 0;
   position: relative;
   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.05);
 }
@@ -1008,10 +1012,10 @@ html, body, #app {
   font-size: 11px;
   font-weight: 500;
   z-index: 1;
-  height: auto; /* 确保高度自适应内容 */
-  line-height: 1.5; /* 增加行高 */
-  white-space: nowrap; /* 防止文本换行 */
-  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2); /* 添加阴影增强可见性 */
+  height: auto;
+  line-height: 1.5;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1063,8 +1067,13 @@ html, body, #app {
 .workflow-group :deep(.ant-menu-item) {
   background: white !important;
   border: 1px solid rgba(24, 144, 255, 0.15) !important;
-  margin: 4px 0 !important;
+  margin: 3px 0 !important;
   transition: all 0.3s ease !important;
+  border-radius: 8px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .workflow-group :deep(.ant-menu-item:hover) {
