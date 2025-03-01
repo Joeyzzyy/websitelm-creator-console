@@ -1,16 +1,5 @@
 <template>
   <page-layout>
-    <smart-banner
-      :theme="bannerTheme"
-      title="Asset Management"
-      description="Efficiently manage and organize your media assets with our powerful asset management system."
-      :badges="[
-        { text: 'Image Library' },
-        { text: 'Video Storage' },
-        { text: 'Asset Analytics' }
-      ]"
-    />
-
     <a-spin 
       :spinning="loading"
       class="centered-spin"

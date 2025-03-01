@@ -4,27 +4,6 @@
       description="Configure your website settings and deployment options"
       icon="⚙️"
     >
-      <smart-banner
-        :theme="{
-          primary: '#7C3AED',
-          secondary: '#EC4899',
-          background: 'linear-gradient(135deg, #F5F3FF, #FCE7F3)',
-          textColor: '#2D3748',
-          descriptionColor: '#4A5568',
-          badgeColor: '#6B7280',
-          badgeBackground: 'rgba(124, 58, 237, 0.1)',
-          badgeHoverBackground: 'rgba(236, 72, 153, 0.1)',
-          badgeHoverColor: '#EC4899',
-          iconBackground: 'rgba(124, 58, 237, 0.1)',
-        }"
-        title="Account Setting"
-        description="Configure your account settings, manage login email and password."
-        :badges="[
-          { text: 'Login Email' },
-          { text: 'Password' },
-          { text: 'Plan Usage' },
-        ]"
-      />
         <div class="settings-content">
             <a-tabs 
                 class="main-tabs"
