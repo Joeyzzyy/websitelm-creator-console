@@ -2298,7 +2298,21 @@ export default defineComponent({
         title: 'KD',
         dataIndex: 'kd',
         key: 'kd',
-        width: '15%'
+        width: '15%',
+        customRender: ({ text }) => {
+          let color, difficulty;
+          if (text <= 30) {
+            color = 'green';
+            difficulty = 'Easy';
+          } else if (text <= 70) {
+            color = 'orange';
+            difficulty = 'Medium';
+          } else {
+            color = 'red';
+            difficulty = 'Hard';
+          }
+          return h(Tag, { color }, `${text} - ${difficulty}`);
+        }
       },
       {
         title: 'Volume',
