@@ -1,16 +1,5 @@
 <template>
   <page-layout>
-    <smart-banner
-      :theme="bannerTheme"
-      title="Page Management"
-      description="Manage your AI-generated pages with powerful tools for publishing, editing, and tracking content status."
-      :badges="[
-        { text: 'AI Content' },
-        { text: 'Publishing Tools' },
-        { text: 'Status Tracking' }
-      ]"
-    />
-
     <a-spin :spinning="loading" class="centered-spin">
     <!-- 添加域名未配置的提示 -->
       <template v-if="domainConfigured">
@@ -411,7 +400,7 @@ export default {
     const currentCustomerId = ref(localStorage.getItem('currentCustomerId') || '')
     const pagination = reactive({
       current: 1,
-      pageSize: 10,
+      pageSize: 15,
       total: 0
     })
     
@@ -2069,5 +2058,20 @@ export default {
   20%, 100% {
     left: 100%;
   }
+}
+
+/* 添加表格行高度控制 */
+:deep(.ant-table-tbody > tr > td) {
+  padding: 6px 8px; /* 减小单元格内边距 */
+  height: 40px; /* 设置单元格高度 */
+}
+
+:deep(.ant-table-thead > tr > th) {
+  padding: 8px; /* 减小表头内边距 */
+  height: 44px; /* 设置表头高度 */
+}
+
+:deep(.ant-table-row) {
+  line-height: 1.2; /* 减小行高 */
 }
 </style>
