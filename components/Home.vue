@@ -301,9 +301,9 @@ html, body, #app {
 /* 用户资料部分 */
 .user-profile-section {
   text-align: center;
-  padding: 20px 16px;
+  padding: 12px 16px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -705,9 +705,9 @@ html, body, #app {
 }
 
 .welcome-text {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 500;
-  margin: 8px 0;
+  margin: 4px 0;
   background: linear-gradient(135deg, #1890ff 0%, #6366F1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -731,230 +731,20 @@ html, body, #app {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   width: 100%;
   padding: 0 8px;
 }
 
 .user-name {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   color: #1F2937;
-  margin-bottom: 2px;
+  margin-bottom: 0;
 }
 
-.user-email {
-  font-size: 13px;
-  color: #64748B;
-  padding: 4px 10px;
-  background: rgba(0, 0, 0, 0.03);
-  border-radius: 6px;
-  max-width: 90%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  cursor: help;
-}
-
-/* 选择模式对话框样式 */
-.guide-mode-modal {
-  :deep(.ant-modal-content) {
-    background: linear-gradient(165deg, #ffffff 0%, #f8f9fa 100%);
-    border-radius: 12px;
-  }
-}
-
-.guide-mode-options {
-  display: flex;
-  gap: 20px;
-  padding: 20px 0;
-}
-
-.guide-mode-card {
-  flex: 1;
-  padding: 24px;
-  border-radius: 12px;
-  background: white;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.guide-mode-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(24, 144, 255, 0.15);
-  border-color: #1890ff;
-}
-
-.mode-icon {
-  width: 36px;
-  height: 36px;
-  margin-bottom: 16px;
-  color: #1890ff;
-}
-
-.guide-mode-card h3 {
-  font-size: 18px;
-  margin-bottom: 8px;
-  color: #1a1a1a;
-}
-
-.guide-mode-card p {
-  color: #666;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-/* 教程库样式 */
-.tutorial-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-  padding: 20px 0;
-  position: relative;
-}
-
-.tutorial-card {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
-  background: white;
-  position: relative;
-  padding: 20px;
-  height: 100%;
-}
-
-.tutorial-step-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: linear-gradient(135deg, #1890ff, #096dd9);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
-  z-index: 2;
-  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
-}
-
-/* 移除所有与图片相关的样式 */
-.tutorial-thumbnail,
-.tech-overlay,
-.thumbnail-image {
-  display: none;
-}
-
-/* 调整卡片内容布局 */
-.tutorial-info {
-  padding: 0;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 更新阅读更多链接样式 */
-.read-more {
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* 添加悬停效果 */
-.tutorial-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
-  border-color: #1890ff;
-}
-
-/* 移除图片加载相关的方法 */
-.tutorial-card img {
-  display: none;
-}
-
-/* 添加自定义样式 */
-.tutorial-library-modal {
-  :deep(.ant-modal-body) {
-    padding: 16px;
-    max-height: calc(90vh - 110px); /* 减去标题和padding的高度 */
-    overflow-y: hidden; /* 防止双滚动条 */
-  }
-  
-  :deep(.ant-modal-content) {
-    max-height: 90vh;
-  }
-  
-  /* 自定义滚动条样式 */
-  .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(24, 144, 255, 0.3) transparent;
-    
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    
-    &::-webkit-scrollbar-thumb {
-      background-color: rgba(24, 144, 255, 0.3);
-      border-radius: 3px;
-      
-      &:hover {
-        background-color: rgba(24, 144, 255, 0.5);
-      }
-    }
-  }
-}
-
-/* 确保模态框在小屏幕上也有合适的高度 */
-@media (max-height: 800px) {
-  .tutorial-library-modal {
-    :deep(.ant-modal-body) {
-      max-height: calc(80vh - 110px);
-    }
-    
-    :deep(.ant-modal-content) {
-      max-height: 80vh;
-    }
-  }
-}
-
-/* 更新底部按钮样式 */
-.account-btn {
-  background: rgba(24, 144, 255, 0.1) !important;
-  border: 1px solid rgba(24, 144, 255, 0.2) !important;
-}
-
-.account-btn:hover {
-  background: rgba(24, 144, 255, 0.15) !important;
-  border-color: rgba(24, 144, 255, 0.3) !important;
-}
-
-.guide-btn {
-  background: rgba(24, 144, 255, 0.05) !important;
-  border: 1px solid rgba(24, 144, 255, 0.15) !important;
-}
-
-.guide-btn:hover {
-  background: rgba(24, 144, 255, 0.1) !important;
-  border-color: rgba(24, 144, 255, 0.25) !important;
-}
-
-/* 更新logo相关样式 */
 .logo-container {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -962,7 +752,7 @@ html, body, #app {
 }
 
 .logo-image {
-  max-width: 140px;
+  max-width: 120px;
   height: auto;
   object-fit: contain;
 }
