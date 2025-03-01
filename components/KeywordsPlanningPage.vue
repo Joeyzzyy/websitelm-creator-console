@@ -78,8 +78,8 @@
               <div class="step-item-horizontal" :class="{ active: currentStep === '1' }" @click="currentStep = '1'">
                 <div class="step-number-horizontal">2</div>
                 <div class="step-info-horizontal">
-                  <div class="step-title-horizontal">Check Intent & Outline</div>
-                  <div class="step-desc-horizontal">Review and generate content plan</div>
+                  <div class="step-title-horizontal">Review Outlines</div>
+                  <div class="step-desc-horizontal">Generate and Review Outlines here</div>
                 </div>
               </div>
             </div>
@@ -3355,24 +3355,12 @@ export default defineComponent({
 
 .steps-navigation-horizontal {
   display: flex;
-  width: 100%;
   margin-bottom: 24px;
-  background: linear-gradient(90deg, rgba(15,23,42,0.02) 0%, rgba(30,58,138,0.05) 100%);
-  border-radius: 12px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  background: #f9fafc;
+  border-radius: 8px;
+  padding: 16px 24px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   position: relative;
-  overflow: hidden;
-}
-
-.steps-navigation-horizontal::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #2563EB 0%, #0EA5E9 100%);
 }
 
 .step-item-horizontal {
@@ -3380,32 +3368,41 @@ export default defineComponent({
   align-items: center;
   position: relative;
   padding: 8px 16px;
-  flex: 1;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s;
-  border-radius: 8px;
+  flex: 1;
+  max-width: 50%;
 }
 
 .step-item-horizontal:hover {
-  background: rgba(37, 99, 235, 0.05);
+  background: rgba(24, 144, 255, 0.05);
 }
 
 .step-item-horizontal.active {
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(24, 144, 255, 0.1);
 }
 
 .step-number-horizontal {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2563EB 0%, #0EA5E9 100%);
-  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  color: #8c8c8c;
+  font-weight: 600;
   margin-right: 12px;
-  box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s;
+  border: 1px solid #e8e8e8;
+}
+
+.step-item-horizontal.active .step-number-horizontal {
+  background: #1890ff;
+  color: #fff;
+  border-color: #1890ff;
 }
 
 .step-info-horizontal {
@@ -3414,28 +3411,59 @@ export default defineComponent({
 }
 
 .step-title-horizontal {
-  font-weight: bold;
+  font-weight: 600;
   font-size: 16px;
-  color: #1f2937;
+  color: #262626;
+  margin-bottom: 2px;
+  transition: color 0.3s;
+}
+
+.step-item-horizontal.active .step-title-horizontal {
+  color: #1890ff;
 }
 
 .step-desc-horizontal {
-  font-size: 14px;
-  color: #6b7280;
+  font-size: 13px;
+  color: #8c8c8c;
 }
 
 .step-connector-horizontal {
   position: absolute;
   top: 50%;
-  right: 0;
-  width: 40px;
+  right: -12px;
   height: 2px;
-  background: linear-gradient(90deg, #2563EB 0%, #0EA5E9 100%);
-  transform: translateY(-50%);
+  width: 24px;
+  background: #e8e8e8;
+  z-index: 1;
 }
 
-.step-item-horizontal:last-child .step-connector-horizontal {
-  display: none;
+.step-item-horizontal.active .step-connector-horizontal {
+  background: #1890ff;
+}
+
+/* 添加响应式设计 */
+@media (max-width: 768px) {
+  .steps-navigation-horizontal {
+    padding: 12px;
+  }
+  
+  .step-item-horizontal {
+    padding: 6px 8px;
+  }
+  
+  .step-number-horizontal {
+    width: 28px;
+    height: 28px;
+    margin-right: 8px;
+  }
+  
+  .step-title-horizontal {
+    font-size: 14px;
+  }
+  
+  .step-desc-horizontal {
+    font-size: 12px;
+  }
 }
 
 .main-content {
