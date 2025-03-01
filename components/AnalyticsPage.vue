@@ -1,211 +1,251 @@
 <template>
   <page-layout
     title="Analytics"
-    description="Track your website performance and search visibility"
+    description="Track your website's search performance and visibility"
     icon="📈"
   >
-    <a-spin 
-      :spinning="loading"
-      class="centered-spin"
-    >
-    <!-- Domain not verified scenario -->
-    <template v-if="!domainConfigured && !loading">
-        <no-site-configured />
-    </template>
-
-    <!-- Domain verified but GSC not connected -->
-    <template v-else-if="!isGscConnected && !loading">
-        <div class="gsc-not-connected">
+    <div class="analytics-content">
+      <!-- Loading state -->
+      <div v-if="loading" class="centered-spin">
+        <a-spin size="large" />
+      </div>
+      
+      <!-- Domain not configured -->
+      <div v-else-if="!domainConfigured" class="domain-not-configured">
+        <no-site-configured @go-to-dashboard="goToDashboard" />
+      </div>
+      
+      <!-- Domain configured - show content -->
+      <div v-else>
+        <!-- Pages Overview Section - Always visible regardless of GSC connection -->
         <a-card class="analytics-card">
-            <template #title>
+          <template #title>
             <div class="card-title">
-                <span>Google Search Console</span>
+              <span>Pages Overview</span>
+              <div class="header-actions">
+                <a-button type="primary" size="small" @click="fetchPageStats">
+                  Refresh Data
+                </a-button>
+              </div>
             </div>
+          </template>
+          
+          <div v-if="loadingPageStats" class="centered-empty-state">
+            <a-spin size="default" />
+          </div>
+          <div v-else class="pages-stats-container">
+            <div class="pages-stats-horizontal">
+              <div class="stat-item">
+                <div class="stat-label">Generated</div>
+                <div class="stat-value enlarged">{{ generatorCount || 0 }}</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Published</div>
+                <div class="stat-value enlarged">{{ publishCount || 0 }}</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Google Indexed</div>
+                <div class="stat-value enlarged">{{ googleIndexedCount || 0 }}</div>
+              </div>
+              <div class="stat-item">
+                <div class="stat-label">Indexed</div>
+                <div class="stat-value enlarged">{{ indexedCount || 0 }}</div>
+              </div>
+            </div>
+          </div>
+        </a-card>
+        
+        <!-- GSC not connected -->
+        <div v-if="!isGscConnected">
+          <a-card class="analytics-card">
+            <template #title>
+              <div class="card-title">
+                <span>Google Search Console</span>
+              </div>
             </template>
             
             <div class="connect-gsc-content">
-            <div class="domain-info">
+              <div class="domain-info">
                 <div class="domain-label">Verified Domain:</div>
                 <div class="domain-value">{{ productInfo?.projectWebsite }}</div>
                 <a-tag color="success">Verified</a-tag>
-            </div>
-            
-            <div class="gsc-preview-overlay">
+              </div>
+              
+              <div class="gsc-preview-overlay">
                 <div class="mock-data-background">
-                    <div class="mock-chart"></div>
-                    <div class="mock-table">
-                        <div class="mock-row" v-for="i in 8" :key="i"></div>
+                  <div class="mock-chart"></div>
+                  <div class="mock-table">
+                    <div class="mock-row" v-for="i in 8" :key="i"></div>
+                  </div>
+                  <div class="mock-sitemap">
+                    <div class="mock-node" v-for="i in 5" :key="i">
+                      <div class="mock-subnodes">
+                        <div class="mock-subnode" v-for="j in 3" :key="j"></div>
+                      </div>
                     </div>
-                    <div class="mock-sitemap">
-                        <div class="mock-node" v-for="i in 5" :key="i">
-                            <div class="mock-subnodes">
-                                <div class="mock-subnode" v-for="j in 3" :key="j"></div>
-                            </div>
-                        </div>
-                    </div>
+                  </div>
                 </div>
                 <div class="overlay-content">
-                    <h3>Connect Google Search Console</h3>
-                    <p>Get insights about your website's search performance, including:</p>
-                    <ul>
-                        <li>Search traffic and impressions</li>
-                        <li>Keyword rankings and click-through rates</li>
-                        <li>Indexed pages and crawl status</li>
-                        <li>Mobile usability and page experience</li>
-                    </ul>
-                    <a-button 
-                        type="primary" 
-                        size="large"
-                        @click="connectGSC"
-                        class="connect-button"
-                    >
-                        <GoogleOutlined />
-                        Connect Google Search Console
-                    </a-button>
+                  <h3>Connect Google Search Console</h3>
+                  <p>Get insights about your website's search performance, including:</p>
+                  <ul>
+                    <li>Search traffic and impressions</li>
+                    <li>Keyword rankings and click-through rates</li>
+                    <li>Indexed pages and crawl status</li>
+                    <li>Mobile usability and page experience</li>
+                  </ul>
+                  <a-button 
+                    type="primary" 
+                    size="large"
+                    @click="connectGSC"
+                    class="connect-button"
+                  >
+                    <GoogleOutlined />
+                    Connect Google Search Console
+                  </a-button>
                 </div>
+              </div>
             </div>
-            </div>
-        </a-card>
+          </a-card>
         </div>
-    </template>
-
-    <!-- GSC connected - show data -->
-    <template v-else>
-        <a-row :gutter="[16, 16]" v-if="!loading">
-        <!-- Traffic Data Section -->
-        <a-col :span="24">
-            <a-card class="analytics-card">
-            <template #title>
-                <div class="card-title">
-                <span>Search Traffic</span>
-                <div class="header-actions">
-                    <a-button type="primary" size="small" @click="refreshGscData">
-                    Refresh Data
-                    </a-button>
-                </div>
-                </div>
-            </template>
-            
-            <div v-if="loadingGscData" class="centered-empty-state">
-                <a-spin size="default" />
-            </div>
-            <div v-else-if="gscData && gscData.length" class="gsc-data-container">
-                <a-table 
-                :dataSource="gscData" 
-                :columns="columns"
-                :pagination="{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['10', '15'] }"
-                size="small"
-                :scroll="{ y: 400, x: 820 }"
-                >
-                <template #bodyCell="{ column, record }">
-                    <template v-if="column.dataIndex === 'date'">
-                    {{ formatDate(record.keys[1]) }}
-                    </template>
-                    <template v-else-if="column.dataIndex === 'url'">
-                    <a-tooltip :title="record.keys[0]">
-                        {{ truncateUrl(record.keys[0]) }}
-                    </a-tooltip>
-                    </template>
-                    <template v-else-if="column.dataIndex === 'ctr'">
-                    {{ record.ctr ? (record.ctr * 100).toFixed(2) + '%' : '-' }}
-                    </template>
-                    <template v-else-if="column.dataIndex === 'clicks'">
-                    {{ record.clicks || '-' }}
-                    </template>
-                    <template v-else-if="column.dataIndex === 'impressions'">
-                    {{ record.impressions || '-' }}
-                    </template>
-                    <template v-else-if="column.dataIndex === 'position'">
-                    {{ record.position ? record.position.toFixed(1) : '-' }}
-                    </template>
+        
+        <!-- GSC connected - show data -->
+        <div v-else>
+          <a-row :gutter="[16, 16]">
+            <!-- Traffic Data Section -->
+            <a-col :span="24">
+              <a-card class="analytics-card">
+                <template #title>
+                  <div class="card-title">
+                    <span>Search Traffic</span>
+                    <div class="header-actions">
+                      <a-button type="primary" size="small" @click="refreshGscData">
+                        Refresh Data
+                      </a-button>
+                    </div>
+                  </div>
                 </template>
                 
-                <!-- Add a summary row at the bottom -->
-                <template #footer>
-                    <div class="table-summary">
-                    <div><strong>Date Range:</strong> {{ dateRange }}</div>
-                    <div><strong>Clicks:</strong> {{ totalClicks }}</div>
-                    <div><strong>Impressions:</strong> {{ totalImpressions }}</div>
-                    <div><strong>CTR:</strong> {{ averageCtr }}%</div>
-                    <div><strong>Position:</strong> {{ averagePosition }}</div>
-                    </div>
-                </template>
-                </a-table>
-            </div>
-            <div v-else class="centered-empty-state">
-                No data available
-            </div>
-            </a-card>
-        </a-col>
-        
-        <!-- Sitemap Section -->
-        <a-col :span="24">
-            <a-card class="analytics-card">
-            <template #title>
-                <div class="card-title">
-                <span>Website Structure</span>
-                <div class="header-actions">
-                    <a-space>
-                    <a-button 
-                        type="link" 
-                        size="small"
-                        @click="handleRefreshSitemap"
-                        :loading="loadingSitemap"
-                    >
-                        Refresh
-                    </a-button>
-                    <a-button
-                        type="link"
-                        size="small"
-                        danger
-                        @click="disconnectGSC"
-                    >
-                        Disconnect Google Search Console
-                    </a-button>
-                    </a-space>
+                <div v-if="loadingGscData" class="centered-empty-state">
+                  <a-spin size="default" />
                 </div>
+                <div v-else-if="gscData && gscData.length" class="gsc-data-container">
+                  <a-table 
+                    :dataSource="gscData" 
+                    :columns="columns"
+                    :pagination="{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['10', '15'] }"
+                    size="small"
+                    :scroll="{ y: 400, x: 820 }"
+                  >
+                    <template #bodyCell="{ column, record }">
+                      <template v-if="column.dataIndex === 'date'">
+                        {{ formatDate(record.keys[1]) }}
+                      </template>
+                      <template v-else-if="column.dataIndex === 'url'">
+                        <a-tooltip :title="record.keys[0]">
+                          {{ truncateUrl(record.keys[0]) }}
+                        </a-tooltip>
+                      </template>
+                      <template v-else-if="column.dataIndex === 'ctr'">
+                        {{ record.ctr ? (record.ctr * 100).toFixed(2) + '%' : '-' }}
+                      </template>
+                      <template v-else-if="column.dataIndex === 'clicks'">
+                        {{ record.clicks || '-' }}
+                      </template>
+                      <template v-else-if="column.dataIndex === 'impressions'">
+                        {{ record.impressions || '-' }}
+                      </template>
+                      <template v-else-if="column.dataIndex === 'position'">
+                        {{ record.position ? record.position.toFixed(1) : '-' }}
+                      </template>
+                    </template>
+                    
+                    <!-- Add a summary row at the bottom -->
+                    <template #footer>
+                      <div class="table-summary">
+                        <div><strong>Date Range:</strong> {{ dateRange }}</div>
+                        <div><strong>Clicks:</strong> {{ totalClicks }}</div>
+                        <div><strong>Impressions:</strong> {{ totalImpressions }}</div>
+                        <div><strong>CTR:</strong> {{ averageCtr }}%</div>
+                        <div><strong>Position:</strong> {{ averagePosition }}</div>
+                      </div>
+                    </template>
+                  </a-table>
                 </div>
-            </template>
+                <div v-else class="centered-empty-state">
+                  No data available
+                </div>
+              </a-card>
+            </a-col>
             
-            <div v-if="loadingSitemap" class="centered-empty-state">
-                <a-spin size="default" />
-            </div>
-            <div v-else-if="sitemapData && sitemapData.length > 0" class="sitemap-content">
-                <a-tree
-                class="sitemap-tree"
-                :tree-data="sitemapData"
-                :expanded-keys="expandedKeys"
-                @expand="onExpand"
-                @select="handleTreeSelect"
-                :auto-expand-parent="true"
-                >
-                <template #title="{ title, key }">
-                    <div class="tree-node-title">
-                    <span>{{ title }}</span>
-                    <div>
-                        <a-button
-                        v-if="key !== 'empty' && !key.startsWith('folder_') && key !== 'root'"
-                        type="link"
-                        size="small"
-                        class="visit-link"
-                        @click.stop="openPreview(key)"
+            <!-- Sitemap Section -->
+            <a-col :span="24">
+              <a-card class="analytics-card">
+                <template #title>
+                  <div class="card-title">
+                    <span>Website Structure</span>
+                    <div class="header-actions">
+                      <a-space>
+                        <a-button 
+                          type="primary" 
+                          size="small"
+                          @click="handleRefreshSitemap"
                         >
-                        <template #icon><link-outlined /></template>
-                        Visit
+                          Refresh Data
                         </a-button>
+                        <a-button
+                          type="primary" 
+                          size="small"
+                          danger
+                          @click="disconnectGSC"
+                        >
+                          Disconnect Google Search Console
+                        </a-button>
+                      </a-space>
                     </div>
-                    </div>
+                  </div>
                 </template>
-                </a-tree>
-            </div>
-            <div v-else class="centered-empty-state">
-                No sitemap data available
-            </div>
-            </a-card>
-        </a-col>
-        </a-row>
-    </template>
-    </a-spin>
+                
+                <div v-if="loadingSitemap" class="centered-empty-state">
+                  <a-spin size="default" />
+                </div>
+                <div v-else-if="sitemapData && sitemapData.length > 0" class="sitemap-content">
+                  <a-tree
+                    class="sitemap-tree"
+                    :tree-data="sitemapData"
+                    :expanded-keys="expandedKeys"
+                    @expand="onExpand"
+                    @select="handleTreeSelect"
+                    :auto-expand-parent="true"
+                  >
+                    <template #title="{ title, key }">
+                      <div class="tree-node-title">
+                        <span>{{ title }}</span>
+                        <div>
+                          <a-button
+                            v-if="key !== 'empty' && !key.startsWith('folder_') && key !== 'root'"
+                            type="link"
+                            size="small"
+                            class="visit-link"
+                            @click.stop="openPreview(key)"
+                          >
+                            <template #icon><link-outlined /></template>
+                            Visit
+                          </a-button>
+                        </div>
+                      </div>
+                    </template>
+                  </a-tree>
+                </div>
+                <div v-else class="centered-empty-state">
+                  No sitemap data available
+                </div>
+              </a-card>
+            </a-col>
+          </a-row>
+        </div>
+      </div>
+    </div>
 
     <!-- Add GSC connection success modal -->
     <a-modal
@@ -266,6 +306,15 @@ export default defineComponent({
     const averagePosition = ref(0)
     const dateRange = ref('')
     const loading = ref(true)
+    const totalPages = ref(0)
+    const indexedPages = ref(0)
+    const crawledPages = ref(0)
+    const mobileFriendlyPages = ref(0)
+    const loadingPageStats = ref(false)
+    const generatorCount = ref(0)
+    const publishCount = ref(0)
+    const googleIndexedCount = ref(0)
+    const indexedCount = ref(0)
 
     const columns = [
       {
@@ -326,6 +375,7 @@ export default defineComponent({
           
           // Check if GSC is connected
           if (domainConfigured.value) {
+            fetchPageStats();
             await checkGscStatus()
           }
         }
@@ -439,7 +489,6 @@ export default defineComponent({
           
           // Calculate summary statistics
           calculateSummaryStats(response.data)
-          
           // Set date range
           if (response.data.length > 0) {
             const startDate = formatDate(response.data[response.data.length - 1].keys[1])
@@ -591,8 +640,37 @@ export default defineComponent({
     }
 
     // Refresh GSC data
-    const refreshGscData = () => {
-      fetchGscData()
+    const refreshGscData = async () => {
+      loadingGscData.value = true;
+      try {
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.getGscAnalytics(
+          customerId,
+          `sc-domain:${productInfo.value?.projectWebsite}`
+        );
+        
+        if (response && response.data) {
+          gscData.value = response.data;
+          
+          // Calculate summary statistics
+          calculateSummaryStats(response.data);
+          
+          // Set date range
+          if (response.data.length > 0) {
+            const startDate = formatDate(response.data[response.data.length - 1].keys[1]);
+            const endDate = formatDate(response.data[0].keys[1]);
+            dateRange.value = `${startDate} - ${endDate}`;
+          }
+        }
+        
+        // 刷新页面统计数据
+        await fetchPageStats();
+      } catch (error) {
+        console.error('Failed to fetch GSC data:', error);
+        message.error('Failed to fetch search console data');
+      } finally {
+        loadingGscData.value = false;
+      }
     }
 
     // Handle tree node selection
@@ -673,11 +751,31 @@ export default defineComponent({
       router.push('/dashboard')
     }
 
+    // 修改 fetchPageStats 方法，使用正确的数据字段
+    const fetchPageStats = async () => {
+      loadingPageStats.value = true;
+      try {
+        const customerId = localStorage.getItem('currentCustomerId');
+        const response = await apiClient.getPagesDashboard(customerId);
+        
+        if (response && response.data) {
+          generatorCount.value = response.data.generatorCount || 0;
+          googleIndexedCount.value = response.data.googleIndexedCount || 0;
+          indexedCount.value = response.data.indexedCount || 0;
+          publishCount.value = response.data.publishCount || 0;
+        }
+      } catch (error) {
+        console.error('Failed to fetch page statistics:', error);
+        message.error('Failed to fetch page statistics');
+      } finally {
+        loadingPageStats.value = false;
+      }
+    };
+
     // Lifecycle hooks
     onMounted(() => {
       loadProductInfo()
       handleGscCallback()
-      // Default expand root node and all folders
       expandedKeys.value = ['root']
     })
 
@@ -718,7 +816,17 @@ export default defineComponent({
       truncateUrl,
       goToDashboard,
       loading,
-      onExpand
+      onExpand,
+      totalPages,
+      indexedPages,
+      crawledPages,
+      mobileFriendlyPages,
+      fetchPageStats,
+      loadingPageStats,
+      generatorCount,
+      publishCount,
+      googleIndexedCount,
+      indexedCount,
     }
   }
 })
@@ -1094,5 +1202,36 @@ export default defineComponent({
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+/* Pages Overview Stats Styles (copied from Dashboard) */
+.pages-stats-container {
+  padding: 16px 0;
+}
+
+.pages-stats-horizontal {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #8c8c8c;
+  margin-bottom: 8px;
+}
+
+.stat-value.enlarged {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1890ff;
 }
 </style>

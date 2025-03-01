@@ -88,47 +88,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Pages Overview 单独一行 -->
-              <div class="info-item">
-                <div class="info-label">
-                  Pages Overview
-                </div>
-                <div class="info-content">
-                  <div class="pages-stats-horizontal">
-                    <div class="stat-item">
-                      <span class="stat-label">Generated</span>
-                      <span class="stat-value enlarged">{{ pagesDashboard?.generatorCount || 0 }}</span>
-                    </div>
-                    <a-divider type="vertical" />
-                    <div class="stat-item">
-                      <span class="stat-label">Published</span>
-                      <span class="stat-value enlarged">{{ pagesDashboard?.publishCount || 0 }}</span>
-                    </div>
-                    <a-divider type="vertical" />
-                    <div class="stat-item">
-                      <span class="stat-label">Indexed</span>
-                      <span class="stat-value enlarged">{{ pagesDashboard?.indexedCount || 0 }}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Discord横幅紧跟在Competitors后面 -->
-              <div class="discord-banner">
-                <div class="banner-content">
-                  <div class="banner-text-container">
-                    <div class="banner-title">Join Our Discord Community</div>
-                    <div class="banner-subtitle">Get help, share feedback, and connect with other users</div>
-                    <div class="banner-actions">
-                      <a href="https://discord.gg/yourlink" target="_blank" class="discord-button">
-                        Join Discord
-                      </a>
-                    </div>
-                  </div>
-                  <img src="/discord-logo.svg" alt="Discord" class="discord-logo" />
-                </div>
-              </div>
             </div>
           </a-card>
         </a-col>
@@ -450,7 +409,6 @@ export default defineComponent({
       },
       submitLoading: false,
       publishedUrls: [],
-      pagesDashboard: null,
       expandedKeys: [], 
       hasTourCompleted: false, 
       originalWebsite: '', 
@@ -635,7 +593,6 @@ export default defineComponent({
           // 使用 Promise.allSettled 替代 Promise.all,避免一个请求失败影响其他请求
           const results = await Promise.allSettled([
             this.checkGscStatus(),
-            this.loadPagesDashboard()
           ]);
 
           // 检查每个请求的结果
@@ -1112,17 +1069,6 @@ export default defineComponent({
       return key;
     },
 
-    async loadPagesDashboard() {
-      try {
-        const response = await apiClient.getPagesDashboard();
-        if (response?.code === 200) {
-          this.pagesDashboard = response.data;
-        }
-      } catch (error) {
-        console.error('Failed to load pages dashboard:', error);
-      }
-    },
-
     openGuideModeDialog() {
       console.log('Guide triggered with productInfo:', this.productInfo);
       console.log('Onboarding status when guide triggered:', this.productInfo?.onboarding);
@@ -1223,132 +1169,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
-/* Discord Banner Styles */
-.discord-banner {
-  margin-top: 16px;
-  background: linear-gradient(135deg, #2b2d31 0%, #1e1f22 100%);
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  height: 160px; /* 增加高度 */
-  
-  /* 添加微妙的光效 */
-  &::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(88, 101, 242, 0.1) 0%, transparent 70%);
-    animation: rotateGradient 10s linear infinite;
-  }
-}
-
-.banner-content {
-  padding: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-  z-index: 1;
-  height: 100%;
-}
-
-.banner-text-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.discord-logo {
-  width: 140px;
-  height: auto;
-  filter: brightness(0) invert(1);
-}
-
-.banner-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  background: linear-gradient(90deg, #fff, #b8b9bf);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.banner-subtitle {
-  font-size: 14px;
-  color: #b8b9bf;
-  margin-bottom: 16px;
-}
-
-/* 添加banner-actions容器样式 */
-.banner-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.discord-button {
-  background: #5865f2;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  width: fit-content;
-  
-  &:hover {
-    background: #4752c4;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
-  }
-  
-  .anticon {
-    font-size: 16px;
-  }
-}
-
-/* 添加ProductHunt按钮样式 */
-.producthunt-button {
-  display: inline-flex;
-  align-items: center;
-  transition: all 0.3s ease;
-  
-  img {
-    height: 36px;
-    width: auto;
-  }
-  
-  &:hover {
-    transform: translateY(-1px);
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
-  }
-}
-
-@keyframes rotateGradient {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* 主容器样式 */
+/* 修改主容器样式，移除 Discord 横幅相关的样式 */
 .dashboard-content {
   display: flex;
   flex-direction: column;
+  gap: 16px;
   height: calc(100vh - 64px); /* 减去顶部导航栏高度 */
-  overflow: hidden; /* 防止外部容器出现滚动条 */
-  padding: 16px;
-  box-sizing: border-box; /* 确保padding不会增加总高度 */
 }
 
 .card-title {

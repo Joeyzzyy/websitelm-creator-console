@@ -159,6 +159,20 @@
       </div>
       <!-- 底部操作区 -->
       <div class="bottom-actions">
+        <!-- Discord 按钮 -->
+        <a-button 
+          type="link" 
+          class="bottom-action-btn discord-btn"
+          href="https://discord.gg/websitelm"
+          target="_blank"
+        >
+          <svg viewBox="0 0 24 24" fill="none" class="discord-icon" width="16" height="16">
+            <path d="M9.555 9.23c-.74 0-1.324.624-1.324 1.385 0 .757.6 1.385 1.324 1.385.738 0 1.323-.628 1.323-1.385.015-.761-.585-1.385-1.323-1.385z" fill="currentColor"/>
+            <path d="M20.207 0H3.79C2.247 0 1 1.244 1 2.784v15.855c0 1.54 1.247 2.784 2.79 2.784h13.627l-.636-2.22 1.534 1.425 1.451 1.342L22 24V2.784C22 1.244 20.753 0 19.21 0h-.003zM14.692 15.68s-.431-.516-.79-.973c1.57-.443 2.168-1.425 2.168-1.425-.491.323-.958.55-1.378.707-.599.251-1.174.419-1.738.516-.862.162-1.65.118-2.324-.01a9.723 9.723 0 01-1.653-.478 6.69 6.69 0 01-.832-.387c-.034-.02-.068-.034-.102-.052-.024-.043-.02-.02-.063-.03-.275-.15-.43-.251-.43-.251s.58.962 2.114 1.419c-.36.457-.806.994-.806.994-2.656-.084-3.667-1.824-3.667-1.824 0-3.866 1.738-7 1.738-7 1.738-1.303 3.392-1.266 3.392-1.266l.122.147c-2.173.626-3.175 1.579-3.175 1.579s.264-.144.71-.347c1.287-.566 2.31-.72 2.73-.757.07-.01.13-.02.198-.02a9.91 9.91 0 012.383-.024c1.12.132 2.324.464 3.55 1.146 0 0-.958-.909-3.02-1.535l.17-.193s1.654-.037 3.392 1.266c0 0 1.738 3.134 1.738 7 0 0-1.025 1.74-3.682 1.824z" fill="currentColor"/>
+          </svg>
+          <span v-if="!collapsed">Join Discord</span>
+        </a-button>
+        
         <!-- View Guide 按钮 -->
         <a-button 
           type="link" 
@@ -303,8 +317,9 @@ html, body, #app {
 .menu-section {
   flex: 1;
   padding: 24px 16px;
-  padding-bottom: 120px;
-  overflow-y: auto;
+  overflow: visible; /* 改为可见，不使用滚动条 */
+  display: flex;
+  flex-direction: column;
 }
 
 .custom-menu {
@@ -315,6 +330,8 @@ html, body, #app {
   background: transparent;
   color: #64748B;
   border-inline-end: none !important;
+  max-height: none;
+  overflow: visible;
 }
 
 :deep(.ant-menu-item) {
@@ -624,59 +641,63 @@ html, body, #app {
 
 /* 更新底部操作区样式 */
 .bottom-actions {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
   padding: 16px;
-  background: linear-gradient(to bottom, 
-    rgba(248, 250, 252, 0) 0%,
-    rgba(248, 250, 252, 0.95) 50%,
-    #F8FAFC 100%
-  );
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: auto;
+  flex-shrink: 0; /* 防止底部区域被压缩 */
 }
 
 .bottom-action-btn {
-  width: 100%;
-  text-align: left;
-  color: #64748B;
-  padding: 8px 12px;
-  height: auto;
-  transition: all 0.3s ease;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  justify-content: flex-start !important;
+  height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 6px !important;
 }
 
-.bottom-action-btn:hover {
-  background: white;
-  color: #6366F1;
-  border-color: rgba(99, 102, 241, 0.2);
-}
-
-/* 添加分隔线 */
 .bottom-divider {
   height: 1px;
-  background: linear-gradient(
-    to right,
-    rgba(0, 0, 0, 0.02),
-    rgba(0, 0, 0, 0.06),
-    rgba(0, 0, 0, 0.02)
-  );
+  background: rgba(0, 0, 0, 0.06);
   margin: 8px 0;
 }
 
-/* 确保图标和文字对齐 */
-.bottom-action-btn .menu-icon,
-.bottom-action-btn .anticon {
-  font-size: 18px;
+.guide-btn {
+  color: #1890ff !important;
+  background: rgba(24, 144, 255, 0.05) !important;
+  border: 1px solid rgba(24, 144, 255, 0.1) !important;
+}
+
+.guide-btn:hover {
+  color: #1890ff !important;
+  background: rgba(24, 144, 255, 0.1) !important;
+  border-color: rgba(24, 144, 255, 0.2) !important;
+}
+
+.discord-btn {
+  color: #5865f2 !important;
+  background: rgba(88, 101, 242, 0.05) !important;
+  border: 1px solid rgba(88, 101, 242, 0.1) !important;
+}
+
+.discord-btn:hover {
+  color: #5865f2 !important;
+  background: rgba(88, 101, 242, 0.1) !important;
+  border-color: rgba(88, 101, 242, 0.2) !important;
+  transform: translateY(-1px);
+}
+
+.discord-icon {
+  color: #5865f2;
+}
+
+/* 确保折叠时图标居中 */
+:deep(.ant-layout-sider-collapsed) .bottom-action-btn {
+  justify-content: center !important;
 }
 
 .welcome-text {
@@ -1145,6 +1166,19 @@ html, body, #app {
   width: 16px;
   height: 16px;
   stroke: #FFD700 !important; /* 强制使用金色 */
+}
+
+/* 确保整个布局不会出现滚动条 */
+:deep(.ant-layout) {
+  height: 100vh;
+  overflow: hidden;
+}
+
+:deep(.ant-layout-sider-children) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: visible; /* 改为可见，不使用滚动条 */
 }
 </style>
 
