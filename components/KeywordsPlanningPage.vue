@@ -176,7 +176,7 @@
                     class="mode-tabs"
                     @change="handleModeChange"
                   >
-                    <a-tab-pane key="ai" tab="AI Recommendations">
+                    <a-tab-pane key="ai" tab="AI Priority Ranking">
 
                       <!-- 原来的 AI 推荐内容 -->
                       <div class="beginner-mode">
@@ -278,6 +278,26 @@
                             </template>
                           </a-table>
                         </a-card>
+                      </div>
+                    </a-tab-pane>
+
+                    <a-tab-pane key="filter" tab="Custom Filtering">
+                      <div class="coming-soon-container">
+                        <div class="coming-soon-content">
+                          <ClockCircleOutlined class="coming-soon-icon" />
+                          <h3 class="coming-soon-title">Coming Soon</h3>
+                          <p class="coming-soon-description">Advanced keyword filtering capabilities are under development.</p>
+                        </div>
+                      </div>
+                    </a-tab-pane>
+                    
+                    <a-tab-pane key="input" tab="Manual Input">
+                      <div class="coming-soon-container">
+                        <div class="coming-soon-content">
+                          <EditOutlined class="coming-soon-icon" />
+                          <h3 class="coming-soon-title">Coming Soon</h3>
+                          <p class="coming-soon-description">Manual keyword input functionality will be available shortly.</p>
+                        </div>
                       </div>
                     </a-tab-pane>
                   </a-tabs>
@@ -1036,7 +1056,7 @@ import {
   ThunderboltFilled,
   FundOutlined,
   CheckCircleFilled,
-  StarFilled
+  StarFilled,
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import api from '../api/api'
@@ -1142,27 +1162,27 @@ export default defineComponent({
     const priorities = [
       {
         level: '1',
-        label: 'P1\nHigh Volume, Low Competition',
+        label: 'High Volume, Low Competition',
         color: '#f50'
       },
       {
         level: '2', 
-        label: 'P2\nGood Volume, Medium Competition',
+        label: 'Good Volume, Medium Competition',
         color: '#fa8c16'
       },
       {
         level: '3',
-        label: 'P3\nMedium Volume & Competition',
+        label: 'Medium Volume & Competition',
         color: '#1890ff'
       },
       {
         level: '4',
-        label: 'P4\nLower Volume, Higher Competition',
+        label: 'Lower Volume, Higher Competition',
         color: '#52c41a'
       },
       {
         level: '5',
-        label: 'P5\nMonitor & Long-term',
+        label: 'Monitor & Long-term',
         color: '#722ed1'
       }
     ]
@@ -5515,4 +5535,38 @@ export default defineComponent({
 }
 
 /* 移除光影效果，因为它会溢出按钮 */
+
+/* 添加相应的 CSS 样式 */
+.coming-soon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.coming-soon-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.coming-soon-icon {
+  font-size: 48px;
+  color: #1890ff;
+  margin-bottom: 16px;
+}
+
+.coming-soon-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 12px;
+}
+
+.coming-soon-description {
+  font-size: 16px;
+  color: #6b7280;
+  max-width: 400px;
+}
 </style>

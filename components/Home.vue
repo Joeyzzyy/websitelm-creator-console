@@ -1,8 +1,8 @@
 <template>
   <a-layout style="height: 100vh;">
     <a-layout-sider
-      :width="270"
-      :collapsed-width="120"
+      :width="320"
+      :collapsed-width="150"
       style="background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F6 100%); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);"
     >
       <!-- 头像部分 -->
@@ -68,7 +68,7 @@
               </template>
               <template #title>
                 <div class="menu-item-content">
-                  <span>Keywords</span>
+                  <span>Keywords & Outlins</span>
                 </div>
               </template>
               
@@ -195,7 +195,7 @@
       </div>
     </a-layout-sider>
     <!-- 内容区域 -->
-    <a-layout-content style="padding: 20px; overflow: auto;">
+    <a-layout-content style="padding: 8px; overflow: auto;">
       <router-view @open-guide-mode="startInteractiveGuide" />
     </a-layout-content>
   </a-layout>
