@@ -26,7 +26,7 @@
             <div class="components-list">
               <a-collapse v-model:activeKey="activeCategories">
                 <a-collapse-panel 
-                  v-for="category in availableComponents" 
+                  v-for="category in filteredAvailableComponents" 
                   :key="category.category" 
                 >
                   <template #header>
@@ -1616,6 +1616,38 @@ export default defineComponent({
       analysisModal.value.visible = false;
     };
 
+    // 添加过滤组件的计算属性
+    const filteredAvailableComponents = computed(() => {
+      // 如果不是编辑模式或者不是Blog类型，返回所有组件
+      if (!isEditMode.value || articleData.value.pageType !== 'Blog') {
+        return availableComponents;
+      }
+      
+      // 博客页面允许的组件类型
+      const allowedComponentTypes = [
+        'TitleSection',
+        'TitleSectionWithImage',
+        'KeyResultsWithTextBlock', // 假设有这个组件
+        'Faqs',
+        'CallToAction',
+        'CallToActionComplex',
+        'CallToActionWithEmailInput'
+      ];
+      
+      // 过滤组件
+      return availableComponents.map(category => {
+        // 复制类别对象
+        const filteredCategory = { ...category };
+        
+        // 过滤该类别下的组件
+        filteredCategory.items = category.items.filter(item => 
+          allowedComponentTypes.includes(item.type)
+        );
+        
+        return filteredCategory;
+      }).filter(category => category.items.length > 0); // 只保留有组件的类别
+    });
+
     return {
       loading,
       saving,
@@ -1681,7 +1713,8 @@ export default defineComponent({
       showAnalysisModal,
       hideAnalysisModal,
       hoverPreview,
-      hideComponentPreview
+      hideComponentPreview,
+      filteredAvailableComponents // 添加到返回对象中
     };
   }
 });

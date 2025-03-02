@@ -114,9 +114,13 @@
                       <template #icon>
                         <ThunderboltOutlined />
                       </template>
-                      <span>Generate Outline Plan</span>
+                      <span>Generate Outlines</span>
                     </a-button>
+                  </a-button-group>
+                </div>
 
+                <div class="toolbar-right">
+                  <a-space>
                     <a-button 
                       type="primary"
                       @click="showSelectedKeywords"
@@ -127,11 +131,7 @@
                       </template>
                       <span>View Selected Keywords</span>
                     </a-button>
-                  </a-button-group>
-                </div>
-
-                <div class="toolbar-right">
-                  <a-space>
+                    
                     <a-button 
                       v-if="currentStep === '1'"
                       type="text"
@@ -3356,6 +3356,28 @@ export default defineComponent({
       getPageTypeColor,
       aiSelectionModalVisible
     }
+  },
+  created() {
+    // 使用 mitt 或其他事件总线库，或者直接使用 provide/inject
+    // 这里我们使用一个简单的方法，将方法暴露到全局
+    if (this.$root) {
+      this.$root.$switchKeywordsStep = this.switchToStep;
+    }
+  },
+  methods: {
+    switchToStep(step) {
+      if (step === 'selection') {
+        this.currentStep = '0'; // 注意这里使用字符串 '0' 而不是数字 0
+      } else if (step === 'outline') {
+        this.currentStep = '1'; // 注意这里使用字符串 '1' 而不是数字 1
+      }
+    }
+  },
+  beforeDestroy() {
+    // 清理全局引用
+    if (this.$root && this.$root.$switchKeywordsStep) {
+      delete this.$root.$switchKeywordsStep;
+    }
   }
 })
 </script>
@@ -4256,7 +4278,7 @@ export default defineComponent({
   gap: 8px;
   align-items: center;
   position: relative;
-  overflow: visible !important;
+  overflow: visible !important; /* 确保溢出内容可见 */
   justify-content: center; /* 确保按钮居中 */
 }
 

@@ -22,7 +22,9 @@
         <a-menu
           mode="inline"
           :selectedKeys="[currentView]"
+          :openKeys="openKeys"
           @click="handleMenuClick"
+          @openChange="handleOpenChange"
           class="custom-menu"
         >
           <!-- Analytics -->
@@ -49,16 +51,14 @@
             <div class="workflow-group-title">
               <span class="group-icon">
                 <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </span>
               AI Writer
             </div>
-            <a-menu-item
-              key="KeywordsPlanningPage"
-              data-tour="keywords"
-              :class="{ 'nav-item--active': currentView === 'KeywordsPlanningPage' }"
-            >
+            
+            <!-- 修改Keywords菜单项为父级菜单 -->
+            <a-sub-menu key="KeywordsMenu">
               <template #icon>
                 <span class="menu-icon">
                   <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
@@ -66,95 +66,107 @@
                   </svg>
                 </span>
               </template>
-              <div class="menu-item-content">
-                <span>Keywords</span>
-              </div>
-            </a-menu-item>
-            
-            <a-menu-item
-              key="TaskManagementPage"
-              data-tour="pages"
-              :class="{ 'nav-item--active': currentView === 'TaskManagementPage' }"
-            >
-              <template #icon>
-                <span class="menu-icon">
-                  <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
-                    <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </span>
+              <template #title>
+                <div class="menu-item-content">
+                  <span>Keywords</span>
+                </div>
               </template>
-              <div class="menu-item-content">
-                <span>Pages</span>
-              </div>
-            </a-menu-item>
+              
+              <!-- 添加子菜单项 -->
+              <a-menu-item 
+                key="KeywordsSelection" 
+                @click="navigateToKeywordsStep('selection')"
+              >
+                <div class="menu-item-content">
+                  <span>Keywords Selection</span>
+                </div>
+              </a-menu-item>
+              
+              <a-menu-item 
+                key="OutlineGeneration" 
+                @click="navigateToKeywordsStep('outline')"
+              >
+                <div class="menu-item-content">
+                  <span>Outline Generation</span>
+                </div>
+              </a-menu-item>
+            </a-sub-menu>
           </div>
 
           <!-- 分隔线 -->
           <div class="menu-divider"></div>
 
-          <!-- Product和Assets组合 - Settings -->
-          <div class="workflow-group">
-            <div class="workflow-group-title">
-              <span class="group-icon">
+          <!-- 将Pages独立出来 -->
+          <a-menu-item
+            key="TaskManagementPage"
+            data-tour="pages"
+            :class="{ 'nav-item--active': currentView === 'TaskManagementPage' }"
+          >
+            <template #icon>
+              <span class="menu-icon">
+                <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
+                  <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </template>
+            <div class="menu-item-content">
+              <span>Pages</span>
+            </div>
+          </a-menu-item>
+
+          <!-- 分隔线 -->
+          <div class="menu-divider"></div>
+
+          <!-- 简化Settings部分，去掉底框和小标签 -->
+          <a-sub-menu key="SettingsMenu">
+            <template #icon>
+              <span class="menu-icon">
                 <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
                   <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </span>
-              Settings
-            </div>
+            </template>
+            <template #title>
+              <div class="menu-item-content">
+                <span>Settings</span>
+              </div>
+            </template>
+            
+            <!-- 产品信息菜单项 -->
             <a-menu-item
               key="DashboardPage"
               data-tour="dashboard"
               :class="{ 'nav-item--active': currentView === 'DashboardPage' }"
             >
-              <template #icon>
-                <span class="menu-icon">
-                  <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
-                    <path d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </span>
-              </template>
               <div class="menu-item-content">
                 <span>Product Information</span>
               </div>
             </a-menu-item>
             
+            <!-- 产品资产菜单项 -->
             <a-menu-item
               key="AssetsPage"
               data-tour="assets"
               :class="{ 'nav-item--active': currentView === 'AssetsPage' }"
             >
-              <template #icon>
-                <span class="menu-icon">
-                  <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
-                    <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </span>
-              </template>
               <div class="menu-item-content">
                 <span>Product Assets</span>
               </div>
             </a-menu-item>
             
+            <!-- 账户菜单项 -->
             <a-menu-item
               key="AccountPage"
               data-tour="account"
               :class="{ 'nav-item--active': currentView === 'AccountPage' }"
               @click="handleAccountClick"
             >
-              <template #icon>
-                <span class="menu-icon">
-                  <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
-                    <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </span>
-              </template>
               <div class="menu-item-content">
                 <span>Account</span>
               </div>
             </a-menu-item>
-          </div>
+          </a-sub-menu>
         </a-menu>
       </div>
       <!-- 底部操作区 -->
@@ -173,18 +185,6 @@
           <span v-if="!collapsed">Join Discord</span>
         </a-button>
         
-        <!-- View Guide 按钮 -->
-        <a-button 
-          type="link" 
-          class="bottom-action-btn guide-btn"
-          @click="startTour"
-          data-tour="restart-tour"
-        >
-          <QuestionCircleOutlined style="color: #1890ff" />
-          <span v-if="!collapsed">View Guide</span>
-        </a-button>
-        
-        <!-- 添加分隔线 -->
         <div class="bottom-divider"></div>
         
         <!-- Logout 按钮 -->
@@ -205,87 +205,6 @@
     ref="onboardingTour"
     @complete="handleOnboardingComplete"
   />
-
-  <!-- 添加选择模式的对话框 -->
-  <a-modal
-    v-model:visible="guideModeVisible"
-    title="Choose Guide Mode"
-    :footer="null"
-    class="guide-mode-modal"
-  >
-    <div class="guide-mode-options">
-      <div class="guide-mode-card" @click="startStepByStepTour">
-        <div class="mode-icon">
-          <svg viewBox="0 0 24 24" class="tech-icon">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" 
-                  fill="none" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </div>
-        <h3>Interactive Guide</h3>
-        <p>Step-by-step walkthrough of key features</p>
-      </div>
-      
-      <div class="guide-mode-card" @click="showTutorialLibrary">
-        <div class="mode-icon">
-          <svg viewBox="0 0 24 24" class="tech-icon">
-            <path d="M4 6h16M4 12h16M4 18h16" 
-                  fill="none" stroke="currentColor" stroke-width="2"/>
-          </svg>
-        </div>
-        <h3>Tutorial Library</h3>
-        <p>Browse and select specific features to learn</p>
-      </div>
-    </div>
-  </a-modal>
-
-  <!-- 添加教程库对话框 -->
-  <a-modal
-    v-model:visible="tutorialLibraryVisible"
-    title="Tutorial Library"
-    :footer="null"
-    class="tutorial-library-modal"
-    width="1000px"
-  >
-    <div class="max-w-full mx-auto px-4 max-h-[600px] overflow-y-auto custom-scrollbar">
-      <div v-for="(group, category) in groupedTutorials" :key="category" class="mb-8">
-        <div class="flex items-center mb-4 group">
-          <div class="relative">
-            <h3 class="text-xs font-medium text-[#1890ff] px-3 py-1.5 bg-gradient-to-r from-[#1890ff]/10 to-white rounded-lg border border-[#1890ff]/20 shadow-sm backdrop-blur-sm">
-              {{ category }}
-            </h3>
-            <div class="absolute inset-0 bg-[#1890ff]/10 blur-lg rounded-full transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          </div>
-          <div class="ml-4 flex-grow">
-            <div class="h-px bg-gradient-to-r from-[#1890ff]/20 via-gray-200 to-transparent"></div>
-          </div>
-        </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div 
-            v-for="tutorial in group" 
-            :key="tutorial.id"
-            class="group flex flex-col bg-white rounded-lg border border-gray-200 hover:border-[#1890ff]/20 hover:shadow-lg transition-all duration-200 cursor-pointer"
-            @click="playTutorial(tutorial)"
-          >
-            <div class="flex flex-col flex-grow p-4">
-              <h4 class="text-sm font-semibold text-gray-900 group-hover:text-[#1890ff] transition-colors duration-200 line-clamp-2 mb-2">
-                {{ tutorial.title }}
-              </h4>
-              
-              <p v-if="tutorial.description" class="text-xs text-gray-600 line-clamp-2 mb-3">
-                {{ tutorial.description }}
-              </p>
-              
-              <div class="read-more mt-auto text-xs text-[#1890ff] font-medium flex items-center gap-1">
-                Read Documentation 
-                <span class="transform transition-transform group-hover:translate-x-1">→</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </a-modal>
 </template>
 
 <style scoped>
@@ -320,10 +239,12 @@ html, body, #app {
   overflow: visible; /* 改为可见，不使用滚动条 */
   display: flex;
   flex-direction: column;
+  align-items: center; /* 添加居中对齐 */
 }
 
 .custom-menu {
   border: none;
+  width: 100%; /* 确保菜单宽度占满容器 */
 }
 
 :deep(.ant-menu) {
@@ -332,6 +253,7 @@ html, body, #app {
   border-inline-end: none !important;
   max-height: none;
   overflow: visible;
+  width: 100%; /* 确保菜单宽度占满容器 */
 }
 
 :deep(.ant-menu-item) {
@@ -344,18 +266,46 @@ html, body, #app {
   line-height: 36px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
+  width: 100% !important; /* 确保菜单项宽度占满 */
 }
 
-:deep(.ant-menu-item:hover) {
+/* 确保子菜单项缩进，但其他菜单项居中 */
+:deep(.ant-menu-sub .ant-menu-item) {
+  padding-left: 24px !important; /* 子菜单项缩进 */
+}
+
+/* 确保Settings菜单项与其他菜单项样式一致 */
+:deep(.ant-menu-submenu-title) {
+  background: white !important;
+  border: 1px solid rgba(24, 144, 255, 0.15) !important;
+  margin: 3px 0 !important;
+  transition: all 0.3s ease !important;
+  border-radius: 8px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+:deep(.ant-menu-submenu-title:hover) {
   background: rgba(24, 144, 255, 0.05) !important;
   border-color: rgba(24, 144, 255, 0.3) !important;
   transform: translateX(4px);
 }
 
-:deep(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), rgba(24, 144, 255, 0.05)) !important;
-  border-color: #1890ff !important;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15) !important;
+/* 确保工作流组内的内容也居中 */
+.workflow-group {
+  width: 100%;
+}
+
+/* 调整菜单分隔线宽度 */
+.menu-divider {
+  width: 100%;
+}
+
+/* 确保底部操作区域也居中 */
+.bottom-actions {
+  width: 100%;
 }
 
 .menu-icon {
@@ -670,18 +620,6 @@ html, body, #app {
   margin: 6px 0;
 }
 
-.guide-btn {
-  color: #1890ff !important;
-  background: rgba(24, 144, 255, 0.05) !important;
-  border: 1px solid rgba(24, 144, 255, 0.1) !important;
-}
-
-.guide-btn:hover {
-  color: #1890ff !important;
-  background: rgba(24, 144, 255, 0.1) !important;
-  border-color: rgba(24, 144, 255, 0.2) !important;
-}
-
 .discord-btn {
   color: #5865f2 !important;
   background: rgba(88, 101, 242, 0.05) !important;
@@ -891,18 +829,7 @@ html, body, #app {
   z-index: 1;
 }
 
-.workflow-group :deep(.menu-icon) {
-  color: #1890ff !important;
-  font-size: 16px !important;
-}
-
-.workflow-group :deep(.ant-menu-item:hover .menu-icon) {
-  transform: scale(1.1);
-  transition: transform 0.3s ease;
-}
-
-/* 添加菜单项内容布局 */
-.menu-item-content {
+.workflow-group :deep(.menu-item-content) {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1001,6 +928,38 @@ html, body, #app {
 .bottom-action-btn > span:nth-child(2) {
   margin-left: 8px !important;
 }
+
+/* 子菜单样式 */
+:deep(.ant-menu-sub) {
+  background: transparent !important;
+  padding-left: 24px !important; /* 增加缩进 */
+}
+
+:deep(.ant-menu-sub .ant-menu-item) {
+  padding: 8px 12px !important;
+  height: auto !important;
+  line-height: 1.5 !important;
+  margin: 4px 0 !important;
+  font-size: 13px !important; /* 减小字体大小 */
+}
+
+/* 确保子菜单项的图标样式一致 */
+:deep(.ant-menu-sub .menu-item-content) {
+  font-size: 13px;
+  color: #4B5563;
+}
+
+/* 子菜单项悬停效果 */
+:deep(.ant-menu-sub .ant-menu-item:hover) {
+  background: rgba(24, 144, 255, 0.05);
+}
+
+/* 子菜单项选中效果 */
+:deep(.ant-menu-sub .ant-menu-item-selected) {
+  background: rgba(24, 144, 255, 0.1);
+  color: #1890ff;
+}
+
 </style>
 
 <script>
@@ -1013,8 +972,6 @@ import { LogoutOutlined, RightOutlined, LeftOutlined, QuestionCircleOutlined, Us
 import { createVNode } from 'vue'
 import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
-import OnboardingTour from './OnboardingTour.vue'
-import { tutorialConfig } from '../config/tutorials'
 import apiClient from '../api/api'
 import {
   DashboardOutlined,
@@ -1037,7 +994,6 @@ export default {
     RightOutlined,
     LeftOutlined,
     QuestionCircleOutlined,
-    OnboardingTour,
     DashboardOutlined,
     SearchOutlined,
     FileTextOutlined,
@@ -1097,7 +1053,7 @@ export default {
       currentCustomerEmail: currentCustomerEmail,
       guideModeVisible: false,
       tutorialLibraryVisible: false,
-      tutorials: tutorialConfig,
+      openKeys: ['KeywordsMenu'],
     };
   },
   computed: {
@@ -1116,22 +1072,6 @@ export default {
         width: '72px',
         height: '72px'
       };
-    },
-    // 将教程按tag分组
-    groupedTutorials() {
-      const groups = {};
-      this.tutorials.forEach((tutorial, index) => {
-        const category = tutorial.tag || 'General';
-        if (!groups[category]) {
-          groups[category] = [];
-        }
-        groups[category].push({
-          ...tutorial,
-          badge: `${groups[category].length + 1}`, // 添加序号作为badge
-          id: tutorial.targetUrl // 使用targetUrl作为唯一标识
-        });
-      });
-      return groups;
     },
     userDisplayName() {
       return this.currentCustomerEmail 
@@ -1316,7 +1256,34 @@ export default {
     handleAccountClick() {
       this.currentView = 'AccountPage';
       this.$router.push('/account');
-    }
+    },
+
+    navigateToKeywordsStep(step) {
+      // 首先导航到Keywords Planning页面
+      this.$router.push('/keywords');
+      
+      // 设置当前视图
+      this.currentView = 'KeywordsPlanningPage';
+      
+      // 使用nextTick确保页面已加载
+      this.$nextTick(() => {
+        // 直接调用暴露在$root上的方法
+        if (this.$root && this.$root.$switchKeywordsStep) {
+          this.$root.$switchKeywordsStep(step);
+        } else {
+          // 如果方法还未注册，可以设置一个短暂的延时再试
+          setTimeout(() => {
+            if (this.$root && this.$root.$switchKeywordsStep) {
+              this.$root.$switchKeywordsStep(step);
+            }
+          }, 500);
+        }
+      });
+    },
+
+    handleOpenChange(openKeys) {
+      this.openKeys = openKeys;
+    },
   },
   watch: {
     '$route'(to) {

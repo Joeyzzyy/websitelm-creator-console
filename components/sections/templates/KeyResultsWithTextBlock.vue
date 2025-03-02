@@ -1,12 +1,8 @@
 <template>
   <div class="section-wrapper">
-    <div class="editor-area">
+    <div class="editor-area full-width">
       <div class="editor-content">
         <div class="right-content">
-          <div class="content-header-with-button">
-            <span>Blog Content</span>
-          </div>
-
           <div class="content-item">
             <div :class="['editor-wrapper', { 'fullscreen-editor': isFullscreen }]">
               <!-- 全屏模式的头部 -->
@@ -114,22 +110,6 @@
             @close="handleVideoLibraryCancel"
           />
         </a-modal>
-      </div>
-    </div>
-
-    <!-- 预览区域 -->
-    <div class="preview-area">
-      <div class="preview-header">
-        <span>Preview</span>
-      </div>
-      
-      <div class="preview-content">
-        <div class="bg-white rounded-lg w-full">
-          <KeyResultsWithTextBlockPreview 
-            :section="localSection"
-            :styles="styles"
-          />
-        </div>
       </div>
     </div>
   </div>
@@ -456,21 +436,27 @@ export default {
 <style scoped>
 @import '../../../assets/styles/section-form.css';
 
+/* 修改布局为全宽 */
 .section-wrapper {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  min-height: 500px;
+  display: block; /* 改为块级显示，不再使用网格布局 */
+  min-height: 800px; /* 增加最小高度 */
+  max-width: 1600px; /* 进一步增加最大宽度 */
+  margin: 0 auto; /* 居中显示 */
 }
 
 .editor-area {
   background: white;
   display: flex;
   flex-direction: column;
-  max-height: 1200px;
+  max-height: 2000px; /* 大幅增加最大高度 */
   position: relative;
   border-radius: 8px;
   padding: 24px;
+  width: 100%; /* 确保宽度为100% */
+}
+
+.editor-area.full-width {
+  width: 100%;
 }
 
 .editor-header {
@@ -493,35 +479,11 @@ export default {
   flex: 1;
   overflow-y: auto;
   padding: 24px;
-}
-
-.preview-area {
-  background: #f8fafc;
-  min-width: 768px;
-  overflow-y: auto;
-  height: 800px;
-  border-radius: 8px;
-  padding: 24px;
-}
-
-.preview-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  color: #64748b;
-  font-weight: 500;
-}
-
-.preview-content {
-  height: calc(100% - 40px);
-  overflow-y: auto;
+  width: 100%; /* 确保宽度为100% */
 }
 
 .section-container {
-  display: grid;
-  grid-template-columns: minmax(300px, 1fr) 2fr;
-  gap: 32px;
+  width: 100%;
 }
 
 .results-container {
@@ -881,7 +843,7 @@ export default {
   margin-top: 8px;
   display: flex;
   flex-direction: column;
-  height: 500px;
+  height: 900px; /* 大幅增加默认高度 */
   transition: all 0.3s ease;
 }
 
@@ -910,17 +872,19 @@ export default {
 .content-textarea {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 32px; /* 增加内边距 */
+  font-size: 16px; /* 保持字体大小 */
 }
 
 .content-textarea :deep(.ProseMirror) {
-  min-height: 120px;
+  min-height: 800px; /* 大幅增加最小高度 */
   outline: none;
-  line-height: 1.5;
+  line-height: 1.6; /* 保持行高 */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
     'Noto Color Emoji';
-  font-size: 14px;
+  font-size: 16px; /* 保持字体大小 */
+  padding: 0 16px; /* 增加内边距 */
 }
 
 .content-textarea :deep(.ProseMirror *) {
@@ -1108,14 +1072,21 @@ export default {
 
 /* 全屏模式下的特殊样式 */
 .fullscreen-editor .content-textarea {
-  padding: 24px;
-  max-width: 1200px;
+  padding: 40px; /* 增加内边距 */
+  max-width: 1400px; /* 增加最大宽度 */
   margin: 0 auto;
   width: 100%;
 }
 
 .fullscreen-editor .editor-toolbar {
   padding: 12px 24px;
+}
+
+.fullscreen-editor .content-textarea :deep(.ProseMirror) {
+  min-height: 1200px; /* 全屏模式下大幅增加高度 */
+  font-size: 18px; /* 全屏模式下保持字体大小 */
+  line-height: 1.8; /* 全屏模式下保持行高 */
+  padding: 0 32px; /* 全屏模式下增加内边距 */
 }
 
 /* 添加过渡动画 */
