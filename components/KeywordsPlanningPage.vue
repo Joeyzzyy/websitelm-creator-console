@@ -911,91 +911,37 @@ digital marketing strategy"
     <!-- 在 template 部分添加模态框组件 -->
     <a-modal
       v-model:visible="aiSelectionModalVisible"
-      :title="null"
+      title="AI Autopilot"
       @ok="handleAISelection"
       :footer="null"
-      :width="1200"
+      :width="600"
       :centered="true"
       :maskClosable="false"
       class="ai-selection-modal"
-      :bodyStyle="{ padding: '0' }"
-      :closeIcon="null"
+      :bodyStyle="{ padding: '24px' }"
     >
-      <div class="ai-selection-modal-content">
-        <!-- Premium visual header -->
-        <div class="ai-selection-visual">
-          <div class="ai-visual-glow"></div>
-          <div class="ai-visual-particles"></div>
-          <div class="ai-visual-icon">
-            <ThunderboltFilled />
-          </div>
-          <h2 class="ai-visual-title">AI-Powered Content Strategy</h2>
-          <p class="ai-visual-subtitle">Unlock your content potential with intelligent automation</p>
+      <div class="ai-selection-simple">
+        <div class="ai-icon-container">
+          <ThunderboltFilled class="ai-icon" />
         </div>
+        <h3 class="ai-title">Automatic Keyword Selection & Outline Generation</h3>
+        <p class="ai-description">
+          We'll automatically select 5 keywords with the highest potential impact and generate optimized content outlines for you.
+          This helps you jumpstart your content creation process without manual keyword filtering.
+        </p>
         
-        <!-- Main content area -->
-        <div class="ai-selection-body">
-          <!-- Feature highlights -->
-          <div class="ai-feature-grid">
-            <div class="ai-feature-card">
-              <div class="feature-icon feature-discover">
-                <CompassOutlined />
-              </div>
-              <div class="feature-content">
-                <h4>Step 1: Discover Keywords</h4>
-                <p>Automatically identify high-potential keywords for your content strategy</p>
-              </div>
-            </div>
-            
-            <div class="ai-feature-card">
-              <div class="feature-icon feature-analyze">
-                <BarChartOutlined />
-              </div>
-              <div class="feature-content">
-                <h4>Step 2: Analyze Competition</h4>
-                <p>Evaluate ranking difficulty and competitive landscape</p>
-              </div>
-            </div>
-            
-            <div class="ai-feature-card">
-              <div class="feature-icon feature-create">
-                <FileTextOutlined />
-              </div>
-              <div class="feature-content">
-                <h4>Step 3: Generate Outlines</h4>
-                <p>Create comprehensive content structures optimized for search</p>
-              </div>
-            </div>
-            
-            <div class="ai-feature-card">
-              <div class="feature-icon feature-prioritize">
-                <FundOutlined />
-              </div>
-              <div class="feature-content">
-                <h4>Step 4: Publish Content</h4>
-                <p>Transform outlines into fully-optimized pages ready to rank</p>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Action buttons -->
-          <div class="ai-action-buttons" style="display: flex; justify-content: flex-end; width: 100%;">
-            <div class="button-group" style="display: flex; justify-content: flex-end;">
-              <a-button class="btn-cancel" @click="aiSelectionModalVisible = false">
-                Cancel
-              </a-button>
-              <a-button 
-                class="btn-start" 
-                type="primary" 
-                :loading="isAISelecting" 
-                @click="handleAISelection"
-                style="min-width: 220px;"
-              >
-                <ThunderboltOutlined />
-                <span>Start AI Generation</span>
-              </a-button>
-            </div>
-          </div>
+        <div class="ai-action-buttons">
+          <a-button class="btn-cancel" @click="aiSelectionModalVisible = false">
+            Cancel
+          </a-button>
+          <a-button 
+            class="btn-start" 
+            type="primary" 
+            :loading="isAISelecting" 
+            @click="handleAISelection"
+          >
+            Start Auto-Generation
+          </a-button>
         </div>
       </div>
     </a-modal>
@@ -5418,17 +5364,6 @@ export default defineComponent({
   color: white;
 }
 
-.feature-prioritize {
-  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
-  color: white;
-}
-
-.feature-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
 .feature-content h4 {
   font-size: 16px;
   font-weight: 700;
@@ -5448,49 +5383,11 @@ export default defineComponent({
   overflow: hidden;
   height: 63px; /* 固定高度，确保所有卡片描述区域一致 */
 }
-
-.feature-metric {
-  display: flex;
-  align-items: baseline;
-  margin-top: 12px;
-  padding-top: 8px;
-  border-top: 1px dashed rgba(0, 0, 0, 0.1);
-}
-
-.metric-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: #2d3748;
-  margin-right: 6px;
-}
-
-.metric-label {
-  font-size: 13px;
-  color: #718096;
-}
-
 /* Action buttons */
 .ai-action-buttons {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.proof-rating {
-  display: flex;
-  align-items: center;
-}
-
-.proof-rating .anticon {
-  color: #f6ad55;
-  font-size: 14px;
-  margin-right: 2px;
-}
-
-.rating-text {
-  margin-left: 8px;
-  color: #718096;
-  font-size: 14px;
 }
 
 .button-group {
@@ -5568,5 +5465,47 @@ export default defineComponent({
   font-size: 16px;
   color: #6b7280;
   max-width: 400px;
+}
+
+/* 添加新的简化样式 */
+.ai-selection-simple {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.ai-icon-container {
+  margin-bottom: 16px;
+}
+
+.ai-icon {
+  font-size: 48px;
+  color: #1890ff;
+}
+
+.ai-title {
+  font-size: 24px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.ai-description {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.ai-action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.btn-cancel {
+  min-width: 100px;
+}
+
+.btn-start {
+  min-width: 140px;
 }
 </style>
