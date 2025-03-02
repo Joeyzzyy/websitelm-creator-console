@@ -30,7 +30,7 @@
               <thunderbolt-filled />
               AI Autopilot
             </span>
-            <span class="ai-badge">NEW</span>
+            <span class="ai-badge">Recommended</span>
           </a-button>
         </div>
         
