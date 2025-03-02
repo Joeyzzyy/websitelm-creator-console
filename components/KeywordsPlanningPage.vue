@@ -2351,7 +2351,22 @@ export default defineComponent({
           message.success('AI keyword selection task submitted successfully');
           // 关闭弹窗
           aiSelectionModalVisible.value = false;
-          api.getAnalysisStatus('auto_pilot');
+          
+          // 获取初始状态并处理响应
+          const statusResponse = await api.getAnalysisStatus('auto_pilot');
+          console.log('Initial auto_pilot status:', statusResponse);
+          
+          // 更新任务状态
+          if (statusResponse?.data) {
+            outlineGenerationStatus.value = statusResponse.data.status || 'processing';
+            taskStartTime.value = statusResponse.data.startTime;
+            taskEndTime.value = statusResponse.data.endTime;
+            taskDescription.value = formatTaskDescription(statusResponse.data.description);
+            taskProgress.value = 50; // 设置初始进度
+          }
+          
+          // 启动轮询
+          startPolling();
         } else if (response && response.code === 429) {
           // 处理 429 错误（在响应体中）
           Modal.info({
@@ -2384,16 +2399,16 @@ export default defineComponent({
                 h('p', { style: 'margin-top: 16px; color: #1890ff;' }, 
                   'You can check the progress in the review outlines tab.')
               ]),
-              okText: '知道了',
+              okText: 'Got it',
               maskClosable: true
             });
           } else {
             // 其他错误
-            message.error(errorData.message || 'AI 关键词选择失败，请稍后再试。');
+            message.error(errorData.message || 'AI keyword selection failed, please try again later.');
           }
         } else {
           // 一般错误
-          message.error('AI 关键词选择失败，请稍后再试。');
+          message.error('AI keyword selection failed, please try again later.');
         }
       } finally {
         isAISelecting.value = false;
