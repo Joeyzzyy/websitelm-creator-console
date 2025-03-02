@@ -843,30 +843,6 @@
       </template>
     </a-modal>
 
-    <!-- 批量输入模态框 -->
-    <a-modal
-      v-model:open="bulkInputVisible"
-      title="Enter Keywords"
-      width="600px"
-      @ok="handleBulkImport"
-    >
-      <div class="bulk-input-container">
-        <div class="bulk-input-header">
-          <InfoCircleOutlined />
-          <span>Enter one keyword per line or separate with commas</span>
-        </div>
-        <a-textarea
-          v-model:value="bulkKeywords"
-          :rows="10"
-          placeholder="Example:
-seo tools
-content marketing
-digital marketing strategy"
-        />
-      </div>
-    </a-modal>
-
-    <!-- 在 template 部分添加模态框组件 -->
     <a-modal
       v-model:visible="aiSelectionModalVisible"
       title="AI Autopilot"
@@ -1450,7 +1426,6 @@ export default defineComponent({
     }
 
     const domainConfigured = ref(false)
-    const router = useRouter()
 
     const checkDomainStatus = async () => {
       loading.value = true
@@ -1463,18 +1438,6 @@ export default defineComponent({
       } finally {
         loading.value = false
       }
-    }
-
-    const getKeywordStatus = (item) => {
-      const gradeMap = {
-        '1': { text: 'Quick Win Choose', color: 'red' },
-        '2': { text: 'High Priority', color: 'orange' },
-        '3': { text: 'Medium Priority', color: 'blue' },
-        '4': { text: 'Low Priority', color: 'cyan' },
-        '5': { text: 'Monitor', color: 'purple' }
-      }
-      
-      return gradeMap[item.grade] || { text: 'Unknown', color: 'default' }
     }
 
     const currentPriority = ref('1')
@@ -2310,20 +2273,11 @@ export default defineComponent({
           // 关闭弹窗
           aiSelectionModalVisible.value = false;
           
-          // 获取初始状态并处理响应
-          const statusResponse = await api.getAnalysisStatus('auto_pilot');
-          
-          // 更新任务状态
-          if (statusResponse?.data) {
-            outlineGenerationStatus.value = statusResponse.data.status || 'processing';
-            taskStartTime.value = statusResponse.data.startTime;
-            taskEndTime.value = statusResponse.data.endTime;
-            taskDescription.value = formatTaskDescription(statusResponse.data.description);
-            taskProgress.value = 50; // 设置初始进度
+          const statusResponse = await checkOutlineGenerationStatus();
+        
+          if (!statusResponse?.data || statusResponse.data.status !== 'finished') {
+            startPolling();
           }
-          
-          // 启动轮询
-          startPolling();
         } else if (response && response.code === 429) {
           // 处理 429 错误（在响应体中）
           Modal.info({

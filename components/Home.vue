@@ -1213,16 +1213,6 @@ export default {
           this.$root.$switchKeywordsStep(step);
         }
         
-        // 尝试直接访问KeywordsPlanningPage组件的方法
-        const keywordsComponent = this.$root.$children.find(c => c.$options.name === 'KeywordsPlanningPage');
-        if (keywordsComponent && keywordsComponent.switchStep) {
-          keywordsComponent.switchStep(step);
-        }
-        
-        // 如果上述方法都不起作用，尝试通过事件总线发送消息
-        this.$root.$emit('switch-keywords-step', step);
-        
-        // 最后的备选方案：直接修改DOM
         if (step === 'outline') {
           const outlineTab = document.querySelector('[data-tab="outline"]');
           if (outlineTab) {
