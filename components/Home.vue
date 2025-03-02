@@ -193,12 +193,6 @@
       <router-view @open-guide-mode="startInteractiveGuide" />
     </a-layout-content>
   </a-layout>
-
-  <!-- 添加 Onboarding 组件 -->
-  <onboarding-tour 
-    ref="onboardingTour"
-    @complete="handleOnboardingComplete"
-  />
 </template>
 
 <style scoped>
@@ -902,7 +896,7 @@ import TaskManagementPage from './TaskManagementPage.vue';
 import DashboardPage from './DashboardPage.vue';
 import KeywordsPlanningPage from './KeywordsPlanningPage.vue';
 import AssetsPage from './AssetsPage.vue';
-import { LogoutOutlined, RightOutlined, LeftOutlined, QuestionCircleOutlined, UserOutlined } from '@ant-design/icons-vue'
+import { LogoutOutlined, RightOutlined, LeftOutlined, QuestionCircleOutlined, UserOutlined, ThunderboltFilled } from '@ant-design/icons-vue'
 import { createVNode } from 'vue'
 import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
@@ -934,7 +928,8 @@ export default {
     PictureOutlined,
     SettingOutlined,
     UserOutlined,
-    DownOutlined
+    DownOutlined,
+    ThunderboltFilled
   },
   setup() {
     const router = useRouter();

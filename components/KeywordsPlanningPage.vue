@@ -1115,7 +1115,6 @@ export default defineComponent({
 
     const fetchKeywords = async (level, page = 1, limit = 10) => {
       try {
-        console.log('Fetching keywords with params:', { level, page, limit })
         const response = await api.getPlanningKeywords({
           level,
           page,
@@ -1126,14 +1125,11 @@ export default defineComponent({
         if (response?.data) {
           // 确保在设置数据之前打印转换后的数据
           const transformedData = response.data.map(transformKeywordData)
-          console.log('Transformed data:', transformedData)
-          
           recommendedKeywords.value = transformedData
           recommendedPagination.value.total = response.totalCount || 0
-          console.log('Updated recommendedKeywords:', recommendedKeywords.value)
         }
       } catch (error) {
-        console.error('Failed to get keywords:', error)
+        message.error('Failed to get keywords')
       } finally {
         loading.value = false
       }
@@ -1180,7 +1176,6 @@ export default defineComponent({
       ],
       ([newRecommendedKeywords, newSelectedKeywords], [oldRecommendedKeywords, oldSelectedKeywords]) => {
         if (newRecommendedKeywords !== oldRecommendedKeywords) {
-          console.log('recommendedKeywords changed:', newRecommendedKeywords)
           const selectedOnes = newRecommendedKeywords.filter(k => k.selected)
           selectedKeywords.value = [
             ...selectedKeywords.value.filter(k => !newRecommendedKeywords.find(nk => nk.keyword === k.keyword)),
@@ -1213,25 +1208,12 @@ export default defineComponent({
     }
 
     const getKeywordsByPriority = (keywords, priority) => {
-      console.log('Getting keywords by priority:', { 
-        priority,
-        totalKeywords: keywords?.length,
-        keywords: keywords
-      });
-
       if (!keywords || !keywords.length) {
-        console.log('No keywords available');
         return [];
       }
       
       // 修改过滤逻辑，直接使用 priority 属性
       const filteredKeywords = keywords.filter(k => k.priority === Number(priority));
-      
-      console.log('Filtered keywords:', {
-        priority,
-        filteredCount: filteredKeywords.length,
-        filteredKeywords
-      });
       
       return filteredKeywords;
     }
@@ -1268,7 +1250,6 @@ export default defineComponent({
       selectedRowKeys: selectedRowKeys,
       onChange: (keys, selectedRows) => {
         selectedRowKeys.value = keys;
-        console.log(`selectedRowKeys: ${keys}`, 'selectedRows: ', selectedRows);
       },
       getCheckboxProps: (record) => ({
         disabled: record.name === 'Disabled User',
@@ -1284,7 +1265,6 @@ export default defineComponent({
     };
 
     const handleTableChange = (pagination, filters, sorter) => {
-      console.log('Table change:', pagination, filters, sorter);
     };
 
     const currentPreset = ref(null);
@@ -1518,8 +1498,6 @@ export default defineComponent({
         .filter(k => k.favorited)
         .map(k => k.id);
       
-      console.log('Filtered IDs:', selectedIds);
-      
       if (totalSelectedKeywords.value === 0) {
         message.warning('Please select at least one keyword');
         return;
@@ -1543,20 +1521,15 @@ export default defineComponent({
         await api.generatePlanningComposite(selectedIds);
         
         message.success('Content plan generation request submitted');
-        console.log('Generation request successful, waiting before status check...');
         
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        console.log('Checking initial status...');
         const statusResponse = await checkOutlineGenerationStatus();
-        console.log('Status response:', statusResponse);
         
         if (!statusResponse?.data || statusResponse.data.status !== 'finished') {
-          console.log('Starting polling...');
           startPolling();
         }
       } catch (error) {
-        console.error('Failed to generate content plan:', error);
         message.error('Failed to generate content plan, please try again');
       } finally {
         isGenerating.value = false;
@@ -1591,14 +1564,6 @@ export default defineComponent({
 
     const handlePlanSelect = (plan, checked) => {
       plan.selected = checked
-    }
-
-    const confirmSelectedPlans = async () => {
-      const selectedPlans = contentPlans.value.filter(plan => plan.selected)
-      if (selectedPlans.length) {
-        console.log('Selected plans:', selectedPlans)
-        message.success('Content plans confirmed')
-      }
     }
 
     const drawerVisible = ref(false)
@@ -1731,7 +1696,6 @@ export default defineComponent({
         return activeResponse || (compositeResponse?.data ? compositeResponse : autoPilotResponse);
         
       } catch (error) {
-        console.error('Failed to check task status:', error);
         message.error('Failed to check task status');
         return null;
       } finally {
@@ -1750,8 +1714,6 @@ export default defineComponent({
           limit: contentPlansPagination.value.pageSize
         })
         
-        console.log('Outlines Response:', outlinesResponse) // 添加日志
-        
         if (outlinesResponse?.data) {
           contentPlans.value = outlinesResponse.data.map(plan => ({
             ...plan,
@@ -1760,12 +1722,9 @@ export default defineComponent({
           }))
           // 确保设置总数
           contentPlansPagination.value.total = outlinesResponse.totalCount || 0
-          console.log('Content Plans:', contentPlans.value) // 添加日志
-          console.log('Pagination:', contentPlansPagination.value) // 添加日志
           hasGenerated.value = true
         }
       } catch (error) {
-        console.error('Failed to fetch content plans:', error)
         message.error('Failed to get content plans')
       } finally {
         isLoadingOutlines.value = false
@@ -1887,10 +1846,8 @@ export default defineComponent({
         })
         
         selectedKeywordsData.value = response?.data?.map(transformKeywordData) || [];
-        console.log('已选关键词数据:', selectedKeywordsData.value);
         
       } catch (error) {
-        console.error('获取选中关键词失败:', error);
         selectedKeywordsData.value = [];
       } finally {
         isLoadingSelectedKeywords.value = false
@@ -2235,7 +2192,8 @@ export default defineComponent({
             color = 'red';
             difficulty = 'Hard';
           }
-          return h(Tag, { color }, `${text} - ${difficulty}`);
+          // 修改这里，使用函数插槽
+          return h(Tag, { color }, () => `${text} - ${difficulty}`);
         }
       },
       {
@@ -2354,7 +2312,6 @@ export default defineComponent({
           
           // 获取初始状态并处理响应
           const statusResponse = await api.getAnalysisStatus('auto_pilot');
-          console.log('Initial auto_pilot status:', statusResponse);
           
           // 更新任务状态
           if (statusResponse?.data) {
@@ -2385,7 +2342,6 @@ export default defineComponent({
           message.error(response?.message || 'AI keyword selection failed, please try again later.');
         }
       } catch (error) {
-        console.error('AI keyword selection failed:', error);
         // 检查错误响应
         if (error.response && error.response.data) {
           const errorData = error.response.data;
@@ -2447,11 +2403,6 @@ export default defineComponent({
     };
 
     const isLoadingTaskInfo = ref(false)
-
-    const showHelpDrawer = () => {
-      // Implementation of showHelpDrawer method
-    }
-
     const historyModalVisible = ref(false)
     const isLoadingHistory = ref(false)
     const historyBatches = ref([])
@@ -2541,11 +2492,6 @@ export default defineComponent({
         failed: 'red'
       }
       return statusColors[status] || 'default'
-    }
-
-    const viewHistoryDetail = (record) => {
-      // Implement detail view logic if needed
-      console.log('Viewing details for batch:', record.batchId)
     }
 
     const loadHistoryBatches = async (page = 1) => {
@@ -2920,34 +2866,9 @@ export default defineComponent({
         okText: 'Got it'
       })
     }
-
-    const showBulkInput = () => {
-      // Implement show bulk input modal logic
-      console.log('Showing bulk input modal')
-    }
-
-    const clearImportedKeywords = () => {
-      // Implement clear imported keywords logic
-      console.log('Clearing imported keywords')
-    }
-
-    const removeImportedKeyword = (keyword) => {
-      // Implement remove imported keyword logic
-      console.log('Removing imported keyword:', keyword)
-    }
-
     const bulkKeywords = ref('')
-
     const bulkInputVisible = ref(false)
-
-    const handleBulkImport = () => {
-      // Implement handle bulk import logic
-      console.log('Handling bulk import:', bulkKeywords.value)
-    }
-
-    // 添加新的响应式变量
     const isUpdatingKeywords = ref(false)
-
     // 从已选关键词中获取可用的关键词选项
     const availableKeywords = computed(() => {
       return selectedKeywordsData.value.map(keyword => ({
@@ -3201,7 +3122,6 @@ export default defineComponent({
       selectedPlansCount,
       generateContentPlan,
       handlePlanSelect,
-      confirmSelectedPlans,
       canProceedToNext,
       drawerVisible,
       selectedPlan,
@@ -3263,7 +3183,6 @@ export default defineComponent({
       handleGenerateOutlinePlan,
       getProgressStatus,
       isLoadingTaskInfo,
-      showHelpDrawer,
       historyModalVisible,
       historyBatches,
       historyRecords,
@@ -3276,7 +3195,6 @@ export default defineComponent({
       showHistoryModal,
       closeHistoryModal,
       getHistoryStatusColor,
-      viewHistoryDetail,
       loadHistoryBatches,
       loadBatchRecords,
       handleBatchesPaginationChange,
@@ -3301,12 +3219,8 @@ export default defineComponent({
       handleImportedKeywordsPaginationChange,
       handleFileUpload,
       downloadTemplate,
-      showBulkInput,
-      clearImportedKeywords,
-      removeImportedKeyword,
       bulkKeywords,
       bulkInputVisible,
-      handleBulkImport,
       isUpdatingKeywords,
       availableKeywords,
       handleKeywordsChange,
