@@ -7,7 +7,7 @@
     <div class="analytics-content">
       <!-- Loading state -->
       <div v-if="loading" class="centered-spin">
-        <a-spin size="large" />
+        <a-spin size="default" />
       </div>
       
       <!-- Domain not configured -->
@@ -1185,23 +1185,15 @@ export default defineComponent({
 
 /* 确保加载指示器居中 */
 .centered-spin {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 100;
-}
-
-.centered-spin :deep(.ant-spin) {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.centered-spin :deep(.ant-spin-spinning) {
+  max-height: none;
 }
 
 /* Pages Overview Stats Styles (copied from Dashboard) */
