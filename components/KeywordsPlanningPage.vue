@@ -86,88 +86,6 @@
 
             <!-- 主内容区域 -->
             <div class="main-content">
-              <div class="content-toolbar">
-                <div class="toolbar-left">
-                  <a-tooltip :title="getAIButtonTooltip">
-                    <a-button 
-                      @click="showAISelectionConfirm"
-                      class="generate-btn ai-autopilot-btn"
-                      :loading="isAISelecting"
-                      :disabled="isGenerating || outlineGenerationStatus === 'processing'"
-                    >
-                      <template #icon>
-                        <ThunderboltOutlined />
-                      </template>
-                      <span class="btn-text">AI Autopilot</span>
-                      <span class="ai-badge">Recommended</span>
-                    </a-button>
-                  </a-tooltip>
-
-                  <a-button-group>
-                    <a-button 
-                      v-if="currentStep === '1'"
-                      type="primary"
-                      :loading="isGenerating"
-                      @click="handleGenerateOutlinePlan"
-                      class="action-button"
-                    >
-                      <template #icon>
-                        <ThunderboltOutlined />
-                      </template>
-                      <span>Generate Outlines</span>
-                    </a-button>
-                  </a-button-group>
-                </div>
-
-                <div class="toolbar-right">
-                  <a-space>
-                    <a-button 
-                      type="primary"
-                      @click="showSelectedKeywords"
-                      class="action-button"
-                    >
-                      <template #icon>
-                        <EyeOutlined />
-                      </template>
-                      <span>View Selected Keywords</span>
-                    </a-button>
-                    
-                    <a-button 
-                      v-if="currentStep === '1'"
-                      type="text"
-                      :disabled="!contentPlans.length"
-                      @click="refreshContentPlans"
-                      class="action-button"
-                    >
-                      <template #icon>
-                        <ReloadOutlined />
-                      </template>
-                      <span>Refresh</span>
-                    </a-button>
-                    <a-button 
-                      v-if="currentStep === '1'"
-                      type="text" 
-                      danger
-                      :disabled="!contentPlans.length"
-                      @click="confirmClearAllOutlines"
-                      class="action-button"
-                    >
-                      <span>Clear All</span>
-                    </a-button>
-                    <a-button 
-                      v-if="currentStep === '1'"
-                      type="primary"
-                      :disabled="selectedOutlinesCount === 0"
-                      @click="handlePublishOutlines"
-                      class="generate-pages-btn"
-                    >
-                      <span>Generate Pages</span>
-                    </a-button>
-                  </a-space>
-                </div> 
-              </div>
-
-              <!-- 步骤内容 -->
               <div v-show="currentStep === '0'" class="step-panel">
                 <!-- 添加模式选择的 Tabs -->
                 <div class="keywords-selection">
@@ -176,6 +94,16 @@
                     class="mode-tabs"
                     @change="handleModeChange"
                   >
+                    <template #rightExtra>
+                      <a-button 
+                        type="link"
+                        @click="showSelectedKeywords"
+                        class="view-keywords-btn"
+                      >
+                        View Selected Keywords
+                      </a-button>
+                    </template>
+                    
                     <a-tab-pane key="ai" tab="AI Priority Ranking">
 
                       <!-- 原来的 AI 推荐内容 -->
@@ -313,7 +241,7 @@
                         <LoadingOutlined spin class="status-icon" />
                       </div>
                       <div class="task-status-info">
-                        <h3 class="task-status-title">Content Plan Generation in Progress</h3>
+                        <h3 class="task-status-title">Page Outline Generation in Progress</h3>
                         <p class="task-status-description">
                           Our AI is analyzing your keywords and creating optimized content plans. This process typically takes 3-5 minutes to complete.
                         </p>
@@ -335,19 +263,66 @@
                           @change="handleContentPlanTabChange"
                         >
                           <template #rightExtra>
-                            <!-- 只在 All Outlines tab 显示全选复选框 -->
-                            <template v-if="contentPlanTab === 'all'">
-                              <a-checkbox
-                                :checked="allOutlinesSelected"
-                                :indeterminate="someOutlinesSelected"
-                                @change="handleSelectAllOutlines"
-                              >
-                                Select All On This Page
-                              </a-checkbox>
-                            </template>
-                            <span class="outline-stats">
-                              {{ contentPlans.length }} outlines | {{ selectedOutlinesCount }} selected
-                            </span>
+                            <div class="outline-actions-container">
+                              <!-- Left area: Selection controls -->
+                              <div class="selection-controls" v-if="contentPlanTab === 'all'">
+                                <a-button 
+                                  type="link"
+                                  @click="showSelectedKeywords"
+                                  class="view-keywords-btn"
+                                >
+                                  View Selected Keywords
+                                </a-button>
+                              </div>
+                              
+                              <!-- Right area: Action buttons, divided into primary and secondary actions -->
+                              <div class="action-buttons-group">
+                                <!-- Secondary action buttons -->
+                                <div class="secondary-actions">
+                                  <a-button 
+                                    type="text"
+                                    :disabled="!contentPlans.length"
+                                    @click="refreshContentPlans"
+                                    class="action-button"
+                                  >
+                                    <template #icon><ReloadOutlined /></template>
+                                    <span>Refresh</span>
+                                  </a-button>
+                                  
+                                  <a-button 
+                                    type="text" 
+                                    danger
+                                    :disabled="!contentPlans.length"
+                                    @click="confirmClearAllOutlines"
+                                    class="action-button"
+                                  >
+                                    <span>Clear All</span>
+                                  </a-button>
+                                </div>
+                                
+                                <!-- Primary action buttons -->
+                                <div class="primary-actions">
+                                  <a-button 
+                                    type="primary"
+                                    :loading="isGenerating"
+                                    @click="handleGenerateOutlinePlan"
+                                    class="action-button"
+                                  >
+                                    <template #icon><ThunderboltOutlined /></template>
+                                    <span>Generate Outlines</span>
+                                  </a-button>
+                                  
+                                  <a-button 
+                                    type="primary"
+                                    :disabled="selectedOutlinesCount === 0"
+                                    @click="handlePublishOutlines"
+                                    class="generate-pages-btn"
+                                  >
+                                    <span>Generate Pages</span>
+                                  </a-button>
+                                </div>
+                              </div>
+                            </div>
                           </template>
                           
                           <a-tab-pane key="all" tab="All Outlines">
@@ -681,7 +656,7 @@
           @click="proceedToContentPlan"
           :disabled="totalSelectedKeywords === 0"
         >
-          Proceed to Content Plan
+          Proceed to Outlines
         </a-button>
       </template>
     </a-modal>
@@ -2386,36 +2361,63 @@ export default defineComponent({
     }
 
     const handleAISelection = async () => {
-      if (isAISelecting.value) return
-      
-      isAISelecting.value = true
+      isAISelecting.value = true;
       try {
-        // Call AI selection API
-        const response = await api.generatePlanningAI()
-        
-        if (response?.code === 200) {
-          message.success('AI selection request submitted')
-          
-          // 直接跳转到 step 1
-          currentStep.value = '1'
-          
-          // 其他逻辑保持不变
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          const statusResponse = await checkOutlineGenerationStatus()
-          
-          if (!statusResponse?.data || statusResponse.data.status !== 'finished') {
-            startPolling()
-          }
+        const response = await api.generatePlanningAI();
+        if (response && response.code === 200) {
+          message.success('AI keyword selection task submitted successfully');
+          // 关闭弹窗
+          aiSelectionModalVisible.value = false;
+          // 其他处理逻辑...
+        } else if (response && response.code === 429) {
+          // 处理 429 错误（在响应体中）
+          Modal.info({
+            title: 'AI Autopilot is already running',
+            content: h('div', {}, [
+              h('p', 'An AI Autopilot task is already in progress.'),
+              h('p', 'Please wait for the current task to complete before starting a new one.'),
+              h('p', { style: 'margin-top: 16px; color: #1890ff;' }, 
+                'You can check the progress in the review outlines tab.')
+            ]),
+            okText: 'OK',
+            maskClosable: true
+          });
         } else {
-          throw new Error('AI selection request failed')
+          // 处理其他响应错误
+          message.error(response?.message || 'AI keyword selection failed, please try again later.');
         }
       } catch (error) {
-        console.error('AI selection failed:', error)
-        message.error('Failed to get AI recommendations. Please try again.')
+        console.error('AI keyword selection failed:', error);
+        // 检查错误响应
+        if (error.response && error.response.data) {
+          const errorData = error.response.data;
+          if (errorData.code === 429 && errorData.message === "auto pilot outline already started") {
+            // 显示友好的提示信息
+            Modal.info({
+              title: 'AI Autopilot is already running',
+              content: h('div', {}, [
+                h('p', 'An AI Autopilot task is already in progress.'),
+                h('p', 'Please wait for the current task to complete before starting a new one.'),
+                h('p', { style: 'margin-top: 16px; color: #1890ff;' }, 
+                  'You can check the progress in the review outlines tab.')
+              ]),
+              okText: '知道了',
+              maskClosable: true
+            });
+          } else {
+            // 其他错误
+            message.error(errorData.message || 'AI 关键词选择失败，请稍后再试。');
+          }
+        } else {
+          // 一般错误
+          message.error('AI 关键词选择失败，请稍后再试。');
+        }
       } finally {
-        isAISelecting.value = false
+        isAISelecting.value = false;
+        // 确保弹窗关闭
+        aiSelectionModalVisible.value = false;
       }
-    }
+    };
 
     const handleGenerateOutlinePlan = () => {
       if (totalSelectedKeywords.value === 0) {
@@ -3328,6 +3330,7 @@ export default defineComponent({
     // 这里我们使用一个简单的方法，将方法暴露到全局
     if (this.$root) {
       this.$root.$switchKeywordsStep = this.switchToStep;
+      this.$root.$showAISelectionConfirm = this.showAISelectionConfirm; // 添加这一行
     }
   },
   methods: {
@@ -3341,8 +3344,13 @@ export default defineComponent({
   },
   beforeDestroy() {
     // 清理全局引用
-    if (this.$root && this.$root.$switchKeywordsStep) {
-      delete this.$root.$switchKeywordsStep;
+    if (this.$root) {
+      if (this.$root.$switchKeywordsStep) {
+        delete this.$root.$switchKeywordsStep;
+      }
+      if (this.$root.$showAISelectionConfirm) { // 添加这一行
+        delete this.$root.$showAISelectionConfirm;
+      }
     }
   }
 })
@@ -5507,5 +5515,87 @@ export default defineComponent({
 
 .btn-start {
   min-width: 140px;
+}
+
+.outline-actions-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.selection-controls {
+  display: flex;
+  align-items: center;
+  margin-right: 16px;
+}
+
+.view-keywords-btn {
+  margin-left: 8px;
+  padding: 0 8px;
+  height: 24px;
+  line-height: 24px;
+}
+
+.action-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.secondary-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.primary-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Add to existing styles */
+.outline-actions-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.selection-controls {
+  margin-right: 16px;
+}
+
+.action-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.secondary-actions {
+  display: flex;
+  gap: 4px;
+  margin-right: 12px;
+}
+
+.primary-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.generate-pages-btn {
+  background-color: #52c41a;
+  border-color: #52c41a;
+}
+
+.generate-pages-btn:hover:not(:disabled) {
+  background-color: #73d13d;
+  border-color: #73d13d;
+}
+
+.generate-pages-btn:disabled {
+  background-color: #d9f7be;
+  border-color: #d9f7be;
 }
 </style>

@@ -19,6 +19,21 @@
       </div>
       <!-- 菜单部分 -->
       <div class="menu-section">
+        <!-- 添加AI Autopilot按钮到菜单部分顶部 -->
+        <div class="autopilot-container">
+          <a-button 
+            class="ai-autopilot-btn" 
+            type="primary" 
+            @click="openAIAutopilot"
+          >
+            <span class="btn-text">
+              <thunderbolt-filled />
+              AI Autopilot
+            </span>
+            <span class="ai-badge">NEW</span>
+          </a-button>
+        </div>
+        
         <a-menu
           mode="inline"
           :selectedKeys="[currentView]"
@@ -43,58 +58,40 @@
             Analytics
           </a-menu-item>
 
-          <!-- 分隔线 -->
-          <div class="menu-divider"></div>
-
           <!-- Keywords和Pages组合 - AI Writer -->
-          <div class="workflow-group">
-            <div class="workflow-group-title">
-              <span class="group-icon">
+          <a-sub-menu key="KeywordsMenu">
+            <template #icon>
+              <span class="menu-icon">
                 <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
-                  <path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </span>
-              AI Writer
-            </div>
+            </template>
+            <template #title>
+              <div class="menu-item-content">
+                <span>Keywords & Outlines</span>
+              </div>
+            </template>
             
-            <!-- 修改Keywords菜单项为父级菜单 -->
-            <a-sub-menu key="KeywordsMenu">
-              <template #icon>
-                <span class="menu-icon">
-                  <svg viewBox="0 0 24 24" fill="none" class="gold-icon">
-                    <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </span>
-              </template>
-              <template #title>
-                <div class="menu-item-content">
-                  <span>Keywords & Outlins</span>
-                </div>
-              </template>
-              
-              <!-- 添加子菜单项 -->
-              <a-menu-item 
-                key="KeywordsSelection" 
-                @click="navigateToKeywordsStep('selection')"
-              >
-                <div class="menu-item-content">
-                  <span>Keywords Selection</span>
-                </div>
-              </a-menu-item>
-              
-              <a-menu-item 
-                key="OutlineGeneration" 
-                @click="navigateToKeywordsStep('outline')"
-              >
-                <div class="menu-item-content">
-                  <span>Outline Generation</span>
-                </div>
-              </a-menu-item>
-            </a-sub-menu>
-          </div>
-
-          <!-- 分隔线 -->
-          <div class="menu-divider"></div>
+            <!-- 添加子菜单项 -->
+            <a-menu-item 
+              key="KeywordsSelection" 
+              @click="navigateToKeywordsStep('selection')"
+            >
+              <div class="menu-item-content">
+                <span>Keywords Selection</span>
+              </div>
+            </a-menu-item>
+            
+            <a-menu-item 
+              key="OutlineGeneration" 
+              @click="navigateToKeywordsStep('outline')"
+            >
+              <div class="menu-item-content">
+                <span>Outline Generation</span>
+              </div>
+            </a-menu-item>
+          </a-sub-menu>
 
           <!-- 将Pages独立出来 -->
           <a-menu-item
@@ -113,9 +110,6 @@
               <span>Pages</span>
             </div>
           </a-menu-item>
-
-          <!-- 分隔线 -->
-          <div class="menu-divider"></div>
 
           <!-- 简化Settings部分，去掉底框和小标签 -->
           <a-sub-menu key="SettingsMenu">
@@ -175,7 +169,7 @@
         <a-button 
           type="link" 
           class="bottom-action-btn discord-btn"
-          href="https://discord.gg/websitelm"
+          href="https://discord.gg/2vCGh39ym"
           target="_blank"
         >
           <svg viewBox="0 0 24 24" fill="none" class="discord-icon" width="16" height="16">
@@ -235,7 +229,7 @@ html, body, #app {
 /* 菜单部分 */
 .menu-section {
   flex: 1;
-  padding: 20px 16px;
+  padding: 0 16px;
   overflow: visible; /* 改为可见，不使用滚动条 */
   display: flex;
   flex-direction: column;
@@ -259,7 +253,7 @@ html, body, #app {
 :deep(.ant-menu-item) {
   background: white !important;
   border: 1px solid rgba(24, 144, 255, 0.15) !important;
-  margin: 3px 0 !important;
+  margin: 8px 0 !important; /* 统一所有菜单项的间距 */
   transition: all 0.3s ease !important;
   border-radius: 8px !important;
   height: 36px !important;
@@ -278,7 +272,7 @@ html, body, #app {
 :deep(.ant-menu-submenu-title) {
   background: white !important;
   border: 1px solid rgba(24, 144, 255, 0.15) !important;
-  margin: 3px 0 !important;
+  margin: 8px 0 !important; /* 统一所有菜单项的间距 */
   transition: all 0.3s ease !important;
   border-radius: 8px !important;
   height: 36px !important;
@@ -300,7 +294,7 @@ html, body, #app {
 
 /* 调整菜单分隔线宽度 */
 .menu-divider {
-  width: 100%;
+  display: none; /* 完全移除分隔线 */
 }
 
 /* 确保底部操作区域也居中 */
@@ -713,218 +707,37 @@ html, body, #app {
   margin: 12px 0;
 }
 
-/* 工作流组合样式 */
-.workflow-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px;
-  padding-top: 18px;
-  background: rgba(24, 144, 255, 0.05);
-  border: 1px solid rgba(24, 144, 255, 0.1);
-  border-radius: 12px;
-  margin: 3px 0;
-  position: relative;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.05);
+/* 确保所有顶级菜单项样式一致 */
+:deep(.ant-menu-submenu) {
+  width: 100% !important;
+  margin: 0 !important; /* 移除子菜单的外部边距 */
+  padding: 0 !important; /* 移除子菜单的内部边距 */
 }
 
-/* 添加工作流组标题样式 */
-.workflow-group-title {
-  position: absolute;
-  top: -10px;
-  left: 16px;
-  background: #1890ff;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 500;
-  z-index: 1;
-  height: auto;
-  line-height: 1.5;
-  white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(24, 144, 255, 0.2);
-  display: flex;
-  align-items: center;
-  gap: 6px;
+:deep(.ant-menu-submenu-inline) {
+  margin: 0 !important; /* 确保内联子菜单没有额外边距 */
 }
 
-.group-icon {
-  display: inline-flex;
-  width: 16px;
-  height: 16px;
-}
-
-.group-icon .gold-icon {
-  width: 16px;
-  height: 16px;
-  stroke: #FFD700;
-}
-
-.workflow-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #1890ff;
-  font-size: 14px;
-  padding: 8px 0;
-  position: relative;
-}
-
-.workflow-arrow::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(to bottom, rgba(24, 144, 255, 0.1), rgba(24, 144, 255, 0.3));
-  transform: translateX(-50%);
-  z-index: 0;
-}
-
-.workflow-arrow .anticon {
-  background: white;
-  border-radius: 50%;
-  padding: 4px;
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.1);
-}
-
-.workflow-group :deep(.ant-menu-item) {
+:deep(.ant-menu-submenu-title) {
   background: white !important;
   border: 1px solid rgba(24, 144, 255, 0.15) !important;
-  margin: 3px 0 !important;
+  margin: 8px 0 !important; /* 统一所有菜单项的间距 */
   transition: all 0.3s ease !important;
   border-radius: 8px !important;
   height: 36px !important;
   line-height: 36px !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
+  width: 100% !important;
 }
 
-.workflow-group :deep(.ant-menu-item:hover) {
-  background: rgba(24, 144, 255, 0.05) !important;
-  border-color: rgba(24, 144, 255, 0.3) !important;
-  transform: translateX(4px);
-}
-
-.workflow-group :deep(.ant-menu-item-selected) {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.1), rgba(24, 144, 255, 0.05)) !important;
-  border-color: #1890ff !important;
-  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15) !important;
-}
-
-.workflow-group::before {
-  position: absolute;
-  top: -10px;
-  left: 16px;
-  background: #1890ff;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 500;
-  z-index: 1;
-}
-
-.workflow-group :deep(.menu-item-content) {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-/* 添加可选标签样式 */
-.optional-badge {
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: rgba(24, 144, 255, 0.1);
-  color: #1890ff;
-  margin-left: 8px;
-}
-
-/* 开始标签特殊样式 */
-.optional-badge:contains("Start here") {
-  background: rgba(82, 196, 26, 0.1);
-  color: #52c41a;
-}
-
-/* 调整菜单项内边距以适应新的布局 */
-.workflow-group :deep(.ant-menu-item) {
-  padding: 12px !important;
-  height: auto !important;
-  line-height: 1.5 !important;
-}
-
-/* 添加金色图标样式 */
-.gold-icon {
-  width: 20px;
-  height: 20px;
-  stroke: #D4AF37; /* 金色 */
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 1px 2px rgba(212, 175, 55, 0.3));
-  transition: all 0.3s ease;
-}
-
-.ant-menu-item:hover .gold-icon {
-  stroke: #F5D76E; /* 亮金色 */
-  filter: drop-shadow(0 2px 4px rgba(212, 175, 55, 0.5));
-  transform: scale(1.1);
-}
-
-.ant-menu-item-selected .gold-icon {
-  stroke: #FFD700; /* 明亮的金色 */
-  filter: drop-shadow(0 2px 6px rgba(255, 215, 0, 0.5));
-}
-
-/* 修改工作流组标题图标颜色 */
-.workflow-group-title .group-icon svg path {
-  stroke: #FFD700 !important; /* 确保标题图标是金色的 */
-}
-
-.group-icon .gold-icon {
-  width: 16px;
-  height: 16px;
-  stroke: #FFD700 !important; /* 强制使用金色 */
-}
-
-/* 确保整个布局不会出现滚动条 */
-:deep(.ant-layout) {
-  height: 100vh;
-  overflow: hidden;
-}
-
-:deep(.ant-layout-sider-children) {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: visible; /* 改为可见，不使用滚动条 */
-}
-
-/* 修复 View Guide 文本的对齐问题 */
-.guide-btn :deep(.anticon) {
+/* 确保子菜单内容区域没有额外边距 */
+:deep(.ant-menu-submenu-inline > .ant-menu-submenu-content) {
   margin: 0 !important;
   padding: 0 !important;
 }
 
 /* 确保所有按钮文本对齐 */
-.bottom-action-btn {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  justify-content: flex-start !important;
-  height: 32px !important;
-  padding: 0 12px !important;
-  border-radius: 6px !important;
-}
-
-/* 确保所有按钮中的文本具有相同的起始位置 */
 .bottom-action-btn > span:nth-child(2) {
   margin-left: 8px !important;
 }
@@ -939,7 +752,7 @@ html, body, #app {
   padding: 8px 12px !important;
   height: auto !important;
   line-height: 1.5 !important;
-  margin: 4px 0 !important;
+  margin: 8px 0 !important; /* 统一所有菜单项的间距 */
   font-size: 13px !important; /* 减小字体大小 */
 }
 
@@ -958,6 +771,104 @@ html, body, #app {
 :deep(.ant-menu-sub .ant-menu-item-selected) {
   background: rgba(24, 144, 255, 0.1);
   color: #1890ff;
+}
+
+.autopilot-container {
+  width: 100%;
+  padding: 0 16px;
+  margin-bottom: 12px; 
+  display: flex;
+  justify-content: center;
+}
+
+.ai-autopilot-btn {
+  width: 85%;
+  height: 36px;
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible !important;
+  margin: 8px 0;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.1) 0%,
+      transparent 50%
+    );
+    animation: subtle-rotate 8s linear infinite;
+    z-index: 0;
+  }
+  
+  .btn-text {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+}
+
+.ai-autopilot-btn:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.ai-autopilot-btn:active {
+  transform: translateY(0);
+}
+
+.ai-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #22c55e;
+  color: white;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2);
+  animation: bounce 1s infinite;
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@keyframes subtle-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* 确保所有可能的父容器都不会裁剪内容 */
+:deep(.ant-btn) {
+  overflow: visible !important;
 }
 
 </style>
@@ -1283,6 +1194,31 @@ export default {
 
     handleOpenChange(openKeys) {
       this.openKeys = openKeys;
+    },
+
+    openAIAutopilot() {
+      // 使用路径导航到关键词规划页面
+      this.$router.push('/keywords');
+      
+      // 使用setTimeout确保页面加载完成后再触发AI自动选择
+      setTimeout(() => {
+        // 先切换到 outline 页面
+        if (this.$root && this.$root.$switchKeywordsStep) {
+          this.$root.$switchKeywordsStep('outline');
+        }
+        
+        // 然后显示AI选择确认对话框
+        setTimeout(() => {
+          if (this.$root && this.$root.$showAISelectionConfirm) {
+            this.$root.$showAISelectionConfirm();
+          }
+          
+          // 触发任务查询以显示进度
+          if (this.$root && this.$root.$fetchOutlineTaskStatus) {
+            this.$root.$fetchOutlineTaskStatus();
+          }
+        }, 300);
+      }, 500);
     },
   },
   watch: {
