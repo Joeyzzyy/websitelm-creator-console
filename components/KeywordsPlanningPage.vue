@@ -2025,10 +2025,10 @@ export default defineComponent({
           await fetchContentPlans()
         }
         
-        message.success('Content plans refreshed')
+        message.success('Outlines refreshed')
       } catch (error) {
-        console.error('Failed to refresh content plans:', error)
-        message.error('Failed to refresh content plans')
+        console.error('Failed to refresh outline list:', error)
+        message.error('Failed to refresh outline list')
       } finally {
         isRefreshing.value = false
       }
@@ -4445,25 +4445,6 @@ export default defineComponent({
   flex-shrink: 0;
 }
 
-.p1 {
-  border-left: 2px solid #f50;
-  background: rgba(245, 0, 0, 0.02);
-}
-
-.p2 {
-  border-left: 2px solid #fa8c16;
-  background: rgba(250, 140, 22, 0.02);
-}
-
-.p3 {
-  border-left: 2px solid #1890ff;
-  background: rgba(24, 144, 255, 0.02);
-}
-
-.p1 .priority-dot { background-color: #f50; }
-.p2 .priority-dot { background-color: #fa8c16; }
-.p3 .priority-dot { background-color: #1890ff; }
-
 /* 确保表格分页样式统一 */
 :deep(.ant-pagination-options) {
   display: none;
@@ -4782,29 +4763,6 @@ export default defineComponent({
   border-radius: 4px;
 }
 
-.krs-header {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 12px;
-  border-radius: 8px;
-  transition: background-color 0.3s;
-}
-
-.krs-header:hover {
-  background-color: rgba(0, 0, 0, 0.02);
-}
-
-.toggle-btn {
-  margin-left: auto;
-  padding: 4px;
-}
-
-.krs-content {
-  padding-top: 12px;
-  transition: all 0.3s;
-}
-
 .ai-autopilot-btn {
   position: relative;
   overflow: hidden;
@@ -4915,14 +4873,6 @@ export default defineComponent({
 :deep(.ant-tooltip) {
   overflow: visible !important;
 }
-
-.krs-content {
-  .highlight-text {
-    color: #1890ff; 
-    font-weight: 500; 
-  }
-}
-
 /* 修改分页器容器样式 */
 :deep(.ant-pagination) {
   margin: 24px 0 !important; /* 添加上下间距 */
