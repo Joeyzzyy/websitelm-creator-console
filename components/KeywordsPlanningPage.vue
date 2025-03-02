@@ -328,7 +328,7 @@
                           <a-tab-pane key="all" tab="All Outlines">
                             <div class="tab-content-wrapper">
                               <div v-if="isLoadingOutlines" class="content-plans-loading">
-                                <a-spin size="large" />
+                                <a-spin />
                                 <span class="loading-text">Loading...</span>
                               </div>
                               
@@ -337,23 +337,6 @@
                                   <FileSearchOutlined class="empty-icon" />
                                   <h3>No Content Outlines Yet</h3>
                                   <p>Use AI Autopilot to generate content outlines based on your selected keywords</p>
-                                  
-                                  <div class="action-buttons" style="justify-content: center;">
-                                    <a-tooltip :title="getAIButtonTooltip">
-                                      <a-button 
-                                        @click="showAISelectionConfirm"
-                                        class="generate-btn ai-autopilot-btn"
-                                        :loading="isAISelecting"
-                                        :disabled="isGenerating || outlineGenerationStatus === 'processing'"
-                                      >
-                                        <template #icon>
-                                          <ThunderboltOutlined />
-                                        </template>
-                                        <span class="btn-text">AI Autopilot</span>
-                                        <span class="ai-badge">Recommended</span>
-                                      </a-button>
-                                    </a-tooltip>
-                                  </div>
                                 </div>
                               </div>
 
@@ -456,7 +439,7 @@
                           <a-tab-pane key="selected" tab="Selected Outlines">
                             <div class="tab-content-wrapper">
                               <div v-if="isLoadingSelectedOutlines" class="content-plans-loading">
-                                <a-spin size="large" />
+                                <a-spin/>
                                 <span class="loading-text">Loading...</span>
                               </div>
                               
@@ -618,7 +601,7 @@
     >
       <!-- 添加加载状态显示 -->
       <div v-if="isLoadingModalKeywords" class="loading-keywords">
-        <a-spin size="large">
+        <a-spin>
         </a-spin>
         <div class="loading-content">
           <p>Loading selected keywords...</p>
@@ -1083,7 +1066,7 @@ export default defineComponent({
     const priorities = [
       {
         level: '1',
-        label: 'High Volume, Low Competition',
+        label: 'Low Competition, Considerable Volumn',
         color: '#f50'
       },
       {

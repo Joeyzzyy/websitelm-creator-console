@@ -36,7 +36,7 @@
         
         <a-menu
           mode="inline"
-          :selectedKeys="[currentView]"
+          :selectedKeys="[currentView, currentKeywordsStep]"
           :openKeys="openKeys"
           @click="handleMenuClick"
           @openChange="handleOpenChange"
@@ -769,8 +769,31 @@ html, body, #app {
 
 /* 子菜单项选中效果 */
 :deep(.ant-menu-sub .ant-menu-item-selected) {
-  background: rgba(24, 144, 255, 0.1);
-  color: #1890ff;
+  background: rgba(24, 144, 255, 0.1) !important;
+  color: #1890ff !important;
+  border-color: rgba(24, 144, 255, 0.3) !important;
+}
+
+/* 添加顶级菜单项选中效果 */
+:deep(.ant-menu-item-selected) {
+  background: rgba(24, 144, 255, 0.1) !important;
+  color: #1890ff !important;
+  border-color: rgba(24, 144, 255, 0.3) !important;
+  font-weight: 500 !important;
+}
+
+/* 添加子菜单标题选中效果 */
+:deep(.ant-menu-submenu-selected > .ant-menu-submenu-title) {
+  color: #1890ff !important;
+  background: rgba(24, 144, 255, 0.05) !important;
+  border-color: rgba(24, 144, 255, 0.3) !important;
+}
+
+/* 菜单项悬停效果 */
+:deep(.ant-menu-item:hover) {
+  background: rgba(24, 144, 255, 0.05) !important;
+  border-color: rgba(24, 144, 255, 0.3) !important;
+  transform: translateX(4px);
 }
 
 .autopilot-container {
@@ -959,6 +982,7 @@ export default {
         { title: 'Assets', view: 'AssetsPage' },
       ],
       currentView: this.getViewFromRoute(),
+      currentKeywordsStep: '',
       selectedUser: currentCustomerId,
       collapsed: localStorage.getItem('sidebarCollapsed') === 'true',
       currentCustomerEmail: currentCustomerEmail,
@@ -1001,6 +1025,11 @@ export default {
         'AccountPage': '/account',
         'AnalyticsPage': '/analytics',
       };
+      
+      // 如果点击的不是Keywords相关的菜单项，清除currentKeywordsStep
+      if (key !== 'KeywordsSelection' && key !== 'OutlineGeneration') {
+        this.currentKeywordsStep = '';
+      }
       
       if (routeMap[key]) {
         this.$router.push(routeMap[key]);
@@ -1170,26 +1199,42 @@ export default {
     },
 
     navigateToKeywordsStep(step) {
-      // 首先导航到Keywords Planning页面
-      this.$router.push('/keywords');
+      // 首先导航到Keywords Planning页面，并通过查询参数传递要显示的步骤
+      this.$router.push({
+        path: '/keywords',
+        query: { step: step }  // 通过URL查询参数传递步骤信息
+      });
       
       // 设置当前视图
       this.currentView = 'KeywordsPlanningPage';
       
-      // 使用nextTick确保页面已加载
-      this.$nextTick(() => {
+      // 设置当前关键词步骤
+      this.currentKeywordsStep = step === 'selection' ? 'KeywordsSelection' : 'OutlineGeneration';
+      
+      // 使用更长的延时确保页面完全加载
+      setTimeout(() => {
         // 直接调用暴露在$root上的方法
         if (this.$root && this.$root.$switchKeywordsStep) {
           this.$root.$switchKeywordsStep(step);
-        } else {
-          // 如果方法还未注册，可以设置一个短暂的延时再试
-          setTimeout(() => {
-            if (this.$root && this.$root.$switchKeywordsStep) {
-              this.$root.$switchKeywordsStep(step);
-            }
-          }, 500);
         }
-      });
+        
+        // 尝试直接访问KeywordsPlanningPage组件的方法
+        const keywordsComponent = this.$root.$children.find(c => c.$options.name === 'KeywordsPlanningPage');
+        if (keywordsComponent && keywordsComponent.switchStep) {
+          keywordsComponent.switchStep(step);
+        }
+        
+        // 如果上述方法都不起作用，尝试通过事件总线发送消息
+        this.$root.$emit('switch-keywords-step', step);
+        
+        // 最后的备选方案：直接修改DOM
+        if (step === 'outline') {
+          const outlineTab = document.querySelector('[data-tab="outline"]');
+          if (outlineTab) {
+            outlineTab.click();
+          }
+        }
+      }, 800);  // 增加延时以确保组件已完全加载
     },
 
     handleOpenChange(openKeys) {
@@ -1213,12 +1258,18 @@ export default {
             this.$root.$showAISelectionConfirm();
           }
           
-          // 触发任务查询以显示进度
           if (this.$root && this.$root.$fetchOutlineTaskStatus) {
             this.$root.$fetchOutlineTaskStatus();
           }
-        }, 300);
-      }, 500);
+          
+          this.$root.$emit('fetch-outline-task-status');
+          
+          const keywordsComponent = this.$root.$children?.find(c => c.$options.name === 'KeywordsPlanningPage');
+          if (keywordsComponent && keywordsComponent.fetchOutlineTaskStatus) {
+            keywordsComponent.fetchOutlineTaskStatus();
+          }
+        }, 500); // 增加延迟时间
+      }, 800); // 增加延迟时间
     },
   },
   watch: {
@@ -1233,6 +1284,11 @@ export default {
         '/analytics': 'AnalyticsPage',
       };
       this.currentView = routeToView[to.path] || 'DashboardPage';
+      
+      // 如果不是keywords页面，清除currentKeywordsStep
+      if (to.path !== '/keywords') {
+        this.currentKeywordsStep = '';
+      }
     }
   },
   async mounted() {
