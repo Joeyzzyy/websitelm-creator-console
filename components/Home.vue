@@ -1247,7 +1247,6 @@ export default {
       
       // 使用setTimeout确保页面加载完成后再触发AI自动选择
       setTimeout(() => {
-        // 先切换到 outline 页面
         if (this.$root && this.$root.$switchKeywordsStep) {
           this.$root.$switchKeywordsStep('outline');
         }
@@ -1258,16 +1257,6 @@ export default {
             this.$root.$showAISelectionConfirm();
           }
           
-          if (this.$root && this.$root.$fetchOutlineTaskStatus) {
-            this.$root.$fetchOutlineTaskStatus();
-          }
-          
-          this.$root.$emit('fetch-outline-task-status');
-          
-          const keywordsComponent = this.$root.$children?.find(c => c.$options.name === 'KeywordsPlanningPage');
-          if (keywordsComponent && keywordsComponent.fetchOutlineTaskStatus) {
-            keywordsComponent.fetchOutlineTaskStatus();
-          }
         }, 500); // 增加延迟时间
       }, 800); // 增加延迟时间
     },

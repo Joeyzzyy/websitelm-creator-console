@@ -140,7 +140,7 @@ const login = async (email, password) => {
         const response = await apiClient.post('/login', {email, password});
         return response.data;
     } catch (error) {
-        console.error('登录失败:', error);
+        console.error('Login failed:', error);
         return false;
     }
 };
@@ -150,7 +150,7 @@ const getCategories = async (customerId) => {
     const response = await apiClient.get(`/categories/${customerId}?categoryName=ArticleType`);
     return response.data;
   } catch (error) {
-    console.error('获取文章分类失败:', error);
+    console.error('Failed to get article categories:', error);
     return null;
   }
 };
@@ -160,7 +160,7 @@ const getLinks = async (customerId) => {
       const response = await apiClient.get(`/links?customerId=${customerId}`);
       return response.data;
   } catch (error) {
-      console.error('获取页头页尾链接组失败:', error);
+      console.error('Failed to get header and footer link groups:', error);
       return null;
   }
 };
@@ -170,7 +170,7 @@ const postLinks = async (payload) => {
       const response = await apiClient.post(`/links`, payload);
       return response.data;
   } catch (error) {
-      console.error('获取页头页尾链组失败:', error);
+      console.error('Failed to get header and footer link groups:', error);
       return null;
   }
 };
@@ -180,7 +180,7 @@ const putLinks = async (groupId, payload) => {
       const response = await apiClient.put(`/links/${groupId}`, payload);
       return response.data;
   } catch (error) {
-      console.error('获取页头页尾链接组失败:', error);
+      console.error('Failed to get header and footer link groups:', error);
       return null;
   }
 };
@@ -190,7 +190,7 @@ const deleteGroupLinks = async (groupId) => {
       const response = await apiClient.delete(`/links/${groupId}`);
       return response.data;
   } catch (error) {
-      console.error('删除页头页尾链接组失败:', error);
+      console.error('Failed to delete header and footer link group:', error);
       return null;
   }
 };
@@ -200,7 +200,7 @@ const deleteLinks = async (groupId, linkId) => {
       const response = await apiClient.delete(`/links/${groupId}/${linkId}`);
       return response.data;
   } catch (error) {
-      console.error('删除页头页尾链接组失败:', error);
+      console.error('Failed to delete header and footer link group:', error);
       return null;
   }
 };
@@ -210,7 +210,7 @@ const getKeywords = async (customerId) => {
     const response = await apiClient.get(`/keywords/${customerId}`);
     return response.data;
   } catch (error) {
-    console.error('获取关键词失败:', error);
+    console.error('Failed to get keywords:', error);
     return null;
   }
 };
@@ -221,30 +221,30 @@ const addKeyword = async (keywordId, keywordType, term) => {
         {subKeywordId: '', term: term});
     return response.data;
   } catch (error) {
-    console.error('添加关键词失:', error);
+    console.error('Failed to add keyword:', error);
     throw error;
   }
 };
 
-// 新增：删除关键词方法
+// New: Delete keyword method
 const deleteKeyword = async (keywordId, keywordType, subKeywordId) => {
   try {
     const response = await apiClient.delete(`/keywords/${keywordId}/${keywordType}/${subKeywordId}`);
     return response.data;
   } catch (error) {
-    console.error('删除关键词失败:', error);
+    console.error('Failed to delete keyword:', error);
     throw error;
   }
 };
 
-// 编辑关键词方法
+// Edit keyword method
 const editKeyword = async (keywordId, keywordType, subKeywordId, term) => {
   try {
     const response = await apiClient.put(`/keywords/${keywordId}/${keywordType}/${subKeywordId}`, 
         {subKeywordId: subKeywordId, term: term});
     return response.data;
   } catch (error) {
-    console.error('删除关键词失败:', error);
+    console.error('Failed to delete keyword:', error);
     throw error;
   }
 };

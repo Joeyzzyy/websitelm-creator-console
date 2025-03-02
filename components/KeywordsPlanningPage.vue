@@ -2351,7 +2351,7 @@ export default defineComponent({
           message.success('AI keyword selection task submitted successfully');
           // 关闭弹窗
           aiSelectionModalVisible.value = false;
-          // 其他处理逻辑...
+          api.getAnalysisStatus('auto_pilot');
         } else if (response && response.code === 429) {
           // 处理 429 错误（在响应体中）
           Modal.info({
