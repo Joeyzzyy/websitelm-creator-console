@@ -178,12 +178,31 @@
                                           </a-form-item>
                                         </a-col>
                                         <a-col :span="8">
-                                          <a-form-item label="Input anything...">
-                                            <a-input
-                                              v-model:value="filterForm.searchTerm"
-                                              placeholder="Enter search term for relevance"
-                                              allow-clear
-                                            />
+                                          <a-form-item label="Smart Keyword Search">
+                                            <div class="smart-input-container">
+                                              <a-input
+                                                v-model:value="filterForm.searchTerm"
+                                                placeholder="Input keywords or questions..."
+                                                allow-clear
+                                                class="smart-search-input"
+                                              />
+                                              <div class="input-suggestions">
+                                                <div class="suggestion-examples">
+                                                  <p class="suggestion-title">Try these:</p>
+                                                  <div class="suggestion-items">
+                                                    <div class="suggestion-item" @click="applySuggestion('How to improve website SEO ranking?')">
+                                                      <QuestionCircleOutlined /> Input a question: "How to improve website SEO ranking?"
+                                                    </div>
+                                                    <div class="suggestion-item" @click="applySuggestion('digital marketing')">
+                                                      <AimOutlined /> Input a seed keyword: "digital marketing"
+                                                    </div>
+                                                    <div class="suggestion-item" @click="applySuggestion('Discover low-competition keywords about content marketing')">
+                                                      <BulbOutlined /> Input a hint: "Discover low-competition keywords about content marketing"
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
                                           </a-form-item>
                                         </a-col>
                                       </a-row>
@@ -1072,10 +1091,8 @@ export default defineComponent({
           
           // 确保正确设置总数
           recommendedPagination.value.total = response.totalCount || 0
-          console.log('设置分页总数:', response.totalCount);
           
         } else {
-          console.log('API响应接收但没有数据');
           recommendedKeywords.value = [];
           recommendedPagination.value.total = 0;
         }
@@ -5471,5 +5488,66 @@ html {
 .deselect-btn:hover {
   color: #ff7875;
   border-color: #ff7875;
+}
+
+.smart-input-container {
+  position: relative;
+}
+
+.smart-search-input {
+  width: 100%;
+}
+
+.input-suggestions {
+  display: none;
+  position: absolute;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  margin-top: 4px;
+  padding: 12px;
+}
+
+.smart-input-container:hover .input-suggestions,
+.smart-search-input:focus + .input-suggestions {
+  display: block;
+}
+
+.suggestion-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.suggestion-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suggestion-item {
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.suggestion-item:hover {
+  background-color: #f5f5f5;
+}
+
+.search-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.help-icon {
+  margin-left: 8px;
+  color: #1890ff;
+  cursor: pointer;
 }
 </style>
