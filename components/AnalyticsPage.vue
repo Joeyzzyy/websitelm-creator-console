@@ -119,9 +119,22 @@
                   <div class="card-title">
                     <span>Search Traffic</span>
                     <div class="header-actions">
-                      <a-button type="primary" size="small" @click="refreshGscData">
-                        Refresh Data
-                      </a-button>
+                      <a-space>
+                        <a-select v-model:value="timeRange" style="width: 150px" @change="handleTimeRangeChange">
+                          <a-select-option value="7">Last 7 days</a-select-option>
+                          <a-select-option value="14">Last 14 days</a-select-option>
+                          <a-select-option value="28">Last 28 days</a-select-option>
+                          <a-select-option value="90">Last 3 months</a-select-option>
+                        </a-select>
+                        <a-select v-model:value="timeGranularity" style="width: 150px" @change="handleGranularityChange">
+                          <a-select-option value="day">Daily</a-select-option>
+                          <a-select-option value="week">Weekly</a-select-option>
+                          <a-select-option value="month">Monthly</a-select-option>
+                        </a-select>
+                        <a-button type="primary" size="small" @click="refreshGscData">
+                          Refresh Data
+                        </a-button>
+                      </a-space>
                     </div>
                   </div>
                 </template>
@@ -130,47 +143,35 @@
                   <a-spin size="default" />
                 </div>
                 <div v-else-if="gscData && gscData.length" class="gsc-data-container">
-                  <a-table 
-                    :dataSource="gscData" 
-                    :columns="columns"
-                    :pagination="{ pageSize: 10, showSizeChanger: true, pageSizeOptions: ['10', '15'] }"
-                    size="small"
-                    :scroll="{ y: 400, x: 820 }"
-                  >
-                    <template #bodyCell="{ column, record }">
-                      <template v-if="column.dataIndex === 'date'">
-                        {{ formatDate(record.keys[1]) }}
-                      </template>
-                      <template v-else-if="column.dataIndex === 'url'">
-                        <a-tooltip :title="record.keys[0]">
-                          {{ truncateUrl(record.keys[0]) }}
-                        </a-tooltip>
-                      </template>
-                      <template v-else-if="column.dataIndex === 'ctr'">
-                        {{ record.ctr ? (record.ctr * 100).toFixed(2) + '%' : '-' }}
-                      </template>
-                      <template v-else-if="column.dataIndex === 'clicks'">
-                        {{ record.clicks || '-' }}
-                      </template>
-                      <template v-else-if="column.dataIndex === 'impressions'">
-                        {{ record.impressions || '-' }}
-                      </template>
-                      <template v-else-if="column.dataIndex === 'position'">
-                        {{ record.position ? record.position.toFixed(1) : '-' }}
-                      </template>
-                    </template>
-                    
-                    <!-- Add a summary row at the bottom -->
-                    <template #footer>
-                      <div class="table-summary">
-                        <div><strong>Date Range:</strong> {{ dateRange }}</div>
-                        <div><strong>Clicks:</strong> {{ totalClicks }}</div>
-                        <div><strong>Impressions:</strong> {{ totalImpressions }}</div>
-                        <div><strong>CTR:</strong> {{ averageCtr }}%</div>
-                        <div><strong>Position:</strong> {{ averagePosition }}</div>
-                      </div>
-                    </template>
-                  </a-table>
+                  <div 
+                    class="chart-container" 
+                    ref="chartContainer" 
+                    style="width: 100%; height: 400px; border: 1px solid #eee;"
+                  ></div>
+                  
+                  <!-- Summary stats below chart -->
+                  <div class="chart-summary">
+                    <div class="summary-item">
+                      <div class="summary-label">Date Range</div>
+                      <div class="summary-value">{{ dateRange }}</div>
+                    </div>
+                    <div class="summary-item">
+                      <div class="summary-label">Total Clicks</div>
+                      <div class="summary-value">{{ totalClicks }}</div>
+                    </div>
+                    <div class="summary-item">
+                      <div class="summary-label">Total Impressions</div>
+                      <div class="summary-value">{{ totalImpressions }}</div>
+                    </div>
+                    <div class="summary-item">
+                      <div class="summary-label">Average CTR</div>
+                      <div class="summary-value">{{ averageCtr }}%</div>
+                    </div>
+                    <div class="summary-item">
+                      <div class="summary-label">Average Position</div>
+                      <div class="summary-value">{{ averagePosition }}</div>
+                    </div>
+                  </div>
                 </div>
                 <div v-else class="centered-empty-state">
                   No data available
@@ -265,7 +266,7 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted, onBeforeUnmount } from 'vue'
+import { defineComponent, ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import PageLayout from './layout/PageLayout.vue'
 import { 
@@ -278,6 +279,28 @@ import apiClient from '../api/api'
 import { Modal, message } from 'ant-design-vue'
 import { createVNode } from 'vue'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
+// Import ECharts
+import * as echarts from 'echarts/core'
+import { LineChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  DataZoomComponent,
+  LegendComponent
+} from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+// Register ECharts components
+echarts.use([
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  DataZoomComponent,
+  LegendComponent,
+  LineChart,
+  CanvasRenderer
+])
 
 export default defineComponent({
   components: {
@@ -315,7 +338,13 @@ export default defineComponent({
     const publishCount = ref(0)
     const googleIndexedCount = ref(0)
     const indexedCount = ref(0)
-
+    
+    // Chart related refs
+    const chartContainer = ref(null)
+    const chart = ref(null)
+    const timeRange = ref('28') // Default to 28 days
+    const timeGranularity = ref('day') // Default to daily view
+    
     const columns = [
       {
         title: 'Date',
@@ -474,39 +503,341 @@ export default defineComponent({
       })
     }
 
+    // Process GSC data for chart display
+    const processChartData = (data) => {
+      if (!data || !data.length) return { dates: [], clicks: [], impressions: [], ctr: [], position: [] }
+      
+      // Sort data by date (ascending)
+      const sortedData = [...data].sort((a, b) => {
+        const dateA = a.keys && a.keys[0] ? new Date(a.keys[0]) : new Date(0)
+        const dateB = b.keys && b.keys[0] ? new Date(b.keys[0]) : new Date(0)
+        return dateA - dateB
+      })
+      
+      // Extract data for chart
+      const dates = []
+      const clicks = []
+      const impressions = []
+      const ctr = []
+      const position = []
+      
+      sortedData.forEach(item => {
+        if (item.keys && item.keys[0]) {
+          dates.push(formatDate(item.keys[0]))
+          clicks.push(Number(item.clicks || 0))
+          impressions.push(Number(item.impressions || 0))
+          ctr.push(Number(item.ctr ? (item.ctr * 100).toFixed(2) : 0))
+          position.push(Number(item.position || 0))
+        }
+      })
+      
+      return { dates, clicks, impressions, ctr, position }
+    }
+    
+    // Aggregate data by week or month
+    const aggregateData = (data, granularity) => {
+      if (!data || !data.length) {
+        return {
+          dates: [],
+          clicks: [],
+          impressions: [],
+          ctr: [],
+          position: []
+        };
+      }
+      
+      if (granularity === 'day') {
+        return processChartData(data);
+      }
+      
+      const aggregated = []
+      const dateMap = new Map()
+      
+      // Sort data by date (ascending)
+      const sortedData = [...data].sort((a, b) => {
+        const dateA = a.keys && a.keys[0] ? new Date(a.keys[0]) : new Date(0)
+        const dateB = b.keys && b.keys[0] ? new Date(b.keys[0]) : new Date(0)
+        return dateA - dateB
+      })
+      
+      sortedData.forEach(item => {
+        if (!item.keys || !item.keys[0]) return
+        
+        const date = new Date(item.keys[0])
+        let key
+        
+        if (granularity === 'week') {
+          // Get the week start date (Sunday)
+          const dayOfWeek = date.getDay()
+          const weekStart = new Date(date)
+          weekStart.setDate(date.getDate() - dayOfWeek)
+          key = formatDate(weekStart)
+        } else if (granularity === 'month') {
+          // Get the month start date
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`
+        }
+        
+        if (!dateMap.has(key)) {
+          dateMap.set(key, {
+            keys: [key],
+            clicks: 0,
+            impressions: 0,
+            ctr: 0,
+            position: 0,
+            count: 0
+          })
+        }
+        
+        const entry = dateMap.get(key)
+        entry.clicks += item.clicks || 0
+        entry.impressions += item.impressions || 0
+        
+        if (item.position) {
+          entry.position += item.position
+          entry.count++
+        }
+      })
+      
+      // Calculate averages and create final array
+      dateMap.forEach(entry => {
+        if (entry.count > 0) {
+          entry.position = entry.position / entry.count
+        }
+        
+        if (entry.impressions > 0) {
+          entry.ctr = entry.clicks / entry.impressions
+        }
+        
+        aggregated.push(entry)
+      })
+      
+      return processChartData(aggregated)
+    }
+    
+    // Modify renderChart function
+    const renderChart = () => {
+      console.log('Render chart called, container:', chartContainer.value);
+      
+      if (!chartContainer.value) {
+        console.error('Chart container not found');
+        return;
+      }
+      
+      try {
+        // 确保容器有尺寸
+        console.log('Container size:', chartContainer.value.offsetWidth, chartContainer.value.offsetHeight);
+        
+        // 检查数据
+        const chartData = aggregateData(gscData.value, timeGranularity.value);
+        
+        // Dispose existing chart if it exists
+        if (chart.value) {
+          chart.value.dispose();
+        }
+        
+        // 初始化图表
+        chart.value = echarts.init(chartContainer.value);
+        
+        // 使用蓝紫色系的颜色方案
+        const colors = [
+          '#5470C6', // 蓝色
+          '#7B68EE', // 中等紫色
+          '#9370DB', // 中等紫色
+          '#8A2BE2'  // 蓝紫色
+        ];
+        
+        // 设置图表选项
+        const option = {
+          color: colors,
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              type: 'cross',
+              label: {
+                backgroundColor: '#6a7985'
+              }
+            }
+          },
+          legend: {
+            data: ['Clicks', 'Impressions', 'CTR (%)', 'Position'],
+            top: 10
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: chartData.dates
+          },
+          yAxis: [
+            {
+              type: 'value',
+              name: 'Clicks/Impressions',
+              position: 'left',
+              axisLine: {
+                show: true,
+                lineStyle: {
+                  color: colors[0]
+                }
+              },
+              axisLabel: {
+                formatter: '{value}'
+              }
+            },
+            {
+              type: 'value',
+              name: 'CTR/Position',
+              position: 'right',
+              axisLine: {
+                show: true,
+                lineStyle: {
+                  color: colors[2]
+                }
+              },
+              axisLabel: {
+                formatter: '{value}'
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'Clicks',
+              type: 'line',
+              data: chartData.clicks,
+              smooth: true,
+              lineStyle: {
+                width: 3
+              }
+            },
+            {
+              name: 'Impressions',
+              type: 'line',
+              data: chartData.impressions,
+              smooth: true,
+              lineStyle: {
+                width: 3
+              }
+            },
+            {
+              name: 'CTR (%)',
+              type: 'line',
+              yAxisIndex: 1,
+              data: chartData.ctr,
+              smooth: true,
+              lineStyle: {
+                width: 3
+              }
+            },
+            {
+              name: 'Position',
+              type: 'line',
+              yAxisIndex: 1,
+              data: chartData.position,
+              smooth: true,
+              lineStyle: {
+                width: 3
+              }
+            }
+          ]
+        };
+        
+        // 设置图表选项
+        chart.value.setOption(option);
+        
+        // 忽略控制台错误，因为图表已经正常显示
+        console.log('Chart rendered successfully');
+      } catch (error) {
+        console.error('Error rendering chart:', error);
+      }
+    }
+    
+    // Handle time range change
+    const handleTimeRangeChange = () => {
+      fetchGscData()
+    }
+    
+    // Handle granularity change
+    const handleGranularityChange = () => {
+      renderChart()
+    }
+
     // Fetch GSC data
     const fetchGscData = async () => {
-      loadingGscData.value = true
+      loadingGscData.value = true;
       try {
         const customerId = localStorage.getItem('currentCustomerId')
         const response = await apiClient.getGscAnalytics(
           customerId,
-          `sc-domain:${productInfo.value?.projectWebsite}`
+          `sc-domain:${productInfo.value?.projectWebsite}`,
+          timeRange.value
         )
         
         if (response && response.data) {
-          gscData.value = response.data
+          // 根据选择的时间范围过滤数据
+          const days = parseInt(timeRange.value);
+          let filteredData = response.data;
           
-          // Calculate summary statistics
-          calculateSummaryStats(response.data)
-          // Set date range
-          if (response.data.length > 0) {
-            const startDate = formatDate(response.data[response.data.length - 1].keys[1])
-            const endDate = formatDate(response.data[0].keys[1])
+          if (days && !isNaN(days)) {
+            const today = new Date();
+            const cutoffDate = new Date();
+            cutoffDate.setDate(today.getDate() - days);
+            
+            filteredData = response.data.filter(item => {
+              if (item.keys && item.keys[0]) {
+                const itemDate = new Date(item.keys[0]);
+                return itemDate >= cutoffDate;
+              }
+              return false;
+            });
+          }
+          
+          gscData.value = filteredData;
+          
+          // 计算统计数据
+          calculateSummaryStats(filteredData);
+          
+          // 设置日期范围
+          if (filteredData.length > 0) {
+            const sortedData = [...filteredData].sort((a, b) => {
+              const dateA = a.keys && a.keys[0] ? new Date(a.keys[0]) : new Date(0)
+              const dateB = b.keys && b.keys[0] ? new Date(b.keys[0]) : new Date(0)
+              return dateA - dateB
+            })
+            
+            const startDate = formatDate(sortedData[0].keys[0])
+            const endDate = formatDate(sortedData[sortedData.length - 1].keys[0])
             dateRange.value = `${startDate} - ${endDate}`
           }
+          
+          console.log('Data loaded, waiting for DOM update');
+          
+          // 确保在下一个 tick 后再尝试渲染图表
+          setTimeout(() => {
+            nextTick(() => {
+              console.log('Attempting to render chart');
+              if (chartContainer.value) {
+                renderChart();
+              } else {
+                console.error('Chart container still not available after timeout');
+              }
+            });
+          }, 300);
         }
       } catch (error) {
         console.error('Failed to fetch GSC data:', error)
-        message.error('获取搜索控制台数据失败')
+        message.error('Failed to fetch search console data')
       } finally {
-        loadingGscData.value = false
+        loadingGscData.value = false;
       }
     }
 
     // Calculate summary statistics for GSC data
     const calculateSummaryStats = (data) => {
-      if (!data || !data.rows || !data.rows.length) {
+      if (!data || !data.length) {
         totalClicks.value = 0
         totalImpressions.value = 0
         averageCtr.value = 0
@@ -517,17 +848,22 @@ export default defineComponent({
       let clicks = 0
       let impressions = 0
       let positions = 0
+      let positionCount = 0
       
-      data.rows.forEach(row => {
+      data.forEach(row => {
         clicks += row.clicks || 0
         impressions += row.impressions || 0
-        positions += row.position || 0
+        
+        if (row.position) {
+          positions += row.position
+          positionCount++
+        }
       })
       
       totalClicks.value = clicks
       totalImpressions.value = impressions
       averageCtr.value = impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : 0
-      averagePosition.value = data.rows.length > 0 ? (positions / data.rows.length).toFixed(1) : 0
+      averagePosition.value = positionCount > 0 ? (positions / positionCount).toFixed(1) : 0
     }
 
     // Fetch sitemap data
@@ -640,37 +976,8 @@ export default defineComponent({
     }
 
     // Refresh GSC data
-    const refreshGscData = async () => {
-      loadingGscData.value = true;
-      try {
-        const customerId = localStorage.getItem('currentCustomerId');
-        const response = await apiClient.getGscAnalytics(
-          customerId,
-          `sc-domain:${productInfo.value?.projectWebsite}`
-        );
-        
-        if (response && response.data) {
-          gscData.value = response.data;
-          
-          // Calculate summary statistics
-          calculateSummaryStats(response.data);
-          
-          // Set date range
-          if (response.data.length > 0) {
-            const startDate = formatDate(response.data[response.data.length - 1].keys[1]);
-            const endDate = formatDate(response.data[0].keys[1]);
-            dateRange.value = `${startDate} - ${endDate}`;
-          }
-        }
-        
-        // 刷新页面统计数据
-        await fetchPageStats();
-      } catch (error) {
-        console.error('Failed to fetch GSC data:', error);
-        message.error('Failed to fetch search console data');
-      } finally {
-        loadingGscData.value = false;
-      }
+    const refreshGscData = () => {
+      fetchGscData();
     }
 
     // Handle tree node selection
@@ -751,7 +1058,7 @@ export default defineComponent({
       router.push('/dashboard')
     }
 
-    // 修改 fetchPageStats 方法，使用正确的数据字段
+    // Fetch page stats
     const fetchPageStats = async () => {
       loadingPageStats.value = true;
       try {
@@ -774,21 +1081,35 @@ export default defineComponent({
 
     // Lifecycle hooks
     onMounted(() => {
-      loadProductInfo()
-      handleGscCallback()
-      expandedKeys.value = ['root']
+      loadProductInfo();
+      handleGscCallback();
+      expandedKeys.value = ['root'];
+      
+      // 添加窗口大小变化监听，确保图表响应式调整
+      window.addEventListener('resize', handleResize);
     })
 
     onBeforeUnmount(() => {
-      if (gscCheckInterval.value) {
-        clearInterval(gscCheckInterval.value)
+      window.removeEventListener('resize', handleResize);
+      
+      // 清理图表实例
+      if (chart.value) {
+        chart.value.dispose();
+        chart.value = null;
       }
     })
 
-    // 处理树节点展开
+    // 添加窗口大小变化处理函数
+    const handleResize = () => {
+      if (chart.value) {
+        chart.value.resize();
+      }
+    }
+
+    // Handle tree node expansion
     const onExpand = (keys) => {
-      expandedKeys.value = keys;
-    };
+      expandedKeys.value = keys
+    }
 
     return {
       productInfo,
@@ -800,7 +1121,6 @@ export default defineComponent({
       sitemapData,
       loadingSitemap,
       expandedKeys,
-      columns,
       totalClicks,
       totalImpressions,
       averageCtr,
@@ -827,6 +1147,11 @@ export default defineComponent({
       publishCount,
       googleIndexedCount,
       indexedCount,
+      chartContainer,
+      timeRange,
+      timeGranularity,
+      handleTimeRangeChange,
+      handleGranularityChange
     }
   }
 })
@@ -1225,5 +1550,78 @@ export default defineComponent({
   font-size: 24px;
   font-weight: 600;
   color: #1890ff;
+}
+
+/* Chart styles */
+.chart-container {
+  width: 100%;
+  height: 400px;
+  margin-bottom: 16px;
+  border: 1px solid #f0f0f0; /* 添加边框以便于调试 */
+}
+
+.chart-summary {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 140px;
+  padding: 12px 16px;
+  background-color: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.summary-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.summary-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #6b7280;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.summary-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+  text-align: center;
+}
+
+/* 为不同类型的数据添加不同的颜色 */
+.summary-item:nth-child(1) .summary-value {
+  color: #4b5563; /* 日期范围 - 深灰色 */
+}
+
+.summary-item:nth-child(2) .summary-value {
+  color: #5470C6; /* 点击量 - 蓝色 */
+}
+
+.summary-item:nth-child(3) .summary-value {
+  color: #7B68EE; /* 展示量 - 紫色 */
+}
+
+.summary-item:nth-child(4) .summary-value {
+  color: #9370DB; /* CTR - 中紫色 */
+}
+
+.summary-item:nth-child(5) .summary-value {
+  color: #8A2BE2; /* 位置 - 蓝紫色 */
 }
 </style>
