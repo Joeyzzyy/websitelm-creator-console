@@ -72,144 +72,147 @@
                     class="mode-tabs"
                     @change="handleModeChange"
                   >
-                    <template #rightExtra>
-                      <a-button 
-                        type="link"
-                        @click="showSelectedKeywords"
-                        class="view-keywords-btn"
-                      >
-                        View Selected Keywords
-                      </a-button>
-                    </template>
-                    
                     <a-tab-pane key="ai" tab="AI Priority Ranking">
                       <div class="beginner-mode">
                         <a-row :gutter="[24, 24]" class="beginner-content">
-                          <a-col :span="24">
-                            <a-card class="keyword-table-card">
-                              <!-- Add filter panel -->
-                              <div class="filter-panel">
-                                <a-form layout="vertical" :model="filterForm">
-                                  <a-row :gutter="16">
-                                    <!-- Priority filter -->
-                                    <a-col :span="8">
-                                      <a-form-item label="Priority">
-                                        <a-select
-                                          v-model:value="filterForm.priority"
-                                          placeholder="Select priority"
-                                          style="width: 100%"
-                                          allow-clear
-                                        >
-                                          <a-select-option v-for="priority in priorities" :key="priority.level" :value="priority.level">
-                                            {{ priority.label }}
-                                          </a-select-option>
-                                        </a-select>
-                                      </a-form-item>
+                          <a-col :span="6">
+                            <!-- Left side filter panel -->
+                            <div class="filter-sidebar">
+                              <h3 class="filter-title">Filter Options</h3>
+                              <a-form layout="vertical" :model="filterForm" class="sidebar-filter-form">
+                                <!-- Priority filter -->
+                                <a-form-item label="Priority">
+                                  <a-select
+                                    v-model:value="filterForm.priority"
+                                    placeholder="Select priority"
+                                    style="width: 100%"
+                                    allow-clear
+                                  >
+                                    <a-select-option v-for="priority in priorities" :key="priority.level" :value="priority.level">
+                                      {{ priority.label }}
+                                    </a-select-option>
+                                  </a-select>
+                                </a-form-item>
+                                
+                                <!-- Keyword difficulty filter -->
+                                <a-form-item label="Keyword Difficulty (KD)">
+                                  <a-row :gutter="8">
+                                    <a-col :span="11">
+                                      <a-input-number
+                                        v-model:value="filterForm.kdMin"
+                                        placeholder="Min"
+                                        style="width: 100%"
+                                        :min="0"
+                                        :max="100"
+                                      />
                                     </a-col>
-                                    
-                                    <!-- KD range filter -->
-                                    <a-col :span="8">
-                                      <a-form-item label="Keyword Difficulty (KD)">
-                                        <a-row :gutter="8">
-                                          <a-col :span="11">
-                                            <a-input-number
-                                              v-model:value="filterForm.kdMin"
-                                              placeholder="Min"
-                                              style="width: 100%"
-                                              :min="0"
-                                              :max="100"
-                                            />
-                                          </a-col>
-                                          <a-col :span="2" style="text-align: center">-</a-col>
-                                          <a-col :span="11">
-                                            <a-input-number
-                                              v-model:value="filterForm.kdMax"
-                                              placeholder="Max"
-                                              style="width: 100%"
-                                              :min="0"
-                                              :max="100"
-                                            />
-                                          </a-col>
-                                        </a-row>
-                                      </a-form-item>
-                                    </a-col>
-                                    
-                                    <!-- Volume range filter -->
-                                    <a-col :span="8">
-                                      <a-form-item label="Search Volume">
-                                        <a-row :gutter="8">
-                                          <a-col :span="11">
-                                            <a-input-number
-                                              v-model:value="filterForm.volumeMin"
-                                              placeholder="Min"
-                                              style="width: 100%"
-                                              :min="0"
-                                            />
-                                          </a-col>
-                                          <a-col :span="2" style="text-align: center">-</a-col>
-                                          <a-col :span="11">
-                                            <a-input-number
-                                              v-model:value="filterForm.volumeMax"
-                                              placeholder="Max"
-                                              style="width: 100%"
-                                              :min="0"
-                                            />
-                                          </a-col>
-                                        </a-row>
-                                      </a-form-item>
+                                    <a-col :span="2" style="text-align: center">-</a-col>
+                                    <a-col :span="11">
+                                      <a-input-number
+                                        v-model:value="filterForm.kdMax"
+                                        placeholder="Max"
+                                        style="width: 100%"
+                                        :min="0"
+                                        :max="100"
+                                      />
                                     </a-col>
                                   </a-row>
+                                </a-form-item>
+                                
+                                <!-- Search volume filter -->
+                                <a-form-item label="Search Volume">
+                                  <a-row :gutter="8">
+                                    <a-col :span="11">
+                                      <a-input-number
+                                        v-model:value="filterForm.volumeMin"
+                                        placeholder="Min"
+                                        style="width: 100%"
+                                        :min="0"
+                                      />
+                                    </a-col>
+                                    <a-col :span="2" style="text-align: center">-</a-col>
+                                    <a-col :span="11">
+                                      <a-input-number
+                                        v-model:value="filterForm.volumeMax"
+                                        placeholder="Max"
+                                        style="width: 100%"
+                                        :min="0"
+                                      />
+                                    </a-col>
+                                  </a-row>
+                                </a-form-item>
+                                
+                                <!-- Related outlines filter -->
+                                <a-form-item label="Related Outlines">
+                                  <a-select
+                                    v-model:value="filterForm.hasOutlines"
+                                    placeholder="Select status"
+                                    style="width: 100%"
+                                    allow-clear
+                                  >
+                                    <a-select-option value="yes">Has Outlines</a-select-option>
+                                    <a-select-option value="no">No Outlines</a-select-option>
+                                  </a-select>
+                                </a-form-item>
+                                
+                                <!-- Smart keyword search -->
+                                <a-form-item label="Smart Keyword Search">
+                                  <a-input
+                                    v-model:value="filterForm.searchTerm"
+                                    placeholder="Input keywords or questions..."
+                                    allow-clear
+                                    class="smart-search-input"
+                                    @pressEnter="applyFilters"
+                                  />
                                   
-                                  <a-row :gutter="16">
-                                    <!-- Related outlines filter -->
-                                    <a-col :span="8">
-                                      <a-form-item label="Related Outlines">
-                                        <a-select
-                                          v-model:value="filterForm.hasOutlines"
-                                          placeholder="Select status"
-                                          style="width: 100%"
-                                          allow-clear
-                                        >
-                                          <a-select-option value="yes">Has Outlines</a-select-option>
-                                          <a-select-option value="no">No Outlines</a-select-option>
-                                        </a-select>
-                                      </a-form-item>
-                                    </a-col>
-                                    <a-col :span="8">
-                                      <a-form-item label="Smart Keyword Search">
-                                        <div class="smart-input-container" style="display: flex; align-items: flex-start;">
-                                          <div style="flex: 1;">
-                                            <a-input
-                                              v-model:value="filterForm.searchTerm"
-                                              placeholder="Input keywords or questions..."
-                                              allow-clear
-                                              class="smart-search-input"
-                                            />
-                                            <div class="input-suggestions">
-                                              <div class="suggestion-examples">
-                                                <p class="suggestion-title">Try like:</p>
-                                                <div class="suggestion-items">
-                                                  <div class="suggestion-item" @click="applySuggestion('digital marketing')">
-                                                    1. Input a seed keyword: "digital marketing"
-                                                  </div>
-                                                  <div class="suggestion-item" @click="applySuggestion('Discover low-competition keywords about content marketing')">
-                                                    2. Input a hint: "Discover low-competition keywords about content marketing"
-                                                  </div>
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </div>
-                                          <a-button 
-                                            type="primary" 
-                                            @click="applyFilters"
-                                            style="margin-left: 8px; margin-top: 0;"
-                                          >Apply Filters</a-button>
-                                        </div>
-                                      </a-form-item>
-                                    </a-col>
-                                  </a-row>
-                                </a-form>
-                              </div>
+                                  <!-- Search examples -->
+                                  <div class="search-examples">
+                                    <p class="example-title">Examples:</p>
+                                    <div class="example-items">
+                                      <div class="example-item" @click="applySuggestion('digital marketing')">
+                                        <SearchOutlined class="example-icon" />
+                                        <span>digital marketing</span>
+                                      </div>
+                                      <div class="example-item" @click="applySuggestion('Discover low-competition keywords about content marketing')">
+                                        <BulbOutlined class="example-icon" />
+                                        <span>low competition content marketing</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </a-form-item>
+                                
+                                <!-- Filter buttons -->
+                                <div class="filter-actions">
+                                  <a-button 
+                                    type="primary" 
+                                    block
+                                    @click="applyFilters"
+                                  >Apply Filters</a-button>
+                                  <a-button 
+                                    block
+                                    @click="resetFilters"
+                                    style="margin-top: 8px;"
+                                  >Reset Filters</a-button>
+                                </div>
+                              </a-form>
+                            </div>
+                          </a-col>
+                          
+                          <a-col :span="18">
+                            <!-- Right side table -->
+                            <a-card class="keyword-table-card">
+                              <template #title>
+                                <div class="table-header">
+                                  <span>{{ totalRecordsText }}</span>
+                                  <a-button 
+                                    type="link"
+                                    @click="showSelectedKeywords"
+                                    class="view-keywords-btn"
+                                  >
+                                    View Selected Keywords
+                                  </a-button>
+                                </div>
+                              </template>
                               
                               <a-table
                                 :dataSource="recommendedKeywords"
@@ -219,7 +222,7 @@
                                   pageSize: recommendedPagination.pageSize,
                                   total: recommendedPagination.total,
                                   showSizeChanger: true,
-                                  showQuickJumper: true
+                                  showQuickJumper: true,
                                 }"
                                 @change="handleKeywordsPaginationChange"
                                 size="small"
@@ -924,7 +927,7 @@ seo tools, 45"
 import { defineComponent, ref, computed, h, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
 import { Tag } from 'ant-design-vue'
-import { 
+import {
   DeleteOutlined,
   PlusOutlined,
   SaveOutlined,
@@ -1128,33 +1131,42 @@ export default defineComponent({
       }
     }
 
-    const fetchKeywords = async (priority = '1', page = 1, pageSize = 15, searchTerm = '') => {
-      console.log('Fetching keywords with priority:', priority, 'page:', page, 'pageSize:', pageSize);
+    const totalRecordsText = computed(() => {
+      return `Total: ${recommendedPagination.value.total} keywords`;
+    });
+
+    const fetchKeywords = async (priority = null, page = 1, pageSize = 15, filters = {}) => {
+      console.log('Fetching keywords, priority:', priority, 'page:', page, 'pageSize:', pageSize, 'filters:', filters);
       try {
-        const response = await api.getPlanningKeywords({
-          level: priority,  // 使用level作为参数名称
+        const params = {
           page,
-          limit: pageSize
-        })
+          limit: pageSize,
+          ...filters
+        };
+        
+        if (priority) {
+          params.level = priority;
+        }
+        
+        const response = await api.getPlanningKeywords(params);
         
         if (response?.data) {
           console.log('API response received, data count:', response.data.length);
-          recommendedKeywords.value = response.data.map(transformKeywordData)
+          recommendedKeywords.value = response.data.map(transformKeywordData);
           
-          // 确保正确设置总数
-          recommendedPagination.value.total = response.totalCount || 0
-          
+          // Ensure total count is set correctly
+          recommendedPagination.value.total = response.totalCount || 0;
         } else {
           recommendedKeywords.value = [];
           recommendedPagination.value.total = 0;
         }
       } catch (error) {
-        console.error('Failed to fetch keywords:', error)
-        message.error('Failed to load keywords')
+        console.error('Failed to fetch keywords:', error);
+        message.error('Failed to load keywords');
         recommendedKeywords.value = [];
         recommendedPagination.value.total = 0;
       }
-    }
+    };
 
     const handleComparisonPaginationChange = (priority, page, pageSize) => {
       recommendedPagination.value.current = page
@@ -3179,10 +3191,10 @@ export default defineComponent({
     // 筛选表单数据
     const filterForm = ref({
       priority: '1',  // 设置默认值为 '1'
-      kdMin: null,
-      kdMax: null,
-      volumeMin: null,
-      volumeMax: null,
+      kdMin: undefined,
+      kdMax: undefined,
+      volumeMin: undefined,
+      volumeMax: undefined,
       hasOutlines: 'no',
       searchTerm: ''
     })
@@ -3196,32 +3208,148 @@ export default defineComponent({
     
     // 关键词数据
     const filteredKeywords = ref([]);
-    
+
     const applyFilters = async () => {
-      recommendedPagination.value.current = 1
+      try {
+        console.log('Applying filters', filterForm.value);
+        if ((filterForm.value.kdMin !== undefined && filterForm.value.kdMin !== null && filterForm.value.kdMin !== '' && 
+             (filterForm.value.kdMax === undefined || filterForm.value.kdMax === null || filterForm.value.kdMax === '')) || 
+            ((filterForm.value.kdMin === undefined || filterForm.value.kdMin === null || filterForm.value.kdMin === '') && 
+             filterForm.value.kdMax !== undefined && filterForm.value.kdMax !== null && filterForm.value.kdMax !== '')) {
+          message.error('Please provide both minimum and maximum values for Keyword Difficulty');
+            return;
+          }
+        
+        if ((filterForm.value.volumeMin !== undefined && filterForm.value.volumeMin !== null && filterForm.value.volumeMin !== '' && 
+             (filterForm.value.volumeMax === undefined || filterForm.value.volumeMax === null || filterForm.value.volumeMax === '')) || 
+            ((filterForm.value.volumeMin === undefined || filterForm.value.volumeMin === null || filterForm.value.volumeMin === '') && 
+             filterForm.value.volumeMax !== undefined && filterForm.value.volumeMax !== null && filterForm.value.volumeMax !== '')) {
+          message.error('Please provide both minimum and maximum values for Search Volume');
+          return;
+        }
+        
+        if (filterForm.value.kdMin !== undefined && filterForm.value.kdMin !== null && filterForm.value.kdMin !== '' &&
+            filterForm.value.kdMax !== undefined && filterForm.value.kdMax !== null && filterForm.value.kdMax !== '') {
+          if (Number(filterForm.value.kdMin) > Number(filterForm.value.kdMax)) {
+            message.error('Minimum KD cannot be greater than maximum KD');
+            return;
+          }
+          if (Number(filterForm.value.kdMin) === Number(filterForm.value.kdMax)) {
+            message.warning('Minimum and maximum KD values are the same');
+          }
+          if (Number(filterForm.value.kdMin) < 0 || Number(filterForm.value.kdMax) < 0) {
+            message.error('KD values must be positive numbers');
+            return;
+          }
+          if (Number(filterForm.value.kdMax) > 100) {
+            message.warning('Maximum KD cannot exceed 100, setting to 100');
+            filterForm.value.kdMax = 100;
+          }
+        }
+        
+        if (filterForm.value.volumeMin !== undefined && filterForm.value.volumeMin !== null && filterForm.value.volumeMin !== '' &&
+            filterForm.value.volumeMax !== undefined && filterForm.value.volumeMax !== null && filterForm.value.volumeMax !== '') {
+          if (Number(filterForm.value.volumeMin) > Number(filterForm.value.volumeMax)) {
+            message.error('Minimum volume cannot be greater than maximum volume');
+            return;
+          }
+          if (Number(filterForm.value.volumeMin) === Number(filterForm.value.volumeMax)) {
+            message.warning('Minimum and maximum volume values are the same');
+          }
+          if (Number(filterForm.value.volumeMin) < 0 || Number(filterForm.value.volumeMax) < 0) {
+            message.error('Volume values must be positive numbers');
+            return;
+          }
+        }
+
+        // Validate individual values are integers
+        const validateInteger = (value, fieldName) => {
+          if (value !== undefined && value !== null && value !== '' && 
+              (!Number.isInteger(Number(value)) || Number(value) < 0)) {
+            message.error(`${fieldName} must be a positive integer`);
+            return false;
+          }
+          return true;
+        };
+        
+        if (!validateInteger(filterForm.value.kdMin, 'Minimum KD') ||
+            !validateInteger(filterForm.value.kdMax, 'Maximum KD') ||
+            !validateInteger(filterForm.value.volumeMin, 'Minimum volume') ||
+            !validateInteger(filterForm.value.volumeMax, 'Maximum volume')) {
+          return;
+        }
+
+        // Reset pagination
+        recommendedPagination.value.current = 1;
+
+        console.log('current form data', filterForm.value);
+        
+        // Call API to get filtered keywords
+        const response = await api.getPlanningKeywords({
+          level: filterForm.value.priority,
+          minKd: filterForm.value.kdMin,
+          maxKd: filterForm.value.kdMax,
+          minVolume: filterForm.value.volumeMin,
+          maxVolume: filterForm.value.volumeMax,
+          prompt: filterForm.value.searchTerm || undefined,
+          page: 1,
+          limit: recommendedPagination.value.pageSize
+        });
+        
+        if (response?.data) {
+          recommendedKeywords.value = response.data.map(transformKeywordData);
+          recommendedPagination.value.total = response.totalCount || 0;
+          
+          // Show success message
+          message.success('Filters applied successfully');
+        } else {
+          recommendedKeywords.value = [];
+          recommendedPagination.value.total = 0;
+          message.info('No matching keywords found');
+        }
+      } catch (error) {
+        console.error('Failed to apply filters:', error);
+        message.error('Failed to apply filters, please try again');
+      }
+    };
+
+    // Add reset filters function
+    const resetFilters = () => {
+      filterForm.value = {
+        priority: undefined,  
+        kdMin: undefined,
+        kdMax: undefined,
+        volumeMin: undefined,
+        volumeMax: undefined,
+        hasOutlines: 'no',  // Set default to 'no'
+        searchTerm: ''
+      };
       
-      const priorityValue = filterForm.value.priority
-      const searchTerm = filterForm.value.searchTerm // 获取搜索词
-      await fetchKeywords(priorityValue, 1, recommendedPagination.value.pageSize, searchTerm);
-    }
-    
+      // Automatically apply the reset filters
+      applyFilters();
+    };
+
+    // Update pagination handler to maintain filters
     const handleKeywordsPaginationChange = (pagination) => {
       recommendedPagination.value.current = pagination.current;
       recommendedPagination.value.pageSize = pagination.pageSize;
-      const priorityValue = filterForm.value.priority
+      
       fetchKeywords(
-        priorityValue, 
-        pagination.current, 
-        pagination.pageSize
+        filterForm.value.priority || currentPriority.value,
+        pagination.current,
+        pagination.pageSize,
+        {
+          minKd: filterForm.value.kdMin,
+          maxKd: filterForm.value.kdMax,
+          minVolume: filterForm.value.volumeMin,
+          maxVolume: filterForm.value.volumeMax,
+          prompt: filterForm.value.searchTerm || undefined
+        }
       );
     };
     
-    onMounted(() => {
-      fetchKeywords();
-    });
-    
-    // 返回新增的响应式变量和方法
     return {
+      totalRecordsText,
       taskStartTime,
       taskEndTime,
       taskDescription,
@@ -3397,7 +3525,8 @@ export default defineComponent({
       filteredKeywords,
       applyFilters,
       handleKeywordsPaginationChange,
-      fetchKeywords
+      fetchKeywords,
+      resetFilters
     }
   },
   created() {
@@ -3453,6 +3582,7 @@ html {
   display: flex;
   flex-direction: column;
   width: 100%;
+  height: 90vh;
 }
 
 @media (max-width: 768px) {
@@ -5624,11 +5754,6 @@ html {
   min-height: 800px; /* 确保标签内容区域有足够的高度 */
 }
 
-/* 筛选面板样式 */
-.filter-panel {
-  margin-bottom: 20px;
-}
-
 .filter-panel .ant-collapse-header {
   font-weight: 500;
   color: #1890ff;
@@ -5638,11 +5763,6 @@ html {
   background-color: #f8f9fa;
   padding: 16px;
   border-radius: 0 0 4px 4px;
-}
-
-/* 表格样式优化 */
-.keywords-table {
-  margin-top: 16px;
 }
 
 /* 筛选按钮样式 */
@@ -5727,11 +5847,6 @@ html {
   cursor: pointer;
 }
 
-/* Add these styles */
-.filter-panel {
-  margin-bottom: 16px;
-}
-
 .filter-panel :deep(.ant-collapse-header) {
   font-weight: 500;
   color: #1890ff;
@@ -5801,4 +5916,97 @@ html {
   margin-top: 0;
 }
 
+/* 左侧筛选面板样式 */
+.filter-sidebar {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 16px;
+  height: 100%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.filter-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: #262626;
+  border-bottom: 1px solid #e8e8e8;
+  padding-bottom: 8px;
+}
+
+.sidebar-filter-form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.search-examples {
+  margin-top: 8px;
+}
+
+.example-title {
+  font-size: 13px;
+  color: #8c8c8c;
+  margin-bottom: 8px;
+}
+
+.example-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.example-item {
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background-color: #f0f5ff;
+  color: #1890ff;
+  font-size: 13px;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+}
+
+.example-item:hover {
+  background-color: #e6f7ff;
+}
+
+.example-icon {
+  margin-right: 6px;
+  font-size: 12px;
+}
+
+.filter-actions {
+  margin-top: 24px;
+}
+
+/* 表格卡片样式 */
+.keyword-table-card {
+  height: 100%;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.view-keywords-btn {
+  padding: 0;
+}
+
+/* 确保表格填充可用空间 */
+.keywords-table {
+  margin-top: 8px;
+}
+
+/* 选择/取消选择按钮样式 */
+.select-btn {
+  color: #1890ff;
+  border-color: #1890ff;
+}
+
+.deselect-btn {
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+}
 </style>

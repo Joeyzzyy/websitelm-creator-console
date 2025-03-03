@@ -1131,6 +1131,11 @@ const getPlanningKeywords = async (params = {}) => {
       source: params.source,
       level: params.level,
       ...(params.status && { status: params.status }),
+      ...(params.minKd !== undefined && { minKd: params.minKd }),
+      ...(params.maxKd !== undefined && { maxKd: params.maxKd }),
+      ...(params.minVolume !== undefined && { minVolume: params.minVolume }),
+      ...(params.maxVolume !== undefined && { maxVolume: params.maxVolume }),
+      ...(params.prompt && { prompt: params.prompt }),
       ...(params.page && { page: params.page }),
       ...(params.limit && { limit: params.limit })
     };
