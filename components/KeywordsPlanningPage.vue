@@ -83,47 +83,151 @@
                     </template>
                     
                     <a-tab-pane key="ai" tab="AI Priority Ranking">
-
                       <div class="beginner-mode">
                         <a-row :gutter="[24, 24]" class="beginner-content">
                           <a-col :span="24">
                             <a-card class="keyword-table-card">
-                              <a-tabs 
-                                v-model:activeKey="currentPriority"
-                                @change="handleTabChange"
-                                class="priority-tabs"
-                                tabPosition="left"
+                              <!-- Add filter panel -->
+                              <div class="filter-panel">
+                                <a-collapse :bordered="false">
+                                  <a-collapse-panel key="1" header="Advanced Filter Options">
+                                    <a-form layout="vertical" :model="filterForm">
+                                      <a-row :gutter="16">
+                                        <!-- Priority filter -->
+                                        <a-col :span="8">
+                                          <a-form-item label="Priority">
+                                            <a-select
+                                              v-model:value="filterForm.priority"
+                                              placeholder="Select priority"
+                                              style="width: 100%"
+                                              allow-clear
+                                            >
+                                              <a-select-option v-for="priority in priorities" :key="priority.level" :value="priority.level">
+                                                {{ priority.label }}
+                                              </a-select-option>
+                                            </a-select>
+                                          </a-form-item>
+                                        </a-col>
+                                        
+                                        <!-- KD range filter -->
+                                        <a-col :span="8">
+                                          <a-form-item label="Keyword Difficulty (KD)">
+                                            <a-row :gutter="8">
+                                              <a-col :span="11">
+                                                <a-input-number
+                                                  v-model:value="filterForm.kdMin"
+                                                  placeholder="Min"
+                                                  style="width: 100%"
+                                                  :min="0"
+                                                  :max="100"
+                                                />
+                                              </a-col>
+                                              <a-col :span="2" style="text-align: center">-</a-col>
+                                              <a-col :span="11">
+                                                <a-input-number
+                                                  v-model:value="filterForm.kdMax"
+                                                  placeholder="Max"
+                                                  style="width: 100%"
+                                                  :min="0"
+                                                  :max="100"
+                                                />
+                                              </a-col>
+                                            </a-row>
+                                          </a-form-item>
+                                        </a-col>
+                                        
+                                        <!-- Volume range filter -->
+                                        <a-col :span="8">
+                                          <a-form-item label="Search Volume">
+                                            <a-row :gutter="8">
+                                              <a-col :span="11">
+                                                <a-input-number
+                                                  v-model:value="filterForm.volumeMin"
+                                                  placeholder="Min"
+                                                  style="width: 100%"
+                                                  :min="0"
+                                                />
+                                              </a-col>
+                                              <a-col :span="2" style="text-align: center">-</a-col>
+                                              <a-col :span="11">
+                                                <a-input-number
+                                                  v-model:value="filterForm.volumeMax"
+                                                  placeholder="Max"
+                                                  style="width: 100%"
+                                                  :min="0"
+                                                />
+                                              </a-col>
+                                            </a-row>
+                                          </a-form-item>
+                                        </a-col>
+                                      </a-row>
+                                      
+                                      <a-row :gutter="16">
+                                        <!-- Related outlines filter -->
+                                        <a-col :span="8">
+                                          <a-form-item label="Related Outlines">
+                                            <a-select
+                                              v-model:value="filterForm.hasOutlines"
+                                              placeholder="Select status"
+                                              style="width: 100%"
+                                              allow-clear
+                                            >
+                                              <a-select-option value="yes">Has Outlines</a-select-option>
+                                              <a-select-option value="no">No Outlines</a-select-option>
+                                            </a-select>
+                                          </a-form-item>
+                                        </a-col>
+                                        <a-col :span="8">
+                                          <a-form-item label="Input anything...">
+                                            <a-input
+                                              v-model:value="filterForm.searchTerm"
+                                              placeholder="Enter search term for relevance"
+                                              allow-clear
+                                            />
+                                          </a-form-item>
+                                        </a-col>
+                                      </a-row>
+                                      
+                                      <!-- Filter action buttons -->
+                                      <a-row>
+                                        <a-col :span="24" style="text-align: right">
+                                          <a-space>
+                                            <a-button type="primary" @click="applyFilters">Apply Filters</a-button>
+                                          </a-space>
+                                        </a-col>
+                                      </a-row>
+                                    </a-form>
+                                  </a-collapse-panel>
+                                </a-collapse>
+                              </div>
+                              
+                              <a-table
+                                :dataSource="recommendedKeywords"
+                                :columns="keywordsTableColumns"
+                                :pagination="{
+                                  current: recommendedPagination.current,
+                                  pageSize: recommendedPagination.pageSize,
+                                  total: recommendedPagination.total,
+                                  showSizeChanger: true,
+                                  showQuickJumper: true
+                                }"
+                                @change="handleKeywordsPaginationChange"
+                                size="small"
+                                class="keywords-table"
                               >
-                                <a-tab-pane v-for="priority in priorities" :key="priority.level" :tab="priority.label">
-                                  <a-table
-                                    :dataSource="getKeywordsByPriority(recommendedKeywords, priority.level)"
-                                    :columns="keywordsTableColumns"
-                                    :pagination="{
-                                      current: recommendedPagination.current,
-                                      pageSize: 15,
-                                      total: recommendedPagination.total,
-                                      showSizeChanger: false,
-                                      showQuickJumper: true
-                                    }"
-                                    @change="(page) => handleComparisonPaginationChange(priority.level, page.current)"
-                                    size="small"
-                                    class="keywords-table"
-                                  >
-                                    <template #bodyCell="{ column, record }">
-                                      <template v-if="column.key === 'actions'">
-                                        <a-button 
-                                          type="primary"
-                                          ghost
-                                          :class="record.favorited ? 'deselect-btn' : 'select-btn'"
-                                          @click="handleKeywordFavorite(record)"
-                                        >
-                                          {{ record.favorited ? 'Deselect' : 'Select' }}
-                                        </a-button>
-                                      </template>
-                                    </template>
-                                  </a-table>
-                                </a-tab-pane>
-                              </a-tabs>
+                                <template #bodyCell="{ column, record }">
+                                  <template v-if="column.key === 'actions'">
+                                    <a-button 
+                                      type="primary"
+                                      ghost
+                                      :class="record.favorited ? 'deselect-btn' : 'select-btn'"
+                                      @click="handleKeywordFavorite(record)"
+                                    >
+                                      {{ record.favorited ? 'Deselect' : 'Select' }}
+                                    </a-button>
+                                  </template>
+                                </template>
+                              </a-table>
                             </a-card>
                           </a-col>
                         </a-row>
@@ -182,17 +286,6 @@
                         </a-card>
                       </div>
                     </a-tab-pane>
-
-                    <a-tab-pane key="filter" tab="Custom Filtering">
-                      <div class="coming-soon-container">
-                        <div class="coming-soon-content">
-                          <ClockCircleOutlined class="coming-soon-icon" />
-                          <h3 class="coming-soon-title">Coming Soon</h3>
-                          <p class="coming-soon-description">Advanced keyword filtering capabilities are under development.</p>
-                        </div>
-                      </div>
-                    </a-tab-pane>
-                    
                     <a-tab-pane key="input" tab="Manual Input">
                       <div class="coming-soon-container">
                         <div class="coming-soon-content">
@@ -672,10 +765,6 @@
             </div>
           </section>
         </div>
-
-        <div class="drawer-footer">
-          <a-button @click="closeDrawer">Close</a-button>
-        </div>
       </template>
     </a-drawer>
 
@@ -819,7 +908,6 @@ import {
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import api from '../api/api'
-import { useRouter } from 'vue-router'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
 import { Modal } from 'ant-design-vue'
 import SmartBanner from './common/SmartBanner.vue'
@@ -969,25 +1057,33 @@ export default defineComponent({
       }
     }
 
-    const fetchKeywords = async (level, page = 1, limit = 15) => {
+    const fetchKeywords = async (priority = '1', page = 1, pageSize = 15, searchTerm = '') => {
+      console.log('Fetching keywords with priority:', priority, 'page:', page, 'pageSize:', pageSize);
       try {
         const response = await api.getPlanningKeywords({
-          level,
+          level: priority,  // 使用level作为参数名称
           page,
-          limit,
-          status: ''
+          limit: pageSize
         })
         
         if (response?.data) {
-          // 确保在设置数据之前打印转换后的数据
-          const transformedData = response.data.map(transformKeywordData)
-          recommendedKeywords.value = transformedData
+          console.log('API response received, data count:', response.data.length);
+          recommendedKeywords.value = response.data.map(transformKeywordData)
+          
+          // 确保正确设置总数
           recommendedPagination.value.total = response.totalCount || 0
+          console.log('设置分页总数:', response.totalCount);
+          
+        } else {
+          console.log('API响应接收但没有数据');
+          recommendedKeywords.value = [];
+          recommendedPagination.value.total = 0;
         }
       } catch (error) {
-        message.error('Failed to get keywords')
-      } finally {
-        loading.value = false
+        console.error('Failed to fetch keywords:', error)
+        message.error('Failed to load keywords')
+        recommendedKeywords.value = [];
+        recommendedPagination.value.total = 0;
       }
     }
 
@@ -1011,11 +1107,16 @@ export default defineComponent({
             pollingInterval.value = setInterval(checkAnalysisStatus, 5000)
           }
 
+          console.log('Before loading keywords') // 添加日志
+          await fetchKeywords('1', 1, recommendedPagination.value.pageSize)
+          console.log('After loading keywords, count:', recommendedKeywords.value.length) // 添加日志
           initializeSelectedKeywords()
         }
       } catch (error) {
         console.error('Initialization failed:', error)
         message.error('Failed to initialize the page')
+      } finally {
+        loading.value = false
       }
     })
 
@@ -2880,6 +2981,54 @@ export default defineComponent({
 
     const aiSelectionModalVisible = ref(false)
 
+    // 筛选表单数据
+    const filterForm = ref({
+      priority: ['1'], // 默认选中第一个优先级
+      kdMin: null,
+      kdMax: null,
+      volumeMin: null,
+      volumeMax: null,
+      hasOutlines: null,
+      searchTerm: '' // 添加搜索关键词字段
+    })
+    
+    // 统一的关键词分页
+    const keywordsPagination = ref({
+      current: 1,
+      pageSize: 15,
+      total: 0
+    });
+    
+    // 关键词数据
+    const filteredKeywords = ref([]);
+    
+    // 应用筛选条件
+    const applyFilters = async () => {
+      recommendedPagination.value.current = 1
+      
+      const priorityValue = filterForm.value.priority
+      const searchTerm = filterForm.value.searchTerm // 获取搜索词
+      
+      console.log('Applying filters with priority:', priorityValue, 'search term:', searchTerm);
+      
+      await fetchKeywords(priorityValue, 1, recommendedPagination.value.pageSize, searchTerm);
+    }
+    
+    const handleKeywordsPaginationChange = (pagination) => {
+      recommendedPagination.value.current = pagination.current;
+      recommendedPagination.value.pageSize = pagination.pageSize;
+      fetchKeywords(
+        currentPriority.value, 
+        pagination.current, 
+        pagination.pageSize
+      );
+    };
+    
+    onMounted(() => {
+      fetchKeywords();
+    });
+    
+    // 返回新增的响应式变量和方法
     return {
       taskStartTime,
       taskEndTime,
@@ -3045,7 +3194,13 @@ export default defineComponent({
       getAIButtonTooltip,
       handleSinglePageGeneration,
       getPageTypeColor,
-      aiSelectionModalVisible
+      aiSelectionModalVisible,
+      filterForm,
+      keywordsPagination,
+      filteredKeywords,
+      applyFilters,
+      handleKeywordsPaginationChange,
+      fetchKeywords
     }
   },
   created() {
@@ -5274,5 +5429,47 @@ html {
 
 .priority-tabs .ant-tabs-content {
   min-height: 800px; /* 确保标签内容区域有足够的高度 */
+}
+
+/* 筛选面板样式 */
+.filter-panel {
+  margin-bottom: 20px;
+}
+
+.filter-panel .ant-collapse-header {
+  font-weight: 500;
+  color: #1890ff;
+}
+
+.filter-panel .ant-collapse-content {
+  background-color: #f8f9fa;
+  padding: 16px;
+  border-radius: 0 0 4px 4px;
+}
+
+/* 表格样式优化 */
+.keywords-table {
+  margin-top: 16px;
+}
+
+/* 筛选按钮样式 */
+.select-btn {
+  color: #1890ff;
+  border-color: #1890ff;
+}
+
+.select-btn:hover {
+  color: #40a9ff;
+  border-color: #40a9ff;
+}
+
+.deselect-btn {
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+.deselect-btn:hover {
+  color: #ff7875;
+  border-color: #ff7875;
 }
 </style>

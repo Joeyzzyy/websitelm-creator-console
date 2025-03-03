@@ -838,7 +838,7 @@ export default {
 }
 
 .editor-wrapper {
-  border: 1px solid #d9d9d9;
+  border: none; /* 移除边框 */
   border-radius: 4px;
   margin-top: 8px;
   display: flex;
