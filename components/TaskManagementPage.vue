@@ -400,7 +400,7 @@ export default {
     const currentCustomerId = ref(localStorage.getItem('currentCustomerId') || '')
     const pagination = reactive({
       current: 1,
-      pageSize: 15,
+      pageSize: 17,
       total: 0
     })
     
