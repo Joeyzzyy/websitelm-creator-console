@@ -89,139 +89,126 @@
                             <a-card class="keyword-table-card">
                               <!-- Add filter panel -->
                               <div class="filter-panel">
-                                <a-collapse 
-                                  :bordered="false" 
-                                  v-model:activeKey="filterCollapseActiveKey" 
-                                  :defaultActiveKey="['1']"
-                                >
-                                  <a-collapse-panel key="1">
-                                    <template #header>
-                                      <div class="filter-header" @click.stop>
-                                        <span>Advanced Filter Options</span>
-                                      </div>
-                                    </template>
-                                    <template #extra>
-                                      <a-button 
-                                        type="primary" 
-                                        @click.stop="applyFilters"
-                                      >Apply Filters</a-button>
-                                    </template>
+                                <a-form layout="vertical" :model="filterForm">
+                                  <a-row :gutter="16">
+                                    <!-- Priority filter -->
+                                    <a-col :span="8">
+                                      <a-form-item label="Priority">
+                                        <a-select
+                                          v-model:value="filterForm.priority"
+                                          placeholder="Select priority"
+                                          style="width: 100%"
+                                          allow-clear
+                                        >
+                                          <a-select-option v-for="priority in priorities" :key="priority.level" :value="priority.level">
+                                            {{ priority.label }}
+                                          </a-select-option>
+                                        </a-select>
+                                      </a-form-item>
+                                    </a-col>
                                     
-                                    <a-form layout="vertical" :model="filterForm">
-                                      <a-row :gutter="16">
-                                        <!-- Priority filter -->
-                                        <a-col :span="8">
-                                          <a-form-item label="Priority">
-                                            <a-select
-                                              v-model:value="filterForm.priority"
-                                              placeholder="Select priority"
+                                    <!-- KD range filter -->
+                                    <a-col :span="8">
+                                      <a-form-item label="Keyword Difficulty (KD)">
+                                        <a-row :gutter="8">
+                                          <a-col :span="11">
+                                            <a-input-number
+                                              v-model:value="filterForm.kdMin"
+                                              placeholder="Min"
                                               style="width: 100%"
-                                              allow-clear
-                                            >
-                                              <a-select-option v-for="priority in priorities" :key="priority.level" :value="priority.level">
-                                                {{ priority.label }}
-                                              </a-select-option>
-                                            </a-select>
-                                          </a-form-item>
-                                        </a-col>
-                                        
-                                        <!-- KD range filter -->
-                                        <a-col :span="8">
-                                          <a-form-item label="Keyword Difficulty (KD)">
-                                            <a-row :gutter="8">
-                                              <a-col :span="11">
-                                                <a-input-number
-                                                  v-model:value="filterForm.kdMin"
-                                                  placeholder="Min"
-                                                  style="width: 100%"
-                                                  :min="0"
-                                                  :max="100"
-                                                />
-                                              </a-col>
-                                              <a-col :span="2" style="text-align: center">-</a-col>
-                                              <a-col :span="11">
-                                                <a-input-number
-                                                  v-model:value="filterForm.kdMax"
-                                                  placeholder="Max"
-                                                  style="width: 100%"
-                                                  :min="0"
-                                                  :max="100"
-                                                />
-                                              </a-col>
-                                            </a-row>
-                                          </a-form-item>
-                                        </a-col>
-                                        
-                                        <!-- Volume range filter -->
-                                        <a-col :span="8">
-                                          <a-form-item label="Search Volume">
-                                            <a-row :gutter="8">
-                                              <a-col :span="11">
-                                                <a-input-number
-                                                  v-model:value="filterForm.volumeMin"
-                                                  placeholder="Min"
-                                                  style="width: 100%"
-                                                  :min="0"
-                                                />
-                                              </a-col>
-                                              <a-col :span="2" style="text-align: center">-</a-col>
-                                              <a-col :span="11">
-                                                <a-input-number
-                                                  v-model:value="filterForm.volumeMax"
-                                                  placeholder="Max"
-                                                  style="width: 100%"
-                                                  :min="0"
-                                                />
-                                              </a-col>
-                                            </a-row>
-                                          </a-form-item>
-                                        </a-col>
-                                      </a-row>
-                                      
-                                      <a-row :gutter="16">
-                                        <!-- Related outlines filter -->
-                                        <a-col :span="8">
-                                          <a-form-item label="Related Outlines">
-                                            <a-select
-                                              v-model:value="filterForm.hasOutlines"
-                                              placeholder="Select status"
+                                              :min="0"
+                                              :max="100"
+                                            />
+                                          </a-col>
+                                          <a-col :span="2" style="text-align: center">-</a-col>
+                                          <a-col :span="11">
+                                            <a-input-number
+                                              v-model:value="filterForm.kdMax"
+                                              placeholder="Max"
                                               style="width: 100%"
+                                              :min="0"
+                                              :max="100"
+                                            />
+                                          </a-col>
+                                        </a-row>
+                                      </a-form-item>
+                                    </a-col>
+                                    
+                                    <!-- Volume range filter -->
+                                    <a-col :span="8">
+                                      <a-form-item label="Search Volume">
+                                        <a-row :gutter="8">
+                                          <a-col :span="11">
+                                            <a-input-number
+                                              v-model:value="filterForm.volumeMin"
+                                              placeholder="Min"
+                                              style="width: 100%"
+                                              :min="0"
+                                            />
+                                          </a-col>
+                                          <a-col :span="2" style="text-align: center">-</a-col>
+                                          <a-col :span="11">
+                                            <a-input-number
+                                              v-model:value="filterForm.volumeMax"
+                                              placeholder="Max"
+                                              style="width: 100%"
+                                              :min="0"
+                                            />
+                                          </a-col>
+                                        </a-row>
+                                      </a-form-item>
+                                    </a-col>
+                                  </a-row>
+                                  
+                                  <a-row :gutter="16">
+                                    <!-- Related outlines filter -->
+                                    <a-col :span="8">
+                                      <a-form-item label="Related Outlines">
+                                        <a-select
+                                          v-model:value="filterForm.hasOutlines"
+                                          placeholder="Select status"
+                                          style="width: 100%"
+                                          allow-clear
+                                        >
+                                          <a-select-option value="yes">Has Outlines</a-select-option>
+                                          <a-select-option value="no">No Outlines</a-select-option>
+                                        </a-select>
+                                      </a-form-item>
+                                    </a-col>
+                                    <a-col :span="8">
+                                      <a-form-item label="Smart Keyword Search">
+                                        <div class="smart-input-container" style="display: flex; align-items: flex-start;">
+                                          <div style="flex: 1;">
+                                            <a-input
+                                              v-model:value="filterForm.searchTerm"
+                                              placeholder="Input keywords or questions..."
                                               allow-clear
-                                            >
-                                              <a-select-option value="yes">Has Outlines</a-select-option>
-                                              <a-select-option value="no">No Outlines</a-select-option>
-                                            </a-select>
-                                          </a-form-item>
-                                        </a-col>
-                                        <a-col :span="16">
-                                          <a-form-item label="Smart Keyword Search">
-                                            <div class="smart-input-container">
-                                              <a-input
-                                                v-model:value="filterForm.searchTerm"
-                                                placeholder="Input keywords or questions..."
-                                                allow-clear
-                                                class="smart-search-input"
-                                              />
-                                              <div class="input-suggestions">
-                                                <div class="suggestion-examples">
-                                                  <p class="suggestion-title">Try these:</p>
-                                                  <div class="suggestion-items">
-                                                    <div class="suggestion-item" @click="applySuggestion('digital marketing')">
-                                                      1. Input a seed keyword: "digital marketing"
-                                                    </div>
-                                                    <div class="suggestion-item" @click="applySuggestion('Discover low-competition keywords about content marketing')">
-                                                      2. Input a hint: "Discover low-competition keywords about content marketing"
-                                                    </div>
+                                              class="smart-search-input"
+                                            />
+                                            <div class="input-suggestions">
+                                              <div class="suggestion-examples">
+                                                <p class="suggestion-title">Try like:</p>
+                                                <div class="suggestion-items">
+                                                  <div class="suggestion-item" @click="applySuggestion('digital marketing')">
+                                                    1. Input a seed keyword: "digital marketing"
+                                                  </div>
+                                                  <div class="suggestion-item" @click="applySuggestion('Discover low-competition keywords about content marketing')">
+                                                    2. Input a hint: "Discover low-competition keywords about content marketing"
                                                   </div>
                                                 </div>
                                               </div>
                                             </div>
-                                          </a-form-item>
-                                        </a-col>
-                                      </a-row>
-                                    </a-form>
-                                  </a-collapse-panel>
-                                </a-collapse>
+                                          </div>
+                                          <a-button 
+                                            type="primary" 
+                                            @click="applyFilters"
+                                            style="margin-left: 8px; margin-top: 0;"
+                                          >Apply Filters</a-button>
+                                        </div>
+                                      </a-form-item>
+                                    </a-col>
+                                  </a-row>
+                                </a-form>
                               </div>
                               
                               <a-table
@@ -3024,11 +3011,9 @@ export default defineComponent({
     // 关键词数据
     const filteredKeywords = ref([]);
     
-    // 应用筛选条件
     const applyFilters = async () => {
       recommendedPagination.value.current = 1
       
-      // 获取单个优先级值
       const priorityValue = filterForm.value.priority
       const searchTerm = filterForm.value.searchTerm // 获取搜索词
       await fetchKeywords(priorityValue, 1, recommendedPagination.value.pageSize, searchTerm);
@@ -3037,8 +3022,9 @@ export default defineComponent({
     const handleKeywordsPaginationChange = (pagination) => {
       recommendedPagination.value.current = pagination.current;
       recommendedPagination.value.pageSize = pagination.pageSize;
+      const priorityValue = filterForm.value.priority
       fetchKeywords(
-        currentPriority.value, 
+        priorityValue, 
         pagination.current, 
         pagination.pageSize
       );
