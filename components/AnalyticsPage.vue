@@ -638,12 +638,12 @@ export default defineComponent({
         // 初始化图表
         chart.value = echarts.init(chartContainer.value);
         
-        // 使用蓝紫色系的颜色方案
+        // 使用更加鲜明对比的颜色方案
         const colors = [
-          '#5470C6', // 蓝色
-          '#7B68EE', // 中等紫色
-          '#9370DB', // 中等紫色
-          '#8A2BE2'  // 蓝紫色
+          '#1890FF', // 蓝色 - 点击量
+          '#52C41A', // 绿色 - 展示量
+          '#FA8C16', // 橙色 - CTR
+          '#F5222D'  // 红色 - 位置
         ];
         
         // 设置图表选项
@@ -1610,18 +1610,18 @@ export default defineComponent({
 }
 
 .summary-item:nth-child(2) .summary-value {
-  color: #5470C6; /* 点击量 - 蓝色 */
+  color: #1890FF; /* 点击量 - 蓝色 */
 }
 
 .summary-item:nth-child(3) .summary-value {
-  color: #7B68EE; /* 展示量 - 紫色 */
+  color: #52C41A; /* 展示量 - 绿色 */
 }
 
 .summary-item:nth-child(4) .summary-value {
-  color: #9370DB; /* CTR - 中紫色 */
+  color: #FA8C16; /* CTR - 橙色 */
 }
 
 .summary-item:nth-child(5) .summary-value {
-  color: #8A2BE2; /* 位置 - 蓝紫色 */
+  color: #F5222D; /* 位置 - 红色 */
 }
 </style>
