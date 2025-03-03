@@ -297,12 +297,73 @@
                       </div>
                     </a-tab-pane>
                     <a-tab-pane key="input" tab="Manual Input">
-                      <div class="coming-soon-container">
-                        <div class="coming-soon-content">
-                          <EditOutlined class="coming-soon-icon" />
-                          <h3 class="coming-soon-title">Coming Soon</h3>
-                          <p class="coming-soon-description">Manual keyword input functionality will be available shortly.</p>
-                        </div>
+                      <div class="manual-input-container">
+                        <a-card class="manual-input-card">
+                          <div class="input-header">
+                            <h3 class="input-title">Add Keywords</h3>
+                            <p class="input-description">Enter one keyword per line, optionally include keyword difficulty (KD) and search volume</p>
+                          </div>
+                          
+                          <a-form layout="vertical">
+                            <a-form-item label="Keywords">
+                              <a-textarea
+                                v-model:value="bulkKeywords"
+                                placeholder="Enter keywords (one per line)
+Example:
+digital marketing
+content strategy, 25, 1200
+seo tools, 45"
+                                :autoSize="{ minRows: 6, maxRows: 12 }"
+                                class="bulk-textarea"
+                              />
+                              <div class="format-hint">
+                                <InfoCircleOutlined />
+                                <span>Format: keyword, KD (optional), volume (optional)</span>
+                              </div>
+                            </a-form-item>
+                            <a-form-item>
+                              <a-button 
+                                type="primary" 
+                                @click="addManualKeywords"
+                                :loading="isAddingKeywords"
+                              >
+                                Add Keywords
+                              </a-button>
+                            </a-form-item>
+                          </a-form>
+                        </a-card>
+                        
+                        <a-card title="Added Keywords" class="manual-keywords-card">
+                          <a-table
+                            :dataSource="manualKeywords"
+                            :columns="manualKeywordsColumns"
+                            :pagination="manualKeywordsPagination"
+                            @change="handleManualKeywordsPaginationChange"
+                            :rowKey="record => record.id || record.keyword"
+                          >
+                            <template #bodyCell="{ column, record }">
+                              <template v-if="column.key === 'actions'">
+                                <a-space>
+                                  <a-button 
+                                    type="primary"
+                                    ghost
+                                    :class="record.favorited ? 'deselect-btn' : 'select-btn'"
+                                    @click="handleKeywordFavorite(record)"
+                                  >
+                                    {{ record.favorited ? 'Deselect' : 'Select' }}
+                                  </a-button>
+                                  <a-button 
+                                    type="link" 
+                                    danger 
+                                    @click="removeManualKeyword(record)"
+                                  >
+                                    <DeleteOutlined />
+                                  </a-button>
+                                </a-space>
+                              </template>
+                            </template>
+                          </a-table>
+                        </a-card>
                       </div>
                     </a-tab-pane>
                   </a-tabs>
@@ -1730,10 +1791,6 @@ export default defineComponent({
       }
     };
 
-    const handleModalTabChange = (activeKey) => {
-      currentModalTab.value = activeKey
-    }
-
     const showSelectedKeywords = async () => {
       showSelectedModal.value = true
       await fetchSelectedKeywords()
@@ -2790,8 +2847,139 @@ export default defineComponent({
       })
     }
     const bulkKeywords = ref('')
-    const bulkInputVisible = ref(false)
-    const isUpdatingKeywords = ref(false)
+    const manualKeywords = ref([])
+    const isAddingKeywords = ref(false)
+    const manualKeywordsPagination = ref({
+      current: 1,
+      pageSize: 15,
+      total: 0
+    })
+
+    const manualKeywordsColumns = [
+      {
+        title: 'Keyword',
+        dataIndex: 'keyword',
+        key: 'keyword',
+        width: '40%'
+      },
+      {
+        title: 'KD',
+        dataIndex: 'kd',
+        key: 'kd',
+        width: '15%',
+        customRender: ({ text }) => {
+          if (text === null || text === undefined) return '-'
+          let color, difficulty
+          if (text <= 30) {
+            color = 'green'
+            difficulty = 'Easy'
+          } else if (text <= 70) {
+            color = 'orange'
+            difficulty = 'Medium'
+          } else {
+            color = 'red'
+            difficulty = 'Hard'
+          }
+          return h(Tag, { color }, () => `${text} - ${difficulty}`)
+        }
+      },
+      {
+        title: 'Volume',
+        dataIndex: 'volume',
+        key: 'volume',
+        width: '15%',
+        customRender: ({ text }) => text === null || text === undefined ? '-' : text
+      },
+      {
+        title: 'Actions',
+        key: 'actions',
+        width: '30%'
+      }
+    ]
+
+    // 添加手动关键词
+    const addManualKeywords = async () => {
+      const keywords = parseBulkKeywords(bulkKeywords.value)
+      
+      if (keywords.length === 0) {
+        message.warning('Please enter at least one valid keyword')
+        return
+      }
+      
+      isAddingKeywords.value = true
+      try {
+        // 这里应该调用API将关键词添加到系统中
+        // 暂时模拟API调用，直接添加到本地列表
+        manualKeywords.value = [...manualKeywords.value, ...keywords]
+        manualKeywordsPagination.value.total = manualKeywords.value.length
+        
+        message.success(`Successfully added ${keywords.length} keywords`)
+        bulkKeywords.value = '' // 清空输入框
+      } catch (error) {
+        console.error('Failed to add keywords:', error)
+        message.error('Failed to add keywords')
+      } finally {
+        isAddingKeywords.value = false
+      }
+    }
+
+    // 解析批量输入的关键词
+    const parseBulkKeywords = (text) => {
+      if (!text.trim()) return []
+      
+      // 分割行
+      const lines = text.split(/\n/).filter(line => line.trim())
+      
+      return lines.map(line => {
+        const parts = line.trim().split(/,|\t/).map(part => part.trim())
+        
+        // 第一部分是关键词
+        const keyword = parts[0]
+        
+        // 如果没有关键词，跳过
+        if (!keyword) return null
+        
+        // 第二部分可能是KD，第三部分可能是搜索量
+        let kd = null
+        let volume = null
+        
+        if (parts.length > 1) {
+          const kdValue = parseInt(parts[1])
+          if (!isNaN(kdValue)) {
+            kd = Math.min(100, Math.max(0, kdValue)) // 确保KD在0-100之间
+          }
+        }
+        
+        if (parts.length > 2) {
+          const volumeValue = parseInt(parts[2])
+          if (!isNaN(volumeValue)) {
+            volume = Math.max(0, volumeValue) // 确保搜索量不为负
+          }
+        }
+        
+        return {
+          id: Date.now() + Math.random().toString(36).substring(2, 9),
+          keyword,
+          kd,
+          volume,
+          keywordType: 'manual',
+          favorited: false
+        }
+      }).filter(Boolean) // 过滤掉无效的条目
+    }
+
+    // 移除手动添加的关键词
+    const removeManualKeyword = (record) => {
+      manualKeywords.value = manualKeywords.value.filter(k => k.id !== record.id)
+      manualKeywordsPagination.value.total = manualKeywords.value.length
+      message.success('Keyword removed')
+    }
+
+    // 处理手动关键词分页变化
+    const handleManualKeywordsPaginationChange = ({ current }) => {
+      manualKeywordsPagination.value.current = current
+    }
+
     // 从已选关键词中获取可用的关键词选项
     const availableKeywords = computed(() => {
       return selectedKeywordsData.value.map(keyword => ({
@@ -2822,8 +3010,6 @@ export default defineComponent({
       
       try {
         isUpdatingKeywords.value = true
-        
-        // 将关键词数组转换为逗号分隔的字符串，不带空格
         const keywordsString = selectedPlan.value.keywords.join(',')
         await api.updatePlanningOutline(selectedPlan.value.outlineId, {
           keywords: keywordsString
@@ -2997,7 +3183,7 @@ export default defineComponent({
       kdMax: null,
       volumeMin: null,
       volumeMax: null,
-      hasOutlines: null,
+      hasOutlines: 'no',
       searchTerm: ''
     })
     
@@ -3186,9 +3372,14 @@ export default defineComponent({
       handleFileUpload,
       downloadTemplate,
       bulkKeywords,
-      bulkInputVisible,
-      isUpdatingKeywords,
-      availableKeywords,
+      manualKeywords,
+      isAddingKeywords,
+      manualKeywordsPagination,
+      manualKeywordsColumns,
+      addManualKeywords,
+      removeManualKeyword,
+      handleManualKeywordsPaginationChange,
+      parseBulkKeywords,
       handleKeywordsChange,
       saveKeywords,
       getKeywordTagColor,
@@ -5212,7 +5403,6 @@ html {
   gap: 10px;
   font-weight: 600;
   font-size: 14px;
-  /* 移除 overflow: hidden 以避免光影效果被截断 */
 }
 
 .btn-start:hover {
@@ -5226,9 +5416,6 @@ html {
   box-shadow: 0 8px 12px rgba(71, 118, 230, 0.3) !important;
 }
 
-/* 移除光影效果，因为它会溢出按钮 */
-
-/* 添加相应的 CSS 样式 */
 .coming-soon-container {
   display: flex;
   justify-content: center;
@@ -5571,6 +5758,47 @@ html {
 
 .filter-header {
   font-weight: 500;
+}
+
+/* Manual Input Styles */
+.manual-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.manual-input-card {
+  margin-bottom: 0;
+}
+
+.input-header {
+  margin-bottom: 20px;
+}
+
+.input-title {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.input-description {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.bulk-textarea {
+  font-family: monospace;
+}
+
+.format-hint {
+  margin-top: 8px;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.manual-keywords-card {
+  margin-top: 0;
 }
 
 </style>
