@@ -89,8 +89,24 @@
                             <a-card class="keyword-table-card">
                               <!-- Add filter panel -->
                               <div class="filter-panel">
-                                <a-collapse :bordered="false">
-                                  <a-collapse-panel key="1" header="Advanced Filter Options">
+                                <a-collapse 
+                                  :bordered="false" 
+                                  v-model:activeKey="filterCollapseActiveKey" 
+                                  :defaultActiveKey="['1']"
+                                >
+                                  <a-collapse-panel key="1">
+                                    <template #header>
+                                      <div class="filter-header" @click.stop>
+                                        <span>Advanced Filter Options</span>
+                                      </div>
+                                    </template>
+                                    <template #extra>
+                                      <a-button 
+                                        type="primary" 
+                                        @click.stop="applyFilters"
+                                      >Apply Filters</a-button>
+                                    </template>
+                                    
                                     <a-form layout="vertical" :model="filterForm">
                                       <a-row :gutter="16">
                                         <!-- Priority filter -->
@@ -177,7 +193,7 @@
                                             </a-select>
                                           </a-form-item>
                                         </a-col>
-                                        <a-col :span="8">
+                                        <a-col :span="16">
                                           <a-form-item label="Smart Keyword Search">
                                             <div class="smart-input-container">
                                               <a-input
@@ -190,29 +206,17 @@
                                                 <div class="suggestion-examples">
                                                   <p class="suggestion-title">Try these:</p>
                                                   <div class="suggestion-items">
-                                                    <div class="suggestion-item" @click="applySuggestion('How to improve website SEO ranking?')">
-                                                      <QuestionCircleOutlined /> Input a question: "How to improve website SEO ranking?"
-                                                    </div>
                                                     <div class="suggestion-item" @click="applySuggestion('digital marketing')">
-                                                      <AimOutlined /> Input a seed keyword: "digital marketing"
+                                                      1. Input a seed keyword: "digital marketing"
                                                     </div>
                                                     <div class="suggestion-item" @click="applySuggestion('Discover low-competition keywords about content marketing')">
-                                                      <BulbOutlined /> Input a hint: "Discover low-competition keywords about content marketing"
+                                                      2. Input a hint: "Discover low-competition keywords about content marketing"
                                                     </div>
                                                   </div>
                                                 </div>
                                               </div>
                                             </div>
                                           </a-form-item>
-                                        </a-col>
-                                      </a-row>
-                                      
-                                      <!-- Filter action buttons -->
-                                      <a-row>
-                                        <a-col :span="24" style="text-align: right">
-                                          <a-space>
-                                            <a-button type="primary" @click="applyFilters">Apply Filters</a-button>
-                                          </a-space>
                                         </a-col>
                                       </a-row>
                                     </a-form>
@@ -1422,6 +1426,7 @@ export default defineComponent({
     const handleTabChange = (activeKey) => {
       const priority = priorities.find(p => p.level === activeKey)
       if (priority) {
+        currentPriority.value = priority.level
         recommendedPagination.value.current = 1
         fetchKeywords(priority.level, 1, recommendedPagination.value.pageSize)
       }
@@ -3000,13 +3005,13 @@ export default defineComponent({
 
     // 筛选表单数据
     const filterForm = ref({
-      priority: ['1'], // 默认选中第一个优先级
+      priority: '1',  // 设置默认值为 '1'
       kdMin: null,
       kdMax: null,
       volumeMin: null,
       volumeMax: null,
       hasOutlines: null,
-      searchTerm: '' // 添加搜索关键词字段
+      searchTerm: ''
     })
     
     // 统一的关键词分页
@@ -3023,11 +3028,9 @@ export default defineComponent({
     const applyFilters = async () => {
       recommendedPagination.value.current = 1
       
+      // 获取单个优先级值
       const priorityValue = filterForm.value.priority
       const searchTerm = filterForm.value.searchTerm // 获取搜索词
-      
-      console.log('Applying filters with priority:', priorityValue, 'search term:', searchTerm);
-      
       await fetchKeywords(priorityValue, 1, recommendedPagination.value.pageSize, searchTerm);
     }
     
@@ -5550,4 +5553,38 @@ html {
   color: #1890ff;
   cursor: pointer;
 }
+
+/* Add these styles */
+.filter-panel {
+  margin-bottom: 16px;
+}
+
+.filter-panel :deep(.ant-collapse-header) {
+  font-weight: 500;
+  color: #1890ff;
+  display: flex;
+  align-items: center;
+  cursor: pointer; /* 确保整个标题区域都有点击光标 */
+}
+
+.filter-panel :deep(.ant-collapse-header-text) {
+  width: 100%; /* 让文本区域占据整个宽度 */
+  cursor: pointer; /* 确保文本区域有点击光标 */
+}
+
+.filter-panel :deep(.ant-collapse-arrow) {
+  font-size: 20px !important; 
+  cursor: pointer; /* 确保箭头有点击光标 */
+}
+
+.filter-panel :deep(.ant-collapse-content) {
+  background-color: #fafafa;
+  border-radius: 0 0 4px 4px;
+  padding: 12px;
+}
+
+.filter-header {
+  font-weight: 500;
+}
+
 </style>
