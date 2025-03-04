@@ -1,8 +1,8 @@
 <template>
   <a-layout style="height: 100vh;">
     <a-layout-sider
-      :width="320"
-      :collapsed-width="150"
+      :width="280"
+      :collapsed-width="120"
       style="background: linear-gradient(180deg, #F8FAFC 0%, #EEF2F6 100%); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);"
     >
       <!-- 头像部分 -->

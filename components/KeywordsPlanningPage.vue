@@ -496,22 +496,20 @@ seo tools, 45"
                           <div class="outline-actions">
                             <a-button 
                               type="text" 
+                              @click.stop="handleSinglePageGeneration(record)"
+                              :disabled="isGeneratingPages || record.status === 'processing'"
+                              :title="record.hasRelatedPageTask ? 'Page already exists' : 'Generate page'"
+                            >
+                              <span>Generate Page</span>
+                            </a-button>
+                            <a-button 
+                              type="text" 
                               @click.stop="handleFavorite(record)"
                               :title="record.favorited ? 'Remove from favorites' : 'Add to favorites'"
                             >
                               <StarFilled v-if="record.favorited" style="color: #faad14;" />
                               <StarOutlined v-else />
                             </a-button>
-                            
-                            <a-button 
-                              type="text" 
-                              @click.stop="handleSinglePageGeneration(record)"
-                              :disabled="isGeneratingPages || record.status === 'processing'"
-                              :title="record.hasRelatedPageTask ? 'Page already exists' : 'Generate page'"
-                            >
-                              <RocketOutlined :style="{ color: record.hasRelatedPageTask ? '#faad14' : '#1890ff' }" />
-                            </a-button>
-                            
                             <a-button 
                               type="text" 
                               @click.stop="handleDeleteOutline(record)"
@@ -3892,8 +3890,9 @@ html {
 
 .outline-actions {
   display: flex;
+  justify-content: flex-start;
+  align-items: center;
   gap: 8px;
-  justify-content: flex-end;
 }
 
 .plan-card {
@@ -6052,5 +6051,40 @@ html {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* 添加这些样式来修复 outline 列表中 action 按钮的对齐问题 */
+.outline-actions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 8px;
+}
+
+.content-plans-table .ant-table-cell {
+  vertical-align: middle;
+}
+
+/* 确保操作列的内容左对齐 */
+.content-plans-table .ant-table-thead > tr > th[key="actions"],
+.content-plans-table .ant-table-tbody > tr > td:last-child {
+  text-align: left;
+  padding-left: 16px;
+}
+
+/* 添加这些样式来修复图标居中问题 */
+.outline-actions .ant-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  height: 32px;
+}
+
+/* 确保图标在按钮中居中 */
+.outline-actions .ant-btn .anticon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>
