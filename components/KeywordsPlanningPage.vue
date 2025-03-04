@@ -13,7 +13,7 @@
                 <div class="analysis-loading-card" style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
                   <div class="preparing-analysis-content">
                     <LoadingOutlined class="analysis-icon" spin />
-                    <h2 class="analysis-title">Initializing Keyword Analysis</h2>
+                    <h2 class="analysis-title">Initializing Keyword Library</h2>
                     <p class="analysis-description">Gathering competitive intelligence from <span class="platform-tag semrush">SEMrush</span>, <span class="platform-tag ahrefs">Ahrefs</span>, <span class="platform-tag google">Google Trends</span>, and <span class="platform-tag social">Social Media</span></p>
                     <div class="loading-tips"> 
                       <ThunderboltOutlined class="tip-icon" />
@@ -484,9 +484,18 @@ seo tools, 45"
                       <!-- 页面类型列 -->
                       <a-table-column title="Type" key="pageType" width="15%">
                         <template #default="{ record }">
-                          <a-tag :color="getPageTypeColor(record.pageType)" @click.stop="showPlanDetails(record)">
-                            {{ record.pageType }}
-                          </a-tag>
+                          <div @click.stop="showPlanDetails(record)">
+                            <a-tag :color="getPageTypeColor(record.pageType)">
+                              {{ record.pageType }}
+                            </a-tag>
+                            <a-tag 
+                              v-if="record.hasRelatedPageTask" 
+                              color="gold" 
+                              style="margin-left: 4px;"
+                            >
+                              Page Created
+                            </a-tag>
+                          </div>
                         </template>
                       </a-table-column>
                       
@@ -495,21 +504,24 @@ seo tools, 45"
                         <template #default="{ record }">
                           <div class="outline-actions">
                             <a-button 
+                              type="primary"
+                              ghost
+                              :class="record.favorited ? 'deselect-btn' : 'select-btn'"
+                              @click.stop="handleFavorite(record)"
+                              :title="record.favorited ? 'Remove from selection' : 'Add to selection'"
+                            >
+                              {{ record.favorited ? 'Deselect' : 'Select' }}
+                            </a-button>
+                            
+                            <a-button 
                               type="text" 
                               @click.stop="handleSinglePageGeneration(record)"
                               :disabled="isGeneratingPages || record.status === 'processing'"
                               :title="record.hasRelatedPageTask ? 'Page already exists' : 'Generate page'"
                             >
-                              <span>Generate Page</span>
+                              <RocketOutlined :style="{ color: record.hasRelatedPageTask ? '#faad14' : '#1890ff' }" />
                             </a-button>
-                            <a-button 
-                              type="text" 
-                              @click.stop="handleFavorite(record)"
-                              :title="record.favorited ? 'Remove from favorites' : 'Add to favorites'"
-                            >
-                              <StarFilled v-if="record.favorited" style="color: #faad14;" />
-                              <StarOutlined v-else />
-                            </a-button>
+                            
                             <a-button 
                               type="text" 
                               @click.stop="handleDeleteOutline(record)"
@@ -559,9 +571,18 @@ seo tools, 45"
                       
                       <a-table-column title="Type" key="pageType" width="15%">
                         <template #default="{ record }">
-                          <a-tag :color="getPageTypeColor(record.pageType)" @click.stop="showPlanDetails(record)">
-                            {{ record.pageType }}
-                          </a-tag>
+                          <div @click.stop="showPlanDetails(record)">
+                            <a-tag :color="getPageTypeColor(record.pageType)">
+                              {{ record.pageType }}
+                            </a-tag>
+                            <a-tag 
+                              v-if="record.hasRelatedPageTask" 
+                              color="gold" 
+                              style="margin-left: 4px;"
+                            >
+                              Page Created
+                            </a-tag>
+                          </div>
                         </template>
                       </a-table-column>
                       
@@ -569,12 +590,13 @@ seo tools, 45"
                         <template #default="{ record }">
                           <div class="outline-actions">
                             <a-button 
-                              type="text" 
+                              type="primary"
+                              ghost
+                              :class="record.favorited ? 'deselect-btn' : 'select-btn'"
                               @click.stop="handleFavorite(record)"
-                              :title="record.favorited ? 'Remove from favorites' : 'Add to favorites'"
+                              :title="record.favorited ? 'Remove from selection' : 'Add to selection'"
                             >
-                              <StarFilled v-if="record.favorited" style="color: #faad14;" />
-                              <StarOutlined v-else />
+                              {{ record.favorited ? 'Deselect' : 'Select' }}
                             </a-button>
                             
                             <a-button 
@@ -3530,8 +3552,6 @@ export default defineComponent({
     }
   },
   created() {
-    // 使用 mitt 或其他事件总线库，或者直接使用 provide/inject
-    // 这里我们使用一个简单的方法，将方法暴露到全局
     if (this.$root) {
       this.$root.$switchKeywordsStep = this.switchToStep;
       this.$root.$showAISelectionConfirm = this.showAISelectionConfirm; // 添加这一行
@@ -3944,7 +3964,7 @@ html {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
+} 
 
 .plan-description {
   color: #6b7280;

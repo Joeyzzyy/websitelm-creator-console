@@ -56,9 +56,14 @@
                     <a-tag v-if="productInfo?.domainStatus" color="success">
                       Verified
                     </a-tag>
-                    <a-tag v-else color="warning">
-                      Not Verified
-                    </a-tag>
+                    <template v-else>
+                      <a-tag color="warning">
+                        Not Verified
+                      </a-tag>
+                      <a-button type="link" size="small" @click="openEditWithBasicInfoToVerify" class="verify-button">
+                      Go Verify
+                      </a-button>
+                    </template>
                   </div>
                 </div>
               </div>

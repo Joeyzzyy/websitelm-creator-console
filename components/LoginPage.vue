@@ -715,7 +715,7 @@ export default {
           }
           
           // 检查 onboarding 状态并决定跳转路径
-          const redirectPath = response.data.onboarding ? '/dashboard' : '/onboarding';
+          const redirectPath = response.data.onboarding ? '/analytics' : '/onboarding';
           this.$router.push(redirectPath);
         }
       } catch (error) {
@@ -903,7 +903,7 @@ export default {
           
           this.showSetPasswordModal = false;
           // 继续正常登录流程
-          this.$router.push('/dashboard');
+          this.$router.push('/analytics');
         }
       } catch (error) {
         this.$notification.error({

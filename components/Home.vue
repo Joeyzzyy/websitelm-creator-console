@@ -897,7 +897,7 @@ import DashboardPage from './DashboardPage.vue';
 import KeywordsPlanningPage from './KeywordsPlanningPage.vue';
 import AssetsPage from './AssetsPage.vue';
 import { LogoutOutlined, RightOutlined, LeftOutlined, QuestionCircleOutlined, UserOutlined, ThunderboltFilled } from '@ant-design/icons-vue'
-import { createVNode } from 'vue'
+import { createVNode, h } from 'vue'
 import { Modal, message } from 'ant-design-vue'
 import { ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import apiClient from '../api/api'
@@ -1227,23 +1227,59 @@ export default {
     },
 
     openAIAutopilot() {
-      // 使用路径导航到关键词规划页面
-      this.$router.push('/keywords');
-      
-      // 使用setTimeout确保页面加载完成后再触发AI自动选择
-      setTimeout(() => {
-        if (this.$root && this.$root.$switchKeywordsStep) {
-          this.$root.$switchKeywordsStep('outline');
-        }
-        
-        // 然后显示AI选择确认对话框
-        setTimeout(() => {
-          if (this.$root && this.$root.$showAISelectionConfirm) {
-            this.$root.$showAISelectionConfirm();
+      // 获取产品信息，检查域名状态
+      apiClient.getProductsByCustomerId()
+        .then(async response => {
+          if (response?.data && response.data.domainStatus === true) {
+            // 域名已验证，检查keywords analysis状态
+            try {
+              const analysisResponse = await apiClient.getAnalysisStatus('analyze_keywords')
+              
+              if (!analysisResponse || analysisResponse.analysisStatus !== 'finished') {
+                // Keywords analysis 未完成，显示提示
+                Modal.info({
+                  title: 'Keywords Analysis In Progress',
+                  content: h('div', {}, [
+                    h('p', 'Please wait for the keywords analysis to complete before using AI Autopilot.'),
+                    h('p', { style: 'margin-top: 12px;' }, 
+                      'The system needs to analyze your keywords first to provide accurate recommendations.'
+                    )
+                  ]),
+                  okText: 'Got it',
+                  maskClosable: true
+                });
+                return;
+              }
+
+              // Keywords analysis 已完成，继续原来的流程
+              this.$router.push('/keywords');
+              
+              setTimeout(() => {
+                if (this.$root && this.$root.$switchKeywordsStep) {
+                  this.$root.$switchKeywordsStep('outline');
+                }
+                
+                setTimeout(() => {
+                  if (this.$root && this.$root.$showAISelectionConfirm) {
+                    this.$root.$showAISelectionConfirm();
+                  }
+                }, 500);
+              }, 800);
+            } catch (error) {
+              console.error('Error checking keywords analysis status:', error);
+              this.$message.error('Failed to check keywords analysis status');
+            }
+          } else {
+            // 域名未验证，显示提示信息
+            this.$message.warning('Please verify your domain before using AI Autopilot');
+            // 导航到域名验证页面
+            this.$router.push('/dashboard');
           }
-          
-        }, 500); // 增加延迟时间
-      }, 800); // 增加延迟时间
+        })
+        .catch(error => {
+          console.error('Error checking domain status:', error);
+          this.$message.error('Failed to check domain verification status');
+        });
     },
   },
   watch: {
