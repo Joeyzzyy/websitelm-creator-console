@@ -81,7 +81,7 @@
                               <h3 class="filter-title">Filter Options</h3>
                               <a-form layout="vertical" :model="filterForm" class="sidebar-filter-form">
                                 <!-- Priority filter -->
-                                <a-form-item label="Priority">
+                                <a-form-item label="Smart Priority Category">
                                   <a-select
                                     v-model:value="filterForm.priority"
                                     placeholder="Select priority"
@@ -167,17 +167,14 @@
                                   
                                   <!-- Search examples -->
                                   <div class="search-examples">
-                                    <p class="example-title">Examples:</p>
-                                    <div class="example-items">
-                                      <div class="example-item" @click="applySuggestion('digital marketing')">
-                                        <SearchOutlined class="example-icon" />
-                                        <span>digital marketing</span>
-                                      </div>
-                                      <div class="example-item" @click="applySuggestion('Discover low-competition keywords about content marketing')">
-                                        <BulbOutlined class="example-icon" />
-                                        <span>low competition content marketing</span>
-                                      </div>
-                                    </div>
+                                    <div class="search-examples-title">Smart Semantic Search:</div>
+                                    <span class="search-example">Enter any semantic prompt or seed keyword</span>
+                                    <div class="search-examples-title">Try prompts like:</div>
+                                    <span class="search-example">"low competition keywords about content marketing"</span>
+                                    <span class="search-example">"trending topics in digital marketing for 2023"</span>
+                                    <div class="search-examples-title">Or simple seed keywords:</div>
+                                    <span class="search-example">"SEO" or "email marketing" or "social media strategy"</span>
+                                    <div class="search-examples-title">Our AI will intelligently interpret your input and find relevant keywords</div>
                                   </div>
                                 </a-form-item>
                                 
@@ -5705,7 +5702,6 @@ html {
 
 .keyword-table-card {
   height: 100%;
-  max-height: 70vh; /* 限制卡片的最大高度为视口高度的70% */
   display: flex;
   flex-direction: column; /* 使用列布局 */
 }
@@ -5866,7 +5862,7 @@ html {
 }
 
 .filter-panel :deep(.ant-collapse-content) {
-  background-color: #fafafa;
+  background: white;
   border-radius: 0 0 4px 4px;
   padding: 12px;
 }
@@ -5918,12 +5914,13 @@ html {
 
 /* 左侧筛选面板样式 */
 .filter-sidebar {
-  background-color: #f9f9f9;
+  background: #ffffff;
   border-radius: 8px;
-  padding: 16px;
-  height: 100%;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e8e8e8;
 }
+
 
 .filter-title {
   font-size: 16px;
@@ -5939,13 +5936,21 @@ html {
 }
 
 .search-examples {
-  margin-top: 8px;
+  color: #6b7280;
+  font-size: 12px;
+  margin-top: 4px;
 }
 
-.example-title {
-  font-size: 13px;
-  color: #8c8c8c;
-  margin-bottom: 8px;
+.search-examples-title {
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.search-example {
+  color: #4b5563;
+  font-style: italic;
+  display: block;
+  margin-bottom: 2px;
 }
 
 .example-items {
@@ -6008,5 +6013,44 @@ html {
 .deselect-btn {
   color: #ff4d4f;
   border-color: #ff4d4f;
+}
+
+.smart-search-input:focus + .search-examples,
+.smart-search-input:hover + .search-examples {
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.search-examples {
+  display: none;
+  color: #6b7280;
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 10px;
+  background: rgba(245, 247, 255, 0.95);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: absolute;
+  width: calc(100% - 32px);
+  z-index: 10;
+}
+
+.search-examples-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #4b5563;
+}
+
+.search-example {
+  color: #4b5563;
+  font-style: italic;
+  display: block;
+  margin-bottom: 4px;
+  padding: 2px 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>
