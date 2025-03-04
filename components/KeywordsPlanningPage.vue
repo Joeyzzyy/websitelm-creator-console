@@ -324,7 +324,7 @@ seo tools, 45"
                             <a-form-item>
                               <a-button 
                                 type="primary" 
-                                @click="addManualKeywords"
+                                @click="showUnderConstructionMessage"
                                 :loading="isAddingKeywords"
                               >
                                 Add Keywords
@@ -3343,6 +3343,10 @@ export default defineComponent({
       );
     };
     
+    const showUnderConstructionMessage = () => {
+      message.info('This feature is currently under construction. Expected to be available before March 7th.');
+    }
+    
     return {
       totalRecordsText,
       taskStartTime,
@@ -3521,7 +3525,8 @@ export default defineComponent({
       applyFilters,
       handleKeywordsPaginationChange,
       fetchKeywords,
-      resetFilters
+      resetFilters,
+      showUnderConstructionMessage
     }
   },
   created() {
