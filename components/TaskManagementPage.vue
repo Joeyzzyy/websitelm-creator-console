@@ -101,29 +101,32 @@
                       <a-tag
                         v-if="record.generatorStatus === 'processing'"
                         color="processing"
-                        class="generating-tag"
+                        class="generating-tag clickable"
                         @click.stop="showWorkflow(record)"
                         title="Click to view generation progress"
                       >
-                        <span class="generating-text">Generation in progress (View)</span>
+                        <span class="generating-text">Generating</span>
                         <span class="dot-animation">...</span>
+                        <span class="view-text">View Progress</span>
                       </a-tag>
                       <a-tag
                         v-else-if="record.generatorStatus === 'failed'"
-                        class="generating-tag failed-tag"
+                        class="generating-tag failed-tag clickable"
                         @click.stop="showWorkflow(record)"
                         title="Click to view generation details"
                       >
-                        <span class="generating-text">Generation Failed (View)</span>
+                        <span class="generating-text">Generation Failed</span>
+                        <span class="view-text">View Details</span>
                       </a-tag>
                       <a-tag
                         v-else
                         color="success"
-                        class="status-tag"
+                        class="status-tag clickable"
                         @click.stop="showWorkflow(record)"
                         title="Click to view generation history"
                       >
-                        <span>Generated (View)</span>
+                        <span>Generated</span>
+                        <span class="view-text"> (View History)</span>
                       </a-tag>
                     </div>
                   </div>
@@ -195,6 +198,14 @@
                             {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
                           </span>
                         </a-menu-item>
+                        <a-menu-item 
+                          key="delete"
+                          @click="handleDelete(record)"
+                          :disabled="record.generatorStatus === 'processing'"
+                          danger
+                        >
+                          <span>Delete</span>
+                        </a-menu-item>
                       </a-menu>
                     </template>
                   </a-dropdown>
@@ -228,6 +239,7 @@
       :confirm-loading="publishModal.loading"
       @ok="handlePublishConfirm"
       @cancel="handlePublishCancel"
+      width="800px"
     >
       <template v-if="publishModal.data?.publishStatus === 'publish'">
         <p>Are you sure you want to unpublish this page?</p>
@@ -354,15 +366,15 @@
 
     <!-- Add workflow modal -->
     <a-modal
-      v-model:visible="workflowModal.visible"
-      title="Workflow Status"
+      v-model:visible="workflowVisible"
+      title="Generation Progress"
       :footer="null"
-      width="800px"
+      width="1200px"
+      @cancel="handleWorkflowClose"
     >
       <workflow-status
-        v-if="workflowModal.visible"
-        :page-id="workflowModal.pageId"
-        :is-processing="workflowModal.isProcessing"
+        :pageId="currentPageId"
+        :isProcessing="isProcessing"
       />
     </a-modal>
   </page-layout>
@@ -1116,20 +1128,20 @@ export default {
     };
 
     // Add workflow modal
-    const workflowModal = ref({
-      visible: false,
-      pageId: null,
-      isProcessing: false
-    });
+    const workflowVisible = ref(false);
+    const currentPageId = ref(null);
+    const isProcessing = ref(false);
 
     const showWorkflow = (record) => {
-      console.log('Opening workflow modal for record:', record);
-      workflowModal.value = {
-        visible: true,
-        pageId: record.pageId,
-        isProcessing: true
-      };
-      console.log('Workflow modal state:', workflowModal.value);
+      workflowVisible.value = true;
+      currentPageId.value = record.pageId;
+      isProcessing.value = record.generatorStatus === 'processing';
+    };
+
+    const handleWorkflowClose = () => {
+      workflowVisible.value = false;
+      currentPageId.value = null;
+      isProcessing.value = false;
     };
 
     onMounted(async () => {
@@ -1197,8 +1209,11 @@ export default {
       showSettings,
       currentCustomerId,
       handleConfigDomain,
-      workflowModal,
-      showWorkflow
+      workflowVisible,
+      showWorkflow,
+      handleWorkflowClose,
+      currentPageId,
+      isProcessing
     }
   }
 }

@@ -514,12 +514,12 @@ seo tools, 45"
                             </a-button>
                             
                             <a-button 
-                              type="text" 
+                              type="primary"
                               @click.stop="handleSinglePageGeneration(record)"
                               :disabled="isGeneratingPages || record.status === 'processing'"
                               :title="record.hasRelatedPageTask ? 'Page already exists' : 'Generate page'"
                             >
-                              <RocketOutlined :style="{ color: record.hasRelatedPageTask ? '#faad14' : '#1890ff' }" />
+                              Generate Page
                             </a-button>
                             
                             <a-button 
@@ -645,7 +645,7 @@ seo tools, 45"
           <LoadingOutlined v-if="isGeneratingPages" spin />
           <CheckCircleOutlined v-else-if="generationCompleted" style="color: #52c41a" />
           <CloseCircleOutlined v-else-if="generationFailed" style="color: #ff4d4f" />
-          <span class="status-text">{{ generationStatusText }}</span>
+          <span class="status-text">&nbsp; {{ generationStatusText }}</span>
         </div>
         <a-progress 
           :percent="generationProgress" 
@@ -1002,6 +1002,7 @@ import api from '../api/api'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
 import { Modal } from 'ant-design-vue'
 import SmartBanner from './common/SmartBanner.vue'
+import { useRouter } from 'vue-router'
 
 export default defineComponent({
   name: 'KeywordsPlanningPage',
@@ -2086,12 +2087,16 @@ export default defineComponent({
         generationStatusText.value = 'All pages generation task submitted successfully!';
         generationDetails.value = `Successfully submitted ${completed}/${total} pages`;
 
+        // 修改这里: 将延迟时间缩短并添加导航逻辑
         setTimeout(() => {
           generationProgressVisible.value = false;
           generationProgress.value = 0;
           generationCompleted.value = false;
           generationFailed.value = false;
-        }, 3000);
+          
+          // 使用路由导航到 pages 页面
+          router.push('/pages');
+        }, 1500); // 缩短到1.5秒
 
       } catch (error) {
         console.error('Page generation process failed:', error)
@@ -3184,6 +3189,11 @@ export default defineComponent({
 
         message.success('Page generation task submitted successfully!');
         
+        // 添加这里: 延迟后导航到 pages 页面
+        setTimeout(() => {
+          router.push('/task-management');
+        }, 1500);
+        
         // Refresh the outline list to update status
         await fetchContentPlans();
 
@@ -3368,6 +3378,8 @@ export default defineComponent({
     const showUnderConstructionMessage = () => {
       message.info('This feature is currently under construction. Expected to be available before March 7th.');
     }
+    
+    const router = useRouter()
     
     return {
       totalRecordsText,

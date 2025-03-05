@@ -33,14 +33,14 @@
 
         <a-timeline>
           <a-timeline-item 
-            v-for="step in workflowSteps" 
+            v-for="step in reversedWorkflowSteps" 
             :key="step.nodeId"
             :color="getStepColor(step.status)"
           >
             <template #dot v-if="step.status === 'processing'">
               <a-spin size="small" />
             </template>
-            <div class="step-content">
+            <div class="step-content" :class="{ 'step-active': isActiveStep(step) }">
               <div class="step-header">
                 <div class="step-header-left">
                   <span class="step-name">{{ translateNodeName(step.nodeName) }}</span>
@@ -132,6 +132,10 @@ export default defineComponent({
       return workflowSteps.value?.length > 0 && workflowStatus.value;
     });
 
+    const reversedWorkflowSteps = computed(() => {
+      return [...workflowSteps.value].reverse();
+    });
+
     const fetchWorkflow = async () => {
       try {
         console.log('Fetching workflow for pageId:', props.pageId);
@@ -162,9 +166,6 @@ export default defineComponent({
     };
 
     const startPolling = () => {
-      // 立即执行一次请求
-      fetchWorkflow();
-      
       // 如果已经存在轮询，先清除
       if (pollingInterval) {
         clearInterval(pollingInterval);
@@ -191,17 +192,24 @@ export default defineComponent({
       }
     };
 
-    // 监听 isProcessing 变化
-    watch(() => props.isProcessing, (newVal) => {
+    // 修改 watch 逻辑
+    watch(() => props.isProcessing, async (newVal, oldVal) => {
+      console.log('isProcessing changed:', newVal, oldVal);
       if (newVal) {
         startPolling();
       } else {
         stopPolling();
+        // 停止轮询时，再获取一次最新数据
+        await fetchWorkflow();
       }
-    }, { immediate: true });
+    });
 
-    onMounted(() => {
+    onMounted(async () => {
       console.log('WorkflowStatus mounted, isProcessing:', props.isProcessing);
+      // 无论是否处理中，都先获取一次数据
+      await fetchWorkflow();
+      
+      // 如果是处理中状态，则开始轮询
       if (props.isProcessing) {
         console.log('Starting polling...');
         startPolling();
@@ -251,8 +259,16 @@ export default defineComponent({
       };
     };
 
+    const isActiveStep = (step) => {
+      return step.status === 'processing' || 
+             step.status === 'started' || 
+             step.status === 'iteration_started' ||
+             step.status === 'iteration_next';
+    };
+
     return {
       workflowSteps,
+      reversedWorkflowSteps,
       expandedSteps,
       loading,
       getStepColor,
@@ -266,6 +282,7 @@ export default defineComponent({
       getStatusClass,
       workflowStatus,
       hasWorkflowData,
+      isActiveStep,
     };
   }
 });
@@ -316,6 +333,14 @@ export default defineComponent({
 
 .step-content {
   margin-left: 8px;
+  padding: 12px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.step-active {
+  background-color: #e6f7ff;  /* 浅蓝色背景 */
+  border: 1px solid #91d5ff;  /* 浅蓝色边框 */
 }
 
 .step-header {
@@ -385,5 +410,15 @@ export default defineComponent({
 :deep(.ant-empty-description) {
   color: #666;
   font-size: 14px;
+}
+
+/* 调整时间轴项的间距 */
+:deep(.ant-timeline-item) {
+  padding-bottom: 20px;
+}
+
+/* 确保最后一个项目没有底部间距 */
+:deep(.ant-timeline-item:last-child) {
+  padding-bottom: 0;
 }
 </style> 
