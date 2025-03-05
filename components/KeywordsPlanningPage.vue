@@ -93,11 +93,6 @@
                                     Ahrefs
                                   </span>
                                 </div>
-                                <div class="source-item">
-                                  <span class="source-tag google">
-                                    Google Trends
-                                  </span>
-                                </div>
                               </div>
                               <div class="library-tip">
                                 <a-icon type="bulb" />
@@ -6240,94 +6235,74 @@ html {
 
 .library-description {
   background: linear-gradient(to right, #f8f9fa, #ffffff);
-  padding: 24px;
-  border-radius: 12px;
-  margin-bottom: 24px;
+  padding: 16px; /* 从 24px 减小到 16px */
+  border-radius: 8px; /* 从 12px 减小到 8px */
+  margin-bottom: 16px; /* 从 24px 减小到 16px */
   border: 1px solid #e6e8eb;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
 }
 
 .library-header {
-  margin-bottom: 20px;
+  margin-bottom: 12px; /* 从 20px 减小到 12px */
 }
 
 .library-header h3 {
-  font-size: 18px;
+  font-size: 15px; /* 从 18px 减小到 15px */
   font-weight: 600;
   color: #1f2937;
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0; /* 从 8px 减小到 4px */
 }
 
 .library-header p {
   color: #6b7280;
   margin: 0;
-  font-size: 14px;
+  font-size: 13px; /* 从 14px 减小到 13px */
 }
 
 .data-sources {
   display: flex;
-  gap: 12px;
-  margin: 16px 0;
+  gap: 8px; /* 从 12px 减小到 8px */
+  margin: 12px 0; /* 从 16px 减小到 12px */
   flex-wrap: wrap;
 }
 
 .source-item {
   flex: 1;
-  min-width: 120px;
+  min-width: 100px; /* 从 120px 减小到 100px */
 }
 
 .source-tag {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 14px;
+  gap: 6px; /* 从 8px 减小到 6px */
+  padding: 6px 10px; /* 从 8px 12px 减小到 6px 10px */
+  border-radius: 6px; /* 从 8px 减小到 6px */
+  font-size: 13px; /* 从 14px 减小到 13px */
   font-weight: 500;
   width: 100%;
   transition: all 0.3s ease;
 }
 
-.source-tag:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
 .source-icon {
-  width: 20px;
-  height: 20px;
+  width: 16px; /* 从 20px 减小到 16px */
+  height: 16px; /* 从 20px 减小到 16px */
   object-fit: contain;
 }
 
-.source-tag.semrush {
-  background: linear-gradient(135deg, #ff642d 0%, #ff974d 100%);
-  color: white;
-}
-
-.source-tag.ahrefs {
-  background: linear-gradient(135deg, #0a53e4 0%, #0066ff 100%);
-  color: white;
-}
-
-.source-tag.google {
-  background: linear-gradient(135deg, #4285f4 0%, #5c9fff 100%);
-  color: white;
-}
-
 .library-tip {
-  margin-top: 16px;
-  padding: 12px;
+  margin-top: 12px; /* 从 16px 减小到 12px */
+  padding: 8px; /* 从 12px 减小到 8px */
   background: #f0f9ff;
-  border-radius: 8px;
+  border-radius: 6px; /* 从 8px 减小到 6px */
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px; /* 从 10px 减小到 8px */
   color: #0369a1;
-  font-size: 14px;
+  font-size: 13px; /* 从 14px 减小到 13px */
 }
 
 .library-tip :deep(.anticon) {
-  font-size: 16px;
+  font-size: 14px; /* 从 16px 减小到 14px */
   color: #0ea5e9;
 }
 
