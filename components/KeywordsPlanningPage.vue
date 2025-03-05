@@ -6347,7 +6347,7 @@ html {
 .mode-tabs :deep(.ant-tabs-tab:first-child::after) {
   content: 'New';
   position: absolute;
-  top: -10px;
+  top: 0px;
   right: -16px;
   background: #f43f5e;
   color: white;
