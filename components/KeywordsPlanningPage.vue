@@ -72,11 +72,39 @@
                     class="mode-tabs"
                     @change="handleModeChange"
                   >
-                    <a-tab-pane key="ai" tab="AI Priority Ranking">
+                    <a-tab-pane key="ai" tab="Keywords Library">
                       <div class="beginner-mode">
                         <a-row :gutter="[24, 24]" class="beginner-content">
                           <a-col :span="6">
-                            <!-- Left side filter panel -->
+                            <!-- Library description -->
+                            <div class="library-description">
+                              <div class="library-header">
+                                <h3>Welcome To Your Keywords Library</h3>
+                                <p>Access our collection of high-quality keywords from:</p>
+                              </div>
+                              <div class="data-sources">
+                                <div class="source-item">
+                                  <span class="source-tag semrush">
+                                    SEMrush
+                                  </span>
+                                </div>
+                                <div class="source-item">
+                                  <span class="source-tag ahrefs">
+                                    Ahrefs
+                                  </span>
+                                </div>
+                                <div class="source-item">
+                                  <span class="source-tag google">
+                                    Google Trends
+                                  </span>
+                                </div>
+                              </div>
+                              <div class="library-tip">
+                                <a-icon type="bulb" />
+                                <span>Pro tip: Use Smart Priority filter for AI-recommended keywords based on traffic potential and competition analysis</span>
+                              </div>
+                            </div>
+                            <!-- Filter panel -->
                             <div class="filter-sidebar">
                               <h3 class="filter-title">Filter Options</h3>
                               <a-form layout="vertical" :model="filterForm" class="sidebar-filter-form">
@@ -6155,5 +6183,189 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.library-description {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: #f5f6f7;
+  border-radius: 8px;
+}
+
+.source-list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+
+.source-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.source-tag.semrush {
+  background: #ff642d;
+  color: white;
+}
+
+.source-tag.ahrefs {
+  background: #0a53e4;
+  color: white;
+}
+
+.source-tag.google {
+  background: #4285f4;
+  color: white;
+}
+
+.mode-tabs :deep(.ant-tabs-tab) {
+  position: relative;
+}
+
+.mode-tabs :deep(.ant-tabs-tab:first-child::after) {
+  content: 'New';
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff4d4f;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  transform: scale(0.8);
+}
+
+.library-description {
+  background: linear-gradient(to right, #f8f9fa, #ffffff);
+  padding: 24px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #e6e8eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.library-header {
+  margin-bottom: 20px;
+}
+
+.library-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.library-header p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 14px;
+}
+
+.data-sources {
+  display: flex;
+  gap: 12px;
+  margin: 16px 0;
+  flex-wrap: wrap;
+}
+
+.source-item {
+  flex: 1;
+  min-width: 120px;
+}
+
+.source-tag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.source-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.source-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.source-tag.semrush {
+  background: linear-gradient(135deg, #ff642d 0%, #ff974d 100%);
+  color: white;
+}
+
+.source-tag.ahrefs {
+  background: linear-gradient(135deg, #0a53e4 0%, #0066ff 100%);
+  color: white;
+}
+
+.source-tag.google {
+  background: linear-gradient(135deg, #4285f4 0%, #5c9fff 100%);
+  color: white;
+}
+
+.library-tip {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f0f9ff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #0369a1;
+  font-size: 14px;
+}
+
+.library-tip :deep(.anticon) {
+  font-size: 16px;
+  color: #0ea5e9;
+}
+
+/* 修复 New 标签的样式 */
+.mode-tabs {
+  position: relative;
+}
+
+.mode-tabs :deep(.ant-tabs-nav) {
+  overflow: visible;
+}
+
+.mode-tabs :deep(.ant-tabs-tab) {
+  overflow: visible;
+}
+
+.mode-tabs :deep(.ant-tabs-tab:first-child::after) {
+  content: 'New';
+  position: absolute;
+  top: -10px;
+  right: -16px;
+  background: #f43f5e;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  transform: scale(1);
+  box-shadow: 0 2px 4px rgba(244, 63, 94, 0.2);
+  z-index: 1;
+}
+
+/* 确保 tab 内容区域不会被遮挡 */
+.mode-tabs :deep(.ant-tabs-content-holder) {
+  overflow: visible;
+}
+
+.mode-tabs :deep(.ant-tabs-content) {
+  overflow: visible;
 }
 </style>
