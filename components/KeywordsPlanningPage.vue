@@ -244,7 +244,7 @@
                       </div>
                     </a-tab-pane>
 
-                    <a-tab-pane key="manual" tab="Manual Import">
+                    <a-tab-pane key="import" tab="Manual Import">
                       <div class="manual-import-content">
                         <a-card class="import-methods-card">
                           <div class="import-method-item">
@@ -285,7 +285,7 @@
                                   <a-button 
                                     type="link" 
                                     danger 
-                                    @click="removeImportedKeyword(record)"
+                                    @click="removeManualKeyword(record)"
                                   >
                                     <DeleteOutlined />
                                   </a-button>
@@ -324,7 +324,7 @@ seo tools, 45"
                             <a-form-item>
                               <a-button 
                                 type="primary" 
-                                @click="showUnderConstructionMessage"
+                                @click="addManualKeywords"
                                 :loading="isAddingKeywords"
                               >
                                 Add Keywords
@@ -2931,33 +2931,7 @@ export default defineComponent({
       }
     ]
 
-    // 添加手动关键词
-    const addManualKeywords = async () => {
-      const keywords = parseBulkKeywords(bulkKeywords.value)
-      
-      if (keywords.length === 0) {
-        message.warning('Please enter at least one valid keyword')
-        return
-      }
-      
-      isAddingKeywords.value = true
-      try {
-        // 这里应该调用API将关键词添加到系统中
-        // 暂时模拟API调用，直接添加到本地列表
-        manualKeywords.value = [...manualKeywords.value, ...keywords]
-        manualKeywordsPagination.value.total = manualKeywords.value.length
-        
-        message.success(`Successfully added ${keywords.length} keywords`)
-        bulkKeywords.value = '' // 清空输入框
-      } catch (error) {
-        console.error('Failed to add keywords:', error)
-        message.error('Failed to add keywords')
-      } finally {
-        isAddingKeywords.value = false
-      }
-    }
-
-    // 解析批量输入的关键词
+    // 修改 parseBulkKeywords 函数
     const parseBulkKeywords = (text) => {
       if (!text.trim()) return []
       
@@ -2974,13 +2948,13 @@ export default defineComponent({
         if (!keyword) return null
         
         // 第二部分可能是KD，第三部分可能是搜索量
-        let kd = null
+        let keywordDifficulty = null
         let volume = null
         
         if (parts.length > 1) {
           const kdValue = parseInt(parts[1])
           if (!isNaN(kdValue)) {
-            kd = Math.min(100, Math.max(0, kdValue)) // 确保KD在0-100之间
+            keywordDifficulty = Math.min(100, Math.max(0, kdValue)) // 确保KD在0-100之间
           }
         }
         
@@ -2992,21 +2966,81 @@ export default defineComponent({
         }
         
         return {
-          id: Date.now() + Math.random().toString(36).substring(2, 9),
           keyword,
-          kd,
-          volume,
-          keywordType: 'manual',
-          favorited: false
+          keywordDifficulty,
+          volume
         }
       }).filter(Boolean) // 过滤掉无效的条目
     }
 
+    // 修改添加手动关键词的函数
+    const addManualKeywords = async () => {
+      const keywords = parseBulkKeywords(bulkKeywords.value)
+      
+      if (keywords.length === 0) {
+        message.warning('Please enter at least one valid keyword')
+        return
+      }
+      
+      isAddingKeywords.value = true
+      try {
+        const response = await api.inputKeywords(keywords)
+        
+        if (response?.code === 200) {
+          message.success(`Successfully added ${keywords.length} keywords`)
+          bulkKeywords.value = '' // 清空输入框
+          
+          // 刷新关键词列表
+          await fetchManualKeywords()
+        } else {
+          throw new Error(response?.message || 'Failed to add keywords')
+        }
+      } catch (error) {
+        console.error('Failed to add keywords:', error)
+        message.error('Failed to add keywords')
+      } finally {
+        isAddingKeywords.value = false
+      }
+    }
+
+    // 修改获取手动输入关键词列表的函数
+    const fetchManualKeywords = async () => {
+      try {
+        const response = await api.getPlanningKeywords({
+          source: 'manual_input',
+          page: manualKeywordsPagination.value.current,
+          limit: manualKeywordsPagination.value.pageSize
+        })
+        
+        if (response?.data) {
+          manualKeywords.value = response.data.map(transformKeywordData)
+          manualKeywordsPagination.value.total = response.totalCount || 0
+        }
+      } catch (error) {
+        console.error('Failed to get manual keywords list:', error)
+        message.error('Failed to load keywords list')
+      }
+    }
+
     // 移除手动添加的关键词
-    const removeManualKeyword = (record) => {
-      manualKeywords.value = manualKeywords.value.filter(k => k.id !== record.id)
-      manualKeywordsPagination.value.total = manualKeywords.value.length
-      message.success('Keyword removed')
+    const removeManualKeyword = async (record) => {
+      try {
+        const response = await api.deletePlanningKeyword(record.id);
+        if (response?.code === 1007) {
+          message.error('Keyword not found, please try other keywords');
+        } else {
+          if (keywordSelectionMode.value === 'input') {
+            message.success('Keyword deleted successfully');
+            await fetchManualKeywords();
+          } else {
+            message.success('Keyword deleted successfully');
+            await fetchImportedKeywords();
+          }
+        }
+      } catch (error) {
+        console.error('Failed to delete keyword:', error);
+        message.error('Failed to delete keyword');
+      }
     }
 
     // 处理手动关键词分页变化
@@ -3098,26 +3132,29 @@ export default defineComponent({
       }
     })
 
+    // 修改 handleModeChange 函数
     const handleModeChange = async (mode) => {
-      if (mode === 'manual') {
-        // 当切换到manual模式时，加载imported keywords
+      keywordSelectionMode.value = mode // 确保更新模式
+      if (mode === 'input') {
+        await fetchManualKeywords()
+      } else if (mode === 'import') {
         await fetchImportedKeywords()
       }
     }
 
     const fetchImportedKeywords = async () => {
-      try {
-        const response = await api.getPlanningKeywords({
-          source: 'import',
-          page: importedKeywordsPagination.value.current,
-          limit: importedKeywordsPagination.value.pageSize
-        })
-        
-        if (response?.data) {
-          importedKeywords.value = response.data.map(transformKeywordData)
-          importedKeywordsPagination.value.total = response.totalCount || 0
-        }
-      } catch (error) {
+        try {
+          const response = await api.getPlanningKeywords({
+          source: 'manual_import',
+            page: importedKeywordsPagination.value.current,
+            limit: importedKeywordsPagination.value.pageSize
+          })
+          
+          if (response?.data) {
+            importedKeywords.value = response.data.map(transformKeywordData)
+            importedKeywordsPagination.value.total = response.totalCount || 0
+          }
+        } catch (error) {
         console.error('Failed to fetch imported keywords:', error)
         message.error('Failed to load imported keywords')
       }
@@ -3375,10 +3412,6 @@ export default defineComponent({
       );
     };
     
-    const showUnderConstructionMessage = () => {
-      message.info('This feature is currently under construction. Expected to be available before March 7th.');
-    }
-    
     const router = useRouter()
     
     return {
@@ -3560,7 +3593,6 @@ export default defineComponent({
       handleKeywordsPaginationChange,
       fetchKeywords,
       resetFilters,
-      showUnderConstructionMessage
     }
   },
   created() {

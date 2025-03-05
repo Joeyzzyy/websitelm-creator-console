@@ -1458,6 +1458,30 @@ const getPageWorkflow = async (pageId) => {
   }
 };
 
+// 新增：手动输入关键词的方法
+const inputKeywords = async (keywordsData) => {
+  try {
+    const response = await apiClient.post('/input/keywords', {
+      inputKeywords: keywordsData
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to input keywords:', error);
+    return null;
+  }
+};
+
+// 新增：删除客户导入关键词的方法
+const deletePlanningKeyword = async (keywordId) => {
+  try {
+    const response = await apiClient.delete(`/planning/keywords/${keywordId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to delete planning keyword:', error);
+    return null;
+  }
+};
+
 export default {
   validateDomain,
   changeEmail,
@@ -1563,5 +1587,7 @@ export default {
   getMediaByCustomer,
   getUserInfo,
   getDomainFavicon,
-  getPageWorkflow
+  getPageWorkflow,
+  inputKeywords,
+  deletePlanningKeyword
 };
