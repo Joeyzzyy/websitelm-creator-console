@@ -32,38 +32,70 @@
         <a-divider style="margin: 12px 0" />
 
         <a-timeline>
-          <a-timeline-item 
-            v-for="step in reversedWorkflowSteps" 
-            :key="step.nodeId"
-            :color="getStepColor(step.status)"
-          >
-            <template #dot v-if="step.status === 'processing'">
-              <a-spin size="small" />
-            </template>
-            <div class="step-content" :class="{ 'step-active': isActiveStep(step) }">
-              <div class="step-header">
-                <div class="step-header-left">
-                  <span class="step-name">{{ translateNodeName(step.nodeName) }}</span>
-                  <span class="step-time">{{ formatTime(step.elapsedTime) }}</span>
+          <template v-for="(group, index) in groupWorkflowSteps" :key="index">
+            <a-timeline-item
+              :color="getStepColor(group.start.status)"
+            >
+              <template #dot v-if="group.start.status === 'processing'">
+                <a-spin size="small" />
+              </template>
+              <div class="step-content">
+                <div class="step-header">
+                  <div class="step-header-left">
+                    <span class="step-name">{{ translateNodeName(group.start.nodeName) }}</span>
+                    <span class="step-time">{{ formatTime(group.start.elapsedTime) }}</span>
+                  </div>
+                  <a-button 
+                    v-if="group.start.output"
+                    type="link" 
+                    class="expand-button"
+                    @click="toggleOutput(group.start.nodeId)"
+                  >
+                    {{ expandedSteps.includes(group.start.nodeId) ? 'Collapse' : 'Expand' }}
+                  </a-button>
                 </div>
-                <a-button 
-                  v-if="step.output"
-                  type="link" 
-                  class="expand-button"
-                  @click="toggleOutput(step.nodeId)"
+                <div 
+                  v-if="group.start.output" 
+                  class="step-message"
+                  :class="{ 'expanded': expandedSteps.includes(group.start.nodeId) }"
                 >
-                  {{ expandedSteps.includes(step.nodeId) ? 'Collapse' : 'Expand' }}
-                </a-button>
+                  {{ formatOutput(group.start.output) }}
+                </div>
               </div>
-              <div 
-                v-if="step.output" 
-                class="step-message"
-                :class="{ 'expanded': expandedSteps.includes(step.nodeId) }"
-              >
-                {{ formatOutput(step.output) }}
+            </a-timeline-item>
+
+            <a-timeline-item
+              v-if="group.result"
+              :color="getStepColor(group.result.status)"
+            >
+              <template #dot v-if="group.result.status === 'processing'">
+                <a-spin size="small" />
+              </template>
+              <div class="step-content">
+                <div class="step-header">
+                  <div class="step-header-left">
+                    <span class="step-name">{{ translateNodeName(group.result.nodeName) }}</span>
+                    <span class="step-time">{{ formatTime(group.result.elapsedTime) }}</span>
+                  </div>
+                  <a-button 
+                    v-if="group.result.output"
+                    type="link" 
+                    class="expand-button"
+                    @click="toggleOutput(group.result.nodeId)"
+                  >
+                    {{ expandedSteps.includes(group.result.nodeId) ? 'Collapse' : 'Expand' }}
+                  </a-button>
+                </div>
+                <div 
+                  v-if="group.result.output" 
+                  class="step-message"
+                  :class="{ 'expanded': expandedSteps.includes(group.result.nodeId) }"
+                >
+                  {{ formatOutput(group.result.output) }}
+                </div>
               </div>
-            </div>
-          </a-timeline-item>
+            </a-timeline-item>
+          </template>
         </a-timeline>
       </template>
     </a-spin>
@@ -336,11 +368,6 @@ export default defineComponent({
   padding: 12px;
   border-radius: 4px;
   transition: background-color 0.3s ease;
-}
-
-.step-active {
-  background-color: #e6f7ff;  /* 浅蓝色背景 */
-  border: 1px solid #91d5ff;  /* 浅蓝色边框 */
 }
 
 .step-header {
