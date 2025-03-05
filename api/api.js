@@ -257,7 +257,7 @@ const getDomains = async (customerId, page, limit) => {
     });
     return response.data;
   } catch (error) {
-    console.error('获取域名列表失败:', error);
+    console.error('Failed to get domain list:', error);
     return null;
   }
 };
@@ -268,7 +268,7 @@ const deleteDomain = async (domainId) => {
     const response = await apiClient.delete(`/domain/${domainId}`);
     return response.data;
   } catch (error) {
-    console.error('删除域名失败:', error);
+    console.error('Failed to delete domain:', error);
     return null;
   }
 };
@@ -279,7 +279,7 @@ const deletePage = async (pageId) => {
     const response = await apiClient.delete(`/pages/${pageId}`);
     return response.data;
   } catch (error) {
-    console.error('删除页面失败:', error);
+    console.error('Failed to delete page:', error);
     return null;
   }
 };
@@ -290,7 +290,7 @@ const updateSection = async (sectionId, sectionData) => {
     const response = await apiClient.put(`/sections/${sectionId}`, sectionData);
     return response.data;
   } catch (error) {
-    console.error('更新页面区块失败:', error);
+    console.error('Failed to update page section:', error);
     return null;
   }
 };
@@ -303,7 +303,7 @@ const updatePageStatus = async (pageId, status, siteURL) => {
     });
     return response.data;
   } catch (error) {
-    console.error('更新页面状态失败:', error);
+    console.error('Failed to update page status:', error);
     return null;
   }
 };
@@ -314,7 +314,7 @@ const updatePage = async (pageId, pageData) => {
     const response = await apiClient.put(`/pages/${pageId}`, pageData);
     return response.data;
   } catch (error) {
-    console.error('更新页面基本信息失败:', error);
+    console.error('Failed to update page basic info:', error);
     return null;
   }
 };
@@ -325,7 +325,7 @@ const getArticleById = async (articleId) => {
     const response = await apiClient.get(`/pages/${articleId}`);
     return response.data;
   } catch (error) {
-    console.error('获取文章详情败:', error);
+    console.error('Failed to get article details:', error);
     return null;
   }
 };
@@ -336,7 +336,7 @@ const createProduct = async (productData) => {
     const response = await apiClient.post('/products', productData);
     return response.data;
   } catch (error) {
-    console.error('创建产品失败:', error);
+    console.error('Failed to create product:', error);
     return null;
   }
 };
@@ -347,7 +347,7 @@ const updateProduct = async (productId, productData) => {
     const response = await apiClient.put(`/products/${productId}`, productData);
     return response.data;
   } catch (error) {
-    console.error('更新产品失败:', error);
+    console.error('Failed to update product:', error);
     return null;
   }
 };
@@ -358,7 +358,7 @@ const getProductsByCustomerId = async () => {
     const response = await apiClient.get(`/products/customer`);
     return response.data;
   } catch (error) {
-    console.error('获取客户产品列表失败:', error);
+    console.error('Failed to get customer product list:', error);
     return null;
   }
 };
@@ -369,7 +369,7 @@ const deleteProduct = async (productId) => {
     const response = await apiClient.delete(`/products/${productId}`);
     return response.data;
   } catch (error) {
-    console.error('删除产品失败:', error);
+    console.error('Failed to delete product:', error);
     return null;
   }
 };
@@ -380,7 +380,7 @@ const getSitemap = async () => {
     const response = await apiClient.get(`/products/sitemap`);
     return response.data;
   } catch (error) {
-    console.error('获取sitemap失败:', error);
+    console.error('Failed to get sitemap:', error);
     return null;
   }
 };
@@ -392,7 +392,7 @@ const getHelpCenterData = async (userName) => {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('获取帮助中心数据失败:', error);
+    console.error('Failed to get help center data:', error);
     return null;
   }
 };
@@ -408,7 +408,7 @@ const uploadMedia = async (formData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Upload media failed:', error);
+    console.error('Failed to upload media:', error);
     return null;
   }
 };
@@ -427,7 +427,7 @@ const getMedia = async (customerId, mediaType, categoryId, page, limit) => {
     const response = await apiClient.get('/media', { params });
     return response.data;
   } catch (error) {
-    console.error('获取媒体文件列表失败:', error);
+    console.error('Failed to get media list:', error);
     return null;
   }
 };
@@ -438,7 +438,7 @@ const deleteMedia = async (mediaId) => {
     const response = await apiClient.delete(`/media/${mediaId}`);
     return response.data;
   } catch (error) {
-    console.error('删除媒体文件失败:', error);
+    console.error('Failed to delete media:', error);
     return null;
   }
 };
@@ -449,7 +449,7 @@ const updateMedia = async (mediaId, mediaData) => {
     const response = await apiClient.put(`/media/${mediaId}`, mediaData);
     return response.data;
   } catch (error) {
-    console.error('Update media failed:', error);
+    console.error('Failed to update media:', error);
     return null;
   }
 };
@@ -486,7 +486,7 @@ const getGscSites = async (customerId) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Get GSC sites failed:', error);
+    console.error('Failed to get GSC sites:', error);
     return null;
   }
 };
@@ -496,7 +496,7 @@ const submitGscSite = async (siteUrl) => {
     const response = await apiClient.post('/sites', { siteUrl });
     return response.data;
   } catch (error) {
-    console.error('Submit GSC site failed:', error);
+    console.error('Failed to submit GSC site:', error);
     return null;
   }
 };
@@ -508,7 +508,7 @@ const deleteGscSite = async (siteUrl) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Delete GSC site failed:', error);
+    console.error('Failed to delete GSC site:', error);
     return null;
   }
 };
@@ -523,7 +523,7 @@ const getGscAnalytics = async (customerId, siteUrl) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Get GSC analytics failed:', error);
+    console.error('Failed to get GSC analytics:', error);
     return null;
   }
 };
@@ -535,7 +535,7 @@ const checkGscAuth = async (customerId) => {
     });
     return response.data;
   } catch (error) {
-    console.error('检查 GSC 授权状态失败:', error);
+    console.error('Failed to check GSC authorization:', error);
     return null;
   }
 };
@@ -554,7 +554,7 @@ const getInternalLinks = async (customerId, params = {}) => {
     const response = await apiClient.get('/internal/links', { params: queryParams });
     return response.data;
   } catch (error) {
-    console.error('获取内部链接列表失败:', error);
+    console.error('Failed to get internal link list:', error);
     return null;
   }
 };
@@ -565,7 +565,7 @@ const createInternalLink = async (linkData) => {
     const response = await apiClient.post('/internal/links', linkData);
     return response.data;
   } catch (error) {
-    console.error('创建内部链接失败:', error);
+    console.error('Failed to create internal link:', error);
     return null;
   }
 };
@@ -576,7 +576,7 @@ const updateInternalLink = async (linkId, linkData) => {
     const response = await apiClient.put(`/internal/links/${linkId}`, linkData);
     return response.data;
   } catch (error) {
-    console.error('更新内部链接失败:', error);
+    console.error('Failed to update internal link:', error);
     return null;
   }
 };
@@ -597,7 +597,7 @@ const addVercelDomain = async (projectId, domainData) => {
     const response = await vercelApiClient.post(`/v10/projects/${projectId}/domains`, domainData);
     return response.data;
   } catch (error) {
-    console.error('添加Vercel域名时出错:', error);
+    console.error('Failed to add Vercel domain:', error);
     throw error;
   }
 };
@@ -607,7 +607,7 @@ const getVercelDomainInfo = async (projectId) => {
     const response = await vercelApiClient.get(`/v9/projects/${projectId}/domains`);
     return response.data;
   } catch (error) {
-    console.error('获取Vercel域名信息失败:', error);
+    console.error('Failed to get Vercel domain info:', error);
     throw error;
   }
 };
@@ -617,7 +617,7 @@ const deleteVercelDomain = async (projectId, domainName) => {
     const response = await vercelApiClient.delete(`/v9/projects/${projectId}/domains/${domainName}`);
     return response.data;
   } catch (error) {
-    console.error('删除Vercel域名失败:', error);
+    console.error('Failed to delete Vercel domain:', error);
     throw error;
   }
 };
@@ -635,7 +635,7 @@ const getVercelDomainConfig = async (domainName, params = {}) => {
     );
     return response.data;
   } catch (error) {
-    console.error('获取Vercel域名配置失败:', error);
+    console.error('Failed to get Vercel domain config:', error);
     throw error;
   }
 };
@@ -652,7 +652,7 @@ const verifyVercelDomain = async (projectId, domainName, params = {}) => {
     );
     return response.data;
   } catch (error) {
-    console.error('验证Vercel域名失败:', error);
+    console.error('Failed to verify Vercel domain:', error);
     throw error;
   }
 };
@@ -661,11 +661,11 @@ const sendEmailCode = async (email, codeType) => {
   try {
     const response = await apiClient.post('/customer/send-email', {
       email,
-      codeType // 可选值: forgot_password, change_email, register
+      codeType // Available values: forgot_password, change_email, register
     });
     return response.data;
   } catch (error) {
-    console.error('发送邮件验证码失败:', error);
+    console.error('Failed to send email verification code:', error);
     return null;
   }
 };
@@ -675,7 +675,7 @@ const register = async (registerData) => {
     const response = await apiClient.post('/customer/register', registerData);
     return response.data;
   } catch (error) {
-    console.error('用户注册失败:', error);
+    console.error('Failed to register user:', error);
     return null;
   }
 };
@@ -686,7 +686,7 @@ const googleLogin = async () => {
     const response = await apiClient.get('/customer/google');
     return response.data;
   } catch (error) {
-    console.error('Google登录失败:', error);
+    console.error('Failed to login with Google:', error);
     return null;
   }
 };
@@ -702,7 +702,7 @@ const googleCallback = async (code, state) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Google callback failed:', error);
+    console.error('Failed to handle Google callback:', error);
     throw error;
   }
 };
@@ -712,7 +712,7 @@ const resetPassword = async (resetData) => {
     const response = await apiClient.post('/customer/reset-password', resetData);
     return response.data;
   } catch (error) {
-    console.error('重置密码失败:', error);
+    console.error('Failed to reset password:', error);
     return null;
   }
 };
@@ -722,7 +722,7 @@ const createDomainWithTXT = async (domainData) => {
     const response = await apiClient.post('/domain', domainData);
     return response.data;
   } catch (error) {
-    console.error('创建域名和添加 TXT 记录失败:', error);
+    console.error('Failed to create domain and add TXT record:', error);
     return null;
   }
 };
@@ -734,7 +734,7 @@ const getDomain = async (customerId) => {
     });
     return response.data;
   } catch (error) {
-    console.error('获取域名列表失败:', error);
+    console.error('Failed to get domain list:', error);
     return null;
   }
 };
@@ -745,7 +745,7 @@ const changeEmail = async (changeEmailData) => {
     const response = await apiClient.post('/customer/change-email', changeEmailData);
     return response.data;
   } catch (error) {
-    console.error('修改邮箱地址失败:', error);
+    console.error('Failed to change email:', error);
     return null;
   }
 };
@@ -757,40 +757,40 @@ const validateDomain = async (customerId) => {
     });
     return response.data;
   } catch (error) {
-    console.error('验证域名失败:', error);
+    console.error('Failed to validate domain:', error);
     return null;
   }
 };
 
-// 修改: 使用knowledgeApiClient获取knowledge center内容列表
+// Changed: Using knowledgeApiClient to get knowledge center content list
 const getKnowledgeCenter = async () => {
   try {
     const response = await knowledgeApiClient.get('/knowledge/list');
     return response.data;
   } catch (error) {
-    console.error('获取knowledge center内容列表失败:', error);
+    console.error('Failed to get knowledge center content list:', error);
     return null;
   }
 };
 
-// 修改: 使用knowledgeApiClient根据ID获取knowledge内容
+// Changed: Using knowledgeApiClient to get knowledge content by ID
 const getKnowledgeById = async (contentId) => {
   try {
     const response = await knowledgeApiClient.get(`/knowledge/${contentId}`);
     return response.data;
   } catch (error) {
-    console.error('获取knowledge内容详情失败:', error);
+    console.error('Failed to get knowledge content details:', error);
     return null;
   }
 };
 
-// 修改: 使用knowledgeApiClient更新knowledge内容
+// Changed: Using knowledgeApiClient to update knowledge content
 const updateKnowledge = async (contentId, updateData) => {
   try {
     const response = await knowledgeApiClient.put(`/knowledge/${contentId}`, updateData);
     return response.data;
   } catch (error) {
-    console.error('更新knowledge内容失败:', error);
+    console.error('Failed to update knowledge content:', error);
     return null;
   }
 };
@@ -801,7 +801,7 @@ const getKnowledgeProcessStatus = async () => {
     const response = await knowledgeApiClient.get('/knowledge/process');
     return response.data;
   } catch (error) {
-    console.error('获取knowledge生成状态失败:', error);
+    console.error('Failed to get knowledge generation status:', error);
     return null;
   }
 };
@@ -812,7 +812,7 @@ const changePassword = async (passwordData) => {
     const response = await apiClient.post('/customer/change-password', passwordData);
     return response.data;
   } catch (error) {
-    console.error('修改密码失败:', error);
+    console.error('Failed to change password:', error);
     return null;
   }
 };
@@ -823,7 +823,7 @@ const createManualPage = async (pageData) => {
     const response = await apiClient.post('/manual/pages', pageData);
     return response.data;
   } catch (error) {
-    console.error('手动创建页面失败:', error);
+    console.error('Failed to create manual page:', error);
     return null;
   }
 };
@@ -833,7 +833,7 @@ const updateFullSections = async (pageId, sectionsData) => {
     const response = await apiClient.put(`/sections/full/${pageId}`, sectionsData);
     return response.data;
   } catch (error) {
-    console.error('全量更新页面sections失败:', error);
+    console.error('Failed to update full page sections:', error);
     return null;
   }
 };
@@ -851,7 +851,7 @@ const getPages = async (params) => {
     });
     return response.data;
   } catch (error) {
-    console.error('获取页面列表失败:', error);
+    console.error('Failed to get page list:', error);
     return null;
   }
 };
@@ -864,7 +864,7 @@ const updateSubfolders = async (subfolders) => {
     });
     return response.data;
   } catch (error) {
-    console.error('更新子文件夹失败:', error);
+    console.error('Failed to update subfolder:', error);
     return null;
   }
 };
@@ -875,7 +875,7 @@ const getSubfolders = async () => {
     const response = await apiClient.get('/customer/subfolder');
     return response.data;
   } catch (error) {
-    console.error('获取用户子文件夹失败:', error);
+    console.error('Failed to get user subfolder:', error);
     return null;
   }
 };
@@ -888,7 +888,7 @@ const updateSitemap = async (customerId) => {
     });
     return response.data;
   } catch (error) {
-    console.error('更新sitemap失败:', error);
+    console.error('Failed to update sitemap:', error);
     return null;
   }
 };
@@ -906,7 +906,7 @@ const getSitemapUrls = async (params) => {
     });
     return response.data;
   } catch (error) {
-    console.error('获取sitemap URLs列表失败:', error);
+    console.error('Failed to get sitemap URLs list:', error);
     return null;
   }
 };
@@ -917,7 +917,7 @@ const updatePageLayout = async (pageLayoutId, layoutData) => {
     const response = await apiClient.put(`/pages/layout/${pageLayoutId}`, layoutData);
     return response.data;
   } catch (error) {
-    console.error('更新页面布局失败:', error);
+    console.error('Failed to update page layout:', error);
     return null;
   }
 };
@@ -934,7 +934,7 @@ const getPageLayout = async (params) => {
     });
     return response.data;
   } catch (error) {
-    console.error('获取页面布局失败:', error);
+    console.error('Failed to get page layout:', error);
     return null;
   }
 };
@@ -947,7 +947,7 @@ const checkSlugExists = async (slug, pageId) => {
     });
     return response.data;
   } catch (error) {
-    console.error('检查 slug 是否存在失败:', error);
+    console.error('Failed to check slug existence:', error);
     return null;
   }
 };
@@ -964,7 +964,7 @@ const getPublishedPagesCount = async (params = {}) => {
     const response = await apiClient.get('/pages/count', { params: queryParams });
     return response.data;
   } catch (error) {
-    console.error('获取页面数量统计失败:', error);
+    console.error('Failed to get page count:', error);
     return null;
   }
 };
@@ -979,7 +979,7 @@ const submitSite = async (customerId, siteURL) => {
     });
     return response.data;
   } catch (error) {
-    console.error('提交站点失败:', error);
+    console.error('Failed to submit site:', error);
     return null;
   }
 };
@@ -992,7 +992,7 @@ const createAIPage = async (outlineId) => {
     });
     return response.data;
   } catch (error) {
-    console.error('AI生成页面内容失败:', error);
+    console.error('Failed to create AI page content:', error);
     return null;
   }
 };
@@ -1003,7 +1003,7 @@ const getPublishUrls = async () => {
     const response = await apiClient.get('/pages/publish/urls');
     return response.data;
   } catch (error) {
-    console.error('获取已发布URL列表失败:', error);
+    console.error('Failed to get published URL list:', error);
     return null;
   }
 };
@@ -1014,7 +1014,7 @@ const publishSitemapAndUrls = async () => {
     const response = await apiClient.post('/pages/publish/sitemap');
     return response.data;
   } catch (error) {
-    console.error('发布客户sitemap和url失败:', error);
+    console.error('Failed to publish customer sitemap and URLs:', error);
     return null;
   }
 };
@@ -1025,7 +1025,7 @@ const getPagesDashboard = async () => {
     const response = await apiClient.get('/pages/dashboard');
     return response.data;
   } catch (error) {
-    console.error('获取页面仪表板数据失败:', error);
+    console.error('Failed to get page dashboard data:', error);
     return null;
   }
 };
@@ -1041,7 +1041,7 @@ const getPageButtonLinks = async (params = {}) => {
     const response = await apiClient.get('/page-button-links', { params: queryParams });
     return response.data;
   } catch (error) {
-    console.error('获取页面按钮链接列表失败:', error);
+    console.error('Failed to get page button link list:', error);
     return null;
   }
 };
@@ -1056,7 +1056,7 @@ const createPageButtonLink = async (linkData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('创建页面按钮链接失败:', error);
+    console.error('Failed to create page button link:', error);
     return null;
   }
 };
@@ -1071,7 +1071,7 @@ const updatePageButtonLink = async (linkId, linkData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('更新页面按钮链接失败:', error);
+    console.error('Failed to update page button link:', error);
     return null;
   }
 };
@@ -1082,7 +1082,7 @@ const deletePageButtonLink = async (linkId) => {
     const response = await apiClient.delete(`/page-button-links/${linkId}`);
     return response.data;
   } catch (error) {
-    console.error('删除页面按钮链接失败:', error);
+    console.error('Failed to delete page button link:', error);
     return null;
   }
 };
@@ -1097,7 +1097,7 @@ const getAnalysisStatus = async (type) => {
     });
     return response.data;
   } catch (error) {
-    console.error('获取分析状态失败:', error);
+    console.error('Failed to get analysis status:', error);
     return null;
   }
 };
@@ -1108,7 +1108,7 @@ const updateOnboardingStatus = async (status) => {
     const response = await apiClient.put('/customer/onboarding', { status });
     return response.data;
   } catch (error) {
-    console.error('更新用户 onboarding status 失败:', error);
+    console.error('Failed to update user onboarding status:', error);
     return null;
   }
 };
@@ -1119,7 +1119,7 @@ const getKeywordAnalysisOverview = async () => {
     const response = await apiClient.post('/planning/analysis-overview');
     return response.data;
   } catch (error) {
-    console.error('获取关键词概览分析失败:', error);
+    console.error('Failed to get keyword analysis overview:', error);
     return null;
   }
 };
@@ -1143,7 +1143,7 @@ const getPlanningKeywords = async (params = {}) => {
     const response = await apiClient.get('/planning/keywords', { params: queryParams });
     return response.data;
   } catch (error) {
-    console.error('获取关键词列表失败:', error);
+    console.error('Failed to get keyword list:', error);
     return null;
   }
 };
@@ -1156,7 +1156,7 @@ const generatePlanningComposite = async (keywordIds) => {
     });
     return response.data;
   } catch (error) {
-    console.error('生成意图和TDK及大纲失败:', error);
+    console.error('Failed to generate planning composite:', error);
     return null;
   }
 };
@@ -1173,7 +1173,7 @@ const getPlanningOutlines = async (params = {}) => {
     const response = await apiClient.get('/planning/outline', { params: queryParams });
     return response.data;
   } catch (error) {
-    console.error('获取用户outline列表失败:', error);
+    console.error('Failed to get user outline list:', error);
     return null;
   }
 };
@@ -1186,7 +1186,7 @@ const selectPlanningOutlines = async (outlineIds) => {
     });
     return response.data;
   } catch (error) {
-    console.error('选择outline失败:', error);
+    console.error('Failed to select outline:', error);
     return null;
   }
 };
@@ -1199,7 +1199,7 @@ const cancelPlanningOutlines = async (outlineIds) => {
     });
     return response.data;
   } catch (error) {
-    console.error('取消选中outline失败:', error);
+    console.error('Failed to cancel selected outline:', error);
     return null;
   }
 };
@@ -1212,7 +1212,7 @@ const selectPlanningKeywords = async (keywordIds) => {
     });
     return response.data;
   } catch (error) {
-    console.error('选择关键词失败:', error);
+    console.error('Failed to select keyword:', error);
     return null;
   }
 };
@@ -1225,7 +1225,7 @@ const cancelPlanningKeywords = async (keywordIds) => {
     });
     return response.data;
   } catch (error) {
-    console.error('取消选中关键词失败:', error);
+    console.error('Failed to cancel selected keyword:', error);
     return null;
   }
 };
@@ -1236,7 +1236,7 @@ const deletePlanningOutline = async (outlineId) => {
     const response = await apiClient.delete(`/planning/outline/${outlineId}`);
     return response.data;
   } catch (error) {
-    console.error('删除outline失败:', error);
+    console.error('Failed to delete outline:', error);
     return null;
   }
 };
@@ -1247,7 +1247,7 @@ const generatePlanningAI = async () => {
     const response = await apiClient.post('/planning/ai-generator');
     return response.data;
   } catch (error) {
-    console.error('AI选词生成outline失败:', error);
+    console.error('Failed to generate AI outline:', error);
     return null;
   }
 };
@@ -1264,7 +1264,7 @@ const getPlanningOutlineBatchRecord = async (params = {}) => {
     const response = await apiClient.get('/planning/outline/batch-record', { params: queryParams });
     return response.data;
   } catch (error) {
-    console.error('获取outline批次记录失败:', error);
+    console.error('Failed to get outline batch record:', error);
     return null;
   }
 };
@@ -1280,7 +1280,7 @@ const getPlanningOutlineBatches = async (params = {}) => {
     const response = await apiClient.get('/planning/outline/batch', { params: queryParams });
     return response.data;
   } catch (error) {
-    console.error('获取outline批次列表失败:', error);
+    console.error('Failed to get outline batch list:', error);
     return null;
   }
 };
@@ -1298,7 +1298,7 @@ const updatePlanningOutline = async (outlineId, outlineData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('更新用户outline失败:', error);
+    console.error('Failed to update user outline:', error);
     return null;
   }
 };
@@ -1308,7 +1308,7 @@ const cancelGscAuth = async () => {
     const response = await apiClient.delete('/auth/cancel');
     return response.data;
   } catch (error) {
-    console.error('取消 GSC OAuth 失败:', error);
+    console.error('Failed to cancel GSC OAuth:', error);
     return null;
   }
 };
@@ -1323,7 +1323,7 @@ const importKeywords = async (formData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('导入关键词失败:', error);
+    console.error('Failed to import keywords:', error);
     return null;
   }
 };
@@ -1334,7 +1334,7 @@ const rebuildKnowledge = async () => {
     const response = await apiClient.post('/knowledge/rebuild');
     return response.data;
   } catch (error) {
-    console.error('重建知识库失败:', error);
+    console.error('Failed to rebuild knowledge:', error);
     return null;
   }
 };
@@ -1345,7 +1345,7 @@ const getCustomerPackage = async () => {
     const response = await apiClient.get('/customer/package');
     return response.data;
   } catch (error) {
-    console.error('获取客户Package失败:', error);
+    console.error('Failed to get customer package:', error);
     return null;
   }
 };
@@ -1358,7 +1358,7 @@ const activateTrialPackage = async (inviteCode) => {
     });
     return response.data;
   } catch (error) {
-    console.error('激活试用套餐失败:', error);
+    console.error('Failed to activate trial package:', error);
     return null;
   }
 };
@@ -1369,23 +1369,23 @@ const deleteKnowledge = async (contentId) => {
     const response = await knowledgeApiClient.delete(`/knowledge/${contentId}`);
     return response.data;
   } catch (error) {
-    console.error('删除knowledge内容失败:', error);
+    console.error('Failed to delete knowledge content:', error);
     return null;
   }
 };
 
-// 新增: 创建knowledge内容的方法
+// New: Create knowledge content
 const createKnowledge = async (knowledgeData) => {
   try {
     const response = await knowledgeApiClient.post('/knowledge/add', knowledgeData);
     return response.data;
   } catch (error) {
-    console.error('创建knowledge内容失败:', error);
+    console.error('Failed to create knowledge content:', error);
     return null;
   }
 };
 
-// 新增：上传favicon的方法
+// New: Upload favicon
 const uploadFavicon = async (formData, faviconType) => {
   try {
     const response = await apiClient.post('/media/favicon', formData, {
@@ -1398,12 +1398,12 @@ const uploadFavicon = async (formData, faviconType) => {
     });
     return response.data;
   } catch (error) {
-    console.error('上传favicon失败:', error);
+    console.error('Failed to upload favicon:', error);
     return null;
   }
 };
 
-// 新增: 根据客户ID获取媒体文件列表的方法
+// New: Get media list by customer ID
 const getMediaByCustomer = async (params = {}) => {
   try {
     const queryParams = {
@@ -1416,7 +1416,7 @@ const getMediaByCustomer = async (params = {}) => {
     const response = await apiClient.get('/media', { params: queryParams });
     return response.data;
   } catch (error) {
-    console.error('获取客户媒体文件列表失败:', error);
+    console.error('Failed to get customer media list:', error);
     return null;
   }
 };
@@ -1429,7 +1429,7 @@ const getDomainFavicon = async (domainName) => {
     });
     return response.data;
   } catch (error) {
-    console.error('获取域名favicon失败:', error);
+    console.error('Failed to get domain favicon:', error);
     return null;
   }
 };
@@ -1440,7 +1440,20 @@ const getUserInfo = async () => {
     const response = await apiClient.get('/customer/info');
     return response.data;
   } catch (error) {
-    console.error('获取用户信息失败:', error);
+    console.error('Failed to get user info:', error);
+    return null;
+  }
+};
+
+// 新增：获取页面生成过程的方法
+const getPageWorkflow = async (pageId) => {
+  try {
+    const response = await apiClient.get('/pages/workflow', {
+      params: { pageId }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to get page workflow:', error);
     return null;
   }
 };
@@ -1549,5 +1562,6 @@ export default {
   uploadFavicon,
   getMediaByCustomer,
   getUserInfo,
-  getDomainFavicon
+  getDomainFavicon,
+  getPageWorkflow
 };

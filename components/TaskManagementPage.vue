@@ -89,27 +89,44 @@
             >
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'title'">
-                  <a 
-                    @click="handleTitleClick(record)" 
-                    class="title-link"
-                    :title="record.publishStatus === 'publish' ? getFullPublishUrl(record) : getPreviewUrl(record)"
-                  >
-                    {{ record.title }}
-                  </a>
-                  <a-tag 
-                    v-if="record.generatorStatus === 'processing'" 
-                    color="processing"
-                    class="generating-tag"
-                  >
-                    <span class="generating-text">Generation in progress</span>
-                    <span class="dot-animation">...</span>
-                  </a-tag>
-                  <a-tag
-                    v-if="record.generatorStatus === 'failed'"
-                    class="generating-tag failed-tag"
-                  >
-                    <span class="generating-text">Generation Failed</span>
-                  </a-tag>
+                  <div class="title-container">
+                    <a 
+                      @click="handleTitleClick(record)" 
+                      class="title-link"
+                      :title="record.publishStatus === 'publish' ? getFullPublishUrl(record) : getPreviewUrl(record)"
+                    >
+                      {{ record.title }}
+                    </a>
+                    <div class="status-tags">
+                      <a-tag
+                        v-if="record.generatorStatus === 'processing'"
+                        color="processing"
+                        class="generating-tag"
+                        @click.stop="showWorkflow(record)"
+                        title="Click to view generation progress"
+                      >
+                        <span class="generating-text">Generation in progress (View)</span>
+                        <span class="dot-animation">...</span>
+                      </a-tag>
+                      <a-tag
+                        v-else-if="record.generatorStatus === 'failed'"
+                        class="generating-tag failed-tag"
+                        @click.stop="showWorkflow(record)"
+                        title="Click to view generation details"
+                      >
+                        <span class="generating-text">Generation Failed (View)</span>
+                      </a-tag>
+                      <a-tag
+                        v-else
+                        color="success"
+                        class="status-tag"
+                        @click.stop="showWorkflow(record)"
+                        title="Click to view generation history"
+                      >
+                        <span>Generated (View)</span>
+                      </a-tag>
+                    </div>
+                  </div>
                 </template>
 
                 <template v-if="column.key === 'pageType'">
@@ -149,42 +166,34 @@
                 </template>
 
                 <template v-if="column.key === 'actions'">
-                  <a-dropdown>
-                    <a-button size="small" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0;">
-                      <template #icon><EllipsisOutlined /></template>
+                  <a-dropdown :trigger="['click']">
+                    <a-button type="link">
+                      <EllipsisOutlined />
                     </a-button>
                     <template #overlay>
                       <a-menu>
-                        <template v-if="record.generatorStatus !== 'failed'">
-                          <a-menu-item 
-                            key="edit" 
-                            @click="handleEdit(record)"
-                            :disabled="record.generatorStatus === 'processing'"
-                          >
-                            Edit
-                          </a-menu-item>
-                          <a-menu-item 
-                            key="preview" 
-                            @click="handlePreview(record)"
-                            :disabled="record.generatorStatus === 'processing'"
-                          >
-                            Preview
-                          </a-menu-item>
-                          <a-menu-item 
-                            key="publish"
-                            @click="handlePublish(record)"
-                            :disabled="record.generatorStatus === 'processing'"
-                          >
-                            {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
-                          </a-menu-item>
-                        </template>
                         <a-menu-item 
-                          key="delete"
-                          @click="handleDelete(record)"
+                          key="edit" 
+                          @click="handleEdit(record)"
                           :disabled="record.generatorStatus === 'processing'"
-                          danger
                         >
-                          Delete
+                          <span>Edit</span>
+                        </a-menu-item>
+                        <a-menu-item 
+                          key="preview" 
+                          @click="handlePreview(record)"
+                          :disabled="record.generatorStatus === 'processing'"
+                        >
+                          <span>Preview</span>
+                        </a-menu-item>
+                        <a-menu-item 
+                          key="publish"
+                          @click="handlePublish(record)"
+                          :disabled="record.generatorStatus === 'processing'"
+                        >
+                          <span>
+                            {{ record.publishStatus === 'publish' ? 'Unpublish' : 'Publish' }}
+                          </span>
                         </a-menu-item>
                       </a-menu>
                     </template>
@@ -342,6 +351,20 @@
       v-model:visible="settingsVisible"
       :product-info="productInfo"
     />
+
+    <!-- Add workflow modal -->
+    <a-modal
+      v-model:visible="workflowModal.visible"
+      title="Workflow Status"
+      :footer="null"
+      width="800px"
+    >
+      <workflow-status
+        v-if="workflowModal.visible"
+        :page-id="workflowModal.pageId"
+        :is-processing="workflowModal.isProcessing"
+      />
+    </a-modal>
   </page-layout>
 </template>
 
@@ -369,6 +392,7 @@ import { VERCEL_CONFIG } from '../config/vercelConfig'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
 import SmartBanner from './common/SmartBanner.vue'
 import SettingsModal from './SettingsDomainModal.vue'
+import WorkflowStatus from './WorkflowStatus.vue'
 
 export default {
   name: 'TaskManagementPage',
@@ -389,7 +413,8 @@ export default {
     NoSiteConfigured,
     SmartBanner,
     SettingOutlined,
-    SettingsModal
+    SettingsModal,
+    WorkflowStatus
   },
 
   setup() {
@@ -1090,6 +1115,23 @@ export default {
       settingsVisible.value = true;
     };
 
+    // Add workflow modal
+    const workflowModal = ref({
+      visible: false,
+      pageId: null,
+      isProcessing: false
+    });
+
+    const showWorkflow = (record) => {
+      console.log('Opening workflow modal for record:', record);
+      workflowModal.value = {
+        visible: true,
+        pageId: record.pageId,
+        isProcessing: true
+      };
+      console.log('Workflow modal state:', workflowModal.value);
+    };
+
     onMounted(async () => {
       await loadProductInfo()
       // 只有在域名已配置的情况下才执行其他操作
@@ -1155,6 +1197,8 @@ export default {
       showSettings,
       currentCustomerId,
       handleConfigDomain,
+      workflowModal,
+      showWorkflow
     }
   }
 }
@@ -2073,5 +2117,56 @@ export default {
 
 :deep(.ant-table-row) {
   line-height: 1.2; /* 减小行高 */
+}
+
+/* Add styles for the workflow menu item */
+:deep(.ant-dropdown-menu-item) {
+  padding: 8px 12px;
+}
+
+:deep(.ant-dropdown-menu-item .anticon) {
+  margin-right: 8px;
+}
+
+:deep(.ant-dropdown-menu-item:hover) {
+  background-color: #f5f5f5;
+}
+
+/* 添加新的样式 */
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-tags {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.status-tag {
+  font-size: 12px;
+  padding: 0 8px;
+  height: 22px;
+  line-height: 20px;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.status-tag:hover {
+  transform: scale(1.05);
+}
+
+/* 确保标题和标签在同一行 */
+.title-link {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* 保持原有的标签样式 */
+.generating-tag, .failed-tag {
+  /* 保持原有样式不变 */
 }
 </style>

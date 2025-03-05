@@ -634,7 +634,7 @@ seo tools, 45"
 
     <a-modal
       v-model:open="generationProgressVisible"
-      title="Generating Pages"
+      title="Submitting Generation Tasks"
       :closable="false"
       :maskClosable="false"
       :footer="null"
@@ -2083,8 +2083,8 @@ export default defineComponent({
         generationCompleted.value = true;
         isGeneratingPages.value = false;
         generationStatus.value = 'success';
-        generationStatusText.value = 'All pages generated successfully!';
-        generationDetails.value = `Successfully generated ${completed}/${total} pages`;
+        generationStatusText.value = 'All pages generation task submitted successfully!';
+        generationDetails.value = `Successfully submitted ${completed}/${total} pages`;
 
         setTimeout(() => {
           generationProgressVisible.value = false;
