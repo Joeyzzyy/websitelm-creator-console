@@ -2180,8 +2180,22 @@ export default {
   min-width: 0;
 }
 
-/* 保持原有的标签样式 */
-.generating-tag, .failed-tag {
-  /* 保持原有样式不变 */
+/* 添加可点击元素的样式 */
+.clickable {
+  cursor: pointer;
+}
+
+/* 修改查看进度文字的样式 */
+.view-text {
+  color: #bae7ff !important; /* 使用浅蓝色 */
+  margin-left: 4px;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.generating-tag:hover .view-text,
+.failed-tag:hover .view-text,
+.status-tag:hover .view-text {
+  opacity: 1;
 }
 </style>

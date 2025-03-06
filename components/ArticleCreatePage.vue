@@ -21,37 +21,6 @@
           v-model:activeKey="activeTab"
           class="compact-tabs"
         >
-          <!-- Component selection panel -->
-          <a-tab-pane key="components" tab="All Components">
-            <div class="components-list">
-              <a-collapse v-model:activeKey="activeCategories">
-                <a-collapse-panel 
-                  v-for="category in filteredAvailableComponents" 
-                  :key="category.category" 
-                >
-                  <template #header>
-                    <div class="add-category-header">
-                      <span>{{ category.category }}</span>
-                      <span class="add-category-count">{{ category.items.length }}</span>
-                    </div>
-                  </template>
-                  <div 
-                    v-for="component in category.items" 
-                    :key="component.type"
-                    class="component-item"
-                    draggable="true"
-                    @dragstart="handleDragStart($event, component)"
-                    @click="addComponent(component)"
-                    @mouseenter="showComponentPreview(component)"
-                    @mouseleave="hideComponentPreview"
-                  >
-                    <span>{{ component.label }}</span>
-                  </div>
-                </a-collapse-panel>
-              </a-collapse>
-            </div>
-          </a-tab-pane>
-
           <!-- Selected Components tab -->
           <a-tab-pane key="selectedComponents" tab="Selected">
             <div class="selected-components-list">
@@ -88,6 +57,37 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </a-tab-pane>
+
+          <!-- Component selection panel -->
+          <a-tab-pane key="components" tab="All Components">
+            <div class="components-list">
+              <a-collapse v-model:activeKey="activeCategories">
+                <a-collapse-panel 
+                  v-for="category in filteredAvailableComponents" 
+                  :key="category.category" 
+                >
+                  <template #header>
+                    <div class="add-category-header">
+                      <span>{{ category.category }}</span>
+                      <span class="add-category-count">{{ category.items.length }}</span>
+                    </div>
+                  </template>
+                  <div 
+                    v-for="component in category.items" 
+                    :key="component.type"
+                    class="component-item"
+                    draggable="true"
+                    @dragstart="handleDragStart($event, component)"
+                    @click="addComponent(component)"
+                    @mouseenter="showComponentPreview(component)"
+                    @mouseleave="hideComponentPreview"
+                  >
+                    <span>{{ component.label }}</span>
+                  </div>
+                </a-collapse-panel>
+              </a-collapse>
             </div>
           </a-tab-pane>
         </a-tabs>
@@ -665,7 +665,7 @@ export default defineComponent({
     });
 
     const saving = ref(false);
-    const activeTab = ref('components');
+    const activeTab = ref('selectedComponents');
     const activeCategories = ref(['basic']);
     const articleData = ref({
       title: '',
