@@ -2246,7 +2246,22 @@ export default defineComponent({
         title: 'Volume',
         dataIndex: 'volume',
         key: 'volume',
-        width: '15%'
+        width: '15%',
+        customRender: ({ text }) => {
+          if (!text) return '0';
+          
+          if (text < 1000) return text.toString();
+          
+          if (text < 1000000) {
+            return `${(text / 1000).toFixed(1)}K`;
+          }
+          
+          if (text < 1000000000) {
+            return `${(text / 1000000).toFixed(1)}M`;
+          }
+          
+          return `${(text / 1000000000).toFixed(1)}B`;
+        }
       },
       {
         title: 'Has Related Outlines',

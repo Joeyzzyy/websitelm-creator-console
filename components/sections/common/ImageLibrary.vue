@@ -30,6 +30,17 @@
                   <div class="asset-overlay">
                     <check-outlined v-if="selectedAsset?.id === asset.id" class="selected-icon" />
                   </div>
+                  <div class="asset-actions">
+                    <a-popconfirm
+                      title="Are you sure you want to delete this image?"
+                      @confirm="deleteAsset(asset)"
+                      @click.stop
+                    >
+                      <a-button type="text" danger>
+                        <delete-outlined />
+                      </a-button>
+                    </a-popconfirm>
+                  </div>
                 </div>
                 <div class="asset-info">
                   <h4 class="asset-name" :title="asset.name">{{ asset.name }}</h4>
@@ -144,7 +155,7 @@
 
 <script>
 import { ref, computed, onMounted } from 'vue'
-import { CheckOutlined, UploadOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { CheckOutlined, UploadOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import apiClient from '../../../api/api'
 
@@ -153,7 +164,8 @@ export default {
   components: {
     CheckOutlined,
     UploadOutlined,
-    DeleteOutlined
+    DeleteOutlined,
+    EditOutlined
   },
   emits: ['select', 'close'],
   setup(props, { emit }) {
@@ -326,6 +338,17 @@ export default {
       fetchAssets()
     }
 
+    const deleteAsset = async (asset) => {
+      try {
+        await apiClient.deleteMedia(asset.id)
+        assets.value = assets.value.filter(item => item.id !== asset.id)
+        message.success('Image deleted successfully')
+      } catch (error) {
+        console.error('Failed to delete image:', error)
+        message.error('Failed to delete image')
+      }
+    }
+
     return {
       loading,
       assets,
@@ -352,7 +375,8 @@ export default {
       pageSize,
       total,
       handlePageChange,
-      handleSizeChange
+      handleSizeChange,
+      deleteAsset
     }
   }
 }
@@ -405,8 +429,8 @@ export default {
   height: 100%;
   background: rgba(0, 0, 0, 0.3);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -513,5 +537,37 @@ export default {
   margin-top: 24px;
   display: flex;
   justify-content: center;
+}
+
+.asset-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+}
+
+:deep(.ant-btn-text) {
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+:deep(.ant-btn-text:hover) {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+}
+
+:deep(.ant-btn-text.ant-btn-dangerous) {
+  color: #fff;
+}
+
+:deep(.ant-btn-text.ant-btn-dangerous:hover) {
+  background: rgba(255, 77, 79, 0.9);
+  color: #fff;
 }
 </style> 
