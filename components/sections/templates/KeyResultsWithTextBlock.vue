@@ -41,6 +41,54 @@
 
                 <a-divider type="vertical" />
 
+                <!-- 平铺展示的标题按钮 -->
+                <a-button-group>
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('heading', { level: 1 }) }"
+                    @click="toggleHeading(1)"
+                  >
+                    H1
+                  </a-button>
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('heading', { level: 2 }) }"
+                    @click="toggleHeading(2)"
+                  >
+                    H2
+                  </a-button>
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('heading', { level: 3 }) }"
+                    @click="toggleHeading(3)"
+                  >
+                    H3
+                  </a-button>
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('heading', { level: 4 }) }"
+                    @click="toggleHeading(4)"
+                  >
+                    H4
+                  </a-button>
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('heading', { level: 5 }) }"
+                    @click="toggleHeading(5)"
+                  >
+                    H5
+                  </a-button>
+                  <a-button 
+                    type="text"
+                    :class="{ active: editor?.isActive('paragraph') }"
+                    @click="setParagraph()"
+                  >
+                    Normal
+                  </a-button>
+                </a-button-group>
+
+                <a-divider type="vertical" />
+
                 <a-button-group>
                   <a-button type="text" @click="handleAddImageClick">
                     <picture-outlined />
@@ -120,7 +168,7 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import KeyResultsWithTextBlockPreview from './KeyResultsWithTextBlockPreview.vue'
 import themeConfig from '../../../assets/config/themeConfig'
-import { LinkOutlined, DeleteOutlined, PictureOutlined, CloseOutlined, VideoCameraOutlined, BoldOutlined, ItalicOutlined, FontSizeOutlined, FullscreenOutlined, FullscreenExitOutlined } from '@ant-design/icons-vue'
+import { LinkOutlined, DeleteOutlined, PictureOutlined, CloseOutlined, VideoCameraOutlined, BoldOutlined, ItalicOutlined, FontSizeOutlined, FullscreenOutlined, FullscreenExitOutlined, DownOutlined } from '@ant-design/icons-vue'
 import ImageLibrary from '../common/ImageLibrary.vue'
 import VideoLibrary from '../common/VideoLibrary.vue'
 import { debounce } from 'lodash'
@@ -207,7 +255,8 @@ export default {
     FontSizeOutlined,
     EditorContent,
     FullscreenOutlined,
-    FullscreenExitOutlined
+    FullscreenExitOutlined,
+    DownOutlined
   },
   computed: {
     tags() {
@@ -266,7 +315,14 @@ export default {
 
       this.editor = new Editor({
         extensions: [
-          StarterKit,
+          StarterKit.configure({
+            heading: {
+              levels: [1, 2, 3, 4, 5],
+              // 修改回车行为，强制创建新段落
+              keepMarks: false,
+              isolating: true
+            }
+          }),
           Image.configure({
             inline: true,
             HTMLAttributes: {
@@ -286,17 +342,34 @@ export default {
               preload: 'metadata',
             },
           }),
-          Subtitle, // 添加子标题扩展
+          Subtitle,
         ],
-        content: this.localSection.rightContent || '', // 直接使用 rightContent 字符串
+        content: this.localSection.rightContent || '',
         editable: !this.disabled,
         autofocus: false,
+        // 添加编辑器配置
+        editorProps: {
+          handleKeyDown: (view, event) => {
+            // 当按下回车键时
+            if (event.key === 'Enter' && !event.shiftKey) {
+              // 强制创建新段落
+              const { state, dispatch } = view;
+              const { selection } = state;
+              
+              if (!selection.empty) return false;
+              
+              dispatch(state.tr.split(selection.from));
+              return true;
+            }
+            return false;
+          }
+        },
         onUpdate: ({ editor }) => {
           if (this._isDestroyed) return
           
           const html = editor.getHTML()
-          this.editorContent = html // 更新 HTML 内容
-          this.localSection.rightContent = html // 直接设置 rightContent 字符串
+          this.editorContent = html
+          this.localSection.rightContent = html
           this.debouncedHandleChange()
         },
       })
@@ -428,6 +501,64 @@ export default {
 
     toggleFullscreen() {
       this.isFullscreen = !this.isFullscreen;
+    },
+
+    // 修改标题切换方法
+    toggleHeading(level) {
+      if (this.editor) {
+        const { from, to } = this.editor.state.selection;
+        
+        // 检查是否有选择文本
+        if (from !== to) {
+          // 获取选中的文本
+          const selectedText = this.editor.state.doc.textBetween(from, to);
+          
+          // 如果当前已经是相同级别的标题，则转换为普通段落
+          if (this.editor.isActive('heading', { level })) {
+            this.editor.chain().focus().setParagraph().run();
+          } else {
+            // 将选中内容按换行符分割
+            const lines = selectedText.split('\n');
+            
+            // 如果只有一行，直接应用标题
+            if (lines.length === 1) {
+              this.editor.chain()
+                .focus()
+                .setTextSelection({ from, to })
+                .toggleHeading({ level })
+                .run();
+            } else {
+              // 如果有多行，先将选中内容转换为普通段落
+              this.editor.chain()
+                .focus()
+                .setTextSelection({ from, to })
+                .setParagraph()
+                .run();
+              
+              // 然后只对第一行应用标题
+              const firstLineLength = lines[0].length;
+              this.editor.chain()
+                .focus()
+                .setTextSelection({ 
+                  from, 
+                  to: from + firstLineLength 
+                })
+                .toggleHeading({ level })
+                .run();
+            }
+          }
+        } else {
+          // 如果没有选中文本，使用默认行为
+          this.editor.chain().focus().toggleHeading({ level }).run();
+        }
+      }
+    },
+    
+    // 修改段落设置方法
+    setParagraph() {
+      if (this.editor) {
+        this.editor.chain().focus().setParagraph().run();
+      }
     },
   }
 }
@@ -848,20 +979,39 @@ export default {
 }
 
 .editor-toolbar {
-  padding: 8px;
+  padding: 8px 16px;
   border-bottom: 1px solid #d9d9d9;
   background: #fafafa;
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
   position: sticky;
   top: 0;
   z-index: 10;
+  min-width: 800px;
+  overflow-x: auto;
 }
 
 .editor-toolbar .ant-btn {
-  padding: 4px 8px;
+  padding: 4px 10px;
   height: 32px;
+  min-width: 40px;
+  margin: 0 2px;
+}
+
+.editor-toolbar .ant-btn-group {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.editor-toolbar .ant-divider-vertical {
+  height: 24px;
+  margin: 0 8px;
+}
+
+/* 确保标题按钮有足够宽度 */
+.editor-toolbar .ant-btn-group .ant-btn {
+  min-width: 45px;
 }
 
 .editor-toolbar .ant-btn.active {
@@ -1101,5 +1251,72 @@ export default {
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* 增强标题样式，使其更加明显 */
+.content-textarea :deep(h1) {
+  font-size: 2.5em;
+  font-weight: 700;
+  margin: 0.67em 0;
+  line-height: 1.2;
+  color: #111827;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.3em;
+}
+
+.content-textarea :deep(h2) {
+  font-size: 2em;
+  font-weight: 700;
+  margin: 0.83em 0;
+  line-height: 1.3;
+  color: #1f2937;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.3em;
+}
+
+.content-textarea :deep(h3) {
+  font-size: 1.5em;
+  font-weight: 600;
+  margin: 1em 0;
+  line-height: 1.4;
+  color: #374151;
+}
+
+.content-textarea :deep(h4) {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin: 1.33em 0;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.content-textarea :deep(h5) {
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 1.67em 0;
+  line-height: 1.6;
+  color: #6b7280;
+}
+
+/* 确保编辑器内容区域能正确显示样式 */
+.content-textarea :deep(.ProseMirror) {
+  min-height: 800px;
+  outline: none;
+  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+  font-size: 16px;
+  padding: 0 16px;
+}
+
+/* 确保标题样式在编辑器中正确显示 */
+.content-textarea :deep(.ProseMirror h1),
+.content-textarea :deep(.ProseMirror h2),
+.content-textarea :deep(.ProseMirror h3),
+.content-textarea :deep(.ProseMirror h4),
+.content-textarea :deep(.ProseMirror h5) {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
 }
 </style> 
