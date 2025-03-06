@@ -693,10 +693,11 @@ export default defineComponent({
 
     // 格式化件名称显示
     const formatComponentName = (name) => {
+      // 在大写字母前添加空格，但排除第一个字符
       return name
-        .split('_')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ');
+        .replace(/([A-Z])/g, ' $1')  // 在大写字母前添加空格
+        .trim()  // 移除可能产生的首尾空格
+        .replace(/\s+/g, ' ');  // 将多个空格替换为单个空格
     };
 
     // 处理组件拖动开始
@@ -1785,8 +1786,8 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: visible; /* 改为 visible，让内容可以溢出 */
-  padding-right: 16px; /* 为按钮预留空间 */
+  overflow: visible;
+  padding-right: 16px; 
 }
 
 .side-nav.collapsed {
