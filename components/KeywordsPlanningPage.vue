@@ -6131,14 +6131,28 @@ html {
   display: none;
   color: #6b7280;
   font-size: 12px;
-  margin-top: 8px;
+  /* 修改定位到输入框上方 */
+  position: absolute;
+  bottom: 100%; /* 改为从底部100%开始 */
+  margin-bottom: 8px; /* 替换 margin-top 为 margin-bottom */
   padding: 10px;
   background: rgba(245, 247, 255, 0.95);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  position: absolute;
   width: calc(100% - 32px);
   z-index: 10;
+}
+
+@keyframes fadeIn {
+  /* 修改动画方向为向上 */
+  from { 
+    opacity: 0; 
+    transform: translateY(5px); /* 改为正值,使其从下往上浮出 */
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
 .search-examples-title {
@@ -6153,11 +6167,6 @@ html {
   display: block;
   margin-bottom: 4px;
   padding: 2px 0;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
 }
 
 /* 添加这些样式来修复 outline 列表中 action 按钮的对齐问题 */
