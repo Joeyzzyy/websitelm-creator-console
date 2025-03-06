@@ -126,7 +126,7 @@
                         title="Click to view generation history"
                       >
                         <span>Generated</span>
-                        <span class="view-text"> (View History)</span>
+                        <span class="view-text"> (View generation details)</span>
                       </a-tag>
                     </div>
                   </div>
@@ -1649,11 +1649,10 @@ export default {
 
 .generating-tag {
   margin-left: 8px;
-  transform: rotate(-2deg);
   position: relative;
   display: inline-flex;
   align-items: center;
-  background: linear-gradient(45deg, #1890ff, #52c41a) !important;
+  background: linear-gradient(45deg, #1890ff, #40a9ff) !important; /* 使用更柔和的蓝色渐变 */
   border: none !important;
   box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
   animation: glow 2s ease-in-out infinite;
@@ -1700,9 +1699,31 @@ export default {
   border-radius: 12px;
 }
 
-/* 添加悬停效果 */
-.generating-tag:hover {
-  transform: rotate(-2deg) scale(1.05);
+/* 修改成功状态标签的样式 */
+:deep(.ant-tag-success.status-tag) {
+  background: #f6ffed !important; /* 使用浅绿色背景 */
+  border: 1px solid #b7eb8f !important; /* 添加绿色边框 */
+  box-shadow: none;
+}
+
+:deep(.ant-tag-success.status-tag span:first-child) {
+  color: #52c41a !important; /* 文字使用深绿色 */
+}
+
+:deep(.ant-tag-success.status-tag .view-text) {
+  color: #73d13d !important; /* "View Generation" 文字使用稍浅的绿色 */
+}
+
+:deep(.ant-tag-success.status-tag:hover) {
+  background: #f6ffed !important;
+  border-color: #95de64 !important;
+  box-shadow: 0 2px 6px rgba(82, 196, 26, 0.1);
+}
+
+/* 移除之前的 transform rotate 相关样式 */
+.generating-tag:hover,
+.failed-tag:hover {
+  transform: scale(1.05);
   transition: transform 0.2s ease;
 }
 
@@ -1758,7 +1779,7 @@ export default {
 
 /* 添加failed-tag的样式 */
 .failed-tag {
-  background: linear-gradient(45deg, #ff4d4f, #cf1322) !important;
+  background: linear-gradient(45deg, #ff4d4f, #ff7875) !important; /* 使用更柔和的红色渐变 */
   border: none !important;
   box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
   animation: glow-failed 2s ease-in-out infinite;
@@ -1786,7 +1807,7 @@ export default {
 }
 
 .failed-tag:hover {
-  transform: rotate(-2deg) scale(1.05);
+  transform: scale(1.05);
   transition: transform 0.2s ease;
 }
 
@@ -2187,15 +2208,39 @@ export default {
 
 /* 修改查看进度文字的样式 */
 .view-text {
-  color: #bae7ff !important; /* 使用浅蓝色 */
+  color: rgba(255, 255, 255, 0.95) !important; /* 改为白色并增加不透明度 */
   margin-left: 4px;
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
+  font-weight: 500; /* 增加字重 */
+  text-decoration: underline; /* 添加下划线 */
+  opacity: 0.9;
+  transition: all 0.2s ease;
 }
 
 .generating-tag:hover .view-text,
 .failed-tag:hover .view-text,
 .status-tag:hover .view-text {
   opacity: 1;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4); /* 添加发光效果 */
+}
+
+/* 修改成功状态标签的样式 */
+:deep(.ant-tag-success.status-tag) {
+  background: #f6ffed !important; /* 使用浅绿色背景 */
+  border: 1px solid #b7eb8f !important; /* 添加绿色边框 */
+  box-shadow: none;
+}
+
+:deep(.ant-tag-success.status-tag span:first-child) {
+  color: #52c41a !important; /* 文字使用深绿色 */
+}
+
+:deep(.ant-tag-success.status-tag .view-text) {
+  color: #73d13d !important; /* "View Generation" 文字使用稍浅的绿色 */
+}
+
+:deep(.ant-tag-success.status-tag:hover) {
+  background: #f6ffed !important;
+  border-color: #95de64 !important;
+  box-shadow: 0 2px 6px rgba(82, 196, 26, 0.1);
 }
 </style>

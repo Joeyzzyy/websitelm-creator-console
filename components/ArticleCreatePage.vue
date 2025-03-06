@@ -61,7 +61,7 @@
           </a-tab-pane>
 
           <!-- Component selection panel -->
-          <a-tab-pane key="components" tab="All Components">
+          <a-tab-pane key="components" tab="Components Library">
             <div class="components-list">
               <a-collapse v-model:activeKey="activeCategories">
                 <a-collapse-panel 
