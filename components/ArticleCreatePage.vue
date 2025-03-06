@@ -13,84 +13,86 @@
       <div class="side-nav" :class="{ 'collapsed': isSideNavCollapsed }">
         <div class="collapse-button" @click="toggleSideNav">
           <div class="collapse-icon">
-            <LeftOutlined :class="{ 'rotated': isSideNavCollapsed }" />
+            <LeftOutlined />
           </div>
         </div>
         
-        <a-tabs 
-          v-model:activeKey="activeTab"
-          class="compact-tabs"
-        >
-          <!-- Selected Components tab -->
-          <a-tab-pane key="selectedComponents" tab="Selected">
-            <div class="selected-components-list">
-              <!-- Empty state hint -->
-              <div v-if="articleData.sections.length === 0" class="empty-hint">
-                <p>No components added yet</p>
-              </div>
+        <div class="side-nav-content">
+          <a-tabs 
+            v-model:activeKey="activeTab"
+            class="compact-tabs"
+          >
+            <!-- Selected Components tab -->
+            <a-tab-pane key="selectedComponents" tab="Selected">
+              <div class="selected-components-list">
+                <!-- Empty state hint -->
+                <div v-if="articleData.sections.length === 0" class="empty-hint">
+                  <p>No components added yet</p>
+                </div>
 
-              <!-- Selected components list -->
-              <div 
-                v-else
-                class="selected-items"
-              >
+                <!-- Selected components list -->
                 <div 
-                  v-for="(section, index) in articleData.sections"
-                  :key="index"
-                  class="selected-item"
-                  draggable="true"
-                  @dragstart="handleSectionDragStart($event, index)"
-                  @dragover.prevent
-                  @drop="(e) => handleSectionDrop(e, index)"
-                  @click="scrollToSection(`section-${index}`)"
+                  v-else
+                  class="selected-items"
                 >
-                  <span class="item-name">{{ formatComponentName(section.componentName) }}</span>
-                  <div class="item-actions">
-                    <a-button 
-                      type="text" 
-                      danger
-                      size="small"
-                      @click.stop="removeSection(index)"
-                    >
-                      <DeleteOutlined />
-                    </a-button>
+                  <div 
+                    v-for="(section, index) in articleData.sections"
+                    :key="index"
+                    class="selected-item"
+                    draggable="true"
+                    @dragstart="handleSectionDragStart($event, index)"
+                    @dragover.prevent
+                    @drop="(e) => handleSectionDrop(e, index)"
+                    @click="scrollToSection(`section-${index}`)"
+                  >
+                    <span class="item-name">{{ formatComponentName(section.componentName) }}</span>
+                    <div class="item-actions">
+                      <a-button 
+                        type="text" 
+                        danger
+                        size="small"
+                        @click.stop="removeSection(index)"
+                      >
+                        <DeleteOutlined />
+                      </a-button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </a-tab-pane>
+            </a-tab-pane>
 
-          <!-- Component selection panel -->
-          <a-tab-pane key="components" tab="Components Library">
-            <div class="components-list">
-              <a-collapse v-model:activeKey="activeCategories">
-                <a-collapse-panel 
-                  v-for="category in filteredAvailableComponents" 
-                  :key="category.category" 
-                >
-                  <template #header>
-                    <div class="add-category-header">
-                      <span>{{ category.category }}</span>
-                      <span class="add-category-count">{{ category.items.length }}</span>
-                    </div>
-                  </template>
-                  <div 
-                    v-for="component in category.items" 
-                    :key="component.type"
-                    class="component-item"
-                    draggable="true"
-                    @dragstart="handleDragStart($event, component)"
-                    @click="addComponent(component)"
-                    @mouseenter="showComponentPreview(component)"
-                    @mouseleave="hideComponentPreview"
+            <!-- Component selection panel -->
+            <a-tab-pane key="components" tab="Components Library">
+              <div class="components-list">
+                <a-collapse v-model:activeKey="activeCategories">
+                  <a-collapse-panel 
+                    v-for="category in filteredAvailableComponents" 
+                    :key="category.category" 
                   >
-                    <span>{{ component.label }}</span>
-                  </div>
-                </a-collapse-panel>
-              </a-collapse>
-            </div>
-          </a-tab-pane>
-        </a-tabs>
+                    <template #header>
+                      <div class="add-category-header">
+                        <span>{{ category.category }}</span>
+                        <span class="add-category-count">{{ category.items.length }}</span>
+                      </div>
+                    </template>
+                    <div 
+                      v-for="component in category.items" 
+                      :key="component.type"
+                      class="component-item"
+                      draggable="true"
+                      @dragstart="handleDragStart($event, component)"
+                      @click="addComponent(component)"
+                      @mouseenter="showComponentPreview(component)"
+                      @mouseleave="hideComponentPreview"
+                    >
+                      <span>{{ component.label }}</span>
+                    </div>
+                  </a-collapse-panel>
+                </a-collapse>
+              </div>
+            </a-tab-pane>
+          </a-tabs>
+        </div>
       </div>
 
       <!-- Header toolbar -->
@@ -101,7 +103,7 @@
         
         <div class="header-actions">
           <template v-if="isEditMode">
-            <!-- 修改查看已发布页面的按钮 -->
+            <!-- Modified button for viewing published page -->
             <a-button
               v-if="articleData.publishStatus === 'publish'"
               type="default"showComponentPreview
@@ -151,7 +153,7 @@
             </a-button>
           </template>
 
-          <!-- 添加分析按钮 -->
+          <!-- Add analysis button -->
           <a-button
             type="default"
             @click="showAnalysisModal"
@@ -171,9 +173,9 @@
             <div class="basic-info-form">
               <a-form layout="vertical">
                 <div class="form-grid">
-                  <!-- 将内容分为两列 -->
+                  <!-- Divide content into two columns -->
                   <div class="form-columns">
-                    <!-- TDK 分组 - 左侧 -->
+                    <!-- TDK section - left column -->
                     <div class="tdk-section">
                       <div class="tdk-label">TDK Information</div>
                       
@@ -219,7 +221,7 @@
                       </a-form-item>
                     </div>
 
-                    <!-- 其他字段 - 右列 -->
+                    <!-- Other fields - right column -->
                     <div class="other-fields-section">
                       <div class="section-label">Other Information</div>
                       <div class="other-fields-grid">
@@ -256,7 +258,7 @@
                           />
                         </a-form-item>
 
-                        <!-- 修改 slug 表单项，添加 v-if -->
+                        <!-- Modified slug form item, added v-if -->
                         <a-form-item label="Slug" required v-if="isEditMode">
                           <a-input
                             v-model:value="articleData.slug"
@@ -273,7 +275,7 @@
                         </a-form-item>
                       </div>
 
-                      <!-- 将 Deployment Method 改为 Publish URL -->
+                      <!-- Changed Deployment Method to Publish URL -->
                       <a-form-item 
                         label="Publish URL"
                         style="margin-top: 24px;"
@@ -294,14 +296,14 @@
                           </a-select-option>
                         </a-select>
 
-                        <!-- 修改预览URL显示逻辑 -->
+                        <!-- Modified preview URL display logic -->
                         <div class="preview-url-hint" v-if="articleData.publishUrl">
                           <div class="hint-label">This page will be published to:</div>
                           <div class="preview-url">{{ getPreviewPublishUrl }}</div>
                         </div>
                       </a-form-item>
 
-                      <!-- Summary 放在 Deployment Method 下面 -->
+                      <!-- Summary below Deployment Method -->
                       <a-form-item 
                         label="Summary"
                         style="margin-top: 24px;"
@@ -356,7 +358,7 @@
               </a-button>
             </div>
             
-            <!-- 添加过渡效果的包装器 -->
+            <!-- Add transition effect wrapper -->
             <div 
               :class="[
                 'section-content-wrapper',
@@ -373,7 +375,7 @@
         </div>
       </div>
 
-      <!-- 添加分析弹窗 -->
+      <!-- Add analysis modal -->
       <a-modal
         v-model:open="analysisModal.visible"
         title="Page Analysis"
@@ -391,7 +393,7 @@
         </div>
       </a-modal>
 
-      <!-- 添加悬浮预览组件 -->
+      <!-- Add hover preview component -->
       <div 
         v-if="hoverPreview.visible" 
         class="hover-preview"
@@ -406,7 +408,7 @@
         </div>
       </div>
 
-      <!-- 修改发布确认弹窗 -->
+      <!-- Modified publish confirmation modal -->
       <a-modal
         v-model:open="publishModal.visible"
         :title="publishModal.title"
@@ -431,14 +433,14 @@
         </template>
       </a-modal>
 
-      <!-- 添加全屏遮罩 -->
+      <!-- Add fullscreen overlay -->
       <div 
         v-if="currentImmersiveSection !== null" 
         class="immersive-overlay"
         @click="exitImmersiveMode"
       >
         <div class="immersive-content" @click.stop>
-          <!-- 全屏模式的顶部工具栏 -->
+          <!-- Fullscreen mode toolbar -->
           <div class="immersive-toolbar">
             <span class="component-name">
               {{ formatComponentName(articleData.sections[currentImmersiveSection]?.componentName) }}
@@ -450,7 +452,7 @@
             </div>
           </div>
           
-          <!-- 全屏模式的内容 -->
+          <!-- Fullscreen mode content -->
           <div class="immersive-body">
             <component 
               v-if="currentImmersiveSection !== null"
@@ -484,7 +486,8 @@ import {
   LeftOutlined,
   ExpandOutlined,
   CompressOutlined,
-  BarChartOutlined
+  BarChartOutlined,
+  MenuUnfoldOutlined
 } from '@ant-design/icons-vue';
 import SectionWrapper from './sections/index.vue';
 import { useRouter, useRoute } from 'vue-router';
@@ -567,6 +570,7 @@ export default defineComponent({
     ExpandOutlined,
     CompressOutlined,
     BarChartOutlined,
+    MenuUnfoldOutlined,
     SectionWrapper,
     FloatingStats,
     TitleSection,
@@ -1778,36 +1782,94 @@ export default defineComponent({
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: visible; /* 改为 visible，让内容可以溢出 */
+  padding-right: 16px; /* 为按钮预留空间 */
 }
 
 .side-nav.collapsed {
-  width: 48px;
-  overflow: hidden;
+  width: 24px; /* 减小宽度 */
+  height: 60px; /* 固定高度 */
+  bottom: auto; /* 取消底部固定 */
+  top: 50%; /* 改为50% */
+  transform: translateY(-50%); /* 添加垂直居中 */
+  background: transparent; /* 移除背景 */
+  box-shadow: none; /* 移除阴影 */
+  padding-right: 0;
 }
 
+/* 修改折叠按钮样式 */
 .collapse-button {
   position: absolute;
-  right: 0px;
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 16px;
-  height: 40px;
+  width: 24px;
+  height: 60px;
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 20px;
+  border-radius: 24px 0 0 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10;
   transition: all 0.3s ease;
+  box-shadow: -2px 0 6px rgba(0, 0, 0, 0.05);
+}
+
+/* 折叠状态下的按钮样式 */
+.side-nav.collapsed .collapse-button {
+  right: 0;
+  border-radius: 24px; /* 完整圆角 */
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
 
+/* 优化图标容器样式 */
+.collapse-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #64748b;
+  transition: all 0.3s ease;
+}
+
+/* 调整图标样式和旋转效果 */
+.collapse-icon .anticon {
+  font-size: 14px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 展开状态箭头指向左侧 */
+.collapse-icon .anticon {
+  transform: rotate(0deg);
+}
+
+/* 折叠状态箭头指向右侧 */
+.side-nav.collapsed .collapse-icon .anticon {
+  transform: rotate(180deg);
+}
+
+/* 移除之前的提示相关样式 */
+.collapsed-hint {
+  display: none;
+}
+
+/* 调整内容容器样式 */
+.side-nav-content {
+  flex: 1;
+  width: 100%; /* 改为100%，让内容自适应容器宽度 */
+  opacity: 1;
+  visibility: visible;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden; /* 添加overflow控制 */
+}
+
+/* 优化hover效果 */
 .collapse-button:hover {
   background: #f0f9ff;
   border-color: #38BDF8;
@@ -1818,36 +1880,20 @@ export default defineComponent({
   transform: translateY(-50%) scale(0.95);
 }
 
-.collapse-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 12px;
-  height: 12px;
-  color: #64748b;
-  transition: all 0.3s ease;
-}
-
-.collapse-button:hover .collapse-icon {
-  color: #38BDF8;
-}
-
-.collapse-icon .anticon {
-  font-size: 10px;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.collapse-icon .anticon.rotated {
-  transform: rotate(180deg);
-}
-
-/* 优化收缩动画 */
-.side-nav {
+/* 添加内容容器样式 */
+.side-nav-content {
+  flex: 1;
+  width: 300px; /* 与展开时宽度一致 */
+  opacity: 1;
+  visibility: visible;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.side-nav.collapsed .collapse-button {
-  right: 0px;
+/* 折叠时隐藏内容 */
+.side-nav.collapsed .side-nav-content {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none; /* 禁用交互 */
 }
 
 /* 组件列表样式 */
