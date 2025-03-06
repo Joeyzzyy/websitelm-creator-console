@@ -18,17 +18,17 @@
 
                   <a-button 
                     class="action-button secondary-btn highlight-btn"
-                    @click="showSettings"
+                    @click.stop="showSettings"
                   >
                     <span>Publish Domain Settings</span>
                   </a-button>
                   
                   <a-button 
                     class="action-button secondary-btn"
-                    @click="collectPublishedUrls"
+                    @click.stop="collectPublishedUrls"
                     :disabled="!tasks.length"
                   >
-                    <span>Submit Sitemap</span>
+                    <span>Submit Urls To Google Search Console</span>
                   </a-button>
 
                   <a-button 
@@ -873,7 +873,7 @@ export default {
     const handleSubmitSitemap = async (record) => {
       // Show confirmation modal first
       modalConfig.visible = true;
-      modalConfig.title = 'Submit Sitemap';
+      modalConfig.title = 'Submit Urls To Google Search Console';
       modalConfig.content = 'Are you sure you want to submit this page to Google Search Console?';
       modalConfig.type = 'submit_sitemap';
       modalConfig.data = record;
@@ -2094,18 +2094,24 @@ export default {
   color: rgba(0, 0, 0, 0.25);
 }
 
-/* 突出显示 Publish Domain Settings 按钮 */
+/* 修改 highlight-btn 样式，移除可能导致遮挡的样式 */
 .highlight-btn {
   background: #e6f7ff;
   border-color: #1890ff;
   color: #1890ff;
   font-weight: 500;
-  position: relative;
-  overflow: hidden;
-  z-index: 1;
   box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
 }
 
+.highlight-btn:hover {
+  background: #bae7ff;
+  border-color: #096dd9;
+  color: #096dd9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+/* 移除可能导致问题的定位和 z-index 相关样式 */
 .highlight-btn::before {
   content: '';
   position: absolute;
@@ -2119,53 +2125,20 @@ export default {
     rgba(255, 255, 255, 0.3) 50%,
     rgba(255, 255, 255, 0) 100%
   );
-  z-index: -1;
   animation: shine 3s infinite;
+  pointer-events: none; /* 添加这行确保不会影响点击事件 */
 }
 
-.highlight-btn:hover {
-  background: #bae7ff;
-  border-color: #096dd9;
-  color: #096dd9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+/* 确保 a-space 中的按钮正确对齐且不重叠 */
+:deep(.ant-space) {
+  display: flex;
+  align-items: center;
+  gap: 8px !important;
 }
 
-@keyframes shine {
-  0% {
-    left: -100%;
-  }
-  20%, 100% {
-    left: 100%;
-  }
-}
-
-/* 添加表格行高度控制 */
-:deep(.ant-table-tbody > tr > td) {
-  padding: 6px 8px; /* 减小单元格内边距 */
-  height: 40px; /* 设置单元格高度 */
-}
-
-:deep(.ant-table-thead > tr > th) {
-  padding: 8px; /* 减小表头内边距 */
-  height: 44px; /* 设置表头高度 */
-}
-
-:deep(.ant-table-row) {
-  line-height: 1.2; /* 减小行高 */
-}
-
-/* Add styles for the workflow menu item */
-:deep(.ant-dropdown-menu-item) {
-  padding: 8px 12px;
-}
-
-:deep(.ant-dropdown-menu-item .anticon) {
-  margin-right: 8px;
-}
-
-:deep(.ant-dropdown-menu-item:hover) {
-  background-color: #f5f5f5;
+:deep(.ant-space-item) {
+  position: relative;
+  z-index: 1;
 }
 
 /* 添加新的样式 */
