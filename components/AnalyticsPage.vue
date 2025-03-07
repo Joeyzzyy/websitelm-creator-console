@@ -455,10 +455,34 @@ export default defineComponent({
       
       // Open GSC authorization window
       const authWindow = window.open(
-        `${apiClient.baseURL}/gsc/auth?customerId=${customerId}&productId=${productId}`,
+        `https://api.websitelm.com/v1/auth?customerId=${customerId}`,
         'GSC Authorization',
         'width=600,height=600'
       )
+      
+      // 监听窗口返回的数据
+      const handleAuthResponse = async () => {
+        try {
+          const response = await fetch(`https://api.websitelm.com/v1/auth?customerId=${customerId}`);
+          const data = await response.json();
+          
+          if (data.code === 200 && data.redirectURL) {
+            // 重定向到 Google 授权页面
+            authWindow.location.href = data.redirectURL;
+          } else {
+            console.error('Failed to get redirect URL');
+            authWindow.close();
+            message.error('Authorization failed');
+          }
+        } catch (error) {
+          console.error('Error during authorization:', error);
+          authWindow.close();
+          message.error('Authorization failed');
+        }
+      }
+      
+      // 执行认证流程
+      handleAuthResponse();
       
       // Start checking for GSC connection status
       startGscStatusCheck()
