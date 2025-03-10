@@ -496,6 +496,12 @@ export default {
         width: '10%'
       },
       {
+        title: 'Status',
+        dataIndex: 'publishStatus',
+        key: 'status',
+        width: '8%'
+      },
+      {
         title: 'Created At',
         dataIndex: 'createdAt',
         key: 'createdAt',
@@ -506,12 +512,6 @@ export default {
         dataIndex: 'updatedAt',
         key: 'updatedAt',
         width: '12%'
-      },
-      {
-        title: 'Status',
-        dataIndex: 'publishStatus',
-        key: 'status',
-        width: '8%'
       },
       {
         title: 'Actions',

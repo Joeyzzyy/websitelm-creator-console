@@ -46,10 +46,8 @@
         const response = await apiClient.googleCallback(code, state);
         
         if (response && response.code === 200) {
-          // Clear all old data
           localStorage.clear();
           
-          // Store new login information
           localStorage.setItem('intelickIsLoggedIn', 'true');
           localStorage.setItem('accessToken', response.accessToken);
           
@@ -74,7 +72,6 @@
             description: 'Successfully logged in with Google'
           });
 
-          // 检查 onboarding 状态并决定跳转路径
           const redirectPath = response.data.onboarding ? '/dashboard' : '/onboarding';
           this.$router.push(redirectPath);
         } else {

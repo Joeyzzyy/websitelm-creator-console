@@ -680,7 +680,6 @@ const register = async (registerData) => {
   }
 };
 
-// Google登录
 const googleLogin = async () => {
   try {
     const response = await apiClient.get('/customer/google');
@@ -691,7 +690,6 @@ const googleLogin = async () => {
   }
 };
 
-// Google登录回调
 const googleCallback = async (code, state) => {
   try {
     const response = await apiClient.get('/customer/google/callback', {
