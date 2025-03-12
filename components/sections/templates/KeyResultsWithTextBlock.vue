@@ -1,143 +1,111 @@
 <template>
   <div class="section-wrapper">
-    <div class="editor-area full-width">
-      <div class="editor-content">
-        <div class="right-content">
-          <div class="content-item">
-            <div class="editor-wrapper">
-              <!-- 工具栏 -->
-              <div class="editor-toolbar">
-                <a-button-group>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('bold') }"
-                    @click="editor?.chain().focus().toggleBold().run()"
-                  >
-                    <bold-outlined />
-                  </a-button>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('italic') }"
-                    @click="editor?.chain().focus().toggleItalic().run()"
-                  >
-                    <italic-outlined />
-                  </a-button>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('subtitle') }"
-                    @click="editor?.chain().focus().toggleMark('subtitle').run()"
-                  >
-                    <font-size-outlined />
-                  </a-button>
-                </a-button-group>
+    <!-- 工具栏 -->
+    <div class="editor-toolbar">
+      <!-- 文本格式工具 -->
+      <a-button-group>
+        <a-button 
+          type="text"
+          :class="{ active: editor?.isActive('bold') }"
+          @click="editor?.chain().focus().toggleBold().run()"
+        >
+          <bold-outlined />
+        </a-button>
+        <a-button 
+          type="text"
+          :class="{ active: editor?.isActive('italic') }"
+          @click="editor?.chain().focus().toggleItalic().run()"
+        >
+          <italic-outlined />
+        </a-button>
+        <a-button 
+          type="text"
+          :class="{ active: editor?.isActive('subtitle') }"
+          @click="editor?.chain().focus().toggleMark('subtitle').run()"
+        >
+          <font-size-outlined />
+        </a-button>
+      </a-button-group>
 
-                <a-divider type="vertical" />
+      <a-divider type="vertical" />
 
-                <!-- 平铺展示的标题按钮 -->
-                <a-button-group>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('heading', { level: 1 }) }"
-                    @click="toggleHeading(1)"
-                  >
-                    H1
-                  </a-button>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('heading', { level: 2 }) }"
-                    @click="toggleHeading(2)"
-                  >
-                    H2
-                  </a-button>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('heading', { level: 3 }) }"
-                    @click="toggleHeading(3)"
-                  >
-                    H3
-                  </a-button>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('heading', { level: 4 }) }"
-                    @click="toggleHeading(4)"
-                  >
-                    H4
-                  </a-button>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('heading', { level: 5 }) }"
-                    @click="toggleHeading(5)"
-                  >
-                    H5
-                  </a-button>
-                  <a-button 
-                    type="text"
-                    :class="{ active: editor?.isActive('paragraph') }"
-                    @click="setParagraph()"
-                  >
-                    Normal
-                  </a-button>
-                </a-button-group>
+      <!-- 标题工具 -->
+      <a-button-group>
+        <template v-for="level in 5" :key="level">
+          <a-button 
+            type="text"
+            :class="{ active: editor?.isActive('heading', { level }) }"
+            @click="toggleHeading(level)"
+          >
+            H{{ level }}
+          </a-button>
+        </template>
+        <a-button 
+          type="text"
+          :class="{ active: editor?.isActive('paragraph') }"
+          @click="setParagraph()"
+        >
+          Normal
+        </a-button>
+      </a-button-group>
 
-                <a-divider type="vertical" />
+      <a-divider type="vertical" />
 
-                <a-button-group>
-                  <a-button type="text" @click="handleAddImageClick">
-                    <picture-outlined />
-                  </a-button>
-                  <a-button type="text" @click="handleAddVideoClick">
-                    <video-camera-outlined />
-                  </a-button>
-                  <a-button type="text" @click="handleAddLinkClick">
-                    <link-outlined />
-                  </a-button>
-                </a-button-group>
-              </div>
-              <editor-content 
-                :editor="editor" 
-                class="content-textarea"
-              />
-            </div>
-          </div>
-
-          <!-- 修改调试区域 -->
-          <div class="debug-area">
-            <div class="debug-title">Editor HTML Content:</div>
-            <a-textarea
-              v-model:value="editorContent"
-              :rows="6"
-              @change="updateEditorFromHTML"
-              class="debug-content"
-            />
-          </div>
-        </div>
-
-        <!-- Modal 部分保持不变 -->
-        <a-modal v-model:visible="linkModalVisible" title="Add Link" @ok="handleAddLink" @cancel="handleCancelLink">
-          <p class="selected-text-preview">Selected Text: {{ selectedText }}</p>
-          <a-input 
-            v-model:value="linkUrl"
-            placeholder="Please enter URL"
-          />
-        </a-modal>
-
-        <a-modal v-model:visible="imageLibraryVisible" title="Select Image" width="800px" @ok="handleImageSelect" @cancel="handleImageLibraryCancel">
-          <image-library
-            v-if="imageLibraryVisible"
-            @select="onImageSelect"
-            @close="handleImageLibraryCancel"
-          />
-        </a-modal>
-
-        <a-modal v-model:visible="videoLibraryVisible" title="Select Video" width="800px" @ok="handleVideoSelect" @cancel="handleVideoLibraryCancel">
-          <video-library
-            v-if="videoLibraryVisible"
-            @select="onVideoSelect"
-            @close="handleVideoLibraryCancel"
-          />
-        </a-modal>
-      </div>
+      <!-- 媒体工具 -->
+      <a-button-group>
+        <a-button type="text" @click="handleAddImageClick">
+          <picture-outlined />
+        </a-button>
+        <a-button type="text" @click="handleAddVideoClick">
+          <video-camera-outlined />
+        </a-button>
+        <a-button type="text" @click="handleAddLinkClick">
+          <link-outlined />
+        </a-button>
+      </a-button-group>
     </div>
+
+    <!-- 编辑器内容区域 -->
+    <editor-content 
+      :editor="editor" 
+      class="content-textarea"
+    />
+
+    <!-- 调试区域 -->
+    <div class="debug-area">
+      <div class="debug-title">Editor HTML Content:</div>
+      <a-textarea
+        v-model:value="editorContent"
+        :rows="6"
+        @change="updateEditorFromHTML"
+        class="debug-content"
+      />
+    </div>
+
+    <!-- 弹窗组件 -->
+    <a-modal v-model:visible="linkModalVisible" title="Add Link" @ok="handleAddLink" @cancel="handleCancelLink">
+      <p class="selected-text-preview">Selected Text: {{ selectedText }}</p>
+      <a-input 
+        v-model:value="linkUrl"
+        placeholder="Please enter URL"
+      />
+    </a-modal>
+
+    <a-modal v-model:visible="imageLibraryVisible" title="Select Image" width="800px" @ok="handleImageSelect" @cancel="handleImageLibraryCancel">
+      <image-library
+        v-if="imageLibraryVisible"
+        @select="onImageSelect"
+        @close="handleImageLibraryCancel"
+      />
+    </a-modal>
+
+    <a-modal v-model:visible="videoLibraryVisible" title="Select Video" width="800px" @ok="handleVideoSelect" @cancel="handleVideoLibraryCancel">
+      <video-library
+        v-if="videoLibraryVisible"
+        @select="onVideoSelect"
+        @close="handleVideoLibraryCancel"
+      />
+    </a-modal>
   </div>
 </template>
 
@@ -536,471 +504,68 @@ export default {
 </script>
 
 <style scoped>
-@import '../../../assets/styles/section-form.css';
-
-/* 修改布局样式 */
 .section-wrapper {
   display: block;
   width: 100%;
   margin: 0 auto;
-  margin-top: 16px; /* 添加上边距 */
-}
-
-.editor-area {
-  background: transparent;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  border-radius: 0;
-  padding: 0;
-  width: 100%;
-}
-
-.editor-area.full-width {
-  width: 100%;
-}
-
-.editor-header {
-  position: sticky;
-  top: 0;
-  background: white;
-  padding: 16px 24px;
-  border-bottom: 1px solid #f0f0f0;
-  z-index: 10;
-}
-
-.component-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0;
-}
-
-.editor-content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0;
-  width: 100%;
-}
-
-.section-container {
-  width: 100%;
-}
-
-.results-container {
-  position: sticky;
-  top: 24px;
-  align-self: start;
-  height: fit-content;
-  width: 100%;
-  min-width: 300px;
-}
-
-.section-title {
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 24px;
-  color: #1f2937;
-  width: 100%;
-  display: block;
-}
-
-.results-container {
-  position: sticky;
-  top: 24px;
-  align-self: start;
-  height: fit-content;
-  min-width: 0;
-  width: auto;
-}
-
-.html-tag {
-  display: inline-block;
-  padding: 2px 8px;
-  background-color: #e6f7ff;
-  border: 1px solid #91d5ff;
-  border-radius: 4px;
-  color: #0050b3;
-  font-size: 12px;
-  margin-right: 8px;
-  font-family: monospace;
-}
-
-.input-with-tag {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-bottom: 12px;
-  width: 100%;
-}
-
-.display-switch {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-  width: 100%;
-}
-
-.switch-label {
-  margin-right: 12px;
-  color: #4b5563;
-  font-size: 14px;
-}
-
-:deep(.ant-switch) {
-  min-width: 40px;
-}
-
-:deep(.ant-form-item) {
-  width: 100%;
-  margin-bottom: 16px;
-}
-
-:deep(.ant-input-wrapper) {
-  width: 100%;
-}
-
-:deep(.ant-input),
-:deep(.ant-input-textarea) {
-  width: 100%;
-}
-
-[v-show="false"] {
-  display: none !important;
-}
-
-.link-tags {
-  margin-top: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.link-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  background: #f5f5f5;
-  border-radius: 4px;
-  font-size: 12px;
-  max-width: 250px;
-}
-
-.link-text {
-  color: #1890ff;
-  margin-right: 4px;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.link-url {
-  color: #666;
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.link-tag :deep(.anticon-close) {
-  font-size: 10px;
-  margin-left: 4px;
-}
-
-.input-group {
-  position: relative;
-  width: 100%;
-}
-
-.add-link-btn {
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 4px 8px;
-  font-size: 12px;
-  z-index: 1;
-}
-
-.selected-text-preview {
-  margin-bottom: 16px;
-  padding: 8px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
-  font-size: 12px;
-  word-break: break-all;
-}
-
-.input-with-tag {
-  width: 100%;
-}
-
-.link-tags {
-  margin-top: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.link-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  background: #f5f5f5;
-  border-radius: 4px;
-  font-size: 12px;
-  max-width: 250px;
-}
-
-.link-text {
-  color: #1890ff;
-  margin-right: 4px;
-  max-width: 100px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.link-url {
-  color: #666;
-  max-width: 120px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.link-tag :deep(.anticon-close) {
-  font-size: 10px;
-  margin-left: 4px;
-}
-
-.form-item-label {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.form-item-label .ant-form-item-label {
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.85);
-}
-
-.add-link-btn {
-  padding: 0 8px;
-  font-size: 12px;
-  height: 24px;
-  line-height: 24px;
-}
-
-.add-link-btn :deep(.anticon) {
-  font-size: 12px;
-  margin-right: 4px;
-}
-
-.top-content {
-  margin-bottom: 24px;
-}
-
-.left-content {
-  margin-bottom: 32px;
-}
-
-.content-header-with-button {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.content-item {
-  position: relative;
-  margin-bottom: 16px;
-  background: transparent;
-  border: none;
-  padding: 0;
-}
-
-.section-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1f2937;
-}
-
-.add-content-btn {
-  background: linear-gradient(135deg, #1890ff, #1890ff);
-  border: none;
-  height: 32px;
-  padding: 0 16px;
-  border-radius: 6px;
-  font-weight: 500;
-  color: white;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.add-content-btn:hover {
-  background: linear-gradient(135deg, #4338CA, #6D28D9);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
-}
-
-.delete-btn {
-  margin-left: 8px;
-}
-
-.content-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.delete-btn {
-  padding: 4px 8px;
-  height: auto;
-  color: #ff4d4f;
-}
-
-.delete-btn:hover {
-  color: #ff7875;
-  background-color: #fff1f0;
-}
-
-.content-header .delete-btn {
-  color: #ff4d4f !important;
-  transition: all 0.3s;
-  padding: 4px;
-  height: 24px;
-  width: 24px;
-  line-height: 1;
-}
-
-.content-header .delete-btn:hover {
-  color: #ff7875 !important;
-  background: rgba(255, 77, 79, 0.1);
-}
-
-.content-header :deep(.anticon) {
-  font-size: 14px;
-  color: inherit;
-}
-
-.add-content-btn {
-  margin-bottom: 24px;
-}
-
-.content-item {
-  background: white;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-.add-image-btn {
-  background: linear-gradient(135deg, #1890ff, #1890ff);
-  border: none;
-  height: 32px;
-  padding: 0 16px;
-  border-radius: 6px;
-  font-weight: 500;
-  color: white;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.add-image-btn:hover {
-  background: linear-gradient(135deg, #4338CA, #6D28D9);
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
-}
-
-.action-buttons {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.add-image-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.add-image-btn:hover {
-  color: #40a9ff;
-  background: rgba(24, 144, 255, 0.1);
-}
-
-.editor-wrapper {
+  margin-top: 32px;
   border: 1px solid #e5e7eb;
   border-radius: 4px;
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 240px);
-  min-height: 400px;
   background: white;
+  min-height: 400px;
+  padding: 12px 16px;
 }
 
 .editor-toolbar {
-  padding: 8px 16px;
+  padding: 8px 24px;
   border-bottom: 1px solid #d9d9d9;
   background: #fafafa;
   display: flex;
-  gap: 12px;
+  gap: 24px;
   align-items: center;
   position: sticky;
-  top: 0;
+  top: 12px;
   z-index: 10;
   min-width: 800px;
   overflow-x: auto;
+  border-radius: 4px;
 }
 
-.editor-toolbar .ant-btn {
-  padding: 4px 10px;
-  height: 32px;
+.editor-toolbar :deep(.ant-btn) {
   min-width: 40px;
-  margin: 0 2px;
-}
-
-.editor-toolbar .ant-btn-group {
+  height: 40px;
+  padding: 0 12px;
   display: flex;
-  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
 }
 
-.editor-toolbar .ant-divider-vertical {
+.editor-toolbar :deep(.ant-btn-group) {
+  gap: 4px;
+  display: flex;
+}
+
+.editor-toolbar :deep(.ant-divider-vertical) {
   height: 24px;
-  margin: 0 8px;
-}
-
-/* 确保标题按钮有足够宽度 */
-.editor-toolbar .ant-btn-group .ant-btn {
-  min-width: 45px;
-}
-
-.editor-toolbar .ant-btn.active {
-  color: #1890ff;
-  background: #e6f7ff;
+  margin: 0 4px;
 }
 
 .content-textarea {
   flex: 1;
   overflow-y: auto;
-  padding: 32px; /* 增加内边距 */
-  font-size: 16px; /* 保持字体大小 */
+  padding: 32px;
+  font-size: 16px;
 }
 
 .content-textarea :deep(.ProseMirror) {
-  min-height: 800px; /* 大幅增加最小高度 */
+  min-height: 800px;
   outline: none;
-  line-height: 1.6; /* 保持行高 */
+  line-height: 1.6;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
     'Noto Color Emoji';
-  font-size: 16px; /* 保持字体大小 */
-  padding: 0 16px; /* 增加内边距 */
+  font-size: 16px;
+  padding: 0 16px;
 }
 
 .content-textarea :deep(.ProseMirror *) {
@@ -1066,23 +631,15 @@ export default {
   text-decoration: underline;
 }
 
-/* 添加光标样式 */
 .content-textarea :deep(.ProseMirror-focused) {
   outline: none;
   background-color: #fff;
 }
 
-/* 选中文本的样式 */
 .content-textarea :deep(.ProseMirror-selectednode) {
   outline: 2px solid #1890ff;
 }
 
-.bottom-add-btn {
-  margin-top: 16px;
-  width: 100%;
-}
-
-/* 视频相关样式 */
 .content-textarea :deep(.video-container) {
   max-width: 400px;
   margin: 8px 0;
@@ -1094,7 +651,7 @@ export default {
 
 .content-textarea :deep(.embedded-video) {
   width: 100%;
-  max-height: 225px; /* 16:9 比例 */
+  max-height: 225px;
   display: block;
   border: none;
 }
@@ -1104,7 +661,6 @@ export default {
   opacity: 0.95;
 }
 
-/* 视频控件样式优化 */
 .content-textarea :deep(video::-webkit-media-controls) {
   background-color: rgba(0, 0, 0, 0.1);
 }
@@ -1122,32 +678,6 @@ export default {
   font-style: italic;
 }
 
-/* 修改调试区域样式 */
-.debug-area {
-  margin-top: 20px;
-  padding: 12px;
-  border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
-}
-
-.debug-title {
-  font-size: 12px;
-  color: #64748b;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-
-.debug-content {
-  font-family: monospace;
-  font-size: 12px;
-  background: #f1f5f9;
-  border-radius: 4px;
-  color: #334155;
-  width: 100%;
-  min-height: 300px; /* 添加最小高度 */
-}
-
-/* 添加子标题样式 */
 .content-textarea :deep(.content-subtitle) {
   font-size: 1.25em;
   font-weight: 600;
@@ -1156,7 +686,6 @@ export default {
   line-height: 1.4;
 }
 
-/* 增强标题样式，使其更加明显 */
 .content-textarea :deep(h1) {
   font-size: 2.5em;
   font-weight: 700;
@@ -1201,25 +730,44 @@ export default {
   color: #6b7280;
 }
 
-/* 确保编辑器内容区域能正确显示样式 */
-.content-textarea :deep(.ProseMirror) {
-  min-height: 800px;
-  outline: none;
-  line-height: 1.6;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
-    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
-    'Noto Color Emoji';
-  font-size: 16px;
-  padding: 0 16px;
+/* 调试区域样式 */
+.debug-area {
+  margin-top: 20px;
+  padding: 12px;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
 }
 
-/* 确保标题样式在编辑器中正确显示 */
-.content-textarea :deep(.ProseMirror h1),
-.content-textarea :deep(.ProseMirror h2),
-.content-textarea :deep(.ProseMirror h3),
-.content-textarea :deep(.ProseMirror h4),
-.content-textarea :deep(.ProseMirror h5) {
-  margin-top: 1em;
-  margin-bottom: 0.5em;
+.debug-title {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.debug-content {
+  font-family: monospace;
+  font-size: 12px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  color: #334155;
+  width: 100%;
+  min-height: 300px;
+}
+
+/* 链接预览样式 */
+.selected-text-preview {
+  margin-bottom: 16px;
+  padding: 8px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  font-size: 12px;
+  word-break: break-all;
+}
+
+/* 工具栏按钮激活状态 */
+.editor-toolbar :deep(.ant-btn.active) {
+  color: #1890ff;
+  background: rgba(24, 144, 255, 0.1);
 }
 </style> 
