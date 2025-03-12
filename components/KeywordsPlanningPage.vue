@@ -194,7 +194,7 @@
                                     <span class="search-example">Enter any semantic prompt or seed keyword</span>
                                     <div class="search-examples-title">Try prompts like:</div>
                                     <span class="search-example">"low competition keywords about content marketing"</span>
-                                    <span class="search-example">"trending topics in digital marketing for 2023"</span>
+                                    <span class="search-example">"trending topics in digital marketing for 2025"</span>
                                     <div class="search-examples-title">Or simple seed keywords:</div>
                                     <span class="search-example">"SEO" or "email marketing" or "social media strategy"</span>
                                     <div class="search-examples-title">Our AI will intelligently interpret your input and find relevant keywords</div>
