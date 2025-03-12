@@ -151,7 +151,7 @@
                         :key="index"
                         class="competitor-tag"
                       >
-                        {{ comp.name }} ({{ comp.url }})
+                        {{ comp.name }} (https://{{ comp.url }})
                         <button @click="removeCompetitor(index)" class="remove-btn">
                           <i class="fas fa-times"></i>
                         </button>
@@ -167,12 +167,18 @@
                       class="competitor-input"
                       ref="competitorNameInput"
                     />
-                    <a-input
-                      v-model:value="newCompetitor.url"
-                      placeholder="Website URL"
-                      class="competitor-input"
-                      @pressEnter="handleCompetitor"
-                    />
+                    <a-input-group compact class="website-input-group flex-1">
+                      <span class="website-prefix">
+                        <i class="fas fa-globe mr-2"></i>
+                        https://
+                      </span>
+                      <a-input
+                        v-model:value="newCompetitor.url"
+                        placeholder="example.com"
+                        class="chat-input"
+                        @pressEnter="handleCompetitor"
+                      />
+                    </a-input-group>
                   </div>
 
                   <!-- 提示信息和完成按钮 -->
@@ -205,7 +211,7 @@
                     Added competitors:
                     <div class="competitor-list-summary">
                       <div v-for="(comp, index) in formData.competitors" :key="index" class="competitor-item">
-                        {{ comp.name }} ({{ comp.url }})
+                        {{ comp.name }} (https://{{ comp.url }})
                       </div>
                     </div>
                   </div>
@@ -567,8 +573,8 @@ watch(messages, () => {
 .website-input-group {
   display: flex;
   align-items: center;
-  width: 100%;
-  min-width: 320px;
+  width: 55%;
+  min-width: 300px;
   background: white;
   border-radius: 16px;
   overflow: visible;
@@ -610,7 +616,8 @@ watch(messages, () => {
 
 .competitor-input {
   @apply h-14 text-lg border-gray-200 rounded-xl transition-shadow;
-  flex: 1;
+  width: 45%;
+  min-width: 200px;
 }
 
 .competitors-list {
