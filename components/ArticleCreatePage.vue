@@ -343,14 +343,6 @@
             
             <div class="section-actions">
               <a-button 
-                type="text"
-                class="action-btn"
-                @click="toggleImmersiveMode(index)"
-              >
-                <ExpandOutlined v-if="currentImmersiveSection !== index" />
-                <CompressOutlined v-else />
-              </a-button>
-              <a-button 
                 type="text" 
                 danger
                 class="action-btn"
@@ -1579,21 +1571,6 @@ export default defineComponent({
       document.body.style.overflow = '';
     };
     
-    // 监听 ESC 键退出全屏
-    onMounted(() => {
-      const handleEsc = (e) => {
-        if (e.key === 'Escape' && currentImmersiveSection.value !== null) {
-          exitImmersiveMode();
-        }
-      };
-      
-      window.addEventListener('keydown', handleEsc);
-      
-      onUnmounted(() => {
-        window.removeEventListener('keydown', handleEsc);
-      });
-    });
-
     // 添加查看已发布页面的方法
     const handleViewPublished = () => {
       if (articleData.value.publishStatus === 'publish' && articleData.value.publishUrl) {
@@ -3132,29 +3109,6 @@ export default defineComponent({
   border-radius: 0 0 12px 12px;
   /* 移除可能存在的重叠背景和阴影 */
   box-shadow: none;
-}
-
-.immersive-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(4px);
-}
-
-.immersive-content {
-  background: white;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  position: relative;
 }
 
 .immersive-toolbar {

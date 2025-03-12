@@ -4,15 +4,7 @@
       <div class="editor-content">
         <div class="right-content">
           <div class="content-item">
-            <div :class="['editor-wrapper', { 'fullscreen-editor': isFullscreen }]">
-              <!-- 全屏模式的头部 -->
-              <div v-if="isFullscreen" class="fullscreen-header">
-                <h2>Editor</h2>
-                <a-button type="text" @click="toggleFullscreen">
-                  <fullscreen-exit-outlined />
-                </a-button>
-              </div>
-
+            <div class="editor-wrapper">
               <!-- 工具栏 -->
               <div class="editor-toolbar">
                 <a-button-group>
@@ -100,21 +92,7 @@
                     <link-outlined />
                   </a-button>
                 </a-button-group>
-
-                <a-divider type="vertical" />
-
-                <!-- 全屏按钮 -->
-                <a-button 
-                  type="text"
-                  @click="toggleFullscreen"
-                  :class="{ active: isFullscreen }"
-                >
-                  <fullscreen-outlined v-if="!isFullscreen" />
-                  <fullscreen-exit-outlined v-else />
-                </a-button>
               </div>
-
-              <!-- 编辑器内容 -->
               <editor-content 
                 :editor="editor" 
                 class="content-textarea"
@@ -168,7 +146,7 @@ import BaseSection from '../common/BaseSection.vue'
 import { SECTION_TAGS } from '../common/SectionTag'
 import KeyResultsWithTextBlockPreview from './KeyResultsWithTextBlockPreview.vue'
 import themeConfig from '../../../assets/config/themeConfig'
-import { LinkOutlined, DeleteOutlined, PictureOutlined, CloseOutlined, VideoCameraOutlined, BoldOutlined, ItalicOutlined, FontSizeOutlined, FullscreenOutlined, FullscreenExitOutlined, DownOutlined } from '@ant-design/icons-vue'
+import { LinkOutlined, DeleteOutlined, PictureOutlined, CloseOutlined, VideoCameraOutlined, BoldOutlined, ItalicOutlined, FontSizeOutlined, DownOutlined } from '@ant-design/icons-vue'
 import ImageLibrary from '../common/ImageLibrary.vue'
 import VideoLibrary from '../common/VideoLibrary.vue'
 import { debounce } from 'lodash'
@@ -254,8 +232,6 @@ export default {
     ItalicOutlined,
     FontSizeOutlined,
     EditorContent,
-    FullscreenOutlined,
-    FullscreenExitOutlined,
     DownOutlined
   },
   computed: {
@@ -281,7 +257,6 @@ export default {
       selectedImage: null,
       selectedVideo: null,
       editorContent: '', // 添加这个属性
-      isFullscreen: false,
     }
   },
   created() {
@@ -499,10 +474,6 @@ export default {
       }
     },
 
-    toggleFullscreen() {
-      this.isFullscreen = !this.isFullscreen;
-    },
-
     // 修改标题切换方法
     toggleHeading(level) {
       if (this.editor) {
@@ -567,23 +538,22 @@ export default {
 <style scoped>
 @import '../../../assets/styles/section-form.css';
 
-/* 修改布局为全宽 */
+/* 修改布局样式 */
 .section-wrapper {
-  display: block; /* 改为块级显示，不再使用网格布局 */
-  min-height: 800px; /* 增加最小高度 */
-  max-width: 1600px; /* 进一步增加最大宽度 */
-  margin: 0 auto; /* 居中显示 */
+  display: block;
+  width: 100%;
+  margin: 0 auto;
+  margin-top: 16px; /* 添加上边距 */
 }
 
 .editor-area {
-  background: white;
+  background: transparent;
   display: flex;
   flex-direction: column;
-  max-height: 2000px; /* 大幅增加最大高度 */
   position: relative;
-  border-radius: 8px;
-  padding: 24px;
-  width: 100%; /* 确保宽度为100% */
+  border-radius: 0;
+  padding: 0;
+  width: 100%;
 }
 
 .editor-area.full-width {
@@ -609,8 +579,8 @@ export default {
 .editor-content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
-  width: 100%; /* 确保宽度为100% */
+  padding: 0;
+  width: 100%;
 }
 
 .section-container {
@@ -845,11 +815,10 @@ export default {
 
 .content-item {
   position: relative;
-  padding: 16px;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
   margin-bottom: 16px;
-  background: white;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
 .section-title {
@@ -964,18 +933,15 @@ export default {
   background: rgba(24, 144, 255, 0.1);
 }
 
-:deep(.ant-modal-body) {
-  padding: 0;
-}
-
 .editor-wrapper {
-  border: none; /* 移除边框 */
+  border: 1px solid #e5e7eb;
   border-radius: 4px;
   margin-top: 8px;
   display: flex;
   flex-direction: column;
-  height: 900px; /* 大幅增加默认高度 */
-  transition: all 0.3s ease;
+  height: calc(100vh - 240px);
+  min-height: 400px;
+  background: white;
 }
 
 .editor-toolbar {
@@ -1188,69 +1154,6 @@ export default {
   color: #374151;
   display: inline-block;
   line-height: 1.4;
-}
-
-/* 更新全屏模式样式 */
-.editor-wrapper.fullscreen-editor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: white;
-  z-index: 1000;
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  flex-direction: column;
-}
-
-.fullscreen-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  border-bottom: 1px solid #f0f0f0;
-  background: white;
-}
-
-.fullscreen-header h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-}
-
-/* 全屏模式下的特殊样式 */
-.fullscreen-editor .content-textarea {
-  padding: 40px; /* 增加内边距 */
-  max-width: 1400px; /* 增加最大宽度 */
-  margin: 0 auto;
-  width: 100%;
-}
-
-.fullscreen-editor .editor-toolbar {
-  padding: 12px 24px;
-}
-
-.fullscreen-editor .content-textarea :deep(.ProseMirror) {
-  min-height: 1200px; /* 全屏模式下大幅增加高度 */
-  font-size: 18px; /* 全屏模式下保持字体大小 */
-  line-height: 1.8; /* 全屏模式下保持行高 */
-  padding: 0 32px; /* 全屏模式下增加内边距 */
-}
-
-/* 添加过渡动画 */
-.editor-wrapper {
-  transition: all 0.3s ease;
-}
-
-.fullscreen-editor {
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 /* 增强标题样式，使其更加明显 */
