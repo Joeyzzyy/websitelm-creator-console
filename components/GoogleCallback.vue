@@ -45,7 +45,7 @@
   
         const response = await apiClient.googleCallback(code, state);
         
-        if (response && response.code === 200) {
+        if (response) {
           localStorage.clear();
           
           localStorage.setItem('intelickIsLoggedIn', 'true');

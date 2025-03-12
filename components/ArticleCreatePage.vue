@@ -199,7 +199,7 @@
                       </a-form-item>
 
                       <!-- Keywords -->
-                      <a-form-item label="Keywords" required>
+                      <a-form-item label="Keywords (press enter to add keyword)" required>
                         <a-select
                           v-model:value="articleData.keywords"
                           mode="tags"
@@ -207,6 +207,8 @@
                           :token-separators="[',']"
                           style="min-height: 80px;"
                           @paste="handleKeywordsPaste"
+                          :dropdown-match-select-width="false"
+                          :open="false"
                         >
                           <template #suffixIcon>
                             <PlusOutlined />
