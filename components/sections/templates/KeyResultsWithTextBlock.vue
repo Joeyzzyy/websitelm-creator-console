@@ -1,5 +1,5 @@
 <template>
-  <div class="section-wrapper">
+  <div class="section-wrapper fullscreen-mode">
     <!-- 工具栏 -->
     <div class="editor-toolbar">
       <!-- 文本格式工具 -->
@@ -769,5 +769,41 @@ export default {
 .editor-toolbar :deep(.ant-btn.active) {
   color: #1890ff;
   background: rgba(24, 144, 255, 0.1);
+}
+
+/* 添加全屏模式相关样式 */
+.fullscreen-mode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  background: white;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.fullscreen-mode .editor-toolbar {
+  position: sticky;
+  top: 0;
+  border-radius: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fullscreen-mode .content-textarea {
+  height: calc(100vh - 57px); /* 工具栏高度 */
+  padding: 40px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.fullscreen-mode .debug-area {
+  max-width: 900px;
+  margin: 20px auto;
+}
+
+.fullscreen-toggle {
+  margin-left: auto;
 }
 </style> 
