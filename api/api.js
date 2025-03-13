@@ -837,19 +837,20 @@ const updateFullSections = async (pageId, sectionsData) => {
 };
 
 // 获取页面列表
-const getPages = async (params) => {
+const getPages = async (params = {}) => {
   try {
-    const { customerId, lang, page, limit } = params;
-    const response = await apiClient.get('/pages', {
-      params: {
-        customerId,
-        page,
-        limit
-      }
-    });
+    const queryParams = {
+      customerId: params.customerId,
+      page: params.page,
+      limit: params.limit,
+      ...(params.type && { type: params.type }),
+      ...(params.source && { source: params.source })
+    };
+    
+    const response = await apiClient.get('/pages', { params: queryParams });
     return response.data;
   } catch (error) {
-    console.error('Failed to get page list:', error);
+    console.error('Failed to get pages:', error);
     return null;
   }
 };
