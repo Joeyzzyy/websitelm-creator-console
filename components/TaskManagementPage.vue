@@ -646,11 +646,11 @@ export default {
             break
           case 'landing':
             queryParams.type = 'Landing Page'
-            queryParams.source = 'manual'
+            queryParams.source = ['ai', 'manual']
             break
           case 'alternatively':
             queryParams.type = 'Landing Page'
-            queryParams.source = 'alternatively'
+            queryParams.source = ['alternatively']
             break
         }
         
