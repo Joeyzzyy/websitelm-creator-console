@@ -10,49 +10,51 @@
                 v-model:activeKey="activeTab" 
                 @change="handleTabChange"
                 class="full-width-tabs"
-                :centered="false"
-                :tabBarGutter="24"
-                :tabBarStyle="{ width: '100%' }"
               >
-                <template #rightExtra>
-                  <a-space>
-                    <a-button 
-                      class="action-button secondary-btn highlight-btn"
-                      @click.stop="showSettings"
-                    >
-                      <span>Publish Domain Settings</span>
-                    </a-button>
-                    
-                    <a-button 
-                      class="action-button secondary-btn"
-                      @click.stop="collectPublishedUrls"
-                      :disabled="!tasks.length"
-                    >
-                      <span>Submit Urls To GSC</span>
-                    </a-button>
+               
 
-                    <a-button 
-                      class="action-button secondary-btn danger-btn"
-                      :disabled="!selectedRowKeys.length"
-                      @click="handleBatchDelete"
-                    >
-                      <span>Delete Selected Pages ({{ selectedRowKeys.length }})</span>
-                    </a-button>
-
-                    <a-button 
-                      type="primary"
-                      @click="handleAddPage"
-                      class="generate-btn action-button"
-                      v-if="currentCustomerId === '67a9fabf538eb88a2247b5be'"
-                    >
-                      <span>Add Page From Scratch</span>
-                    </a-button>
-                  </a-space>
-                </template>
                 <a-tab-pane key="blog" tab="Blog Posts" />
                 <a-tab-pane key="landing" tab="General Landing Pages" />
                 <a-tab-pane key="alternatively" tab="Alternatively Pages" />
               </a-tabs>
+              
+              <div class="header-top">
+                <a-space>
+                  <a-button 
+                    class="action-button secondary-btn highlight-btn"
+                    @click.stop="showSettings"
+                  >
+                    <span>Publish Domain Settings</span>
+                  </a-button>
+                  
+                  <a-button 
+                    class="action-button secondary-btn"
+                    @click.stop="collectPublishedUrls"
+                    :disabled="!tasks.length"
+                  >
+                    <span>Submit Urls To Google Search Console</span>
+                  </a-button>
+
+                  <a-button 
+                    class="action-button secondary-btn danger-btn"
+                    :disabled="!selectedRowKeys.length"
+                    @click="handleBatchDelete"
+                  >
+                    <span>Delete Selected Pages ({{ selectedRowKeys.length }})</span>
+                  </a-button>
+
+                  <a-button 
+                    type="primary"
+                    @click="handleAddPage"
+                    class="generate-btn action-button"
+                    v-if="currentCustomerId === '67a9fabf538eb88a2247b5be'"
+                  >
+                    <span>Add Page From Scratch</span>
+                  </a-button>
+
+                  
+                </a-space>
+              </div>
             </div>
             <!-- <div class="header-right">
               <a-input
@@ -1276,7 +1278,16 @@ export default {
 }
 
 .header-top {
-  display: none;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-top h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .header-bottom {
@@ -1743,111 +1754,549 @@ export default {
   box-shadow: 0 2px 6px rgba(82, 196, 26, 0.1);
 }
 
+/* 移除之前的 transform rotate 相关样式 */
+.generating-tag:hover,
+.failed-tag:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* 调整 actions 列的宽度 */
+:deep(.ant-table) .ant-table-cell:last-child {
+  width: 40px !important;
+  min-width: 40px !important;
+  padding: 8px 4px !important;
+  text-align: center;
+}
+
+/* 确保表格单元格内容正确显示 */
+:deep(.ant-table-cell) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 标题列允许换行和宽度限制 */
+:deep(.ant-table-cell-fix-left) {
+  white-space: normal !important;
+  word-break: break-word;
+  /* 移除最大和最小宽度限制 */
+  /* max-width: 200px !important;
+  min-width: 200px !important; */
+}
+
+/* 确保标签内容不换行且省略 */
+:deep(.ant-tag) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 调整下拉按钮样式 */
+:deep(.ant-dropdown-trigger) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:deep(.ant-btn) {
+  min-width: 32px;
+  padding: 0;
+}
+
+:deep(.ant-btn .anticon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+/* 添加failed-tag的样式 */
+.failed-tag {
+  background: linear-gradient(45deg, #ff4d4f, #ff7875) !important; /* 使用更柔和的红色渐变 */
+  border: none !important;
+  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+  animation: glow-failed 2s ease-in-out infinite;
+}
+
+@keyframes glow-failed {
+  0% {
+    box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+  }
+  50% {
+    box-shadow: 0 2px 12px rgba(255, 77, 79, 0.5);
+  }
+  100% {
+    box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+  }
+}
+
+/* 确保failed-tag继承generating-tag的基础样式 */
+:deep(.ant-tag.generating-tag.failed-tag) {
+  font-size: 12px;
+  padding: 2px 10px;
+  height: 24px;
+  line-height: 20px;
+  border-radius: 12px;
+}
+
+.failed-tag:hover {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+.sitemap-preview {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.preview-header {
+  margin-bottom: 16px;
+}
+
+.url-count {
+  margin: 8px 0;
+  font-weight: 500;
+  color: #1890ff;
+}
+
+.url-list {
+  border-radius: 4px;
+  border: 1px solid #f0f0f0;
+}
+
+.url-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.url-text {
+  flex: 1;
+  word-break: break-all;
+  margin-right: 16px;
+}
+
+:deep(.ant-list-item) {
+  padding: 8px 16px;
+}
+
+:deep(.ant-btn-link) {
+  padding: 0 8px;
+  height: 24px;
+  font-size: 12px;
+}
+
+/* 添加标题链接样式 */
+.title-link {
+  color: #1890ff;
+  cursor: pointer;
+  transition: color 0.3s;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 限制最多显示2行 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.title-link:hover {
+  color: #40a9ff;
+  text-decoration: underline;
+}
+
+/* 移除多余的容器样式，只保留必要的表格样式 */
+:deep(.ant-table) {
+  /* min-width: 1200px; */
+}
+
+/* 修改表格容器样式 */
+.task-container {
+  width: 100%;
+  overflow: hidden;  /* 添加这个 */
+}
+
+.task-list {
+  width: 100%;
+  overflow: visible;  /* 修改这个 */
+}
+
+/* 添加新的滚动容器样式 */
+:deep(.ant-table-wrapper) {
+  overflow-x: auto;
+  width: 100%;
+}
+
+:deep(.ant-table-content) {
+  overflow-x: auto;
+}
+
+/* 确保操作列样式正确 */
+:deep(.ant-table-cell:last-child) {
+  padding: 8px !important;
+  text-align: center;
+  background: #fff;
+}
+
+/* 新增和修改的样式 */
+.header-top {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* 增加间距 */
+}
+
+.header-top h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 修改按钮样式 */
+.action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-button :deep(.anticon) {
+  display: flex;
+  align-items: center;
+  margin-right: 0; /* 覆盖默认的 margin */
+}
+
+/* 主按钮渐变样式 */
+.generate-btn {
+  background: linear-gradient(-45deg, #2563eb, #7c3aed, #2563eb);
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+  border: none;
+  padding: 0 16px;
+  border-radius: 6px;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3),
+              0 0 20px rgba(37, 99, 235, 0.2),
+              inset 0 0 8px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4),
+              0 0 30px rgba(37, 99, 235, 0.3),
+              inset 0 0 12px rgba(255, 255, 255, 0.3);
+}
+
+.generate-btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.generate-btn :deep(span) {
+  color: white !important;
+}
+
+.generate-btn :deep(.anticon) {
+  color: white !important;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* 优化次要按钮样式 */
+.secondary-btn {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.secondary-btn:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.secondary-btn:active {
+  background: #e2e8f0;
+  transform: translateY(0);
+}
+
+.secondary-btn:disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.secondary-btn :deep(.anticon) {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+/* 修改 loading 状态样式 */
+.secondary-btn:loading {
+  opacity: 0.8;
+  cursor: wait;
+}
+
+.preview-url-hint {
+  margin-top: 8px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.hint-label {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.preview-url {
+  font-size: 14px;
+  color: #1890ff;
+  word-break: break-all;
+}
+
+/* Add styles for delete button */
+.action-button.secondary-btn[danger] {
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+.action-button.secondary-btn[danger]:hover {
+  color: #ff7875;
+  border-color: #ff7875;
+  background: #fff1f0;
+}
+
+.action-button.secondary-btn[danger]:disabled {
+  color: rgba(0, 0, 0, 0.25);
+  border-color: #d9d9d9;
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+/* 添加 centered-spin 样式 */
+:deep(.centered-spin) {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+
+.centered-spin :deep(.ant-spin-spinning) {
+  max-height: none;
+}
+
+/* 添加设置按钮样式 */
+.action-button.secondary-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 添加危险按钮样式 */
+.danger-btn {
+  background: #fff1f0;
+  border-color: #ff4d4f;
+  color: #ff4d4f;
+}
+
+.danger-btn:hover:not(:disabled) {
+  background: #fff1f0;
+  border-color: #ff7875;
+  color: #ff7875;
+}
+
+.danger-btn:disabled {
+  background: #f5f5f5;
+  border-color: #d9d9d9;
+  color: rgba(0, 0, 0, 0.25);
+}
+
+/* 修改 highlight-btn 样式，移除可能导致遮挡的样式 */
+.highlight-btn {
+  background: #e6f7ff;
+  border-color: #1890ff;
+  color: #1890ff;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
+}
+
+.highlight-btn:hover {
+  background: #bae7ff;
+  border-color: #096dd9;
+  color: #096dd9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+}
+
+/* 移除可能导致问题的定位和 z-index 相关样式 */
+.highlight-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shine 3s infinite;
+  pointer-events: none; /* 添加这行确保不会影响点击事件 */
+}
+
+/* 确保 a-space 中的按钮正确对齐且不重叠 */
+:deep(.ant-space) {
+  display: flex;
+  align-items: center;
+  gap: 8px !important;
+}
+
+:deep(.ant-space-item) {
+  position: relative;
+  z-index: 1;
+}
+
+/* 添加新的样式 */
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-tags {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.status-tag {
+  font-size: 12px;
+  padding: 0 8px;
+  height: 22px;
+  line-height: 20px;
+  border-radius: 11px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.status-tag:hover {
+  transform: scale(1.05);
+}
+
+/* 确保标题和标签在同一行 */
+.title-link {
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+/* 添加可点击元素的样式 */
+.clickable {
+  cursor: pointer;
+}
+
+/* 修改查看进度文字的样式 */
+.view-text {
+  color: rgba(255, 255, 255, 0.95) !important; /* 改为白色并增加不透明度 */
+  margin-left: 4px;
+  font-weight: 500; /* 增加字重 */
+  text-decoration: underline; /* 添加下划线 */
+  opacity: 0.9;
+  transition: all 0.2s ease;
+}
+
+.generating-tag:hover .view-text,
+.failed-tag:hover .view-text,
+.status-tag:hover .view-text {
+  opacity: 1;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4); /* 添加发光效果 */
+}
+
+/* 修改成功状态标签的样式 */
+:deep(.ant-tag-success.status-tag) {
+  background: #f6ffed !important; /* 使用浅绿色背景 */
+  border: 1px solid #b7eb8f !important; /* 添加绿色边框 */
+  box-shadow: none;
+}
+
+:deep(.ant-tag-success.status-tag span:first-child) {
+  color: #52c41a !important; /* 文字使用深绿色 */
+}
+
+:deep(.ant-tag-success.status-tag .view-text) {
+  color: #73d13d !important; /* "View Generation" 文字使用稍浅的绿色 */
+}
+
+:deep(.ant-tag-success.status-tag:hover) {
+  background: #f6ffed !important;
+  border-color: #95de64 !important;
+  box-shadow: 0 2px 6px rgba(82, 196, 26, 0.1);
+}
+
 :deep(.ant-tabs-tab-active) {
   font-weight: 500;
 }
 
-/* 确保 Tab 区域撑满 100% 的容器宽度 */
+/* 调整 tabs 样式 */
 .full-width-tabs {
   width: 100%;
 }
 
 :deep(.ant-tabs-nav) {
-  width: 100%;
-  margin-bottom: 16px;
+  padding: 8px 24px;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 :deep(.ant-tabs-nav-wrap) {
-  width: 100%;
-  display: flex;
+  flex: 1;
 }
 
 :deep(.ant-tabs-nav-list) {
-  flex: 1;
   width: 100%;
-  display: flex;
 }
 
-/* 让每个 Tab 项目平均分配空间 */
-:deep(.ant-tabs-tab) {
-  flex: 1;
-  text-align: center;
-  margin-right: 0 !important;
-}
-
-/* 确保额外内容不会被挤压 */
 :deep(.ant-tabs-extra-content) {
-  flex-shrink: 0;
-  margin-left: auto;
-  padding-left: 24px;
+  margin-left: auto;  /* 这才是关键：让 extra 内容靠右对齐 */
 }
 
-/* 移动端适配 */
-@media (max-width: 1024px) {
-  :deep(.ant-tabs-nav) {
-    flex-direction: column;
-  }
-  
-  :deep(.ant-tabs-extra-content) {
-    margin-top: 12px;
-    margin-left: 0;
-    padding-left: 0;
-    width: 100%;
-  }
+:deep(.ant-tabs-tab) {
+  padding: 8px 16px;
+  font-size: 14px;
 }
 
-/* 禁用 Tab 的缩略功能 */
-:deep(.ant-tabs-nav) {
-  overflow: visible !important;
+:deep(.ant-tabs-tab-active) {
+  font-weight: 500;
 }
 
-:deep(.ant-tabs-nav-wrap) {
-  overflow: visible !important;
-  flex: initial;
+/* 调整按钮样式 */
+.action-button {
+  height: 32px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
-:deep(.ant-tabs-nav-list) {
-  transform: none !important;
-  transition: none !important;
-}
-
-:deep(.ant-tabs-nav-operations) {
-  display: none !important;
-}
-
-/* 添加以下样式 */
-:deep(.full-width-tabs) {
-  width: 100%;
-}
-
-:deep(.full-width-tabs .ant-tabs-nav) {
-  width: 100%;
-  margin: 0;
-}
-
-:deep(.full-width-tabs .ant-tabs-nav-wrap) {
-  width: 100%;
-  display: flex;
-}
-
-:deep(.full-width-tabs .ant-tabs-nav-list) {
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-}
-
-:deep(.full-width-tabs .ant-tabs-tab) {
-  flex: 1;
-  text-align: center;
-  justify-content: center;
-  margin-right: 0 !important;
-}
-
-:deep(.full-width-tabs .ant-tabs-tab + .ant-tabs-tab) {
-  margin-left: 24px; /* 保持原有的 gutter 间距 */
-}
-
-:deep(.full-width-tabs .ant-tabs-ink-bar) {
-  width: calc(100% / 3 - 16px) !important; /* 根据tab数量调整 */
+.action-button :deep(.anticon) {
+  font-size: 14px;
 }
 </style>
