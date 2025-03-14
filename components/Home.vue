@@ -35,11 +35,12 @@
         </div>
         
         <a-menu
-          mode="inline"
-          :selectedKeys="[currentView, currentKeywordsStep]"
+          :selectedKeys="selectedKeys"
           :openKeys="openKeys"
-          @click="handleMenuClick"
           @openChange="handleOpenChange"
+          @select="handleMenuSelect"
+          mode="inline"
+          :inline-collapsed="collapsed"
           class="custom-menu"
         >
           <!-- Analytics -->
@@ -73,20 +74,14 @@
               </div>
             </template>
             
-            <!-- 添加子菜单项 -->
-            <a-menu-item 
-              key="KeywordsSelection" 
-              @click="navigateToKeywordsStep('selection')"
-            >
+            <!-- 修改子菜单项，移除单独的点击事件 -->
+            <a-menu-item key="KeywordsPlanningPage">
               <div class="menu-item-content">
-                <span>Keywords Selection</span>
+                <span>Keywords Research</span>
               </div>
             </a-menu-item>
             
-            <a-menu-item 
-              key="OutlineGeneration" 
-              @click="navigateToKeywordsStep('outline')"
-            >
+            <a-menu-item key="OutlinePlanning">
               <div class="menu-item-content">
                 <span>Outline Generation</span>
               </div>
@@ -968,22 +963,27 @@ export default {
   data() {
     const currentCustomerId = localStorage.getItem('currentCustomerId');
     const currentCustomerEmail = localStorage.getItem('currentCustomerEmail');
+    
+    // 从localStorage获取已保存的openKeys，如果没有则设为空数组
+    const savedOpenKeys = localStorage.getItem('sidebarOpenKeys');
+    const openKeys = savedOpenKeys ? JSON.parse(savedOpenKeys) : [];
+    
     return {
       mainNavItems: [
         { title: 'Dashboard', view: 'DashboardPage' },
         { title: 'Analytics', view: 'AnalyticsPage' },
         { title: 'Keywords', view: 'KeywordsPlanningPage' },
+        { title: 'Outlines', view: 'OutlinePlanning' },
         { title: 'Pages', view: 'TaskManagementPage' },
         { title: 'Assets', view: 'AssetsPage' },
       ],
-      currentView: this.getViewFromRoute(),
-      currentKeywordsStep: '',
+      currentView: this.getInitialView(),
       selectedUser: currentCustomerId,
       collapsed: localStorage.getItem('sidebarCollapsed') === 'true',
       currentCustomerEmail: currentCustomerEmail,
       guideModeVisible: false,
       tutorialLibraryVisible: false,
-      openKeys: ['KeywordsMenu'],
+      openKeys: ['KeywordsMenu', 'SettingsMenu'],
     };
   },
   computed: {
@@ -1007,24 +1007,25 @@ export default {
       return this.currentCustomerEmail 
         ? this.currentCustomerEmail.split('@')[0]
         : 'User';
+    },
+    selectedKeys() {
+      return [this.currentView];
     }
   },
   methods: {
-    handleMenuClick({ key }) {
+    handleMenuSelect({ key }) {
+      this.currentView = key;
+      
       const routeMap = {
         'DashboardPage': '/dashboard',
         'KnowledgeBasePage': '/knowledge',
         'KeywordsPlanningPage': '/keywords',
+        'OutlinePlanning': '/outlines',
         'TaskManagementPage': '/task-management',
         'AssetsPage': '/product-assets',
         'AccountPage': '/account',
         'AnalyticsPage': '/analytics',
       };
-      
-      // 如果点击的不是Keywords相关的菜单项，清除currentKeywordsStep
-      if (key !== 'KeywordsSelection' && key !== 'OutlineGeneration') {
-        this.currentKeywordsStep = '';
-      }
       
       if (routeMap[key]) {
         this.$router.push(routeMap[key]);
@@ -1067,17 +1068,21 @@ export default {
       localStorage.setItem('sidebarCollapsed', this.collapsed);
     },
 
-    getViewFromRoute() {
+    getInitialView() {
+      const path = this.$route.path;
       const routeToView = {
         '/dashboard': 'DashboardPage',
         '/knowledge': 'KnowledgeBasePage',
         '/keywords': 'KeywordsPlanningPage',
+        '/outlines': 'OutlinePlanning',
         '/task-management': 'TaskManagementPage',
         '/product-assets': 'AssetsPage',
         '/account': 'AccountPage',
         '/analytics': 'AnalyticsPage',
       };
-      return routeToView[this.$route.path] || 'DashboardPage';
+      
+      // 确保路径匹配是精确的
+      return routeToView[path] || 'DashboardPage';
     },
 
     startTour() {
@@ -1193,35 +1198,6 @@ export default {
       this.$router.push('/account');
     },
 
-    navigateToKeywordsStep(step) {
-      // 首先导航到Keywords Planning页面，并通过查询参数传递要显示的步骤
-      this.$router.push({
-        path: '/keywords',
-        query: { step: step }  // 通过URL查询参数传递步骤信息
-      });
-      
-      // 设置当前视图
-      this.currentView = 'KeywordsPlanningPage';
-      
-      // 设置当前关键词步骤
-      this.currentKeywordsStep = step === 'selection' ? 'KeywordsSelection' : 'OutlineGeneration';
-      
-      // 使用更长的延时确保页面完全加载
-      setTimeout(() => {
-        // 直接调用暴露在$root上的方法
-        if (this.$root && this.$root.$switchKeywordsStep) {
-          this.$root.$switchKeywordsStep(step);
-        }
-        
-        if (step === 'outline') {
-          const outlineTab = document.querySelector('[data-tab="outline"]');
-          if (outlineTab) {
-            outlineTab.click();
-          }
-        }
-      }, 800);  // 增加延时以确保组件已完全加载
-    },
-
     handleOpenChange(openKeys) {
       this.openKeys = openKeys;
     },
@@ -1252,18 +1228,12 @@ export default {
               }
 
               // Keywords analysis 已完成，继续原来的流程
-              this.$router.push('/keywords');
+              this.$router.push('/outlines');
               
               setTimeout(() => {
-                if (this.$root && this.$root.$switchKeywordsStep) {
-                  this.$root.$switchKeywordsStep('outline');
+                if (this.$root && this.$root.$showAISelectionConfirm) {
+                  this.$root.$showAISelectionConfirm();
                 }
-                
-                setTimeout(() => {
-                  if (this.$root && this.$root.$showAISelectionConfirm) {
-                    this.$root.$showAISelectionConfirm();
-                  }
-                }, 500);
               }, 800);
             } catch (error) {
               console.error('Error checking keywords analysis status:', error);
@@ -1281,24 +1251,46 @@ export default {
           this.$message.error('Failed to check domain verification status');
         });
     },
-  },
-  watch: {
-    '$route'(to) {
+
+    navigateToOutlines() {
+      this.currentView = 'OutlinePlanning'; // 直接设置当前视图
+      this.$router.push('/outlines');
+    },
+
+    // 添加新方法来更新菜单状态
+    updateMenuState() {
+      const path = this.$route.path;
       const routeToView = {
         '/dashboard': 'DashboardPage',
         '/knowledge': 'KnowledgeBasePage',
         '/keywords': 'KeywordsPlanningPage',
+        '/outlines': 'OutlinePlanning',
         '/task-management': 'TaskManagementPage',
         '/product-assets': 'AssetsPage',
         '/account': 'AccountPage',
         '/analytics': 'AnalyticsPage',
+        '/': 'KeywordsPlanningPage', // 添加根路径的映射
       };
-      this.currentView = routeToView[to.path] || 'DashboardPage';
       
-      // 如果不是keywords页面，清除currentKeywordsStep
-      if (to.path !== '/keywords') {
-        this.currentKeywordsStep = '';
-      }
+      this.currentView = routeToView[path] || 'DashboardPage';
+      
+      // 确保所有子菜单都是打开状态
+      this.ensureAllSubmenuOpen();
+    },
+
+    // 添加新方法来确保所有子菜单打开
+    ensureAllSubmenuOpen() {
+      // 获取所有子菜单的key
+      const allSubmenus = ['KeywordsMenu', 'SettingsMenu']; // 添加所有子菜单的key
+      
+      // 确保openKeys包含所有子菜单的key
+      this.openKeys = allSubmenus;
+    },
+  },
+  watch: {
+    '$route'(to) {
+      // 路由变化时更新菜单状态
+      this.updateMenuState();
     }
   },
   async mounted() {
@@ -1315,6 +1307,13 @@ export default {
     else {
       await this.checkAndStartOnboarding();
     }
+
+    // 在组件挂载后，确保所有子菜单都是打开状态
+    this.ensureAllSubmenuOpen();
+  },
+  created() {
+    // 初始化菜单状态
+    this.updateMenuState();
   }
 };
 </script>

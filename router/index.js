@@ -56,6 +56,11 @@ const routes = [
         component: () => import('../components/KeywordsPlanningPage.vue')
       },
       {
+        path: 'outlines',
+        name: 'OutlinePlanning',
+        component: () => import('../components/OutlinePlanningPage.vue')
+      },
+      {
         path: 'task-management',
         name: 'TaskManagement',
         component: () => import('../components/TaskManagementPage.vue')
