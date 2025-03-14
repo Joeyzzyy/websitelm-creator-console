@@ -11,7 +11,17 @@
                 @change="handleTabChange"
                 class="full-width-tabs"
               >
-               
+                <template #rightExtra>
+                  <a-button 
+                    type="link"
+                    class="refresh-btn"
+                    :loading="loading"
+                    @click="handleRefresh"
+                  >
+                    <template #icon><ReloadOutlined /></template>
+                    Refresh
+                  </a-button>
+                </template>
 
                 <a-tab-pane key="blog" tab="Blog Posts" />
                 <a-tab-pane key="landing" tab="General Landing Pages" />
@@ -626,7 +636,6 @@ export default {
       }
     };
 
-    // fetchTasks 方法的修改
     const fetchTasks = async () => {
       loading.value = true
       try {
@@ -1177,6 +1186,10 @@ export default {
       fetchTasks()
     }
 
+    const handleRefresh = () => {
+      fetchTasks();
+    };
+
     onMounted(async () => {
       await loadProductInfo()
       if (domainConfigured.value) {
@@ -1198,7 +1211,7 @@ export default {
       handlePublish: confirmPublishAction,
       handleModalConfirm,
       getStatusColor,
-      handleRefresh: fetchTasks,
+      handleRefresh,
       searchQuery,
       filteredTasks,
       loadingProgress,
@@ -2298,5 +2311,26 @@ export default {
 
 .action-button :deep(.anticon) {
   font-size: 14px;
+}
+
+.refresh-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 4px 12px;
+}
+
+.refresh-btn:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+:deep(.refresh-btn .anticon) {
+  font-size: 14px;
+}
+
+:deep(.ant-tabs-nav-operations) {
+  margin-left: 8px;
 }
 </style>

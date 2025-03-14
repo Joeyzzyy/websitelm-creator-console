@@ -235,6 +235,12 @@ export default defineComponent({
     const getWorkflowStatus = () => {
       if (loading.value) return 'Processing';
       
+      // 检查是否有任何步骤失败
+      const hasFailedStep = workflowSteps.value.some(step => step.status === 'failed');
+      if (hasFailedStep) {
+        return 'Failed';
+      }
+      
       // 使用API返回的status来判断
       switch (workflowStatus.value) {
         case 'completed':
