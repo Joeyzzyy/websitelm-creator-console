@@ -1175,8 +1175,8 @@ export default {
         await this.initializeUserData();
 
       } catch (error) {
-        console.error('初始化失败:', error);
-        this.$message.error('系统初始化失败，请刷新页面重试');
+        console.error('Initialization failed:', error);
+        this.$message.error('Failed to initialize the system. Please refresh the page and try again.');
       }
     },
 
@@ -1227,14 +1227,12 @@ export default {
                 return;
               }
 
-              // Keywords analysis 已完成，继续原来的流程
-              this.$router.push('/outlines');
+              // Keywords analysis 已完成，使用查询参数进行路由跳转
+              this.$router.push({
+                path: '/outlines',
+                query: { aiAutopilot: 'true' }
+              });
               
-              setTimeout(() => {
-                if (this.$root && this.$root.$showAISelectionConfirm) {
-                  this.$root.$showAISelectionConfirm();
-                }
-              }, 800);
             } catch (error) {
               console.error('Error checking keywords analysis status:', error);
               this.$message.error('Failed to check keywords analysis status');

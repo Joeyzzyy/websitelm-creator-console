@@ -5,83 +5,83 @@
       class="centered-spin"
     >
       <template v-if="domainConfigured">
-        <template v-if="analysisState !== 'finished'">
-          <div class="analysis-loading-state">
-            <a-card class="loading-card">
-              <!-- Not Started State -->
-              <template v-if="analysisState === 'not_started'">
-                <div class="analysis-loading-card" style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
-                  <div class="preparing-analysis-content">
-                    <LoadingOutlined class="analysis-icon" spin />
-                    <h2 class="analysis-title">Initializing Keyword Library</h2>
-                    <p class="analysis-description">Gathering competitive intelligence from <span class="platform-tag semrush">SEMrush</span>, <span class="platform-tag ahrefs">Ahrefs</span>, <span class="platform-tag google">Google Trends</span>, and <span class="platform-tag social">Social Media</span></p>
-                    <div class="loading-tips"> 
-                      <ThunderboltOutlined class="tip-icon" />
-                      <span class="tip-text">Pro Tip: This initial scan typically takes several minutes</span>
-                    </div>
-                  </div>
-                </div>
-              </template>
+        <div class="planning-layout">
+          <div class="main-content">
+            <div class="keywords-selection">
+              <a-tabs 
+                v-model:activeKey="keywordSelectionMode"
+                class="mode-tabs"
+                @change="handleModeChange"
+              >
+                <template #rightExtra>
+                  <a-button 
+                    type="link"
+                    @click="showSelectedKeywords"
+                    class="view-keywords-btn"
+                  >
+                    View Selected Keywords
+                  </a-button>
+                </template>
 
-              <template v-if="analysisState === 'processing'">
-                <div class="analysis-loading-card" style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
-                  <div class="processing-analysis-content">
-                    <div class="analysis-icon-container">
-                      <LoadingOutlined class="analysis-icon pulse" spin />
-                    </div>
-                    <h2 class="analysis-title">Keywords Analysis in Progress</h2>
-                    <p class="analysis-description">
-                      Your keyword database has been successfully created! We're now analyzing and prioritizing your keywords for maximum impact.
-                    </p>
-                    <div class="analysis-status">
-                      <div v-for="task in currentTasks" :key="task.taskName" class="task-item">
-                        <div class="task-header">
-                          <span class="task-name">{{ task.taskName }}</span>
-                          <span class="task-status" :class="task.status">{{ task.status }}</span>
-                        </div>
-                        <a-progress 
-                          :percent="getProgressPercent(task.progress)" 
-                          :status="task.status === 'finished' ? 'success' : 'active'"
-                          :strokeColor="{ from: '#108ee9', to: '#87d068' }"
-                          size="small"
-                        />
-                        <div class="task-timing">
-                          <span>Started: {{ formatTime(task.startTime) }}</span>
-                          <span v-if="task.endTime">Completed: {{ formatTime(task.endTime) }}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="notification-message">
-                      <MailOutlined class="mail-icon" />
-                      <span>You'll receive an email notification when the analysis is complete!</span>
-                    </div>
-                  </div>
-                </div>
-              </template>
-            </a-card>
-          </div>
-        </template>
+                <a-tab-pane key="ai" tab="Keywords Library">
+                  <template v-if="analysisState !== 'finished'">
+                    <div class="analysis-loading-state">
+                      <a-card class="loading-card">
+                        <!-- Not Started State -->
+                        <template v-if="analysisState === 'not_started'">
+                          <div class="analysis-loading-card" style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+                            <div class="preparing-analysis-content">
+                              <LoadingOutlined class="analysis-icon" spin />
+                              <h2 class="analysis-title">Initializing Keyword Library</h2>
+                              <p class="analysis-description">Gathering competitive intelligence from <span class="platform-tag semrush">SEMrush</span>, <span class="platform-tag ahrefs">Ahrefs</span></p>
+                              <div class="loading-tips"> 
+                                <ThunderboltOutlined class="tip-icon" />
+                                <span class="tip-text">Pro Tip: This initial scan typically takes several minutes</span>
+                              </div>
+                            </div>
+                          </div>
+                        </template>
 
-        <template v-else>
-          <div class="planning-layout">
-            <div class="main-content">
-              <div class="keywords-selection">
-                <a-tabs 
-                  v-model:activeKey="keywordSelectionMode"
-                  class="mode-tabs"
-                  @change="handleModeChange"
-                >
-                  <template #rightExtra>
-                    <a-button 
-                      type="link"
-                      @click="showSelectedKeywords"
-                      class="view-keywords-btn"
-                    >
-                      View Selected Keywords
-                    </a-button>
+                        <template v-if="analysisState === 'processing'">
+                          <div class="analysis-loading-card" style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+                            <div class="processing-analysis-content">
+                              <div class="analysis-icon-container">
+                                <LoadingOutlined class="analysis-icon pulse" spin />
+                              </div>
+                              <h2 class="analysis-title">Keywords Analysis in Progress</h2>
+                              <p class="analysis-description">
+                                Your keyword database has been successfully created! We're now analyzing and prioritizing your keywords for maximum impact.
+                              </p>
+                              <div class="analysis-status">
+                                <div v-for="task in currentTasks" :key="task.taskName" class="task-item">
+                                  <div class="task-header">
+                                    <span class="task-name">{{ task.taskName }}</span>
+                                    <span class="task-status" :class="task.status">{{ task.status }}</span>
+                                  </div>
+                                  <a-progress 
+                                    :percent="getProgressPercent(task.progress)" 
+                                    :status="task.status === 'finished' ? 'success' : 'active'"
+                                    :strokeColor="{ from: '#108ee9', to: '#87d068' }"
+                                    size="small"
+                                  />
+                                  <div class="task-timing">
+                                    <span>Started: {{ formatTime(task.startTime) }}</span>
+                                    <span v-if="task.endTime">Completed: {{ formatTime(task.endTime) }}</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="notification-message">
+                                <MailOutlined class="mail-icon" />
+                                <span>You'll receive an email notification when the analysis is complete!</span>
+                              </div>
+                            </div>
+                          </div>
+                        </template>
+                      </a-card>
+                    </div>
                   </template>
 
-                  <a-tab-pane key="ai" tab="Keywords Library">
+                  <template v-else>
                     <div class="beginner-mode">
                       <a-row :gutter="[24, 24]" class="beginner-content">
                         <a-col :span="6">
@@ -112,31 +112,6 @@
                           <div class="filter-sidebar">
                             <h3 class="filter-title">Filter Options</h3>
                             <a-form layout="vertical" :model="filterForm" class="sidebar-filter-form">
-                              <!-- Smart keyword search -->
-                              <a-form-item label="Smart Keyword Search">
-                                <div class="smart-search-container">
-                                  <a-input
-                                    v-model:value="filterForm.searchTerm"
-                                    placeholder="Input keywords or questions..."
-                                    allow-clear
-                                    class="smart-search-input"
-                                    @pressEnter="applyFilters"
-                                  />
-                                  <div class="search-examples-popup">
-                                    <div class="search-examples-content">
-                                      <div class="search-examples-title">Smart Semantic Search:</div>
-                                      <span class="search-example">Enter any semantic prompt or seed keyword</span>
-                                      <div class="search-examples-title">Try prompts like:</div>
-                                      <span class="search-example">"low competition keywords about content marketing"</span>
-                                      <span class="search-example">"trending topics in digital marketing for 2025"</span>
-                                      <div class="search-examples-title">Or simple seed keywords:</div>
-                                      <span class="search-example">"SEO" or "email marketing" or "social media strategy"</span>
-                                      <div class="search-examples-title">Our AI will intelligently interpret your input and find relevant keywords</div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </a-form-item>
-                              
                               <!-- Priority filter -->
                               <a-form-item label="Smart Priority Category">
                                 <a-select
@@ -212,6 +187,29 @@
                                 </a-select>
                               </a-form-item>
                               
+                              <!-- Smart keyword search moved to bottom -->
+                              <a-form-item label="Smart Keyword Search">
+                                <div class="smart-search-container">
+                                  <a-input
+                                    v-model:value="filterForm.searchTerm"
+                                    placeholder="Input keywords or questions..."
+                                    allow-clear
+                                    class="smart-search-input"
+                                    @pressEnter="applyFilters"
+                                  />
+                                  <div class="search-examples-popup">
+                                    <div class="search-examples-content">
+                                      <div class="search-examples-title">Smart Search Tips:</div>
+                                      <span class="search-example">Enter any keyword or semantic prompt, such as:</span>
+                                      <div class="examples-list">
+                                        <span class="search-example">"low competition content marketing"</span>
+                                        <span class="search-example">"SEO", "email marketing"</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </a-form-item>
+                              
                               <!-- Filter buttons -->
                               <div class="filter-actions">
                                 <a-button 
@@ -269,143 +267,143 @@
                         </a-col>
                       </a-row>
                     </div>
-                  </a-tab-pane>
+                  </template>
+                </a-tab-pane>
 
-                  <a-tab-pane key="import" tab="Manual Import">
-                    <div class="manual-import-content">
-                      <a-card class="import-methods-card">
-                        <div class="import-method-item">
-                          <div class="method-header">
-                            <p class="method-desc">Import keywords from a CSV or Excel file</p>
-                            <div class="method-actions">
-                              <a-upload
-                                :customRequest="handleFileUpload"
-                                :showUploadList="false"
-                                accept=".csv,.xlsx,.xls"
-                              >
-                                <a-button type="primary">Upload File</a-button>
-                              </a-upload>
-                              <a-button @click="downloadTemplate">Download Template</a-button>
-                              <a-button type="link" @click="showTemplateInfo">View Guide</a-button>
-                            </div>
+                <a-tab-pane key="import" tab="Manual Import">
+                  <div class="manual-import-content">
+                    <a-card class="import-methods-card">
+                      <div class="import-method-item">
+                        <div class="method-header">
+                          <p class="method-desc">Import keywords from a CSV or Excel file</p>
+                          <div class="method-actions">
+                            <a-upload
+                              :customRequest="handleFileUpload"
+                              :showUploadList="false"
+                              accept=".csv,.xlsx,.xls"
+                            >
+                              <a-button type="primary">Upload File</a-button>
+                            </a-upload>
+                            <a-button @click="downloadTemplate">Download Template</a-button>
+                            <a-button type="link" @click="showTemplateInfo">View Guide</a-button>
                           </div>
                         </div>
-                      </a-card>
-                      <a-card title="Imported Keywords" class="imported-keywords-card">
-                        <a-table
-                          :dataSource="importedKeywords"
-                          :columns="importedKeywordsColumns"
-                          :pagination="importedKeywordsPagination"
-                          :loading="importedTableLoading"
-                          @change="handleImportedKeywordsPaginationChange"
-                        >
-                          <template #bodyCell="{ column, record }">
-                            <template v-if="column.key === 'actions'">
-                              <a-space>
-                                <a-button 
-                                  type="primary"
-                                  ghost
-                                  :class="record.favorited ? 'deselect-btn' : 'select-btn'"
-                                  @click="handleKeywordFavorite(record)"
-                                >
-                                  {{ record.favorited ? 'Deselect' : 'Select' }}
-                                </a-button>
-                                <a-button 
-                                  type="link" 
-                                  danger 
-                                  @click="removeManualKeyword(record)"
-                                >
-                                  <DeleteOutlined />
-                                </a-button>
-                              </a-space>
-                            </template>
+                      </div>
+                    </a-card>
+                    <a-card title="Imported Keywords" class="imported-keywords-card">
+                      <a-table
+                        :dataSource="importedKeywords"
+                        :columns="importedKeywordsColumns"
+                        :pagination="importedKeywordsPagination"
+                        :loading="importedTableLoading"
+                        @change="handleImportedKeywordsPaginationChange"
+                      >
+                        <template #bodyCell="{ column, record }">
+                          <template v-if="column.key === 'actions'">
+                            <a-space>
+                              <a-button 
+                                type="primary"
+                                ghost
+                                :class="record.favorited ? 'deselect-btn' : 'select-btn'"
+                                @click="handleKeywordFavorite(record)"
+                              >
+                                {{ record.favorited ? 'Deselect' : 'Select' }}
+                              </a-button>
+                              <a-button 
+                                type="link" 
+                                danger 
+                                @click="removeManualKeyword(record)"
+                              >
+                                <DeleteOutlined />
+                              </a-button>
+                            </a-space>
                           </template>
-                        </a-table>
-                      </a-card>
-                    </div>
-                  </a-tab-pane>
-                  <a-tab-pane key="input" tab="Manual Input">
-                    <div class="manual-input-container">
-                      <a-card class="manual-input-card">
-                        <div class="input-section">
-                          <div class="input-header">
-                            <h3 class="input-title">
-                              Add Keywords 
-                              <span class="input-subtitle">Enter one keyword per line</span>
-                            </h3>
-                          </div>
-                          
-                          <a-form layout="vertical">
-                            <a-form-item>
-                              <template #label>
-                                <span class="textarea-label">Keywords</span>
-                                <span class="format-hint">
-                                  <InfoCircleOutlined />
-                                  Format: keyword, KD (optional), volume (optional)
-                                </span>
-                              </template>
-                              <a-textarea
-                                v-model:value="bulkKeywords"
-                                placeholder="Example:
+                        </template>
+                      </a-table>
+                    </a-card>
+                  </div>
+                </a-tab-pane>
+                <a-tab-pane key="input" tab="Manual Input">
+                  <div class="manual-input-container">
+                    <a-card class="manual-input-card">
+                      <div class="input-section">
+                        <div class="input-header">
+                          <h3 class="input-title">
+                            Add Keywords 
+                            <span class="input-subtitle">Enter one keyword per line</span>
+                          </h3>
+                        </div>
+                        
+                        <a-form layout="vertical">
+                          <a-form-item>
+                            <template #label>
+                              <span class="textarea-label">Keywords</span>
+                              <span class="format-hint">
+                                <InfoCircleOutlined />
+                                Format: keyword, KD (optional), volume (optional)
+                              </span>
+                            </template>
+                            <a-textarea
+                              v-model:value="bulkKeywords"
+                              placeholder="Example:
 digital marketing
 content strategy, 25, 1200
 seo tools, 45"
-                                :autoSize="{ minRows: 4, maxRows: 8 }"
-                                class="bulk-textarea"
-                              />
-                            </a-form-item>
-                            <a-form-item>
+                              :autoSize="{ minRows: 4, maxRows: 8 }"
+                              class="bulk-textarea"
+                            />
+                          </a-form-item>
+                          <a-form-item>
+                            <a-button 
+                              type="primary" 
+                              @click="addManualKeywords"
+                              :loading="isAddingKeywords"
+                            >
+                              Add Keywords
+                            </a-button>
+                          </a-form-item>
+                        </a-form>
+                      </div>
+                    </a-card>
+                    
+                    <a-card title="Added Keywords" class="manual-keywords-card">
+                      <a-table
+                        :dataSource="manualKeywords"
+                        :columns="manualKeywordsColumns"
+                        :pagination="manualKeywordsPagination"
+                        :loading="manualTableLoading"
+                        @change="handleManualKeywordsPaginationChange"
+                        :rowKey="record => record.id || record.keyword"
+                      >
+                        <template #bodyCell="{ column, record }">
+                          <template v-if="column.key === 'actions'">
+                            <a-space>
                               <a-button 
-                                type="primary" 
-                                @click="addManualKeywords"
-                                :loading="isAddingKeywords"
+                                type="primary"
+                                ghost
+                                :class="record.favorited ? 'deselect-btn' : 'select-btn'"
+                                @click="handleKeywordFavorite(record)"
                               >
-                                Add Keywords
+                                {{ record.favorited ? 'Deselect' : 'Select' }}
                               </a-button>
-                            </a-form-item>
-                          </a-form>
-                        </div>
-                      </a-card>
-                      
-                      <a-card title="Added Keywords" class="manual-keywords-card">
-                        <a-table
-                          :dataSource="manualKeywords"
-                          :columns="manualKeywordsColumns"
-                          :pagination="manualKeywordsPagination"
-                          :loading="manualTableLoading"
-                          @change="handleManualKeywordsPaginationChange"
-                          :rowKey="record => record.id || record.keyword"
-                        >
-                          <template #bodyCell="{ column, record }">
-                            <template v-if="column.key === 'actions'">
-                              <a-space>
-                                <a-button 
-                                  type="primary"
-                                  ghost
-                                  :class="record.favorited ? 'deselect-btn' : 'select-btn'"
-                                  @click="handleKeywordFavorite(record)"
-                                >
-                                  {{ record.favorited ? 'Deselect' : 'Select' }}
-                                </a-button>
-                                <a-button 
-                                  type="link" 
-                                  danger 
-                                  @click="removeManualKeyword(record)"
-                                >
-                                  <DeleteOutlined />
-                                </a-button>
-                              </a-space>
-                            </template>
+                              <a-button 
+                                type="link" 
+                                danger 
+                                @click="removeManualKeyword(record)"
+                              >
+                                <DeleteOutlined />
+                              </a-button>
+                            </a-space>
                           </template>
-                        </a-table>
-                      </a-card>
-                    </div>
-                  </a-tab-pane>
-                </a-tabs>
-              </div>
+                        </template>
+                      </a-table>
+                    </a-card>
+                  </div>
+                </a-tab-pane>
+              </a-tabs>
             </div>
           </div>
-        </template>
+        </div>
       </template>
 
       <template v-else>
@@ -885,7 +883,7 @@ export default defineComponent({
     }
     
     const proceedToContentPlan = () => {
-      router.push('/content-planning');
+      router.push('/outlines');
     }
     
     const getFilterParams = () => {

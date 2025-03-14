@@ -5,308 +5,253 @@
       class="centered-spin"
     >
       <template v-if="domainConfigured">
-        <template v-if="analysisState !== 'finished'">
-          <div class="analysis-loading-state">
-            <a-card class="loading-card">
-              <!-- Not Started State -->
-              <template v-if="analysisState === 'not_started'">
-                <div class="analysis-loading-card" style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
-                  <div class="preparing-analysis-content">
-                    <LoadingOutlined class="analysis-icon" spin />
-                    <h2 class="analysis-title">Initializing Keyword Library</h2>
-                    <p class="analysis-description">Gathering competitive intelligence from <span class="platform-tag semrush">SEMrush</span>, <span class="platform-tag ahrefs">Ahrefs</span>, <span class="platform-tag google">Google Trends</span>, and <span class="platform-tag social">Social Media</span></p>
-                    <div class="loading-tips"> 
-                      <ThunderboltOutlined class="tip-icon" />
-                      <span class="tip-text">Pro Tip: This initial scan typically takes several minutes</span>
-                    </div>
-                  </div>
+        <div class="planning-layout">
+          <div class="main-content">
+            <div v-if="outlineGenerationStatus === 'processing'" class="task-status-card">
+              <div class="task-status-content">
+                <div class="task-status-icon">
+                  <LoadingOutlined spin class="status-icon" />
                 </div>
-              </template>
-
-              <template v-if="analysisState === 'processing'">
-                <div class="analysis-loading-card" style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
-                  <div class="processing-analysis-content">
-                    <div class="analysis-icon-container">
-                      <LoadingOutlined class="analysis-icon pulse" spin />
-                    </div>
-                    <h2 class="analysis-title">Keywords Analysis in Progress</h2>
-                    <p class="analysis-description">
-                      Your keyword database has been successfully created! We're now analyzing and prioritizing your keywords for maximum impact.
-                    </p>
-                    <div class="analysis-status">
-                      <div v-for="task in currentTasks" :key="task.taskName" class="task-item">
-                        <div class="task-header">
-                          <span class="task-name">{{ task.taskName }}</span>
-                          <span class="task-status" :class="task.status">{{ task.status }}</span>
-                        </div>
-                        <a-progress 
-                          :percent="getProgressPercent(task.progress)" 
-                          :status="task.status === 'finished' ? 'success' : 'active'"
-                          :strokeColor="{ from: '#108ee9', to: '#87d068' }"
-                          size="small"
-                        />
-                        <div class="task-timing">
-                          <span>Started: {{ formatTime(task.startTime) }}</span>
-                          <span v-if="task.endTime">Completed: {{ formatTime(task.endTime) }}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="notification-message">
-                      <MailOutlined class="mail-icon" />
-                      <span>You'll receive an email notification when the analysis is complete!</span>
-                    </div>
-                  </div>
-                </div>
-              </template>
-            </a-card>
-          </div>
-        </template>
-
-        <template v-else>
-          <div class="planning-layout">
-            <div class="main-content">
-              <div v-if="outlineGenerationStatus === 'processing'" class="task-status-card">
-                <div class="task-status-content">
-                  <div class="task-status-icon">
-                    <LoadingOutlined spin class="status-icon" />
-                  </div>
-                  <div class="task-status-info">
-                    <h3 class="task-status-title">Page Outline Generation in Progress</h3>
-                    <p class="task-status-description">
-                      Our AI is analyzing your keywords and creating optimized content plans. This process typically takes 3-5 minutes to complete.
-                    </p>
-                    <div class="task-timing">
-                      <span>Started: {{ formatTime(taskStartTime) }}</span>
-                      <span v-if="taskEndTime">Completed: {{ formatTime(taskEndTime) }}</span>
-                    </div>
+                <div class="task-status-info">
+                  <h3 class="task-status-title">Page Outline Generation in Progress</h3>
+                  <p class="task-status-description">
+                    Our AI is analyzing your keywords and creating optimized content plans. This process typically takes 3-5 minutes to complete.
+                  </p>
+                  <div class="task-timing">
+                    <span>Started: {{ formatTime(taskStartTime) }}</span>
+                    <span v-if="taskEndTime">Completed: {{ formatTime(taskEndTime) }}</span>
                   </div>
                 </div>
               </div>
-              
-              <a-tabs 
-                v-model:activeKey="contentPlanTab" 
-                class="content-plan-tabs"
-                @change="handleContentPlanTabChange"
-              >
-                <template #tabBarExtraContent>
-                  <div class="toolbar-right">
-                    <a-button 
-                      class="action-button"
-                      @click="refreshContentPlans"
-                      :loading="isRefreshing"
-                      type="default"
-                    >
-                      Refresh
-                    </a-button>
-                    <a-button 
-                      @click="confirmClearAllOutlines" 
-                      type="default" 
-                      danger
-                      :disabled="contentPlans.length === 0"
-                      class="action-button"
-                    >
-                      Clear All
-                    </a-button>
-                    <a-button 
-                      class="action-button generate-btn"
-                      @click="handleGenerateOutlinePlan"
-                      :disabled="isGenerating || outlineGenerationStatus === 'processing'"
-                      :loading="isGenerating"
-                      :title="getAIButtonTooltip"
-                    >
-                      <ThunderboltOutlined />
-                      Generate Outlines
-                    </a-button>
-                    <a-button
-                      type="primary"
-                      @click="handlePublishOutlines"
-                      :disabled="selectedOutlinesCount === 0 || isGeneratingPages"
-                      class="action-button generate-pages-btn"
-                    >
-                      <RocketOutlined v-if="!isGeneratingPages" />
-                      <LoadingOutlined v-else />
-                      Generate Pages
-                    </a-button>
-                  </div>
-                </template>
-                
-                <a-tab-pane key="all" tab="All Outlines">
-                  <a-table
-                    class="content-plans-table"
-                    :dataSource="contentPlans"
-                    :loading="isLoadingOutlines"
-                    :pagination="contentPlansPagination"
-                    :rowKey="record => record.outlineId"
-                    @change="handleContentPlansPaginationChange"
-                    @row-click="showPlanDetails"
-                  >
-                    <!-- Title column -->
-                    <a-table-column title="Title" key="title" width="30%">
-                      <template #default="{ record }">
-                        <div class="outline-title" @click.stop="showPlanDetails(record)">{{ record.title }}</div>
-                        <div class="outline-description" v-if="record.description" @click.stop="showPlanDetails(record)">
-                          {{ record.description.length > 80 ? record.description.substring(0, 80) + '...' : record.description }}
-                        </div>
-                      </template>
-                    </a-table-column>
-                    
-                    <!-- Keywords column -->
-                    <a-table-column title="Keywords" key="keywords" width="25%">
-                      <template #default="{ record }">
-                        <div class="outline-keywords" @click.stop="showPlanDetails(record)">
-                          <a-tag v-for="(keyword, index) in record.keywords.split(',').slice(0, 3)" :key="index">
-                            {{ keyword.trim() }}
-                          </a-tag>
-                          <a-tag v-if="record.keywords.split(',').length > 3" class="more-tag">
-                            +{{ record.keywords.split(',').length - 3 }}
-                          </a-tag>
-                        </div>
-                      </template>
-                    </a-table-column>
-                    
-                    <!-- Page type column -->
-                    <a-table-column title="Type" key="pageType" width="15%">
-                      <template #default="{ record }">
-                        <div @click.stop="showPlanDetails(record)">
-                          <a-tag :color="getPageTypeColor(record.pageType)">
-                            {{ record.pageType }}
-                          </a-tag>
-                          <a-tag 
-                            v-if="record.hasRelatedPageTask" 
-                            color="gold" 
-                            style="margin-left: 4px;"
-                          >
-                            Page Created
-                          </a-tag>
-                        </div>
-                      </template>
-                    </a-table-column>
-                    
-                    <!-- Actions column -->
-                    <a-table-column title="Actions" key="actions" width="15%">
-                      <template #default="{ record }">
-                        <div class="outline-actions">
-                          <a-button 
-                            type="primary"
-                            ghost
-                            :class="record.favorited ? 'deselect-btn' : 'select-btn'"
-                            @click.stop="handleFavorite(record)"
-                            :title="record.favorited ? 'Remove from selection' : 'Add to selection'"
-                          >
-                            {{ record.favorited ? 'Deselect' : 'Select' }}
-                          </a-button>
-                          
-                          <a-button 
-                            type="primary"
-                            @click.stop="handleSinglePageGeneration(record)"
-                            :disabled="isGeneratingPages || record.status === 'processing'"
-                            :title="record.hasRelatedPageTask ? 'Page already exists' : 'Generate page'"
-                          >
-                            Generate Page
-                          </a-button>
-                          
-                          <a-button 
-                            type="text" 
-                            @click.stop="handleDeleteOutline(record)"
-                            title="Delete outline"
-                          >
-                            <DeleteOutlined style="color: #ff4d4f;" />
-                          </a-button>
-                        </div>
-                      </template>
-                    </a-table-column>
-                  </a-table>
-                </a-tab-pane>
-
-                <a-tab-pane key="favorites" tab="Selected Outlines">
-                  <!-- Favorites table, similar to the one above but filtered for favorites -->
-                  <a-table
-                    class="content-plans-table"
-                    :dataSource="contentPlans.filter(plan => plan.favorited)"
-                    :loading="isLoadingOutlines"
-                    :pagination="contentPlansPagination"
-                    :rowKey="record => record.outlineId"
-                    @change="handleContentPlansPaginationChange"
-                    @row-click="showPlanDetails"
-                  >
-                    <!-- Same column definitions as above -->
-                    <a-table-column title="Title" key="title" width="30%">
-                      <template #default="{ record }">
-                        <div class="outline-title" @click.stop="showPlanDetails(record)">{{ record.title }}</div>
-                        <div class="outline-description" v-if="record.description" @click.stop="showPlanDetails(record)">
-                          {{ record.description.length > 80 ? record.description.substring(0, 80) + '...' : record.description }}
-                        </div>
-                      </template>
-                    </a-table-column>
-                    
-                    <a-table-column title="Keywords" key="keywords" width="25%">
-                      <template #default="{ record }">
-                        <div class="outline-keywords" @click.stop="showPlanDetails(record)">
-                          <a-tag v-for="(keyword, index) in record.keywords.split(',').slice(0, 3)" :key="index">
-                            {{ keyword.trim() }}
-                          </a-tag>
-                          <a-tag v-if="record.keywords.split(',').length > 3" class="more-tag">
-                            +{{ record.keywords.split(',').length - 3 }}
-                          </a-tag>
-                        </div>
-                      </template>
-                    </a-table-column>
-                    
-                    <a-table-column title="Type" key="pageType" width="15%">
-                      <template #default="{ record }">
-                        <div @click.stop="showPlanDetails(record)">
-                          <a-tag :color="getPageTypeColor(record.pageType)">
-                            {{ record.pageType }}
-                          </a-tag>
-                          <a-tag 
-                            v-if="record.hasRelatedPageTask" 
-                            color="gold" 
-                            style="margin-left: 4px;"
-                          >
-                            Page Created
-                          </a-tag>
-                        </div>
-                      </template>
-                    </a-table-column>
-                    
-                    <a-table-column title="Actions" key="actions" width="15%">
-                      <template #default="{ record }">
-                        <div class="outline-actions">
-                          <a-button 
-                            type="primary"
-                            ghost
-                            :class="record.favorited ? 'deselect-btn' : 'select-btn'"
-                            @click.stop="handleFavorite(record)"
-                            :title="record.favorited ? 'Remove from selection' : 'Add to selection'"
-                          >
-                            {{ record.favorited ? 'Deselect' : 'Select' }}
-                          </a-button>
-                          
-                          <a-button 
-                            type="text" 
-                            @click.stop="handleSinglePageGeneration(record)"
-                            :disabled="isGeneratingPages || record.status === 'processing'"
-                            :title="record.hasRelatedPageTask ? 'Page already exists' : 'Generate page'"
-                          >
-                            <RocketOutlined :style="{ color: record.hasRelatedPageTask ? '#faad14' : '#1890ff' }" />
-                          </a-button>
-                          
-                          <a-button 
-                            type="text" 
-                            @click.stop="handleDeleteOutline(record)"
-                            title="Delete outline"
-                          >
-                            <DeleteOutlined style="color: #ff4d4f;" />
-                          </a-button>
-                        </div>
-                      </template>
-                    </a-table-column>
-                  </a-table>
-                </a-tab-pane>
-              </a-tabs>
             </div>
+            
+            <a-tabs 
+              v-model:activeKey="contentPlanTab" 
+              class="content-plan-tabs"
+              @change="handleContentPlanTabChange"
+            >
+              <template #tabBarExtraContent>
+                <div class="toolbar-right">
+                  <a-button 
+                    type="link"
+                    @click="showSelectedKeywords"
+                    class="view-keywords-btn"
+                  >
+                    View Selected Keywords
+                  </a-button>
+                  <a-button 
+                    class="action-button"
+                    @click="refreshContentPlans"
+                    :loading="isRefreshing"
+                    type="default"
+                  >
+                    Refresh
+                  </a-button>
+                  <a-button 
+                    @click="confirmClearAllOutlines" 
+                    type="default" 
+                    danger
+                    :disabled="contentPlans.length === 0"
+                    class="action-button"
+                  >
+                    Clear All
+                  </a-button>
+                  <a-button 
+                    class="action-button generate-btn"
+                    @click="handleGenerateOutlinePlan"
+                    :disabled="isGenerating || outlineGenerationStatus === 'processing'"
+                    :loading="isGenerating"
+                    :title="getAIButtonTooltip"
+                  >
+                    Generate Outlines
+                  </a-button>
+                  <a-button
+                    type="primary"
+                    @click="handlePublishOutlines"
+                    :disabled="selectedOutlinesCount === 0 || isGeneratingPages"
+                    class="action-button generate-pages-btn"
+                  >
+                    Generate Pages
+                  </a-button>
+                </div>
+              </template>
+              
+              <a-tab-pane key="all" tab="All Outlines">
+                <a-table
+                  class="content-plans-table"
+                  :dataSource="contentPlans"
+                  :loading="isLoadingOutlines"
+                  :pagination="contentPlansPagination"
+                  :rowKey="record => record.outlineId"
+                  @change="handleContentPlansPaginationChange"
+                  @row-click="showPlanDetails"
+                >
+                  <!-- Title column -->
+                  <a-table-column title="Title" key="title" width="30%">
+                    <template #default="{ record }">
+                      <div class="outline-title" @click.stop="showPlanDetails(record)">{{ record.title }}</div>
+                      <div class="outline-description" v-if="record.description" @click.stop="showPlanDetails(record)">
+                        {{ record.description.length > 80 ? record.description.substring(0, 80) + '...' : record.description }}
+                      </div>
+                    </template>
+                  </a-table-column>
+                  
+                  <!-- Keywords column -->
+                  <a-table-column title="Keywords" key="keywords" width="25%">
+                    <template #default="{ record }">
+                      <div class="outline-keywords" @click.stop="showPlanDetails(record)">
+                        <a-tag v-for="(keyword, index) in record.keywords.split(',').slice(0, 3)" :key="index">
+                          {{ keyword.trim() }}
+                        </a-tag>
+                        <a-tag v-if="record.keywords.split(',').length > 3" class="more-tag">
+                          +{{ record.keywords.split(',').length - 3 }}
+                        </a-tag>
+                      </div>
+                    </template>
+                  </a-table-column>
+                  
+                  <!-- Page type column -->
+                  <a-table-column title="Type" key="pageType" width="15%">
+                    <template #default="{ record }">
+                      <div @click.stop="showPlanDetails(record)">
+                        <a-tag :color="getPageTypeColor(record.pageType)">
+                          {{ record.pageType }}
+                        </a-tag>
+                        <a-tag 
+                          v-if="record.hasRelatedPageTask" 
+                          color="gold" 
+                          style="margin-left: 4px;"
+                        >
+                          Page Created
+                        </a-tag>
+                      </div>
+                    </template>
+                  </a-table-column>
+                  
+                  <!-- Actions column -->
+                  <a-table-column title="Actions" key="actions" width="15%">
+                    <template #default="{ record }">
+                      <div class="outline-actions">
+                        <a-button 
+                          type="primary"
+                          ghost
+                          :class="record.favorited ? 'deselect-btn' : 'select-btn'"
+                          @click.stop="handleFavorite(record)"
+                          :title="record.favorited ? 'Remove from selection' : 'Add to selection'"
+                        >
+                          {{ record.favorited ? 'Deselect' : 'Select' }}
+                        </a-button>
+                        
+                        <a-button 
+                          type="primary"
+                          @click.stop="handleSinglePageGeneration(record)"
+                          :disabled="isGeneratingPages || record.status === 'processing'"
+                          :title="record.hasRelatedPageTask ? 'Page already exists' : 'Generate page'"
+                        >
+                          Generate Page
+                        </a-button>
+                        
+                        <a-button 
+                          type="text" 
+                          @click.stop="handleDeleteOutline(record)"
+                          title="Delete outline"
+                        >
+                          <DeleteOutlined style="color: #ff4d4f;" />
+                        </a-button>
+                      </div>
+                    </template>
+                  </a-table-column>
+                </a-table>
+              </a-tab-pane>
+
+              <a-tab-pane key="favorites" tab="Selected Outlines">
+                <!-- Favorites table, similar to the one above but filtered for favorites -->
+                <a-table
+                  class="content-plans-table"
+                  :dataSource="contentPlans.filter(plan => plan.favorited)"
+                  :loading="isLoadingOutlines"
+                  :pagination="contentPlansPagination"
+                  :rowKey="record => record.outlineId"
+                  @change="handleContentPlansPaginationChange"
+                  @row-click="showPlanDetails"
+                >
+                  <!-- Same column definitions as above -->
+                  <a-table-column title="Title" key="title" width="30%">
+                    <template #default="{ record }">
+                      <div class="outline-title" @click.stop="showPlanDetails(record)">{{ record.title }}</div>
+                      <div class="outline-description" v-if="record.description" @click.stop="showPlanDetails(record)">
+                        {{ record.description.length > 80 ? record.description.substring(0, 80) + '...' : record.description }}
+                      </div>
+                    </template>
+                  </a-table-column>
+                  
+                  <a-table-column title="Keywords" key="keywords" width="25%">
+                    <template #default="{ record }">
+                      <div class="outline-keywords" @click.stop="showPlanDetails(record)">
+                        <a-tag v-for="(keyword, index) in record.keywords.split(',').slice(0, 3)" :key="index">
+                          {{ keyword.trim() }}
+                        </a-tag>
+                        <a-tag v-if="record.keywords.split(',').length > 3" class="more-tag">
+                          +{{ record.keywords.split(',').length - 3 }}
+                        </a-tag>
+                      </div>
+                    </template>
+                  </a-table-column>
+                  
+                  <a-table-column title="Type" key="pageType" width="15%">
+                    <template #default="{ record }">
+                      <div @click.stop="showPlanDetails(record)">
+                        <a-tag :color="getPageTypeColor(record.pageType)">
+                          {{ record.pageType }}
+                        </a-tag>
+                        <a-tag 
+                          v-if="record.hasRelatedPageTask" 
+                          color="gold" 
+                          style="margin-left: 4px;"
+                        >
+                          Page Created
+                        </a-tag>
+                      </div>
+                    </template>
+                  </a-table-column>
+                  
+                  <a-table-column title="Actions" key="actions" width="15%">
+                    <template #default="{ record }">
+                      <div class="outline-actions">
+                        <a-button 
+                          type="primary"
+                          ghost
+                          :class="record.favorited ? 'deselect-btn' : 'select-btn'"
+                          @click.stop="handleFavorite(record)"
+                          :title="record.favorited ? 'Remove from selection' : 'Add to selection'"
+                        >
+                          {{ record.favorited ? 'Deselect' : 'Select' }}
+                        </a-button>
+                        
+                        <a-button 
+                          type="text" 
+                          @click.stop="handleSinglePageGeneration(record)"
+                          :disabled="isGeneratingPages || record.status === 'processing'"
+                          :title="record.hasRelatedPageTask ? 'Page already exists' : 'Generate page'"
+                        >
+                          <RocketOutlined :style="{ color: record.hasRelatedPageTask ? '#faad14' : '#1890ff' }" />
+                        </a-button>
+                        
+                        <a-button 
+                          type="text" 
+                          @click.stop="handleDeleteOutline(record)"
+                          title="Delete outline"
+                        >
+                          <DeleteOutlined style="color: #ff4d4f;" />
+                        </a-button>
+                      </div>
+                    </template>
+                  </a-table-column>
+                </a-table>
+              </a-tab-pane>
+            </a-tabs>
           </div>
-        </template>
+        </div>
       </template>
 
       <template v-else>
@@ -317,10 +262,10 @@
     <a-modal
       v-model:open="generationProgressVisible"
       title="Submitting Generation Tasks"
-      :closable="false"
+      :closable="true"
       :maskClosable="false"
       :footer="null"
-      width="400px"
+      width="600px"
     >
       <div class="generation-progress">
         <div class="progress-status">
@@ -527,11 +472,71 @@
         </div>
       </div>
     </a-modal>
+
+    <a-modal
+      v-model:visible="showSelectedModal"
+      title="Selected Keywords"
+      @cancel="handleModalClose"
+      :footer="null"
+      width="800px"
+    >
+      <a-spin :spinning="isLoadingModalKeywords">
+        <div v-if="modalKeywords.comparison.length > 0">
+          <div class="selected-keywords-header">
+            <span>Total Selected: {{ totalSelectedKeywords }} keywords</span>
+          </div>
+          <a-table
+            :dataSource="modalKeywords.comparison"
+            :columns="[
+              {
+                title: 'Keyword',
+                dataIndex: 'keyword',
+                key: 'keyword',
+              },
+              {
+                title: 'KD',
+                dataIndex: 'kd',
+                key: 'kd',
+                width: 100,
+              },
+              {
+                title: 'Volume',
+                dataIndex: 'volume',
+                key: 'volume',
+                width: 120,
+              },
+              {
+                title: 'Actions',
+                key: 'actions',
+                width: 120,
+                align: 'center'
+              }
+            ]"
+            :pagination="false"
+            class="selected-keywords-table"
+          >
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.key === 'actions'">
+                <a-button 
+                  type="primary"
+                  ghost
+                  class="deselect-btn"
+                  @click="handleCancelSelection(record)"
+                >
+                  Deselect
+                </a-button>
+              </template>
+            </template>
+          </a-table>
+        </div>
+        <a-empty v-else description="No keywords selected" />
+      </a-spin>
+    </a-modal>
   </PageLayout>
 </template>
 
 <script>
-import { defineComponent, ref, computed, h, watch, nextTick, onMounted, onUnmounted } from 'vue'
+import { defineComponent, ref, computed, h, watch, nextTick, onMounted, onUnmounted, getCurrentInstance } from 'vue'
 import PageLayout from './layout/PageLayout.vue'
 import { Tag } from 'ant-design-vue'
 import {
@@ -549,7 +554,7 @@ import { message } from 'ant-design-vue'
 import api from '../api/api'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
 import { Modal } from 'ant-design-vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 export default defineComponent({
   name: 'OutlinePlanningPage',
@@ -568,33 +573,10 @@ export default defineComponent({
     Tag,
   },
   setup() {
-    const loading = ref(true) 
-    const taskStartTime = ref(null)
-    const taskEndTime = ref(null)
-    const taskDescription = ref(null)
-    const taskProgress = ref(null)
-    
-    const formatTime = (isoString) => {
-      if (!isoString) return '--'
-      try {
-        const date = new Date(isoString)
-        if (isNaN(date.getTime())) return '--'
-        
-        return new Intl.DateTimeFormat('en-US', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false
-        }).format(date)
-      } catch {
-        return '--'
-      }
-    }
-
+    const loading = ref(true)
     const domainConfigured = ref(false)
+    const router = useRouter()
+    const route = useRoute()
 
     const checkDomainStatus = async () => {
       loading.value = true
@@ -830,22 +812,17 @@ export default defineComponent({
           }
         }
         
-        // Only refresh outline list when task status changes from processing to finished
-        if (nowFinished) {
-          await fetchContentPlans();
-        }
-        
-        // If no task is processing, clear polling
-        if (pollingInterval.value && !activeResponse) {
-          clearInterval(pollingInterval.value);
-          pollingInterval.value = null;
+        // 如果没有活动的响应，且之前在处理中，说明任务已完成
+        if (!activeResponse && wasProcessing) {
+          outlineGenerationStatus.value = 'finished';
         }
         
         // Return active task response (if any)
         return activeResponse || (compositeResponse?.data ? compositeResponse : autoPilotResponse);
         
       } catch (error) {
-        message.error('Failed to check task status');
+        // 移除错误消息，因为这可能是正常的情况
+        console.debug('Task status check:', error);
         return null;
       } finally {
         isLoadingTaskInfo.value = false;
@@ -857,31 +834,29 @@ export default defineComponent({
     }
 
     const fetchContentPlans = async () => {
-      const isLoadingOutlines = ref(false)
-      if (isLoadingOutlines.value) return
+      if (isLoadingOutlines.value) return;
       
-      isLoadingOutlines.value = true
+      isLoadingOutlines.value = true;
       try {
         const outlinesResponse = await api.getPlanningOutlines({
           status: contentPlanTab.value === 'favorites' ? 'selected' : '',
           page: contentPlansPagination.value.current,
           limit: contentPlansPagination.value.pageSize
-        })
+        });
         
         if (outlinesResponse?.data) {
           contentPlans.value = outlinesResponse.data.map(plan => ({
             ...plan,
             favorited: plan.status === 'selected'
-          }))
-          // Ensure total count is set
-          contentPlansPagination.value.total = outlinesResponse.totalCount || 0
+          }));
+          contentPlansPagination.value.total = outlinesResponse.totalCount || 0;
         }
       } catch (error) {
-        message.error('Failed to get content plans')
+        message.error('获取内容计划失败');
       } finally {
-        isLoadingOutlines.value = false
+        isLoadingOutlines.value = false;
       }
-    }
+    };
 
     const handleContentPlansPaginationChange = async (page, pageSize) => {
       contentPlansPagination.value.current = page
@@ -966,12 +941,38 @@ export default defineComponent({
 
     const clearAllOutlines = async () => {
       try {
-        await api.clearPlanningOutlines();
-        message.success('All outlines cleared successfully');
-        contentPlans.value = [];
-        closeDrawer();
+        // 获取当前页面显示的大纲ID列表
+        const currentPageOutlineIds = contentPlans.value.map(plan => plan.outlineId);
+        
+        if (currentPageOutlineIds.length === 0) {
+          return;
+        }
+
+        // 显示删除进度
+        message.loading('Deleting outlines...', 0);
+        
+        // 逐个删除大纲
+        for (const outlineId of currentPageOutlineIds) {
+          await api.deletePlanningOutline(outlineId);
+        }
+        
+        // 更新本地数据
+        contentPlans.value = contentPlans.value.filter(
+          plan => !currentPageOutlineIds.includes(plan.outlineId)
+        );
+        
+        // 关闭抽屉(如果打开的是正在删除的大纲)
+        if (selectedPlan.value && currentPageOutlineIds.includes(selectedPlan.value.outlineId)) {
+          closeDrawer();
+        }
+
+        message.destroy(); // 清除loading消息
+        message.success(`Successfully deleted ${currentPageOutlineIds.length} outlines`);
+        
       } catch (error) {
+        message.destroy(); // 清除loading消息
         message.error('Failed to clear outlines');
+        console.error('Failed to clear outlines:', error);
       }
     };
 
@@ -988,8 +989,61 @@ export default defineComponent({
       }
     };
 
-    const handleGenerateOutlinePlan = () => {
-      aiSelectionModalVisible.value = true;
+    const handleGenerateOutlinePlan = async () => {
+      try {
+        const response = await api.getPlanningKeywords({ status: 'selected' });
+        const selectedKeywords = response?.data || [];
+        
+        if (!selectedKeywords.length) {
+          Modal.confirm({
+            title: 'No Keywords Selected',
+            content: 'Please select keywords first to generate outlines.',
+            okText: 'Go to Keywords',
+            cancelText: 'Cancel',
+            onOk: () => {
+              router.push('/keywords');
+            }
+          });
+          return;
+        }
+
+        // Show confirmation dialog with selected keywords
+        const confirmed = await new Promise(resolve => {
+          Modal.confirm({
+            title: 'Generate Outlines',
+            content: h('div', [
+              h('p', `Are you sure you want to generate outlines for ${selectedKeywords.length} selected keywords?`),
+              h('div', { style: 'max-height: 200px; overflow-y: auto; margin-top: 12px;' }, [
+                h('ul', { style: 'padding-left: 20px;' }, 
+                  selectedKeywords.map(kw => h('li', kw.keyword))
+                )
+              ])
+            ]),
+            okText: 'Generate',
+            cancelText: 'Cancel',
+            width: 500,
+            onOk: () => resolve(true),
+            onCancel: () => resolve(false),
+          });
+        });
+
+        if (!confirmed) return;
+
+        // Start outline generation with selected keywords
+        const keywordIds = selectedKeywords.map(k => k.keywordId);
+        await api.generatePlanningComposite(keywordIds);
+        
+        message.success('Outline generation started');
+        
+        // Check status and start polling
+        const statusResponse = await checkOutlineGenerationStatus();
+        if (!statusResponse?.data || statusResponse.data.status !== 'finished') {
+          startPolling();
+        }
+      } catch (error) {
+        console.error('Failed to generate outlines:', error);
+        message.error('Failed to generate outlines');
+      }
     };
 
     const aiSelectionModalVisible = ref(false);
@@ -998,7 +1052,7 @@ export default defineComponent({
     const handleAISelection = async () => {
       isAISelecting.value = true;
       try {
-        await api.generateAutoPilot();
+        await api.generatePlanningAI();
         message.success('Auto-generation started');
         aiSelectionModalVisible.value = false;
         
@@ -1048,7 +1102,7 @@ export default defineComponent({
       generationDetails.value = 'Please wait while we prepare your page...';
 
       try {
-        await api.generatePageFromOutline(outline.outlineId);
+        await api.createAIPage(outline.outlineId);
         
         generationProgress.value = 100;
         generationStatus.value = 'success';
@@ -1066,6 +1120,8 @@ export default defineComponent({
         
         setTimeout(() => {
           generationProgressVisible.value = false;
+          // Add navigation to task management
+          router.push('/task-management');
         }, 2000);
       } catch (error) {
         generationProgress.value = 100;
@@ -1107,13 +1163,35 @@ export default defineComponent({
       generationDetails.value = `Processing ${selectedOutlines.length} outlines...`;
 
       try {
+        console.log('Selected outlines:', selectedOutlines);
         const outlineIds = selectedOutlines.map(outline => outline.outlineId);
-        await api.generatePagesFromOutlines(outlineIds);
+        console.log('Outline IDs to be processed:', outlineIds);
+        
+        if (!outlineIds.length) {
+          throw new Error('No valid outline IDs found');
+        }
+
+        // Process outlines one by one
+        let processedCount = 0;
+        for (const outlineId of outlineIds) {
+          try {
+            console.log(`Processing outline ID: ${outlineId}`);
+            await api.createAIPage(outlineId);
+            processedCount++;
+            
+            // Update progress
+            generationProgress.value = Math.floor((processedCount / outlineIds.length) * 100);
+            generationDetails.value = `Processed ${processedCount} of ${outlineIds.length} outlines...`;
+          } catch (err) {
+            console.error(`Failed to process outline ${outlineId}:`, err);
+            // Continue with next outline even if one fails
+          }
+        }
         
         generationProgress.value = 100;
         generationStatus.value = 'success';
         generationStatusText.value = 'Page generation tasks submitted successfully!';
-        generationDetails.value = 'Your pages will be created in the background. You can check their status in the Pages section.';
+        generationDetails.value = `Successfully submitted ${processedCount} of ${outlineIds.length} page generation tasks. You can check their status in the Pages section.`;
         generationCompleted.value = true;
         
         // Update the outlines to show they have related page tasks
@@ -1126,12 +1204,14 @@ export default defineComponent({
         
         setTimeout(() => {
           generationProgressVisible.value = false;
+          router.push('/task-management');
         }, 2000);
       } catch (error) {
+        console.error('Page generation process failed:', error);
         generationProgress.value = 100;
         generationStatus.value = 'exception';
         generationStatusText.value = 'Failed to submit page generation tasks';
-        generationDetails.value = 'Please try again later or contact support if the issue persists.';
+        generationDetails.value = error.message || 'Please try again later or contact support if the issue persists.';
         generationFailed.value = true;
       } finally {
         isGeneratingPages.value = false;
@@ -1200,24 +1280,31 @@ export default defineComponent({
     })
 
     const getProgressPercent = (progress) => {
-      if (!progress || !progress.total) return 0
-      return Math.round((progress.current / progress.total) * 100)
+      if (!progress || !progress.total) return 0;
+      return Math.round((progress.current / progress.total) * 100);
     }
+
+    const formatTime = (timestamp) => {
+      if (!timestamp) return '';
+      const date = new Date(timestamp);
+      return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    };
 
     onMounted(async () => {
       loading.value = true
       try {
         await checkDomainStatus()
-
+        
         if (domainConfigured.value) {
-          await checkAnalysisStatus()
-          
-          if (analysisState.value !== 'finished') {
-            pollingInterval.value = setInterval(checkAnalysisStatus, 5000)
-          } else {
-            await fetchContentPlans()
-            await checkAndStartPolling()
-          }
+          await fetchContentPlans()
+          await checkAndStartPolling()
         }
       } catch (error) {
         console.error('Initialization failed:', error)
@@ -1239,21 +1326,112 @@ export default defineComponent({
           await fetchContentPlans()
         }
       } catch (error) {
-        console.error('Failed to check outline status:', error)
-        message.error('Failed to check outline status')
+        // 移除错误消息，改为调试日志
+        console.debug('Failed to check outline status:', error)
       }
     }
+
+    // Add new refs for selected keywords modal
+    const showSelectedModal = ref(false);
+    const isLoadingModalKeywords = ref(false);
+    const modalKeywords = ref({
+      comparison: []
+    });
+
+    // Add new methods for selected keywords handling
+    const showSelectedKeywords = () => {
+      showSelectedModal.value = true;
+      fetchSelectedKeywords();
+    };
+
+    const fetchSelectedKeywords = async () => {
+      isLoadingModalKeywords.value = true;
+      try {
+        const response = await api.getPlanningKeywords({
+          status: 'selected',
+          page: 1,
+          limit: 100
+        });
+        
+        if (response?.data) {
+          modalKeywords.value.comparison = response.data
+            .map(keyword => ({
+              id: keyword.keywordId,
+              keyword: keyword.keyword,
+              kd: keyword.kd || 0,
+              volume: keyword.volume || 0,
+              cpc: Number(keyword.cpc || 0).toFixed(2),
+              favorited: keyword.status === 'selected'
+            }))
+            .filter(k => k.favorited);
+        } else {
+          modalKeywords.value.comparison = [];
+        }
+      } catch (error) {
+        console.error('Failed to get selected keywords:', error);
+        message.error('Failed to load selected keywords');
+        modalKeywords.value.comparison = [];
+      } finally {
+        isLoadingModalKeywords.value = false;
+      }
+    };
+
+    const handleModalClose = () => {
+      showSelectedModal.value = false;
+    };
+
+    const totalSelectedKeywords = computed(() => {
+      return modalKeywords.value.comparison.length;
+    });
+
+    // Add method to handle keyword deselection
+    const handleCancelSelection = async (record) => {
+      try {
+        await api.cancelPlanningKeywords([record.id]);
+        message.success('Keyword deselected successfully');
+        
+        // Update the modal data
+        modalKeywords.value.comparison = modalKeywords.value.comparison
+          .filter(k => k.id !== record.id);
+        
+        // Refresh content plans if needed
+        await fetchContentPlans();
+      } catch (error) {
+        console.error('Failed to deselect keyword:', error);
+        message.error('Failed to deselect keyword');
+      }
+    };
+
+    // Watch for AI Autopilot signal
+    watch(
+      () => route.query.aiAutopilot,
+      (newValue) => {
+        if (newValue === 'true') {
+          console.log('AI Autopilot signal received'); // 添加调试日志
+          aiSelectionModalVisible.value = true;
+          // Clean up the URL after a short delay
+          setTimeout(() => {
+            router.replace({ query: {} });
+          }, 100);
+        }
+      },
+      { immediate: true } // 确保组件加载时立即执行
+    );
+
+    // 添加缺失的响应式变量
+    const taskStartTime = ref(null);
+    const taskEndTime = ref(null);
+    const isRefreshing = ref(false);
+    const isGenerating = ref(false);
+
+    // 添加新缺失的响应式变量
+    const isLoadingOutlines = ref(false);
 
     return {
       loading,
       domainConfigured,
-      analysisState,
-      currentTasks,
-      getProgressPercent,
-      formatTime,
-      taskStartTime,
-      taskEndTime,
       contentPlans,
+      selectedOutlinesCount,
       contentPlanTab,
       contentPlansPagination,
       handleContentPlanTabChange,
@@ -1297,6 +1475,19 @@ export default defineComponent({
       aiSelectionModalVisible,
       isAISelecting,
       handleAISelection,
+      showSelectedModal,
+      isLoadingModalKeywords,
+      modalKeywords,
+      totalSelectedKeywords,
+      showSelectedKeywords,
+      handleModalClose,
+      handleCancelSelection,
+      formatTime,
+      taskStartTime,
+      taskEndTime,
+      isRefreshing,
+      isGenerating,
+      isLoadingOutlines,
     }
   }
 })
@@ -1868,5 +2059,60 @@ export default defineComponent({
 .btn-start:hover {
   background-color: #ffc53d;
   border-color: #ffc53d;
+}
+
+/* Selected Keywords Modal */
+.selected-keywords-modal :deep(.ant-modal-body) {
+  padding: 0;
+}
+
+.selected-keywords-content {
+  padding: 24px;
+  text-align: center;
+}
+
+.keyword-item {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.keyword {
+  font-size: 16px;
+  font-weight: 500;
+  color: #262626;
+}
+
+.kd, .volume, .cpc {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-left: 8px;
+}
+
+.deselect-btn {
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+.select-btn {
+  color: #1890ff;
+  border-color: #1890ff;
+}
+
+.selected-keywords-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.selected-keywords-table {
+  margin-top: 16px;
+}
+
+.view-keywords-btn {
+  font-weight: 500;
+  margin-right: 8px;
 }
 </style>
