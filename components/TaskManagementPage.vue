@@ -90,7 +90,7 @@
             <a-table
               v-if="!loading && tasks.length > 0"
               :columns="columns"
-              :data-source="tasks"
+              :data-source="filteredTasks"
               :pagination="false"
               :scroll="{ x: true }"
               :row-selection="{ 
@@ -98,7 +98,8 @@
                 onChange: onSelectChange,
                 getCheckboxProps: getCheckboxProps
               }"
-              @change="handleTableChange"
+              :expanded-row-keys="expandedRowKeys"
+              @expand="onExpandRow"
             >
               <template #bodyCell="{ column, record }">
                 <template v-if="column.key === 'title'">
@@ -183,9 +184,6 @@
 
                 <template v-if="column.key === 'actions'">
                   <a-dropdown :trigger="['click']">
-                    <a-button type="link">
-                      <EllipsisOutlined />
-                    </a-button>
                     <template #overlay>
                       <a-menu>
                         <a-menu-item 
@@ -221,8 +219,83 @@
                         </a-menu-item>
                       </a-menu>
                     </template>
+                    <a-button type="link">
+                      <EllipsisOutlined />
+                    </a-button>
                   </a-dropdown>
                 </template>
+              </template>
+
+              <!-- 添加展开行插槽 -->
+              <template #expandedRowRender="{ record }">
+                <div :class="['workflow-container', { 'inline-mode': true }]">
+                  <a-spin :spinning="workflowLoading">
+                    <div v-if="!hasWorkflowData(record.pageId)" class="empty-workflow">
+                      <a-empty
+                        description="No generation history available"
+                      />
+                    </div>
+
+                    <template v-else>
+                      <div class="workflow-summary">
+                        <div class="summary-item">
+                          <span class="summary-label">Total Time:</span>
+                          <span class="summary-value">{{ getTotalTime(record.pageId) }} seconds</span>
+                        </div>
+                        <div class="summary-item">
+                          <span class="summary-label">Total Steps:</span>
+                          <span class="summary-value">{{ getWorkflowSteps(record.pageId).length }}</span>
+                        </div>
+                        <div class="summary-item">
+                          <span class="summary-label">Completed Steps:</span>
+                          <span class="summary-value">{{ getCompletedSteps(record.pageId) }}</span>
+                        </div>
+                        <div class="summary-item">
+                          <span class="summary-label">Status:</span>
+                          <span class="summary-value" :class="getStatusClass(record.pageId)">
+                            {{ getWorkflowStatus(record.pageId) }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <a-divider style="margin: 12px 0" />
+                      <a-timeline>
+                        <a-timeline-item 
+                          v-for="step in getReversedWorkflowSteps(record.pageId)" 
+                          :key="step.nodeId"
+                          :color="getStepColor(step.status)"
+                        >
+                          <template #dot v-if="step.status === 'processing'">
+                            <a-spin size="small" />
+                          </template>
+                          <div class="step-content" :class="{ 'step-active': isActiveStep(step) }">
+                            <div class="step-header">
+                              <div class="step-header-left">
+                                <span class="step-name">{{ translateNodeName(step.nodeName) }}</span>
+                                <span class="step-time">{{ formatTime(step.elapsedTime) }}</span>
+                              </div>
+                              <a-button 
+                                v-if="step.output"
+                                type="link" 
+                                class="expand-button"
+                                @click="toggleOutput(step.nodeId)"
+                              >
+                                {{ isStepExpanded(step.nodeId) ? 'Collapse' : 'Expand' }}
+                              </a-button>
+                            </div>
+                            <div 
+                              v-if="step.output" 
+                              class="step-message"
+                              :class="{ 'expanded': isStepExpanded(step.nodeId) }"
+                            >
+                              {{ formatOutput(step.output) }}
+                            </div>
+                          </div>
+                        </a-timeline-item>
+                      </a-timeline>
+                    </template>
+                  </a-spin>
+                </div>
               </template>
             </a-table>
           </div>
@@ -394,7 +467,7 @@
 </template>
 
 <script>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { 
   ReloadOutlined,
@@ -420,6 +493,7 @@ import NoSiteConfigured from './common/NoSiteConfigured.vue'
 import SmartBanner from './common/SmartBanner.vue'
 import SettingsModal from './SettingsDomainModal.vue'
 import WorkflowStatus from './WorkflowStatus.vue'
+import { formatDistanceToNow } from 'date-fns'
 
 export default {
   name: 'TaskManagementPage',
@@ -689,6 +763,9 @@ export default {
 
           tasks.value = pages;
           pagination.total = response.TotalCount || 0;
+          
+          // 添加检查进行中任务的逻辑
+          checkProcessingTasks();
         } else {
           message.error('Failed to fetch tasks: Invalid response');
         }
@@ -933,10 +1010,10 @@ export default {
       // 确保 URL 以 https:// 开头
       const baseUrl = record.publishURL.startsWith('http') 
         ? record.publishURL 
-        : `https://${record.publishURL}`;
+        : `https://${record.publishURL}`
       
       // 只有非英语时才添加语言路径
-      const langPath = record.lang === 'en' ? '' : `/${record.lang}`;
+      const langPath = record.lang === 'en' ? '' : `/${record.lang}`
       
       return `${baseUrl}${langPath}/${record.slug}`;
     };
@@ -1162,21 +1239,81 @@ export default {
       settingsVisible.value = true;
     };
 
-    // Add workflow modal
-    const workflowVisible = ref(false);
-    const currentPageId = ref(null);
-    const isProcessing = ref(false);
+    const expandedRowKeys = ref([]);
+    const expandedRowData = ref({});
+    const loadingWorkflow = ref(false);
 
-    const showWorkflow = (record) => {
-      workflowVisible.value = true;
-      currentPageId.value = record.pageId;
-      isProcessing.value = record.generatorStatus === 'processing';
+    // 添加调试标志
+    const debugMode = ref(true);
+
+    // 修改展开行渲染函数，使用 WorkflowStatus 组件
+    const expandedRowRender = (record) => {
+      if (debugMode.value) {
+        console.log('expandedRowRender called for:', record.pageId);
+      }
+      
+      // 返回 WorkflowStatus 组件
+      return () => h(WorkflowStatus, {
+        pageId: record.pageId,
+        isProcessing: record.generatorStatus === 'processing',
+        inlineMode: true
+      });
     };
 
-    const handleWorkflowClose = () => {
-      workflowVisible.value = false;
-      currentPageId.value = null;
-      isProcessing.value = false;
+    // 添加当前页面ID和处理状态的响应式变量
+    const currentPageId = ref('');
+    const isProcessing = ref(false);
+
+    // 修改 showWorkflow 函数
+    const showWorkflow = async (record) => {
+      console.log('Show workflow for record:', record.pageId);
+      
+      // Check if currently expanded
+      const isCurrentlyExpanded = expandedRowKeys.value.includes(record.key);
+      console.log('Is currently expanded:', isCurrentlyExpanded);
+      
+      if (isCurrentlyExpanded) {
+        // If already expanded, collapse
+        expandedRowKeys.value = [];
+        
+        // Don't stop polling if task is still processing
+        if (record.generatorStatus !== 'processing') {
+          stopPolling(record.pageId);
+        }
+      } else {
+        // If not expanded, expand
+        expandedRowKeys.value = [record.key];
+        console.log('Expanded row keys updated:', expandedRowKeys.value);
+        
+        // Fetch workflow data
+        await fetchWorkflow(record.pageId);
+        
+        // If processing, start polling
+        if (record.generatorStatus === 'processing') {
+          startPolling(record.pageId);
+        }
+      }
+    };
+
+    // 在初始化时检查是否有进行中的任务，并自动展开
+    const checkProcessingTasks = () => {
+      const processingTasks = tasks.value.filter(task => 
+        task.generatorStatus === 'processing'
+      );
+      
+      console.log('Found processing tasks:', processingTasks.length);
+      
+      if (processingTasks.length > 0) {
+        // Expand the first processing task
+        const firstProcessingTask = processingTasks[0];
+        expandedRowKeys.value = [firstProcessingTask.key];
+        console.log('Auto-expanded processing task:', firstProcessingTask.pageId);
+        
+        // Start polling for all processing tasks
+        processingTasks.forEach(task => {
+          ensurePolling(task.pageId);
+        });
+      }
     };
 
     // 添加标签页切换处理函数
@@ -1190,6 +1327,247 @@ export default {
       fetchTasks();
     };
 
+    // 保留这个更完整的 onExpandRow 函数定义
+    const onExpandRow = async (expanded, record) => {
+      console.log('Row expand event triggered:', expanded, record.pageId);
+      
+      if (expanded) {
+        expandedRowKeys.value = [record.key];
+        
+        // Fetch workflow data
+        await fetchWorkflow(record.pageId);
+        
+        // If processing, start polling
+        if (record.generatorStatus === 'processing') {
+          startPolling(record.pageId);
+        }
+      } else {
+        expandedRowKeys.value = [];
+        
+        // Don't stop polling if task is still processing
+        const task = tasks.value.find(t => t.pageId === record.pageId);
+        if (!task || task.generatorStatus !== 'processing') {
+          stopPolling(record.pageId);
+        }
+      }
+    };
+
+    // 添加工作流相关的状态和方法
+    const workflowData = ref({});  // Store workflow data for all pages
+    const workflowLoading = ref(false);
+    const expandedSteps = ref([]);  // Store expanded step IDs
+    const pollingPageIds = ref(new Set());  // Store page IDs being polled
+    
+    // Translate node names
+    const translateNodeName = (nodeName) => {
+      if (nodeName === '開始') return 'Start';
+      // Add other translations as needed
+      return nodeName;
+    };
+
+    // Get step color
+    const getStepColor = (status) => {
+      switch (status) {
+        case 'succeeded': return 'green';
+        case 'started': 
+        case 'iteration_started':
+        case 'iteration_next': return 'blue';
+        case 'failed': return 'red';
+        default: return 'gray';
+      }
+    };
+
+    // Format time
+    const formatTime = (elapsedTime) => {
+      if (!elapsedTime) return 'Processing...';
+      return `${elapsedTime.toFixed(2)} seconds`;
+    };
+
+    // Format output
+    const formatOutput = (output) => {
+      try {
+        const outputObj = JSON.parse(output);
+        return outputObj.text || outputObj.result || output;
+      } catch (e) {
+        return output;
+      }
+    };
+
+    // Check if workflow data exists
+    const hasWorkflowData = (pageId) => {
+      return workflowData.value[pageId]?.steps?.length > 0 && workflowData.value[pageId]?.status;
+    };
+
+    // Get workflow steps
+    const getWorkflowSteps = (pageId) => {
+      return workflowData.value[pageId]?.steps || [];
+    };
+
+    // Get reversed workflow steps
+    const getReversedWorkflowSteps = (pageId) => {
+      return [...getWorkflowSteps(pageId)].reverse();
+    };
+
+    // Get total time
+    const getTotalTime = (pageId) => {
+      const steps = getWorkflowSteps(pageId);
+      const total = steps.reduce((sum, step) => {
+        return sum + (step.elapsedTime || 0);
+      }, 0);
+      return total.toFixed(2);
+    };
+
+    // Get completed steps count
+    const getCompletedSteps = (pageId) => {
+      const steps = getWorkflowSteps(pageId);
+      return steps.filter(step => 
+        step.status === 'succeeded' || step.status === 'failed'
+      ).length;
+    };
+
+    // Get workflow status
+    const getWorkflowStatus = (pageId) => {
+      if (workflowLoading.value) return 'Processing';
+      
+      const steps = getWorkflowSteps(pageId);
+      
+      // Check if any step failed
+      const hasFailedStep = steps.some(step => step.status === 'failed');
+      if (hasFailedStep) {
+        return 'Failed';
+      }
+      
+      // Use API returned status
+      const status = workflowData.value[pageId]?.status;
+      switch (status) {
+        case 'completed':
+          return 'Completed';
+        case 'failed':
+          return 'Failed';
+        case 'processResponse':
+        case 'processing':
+          return 'In Progress';
+        default:
+          return 'Processing';
+      }
+    };
+
+    // Get status class
+    const getStatusClass = (pageId) => {
+      const status = getWorkflowStatus(pageId);
+      return {
+        'status-processing': status === 'Processing' || status === 'In Progress',
+        'status-completed': status === 'Completed',
+        'status-failed': status === 'Failed'
+      };
+    };
+
+    // Check if step is active
+    const isActiveStep = (step) => {
+      return step.status === 'processing' || 
+             step.status === 'started' || 
+             step.status === 'iteration_started' ||
+             step.status === 'iteration_next';
+    };
+
+    // Toggle output expand/collapse
+    const toggleOutput = (nodeId) => {
+      const index = expandedSteps.value.indexOf(nodeId);
+      if (index === -1) {
+        expandedSteps.value.push(nodeId);
+      } else {
+        expandedSteps.value.splice(index, 1);
+      }
+    };
+
+    // Check if step is expanded
+    const isStepExpanded = (nodeId) => {
+      return expandedSteps.value.includes(nodeId);
+    };
+
+    // Fetch workflow data
+    const fetchWorkflow = async (pageId) => {
+      try {
+        console.log('Fetching workflow data for pageId:', pageId);
+        workflowLoading.value = true;
+        const response = await apiClient.getPageWorkflow(pageId);
+        console.log('Workflow response:', response);
+        
+        if (response?.code === 200) {
+          if (!response.data.workflowId || !response.data.steps) {
+            workflowData.value[pageId] = { steps: [], status: '' };
+          } else {
+            workflowData.value[pageId] = response.data;
+            
+            // Check if workflow is completed or failed
+            const isCompleted = response.data.status === 'completed' || 
+                              response.data.status === 'failed';
+            
+            // If completed, stop polling
+            if (isCompleted) {
+              stopPolling(pageId);
+            } else {
+              // If not completed and the task is processing, ensure polling continues
+              const task = tasks.value.find(t => t.pageId === pageId);
+              if (task && task.generatorStatus === 'processing') {
+                ensurePolling(pageId);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch workflow status:', error);
+      } finally {
+        workflowLoading.value = false;
+      }
+    };
+
+    // Start polling
+    const startPolling = (pageId) => {
+      if (pollingPageIds.value.has(pageId)) {
+        return; // Already polling
+      }
+      
+      pollingPageIds.value.add(pageId);
+      console.log('Started polling for pageId:', pageId);
+      
+      const poll = async () => {
+        if (!pollingPageIds.value.has(pageId)) {
+          return; // Stop polling
+        }
+        
+        await fetchWorkflow(pageId);
+        
+        // Check if we need to continue polling
+        const status = workflowData.value[pageId]?.status;
+        const task = tasks.value.find(t => t.pageId === pageId);
+        
+        if (status === 'completed' || status === 'failed') {
+          stopPolling(pageId);
+        } else if (task && task.generatorStatus === 'processing') {
+          // Continue polling if task is still processing
+          setTimeout(poll, 3000);
+        } else {
+          stopPolling(pageId);
+        }
+      };
+      
+      poll();
+    };
+
+    // Ensure polling is active for a page
+    const ensurePolling = (pageId) => {
+      if (!pollingPageIds.value.has(pageId)) {
+        startPolling(pageId);
+      }
+    };
+
+    // Stop polling
+    const stopPolling = (pageId) => {
+      pollingPageIds.value.delete(pageId);
+      console.log('Stopped polling for pageId:', pageId);
+    };
+
     onMounted(async () => {
       await loadProductInfo()
       if (domainConfigured.value) {
@@ -1198,6 +1576,12 @@ export default {
       }
       isMounted.value = true
     })
+
+    // Add these properties back to fix the errors
+    const workflowVisible = ref(false);
+    const handleWorkflowClose = () => {
+      workflowVisible.value = false;
+    };
 
     return {
       activeTab,
@@ -1256,11 +1640,33 @@ export default {
       showSettings,
       currentCustomerId,
       handleConfigDomain,
-      workflowVisible,
+      expandedRowKeys,
+      onExpandRow,
       showWorkflow,
-      handleWorkflowClose,
+      checkProcessingTasks,
+      debugMode,
       currentPageId,
-      isProcessing
+      isProcessing,
+      workflowData,
+      workflowLoading,
+      expandedSteps,
+      pollingPageIds,
+      translateNodeName,
+      getStepColor,
+      formatTime,
+      formatOutput,
+      hasWorkflowData,
+      getWorkflowSteps,
+      getReversedWorkflowSteps,
+      getTotalTime,
+      getCompletedSteps,
+      getWorkflowStatus,
+      getStatusClass,
+      isActiveStep,
+      toggleOutput,
+      isStepExpanded,
+      workflowVisible,
+      handleWorkflowClose,
     }
   }
 }
@@ -1767,503 +2173,6 @@ export default {
   box-shadow: 0 2px 6px rgba(82, 196, 26, 0.1);
 }
 
-/* 移除之前的 transform rotate 相关样式 */
-.generating-tag:hover,
-.failed-tag:hover {
-  transform: scale(1.05);
-  transition: transform 0.2s ease;
-}
-
-/* 调整 actions 列的宽度 */
-:deep(.ant-table) .ant-table-cell:last-child {
-  width: 40px !important;
-  min-width: 40px !important;
-  padding: 8px 4px !important;
-  text-align: center;
-}
-
-/* 确保表格单元格内容正确显示 */
-:deep(.ant-table-cell) {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 标题列允许换行和宽度限制 */
-:deep(.ant-table-cell-fix-left) {
-  white-space: normal !important;
-  word-break: break-word;
-  /* 移除最大和最小宽度限制 */
-  /* max-width: 200px !important;
-  min-width: 200px !important; */
-}
-
-/* 确保标签内容不换行且省略 */
-:deep(.ant-tag) {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* 调整下拉按钮样式 */
-:deep(.ant-dropdown-trigger) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-:deep(.ant-btn) {
-  min-width: 32px;
-  padding: 0;
-}
-
-:deep(.ant-btn .anticon) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-}
-
-/* 添加failed-tag的样式 */
-.failed-tag {
-  background: linear-gradient(45deg, #ff4d4f, #ff7875) !important; /* 使用更柔和的红色渐变 */
-  border: none !important;
-  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
-  animation: glow-failed 2s ease-in-out infinite;
-}
-
-@keyframes glow-failed {
-  0% {
-    box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
-  }
-  50% {
-    box-shadow: 0 2px 12px rgba(255, 77, 79, 0.5);
-  }
-  100% {
-    box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
-  }
-}
-
-/* 确保failed-tag继承generating-tag的基础样式 */
-:deep(.ant-tag.generating-tag.failed-tag) {
-  font-size: 12px;
-  padding: 2px 10px;
-  height: 24px;
-  line-height: 20px;
-  border-radius: 12px;
-}
-
-.failed-tag:hover {
-  transform: scale(1.05);
-  transition: transform 0.2s ease;
-}
-
-.sitemap-preview {
-  max-height: 500px;
-  overflow-y: auto;
-}
-
-.preview-header {
-  margin-bottom: 16px;
-}
-
-.url-count {
-  margin: 8px 0;
-  font-weight: 500;
-  color: #1890ff;
-}
-
-.url-list {
-  border-radius: 4px;
-  border: 1px solid #f0f0f0;
-}
-
-.url-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-}
-
-.url-text {
-  flex: 1;
-  word-break: break-all;
-  margin-right: 16px;
-}
-
-:deep(.ant-list-item) {
-  padding: 8px 16px;
-}
-
-:deep(.ant-btn-link) {
-  padding: 0 8px;
-  height: 24px;
-  font-size: 12px;
-}
-
-/* 添加标题链接样式 */
-.title-link {
-  color: #1890ff;
-  cursor: pointer;
-  transition: color 0.3s;
-  display: -webkit-box;
-  -webkit-line-clamp: 2; /* 限制最多显示2行 */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.title-link:hover {
-  color: #40a9ff;
-  text-decoration: underline;
-}
-
-/* 移除多余的容器样式，只保留必要的表格样式 */
-:deep(.ant-table) {
-  /* min-width: 1200px; */
-}
-
-/* 修改表格容器样式 */
-.task-container {
-  width: 100%;
-  overflow: hidden;  /* 添加这个 */
-}
-
-.task-list {
-  width: 100%;
-  overflow: visible;  /* 修改这个 */
-}
-
-/* 添加新的滚动容器样式 */
-:deep(.ant-table-wrapper) {
-  overflow-x: auto;
-  width: 100%;
-}
-
-:deep(.ant-table-content) {
-  overflow-x: auto;
-}
-
-/* 确保操作列样式正确 */
-:deep(.ant-table-cell:last-child) {
-  padding: 8px !important;
-  text-align: center;
-  background: #fff;
-}
-
-/* 新增和修改的样式 */
-.header-top {
-  display: flex;
-  align-items: center;
-  gap: 16px; /* 增加间距 */
-}
-
-.header-top h3 {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* 修改按钮样式 */
-.action-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.action-button :deep(.anticon) {
-  display: flex;
-  align-items: center;
-  margin-right: 0; /* 覆盖默认的 margin */
-}
-
-/* 主按钮渐变样式 */
-.generate-btn {
-  background: linear-gradient(-45deg, #2563eb, #7c3aed, #2563eb);
-  background-size: 200% 200%;
-  animation: gradient-shift 3s ease infinite;
-  border: none;
-  padding: 0 16px;
-  border-radius: 6px;
-  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3),
-              0 0 20px rgba(37, 99, 235, 0.2),
-              inset 0 0 8px rgba(255, 255, 255, 0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.generate-btn:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4),
-              0 0 30px rgba(37, 99, 235, 0.3),
-              inset 0 0 12px rgba(255, 255, 255, 0.3);
-}
-
-.generate-btn:active {
-  transform: translateY(1px) scale(0.98);
-}
-
-.generate-btn :deep(span) {
-  color: white !important;
-}
-
-.generate-btn :deep(.anticon) {
-  color: white !important;
-}
-
-@keyframes gradient-shift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* 优化次要按钮样式 */
-.secondary-btn {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #475569;
-  height: 32px;
-  padding: 0 16px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-
-.secondary-btn:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #1e293b;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.secondary-btn:active {
-  background: #e2e8f0;
-  transform: translateY(0);
-}
-
-.secondary-btn:disabled {
-  background: #f8fafc;
-  border-color: #e2e8f0;
-  color: #94a3b8;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.secondary-btn :deep(.anticon) {
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-}
-
-/* 修改 loading 状态样式 */
-.secondary-btn:loading {
-  opacity: 0.8;
-  cursor: wait;
-}
-
-.preview-url-hint {
-  margin-top: 8px;
-  padding: 8px;
-  background: #f5f5f5;
-  border-radius: 4px;
-}
-
-.hint-label {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-.preview-url {
-  font-size: 14px;
-  color: #1890ff;
-  word-break: break-all;
-}
-
-/* Add styles for delete button */
-.action-button.secondary-btn[danger] {
-  color: #ff4d4f;
-  border-color: #ff4d4f;
-}
-
-.action-button.secondary-btn[danger]:hover {
-  color: #ff7875;
-  border-color: #ff7875;
-  background: #fff1f0;
-}
-
-.action-button.secondary-btn[danger]:disabled {
-  color: rgba(0, 0, 0, 0.25);
-  border-color: #d9d9d9;
-  background: #f5f5f5;
-  cursor: not-allowed;
-}
-
-/* 添加 centered-spin 样式 */
-:deep(.centered-spin) {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
-}
-
-.centered-spin :deep(.ant-spin-spinning) {
-  max-height: none;
-}
-
-/* 添加设置按钮样式 */
-.action-button.secondary-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* 添加危险按钮样式 */
-.danger-btn {
-  background: #fff1f0;
-  border-color: #ff4d4f;
-  color: #ff4d4f;
-}
-
-.danger-btn:hover:not(:disabled) {
-  background: #fff1f0;
-  border-color: #ff7875;
-  color: #ff7875;
-}
-
-.danger-btn:disabled {
-  background: #f5f5f5;
-  border-color: #d9d9d9;
-  color: rgba(0, 0, 0, 0.25);
-}
-
-/* 修改 highlight-btn 样式，移除可能导致遮挡的样式 */
-.highlight-btn {
-  background: #e6f7ff;
-  border-color: #1890ff;
-  color: #1890ff;
-  font-weight: 500;
-  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
-}
-
-.highlight-btn:hover {
-  background: #bae7ff;
-  border-color: #096dd9;
-  color: #096dd9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
-}
-
-/* 移除可能导致问题的定位和 z-index 相关样式 */
-.highlight-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  animation: shine 3s infinite;
-  pointer-events: none; /* 添加这行确保不会影响点击事件 */
-}
-
-/* 确保 a-space 中的按钮正确对齐且不重叠 */
-:deep(.ant-space) {
-  display: flex;
-  align-items: center;
-  gap: 8px !important;
-}
-
-:deep(.ant-space-item) {
-  position: relative;
-  z-index: 1;
-}
-
-/* 添加新的样式 */
-.title-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.status-tags {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.status-tag {
-  font-size: 12px;
-  padding: 0 8px;
-  height: 22px;
-  line-height: 20px;
-  border-radius: 11px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.status-tag:hover {
-  transform: scale(1.05);
-}
-
-/* 确保标题和标签在同一行 */
-.title-link {
-  flex-shrink: 1;
-  min-width: 0;
-}
-
-/* 添加可点击元素的样式 */
-.clickable {
-  cursor: pointer;
-}
-
-/* 修改查看进度文字的样式 */
-.view-text {
-  color: rgba(255, 255, 255, 0.95) !important; /* 改为白色并增加不透明度 */
-  margin-left: 4px;
-  font-weight: 500; /* 增加字重 */
-  text-decoration: underline; /* 添加下划线 */
-  opacity: 0.9;
-  transition: all 0.2s ease;
-}
-
-.generating-tag:hover .view-text,
-.failed-tag:hover .view-text,
-.status-tag:hover .view-text {
-  opacity: 1;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4); /* 添加发光效果 */
-}
-
-/* 修改成功状态标签的样式 */
-:deep(.ant-tag-success.status-tag) {
-  background: #f6ffed !important; /* 使用浅绿色背景 */
-  border: 1px solid #b7eb8f !important; /* 添加绿色边框 */
-  box-shadow: none;
-}
-
-:deep(.ant-tag-success.status-tag span:first-child) {
-  color: #52c41a !important; /* 文字使用深绿色 */
-}
-
-:deep(.ant-tag-success.status-tag .view-text) {
-  color: #73d13d !important; /* "View Generation" 文字使用稍浅的绿色 */
-}
-
-:deep(.ant-tag-success.status-tag:hover) {
-  background: #f6ffed !important;
-  border-color: #95de64 !important;
-  box-shadow: 0 2px 6px rgba(82, 196, 26, 0.1);
-}
-
 :deep(.ant-tabs-tab-active) {
   font-weight: 500;
 }
@@ -2332,5 +2241,164 @@ export default {
 
 :deep(.ant-tabs-nav-operations) {
   margin-left: 8px;
+}
+
+/* 添加工作流相关样式 */
+.workflow-container {
+  padding: 20px;
+}
+
+.workflow-container.inline-mode {
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 0;
+  border-top: 1px solid #f0f0f0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.workflow-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.summary-value {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.status-processing {
+  color: #1890ff;
+}
+
+.status-completed {
+  color: #52c41a;
+}
+
+.status-failed {
+  color: #f5222d;
+}
+
+.step-content {
+  margin-left: 8px;
+  padding: 12px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.step-active {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+}
+
+.step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.step-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-name {
+  font-weight: bold;
+}
+
+.step-time {
+  font-size: 12px;
+  color: #999;
+}
+
+.step-message {
+  font-size: 14px;
+  color: #666;
+  max-height: 42px;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  position: relative;
+}
+
+.step-message.expanded {
+  max-height: 1000px;
+}
+
+.step-message:not(.expanded)::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(transparent, white);
+}
+
+.expand-button {
+  padding: 0 8px;
+  height: 24px;
+  line-height: 24px;
+}
+
+.empty-workflow {
+  padding: 40px 0;
+  text-align: center;
+}
+
+:deep(.ant-timeline-item-content) {
+  margin-left: 28px !important;
+}
+
+:deep(.ant-empty) {
+  margin: 32px 0;
+}
+
+:deep(.ant-empty-description) {
+  color: #666;
+  font-size: 14px;
+}
+
+:deep(.ant-timeline-item) {
+  padding-bottom: 20px;
+}
+
+:deep(.ant-timeline-item:last-child) {
+  padding-bottom: 0;
+}
+
+/* Ensure clicking tags doesn't trigger row expansion */
+.clickable {
+  cursor: pointer;
+}
+
+.view-text {
+  margin-left: 4px;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Add failed tag style */
+.failed-tag {
+  background: linear-gradient(45deg, #ff4d4f, #ff7875) !important;
+  border: none !important;
+  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
 }
 </style>

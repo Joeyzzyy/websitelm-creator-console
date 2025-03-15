@@ -1,5 +1,5 @@
 <template>
-  <div class="workflow-status">
+  <div :class="['workflow-container', { 'inline-mode': inlineMode }]">
     <a-spin :spinning="loading">
       <div v-if="!hasWorkflowData" class="empty-workflow">
         <a-empty
@@ -82,6 +82,10 @@ export default defineComponent({
       required: true
     },
     isProcessing: {
+      type: Boolean,
+      default: false
+    },
+    inlineMode: {
       type: Boolean,
       default: false
     }
@@ -294,7 +298,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.workflow-status {
+.workflow-container {
   padding: 20px;
 }
 
@@ -426,4 +430,16 @@ export default defineComponent({
 :deep(.ant-timeline-item:last-child) {
   padding-bottom: 0;
 }
+
+/* 添加内联模式的样式 */
+.workflow-container.inline-mode {
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 0;
+  border-top: 1px solid #f0f0f0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* 可能需要调整其他样式以适应内联模式 */
 </style> 
