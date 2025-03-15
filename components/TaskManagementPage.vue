@@ -6,78 +6,66 @@
         <div class="task-container">
           <div class="header">
             <div class="header-left">
-              <a-tabs 
-                v-model:activeKey="activeTab" 
-                @change="handleTabChange"
-                class="full-width-tabs"
-              >
-                <template #rightExtra>
-                  <a-button 
-                    type="link"
-                    class="refresh-btn"
-                    :loading="loading"
-                    @click="handleRefresh"
+              <div class="planning-layout">
+                <div class="main-content">
+                  <a-tabs 
+                    v-model:activeKey="activeTab" 
+                    class="content-plan-tabs"
+                    @change="handleTabChange"
                   >
-                    <template #icon><ReloadOutlined /></template>
-                    Refresh
-                  </a-button>
-                </template>
+                    <a-tab-pane key="blog" tab="Blog Posts" />
+                    <a-tab-pane key="landing" tab="General Landing Pages" />
+                    <a-tab-pane key="alternatively" tab="Alternatively Pages" />
+                    
+                    <template #tabBarExtraContent>
+                      <div class="toolbar-right">
+                        <a-button 
+                          class="action-button secondary-btn highlight-btn"
+                          @click.stop="showSettings"
+                        >
+                          <span>Publish Domain Settings</span>
+                        </a-button>
+                        
+                        <a-button 
+                          class="action-button secondary-btn"
+                          @click.stop="collectPublishedUrls"
+                          :disabled="!tasks.length"
+                        >
+                          <span>Submit Urls To Google</span>
+                        </a-button>
 
-                <a-tab-pane key="blog" tab="Blog Posts" />
-                <a-tab-pane key="landing" tab="General Landing Pages" />
-                <a-tab-pane key="alternatively" tab="Alternatively Pages" />
-              </a-tabs>
-              
-              <div class="header-top">
-                <a-space>
-                  <a-button 
-                    class="action-button secondary-btn highlight-btn"
-                    @click.stop="showSettings"
-                  >
-                    <span>Publish Domain Settings</span>
-                  </a-button>
-                  
-                  <a-button 
-                    class="action-button secondary-btn"
-                    @click.stop="collectPublishedUrls"
-                    :disabled="!tasks.length"
-                  >
-                    <span>Submit Urls To Google Search Console</span>
-                  </a-button>
+                        <a-button 
+                          class="action-button secondary-btn danger-btn"
+                          :disabled="!selectedRowKeys.length"
+                          @click="handleBatchDelete"
+                        >
+                          <span>Delete Selected ({{ selectedRowKeys.length }})</span>
+                        </a-button>
 
-                  <a-button 
-                    class="action-button secondary-btn danger-btn"
-                    :disabled="!selectedRowKeys.length"
-                    @click="handleBatchDelete"
-                  >
-                    <span>Delete Selected Pages ({{ selectedRowKeys.length }})</span>
-                  </a-button>
-
-                  <a-button 
-                    type="primary"
-                    @click="handleAddPage"
-                    class="generate-btn action-button"
-                    v-if="currentCustomerId === '67a9fabf538eb88a2247b5be'"
-                  >
-                    <span>Add Page From Scratch</span>
-                  </a-button>
-
-                  
-                </a-space>
+                        <a-button 
+                          type="primary"
+                          @click="handleAddPage"
+                          class="generate-btn action-button"
+                          v-if="currentCustomerId === '67a9fabf538eb88a2247b5be'"
+                        >
+                          <span>Add Page</span>
+                        </a-button>
+                        
+                        <a-button 
+                          type="link"
+                          class="refresh-btn"
+                          :loading="loading"
+                          @click="handleRefresh"
+                        >
+                          <template #icon><ReloadOutlined /></template>
+                          Refresh
+                        </a-button>
+                      </div>
+                    </template>
+                  </a-tabs>
+                </div>
               </div>
             </div>
-            <!-- <div class="header-right">
-              <a-input
-                v-model:value="searchQuery"
-                placeholder="Search by page title..."
-                class="search-input"
-                @input="handleSearch"
-              >
-                <template #prefix>
-                  <SearchOutlined />
-                </template>
-              </a-input>
-            </div> -->
           </div>
 
           <div class="task-list">
@@ -492,7 +480,6 @@ import { VERCEL_CONFIG } from '../config/vercelConfig'
 import NoSiteConfigured from './common/NoSiteConfigured.vue'
 import SmartBanner from './common/SmartBanner.vue'
 import SettingsModal from './SettingsDomainModal.vue'
-import WorkflowStatus from './WorkflowStatus.vue'
 import { formatDistanceToNow } from 'date-fns'
 
 export default {
@@ -516,7 +503,6 @@ export default {
     SettingOutlined,
     SyncOutlined,
     SettingsModal,
-    WorkflowStatus,
     AntDeleteOutlined
   },
 
@@ -2178,69 +2164,63 @@ export default {
 }
 
 /* 调整 tabs 样式 */
-.full-width-tabs {
+.content-plan-tabs {
+  width: 100%;
+}
+
+:deep(.ant-tabs) {
   width: 100%;
 }
 
 :deep(.ant-tabs-nav) {
-  padding: 8px 24px;
-  background: #fff;
-  border-bottom: 1px solid #f0f0f0;
+  width: 100%;
+  margin: 0;
 }
 
 :deep(.ant-tabs-nav-wrap) {
-  flex: 1;
+  width: 100%;
+  overflow: visible !important; /* 禁止溢出隐藏 */
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 :deep(.ant-tabs-nav-list) {
-  width: 100%;
-}
-
-:deep(.ant-tabs-extra-content) {
-  margin-left: auto;  /* 这才是关键：让 extra 内容靠右对齐 */
+  transform: none !important; /* 禁止 transform 变换 */
+  width: auto !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
 }
 
 :deep(.ant-tabs-tab) {
-  padding: 8px 16px;
-  font-size: 14px;
+  padding: 8px 20px;
+  margin: 0 10px 0 0;
+  white-space: nowrap; /* 确保文本不换行 */
+  flex-shrink: 0 !important; /* 防止 Tab 被压缩 */
 }
 
-:deep(.ant-tabs-tab-active) {
-  font-weight: 500;
-}
-
-/* 调整按钮样式 */
-.action-button {
-  height: 32px;
-  padding: 0 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.action-button :deep(.anticon) {
-  font-size: 14px;
-}
-
-.refresh-btn {
-  margin-left: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  height: 32px;
-  padding: 4px 12px;
-}
-
-.refresh-btn:hover {
-  background: rgba(0, 0, 0, 0.02);
-}
-
-:deep(.refresh-btn .anticon) {
-  font-size: 14px;
-}
-
+/* 隐藏点点点元素 */
 :deep(.ant-tabs-nav-operations) {
-  margin-left: 8px;
+  display: none !important; /* 彻底隐藏点点点按钮 */
+}
+
+/* 确保工具栏不会挤压 Tab 空间 */
+.toolbar-right {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0; /* 防止工具栏被压缩 */
+  margin-left: 20px; /* 与 Tab 保持距离 */
+}
+
+.action-button {
+  margin-left: 4px;
+  white-space: nowrap;
+  flex-shrink: 0; /* 防止按钮被压缩 */
+}
+
+/* 缩短按钮文本，确保适合工具栏 */
+.action-button span {
+  font-size: 12px;
 }
 
 /* 添加工作流相关样式 */
@@ -2400,5 +2380,74 @@ export default {
   background: linear-gradient(45deg, #ff4d4f, #ff7875) !important;
   border: none !important;
   box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+}
+
+/* 添加 OutlinePlanningPage 的布局样式 */
+.planning-layout {
+  width: 100%;
+}
+
+.main-content {
+  width: 100%;
+}
+
+.content-plan-tabs {
+  width: 100%;
+}
+
+:deep(.ant-tabs) {
+  width: 100%;
+}
+
+:deep(.ant-tabs-nav) {
+  width: 100%;
+}
+
+:deep(.ant-tabs-nav-wrap) {
+  width: 100%;
+}
+
+:deep(.ant-tabs-nav-list) {
+  /* 移除宽度 100% 和 flex 布局，让 Tab 自然展开 */
+  /* width: 100%; */
+  /* display: flex; */
+}
+
+:deep(.ant-tabs-tab) {
+  /* 移除 flex: 1，让 Tab 根据内容宽度展开 */
+  /* flex: 1; */
+  padding: 8px 20px;
+  margin: 0 10px 0 0;
+  /* 移除文本居中 */
+  /* justify-content: center; */
+  /* text-align: center; */
+}
+
+/* 添加工具栏样式 */
+.toolbar-right {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0; /* 防止工具栏被压缩 */
+  margin-left: 20px; /* 与 Tab 保持距离 */
+}
+
+.action-button {
+  margin-left: 4px;
+  white-space: nowrap;
+  flex-shrink: 0; /* 防止按钮被压缩 */
+}
+
+/* 缩短按钮文本，确保适合工具栏 */
+.action-button span {
+  font-size: 12px;
+}
+
+/* 调整容器宽度，确保有足够空间 */
+.planning-layout,
+.main-content,
+.content-plan-tabs {
+  width: 100%;
+  overflow: visible !important;
 }
 </style>
