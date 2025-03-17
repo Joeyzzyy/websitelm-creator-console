@@ -47,10 +47,6 @@
                 <div class="stat-label">Google Indexed</div>
                 <div class="stat-value enlarged">{{ googleIndexedCount || 0 }}</div>
               </div>
-              <div class="stat-item">
-                <div class="stat-label">Indexed</div>
-                <div class="stat-value enlarged">{{ indexedCount || 0 }}</div>
-              </div>
             </div>
           </div>
         </a-card>
@@ -638,10 +634,8 @@ export default defineComponent({
       return processChartData(aggregated)
     }
     
-    // Modify renderChart function
+    // 完全重构 renderChart 函数
     const renderChart = () => {
-      console.log('Render chart called, container:', chartContainer.value);
-      
       if (!chartContainer.value) {
         console.error('Chart container not found');
         return;
@@ -649,46 +643,46 @@ export default defineComponent({
       
       try {
         // 确保容器有尺寸
-        console.log('Container size:', chartContainer.value.offsetWidth, chartContainer.value.offsetHeight);
-        
-        // 检查数据
-        const chartData = aggregateData(gscData.value, timeGranularity.value);
-        
-        // Dispose existing chart if it exists
-        if (chart.value) {
-          chart.value.dispose();
+        if (!chartContainer.value.offsetWidth || !chartContainer.value.offsetHeight) {
+          console.warn('Chart container has no dimensions');
+          return;
         }
         
-        // 初始化图表 - 确保容器宽度设置为100%
-        chart.value = echarts.init(chartContainer.value, null, {
-          renderer: 'canvas',
-          width: 'auto',
-          height: 'auto'
-        });
+        // 检查数据
+        if (!gscData.value || !gscData.value.length) {
+          console.warn('No GSC data available');
+          return;
+        }
         
-        // 使用更加鲜明对比的颜色方案
-        const colors = [
-          '#1890FF', // 蓝色 - 点击量
-          '#52C41A', // 绿色 - 展示量
-          '#FA8C16', // 橙色 - CTR
-          '#F5222D'  // 红色 - 位置
-        ];
+        // 处理数据
+        const chartData = aggregateData(gscData.value, timeGranularity.value);
         
-        // 设置图表选项
+        // 确保所有数据数组都存在且有效
+        if (!chartData.dates || chartData.dates.length === 0) {
+          console.warn('No valid chart data available');
+          return;
+        }
+        
+        // 销毁现有图表
+        if (chart.value) {
+          chart.value.dispose();
+          chart.value = null;
+        }
+        
+        // 创建新图表实例
+        chart.value = echarts.init(chartContainer.value);
+        
+        // 定义图表选项
         const option = {
-          color: colors,
+          color: ['#1890FF', '#52C41A', '#FA8C16', '#F5222D'],
           tooltip: {
             trigger: 'axis',
             axisPointer: {
-              type: 'cross',
-              label: {
-                backgroundColor: '#6a7985'
-              }
+              type: 'cross'
             }
           },
           legend: {
-            data: ['Clicks', 'Impressions', 'CTR (%)', 'Position'],
-            top: 10
+            data: ['Clicks', 'Impressions', 'CTR (%)', 'Position']
           },
           grid: {
             left: '3%',
@@ -696,39 +690,23 @@ export default defineComponent({
             bottom: '3%',
             containLabel: true
           },
-          xAxis: {
-            type: 'category',
-            boundaryGap: false,
-            data: chartData.dates
-          },
+          xAxis: [
+            {
+              type: 'category',
+              boundaryGap: false,
+              data: chartData.dates
+            }
+          ],
           yAxis: [
             {
               type: 'value',
               name: 'Clicks/Impressions',
-              position: 'left',
-              axisLine: {
-                show: true,
-                lineStyle: {
-                  color: colors[0]
-                }
-              },
-              axisLabel: {
-                formatter: '{value}'
-              }
+              position: 'left'
             },
             {
               type: 'value',
               name: 'CTR/Position',
-              position: 'right',
-              axisLine: {
-                show: true,
-                lineStyle: {
-                  color: colors[2]
-                }
-              },
-              axisLabel: {
-                formatter: '{value}'
-              }
+              position: 'right'
             }
           ],
           series: [
@@ -736,68 +714,66 @@ export default defineComponent({
               name: 'Clicks',
               type: 'line',
               data: chartData.clicks,
-              smooth: true,
-              lineStyle: {
-                width: 3
-              }
+              smooth: true
             },
             {
               name: 'Impressions',
               type: 'line',
               data: chartData.impressions,
-              smooth: true,
-              lineStyle: {
-                width: 3
-              }
+              smooth: true
             },
             {
               name: 'CTR (%)',
               type: 'line',
               yAxisIndex: 1,
               data: chartData.ctr,
-              smooth: true,
-              lineStyle: {
-                width: 3
-              }
+              smooth: true
             },
             {
               name: 'Position',
               type: 'line',
               yAxisIndex: 1,
               data: chartData.position,
-              smooth: true,
-              lineStyle: {
-                width: 3
-              }
+              smooth: true
             }
           ]
         };
         
-        // 设置图表选项
+        // 应用选项
         chart.value.setOption(option);
         
-        // 确保图表填充容器
-        chart.value.resize({
-          width: 'auto',
-          height: 'auto'
+        // 调整大小
+        window.addEventListener('resize', () => {
+          if (chart.value) {
+            chart.value.resize();
+          }
         });
         
-        // 忽略控制台错误，因为图表已经正常显示
-        console.log('Chart rendered successfully');
       } catch (error) {
         console.error('Error rendering chart:', error);
+        // 如果出错，尝试清理图表实例
+        if (chart.value) {
+          try {
+            chart.value.dispose();
+          } catch (e) {
+            console.error('Error disposing chart:', e);
+          }
+          chart.value = null;
+        }
       }
-    }
+    };
     
     // Handle time range change
     const handleTimeRangeChange = () => {
-      fetchGscData()
-    }
+      fetchGscData();
+    };
     
     // Handle granularity change
     const handleGranularityChange = () => {
-      renderChart()
-    }
+      if (gscData.value && gscData.value.length > 0) {
+        renderChart();
+      }
+    };
 
     // Fetch GSC data
     const fetchGscData = async () => {
@@ -847,18 +823,11 @@ export default defineComponent({
             dateRange.value = `${startDate} - ${endDate}`
           }
           
-          console.log('Data loaded, waiting for DOM update');
-          
-          // 确保在下一个 tick 后再尝试渲染图表
+          // 使用 setTimeout 确保 DOM 已更新
           setTimeout(() => {
-            nextTick(() => {
-              console.log('Attempting to render chart');
-              if (chartContainer.value) {
-                renderChart();
-              } else {
-                console.error('Chart container still not available after timeout');
-              }
-            });
+            if (chartContainer.value) {
+              renderChart();
+            }
           }, 300);
         }
       } catch (error) {
@@ -1119,7 +1088,7 @@ export default defineComponent({
       handleGscCallback();
       expandedKeys.value = ['root'];
       
-      // 添加窗口大小变化监听，确保图表响应式调整
+      // 添加窗口大小变化监听
       window.addEventListener('resize', handleResize);
     })
 
@@ -1133,13 +1102,10 @@ export default defineComponent({
       }
     })
 
-    // 修改 handleResize 函数以确保图表正确调整大小
+    // 修改 handleResize 函数
     const handleResize = () => {
       if (chart.value) {
-        chart.value.resize({
-          width: 'auto',
-          height: 'auto'
-        });
+        chart.value.resize();
       }
     }
 
