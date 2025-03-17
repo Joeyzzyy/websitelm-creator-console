@@ -251,6 +251,16 @@
                               class="keywords-table"
                             >
                               <template #bodyCell="{ column, record }">
+                                <template v-if="column.key === 'kd'">
+                                  <a-tag :color="record.kd > 70 ? 'red' : record.kd > 40 ? 'orange' : 'green'">
+                                    {{ record.kd }}
+                                  </a-tag>
+                                </template>
+                                
+                                <template v-if="column.key === 'volume'">
+                                  {{ formatVolume(record.volume) }}
+                                </template>
+                                
                                 <template v-if="column.key === 'actions'">
                                   <a-button 
                                     type="primary"
@@ -297,8 +307,19 @@
                         :pagination="importedKeywordsPagination"
                         :loading="importedTableLoading"
                         @change="handleImportedKeywordsPaginationChange"
+                        size="small"
                       >
                         <template #bodyCell="{ column, record }">
+                          <template v-if="column.key === 'kd'">
+                            <a-tag :color="record.kd > 70 ? 'red' : record.kd > 40 ? 'orange' : 'green'">
+                              {{ record.kd }}
+                            </a-tag>
+                          </template>
+                          
+                          <template v-if="column.key === 'volume'">
+                            {{ formatVolume(record.volume) }}
+                          </template>
+                          
                           <template v-if="column.key === 'actions'">
                             <a-space>
                               <a-button 
@@ -374,8 +395,19 @@ seo tools, 45"
                         :loading="manualTableLoading"
                         @change="handleManualKeywordsPaginationChange"
                         :rowKey="record => record.id || record.keyword"
+                        size="small"
                       >
                         <template #bodyCell="{ column, record }">
+                          <template v-if="column.key === 'kd'">
+                            <a-tag :color="record.kd > 70 ? 'red' : record.kd > 40 ? 'orange' : 'green'">
+                              {{ record.kd }}
+                            </a-tag>
+                          </template>
+                          
+                          <template v-if="column.key === 'volume'">
+                            {{ formatVolume(record.volume) }}
+                          </template>
+                          
                           <template v-if="column.key === 'actions'">
                             <a-space>
                               <a-button 
@@ -601,22 +633,14 @@ export default defineComponent({
         dataIndex: 'kd',
         key: 'kd',
         sorter: (a, b) => a.kd - b.kd,
-        width: '15%',
-        render: (text) => {
-          let color = 'green'
-          if (text > 70) color = 'red'
-          else if (text > 40) color = 'orange'
-          
-          return h(Tag, { color }, () => `${text}`)
-        }
+        width: '15%'
       },
       {
         title: 'Volume',
         dataIndex: 'volume',
         key: 'volume',
         sorter: (a, b) => a.volume - b.volume,
-        width: '15%',
-        render: (text) => text.toLocaleString()
+        width: '15%'
       },
       {
         title: 'CPC ($)',
@@ -636,24 +660,25 @@ export default defineComponent({
       {
         title: 'Keyword',
         dataIndex: 'keyword',
-        key: 'keyword'
-      },
-      {
-        title: 'KD',
-        dataIndex: 'kd',
-        key: 'kd',
-        width: 100
+        key: 'keyword',
+        width: '40%'
       },
       {
         title: 'Volume',
         dataIndex: 'volume',
         key: 'volume',
-        width: 120
+        width: '15%'
+      },
+      {
+        title: 'KD',
+        dataIndex: 'kd',
+        key: 'kd',
+        width: '15%'
       },
       {
         title: 'Actions',
         key: 'actions',
-        width: 200
+        width: '30%'
       }
     ]
     
@@ -661,24 +686,25 @@ export default defineComponent({
       {
         title: 'Keyword',
         dataIndex: 'keyword',
-        key: 'keyword'
-      },
-      {
-        title: 'KD',
-        dataIndex: 'kd',
-        key: 'kd',
-        width: 100
+        key: 'keyword',
+        width: '40%'
       },
       {
         title: 'Volume',
         dataIndex: 'volume',
         key: 'volume',
-        width: 120
+        width: '15%'
+      },
+      {
+        title: 'KD',
+        dataIndex: 'kd',
+        key: 'kd',
+        width: '15%'
       },
       {
         title: 'Actions',
         key: 'actions',
-        width: 200
+        width: '30%'
       }
     ]
     
@@ -1158,6 +1184,18 @@ export default defineComponent({
       }
     }
     
+    const formatVolume = (volume) => {
+      if (!volume && volume !== 0) return '-';
+      
+      if (volume >= 1000000) {
+        return `${(volume / 1000000).toFixed(1)}M`;
+      } else if (volume >= 1000) {
+        return `${(volume / 1000).toFixed(1)}K`;
+      }
+      
+      return volume.toLocaleString();
+    }
+    
     // Lifecycle hooks
     onMounted(async () => {
       loading.value = true
@@ -1237,7 +1275,8 @@ export default defineComponent({
       importedKeywordsColumns,
       manualKeywordsColumns,
       importedTableLoading,
-      manualTableLoading
+      manualTableLoading,
+      formatVolume
     }
   }
 })
