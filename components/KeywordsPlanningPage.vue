@@ -114,16 +114,19 @@
                             <a-form layout="vertical" :model="filterForm" class="sidebar-filter-form">
                               <!-- Priority filter -->
                               <a-form-item label="Smart Priority Category">
-                                <a-select
-                                  v-model:value="filterForm.priority"
-                                  placeholder="Select priority"
-                                  style="width: 100%"
-                                  allow-clear
-                                >
-                                  <a-select-option v-for="priority in priorities" :key="priority.level" :value="priority.level">
-                                    {{ priority.label }}
-                                  </a-select-option>
-                                </a-select>
+                                <div class="custom-select-wrapper">
+                                  <a-select
+                                    v-model:value="filterForm.priority"
+                                    placeholder="Select priority"
+                                    style="width: 100%"
+                                    allow-clear
+                                  >
+                                    <a-select-option v-for="priority in priorities" :key="priority.level" :value="priority.level">
+                                      {{ priority.label }}
+                                    </a-select-option>
+                                  </a-select>
+                                  <div class="select-indicator">▼</div>
+                                </div>
                               </a-form-item>
                               
                               <!-- Keyword difficulty filter -->
@@ -176,15 +179,18 @@
                               
                               <!-- Related outlines filter -->
                               <a-form-item label="Related Outlines">
-                                <a-select
-                                  v-model:value="filterForm.hasOutlines"
-                                  placeholder="Select status"
-                                  style="width: 100%"
-                                  allow-clear
-                                >
-                                  <a-select-option value="yes">Has Outlines</a-select-option>
-                                  <a-select-option value="no">No Outlines</a-select-option>
-                                </a-select>
+                                <div class="custom-select-wrapper">
+                                  <a-select
+                                    v-model:value="filterForm.hasOutlines"
+                                    placeholder="Select status"
+                                    style="width: 100%"
+                                    allow-clear
+                                  >
+                                    <a-select-option value="yes">Has Outlines</a-select-option>
+                                    <a-select-option value="no">No Outlines</a-select-option>
+                                  </a-select>
+                                  <div class="select-indicator">▼</div>
+                                </div>
                               </a-form-item>
                               
                               <!-- Smart keyword search moved to bottom -->
@@ -1817,5 +1823,44 @@ export default defineComponent({
   .view-keywords-btn {
     margin-top: 8px;
   }
+}
+
+.custom-select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.select-indicator {
+  position: absolute;
+  right: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #999;
+  font-size: 12px;
+}
+
+:deep(.ant-select) {
+  width: 100%;
+}
+
+:deep(.ant-select-arrow) {
+  display: none; /* 隐藏原始箭头 */
+}
+
+:deep(.ant-select-selector) {
+  background-color: #fff !important;
+  border: 1px solid #d9d9d9 !important;
+  border-radius: 4px !important;
+  transition: all 0.3s !important;
+}
+
+:deep(.ant-select:hover .ant-select-selector) {
+  border-color: #40a9ff !important;
+}
+
+:deep(.ant-select-focused .ant-select-selector) {
+  border-color: #40a9ff !important;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
 }
 </style>
