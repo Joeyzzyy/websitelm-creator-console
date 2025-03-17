@@ -659,8 +659,12 @@ export default defineComponent({
           chart.value.dispose();
         }
         
-        // 初始化图表
-        chart.value = echarts.init(chartContainer.value);
+        // 初始化图表 - 确保容器宽度设置为100%
+        chart.value = echarts.init(chartContainer.value, null, {
+          renderer: 'canvas',
+          width: 'auto',
+          height: 'auto'
+        });
         
         // 使用更加鲜明对比的颜色方案
         const colors = [
@@ -771,6 +775,12 @@ export default defineComponent({
         
         // 设置图表选项
         chart.value.setOption(option);
+        
+        // 确保图表填充容器
+        chart.value.resize({
+          width: 'auto',
+          height: 'auto'
+        });
         
         // 忽略控制台错误，因为图表已经正常显示
         console.log('Chart rendered successfully');
@@ -1123,10 +1133,13 @@ export default defineComponent({
       }
     })
 
-    // 添加窗口大小变化处理函数
+    // 修改 handleResize 函数以确保图表正确调整大小
     const handleResize = () => {
       if (chart.value) {
-        chart.value.resize();
+        chart.value.resize({
+          width: 'auto',
+          height: 'auto'
+        });
       }
     }
 
@@ -1578,10 +1591,11 @@ export default defineComponent({
 
 /* Chart styles */
 .chart-container {
-  width: 100%;
+  width: 100% !important; /* 强制宽度为100% */
   height: 400px;
   margin-bottom: 16px;
-  border: 1px solid #f0f0f0; /* 添加边框以便于调试 */
+  border: 1px solid #f0f0f0;
+  overflow: hidden; /* 防止内容溢出 */
 }
 
 .chart-summary {
