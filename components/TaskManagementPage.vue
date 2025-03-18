@@ -164,6 +164,12 @@
                   </a-tag>
                 </template>
 
+                <template v-if="column.key === 'indexedStatus'">
+                  <a-tag :color="record.indexedStatus === 'indexed' ? 'green' : 'red'">
+                    {{ record.indexedStatus === 'indexed' ? 'Indexed' : 'Not Indexed' }}
+                  </a-tag>
+                </template>
+
                 <template v-if="column.key === 'hasEmpty'">
                   <a-tag :color="record.hasEmpty ? 'warning' : 'success'" style="width: fit-content">
                     {{ record.hasEmpty ? 'Has Empty Fields' : 'No Empty Fields' }}
@@ -580,6 +586,12 @@ export default {
         width: '8%'
       },
       {
+        title: 'Index Status',
+        dataIndex: 'indexedStatus',
+        key: 'indexedStatus',
+        width: '10%'
+      },
+      {
         title: 'Created At',
         dataIndex: 'createdAt',
         key: 'createdAt',
@@ -745,6 +757,7 @@ export default {
             generatorStatus: page.generatorStatus || '',
             createdAt: new Date(page.createdAt).toLocaleString(),
             updatedAt: new Date(page.updatedAt).toLocaleString(),
+            indexedStatus: page.indexedStatus || 'noindex',
           }));
 
           tasks.value = pages;
