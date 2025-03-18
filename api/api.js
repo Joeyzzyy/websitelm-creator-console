@@ -846,6 +846,8 @@ const getPages = async (params = {}) => {
     if (params.limit) queryString += `limit=${params.limit}&`;
     if (params.type) queryString += `type=${params.type}&`; // 保持 "Landing Page"
     if (params.source) queryString += `source=${params.source}&`;
+    if (params.author) queryString += `author=${params.author}&`;
+    if (params.title) queryString += `title=${params.title}&`;
     queryString = queryString.slice(0, -1); // 移除末尾的 "&"
 
     const response = await apiClient.get(`/pages?${queryString}`);

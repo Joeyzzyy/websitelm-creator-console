@@ -19,6 +19,30 @@
                     
                     <template #tabBarExtraContent>
                       <div class="toolbar-right">
+                        <a-input-search
+                          v-model:value="titleQuery"
+                          placeholder="Search by title..."
+                          class="search-input"
+                          @search="handleSearch"
+                          allowClear
+                        >
+                          <template #prefix>
+                            <SearchOutlined />
+                          </template>
+                        </a-input-search>
+
+                        <a-input-search
+                          v-model:value="authorQuery"  
+                          placeholder="Search by author..."
+                          class="search-input"
+                          @search="handleSearch"
+                          allowClear
+                        >
+                          <template #prefix>
+                            <SearchOutlined />
+                          </template>
+                        </a-input-search>
+
                         <a-button 
                           class="action-button secondary-btn highlight-btn"
                           @click.stop="showSettings"
@@ -461,7 +485,7 @@
 </template>
 
 <script>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { message } from 'ant-design-vue'
 import { 
   ReloadOutlined,
@@ -487,6 +511,7 @@ import NoSiteConfigured from './common/NoSiteConfigured.vue'
 import SmartBanner from './common/SmartBanner.vue'
 import SettingsModal from './SettingsDomainModal.vue'
 import { formatDistanceToNow } from 'date-fns'
+import { debounce } from 'lodash'
 
 export default {
   name: 'TaskManagementPage',
@@ -535,6 +560,7 @@ export default {
     })
 
     const searchQuery = ref('')
+    const searchLoading = ref(false)
     
     const loadingProgress = ref(0)
     
@@ -542,14 +568,26 @@ export default {
     
     const domainConfigured = ref(false)
     
+    const titleQuery = ref('')
+    const authorQuery = ref('')
+    
     // 添加计算属性于过滤任务
     const filteredTasks = computed(() => {
-      if (!searchQuery.value) return tasks.value
-      
-      const query = searchQuery.value.toLowerCase()
-      return tasks.value.filter(task => 
-        task.batchName.toLowerCase().includes(query)
-      )
+      let filtered = tasks.value
+
+      if (titleQuery.value) {
+        filtered = filtered.filter(task =>
+          task.title.toLowerCase().includes(titleQuery.value.toLowerCase())  
+        )
+      }
+
+      if (authorQuery.value) {
+        filtered = filtered.filter(task => 
+          task.author.toLowerCase().includes(authorQuery.value.toLowerCase())
+        )
+      }
+
+      return filtered
     })
 
     const columns = [
@@ -713,11 +751,13 @@ export default {
       try {
         const userId = localStorage.getItem('currentCustomerId')
         
-        // 根据当前激活的标签页确定查询参数
+        // 构建查询参数
         const queryParams = {
           customerId: userId,
           page: pagination.current,
-          limit: pagination.pageSize
+          limit: pagination.pageSize,
+          title: titleQuery.value,
+          author: authorQuery.value
         }
 
         // 根据不同 tab 添加不同的查询参数
@@ -1567,6 +1607,28 @@ export default {
       console.log('Stopped polling for pageId:', pageId);
     };
 
+    // 添加搜索处理函数
+    const handleSearch = () => {
+      searchLoading.value = true
+      
+      // 重置分页
+      pagination.current = 1
+      
+      fetchTasks()
+    }
+
+    // 监听搜索输入的变化，添加防抖
+    const debouncedSearch = debounce(handleSearch, 500)
+    
+    watch(searchQuery, (newValue) => {
+      if (!newValue) {
+        // 当搜索框被清空时，立即刷新列表
+        handleSearch('')
+      } else {
+        debouncedSearch(newValue)
+      }
+    })
+
     onMounted(async () => {
       await loadProductInfo()
       if (domainConfigured.value) {
@@ -1666,6 +1728,10 @@ export default {
       isStepExpanded,
       workflowVisible,
       handleWorkflowClose,
+      searchLoading,
+      handleSearch,
+      titleQuery,
+      authorQuery,
     }
   }
 }
@@ -1911,31 +1977,20 @@ export default {
 
 .search-input {
   width: 250px;
-  margin-right: 12px;
+  margin-right: 8px;
 }
 
 :deep(.search-input) {
-  .ant-input {
-    border-radius: 6px;
-    box-shadow: none;
-  }
-  
-  .ant-input:focus, 
-  .ant-input:hover {
-    border-color: #1890ff;
-  }
-  
   .ant-input-affix-wrapper {
     border-radius: 6px;
-    border: 1px solid #d9d9d9;
-    box-shadow: none;
   }
   
-  .ant-input-affix-wrapper:focus,
-  .ant-input-affix-wrapper:hover,
-  .ant-input-affix-wrapper-focused {
-    border-color: #1890ff; 
-    box-shadow: none;
+  .ant-input-search-button {
+    border-radius: 0 6px 6px 0;
+  }
+  
+  .ant-input {
+    font-size: 13px;
   }
 }
 
