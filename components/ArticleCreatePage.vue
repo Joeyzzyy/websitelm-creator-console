@@ -234,6 +234,7 @@
                           <a-select v-else v-model:value="articleData.pageType" allowClear>
                             <a-select-option value="Blog">Blog</a-select-option>
                             <a-select-option value="Landing Page">Landing Page</a-select-option>
+                            <a-select-option value="alternatively">Alternatively Page</a-select-option>
                           </a-select>
                         </a-form-item>
 
