@@ -839,15 +839,16 @@ const updateFullSections = async (pageId, sectionsData) => {
 // 获取页面列表
 const getPages = async (params = {}) => {
   try {
-    const queryParams = {
-      customerId: params.customerId,
-      page: params.page,
-      limit: params.limit,
-      ...(params.type && { type: params.type }),
-      ...(params.source && { source: params.source })
-    };
-    
-    const response = await apiClient.get('/pages', { params: queryParams });
+    // 手动构建查询字符串，避免自动编码
+    let queryString = '';
+    if (params.customerId) queryString += `customerId=${params.customerId}&`;
+    if (params.page) queryString += `page=${params.page}&`;
+    if (params.limit) queryString += `limit=${params.limit}&`;
+    if (params.type) queryString += `type=${params.type}&`; // 保持 "Landing Page"
+    if (params.source) queryString += `source=${params.source}&`;
+    queryString = queryString.slice(0, -1); // 移除末尾的 "&"
+
+    const response = await apiClient.get(`/pages?${queryString}`);
     return response.data;
   } catch (error) {
     console.error('Failed to get pages:', error);
