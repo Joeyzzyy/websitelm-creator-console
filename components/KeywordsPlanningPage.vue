@@ -864,19 +864,25 @@ export default defineComponent({
     
     const handleCancelSelection = async (keyword) => {
       try {
-        await api.deselectKeyword(keyword.id);
+        const response = await api.cancelPlanningKeywords([keyword.id]);
         
-        // Remove from modal list
-        modalKeywords.value.comparison = modalKeywords.value.comparison.filter(k => k.id !== keyword.id);
+        if (response?.code === 200 || response?.status === 'success') {
+          // Remove from modal list  
+          modalKeywords.value.comparison = modalKeywords.value.comparison.filter(k => k.id !== keyword.id);
         
-        // Update in main list if visible
-        const keywordInList = recommendedKeywords.value.find(k => k.id === keyword.id);
-        if (keywordInList) {
-          keywordInList.favorited = false;
+          // Update in main list if visible
+          const keywordInList = recommendedKeywords.value.find(k => k.id === keyword.id);
+          if (keywordInList) {
+            keywordInList.favorited = false;
+          }
+
+          message.success('Keyword deselected successfully');
+        } else {
+          throw new Error(response?.message || 'Deselect failed');
         }
       } catch (error) {
         console.error('Failed to deselect keyword:', error);
-        message.error('Failed to deselect keyword');
+        message.error('Failed to deselect keyword, please try again');
       }
     }
     

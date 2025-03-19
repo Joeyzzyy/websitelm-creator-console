@@ -1031,14 +1031,21 @@ export default defineComponent({
 
         // Start outline generation with selected keywords
         const keywordIds = selectedKeywords.map(k => k.keywordId);
-        await api.generatePlanningComposite(keywordIds);
+        const planningResponse = await api.generatePlanningComposite(keywordIds);
         
-        message.success('Outline generation started');
-        
-        // Check status and start polling
-        const statusResponse = await checkOutlineGenerationStatus();
-        if (!statusResponse?.data || statusResponse.data.status !== 'finished') {
-          startPolling();
+        if (planningResponse.data?.code === 13001) {
+          Modal.warning({
+            title: 'Package Limit Reached',
+            content: 'You have reached the limit for outline generation in your current package. Please upgrade your package to generate more outlines.',
+          });
+        } else {
+          message.success('Outline generation started');
+          
+          // Check status and start polling
+          const statusResponse = await checkOutlineGenerationStatus();
+          if (!statusResponse?.data || statusResponse.data.status !== 'finished') {
+            startPolling();
+          }
         }
       } catch (error) {
         console.error('Failed to generate outlines:', error);
@@ -1102,27 +1109,34 @@ export default defineComponent({
       generationDetails.value = 'Please wait while we prepare your page...';
 
       try {
-        await api.createAIPage(outline.outlineId);
+        const response = await api.createAIPage(outline.outlineId);
         
-        generationProgress.value = 100;
-        generationStatus.value = 'success';
-        generationStatusText.value = 'Page generation task submitted successfully!';
-        generationDetails.value = 'Your page will be created in the background. You can check its status in the Pages section.';
-        generationCompleted.value = true;
-        
-        // Update the outline to show it has a related page task
-        contentPlans.value = contentPlans.value.map(plan => {
-          if (plan.outlineId === outline.outlineId) {
-            return { ...plan, hasRelatedPageTask: true };
-          }
-          return plan;
-        });
-        
-        setTimeout(() => {
-          generationProgressVisible.value = false;
-          // Add navigation to task management
-          router.push('/task-management');
-        }, 2000);
+        if (response.data?.code === 13001) {
+          Modal.warning({
+            title: 'Package Limit Reached',
+            content: 'You have reached the limit for generating pages from outlines in your current package. Please upgrade your package to generate more pages.',
+          });
+        } else {
+          generationProgress.value = 100;
+          generationStatus.value = 'success';
+          generationStatusText.value = 'Page generation task submitted successfully!';
+          generationDetails.value = 'Your page will be created in the background. You can check its status in the Pages section.';
+          generationCompleted.value = true;
+          
+          // Update the outline to show it has a related page task
+          contentPlans.value = contentPlans.value.map(plan => {
+            if (plan.outlineId === outline.outlineId) {
+              return { ...plan, hasRelatedPageTask: true };
+            }
+            return plan;
+          });
+          
+          setTimeout(() => {
+            generationProgressVisible.value = false;
+            // Add navigation to task management
+            router.push('/task-management');
+          }, 2000);
+        }
       } catch (error) {
         generationProgress.value = 100;
         generationStatus.value = 'exception';
@@ -1176,15 +1190,23 @@ export default defineComponent({
         for (const outlineId of outlineIds) {
           try {
             console.log(`Processing outline ID: ${outlineId}`);
-            await api.createAIPage(outlineId);
-            processedCount++;
+            const response = await api.createAIPage(outlineId);
             
-            // Update progress
-            generationProgress.value = Math.floor((processedCount / outlineIds.length) * 100);
-            generationDetails.value = `Processed ${processedCount} of ${outlineIds.length} outlines...`;
+            if (response.data?.code === 13001) {
+              Modal.warning({
+                title: 'Package Limit Reached',
+                content: 'You have reached the limit for generating pages from outlines in your current package. Please upgrade your package to generate more pages.',
+              });
+              break; // 停止处理其他大纲
+            } else {
+              processedCount++;
+              // Update progress
+              generationProgress.value = Math.floor((processedCount / outlineIds.length) * 100);
+              generationDetails.value = `Processed ${processedCount} of ${outlineIds.length} outlines...`;
+            }
           } catch (err) {
             console.error(`Failed to process outline ${outlineId}:`, err);
-            // Continue with next outline even if one fails
+            // Continue with next outline
           }
         }
         

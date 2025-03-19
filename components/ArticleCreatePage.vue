@@ -1055,8 +1055,8 @@ export default defineComponent({
       const userDomain = productInfo.value?.projectWebsite || '';
       const previewDomain = config.domains.preview.replace(/\/$/, '');
       
-      // 构建预览 URL，将 userDomain 放在最后
-      return `${previewDomain}/${article.language}/${article.slug}/${userDomain}`;
+      // 构建预览 URL，在语言后添加 generalpage
+      return `${previewDomain}/${article.language}/generalpage/${article.slug}/${userDomain}`;
     };
 
     const handlePreview = () => {
@@ -1579,7 +1579,7 @@ export default defineComponent({
           ? articleData.value.publishUrl 
           : `https://${articleData.value.publishUrl}`;
           
-        // 只有非英语语言才添加语言路径
+        // 发布URL不需要添加 generalpage
         const langPath = articleData.value.language === 'en' ? '' : `/${articleData.value.language}`;
         const publishedUrl = `${baseUrl}${langPath}/${articleData.value.slug}`;
         window.open(publishedUrl, '_blank');
