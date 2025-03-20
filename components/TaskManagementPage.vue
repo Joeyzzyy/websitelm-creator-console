@@ -935,7 +935,7 @@ export default {
       // 使用 productInfo 中的 projectWebsite 作为 userDomain
       const userDomain = productInfo.value?.projectWebsite || '';
       // 构建预览 URL，将 userDomain 放在最后
-      return `${previewDomain}/${record.lang}/generalpage/${record.slug}/${userDomain}`;
+      return `${config.domains.preview}/${record.lang}/generalpage/${record.slug}/${userDomain}`;
     };
 
     const getStatusColor = (status) => {
